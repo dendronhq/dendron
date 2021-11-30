@@ -8,6 +8,7 @@ import {
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
+  ResponseUtil,
   VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
@@ -402,7 +403,12 @@ export class DendronExtension {
             typeId,
             path.join(userTypesPath, file)
           );
-          this._typeRegistrar.registerTrait(newNoteType);
+          const resp = this._typeRegistrar.registerTrait(newNoteType);
+          if (ResponseUtil.hasError(resp)) {
+            this.L.error({
+              msg: `Error registering trait for trait definition at ${file}`,
+            });
+          }
         }
       });
     }

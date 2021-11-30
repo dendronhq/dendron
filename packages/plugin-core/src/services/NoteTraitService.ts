@@ -5,7 +5,6 @@ import {
   ResponseUtil,
   RespV2,
 } from "@dendronhq/common-all";
-import * as vscode from "vscode";
 import { CommandRegistrar } from "./CommandRegistrar";
 
 /**

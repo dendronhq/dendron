@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-102-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -191,6 +191,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="http://www.greatworx.com"><img src="https://avatars.githubusercontent.com/u/3717?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Wells</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=d1rewolf" title="Documentation">📖</a></td>
     <td align="center"><a href="https://luke.carrier.im/"><img src="https://avatars.githubusercontent.com/u/597015?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Luke Carrier</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ALukeCarrier" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/maximilianigl"><img src="https://avatars.githubusercontent.com/u/4333579?v=4?s=100" width="100px;" alt=""/><br /><sub><b>maximilianigl</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amaximilianigl" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://byroni.us"><img src="https://avatars.githubusercontent.com/u/495404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>byron wall</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=byronwall" title="Documentation">📖</a></td>
   </tr>
 </table>
 

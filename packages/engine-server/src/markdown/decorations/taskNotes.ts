@@ -62,8 +62,11 @@ export function decorateTaskNote({
   const decoration: DecorationTaskNote = {
     type: DECORATION_TYPES.taskNote,
     range,
-    beforeText: status,
-    afterText: decorationString.join(" "),
+    beforeText: status ? `${status} ` : undefined,
+    afterText:
+      decorationString.length > 0
+        ? ` ${decorationString.join(" ")}`
+        : undefined,
   };
   return decoration;
 }

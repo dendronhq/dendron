@@ -63,7 +63,7 @@ export const FuseExtendedSearchConstants = {
 //         });
 //       const path = `${dir}/${THRESHOLD_VALUE}_${new Date().getTime()}.json`;
 //       require('fs').writeFile(path, data, ()=>{});
-const THRESHOLD_VALUE = 0.2;
+export const DEFAULT_THRESHOLD_VALUE = 0.2;
 
 function createFuse<T>(
   initList: T[],
@@ -132,6 +132,20 @@ export type SerializedFuseIndex = ReturnType<
 
 type FuseEngineOpts = {
   mode?: DEngineMode;
+  /** If specified must be within 0-1 range. */
+  fuzzThreshold?: number;
+};
+
+export const getThresholdValue = (configThreshold?: number) => {
+  let threshold = DEFAULT_THRESHOLD_VALUE;
+  if (
+    !_.isUndefined(configThreshold) &&
+    configThreshold >= 0 &&
+    configThreshold <= 1
+  ) {
+    threshold = configThreshold;
+  }
+  return threshold;
 };
 
 export class FuseEngine {
@@ -159,7 +173,8 @@ export class FuseEngine {
   private readonly threshold: number;
 
   constructor(opts: FuseEngineOpts) {
-    this.threshold = opts.mode === "exact" ? 0.0 : THRESHOLD_VALUE;
+    this.threshold =
+      opts.mode === "exact" ? 0.0 : getThresholdValue(opts.fuzzThreshold);
 
     this.notesIndex = createFuse<NoteProps>([], {
       preset: "note",

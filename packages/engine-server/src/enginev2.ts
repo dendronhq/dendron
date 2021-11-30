@@ -143,7 +143,9 @@ export class DendronEngineV2 implements DEngine {
     this.configRoot = props.wsRoot;
     this.logger = props.logger;
     this.props = props;
-    this.fuseEngine = new FuseEngine({});
+    this.fuseEngine = new FuseEngine({
+      fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+    });
     this.links = [];
     this.config = props.config;
     this._vaults = props.vaults;

@@ -27,6 +27,7 @@ export type NoteLookupConfig = {
   confirmVaultOnCreate: boolean;
   leaveTrace: boolean;
   bubbleUpCreateNew: boolean;
+  fuzzThreshold?: number;
 };
 
 /**

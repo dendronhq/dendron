@@ -5,6 +5,10 @@ import {
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
+import {
+  DEFAULT_THRESHOLD_VALUE,
+  getThresholdValue,
+} from "@dendronhq/common-all/src";
 
 type TestData = {
   fname: string;
@@ -73,6 +77,24 @@ const queryTestV1 = ({
 };
 
 describe("Fuse utility function tests", () => {
+  describe(`getThresholdValue`, () => {
+    it("WHEN val is not specified THEN use default", () => {
+      expect(getThresholdValue()).toEqual(DEFAULT_THRESHOLD_VALUE);
+    });
+
+    it("WHEN val is specified but too small THEN use default", () => {
+      expect(getThresholdValue(-1)).toEqual(DEFAULT_THRESHOLD_VALUE);
+    });
+
+    it("WHEN val is specified but too large THEN use default", () => {
+      expect(getThresholdValue(1.1)).toEqual(DEFAULT_THRESHOLD_VALUE);
+    });
+
+    it("WHEN val is specified and within range THEN use the configured value", () => {
+      expect(getThresholdValue(0.1234)).toEqual(0.1234);
+    });
+  });
+
   describe(`doesContainSpecialQueryChars`, () => {
     test.each([
       // Fuse doesn't treat * specially but we map * to ' ' hence we treat it as special character.

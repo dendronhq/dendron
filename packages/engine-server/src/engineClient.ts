@@ -116,7 +116,6 @@ export class DendronEngineClient implements DEngineClient {
     this.notes = {};
     this.schemas = {};
     this.links = [];
-    this.fuseEngine = new FuseEngine({});
     this.vaults = vaults;
     this.wsRoot = ws;
     this.ws = ws;
@@ -125,6 +124,9 @@ export class DendronEngineClient implements DEngineClient {
     this.logger = logger || createLogger();
     const cpath = DConfig.configPath(ws);
     this.config = readYAML(cpath) as IntermediateDendronConfig;
+    this.fuseEngine = new FuseEngine({
+      fuzzThreshold: ConfigUtils.getLookup(this.config).note.fuzzThreshold,
+    });
     this.store = new FileStorage({
       engine: this,
       logger: this.logger,

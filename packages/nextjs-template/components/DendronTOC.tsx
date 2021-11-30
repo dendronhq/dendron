@@ -27,7 +27,6 @@ export const DendronTOC = ({
         {Object.entries(note?.anchors).map(([key, entry]) =>
           entry?.type === "header" ? (
             <Link
-              key={key}
               href={`#${key}`}
               title={unslug(entry?.text ?? entry?.value)}
             />

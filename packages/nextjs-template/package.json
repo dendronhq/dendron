@@ -38,7 +38,8 @@
     "react-ga": "^3.3.0",
     "react-ga4": "^1.0.6",
     "react-redux": "^7.2.3",
-    "sass": "^1.41.1"
+    "sass": "^1.41.1",
+    "fs-extra": "^10.0.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^11.1.2",
@@ -48,7 +49,6 @@
     "eslint": "^7.32.0",
     "eslint-config-next": "^11.1.2",
     "eslint-plugin-cypress": "^2.12.1",
-    "fs-extra": "^10.0.0",
     "har-validator": "^5.1.5",
     "typescript": "^4.4.3"
   }

@@ -18922,6 +18922,13 @@ npm-bundled@^1.0.1:
   dependencies:
     npm-normalize-package-bin "^1.0.1"
 
+npm-cli-adduser@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/npm-cli-adduser/-/npm-cli-adduser-1.1.4.tgz#b5077986f64d3e4fdc48f18a7b42a7d8472e7bd4"
+  integrity sha512-0G/EqlhX62+D7ljtWz3kuuvYNIRizO5fqDC1PSR4bvgANtcE92lULfHLFnuuEJl6JJMss/M19yck+iWdN2TPBw==
+  dependencies:
+    commander "^2.19.0"
+
 npm-cli-login@^0.1.1:
   version "0.1.1"
   resolved "https://registry.npmjs.org/npm-cli-login/-/npm-cli-login-0.1.1.tgz#12e5bebc753cf433a3edab75be1d76f696c6fb86"

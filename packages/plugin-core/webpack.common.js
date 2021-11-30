@@ -36,6 +36,9 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
+    new CopyPlugin({
+      patterns: [{ from: path.join("assets", "images"), to: "images" }],
+    }),
     // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],

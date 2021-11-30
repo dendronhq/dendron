@@ -1,7 +1,7 @@
 import { ConfigUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
-import { JournalNote } from "../traits/Journal";
+import { JournalNote } from "../traits/journal";
 import { getDWorkspace } from "../workspace";
 import {
   CommandOpts,

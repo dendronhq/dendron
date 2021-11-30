@@ -87,7 +87,6 @@ export class ExternalConnectionManager {
           configSchema: GoogleDocsConnection.getSchema(),
           setProperties: { connectionId: id },
         });
-        //launchGoogleOAuthFlow(id);
         return file;
       }
       default:

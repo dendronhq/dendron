@@ -1,12 +1,8 @@
-import { assertUnreachable } from "@dendronhq/common-all";
 import {
-  AirtableConnection,
-  ConfigFileUtils,
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   ExternalService,
   ExternalTarget,
-  GoogleDocsConnection,
   PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
@@ -238,7 +234,10 @@ export class PodUIControls {
           break;
         }
         case ExternalService.GoogleDocs: {
-          await this.promptToCreateNewServiceConfig(ExternalService.GoogleDocs);
+          const id = await this.promptToCreateNewServiceConfig(
+            ExternalService.GoogleDocs
+          );
+          launchGoogleOAuthFlow(id);
           vscode.window.showInformationMessage(
             "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
           );
@@ -278,8 +277,9 @@ export class PodUIControls {
       return;
     }
 
-    const newFile = await this.createNewConfig({ serviceType, id, mngr });
+    const newFile = await mngr.createNewConfig({ serviceType, id });
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(newFile));
+    return id;
   }
 
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {

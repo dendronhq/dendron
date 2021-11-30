@@ -17,12 +17,12 @@ import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { VSCodeUtils } from "../../utils";
+import { clipboard, VSCodeUtils } from "../../utils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
- * VSCode command for running the Airtable Export Pod. It is not meant to be
+ * VSCode command for running the Google Docs Export Pod. It is not meant to be
  * directly invoked throught the command palette, but is invoked by
  * {@link ExportPodV2Command}
  */
@@ -156,8 +156,10 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
         note: payload,
       });
     }
+    const gdocLink = `https://docs.google.com/document/d/${exportReturnValue.data?.documentId}`;
+    clipboard.writeText(gdocLink);
     vscode.window.showInformationMessage(
-      "Finished running Google Docs export pod."
+      `Finished running Google Docs export pod. The doc titled ${payload.title} is created in your selected google docs account and link is copied to the clipboard.`
     );
   }
 

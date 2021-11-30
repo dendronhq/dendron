@@ -29,7 +29,7 @@ export type GoogleDocsExportReturnType = RespV2<{
 
 /**
  * GDoc Export Pod (V2 - for compatibility with Pod V2 workflow). Supports
- * both exportText() and exportNote()
+ *exportNote()
  */
 export class GoogleDocsExportPodV2
   implements ExportPodV2<GoogleDocsExportReturnType>

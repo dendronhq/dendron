@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  DVault,
   NoteTrait,
   OnCreateContext,
   RespV2,
@@ -15,6 +16,7 @@ import {
   NoteLookupProvider,
   OnAcceptHook,
 } from "../components/lookup/LookupProviderV3";
+import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { VSCodeUtils } from "../utils";
 import { getDWorkspace, getExtension } from "../workspace";
@@ -23,6 +25,7 @@ import { GotoNoteCommand } from "./GotoNote";
 
 export type CommandOpts = {
   fname: string;
+  vaultOverride?: DVault;
 };
 
 export type CommandInput = {
@@ -113,13 +116,27 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     const config = getDWorkspace().config;
     const confirmVaultOnCreate =
       ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
-    const { engine } = getDWorkspace();
-    let vault;
-    if (confirmVaultOnCreate) {
-      vault = await PickerUtilsV2.promptVault(engine.vaults);
-      if (vault === undefined) {
+
+    // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then
+    // this vault logic can be deferred there.
+    let vault = opts.vaultOverride;
+    if (!opts.vaultOverride) {
+      const selectionMode = confirmVaultOnCreate
+        ? VaultSelectionMode.alwaysPrompt
+        : VaultSelectionMode.smart;
+
+      const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+      const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+        vault: currentVault,
+        fname,
+        vaultSelectionMode: selectionMode,
+      });
+
+      if (!selectedVault) {
         vscode.window.showInformationMessage("Note creation cancelled");
         return;
+      } else {
+        vault = selectedVault;
       }
     }
 

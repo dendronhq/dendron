@@ -19,6 +19,9 @@ import {
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
   sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vault));
+  sinon
+    .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
+    .returns(Promise.resolve(vault));
   return vault;
 };
 

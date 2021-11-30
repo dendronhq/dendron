@@ -21,6 +21,7 @@ import {
   IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
+  NotePropsDict,
   QueryNotesOpts,
   RefreshNotesOpts,
   RenameNoteOpts,
@@ -40,13 +41,6 @@ export class EngineAPIService implements DEngineClient {
   private internalEngine: DEngineClient;
 
   private _trustedWorkspace: boolean = true;
-
-  get trustedWorkspace(): boolean {
-    return this._trustedWorkspace;
-  }
-  set trustedWorkspace(value: boolean) {
-    this._trustedWorkspace = value;
-  }
 
   static createEngine({
     port,
@@ -84,36 +78,67 @@ export class EngineAPIService implements DEngineClient {
     this.internalEngine = engineClient;
   }
 
-  public get notes() {
+  get trustedWorkspace(): boolean {
+    return this._trustedWorkspace;
+  }
+  set trustedWorkspace(value: boolean) {
+    this._trustedWorkspace = value;
+  }
+
+  public get notes(): NotePropsDict {
     return this.internalEngine.notes;
+  }
+  public set notes(arg: NotePropsDict) {
+    this.internalEngine.notes = arg;
   }
 
   public get wsRoot(): string {
     return this.internalEngine.wsRoot;
   }
+  public set wsRoot(arg: string) {
+    this.internalEngine.wsRoot = arg;
+  }
 
   public get schemas(): SchemaModuleDict {
     return this.internalEngine.schemas;
+  }
+  public set schemas(arg: SchemaModuleDict) {
+    this.internalEngine.schemas = arg;
   }
 
   public get links(): DLink[] {
     return this.internalEngine.links;
   }
+  public set links(arg: DLink[]) {
+    this.internalEngine.links = arg;
+  }
 
   public get vaults(): DVault[] {
     return this.internalEngine.vaults;
+  }
+  public set vaults(arg: DVault[]) {
+    this.internalEngine.vaults = arg;
   }
 
   public get configRoot(): string {
     return this.internalEngine.configRoot;
   }
+  public set configRoot(arg: string) {
+    this.internalEngine.configRoot = arg;
+  }
 
   public get config(): IntermediateDendronConfig {
     return this.internalEngine.config;
   }
+  public set config(arg: IntermediateDendronConfig) {
+    this.internalEngine.config = arg;
+  }
 
   public get hooks(): DHookDict {
     return this.internalEngine.hooks;
+  }
+  public set hooks(arg: DHookDict) {
+    this.internalEngine.hooks = arg;
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {

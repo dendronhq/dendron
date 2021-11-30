@@ -1,6 +1,5 @@
 import { DEngineClient, NoteProps } from "@dendronhq/common-all";
 import { BackfillService } from "@dendronhq/engine-server";
-import _ from "lodash";
 import { BaseCommand, CommandCommonProps } from "./base";
 
 type CommandOpts = {

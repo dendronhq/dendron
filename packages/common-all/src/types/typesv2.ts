@@ -522,6 +522,7 @@ export type DEngine = DCommonProps &
     getConfig: () => Promise<RespV2<ConfigGetPayload>>;
 
     // ui offloading
+    /** Make sure to call this with plain VSRange and not vscode.Range objects, which can't make it across to the API */
     getDecorations: (
       opts: GetDecorationsOpts
     ) => Promise<GetDecorationsPayload>;

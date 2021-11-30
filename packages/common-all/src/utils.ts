@@ -205,6 +205,35 @@ export class DefaultMap<K, V> {
   }
 }
 
+/** Similar to lodash `_.groupBy`, except not limited to string keys. */
+export function groupBy<K, V>(
+  collection: V[],
+  iteratee: (value: V, index: number) => K
+): Map<K, V[]> {
+  const map = new Map<K, V[]>();
+  collection.forEach((value, index) => {
+    const key = iteratee(value, index);
+    let group = map.get(key);
+    if (group === undefined) {
+      group = [];
+      map.set(key, group);
+    }
+    group.push(value);
+  });
+  return map;
+}
+
+export function mapValues<K, I, O>(
+  inMap: Map<K, I>,
+  applyFn: (valueIn: I) => O
+): Map<K, O> {
+  const outMap = new Map<K, O>();
+  for (const [key, value] of inMap.entries()) {
+    outMap.set(key, applyFn(value));
+  }
+  return outMap;
+}
+
 export class TagUtils {
   /** Removes `oldTag` from the frontmatter tags of `note` and replaces it with `newTag`, if any. */
   static replaceTag({

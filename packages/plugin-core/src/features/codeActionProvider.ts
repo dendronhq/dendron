@@ -34,7 +34,7 @@ const FRONTMATTER_WARNING = languages.createDiagnosticCollection();
  *
  * The user is considered to have stopped typing if they didn't type anything after 500ms.
  */
-const delayedFrontmatterWarning = _.debounce(
+export const delayedFrontmatterWarning = _.debounce(
   (uri: Uri, diagnostics: Diagnostic[]) => {
     FRONTMATTER_WARNING.set(uri, diagnostics);
   },

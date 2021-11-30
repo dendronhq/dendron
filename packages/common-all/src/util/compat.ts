@@ -1,6 +1,6 @@
 import { Point, Position, VSPosition, VSRange } from "../types";
 
-type PointOffset = { line?: number; column?: number };
+export type PointOffset = { line?: number; column?: number };
 
 /** Convert a `Point` from a parsed remark node to a `vscode.Poisition`
  *

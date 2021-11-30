@@ -5,7 +5,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import {
-  DECORATION_TYPE,
+  EDITOR_DECORATION_TYPES,
   updateDecorations,
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../utils";
@@ -92,12 +92,12 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = updateDecorations(editor);
+          const { allDecorations } = await updateDecorations(editor);
 
           const timestampDecorations = allDecorations!.get(
-            DECORATION_TYPE.timestamp
+            EDITOR_DECORATION_TYPES.timestamp
           );
-          expect(timestampDecorations.length).toEqual(2);
+          expect(timestampDecorations!.length).toEqual(2);
           // check that the decorations are at the right locations
           expect(
             isTextDecorated(CREATED, timestampDecorations!, document)
@@ -107,9 +107,9 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const blockAnchorDecorations = allDecorations!.get(
-            DECORATION_TYPE.blockAnchor
+            EDITOR_DECORATION_TYPES.blockAnchor
           );
-          expect(blockAnchorDecorations.length).toEqual(3);
+          expect(blockAnchorDecorations!.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
             isTextDecorated("^anchor-1", blockAnchorDecorations!, document)
@@ -122,9 +122,9 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const wikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.wikiLink
+            EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations.length).toEqual(4);
+          expect(wikilinkDecorations!.length).toEqual(4);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -142,16 +142,18 @@ suite("windowDecorations", function () {
             isTextDecorated("![[root.*#head]]", wikilinkDecorations!, document)
           ).toBeTruthy();
 
-          const aliasDecorations = allDecorations!.get(DECORATION_TYPE.alias);
-          expect(aliasDecorations.length).toEqual(1);
+          const aliasDecorations = allDecorations!.get(
+            EDITOR_DECORATION_TYPES.alias
+          );
+          expect(aliasDecorations!.length).toEqual(1);
           expect(
             isTextDecorated("with alias", aliasDecorations!, document)
           ).toBeTruthy();
 
           const brokenWikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.brokenWikilink
+            EDITOR_DECORATION_TYPES.brokenWikilink
           );
-          expect(brokenWikilinkDecorations.length).toEqual(4);
+          expect(brokenWikilinkDecorations!.length).toEqual(4);
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
@@ -241,10 +243,12 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = updateDecorations(editor);
+          const { allDecorations } = await updateDecorations(editor);
 
-          const taskDecorations = allDecorations!.get(DECORATION_TYPE.taskNote);
-          expect(taskDecorations.length).toEqual(3);
+          const taskDecorations = allDecorations!.get(
+            EDITOR_DECORATION_TYPES.taskNote
+          );
+          expect(taskDecorations!.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
             isTextDecorated("[[with.all]]", taskDecorations!, document)
@@ -256,22 +260,22 @@ suite("windowDecorations", function () {
             isTextDecorated("[[without.due]]", taskDecorations!, document)
           ).toBeTruthy();
 
-          expect(taskDecorations[0].renderOptions?.before?.contentText).toEqual(
-            "[x]"
-          );
-          expect(taskDecorations[0].renderOptions?.after?.contentText).toEqual(
+          expect(
+            taskDecorations![0].renderOptions?.before?.contentText
+          ).toEqual("[x]");
+          expect(taskDecorations![0].renderOptions?.after?.contentText).toEqual(
             "due:2021.10.29 @grace priority:high #foo"
           );
           expect(
-            taskDecorations[1].renderOptions?.before?.contentText
+            taskDecorations![1].renderOptions?.before?.contentText
           ).toBeFalsy();
-          expect(taskDecorations[1].renderOptions?.after?.contentText).toEqual(
+          expect(taskDecorations![1].renderOptions?.after?.contentText).toEqual(
             "@grace priority:high #foo #bar"
           );
-          expect(taskDecorations[2].renderOptions?.before?.contentText).toEqual(
-            "[ ]"
-          );
-          expect(taskDecorations[2].renderOptions?.after?.contentText).toEqual(
+          expect(
+            taskDecorations![2].renderOptions?.before?.contentText
+          ).toEqual("[ ]");
+          expect(taskDecorations![2].renderOptions?.after?.contentText).toEqual(
             "priority:low"
           );
 
@@ -311,12 +315,12 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = updateDecorations(editor);
+          const { allDecorations } = await updateDecorations(editor);
 
           const wikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.wikiLink
+            EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations.length).toEqual(3);
+          expect(wikilinkDecorations!.length).toEqual(3);
           expect(
             isTextDecorated("[[#^anchor-1]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -332,9 +336,9 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
 
           const brokenWikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.brokenWikilink
+            EDITOR_DECORATION_TYPES.brokenWikilink
           );
-          expect(brokenWikilinkDecorations.length).toEqual(3);
+          expect(brokenWikilinkDecorations!.length).toEqual(3);
           expect(
             isTextDecorated(
               "[[#^anchor-not-exists]]",
@@ -384,12 +388,12 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = updateDecorations(editor);
+          const { allDecorations } = await updateDecorations(editor);
 
           const wikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.wikiLink
+            EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations.length).toEqual(1);
+          expect(wikilinkDecorations!.length).toEqual(1);
           expect(
             isTextDecorated("![[foo.bar.*]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -422,13 +426,13 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
 
-          const { allDecorations } = updateDecorations(editor);
+          const { allDecorations } = await updateDecorations(editor);
 
           // This note is really long, so not all links in it will be decorated (there are repeat * 2 many links)
           const brokenWikilinkDecorations = allDecorations!.get(
-            DECORATION_TYPE.brokenWikilink
+            EDITOR_DECORATION_TYPES.brokenWikilink
           );
-          expect(brokenWikilinkDecorations.length < repeat * 2).toBeTruthy();
+          expect(brokenWikilinkDecorations!.length < repeat * 2).toBeTruthy();
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
@@ -475,7 +479,9 @@ suite("windowDecorations", function () {
             });
             const editor = await VSCodeUtils.openNote(note!);
 
-            const { allDecorations, allWarnings } = updateDecorations(editor);
+            const { allDecorations, allWarnings } = await updateDecorations(
+              editor
+            );
 
             expect(allDecorations).toBeFalsy();
             expect(allWarnings).toBeFalsy();
@@ -504,7 +510,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = updateDecorations(editor);
+          const { allWarnings } = await updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -534,7 +540,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = updateDecorations(editor);
+          const { allWarnings } = await updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -567,7 +573,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = updateDecorations(editor);
+          const { allWarnings } = await updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -594,7 +600,9 @@ suite("windowDecorations", function () {
           const schemaURI = vscode.Uri.parse(schemaFile);
           const editor = await VSCodeUtils.openFileInEditor(schemaURI);
 
-          const { allDecorations, allWarnings } = updateDecorations(editor!);
+          const { allDecorations, allWarnings } = await updateDecorations(
+            editor!
+          );
 
           expect(allWarnings).toEqual(undefined);
           expect(allDecorations).toEqual(undefined);

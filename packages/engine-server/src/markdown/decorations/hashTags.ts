@@ -12,6 +12,12 @@ export type DecorationHashTag = DecorationWikilink & {
   color?: string;
 };
 
+export function isDecorationHashTag(
+  decoration: DecorationWikilink
+): decoration is DecorationHashTag {
+  return (decoration as DecorationHashTag).color !== undefined;
+}
+
 export const decorateHashTag: Decorator<HashTag, DecorationHashTag> = (
   opts
 ) => {

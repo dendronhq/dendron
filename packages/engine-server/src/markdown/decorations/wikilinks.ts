@@ -3,6 +3,7 @@ import {
   containsNonDendronUri,
   DendronError,
   DEngine,
+  DEngineClient,
   getTextRange,
   IDendronError,
   isNotUndefined,
@@ -104,7 +105,7 @@ export function linkedNoteType({
   anchorEnd?: string;
   vaultName?: string;
   note?: NoteProps;
-  engine: DEngine;
+  engine: DEngine | DEngineClient;
 }): {
   type: DECORATION_TYPES.brokenWikilink | DECORATION_TYPES.wikiLink;
   errors: IDendronError[];

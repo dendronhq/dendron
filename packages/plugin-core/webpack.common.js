@@ -3,6 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const SentryWebpackPlugin = require("@sentry/webpack-plugin");
 const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const CircularDependencyPlugin = require("circular-dependency-plugin");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -80,6 +81,23 @@ const config = {
             analyzerMode: "static",
             openAnalyzer: false,
             generateStatsFile: true,
+          }),
+        ]
+      : []),
+    ...(process.env.DETECT_CIRCULAR_DEPS
+      ? [
+          new CircularDependencyPlugin({
+            // exclude detection of files based on a RegExp
+            exclude: /a\.js|node_modules/,
+            // include specific files based on a RegExp
+            include: /src/,
+            // add warnings to webpack instead of errors
+            failOnError: false,
+            // allow import cycles that include an asyncronous import,
+            // e.g. via import(/* webpackMode: "weak" */ './file.js')
+            allowAsyncCycles: false,
+            // set the current working directory for displaying module paths
+            cwd: process.cwd(),
           }),
         ]
       : []),

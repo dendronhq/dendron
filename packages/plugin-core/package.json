@@ -879,7 +879,7 @@
   },
   "icon": "assets/images/logo.png",
   "scripts": {
-    "webpack": "cross-env SKIP_SENTRY=1 webpack --config webpack.dev.js",
+    "webpack": "cross-env SKIP_SENTRY=1 DETECT_CIRCULAR_DEPS=1 webpack --config webpack.dev.js",
     "webpack:dev:watch": "yarn webpack --watch",
     "webpack:prod": "webpack --config webpack.prod.js",
     "watch": "yarn compile --watch",
@@ -915,6 +915,7 @@
     "@types/open-graph-scraper": "^4.7.0",
     "@types/semver": "^7.3.1",
     "@types/string-similarity": "^4.0.0",
+    "circular-dependency-plugin": "^5.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",
     "glob": "^7.1.6",

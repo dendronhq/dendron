@@ -214,7 +214,6 @@ export class NoteLookupCommand extends BaseCommand<
       lc.fuzzThreshold = copts.fuzzThreshold;
     }
     const { quickpick } = await lc.prepareQuickPick({
-      title: "Lookup",
       placeholder: "a seed",
       provider: this.provider,
       initialValue: copts.initialValue,

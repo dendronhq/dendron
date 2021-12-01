@@ -92,7 +92,7 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = await updateDecorations(editor);
+          const { allDecorations } = (await updateDecorations(editor))!;
 
           const timestampDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.timestamp
@@ -243,7 +243,7 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = await updateDecorations(editor);
+          const { allDecorations } = (await updateDecorations(editor))!;
 
           const taskDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.taskNote
@@ -315,7 +315,7 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = await updateDecorations(editor);
+          const { allDecorations } = (await updateDecorations(editor))!;
 
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
@@ -388,7 +388,7 @@ suite("windowDecorations", function () {
           });
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
-          const { allDecorations } = await updateDecorations(editor);
+          const { allDecorations } = (await updateDecorations(editor))!;
 
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
@@ -426,7 +426,7 @@ suite("windowDecorations", function () {
           const editor = await VSCodeUtils.openNote(note!);
           const document = editor.document;
 
-          const { allDecorations } = await updateDecorations(editor);
+          const { allDecorations } = (await updateDecorations(editor))!;
 
           // This note is really long, so not all links in it will be decorated (there are repeat * 2 many links)
           const brokenWikilinkDecorations = allDecorations!.get(
@@ -479,9 +479,9 @@ suite("windowDecorations", function () {
             });
             const editor = await VSCodeUtils.openNote(note!);
 
-            const { allDecorations, allWarnings } = await updateDecorations(
+            const { allDecorations, allWarnings } = (await updateDecorations(
               editor
-            );
+            ))!;
 
             expect(allDecorations).toBeFalsy();
             expect(allWarnings).toBeFalsy();
@@ -510,7 +510,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = await updateDecorations(editor);
+          const { allWarnings } = (await updateDecorations(editor))!;
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -540,7 +540,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = await updateDecorations(editor);
+          const { allWarnings } = (await updateDecorations(editor))!;
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -573,7 +573,7 @@ suite("windowDecorations", function () {
         },
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(note!);
-          const { allWarnings } = await updateDecorations(editor);
+          const { allWarnings } = (await updateDecorations(editor))!;
 
           expect(allWarnings!.length).toEqual(1);
           expect(
@@ -600,9 +600,9 @@ suite("windowDecorations", function () {
           const schemaURI = vscode.Uri.parse(schemaFile);
           const editor = await VSCodeUtils.openFileInEditor(schemaURI);
 
-          const { allDecorations, allWarnings } = await updateDecorations(
+          const { allDecorations, allWarnings } = (await updateDecorations(
             editor!
-          );
+          ))!;
 
           expect(allWarnings).toEqual(undefined);
           expect(allDecorations).toEqual(undefined);

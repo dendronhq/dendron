@@ -234,6 +234,48 @@ export function mapValues<K, I, O>(
   return outMap;
 }
 
+/** Debounces a given async function so that it is only executed again once the first execution is complete.
+ *
+ * Similar to lodash _.throttle, except that:
+ * 1. It's aware of the inputs, and will only throttle calls where `keyFn` returns the same key for the inputs of that call.
+ * 2. Rather than a set timeout, it will keep throttling until the first async call is complete or if set, the `maxTimeout` is reached.
+ *
+ * @param fn The function to throttle.
+ * @param keyFn A function that takes the inputs to an `fn` call and turns them into an identifying key, where to calls with same input will have the same key.
+ * @param maxTimeout Optional. If set, the throttle will not throttle for more than this much time. Once the timeout is reached, the next call will be allowed to execute.
+ * @returns The output from `fn` if it was executed, `undefined` otherwise.
+ */
+export function throttleAsyncUntilComplete<I extends any[], O>({
+  fn,
+  keyFn,
+  maxTimeout,
+}: {
+  fn: (...args: I) => Promise<O>;
+  keyFn: (...args: I) => string | number;
+  maxTimeout?: number;
+}): (...args: I) => Promise<O | undefined> {
+  const lastStarted = new Map<ReturnType<typeof keyFn>, number>();
+  return async (...args: I) => {
+    const key = keyFn(...args);
+    const last = lastStarted.get(key);
+    if (
+      last === undefined ||
+      (maxTimeout !== undefined && Date.now() - last > maxTimeout)
+    ) {
+      // Function was never run with this input before or it timed out, re-run it
+      lastStarted.set(key, Date.now());
+      let out: O;
+      try {
+        out = await fn(...args);
+      } finally {
+        lastStarted.delete(key);
+      }
+      return out;
+    }
+    return undefined;
+  };
+}
+
 export class TagUtils {
   /** Removes `oldTag` from the frontmatter tags of `note` and replaces it with `newTag`, if any. */
   static replaceTag({

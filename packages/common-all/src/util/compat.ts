@@ -63,3 +63,13 @@ export function newRange(
     },
   };
 }
+
+export function offsetRange(range: VSRange, offset: PointOffset): VSRange {
+  const { line, column } = { line: 0, column: 0, ...offset };
+  return newRange(
+    range.start.line + line,
+    range.start.character + column,
+    range.end.line + line,
+    range.end.character + column
+  );
+}

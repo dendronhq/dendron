@@ -4,11 +4,10 @@ import {
   DEngine,
   Diagnostic,
   GetDecorationsOpts,
-  getTextRange,
   IDendronError,
   NonOptional,
   NoteProps,
-  NoteUtils,
+  offsetRange,
 } from "@dendronhq/common-all";
 import { decorateUserTag } from "./userTags";
 import {
@@ -114,8 +113,9 @@ export function getDecorations(
         allDecorations.push(
           ...decorations.map((decoration) => {
             // Add the offset from the start of the range so these decorations match up in the original document
-            decoration.range.start.line += range.start.line;
-            decoration.range.end.line += range.start.line;
+            decoration.range = offsetRange(decoration.range, {
+              line: range.start.line,
+            });
             return decoration;
           })
         );

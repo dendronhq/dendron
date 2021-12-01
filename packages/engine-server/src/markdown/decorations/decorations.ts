@@ -63,14 +63,12 @@ export function getDecorations(
   opts: Omit<GetDecorationsOpts, "id"> & { note: NoteProps; engine: DEngine }
 ) {
   const { note, ranges, engine } = opts;
-  const noteText = NoteUtils.serialize(note);
 
   const allDecorations: Decoration[] = [];
   const allDiagnostics: Diagnostic[] = [];
   const allErrors: IDendronError[] = [];
 
-  for (const range of ranges) {
-    const text = getTextRange(noteText, range);
+  for (const { range, text } of ranges) {
     if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
       return {
         errors: [
@@ -103,9 +101,6 @@ export function getDecorations(
     visit(tree, (nodeIn) => {
       // This was parsed, it must have a position
       const node = nodeIn as NonOptional<DendronASTNode, "position">;
-      // Need to update node position with the added offset from the range
-      node.position.start.line += range.start.line;
-      node.position.end.line += range.end.line;
 
       // Need to update node position with the added offset from the range
       const decoratorOut = runDecorator({
@@ -116,7 +111,14 @@ export function getDecorations(
       });
       if (decoratorOut) {
         const { decorations, errors } = decoratorOut;
-        allDecorations.push(...decorations);
+        allDecorations.push(
+          ...decorations.map((decoration) => {
+            // Add the offset from the start of the range so these decorations match up in the original document
+            decoration.range.start.line += range.start.line;
+            decoration.range.end.line += range.start.line;
+            return decoration;
+          })
+        );
         if (errors) allErrors.push(...errors);
       }
       // Capture frontmatter if we come across it so we can check it for warnings

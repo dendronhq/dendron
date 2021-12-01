@@ -131,7 +131,7 @@ export const updateDecorations = sentryReportingCallback(
       return {};
     }
     // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
-    const ranges = VSCodeUtils.mergeOverlappingRanges(
+    const inputRanges = VSCodeUtils.mergeOverlappingRanges(
       editor.visibleRanges.map((range) =>
         VSCodeUtils.padRange({
           range,
@@ -141,10 +141,15 @@ export const updateDecorations = sentryReportingCallback(
       )
     );
 
-    const rangesPlain = ranges.map(VSCodeUtils.toPlainRange);
+    const ranges = inputRanges.map((range) => {
+      return {
+        range: VSCodeUtils.toPlainRange(range),
+        text: editor.document.getText(range),
+      };
+    });
     const out = await engine.getDecorations({
       id: note.id,
-      ranges: rangesPlain,
+      ranges,
     });
     const { data, error } = out;
     Logger.info({

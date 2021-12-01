@@ -728,16 +728,19 @@ export class DendronEngineV2 implements DEngine {
           status: ERROR_STATUS.INVALID_STATE,
           message: `${opts.id} does not exist`,
         });
-      // Very weirdly, these somehow turn into strings when getting called in through the API.
+      // Very weirdly, these range numbers turn into strings when getting called in through the API.
       // Not sure if I'm missing something.
-      opts.ranges = opts.ranges.map((range) =>
-        newRange(
-          _.toNumber(range.start.line),
-          _.toNumber(range.start.character),
-          _.toNumber(range.end.line),
-          _.toNumber(range.end.character)
-        )
-      );
+      opts.ranges = opts.ranges.map((item) => {
+        return {
+          text: item.text,
+          range: newRange(
+            _.toNumber(item.range.start.line),
+            _.toNumber(item.range.start.character),
+            _.toNumber(item.range.end.line),
+            _.toNumber(item.range.end.character)
+          ),
+        };
+      });
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,

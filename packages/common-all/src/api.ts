@@ -157,7 +157,10 @@ export type GetNoteBlocksRequest = {
 
 export type GetDecorationsRequest = {
   id: string;
-  ranges: VSRange[];
+  ranges: {
+    range: VSRange;
+    text: string;
+  }[];
 } & Partial<WorkspaceRequest>;
 
 export type SchemaDeleteRequest = {

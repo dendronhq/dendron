@@ -317,7 +317,11 @@ export type ConfigWriteOpts = {
 
 export type GetDecorationsOpts = {
   id: string;
-  ranges: VSRange[];
+  ranges: {
+    range: VSRange;
+    /** The document text that corresponds to this range. This is required because otherwise there's a data race between the notes in engine updating and decorations being generated. */
+    text: string;
+  }[];
 };
 
 // === Engine and Store Main

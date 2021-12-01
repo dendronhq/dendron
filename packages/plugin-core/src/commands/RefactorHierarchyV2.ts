@@ -1,16 +1,15 @@
 import {
   DEngineClient,
   DNodeProps,
+  DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  NoteQuickInput,
-  NoteUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
-import { HistoryEvent } from "@dendronhq/engine-server";
+import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import {
@@ -56,23 +55,33 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
 
-  async promptScope(opts: {
-    initialValue: string;
-  }): Promise<NoteLookupProviderSuccessResp | undefined> {
-    const { initialValue } = opts;
+  entireWorkspaceQuickPickItem = {
+    label: "Entire Workspace",
+    detail: "Scope refactor to entire workspace",
+    alwaysShow: true,
+  } as DNodePropsQuickInputV2;
+
+  async promptScope(): Promise<NoteLookupProviderSuccessResp | undefined> {
+    // see if we have a selection that contains wikilinks
+    const { text } = VSCodeUtils.getSelection();
+    const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+    const shouldUseSelection = wikiLinks.length > 0;
+
     const lcOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: true,
       vaultSelectCanToggle: false,
       extraButtons: [
-        Selection2ItemsBtn.create(false),
-        MultiSelectBtn.create(false),
+        Selection2ItemsBtn.create(shouldUseSelection),
+        MultiSelectBtn.create(shouldUseSelection),
       ],
     };
     const controller = LookupControllerV3.create(lcOpts);
+
     const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
+      extraItems: [this.entireWorkspaceQuickPickItem],
     });
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
@@ -91,9 +100,9 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         },
       });
       controller.show({
-        initialValue,
-        title: "Scope",
-        placeholder: "Query for scope. Press esc. to use all notes.",
+        title: "Decide the scope of refactor",
+        placeholder:
+          "Query for scope. Select 'Entire Workspace' to use all notes.",
         provider,
       });
     });
@@ -101,7 +110,9 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
 
   async promptMatchText() {
     const match = await VSCodeUtils.showInputBox({
-      prompt: "Enter match text. Leave blank to capture entire file name.",
+      title: "Enter match text.",
+      prompt:
+        "The matched portion of the file name will be the part that gets modified. The rest will remain unchanged. This support full range of regular expression. Leave blank to capture entire file name",
     });
 
     if (match === undefined) {
@@ -119,7 +130,9 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     do {
       // eslint-disable-next-line no-await-in-loop
       replace = await VSCodeUtils.showInputBox({
-        prompt: "Enter replace text.",
+        title: "Enter replace text.",
+        prompt:
+          "This will replace the matched portion of the file name. If the matched text from previous step has named / unnamed captured groups, they are available here.",
       });
 
       if (replace === undefined) {
@@ -135,14 +148,14 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
-    let value: string = "";
-    const editor = VSCodeUtils.getActiveTextEditor();
-    if (editor) {
-      value = NoteUtils.uri2Fname(editor.document.uri);
-    }
-
-    const scope = await this.promptScope({ initialValue: value });
+    const scope = await this.promptScope();
     if (_.isUndefined(scope)) {
+      window.showInformationMessage("No scope provided.");
+      return;
+    } else if (
+      scope.selectedItems &&
+      scope.selectedItems[0] === this.entireWorkspaceQuickPickItem
+    ) {
       window.showInformationMessage("Refactor scoped to all notes.");
     } else {
       window.showInformationMessage(
@@ -229,50 +242,44 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     panel.webview.html = md.render(content);
   }
 
-  getCapturedEntries(opts: {
+  getCapturedNotes(opts: {
     scope: NoteLookupProviderSuccessResp | undefined;
     matchRE: RegExp;
     engine: DEngineClient;
   }) {
     const { scope, matchRE, engine } = opts;
-    const { notes, schemas, vaults, wsRoot } = engine;
+    const { notes } = engine;
 
-    const capturedEntries: NoteQuickInput[] = [];
+    const scopedItems =
+      _.isUndefined(scope) ||
+      scope.selectedItems[0] === this.entireWorkspaceQuickPickItem
+        ? _.toArray(notes)
+        : scope.selectedItems.map(
+            (item) =>
+              _.omit(item, ["label", "detail", "alwasyShow"]) as DNodeProps
+          );
 
-    const scopedItems = _.isUndefined(scope)
-      ? _.toArray(notes).map((note: DNodeProps) => {
-          return DNodeUtils.enhancePropForQuickInputV3({
-            props: note,
-            schemas,
-            vaults,
-            wsRoot,
-          });
-        })
-      : scope.selectedItems;
-
-    scopedItems.forEach((item) => {
+    const capturedNotes: DNodeProps[] = scopedItems.filter((item) => {
       const result = matchRE.exec(item.fname);
-      // Shouldn't include root notes
-      if (result && !DNodeUtils.isRoot(item)) {
-        capturedEntries.push(item);
-      }
+      return result && !DNodeUtils.isRoot(item);
     });
-    return capturedEntries;
+
+    return capturedNotes;
   }
 
   getRenameOperations(opts: {
-    capturedEntries: NoteQuickInput[];
+    capturedNotes: DNodeProps[];
     matchRE: RegExp;
     replace: string;
     wsRoot: string;
   }) {
-    const { capturedEntries, matchRE, replace, wsRoot } = opts;
-    const operations = capturedEntries.map((entry) => {
-      const vault = entry.vault;
+    const { capturedNotes, matchRE, replace, wsRoot } = opts;
+    const operations = capturedNotes.map((note) => {
+      const vault = note.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);
-      const source = entry.fname;
-      const dest = entry.fname.replace(matchRE, replace);
+      const source = note.fname;
+      const dest = note.fname.replace(matchRE, replace);
       return {
         oldUri: VSCodeUtils.joinPath(rootUri, source + ".md"),
         newUri: VSCodeUtils.joinPath(rootUri, dest + ".md"),
@@ -349,14 +356,14 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const ext = getExtension();
     const { engine } = getDWorkspace();
     const matchRE = new RegExp(match);
-    const capturedEntries = this.getCapturedEntries({
+    const capturedNotes = this.getCapturedNotes({
       scope,
       matchRE,
       engine,
     });
 
     const operations = this.getRenameOperations({
-      capturedEntries,
+      capturedNotes,
       matchRE,
       replace,
       wsRoot: engine.wsRoot,

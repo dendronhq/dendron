@@ -141,7 +141,7 @@ export async function showDocAndHidePicker(
 }
 
 export type CreateQuickPickOpts = {
-  title: string;
+  title?: string;
   placeholder: string;
   /**
    * QuickPick.ignoreFocusOut prop

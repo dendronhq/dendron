@@ -15,12 +15,7 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
 import { getEngine } from "../../workspace";
-import {
-  DNodeProps,
-  DNodeUtils,
-  DVault,
-  NoteUtils,
-} from "@dendronhq/common-all";
+import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3";
 
 suite("RefactorHiearchy", function () {
@@ -55,7 +50,6 @@ suite("RefactorHiearchy", function () {
           vault,
           wsRoot,
           fname: "refactor.two",
-          body: [""].join("\n"),
         });
       };
     });
@@ -182,19 +176,11 @@ suite("RefactorHiearchy", function () {
             const cmd = new RefactorHierarchyCommandV2();
 
             const engine = getEngine();
-            const { schemas, vaults, wsRoot } = engine;
+            const { wsRoot } = engine;
 
-            const capturedEntries = [note, noteOne, noteTwo].map((ent) => {
-              return DNodeUtils.enhancePropForQuickInputV3({
-                props: ent,
-                schemas,
-                vaults,
-                wsRoot,
-              });
-            });
-
+            const capturedNotes = [note, noteOne, noteTwo];
             const operations = cmd.getRenameOperations({
-              capturedEntries,
+              capturedNotes,
               matchRE: new RegExp("(.*)"),
               replace: "prefix.$1.suffix",
               wsRoot,
@@ -229,21 +215,18 @@ suite("RefactorHiearchy", function () {
           vault,
           wsRoot,
           fname: "dendron.ref.foo.test",
-          body: [""].join("\n"),
         });
 
         refBarTest = await NoteTestUtilsV4.createNote({
           vault,
           wsRoot,
           fname: "dendron.ref.bar.test",
-          body: [""].join("\n"),
         });
 
         refEggTest = await NoteTestUtilsV4.createNote({
           vault,
           wsRoot,
           fname: "dendron.ref.egg.test",
-          body: [""].join("\n"),
         });
       };
     });
@@ -261,21 +244,12 @@ suite("RefactorHiearchy", function () {
             const cmd = new RefactorHierarchyCommandV2();
 
             const engine = getEngine();
-            const { schemas, vaults, wsRoot } = engine;
+            const { wsRoot } = engine;
 
-            const capturedEntries = [refFooTest, refBarTest, refEggTest].map(
-              (ent) => {
-                return DNodeUtils.enhancePropForQuickInputV3({
-                  props: ent,
-                  schemas,
-                  vaults,
-                  wsRoot,
-                });
-              }
-            );
+            const capturedNotes = [refFooTest, refBarTest, refEggTest];
 
             const operations = cmd.getRenameOperations({
-              capturedEntries,
+              capturedNotes,
               // capture two depth of hierarchy if parent is "ref"
               // discard whatever comes before "ref"
               matchRE: new RegExp("(?:.*)(?<=ref)\\.(\\w*)\\.(?<rest>.*)"),

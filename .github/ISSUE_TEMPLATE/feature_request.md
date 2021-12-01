@@ -17,7 +17,7 @@ assignees: ''
  for help with choosing.
 
  Needed for Auto labeling:
- issue_labeler_regex_version=3
+ issue_labeler_regex_version=4
 
  - [ ] IsTriaged
 
@@ -28,15 +28,15 @@ assignees: ''
 - [ ] Enhancement of an existing Feature.
 - [ ] Request of a new feature.
 
-## Please select the area your request applies to. (Multiple selections are possible) ##
+## Please select the area your request applies to. (Multiple selections are Possible. You can leave blank if you're not sure.) ##
 
-- [ ] Onboard. Initial vault setup and import/export pods
-- [ ] Create. Note creation, lookup, snippets and templates
-- [ ] Retrieve. Backlinks, references, graph view
-- [ ] Structure. Refactoring, multi-vault and schemas
-- [ ] Publish. Sharing your repo with the world
-- [ ] Misc (Choose this if your not sure)
-
+- [ ] Workspace - VSCode workspace, vaults, Intellisense/autocomplete, Dendron settings
+- [ ] Lookup - Dendron's Lookup Command
+- [ ] Views - Dendron Preview, Tree View, Side Panels in the UI
+- [ ] Schema - Dendron Schemas
+- [ ] Pod - Data import from / export to Dendron
+- [ ] Publish - External Site Publish
+- [ ] Markdown - Markdown features, such as syntax support and features
 
 ## Is your feature request related to a problem? Please describe ##
 

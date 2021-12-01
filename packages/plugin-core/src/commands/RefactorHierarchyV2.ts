@@ -110,7 +110,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
 
   async promptMatchText() {
     const match = await VSCodeUtils.showInputBox({
-      title: "Enter match text.",
+      title: "Enter match text",
       prompt:
         "The matched portion of the file name will be the part that gets modified. The rest will remain unchanged. This support full range of regular expression. Leave blank to capture entire file name",
     });
@@ -130,7 +130,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     do {
       // eslint-disable-next-line no-await-in-loop
       replace = await VSCodeUtils.showInputBox({
-        title: "Enter replace text.",
+        title: "Enter replace text",
         prompt:
           "This will replace the matched portion of the file name. If the matched text from previous step has named / unnamed captured groups, they are available here.",
       });

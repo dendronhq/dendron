@@ -893,7 +893,7 @@
     "deploy:vscode": "vsce publish --yarn",
     "deploy:vscode:vsix": "vsce publish --packagePath",
     "deploy:ovsx": "ovsx publish --yarn",
-    "deploy:ovsx:vsix": "ovsx publish --packagePath",
+    "deploy:ovsx:vsix": "ovsx publish ",
     "clean": "yarn rimraf out dist node_modules && yarn clean:assets",
     "clean:assets": "yarn rimraf assets/{static}",
     "rimraf": "npx rimraf"

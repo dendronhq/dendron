@@ -28,8 +28,8 @@ export type GoogleDocsExportReturnType = RespV2<{
 }>;
 
 /**
- * GDoc Export Pod (V2 - for compatibility with Pod V2 workflow). Supports
- *exportNote()
+ * GDoc Export Pod (V2 - for compatibility with Pod V2 workflow). Supports only
+ * exportNote() for now
  */
 export class GoogleDocsExportPodV2
   implements ExportPodV2<GoogleDocsExportReturnType>
@@ -62,7 +62,7 @@ export class GoogleDocsExportPodV2
       fname: input.fname,
       vaultName: input.vault,
       dest: "stdout",
-      convertWikilinksToHref: false,
+      convertLinks: false,
     };
     // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
     const data = await pod.plant({

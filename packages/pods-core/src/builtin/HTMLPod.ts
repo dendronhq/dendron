@@ -8,9 +8,9 @@ const ID = "dendron.html";
 
 export type HTMLPublishPodConfig = PublishPodConfig & {
   /**
-   * check for parsing wikilinks. Used by gdoc export pod to avoid parsing wikilinks as href.
+   * check for parsing links(wikilinks and backlinks). Used by gdoc export pod to avoid parsing wikilinks as href.
    */
-  convertWikilinksToHref?: boolean;
+  convertLinks?: boolean;
 };
 
 export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
@@ -21,8 +21,8 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     return PodUtils.createPublishConfig({
       required: [],
       properties: {
-        convertWikilinksToHref: {
-          description: "convert wikilinks to href",
+        convertLinks: {
+          description: "convert Links to href",
           type: "boolean",
           default: true,
           nullable: true,
@@ -33,7 +33,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
 
   async plant(opts: PublishPodPlantOpts): Promise<any> {
     const { config, engine, note } = opts;
-    const { fname, convertWikilinksToHref = true } = config;
+    const { fname, convertLinks = true } = config;
     const { data: econfig } = await engine.getConfig();
     const proc = MDUtilsV4.procFull({
       engine,
@@ -46,7 +46,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       },
       config: econfig!,
       mermaid: ConfigUtils.getProp(econfig!, "mermaid"),
-      wikiLinksOpts: { convertWikilinksToHref },
+      wikiLinksOpts: { convertLinks },
     });
     const { contents } = await MDUtilsV4.procRehype({
       proc,

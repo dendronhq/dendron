@@ -206,6 +206,7 @@ function mapDecoration(decoration: Decoration): DecorationAndType | undefined {
     // Some decoration types require special processing to add per-decoration data
     case DECORATION_TYPES.timestamp:
       return mapTimestamp(decoration as DecorationTimestamp);
+    case DECORATION_TYPES.brokenWikilink: // fallthrough deliberate
     case DECORATION_TYPES.wikiLink:
       return mapWikilink(decoration as DecorationWikilink); // some wikilinks are hashtags and need the color squares
     case DECORATION_TYPES.taskNote:

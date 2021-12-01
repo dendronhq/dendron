@@ -46,7 +46,7 @@ export function decorateTag({
     fname,
     notes: engine.notes,
   });
-  if (colorType === "configured" || engine.config.noRandomlyColoredTags) {
+  if (colorType === "configured" || !engine.config.noRandomlyColoredTags) {
     color = foundColor;
   }
 

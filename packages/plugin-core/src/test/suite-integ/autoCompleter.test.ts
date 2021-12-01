@@ -5,9 +5,9 @@ import { expect } from "../expect";
 describe(`Auto Completer tests.`, () => {
   describe(`GIVEN empty file name input`, () => {
     it(`WHEN auto complete is used with empty file names THEN return current value`, () => {
-      expect(AutoCompleter.autoCompleteNoteLookup("hello", [])).toEqual(
-        "hello"
-      );
+      expect(
+        AutoCompleter.autoCompleteNoteLookup("hello", "hello", [])
+      ).toEqual("hello");
     });
   });
 
@@ -26,13 +26,39 @@ describe(`Auto Completer tests.`, () => {
       "langrel.hello-world",
     ];
 
-    function testWithLanguageInput(input: string, expected: string) {
+    function testWithLanguageInput(
+      input: string,
+      expected: string,
+      activeItemValue?: string
+    ) {
+      if (activeItemValue === undefined) {
+        activeItemValue = input;
+      }
       const actual = AutoCompleter.autoCompleteNoteLookup(
         input,
+        activeItemValue,
         LANGUAGE_FNAMES
       );
       expect(actual).toEqual(expected);
     }
+
+    describe(`WHEN active item is specified`, () => {
+      it(`AND there is a match with input THEN return active item`, () => {
+        testWithLanguageInput(
+          "mach",
+          "languages.python.machine-learning.pandas",
+          "languages.python.machine-learning.pandas"
+        );
+      });
+
+      it("AND there is NO match with the input THEN return active item", () => {
+        testWithLanguageInput(
+          "data",
+          "languages.python.machine-learning.pandas",
+          "languages.python.machine-learning.pandas"
+        );
+      });
+    });
 
     describe(`Testing prefix auto completion (digging into hierarchy):`, () => {
       [

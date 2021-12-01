@@ -2,7 +2,7 @@
 id: bNkYI2WWK6Jhm2eeVwqrh
 title: Note Lookup
 desc: ''
-updated: 1637755384684
+updated: 1638339130562
 created: 1633501913732
 ---
 
@@ -76,3 +76,9 @@ All matches should have `data.` and some value after `data.`
 1. Activate lookup
 2. Enter `pyth`
 3. Press `Tab` should auto complete to `languages.pyth` 
+
+### Focused item
+1. Activate lookup
+2. Enter `la`
+3. Scroll down (using down arrow key) to `templates.book.characters` press tab
+EXPECTED: Auto completes to `templates.book.characters`

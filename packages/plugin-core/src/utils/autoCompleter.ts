@@ -47,14 +47,44 @@ export class UIAutoCompletableCmds {
 
 export class AutoCompleter {
   /**
+   * Auto complete note look up will do its best to add completions incrementally,
+   * since if the user already found the result they want they can just press Enter.
+   *
    * currentValue: currently entered into lookup.
+   * activeItemValue: val of the item that is in focus in the list of possible items
+   *                 (if nothing is in focus this should be equal to the current value).
    * fnames: the file names to choose completions from sorted by most likely matches first.
    * */
-  static autoCompleteNoteLookup(currentValue: string, fnames: string[]) {
+  static autoCompleteNoteLookup(
+    currentValue: string,
+    activeItemValue: string,
+    fnames: string[]
+  ) {
     if (fnames.length === 0) {
       return currentValue;
     }
     let topPickIdx = 0;
+
+    if (currentValue !== activeItemValue && fnames.includes(activeItemValue)) {
+      // If active item is not equal to the current value and it does exist in
+      // file names then we can deem that its the item which is currently selected.
+      //
+      // Initial thoughts to tackle this scenario was to apply similar logic of auto
+      // complete of attempting to incrementally auto complete using active item
+      // as origin of partial completion (Eg. auto complete up to the part currentValue part
+      // within the active item).
+      //
+      // However, doing some usability testing it proved rather annoying to have the selection
+      // appear to drop after scrolling through a long list of items.
+      // Example: in test workspace if typed 'la' and then scrolled down past all 'language' matches,
+      // while hovering on top of 'templates.book.characters' when trying to do partial
+      // completion it would complete to 'templa' and show all new results, with
+      // 'templates.book.characters' not having any priority in those results. It appears to be
+      // much smoother experience if we just auto complete to 'templates.book.characters' in such
+      // cases. Which is just returning the currently focused item.
+
+      return activeItemValue;
+    }
 
     if (FuseEngine.doesContainSpecialQueryChars(currentValue)) {
       // If there are special query characters and auto complete is activated we will not
@@ -92,10 +122,12 @@ export class AutoCompleter {
       }
 
       return this.matchPrefixTillNextDot(fnames[topPickIdx], currentValue, 0);
-    } else {
+    } else if (fnames[topPickIdx].includes(currentValue)) {
       // Add the beginning of the matching note to the auto complete, which should
       // allow the user to use matching into next hierarchy level.
       return this.matchNoteUpToCurrValue(fnames[topPickIdx], currentValue);
+    } else {
+      return fnames[topPickIdx];
     }
   }
 

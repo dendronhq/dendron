@@ -61,6 +61,10 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
     label: "Bubble Up Create New",
     desc: "Put `Create New` at the top of the lookup result.",
   },
+  fuzzThreshold: {
+    label: "Fuzziness threshold for lookup",
+    desc: "Sets the fuzziness level of lookups 0=exact matches only, 1=max fuzziness.",
+  },
 };
 
 /**

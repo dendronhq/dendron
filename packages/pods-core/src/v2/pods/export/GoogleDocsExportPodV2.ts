@@ -62,6 +62,7 @@ export class GoogleDocsExportPodV2
       fname: input.fname,
       vaultName: input.vault,
       dest: "stdout",
+      convertWikilinksToHref: false,
     };
     // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
     const data = await pod.plant({
@@ -71,7 +72,13 @@ export class GoogleDocsExportPodV2
       vaults: this._vaults,
       wsRoot: this._wsRoot,
     });
-    const response = await this.exportToGDoc({ data, name: input.title });
+    const documentId = input.custom.documentId;
+
+    const response = await this.exportToGDoc({
+      data,
+      name: input.fname,
+      documentId,
+    });
     return response;
   }
 
@@ -81,8 +88,9 @@ export class GoogleDocsExportPodV2
   async exportToGDoc(opts: {
     data: string;
     name: string;
+    documentId?: string;
   }): Promise<GoogleDocsExportReturnType> {
-    const { data, name } = opts;
+    const { data, name, documentId } = opts;
     const { refreshToken, expirationTime } = this._config;
     let { accessToken } = this._config;
 
@@ -94,9 +102,25 @@ export class GoogleDocsExportPodV2
         this._config.connectionId
       );
     }
+    const content = Buffer.from(data);
 
+    if (_.isUndefined(documentId)) {
+      return this.createGdoc({ content, name, accessToken });
+    } else {
+      return this.overwriteGdoc({ content, accessToken, documentId });
+    }
+  }
+
+  /**
+   * Create a new gdoc
+   */
+  async createGdoc(opts: {
+    content: Buffer;
+    name: string;
+    accessToken: string;
+  }): Promise<GoogleDocsExportReturnType> {
     try {
-      const content = Buffer.from(data);
+      const { content, name, accessToken } = opts;
       //metadata is used by drive API to understand the required MIME type
       const metadata = {
         name,
@@ -116,6 +140,41 @@ export class GoogleDocsExportPodV2
           "Content-Type": `multipart/related; boundary=${formData.getBoundary()}`,
         },
         data: formData,
+      });
+      return ResponseUtil.createHappyResponse({
+        data: {
+          documentId: response.data.id,
+        },
+      });
+    } catch (err: any) {
+      return ResponseUtil.createUnhappyResponse({
+        error: err as DendronError,
+      });
+    }
+  }
+
+  /**
+   * If a note has document id, overwrite the existing gdoc with the note's content.
+   * @param opts
+   * @returns
+   */
+  async overwriteGdoc(opts: {
+    content: Buffer;
+    accessToken: string;
+    documentId: string;
+  }): Promise<GoogleDocsExportReturnType> {
+    const { content, accessToken, documentId } = opts;
+    const fileSize = content.length;
+    try {
+      const response = await axios({
+        method: "PUT",
+        url: `https://www.googleapis.com/upload/drive/v2/files/${documentId}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          "Content-Range": `bytes 0-${fileSize - 1}/${fileSize}`,
+        },
+        data: content,
       });
       return ResponseUtil.createHappyResponse({
         data: {

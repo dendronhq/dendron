@@ -159,7 +159,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     const gdocLink = `https://docs.google.com/document/d/${exportReturnValue.data?.documentId}`;
     clipboard.writeText(gdocLink);
     vscode.window.showInformationMessage(
-      `Finished running Google Docs export pod. The doc titled ${payload.title} is created in your selected google docs account and link is copied to the clipboard.`
+      `Finished running Google Docs export pod. The doc ${payload.fname} is created in your selected google docs account and link is copied to the clipboard.`
     );
   }
 

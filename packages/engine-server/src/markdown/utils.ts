@@ -393,7 +393,6 @@ export class MDUtilsV4 {
       .use(abbrPlugin)
       .use(variables)
       .use(footnotes)
-      .use(wikiLinks, opts.wikiLinksOpts)
       .use(hierarchies, {
         hierarchyDisplayTitle: config.hierarchyDisplayTitle,
         hierarchyDisplay: config.hierarchyDisplay,
@@ -409,6 +408,9 @@ export class MDUtilsV4 {
         prettyRefs: usePrettyRefs,
         insertTitle,
       });
+    if (opts.wikiLinksOpts?.convertWikilinksToHref) {
+      proc = proc.use(wikiLinks, opts.wikiLinksOpts);
+    }
 
     if (
       opts.mathOpts?.katex ||

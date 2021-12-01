@@ -3,6 +3,8 @@ import {
   SchemaUtils,
   DVault,
   SchemaOpts,
+  NoteProps,
+  SchemaTemplate,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
@@ -99,72 +101,86 @@ describe(`NoteUtils tests:`, () => {
 });
 
 describe(`SchemaUtil tests:`, () => {
-  describe(`applyTemplate tests`, () => {
-    test("Test that template note's body replaces empty note's body", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const noteFactory = TestNoteFactory.defaultUnitTestFactory();
-          const note = await noteFactory.createForFName("new note");
+  describe(`WHEN running applyTemplate tests`, () => {
+    const noteFactory: TestNoteFactory =
+      TestNoteFactory.defaultUnitTestFactory();
+    let note: NoteProps;
+    const template: SchemaTemplate = { id: "foo", type: "note" };
 
-          const resp = SchemaUtils.applyTemplate({
-            template: { id: "foo", type: "note" },
-            note,
-            engine,
-          });
-          expect(resp).toBeTruthy();
-          expect(note.body).toEqual(engine.notes["foo"].body);
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-        }
-      );
+    describe(`GIVEN current note's body is empty`, () => {
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+      });
+
+      it("WHEN applying a template, THEN replace note's body with template's body", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template,
+              note,
+              engine,
+            });
+            expect(resp).toBeTruthy();
+            expect(note.body).toEqual(engine.notes["foo"].body);
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
     });
 
-    test("Test that template note's body is appended to existing note's body", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const noteFactory = TestNoteFactory.defaultUnitTestFactory();
-          const note = await noteFactory.createForFName("new note");
-          const noteBody = "test test";
-          note.body = noteBody;
+    describe(`GIVEN current note's body is not empty`, () => {
+      const noteBody = "test test";
 
-          const resp = SchemaUtils.applyTemplate({
-            template: { id: "foo", type: "note" },
-            note,
-            engine,
-          });
-          expect(resp).toBeTruthy();
-          expect(note.body).toEqual(noteBody + "\n" + engine.notes["foo"].body);
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-        }
-      );
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+        note.body = noteBody;
+      });
+
+      it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template,
+              note,
+              engine,
+            });
+            expect(resp).toBeTruthy();
+            expect(note.body).toEqual(
+              noteBody + "\n" + engine.notes["foo"].body
+            );
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
     });
 
-    test("Test that applying template only applies to type note", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const noteFactory = TestNoteFactory.defaultUnitTestFactory();
-          const note = await noteFactory.createForFName("new note");
+    describe("GIVEN template type is not a note", async () => {
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+      });
 
-          const resp = SchemaUtils.applyTemplate({
-            template: { id: "foo", type: "snippet" },
-            note,
-            engine,
-          });
-          expect(resp).toBeFalsy();
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-        }
-      );
+      it("WHEN applying a template, THEN do nothing and return false ", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template: { id: "foo", type: "snippet" },
+              note,
+              engine,
+            });
+            expect(resp).toBeFalsy();
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
     });
   });
 });

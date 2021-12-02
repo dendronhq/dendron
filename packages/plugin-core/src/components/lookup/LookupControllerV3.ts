@@ -156,12 +156,13 @@ export class LookupControllerV3 {
   async prepareQuickPick(opts: PrepareQuickPickOpts) {
     const ctx = "prepareQuickPick";
     Logger.info({ ctx, msg: "enter" });
-    const { provider, title } = _.defaults(opts, {
+    const { provider, title, selectAll } = _.defaults(opts, {
       nonInteractive: false,
       title: [
         `Lookup (${this.nodeType})`,
         `- version: ${DendronExtension.version()}`,
       ].join(" "),
+      selectAll: false,
     });
     this._provider = provider;
     const { buttonsPrev, buttons } = this.state;
@@ -182,6 +183,8 @@ export class LookupControllerV3 {
       });
     });
     quickpick.title = title;
+
+    quickpick.selectAll = quickpick.canSelectMany && selectAll;
 
     quickpick.buttons.forEach((button: DendronBtn) => {
       AnalyticsUtils.track(LookupEvents.LookupModifierSetByController, {

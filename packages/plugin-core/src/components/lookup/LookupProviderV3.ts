@@ -313,6 +313,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
       if (picker.itemsFromSelection) {
         picker.items = picker.itemsFromSelection;
+        if (picker.selectAll) {
+          picker.selectedItems = picker.items;
+        }
         return;
       }
 

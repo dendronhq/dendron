@@ -234,7 +234,7 @@ export function mapValues<K, I, O>(
   return outMap;
 }
 
-/** Debounces a given async function so that it is only executed again once the first execution is complete.
+/** Throttles a given async function so that it is only executed again once the first execution is complete.
  *
  * Similar to lodash _.throttle, except that:
  * 1. It's aware of the inputs, and will only throttle calls where `keyFn` returns the same key for the inputs of that call.
@@ -242,17 +242,17 @@ export function mapValues<K, I, O>(
  *
  * @param fn The function to throttle.
  * @param keyFn A function that takes the inputs to an `fn` call and turns them into an identifying key, where to calls with same input will have the same key.
- * @param maxTimeout Optional. If set, the throttle will not throttle for more than this much time. Once the timeout is reached, the next call will be allowed to execute.
- * @returns The output from `fn` if it was executed, `undefined` otherwise.
+ * @param timeout Optional, in ms. If set, the throttle will not throttle for more than this much time. Once the timeout is reached, the next call will be allowed to execute.
+ * @returns The throttled function. This function will return its results if it got executed, or undefined it it was throttled.
  */
 export function throttleAsyncUntilComplete<I extends any[], O>({
   fn,
   keyFn,
-  maxTimeout,
+  timeout,
 }: {
   fn: (...args: I) => Promise<O>;
   keyFn: (...args: I) => string | number;
-  maxTimeout?: number;
+  timeout?: number;
 }): (...args: I) => Promise<O | undefined> {
   const lastStarted = new Map<ReturnType<typeof keyFn>, number>();
   return async (...args: I) => {
@@ -260,7 +260,7 @@ export function throttleAsyncUntilComplete<I extends any[], O>({
     const last = lastStarted.get(key);
     if (
       last === undefined ||
-      (maxTimeout !== undefined && Date.now() - last > maxTimeout)
+      (timeout !== undefined && Date.now() - last > timeout)
     ) {
       // Function was never run with this input before or it timed out, re-run it
       lastStarted.set(key, Date.now());
@@ -274,6 +274,84 @@ export function throttleAsyncUntilComplete<I extends any[], O>({
     }
     return undefined;
   };
+}
+
+type DebounceStates = "timeout" | "execute" | "trailing";
+type DebounceStateMap = Map<string | number, DebounceStates>;
+
+/** Debounces a given async function so that it is only executed again once the first execution is complete.
+ *
+ * Similar to lodash _.debounce, except that:
+ * 1. It's aware of the inputs, and will only debounce calls where `keyFn` returns the same key for the inputs of that call.
+ * 2. In addition to the timeout, it will also debouce calls while the async function is executing.
+ *
+ * Differently from `throttleAsyncUntilComplete`, this will wait for the timeout to expire before running the function for the first time.
+ * Additionally, if any calls occur while the function is being executed and `trailing` is set,
+ * another timeout and execution will happen once the current execution is done.
+ * For example, consider this timeline where the arrows are calls to the debounced function.
+ *
+ * ```
+ * +---------+---------+---------+---------+
+ * | timeout | execute | timeout | execute |
+ * +---------+---------+---------+---------+
+ * ^   ^   ^     ^
+ * ```
+ * The timeout starts at first function call, all calls during that time are debounced, and the function finally executes after the timeout.
+ * Because another function call happens during the execution of the async function, another timeout and execution trigger right after the
+ * first is done (this will only happen if trailing is set). After that point, no more function calls occur so no more timeouts or executions happen.
+ *
+ * **Check `windowDecorations.ts` for an example of how this is used. It was primarily purpose-built for that.
+ *
+ * @param fn The function to debounce.
+ * @param keyFn A function that takes the inputs to an `fn` call and turns them into an identifying key, where to calls with same input will have the same key.
+ * @param timeout In ms. The function will not execute until this much time has passed. In other words, there will be at least this much time between executions.
+ * @param trailing Optional. If set, an additional execution will be done to respond to calls during the execute phase.
+ * @returns An object containing the debounced function, and the
+ */
+export function debounceAsyncUntilComplete<I extends any[], O>({
+  fn,
+  keyFn,
+  timeout,
+  trailing,
+}: {
+  fn: (...args: I) => Promise<O>;
+  keyFn: (...args: I) => string | number;
+  timeout: number;
+  trailing?: boolean;
+}): {
+  debouncedFn: (...args: I) => void;
+  states: DebounceStateMap;
+} {
+  const states: DebounceStateMap = new Map();
+  const debouncedFn = async (...args: I) => {
+    const key = keyFn(...args);
+    const state = states.get(key);
+    debugger;
+    if (state === "timeout" || state === "trailing") {
+      // Another execution is already scheduled
+      return;
+    } else if (state === "execute" && trailing) {
+      // Currently executing, and configured for a trailing execution
+      states.set(key, "trailing");
+    } else {
+      // Not currently executing or scheduled, schedule now
+      states.set(key, "timeout");
+      setTimeout(async () => {
+        debugger;
+        // timeout done, start executing
+        states.set(key, "execute");
+        await fn(...args);
+        const lastState = states.get(key);
+        // execution complete, mark as not executing
+        states.delete(key);
+        if (lastState === "trailing") {
+          // but if we had a trailing execution scheduled, do that
+          debouncedFn(...args);
+        }
+      }, timeout);
+    }
+  };
+  return { debouncedFn, states };
 }
 
 export class TagUtils {

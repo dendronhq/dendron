@@ -16,7 +16,7 @@ import {
   window,
 } from "vscode";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
-import { updateDecorations } from "./features/windowDecorations";
+import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
@@ -128,7 +128,7 @@ export class WindowWatcher {
     if (!editor) return;
     // This may be the active editor, but could be another editor that's open side by side without being selected.
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
-    updateDecorations(editor);
+    debouncedUpdateDecorations.debouncedFn(editor);
     return;
   }
 

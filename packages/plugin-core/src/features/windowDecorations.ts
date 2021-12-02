@@ -6,8 +6,9 @@ import {
   mapValues,
   isNotUndefined,
   NoteProps,
-  throttleAsyncUntilComplete,
+  debounceAsyncUntilComplete,
 } from "@dendronhq/common-all";
+import * as Sentry from "@sentry/node";
 import {
   DECORATION_TYPES,
   DecorationTimestamp,
@@ -29,7 +30,6 @@ import {
 import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { VSCodeUtils } from "../utils";
-import { sentryReportingCallback } from "../utils/analytics";
 import { getConfigValue, getDWorkspace } from "../workspace";
 import { delayedFrontmatterWarning } from "./codeActionProvider";
 
@@ -102,109 +102,133 @@ export function delayedUpdateDecorations(
   }, updateDelay);
 }
 
-export const updateDecorations = sentryReportingCallback(
-  throttleAsyncUntilComplete({
-    keyFn: (editor) => editor.document.uri.fsPath,
-    fn: async (
-      editor: TextEditor
-    ): Promise<{
-      allDecorations?: Map<TextEditorDecorationType, DecorationOptions[]>;
-      allWarnings?: Diagnostic[];
-    }> => {
-      const ctx = "updateDecorations";
-      const { engine } = getDWorkspace();
-      if (
-        ConfigUtils.getWorkspace(engine.config).enableEditorDecorations ===
-        false
-      ) {
-        // Explicitly disabled, stop here.
-        return {};
-      }
+function updateDecorationsKeyFunction(editor: TextEditor) {
+  return editor.document.uri.fsPath;
+}
 
-      // Only show decorations & warnings for notes
-      let note: NoteProps | undefined;
-      try {
-        note = VSCodeUtils.getNoteFromDocument(editor.document);
-        if (_.isUndefined(note)) return {};
-      } catch (error) {
-        Logger.info({
-          ctx,
-          msg: "Unable to check if decorations should be updated",
-          error,
-        });
-        return {};
-      }
-      // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
-      const inputRanges = VSCodeUtils.mergeOverlappingRanges(
-        editor.visibleRanges.map((range) =>
-          VSCodeUtils.padRange({
-            range,
-            padding: VISIBLE_RANGE_MARGIN,
-            zeroCharacter: true,
-          })
-        )
-      );
+export const debouncedUpdateDecorations = debounceAsyncUntilComplete({
+  fn: updateDecorations,
+  keyFn: updateDecorationsKeyFunction,
+  timeout: 50,
+  trailing: true,
+});
 
-      const ranges = inputRanges.map((range) => {
-        return {
-          range: VSCodeUtils.toPlainRange(range),
-          text: editor.document.getText(range),
-        };
-      });
-      const out = await engine.getDecorations({
-        id: note.id,
-        ranges,
-      });
-      const { data, error } = out;
+export async function updateDecorations(editor: TextEditor): Promise<{
+  allDecorations?: Map<TextEditorDecorationType, DecorationOptions[]>;
+  allWarnings?: Diagnostic[];
+}> {
+  try {
+    const ctx = "updateDecorations";
+    const { engine } = getDWorkspace();
+    if (
+      ConfigUtils.getWorkspace(engine.config).enableEditorDecorations === false
+    ) {
+      // Explicitly disabled, stop here.
+      return {};
+    }
+
+    // Only show decorations & warnings for notes
+    let note: NoteProps | undefined;
+    try {
+      note = VSCodeUtils.getNoteFromDocument(editor.document);
+      if (_.isUndefined(note)) return {};
+    } catch (error) {
       Logger.info({
         ctx,
-        payload: {
-          error,
-          decorationsLength: data?.decorations?.length,
-          diagnosticsLength: data?.diagnostics?.length,
-        },
+        msg: "Unable to check if decorations should be updated",
+        error,
       });
+      return {};
+    }
+    // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
+    const inputRanges = VSCodeUtils.mergeOverlappingRanges(
+      editor.visibleRanges.map((range) =>
+        VSCodeUtils.padRange({
+          range,
+          padding: VISIBLE_RANGE_MARGIN,
+          zeroCharacter: true,
+        })
+      )
+    );
 
-      const vscodeDecorations = data?.decorations
-        ?.map(mapDecoration)
-        .filter(isNotUndefined);
-      if (vscodeDecorations === undefined || vscodeDecorations.length === 0)
-        return {};
-      const activeDecorations = mapValues(
-        groupBy(vscodeDecorations, (decoration) => decoration.type),
-        (decorations) => decorations.map((item) => item.decoration)
-      );
-
-      for (const [type, decorations] of activeDecorations.entries()) {
-        editor.setDecorations(type, decorations);
-      }
-
-      // Clear out any old decorations left over from last pass
-      for (const type of _.values(EDITOR_DECORATION_TYPES)) {
-        if (!activeDecorations.has(type)) {
-          editor.setDecorations(type, []);
-        }
-      }
-
-      const allWarnings =
-        data?.diagnostics?.map((diagnostic) => {
-          const diagnosticObject = new Diagnostic(
-            VSCodeUtils.toRangeObject(diagnostic.range),
-            diagnostic.message,
-            diagnostic.severity
-          );
-          diagnosticObject.code = diagnostic.code;
-          return diagnosticObject;
-        }) || [];
-      delayedFrontmatterWarning(editor.document.uri, allWarnings);
-
+    const ranges = inputRanges.map((range) => {
       return {
-        allDecorations: activeDecorations,
-        allWarnings,
+        range: VSCodeUtils.toPlainRange(range),
+        text: editor.document.getText(range),
       };
-    },
-  })
-);
+    });
+    const out = await engine.getDecorations({
+      id: note.id,
+      ranges,
+    });
+
+    if (
+      debouncedUpdateDecorations.states.get(
+        updateDecorationsKeyFunction(editor)
+      ) === "trailing"
+    ) {
+      // There's another execution that has already been called after this was
+      // run. That means these results are stale. If existing lines have shifted
+      // up or down since this function execution was started, setting the
+      // decorations now will place the decorations at bad positions in the
+      // document. On the other hand, if we do nothing VSCode will smartly move
+      // those decorations to their new locations. With another execution
+      // already scheduled, it's better to just wait for those decorations to
+      // come in.
+      return {};
+    }
+    const { data, error } = out;
+    Logger.info({
+      ctx,
+      payload: {
+        error,
+        decorationsLength: data?.decorations?.length,
+        diagnosticsLength: data?.diagnostics?.length,
+      },
+    });
+
+    const vscodeDecorations = data?.decorations
+      ?.map(mapDecoration)
+      .filter(isNotUndefined);
+    if (vscodeDecorations === undefined || vscodeDecorations.length === 0)
+      return {};
+    const activeDecorations = mapValues(
+      groupBy(vscodeDecorations, (decoration) => decoration.type),
+      (decorations) => decorations.map((item) => item.decoration)
+    );
+
+    for (const [type, decorations] of activeDecorations.entries()) {
+      editor.setDecorations(type, decorations);
+    }
+
+    // Clear out any old decorations left over from last pass
+    for (const type of _.values(EDITOR_DECORATION_TYPES)) {
+      if (!activeDecorations.has(type)) {
+        editor.setDecorations(type, []);
+      }
+    }
+
+    const allWarnings =
+      data?.diagnostics?.map((diagnostic) => {
+        const diagnosticObject = new Diagnostic(
+          VSCodeUtils.toRangeObject(diagnostic.range),
+          diagnostic.message,
+          diagnostic.severity
+        );
+        diagnosticObject.code = diagnostic.code;
+        return diagnosticObject;
+      }) || [];
+    delayedFrontmatterWarning(editor.document.uri, allWarnings);
+
+    return {
+      allDecorations: activeDecorations,
+      allWarnings,
+    };
+  } catch (err) {
+    Sentry.captureException(err);
+    throw err;
+  }
+}
 
 function mapDecoration(decoration: Decoration): DecorationAndType | undefined {
   switch (decoration.type) {

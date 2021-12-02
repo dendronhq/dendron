@@ -67,7 +67,8 @@ export type TaskNoteProps = {
 export class TaskNoteUtils {
   static isTaskNote(note: NoteProps): note is NoteProps & TaskNoteProps {
     for (const prop of TASK_NOTE_PROP_KEYS) {
-      if (note.custom[prop] !== undefined) return true;
+      if (note.custom !== undefined && note.custom[prop] !== undefined)
+        return true;
     }
     return false;
   }

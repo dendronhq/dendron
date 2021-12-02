@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  DNodePropsQuickInputV2,
   DNodeUtils,
   FuseEngine,
   LookupEvents,
@@ -63,6 +64,12 @@ export type ILookupProviderOptsV3 = {
   noHidePickerOnAccept?: boolean;
   /** Forces to use picker value as is when constructing the query string. */
   forceAsIsPickerValueUsage?: boolean;
+  /**
+   * Extra items to show in picker.
+   * This will always be shown at the top
+   * when (and only when) nothing is queried.
+   */
+  extraItems?: DNodePropsQuickInputV2[];
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {
@@ -317,13 +324,21 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
       if (picker.itemsFromSelection) {
         picker.items = picker.itemsFromSelection;
+        if (picker.selectAll) {
+          picker.selectedItems = picker.items;
+        }
         return;
       }
 
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         Logger.debug({ ctx, msg: "empty qs" });
-        picker.items = NotePickerUtils.fetchRootQuickPickResults({ engine });
+        const items = NotePickerUtils.fetchRootQuickPickResults({ engine });
+        const extraItems = this.opts.extraItems;
+        if (extraItems) {
+          items.unshift(...extraItems);
+        }
+        picker.items = items;
         return;
       }
 

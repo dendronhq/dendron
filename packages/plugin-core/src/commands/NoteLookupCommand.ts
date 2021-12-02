@@ -226,7 +226,7 @@ export class NoteLookupCommand extends BaseCommand<
       vaultButtonPressed:
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
       extraButtons: [
-        MultiSelectBtn.create(copts.multiSelect),
+        MultiSelectBtn.create({ pressed: copts.multiSelect }),
         CopyNoteLinkBtn.create(copts.copyNoteLink),
         DirectChildFilterBtn.create(
           copts.filterMiddleware?.includes("directChildOnly")
@@ -237,9 +237,10 @@ export class NoteLookupCommand extends BaseCommand<
         Selection2LinkBtn.create(
           copts.selectionType === LookupSelectionTypeEnum.selection2link
         ),
-        Selection2ItemsBtn.create(
-          copts.selectionType === LookupSelectionTypeEnum.selection2Items
-        ),
+        Selection2ItemsBtn.create({
+          pressed:
+            copts.selectionType === LookupSelectionTypeEnum.selection2Items,
+        }),
         JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
         ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
         TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
@@ -261,7 +262,6 @@ export class NoteLookupCommand extends BaseCommand<
     VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
 
     const { quickpick } = await lc.prepareQuickPick({
-      title: "Lookup",
       placeholder: "a seed",
       provider: this.provider,
       initialValue: copts.initialValue,

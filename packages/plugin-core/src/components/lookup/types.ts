@@ -106,6 +106,11 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    */
   itemsFromSelection?: DNodePropsQuickInputV2[];
   /**
+   * select all when quickpick is created and canSelectMany
+   * NOTE: this is only used with multiSelect + selection2Items
+   */
+  selectAll?: boolean;
+  /**
    * Method to copy note link
    */
   copyNoteLinkFunc?: CopyNoteLinkFunc;

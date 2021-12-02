@@ -1,7 +1,7 @@
 ---
 id: GzqTTx3jaIwjzU9alNGrT
 title: Selection to Items
-desc: ''
+desc: ""
 updated: 1637657491190
 created: 1637588464144
 ---

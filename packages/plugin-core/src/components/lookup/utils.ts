@@ -141,7 +141,7 @@ export async function showDocAndHidePicker(
 }
 
 export type CreateQuickPickOpts = {
-  title: string;
+  title?: string;
   placeholder: string;
   /**
    * QuickPick.ignoreFocusOut prop
@@ -156,6 +156,10 @@ export type CreateQuickPickOpts = {
    * See {@link DendronQuickPickerV2["alwaysShow"]}
    */
   alwaysShow?: boolean;
+  /**
+   * if canSelectMany and items from selection, select all items at creation
+   */
+  selectAll?: boolean;
 };
 
 export type PrepareQuickPickOpts = CreateQuickPickOpts & {

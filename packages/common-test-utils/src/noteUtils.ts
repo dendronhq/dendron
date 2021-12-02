@@ -6,6 +6,7 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   DNodePropsQuickInputV2,
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -88,6 +89,16 @@ export class TestNoteFactory {
       noteProps.push(await this.createForFName(fnames[i]));
     }
     return noteProps;
+  }
+
+  toNotePropsDict(notes: NoteProps[]): NotePropsDict {
+    const dict: NotePropsDict = {};
+
+    for (const note of notes) {
+      dict[note.id] = note;
+    }
+
+    return dict;
   }
 }
 

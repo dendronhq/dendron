@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1637081758300
+updated: 1638356699074
 created: 1608518909864
 ---
 
@@ -13,6 +13,10 @@ created: 1608518909864
 - [[dendron.ref.figure]]
 - [[same note link to anchor|#unpublished-page]]
 - [[diff note link to anchor|dendron.ref.figure#block]]
+
+## Link in different vault without vault specified
+Should get a quick pick prompt to choose a note to navigate to when clicking on following link in preview. Upon choosing the the note in quick Dendron opens the note. If quick pick is cancelled NO errors should be shown.
+- [[dendron.ref.links.target-different-vault]] 
 
 ## XVault Link
 

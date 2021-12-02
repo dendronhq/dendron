@@ -8,6 +8,7 @@ import {
   ErrorFactory,
   getStage,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   NoteViewMessage,
   NoteViewMessageEnum,
@@ -29,6 +30,7 @@ import { VSCodeUtils, WSUtils } from "../utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
+import { QuickPickUtil } from "../utils/quickPick";
 
 type CommandOpts = {};
 type CommandOutput = any;
@@ -84,7 +86,7 @@ export const extractNoteIdFromHref = (data: {
   href?: string;
 }): string | undefined => {
   if (data.href === undefined) {
-    return undefined;
+    throw ErrorFactory.createInvalidStateError({ message: `href is missing.` });
   }
   // For some cases such as markdown value='[head2](#head2)' the href isn't as nice
   // and looks like href='http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2'
@@ -216,6 +218,70 @@ const handleAssetLink = async ({
   await ShowPreviewAssetOpener.openWithDefaultApp(assetFullPath);
 };
 
+export const getNavigationTargetNoteForWikiLink = async ({
+  data,
+  notes,
+}: {
+  data: NoteViewMessage["data"];
+  notes: NotePropsDict;
+}) => {
+  // wiki links will have the following format
+  //
+  // with `prettyLinks` set to false
+  //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo.html'
+  //
+  // with `prettyLinks` set to true
+  //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo'
+  //    without anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#foobar'
+  //
+  // And when the target of the link is a note in different vault without specifying
+  // the vault explicitly the href is going to have the file name of the node in place of the id:
+  // Example of href note inf different vault without vault specified:
+  // vscode-webview://25d7783e-df29-479c-9838-386c17dbf9b6/dendron.ref.links.target-different-vault
+  //
+  if (!data.href) {
+    throw ErrorFactory.createInvalidStateError({
+      message: `href is missing from data: '${ErrorFactory.safeStringify(
+        data
+      )}'`,
+    });
+  }
+
+  const noteId = extractNoteIdFromHref(data);
+  if (!noteId) {
+    throw ErrorFactory.createInvalidStateError({
+      message: `Failed to extract noteId from '${ErrorFactory.safeStringify(
+        data
+      )}'`,
+    });
+  }
+
+  const anchor = extractHeaderAnchorIfExists(data.href);
+  let note: NoteProps | undefined = notes[noteId];
+
+  if (note === undefined) {
+    // If we could not find the note by the extracted id (when the note is within the same
+    // vault we should have been able to find the note by id) there is a good chance that the name
+    // of the note was in place of the id in the HREF (as in case of navigating to a note
+    // in a different vault without explicit vault specification). Hence we will attempt
+    // to find the note by file name.
+    const candidates = NoteUtils.getNotesByFname({ fname: noteId, notes });
+
+    if (candidates.length === 1) {
+      note = candidates[0];
+    } else if (candidates.length > 1) {
+      // We have more than one candidate hence lets as the user which candidate they would like
+      // to navigate to
+      note = await QuickPickUtil.showChooseNote(candidates);
+    }
+  }
+
+  return {
+    note,
+    anchor,
+  };
+};
+
 export const handleLink = async ({
   linkType,
   data,
@@ -231,29 +297,29 @@ export const handleLink = async ({
       break;
     }
     case LinkType.WIKI: {
-      // wiki links will have the following format
-      //
-      // with `prettyLinks` set to false
-      //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo.html'
-      //
-      // with `prettyLinks` set to true
-      //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo'
-      //    without anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#foobar'
-      //
-      // TODO: should be error
-      if (!data.href) return;
-      const noteId = extractNoteIdFromHref(data);
-      // TODO: should be error
-      if (!noteId) return;
+      try {
+        const noteData = await getNavigationTargetNoteForWikiLink({
+          data,
+          notes: getEngine().notes,
+        });
 
-      const anchor = extractHeaderAnchorIfExists(data.href);
-      const note: NoteProps | undefined = getEngine().notes[noteId];
-      return new GotoNoteCommand().execute({
-        qs: note.fname,
-        vault: note.vault,
-        column: vscode.ViewColumn.One,
-        anchor,
-      });
+        if (noteData.note === undefined) {
+          // One valid case for note being undefined if user clicked on target note in
+          // different vault which had ambiguous vault and upon being prompted
+          // to select a note in quick user cancelled.
+          return;
+        }
+
+        return new GotoNoteCommand().execute({
+          qs: noteData.note.fname,
+          vault: noteData.note.vault,
+          column: vscode.ViewColumn.One,
+          anchor: noteData.anchor,
+        });
+      } catch (err) {
+        Logger.error({ error: ErrorFactory.wrapIfNeeded(err) });
+        return;
+      }
     }
     case LinkType.WEBSITE: {
       return VSCodeUtils.openLink(data.href!);

@@ -41,5 +41,52 @@ export function expect(value: any) {
     toBeFalsy: () => {
       assert.ok(_.isUndefined(value) || !value);
     },
+    /**
+     *  Pass examples:
+     *  <pre>
+     *  await expect(() => { throw new Error(); }).toThrow(); // Passes exception thrown
+     *  await expect(() => { throw new Error(`hi world`); }).toThrow(`hi`); // Passes regex matches
+     *  </pre>
+     *
+     *  Failure examples:
+     *  <pre>
+     *  await expect(() => {  }).toThrow(); // Fails (no exception thrown)
+     *  await expect(() => { throw new Error(`hi`); }).toThrow(`hi world`); // Fails regex does not match
+     *  </pre>
+     * */
+    toThrow: async (regex?: string) => {
+      let threwException = false;
+
+      try {
+        await value();
+      } catch (err) {
+        threwException = true;
+
+        if (regex)
+          if (err instanceof Error) {
+            if (err.message === undefined) {
+              assert.fail(
+                `Regex '${regex}' was specified but thrown error did not have a message`
+              );
+            }
+
+            const matchArr = err.message.match(regex);
+
+            assert.ok(
+              matchArr !== null,
+              `Thrown exception message did NOT match regex:'${regex}' ErrorMessage:'${err.message}'`
+            );
+          } else {
+            assert.fail(
+              `Regex '${regex}' was specified but non Error type was thrown.`
+            );
+          }
+      }
+
+      assert(
+        threwException,
+        `Expected exception to be thrown. None were thrown.`
+      );
+    }
   };
 }

@@ -99,6 +99,7 @@ export function genDefaultConfig() {
     }),
   };
 }
+
 export function genDefaultSettings() {
   return {
     extensions: {
@@ -430,6 +431,7 @@ export class LocationTestUtils {
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
 }
+
 export const stubWorkspaceFile = (wsRoot: string) => {
   const wsPath = path.join(wsRoot, "dendron.code-workspace");
   fs.writeJSONSync(wsPath, {});

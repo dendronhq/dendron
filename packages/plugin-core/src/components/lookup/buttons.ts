@@ -321,7 +321,11 @@ export class SelectionExtractBtn extends DendronBtn {
 }
 
 export class Selection2ItemsBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new Selection2ItemsBtn({
       title: "Selection to Items",
       description:
@@ -330,6 +334,7 @@ export class Selection2ItemsBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "selection2Items",
       pressed,
+      canToggle,
     });
   }
 
@@ -585,7 +590,11 @@ export class DirectChildFilterBtn extends DendronBtn {
 }
 
 export class MultiSelectBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new MultiSelectBtn({
       title: "Multi-Select",
       description: "Select multiple notes at once",
@@ -593,6 +602,7 @@ export class MultiSelectBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "multiSelect" as LookupEffectType,
       pressed,
+      canToggle,
     });
   }
 
@@ -696,12 +706,12 @@ export function createAllButtons(
   typesToTurnOn: ButtonType[] = []
 ): DendronBtn[] {
   const buttons = [
-    MultiSelectBtn.create(),
+    MultiSelectBtn.create({}),
     CopyNoteLinkBtn.create(),
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),
-    Selection2ItemsBtn.create(),
+    Selection2ItemsBtn.create({}),
     JournalBtn.create(),
     ScratchBtn.create(),
     HorizontalSplitBtn.create(),

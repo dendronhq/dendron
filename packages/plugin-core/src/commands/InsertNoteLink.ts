@@ -49,7 +49,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     const lc = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection: true,
-      extraButtons: [MultiSelectBtn.create(copts.multiSelect)],
+      extraButtons: [MultiSelectBtn.create({ pressed: copts.multiSelect })],
     });
     const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,

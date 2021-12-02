@@ -1241,7 +1241,6 @@ type SchemaMatchResult = {
 export class SchemaUtils {
   /** The props of a template note that will get copied over when the template is applied. */
   static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
-    "body",
     "desc",
     "custom",
     "color",
@@ -1265,6 +1264,12 @@ export class SchemaUtils {
         // @ts-ignore
         note[k] = v;
       });
+      // If note body exists, append template's body instead of overriding
+      if (note.body) {
+        note.body += `\n${tempNote.body}`;
+      } else {
+        note.body = tempNote.body;
+      }
       return true;
     }
     return false;

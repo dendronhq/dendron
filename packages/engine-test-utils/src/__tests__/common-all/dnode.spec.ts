@@ -3,15 +3,19 @@ import {
   SchemaUtils,
   DVault,
   SchemaOpts,
+  NoteProps,
+  SchemaTemplate,
 } from "@dendronhq/common-all";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { runEngineTestV5 } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 
 describe(`NoteUtils tests:`, () => {
   describe(`genSchemaDesc tests`, () => {
     const vault = { fsPath: "/tmp/ws/vault1" };
     const SCHEMA_ID = "id-1";
 
-    async function test_genSchemaDesc(
+    async function testGenSchemaDesc(
       schemaCreateOpts: SchemaOpts & { vault: DVault },
       expectedDescription: string
     ) {
@@ -20,7 +24,7 @@ describe(`NoteUtils tests:`, () => {
       const wsRoot = "/tmp/ws/";
       const schemaModuleProps = await NoteTestUtilsV4.createSchema({
         fname: "/tmp/fname1",
-        vault: vault,
+        vault,
         wsRoot,
         noWrite: true,
       });
@@ -44,7 +48,7 @@ describe(`NoteUtils tests:`, () => {
     }
 
     it(`WHEN id is auto generated THEN use the pattern.`, async () => {
-      await test_genSchemaDesc(
+      await testGenSchemaDesc(
         {
           fname: "hi",
           id: SCHEMA_ID,
@@ -56,7 +60,7 @@ describe(`NoteUtils tests:`, () => {
     });
 
     it(`WHEN id is auto generated AND title is different than id then use title`, async () => {
-      await test_genSchemaDesc(
+      await testGenSchemaDesc(
         {
           fname: "hi",
           title: "title-val",
@@ -69,7 +73,7 @@ describe(`NoteUtils tests:`, () => {
     });
 
     it(`WHEN id is not auto generated AND title is equal to id THEN use title.`, async () => {
-      await test_genSchemaDesc(
+      await testGenSchemaDesc(
         {
           fname: "hi",
           title: SCHEMA_ID,
@@ -82,7 +86,7 @@ describe(`NoteUtils tests:`, () => {
     });
 
     it(`WHEN id is not auto generated AND title is omitted THEN use id.`, async () => {
-      await test_genSchemaDesc(
+      await testGenSchemaDesc(
         {
           fname: "hi",
           title: undefined,
@@ -92,6 +96,91 @@ describe(`NoteUtils tests:`, () => {
         },
         `F1 $(repo) /tmp/fname1 $(breadcrumb-separator) ${SCHEMA_ID}`
       );
+    });
+  });
+});
+
+describe(`SchemaUtil tests:`, () => {
+  describe(`WHEN running applyTemplate tests`, () => {
+    const noteFactory: TestNoteFactory =
+      TestNoteFactory.defaultUnitTestFactory();
+    let note: NoteProps;
+    const template: SchemaTemplate = { id: "foo", type: "note" };
+
+    describe(`GIVEN current note's body is empty`, () => {
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+      });
+
+      it("WHEN applying a template, THEN replace note's body with template's body", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template,
+              note,
+              engine,
+            });
+            expect(resp).toBeTruthy();
+            expect(note.body).toEqual(engine.notes["foo"].body);
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
+    });
+
+    describe(`GIVEN current note's body is not empty`, () => {
+      const noteBody = "test test";
+
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+        note.body = noteBody;
+      });
+
+      it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template,
+              note,
+              engine,
+            });
+            expect(resp).toBeTruthy();
+            expect(note.body).toEqual(
+              noteBody + "\n" + engine.notes["foo"].body
+            );
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
+    });
+
+    describe("GIVEN template type is not a note", async () => {
+      beforeEach(async () => {
+        note = await noteFactory.createForFName("new note");
+      });
+
+      it("WHEN applying a template, THEN do nothing and return false ", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template: { id: "foo", type: "snippet" },
+              note,
+              engine,
+            });
+            expect(resp).toBeFalsy();
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
     });
   });
 });

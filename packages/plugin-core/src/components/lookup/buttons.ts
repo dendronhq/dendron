@@ -386,9 +386,13 @@ export class Selection2ItemsBtn extends DendronBtn {
     // get selection
     const { text } = VSCodeUtils.getSelection();
     const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+
+    // dedupe wikilinks by value
+    const uniqueWikiLinks = _.uniqBy(wikiLinks, "value");
+
     // make a list of picker items from wikilinks
     const notesFromWikiLinks = this.getNotesFromWikiLinks({
-      wikiLinks,
+      wikiLinks: uniqueWikiLinks,
       engine,
     });
     const pickerItemsFromSelection = notesFromWikiLinks.map(

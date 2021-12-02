@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DVault,
   NoteProps,
   NoteUtils,
@@ -170,6 +171,12 @@ export class NoteSyncService {
     fmChangeOnly: boolean;
   }) {
     const { engine } = getDWorkspace();
+    // Avoid calculating links/anchors if the note is too long
+    if (
+      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
+    ) {
+      return note;
+    }
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links
     const links = LinkUtils.findLinks({ note, engine });

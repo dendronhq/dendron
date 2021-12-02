@@ -326,7 +326,6 @@ export function debounceAsyncUntilComplete<I extends any[], O>({
   const debouncedFn = async (...args: I) => {
     const key = keyFn(...args);
     const state = states.get(key);
-    debugger;
     if (state === "timeout" || state === "trailing") {
       // Another execution is already scheduled
       return;
@@ -337,7 +336,6 @@ export function debounceAsyncUntilComplete<I extends any[], O>({
       // Not currently executing or scheduled, schedule now
       states.set(key, "timeout");
       setTimeout(async () => {
-        debugger;
         // timeout done, start executing
         states.set(key, "execute");
         await fn(...args);

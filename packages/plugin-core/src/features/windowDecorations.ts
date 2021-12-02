@@ -190,8 +190,7 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     const vscodeDecorations = data?.decorations
       ?.map(mapDecoration)
       .filter(isNotUndefined);
-    if (vscodeDecorations === undefined || vscodeDecorations.length === 0)
-      return {};
+    if (vscodeDecorations === undefined) return {};
     const activeDecorations = mapValues(
       groupBy(vscodeDecorations, (decoration) => decoration.type),
       (decorations) => decorations.map((item) => item.decoration)

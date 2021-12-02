@@ -9,7 +9,6 @@ import {
 } from "@dendronhq/pods-core";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
-import { VSCodeUtils } from "../utils";
 import {
   getGlobalState,
   launchGoogleOAuthFlow,
@@ -19,7 +18,8 @@ import {
   showPodQuickPickItemsV4,
   updateGlobalState,
 } from "../utils/pods";
-import { getExtension, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 

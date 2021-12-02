@@ -4,7 +4,8 @@ import fs, { readdirSync } from "fs-extra";
 import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils, WSUtils } from "../utils";
+import { WSUtils } from "../WSUtils";
+import { VSCodeUtils } from "../vsCodeutils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 

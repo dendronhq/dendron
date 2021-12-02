@@ -8,7 +8,7 @@ import {
   NoteTestUtilsV4,
   PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { describe, beforeEach } from "mocha";
 import vscode from "vscode";
@@ -16,6 +16,7 @@ import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
 import { getDWorkspace } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -58,7 +59,7 @@ suite("MoveHeader", function () {
       beforeEach(() => {
         onInitFunc = (nextFunc: Function) => {
           return async () => {
-            const editor = await VSCodeUtils.openNote(originNote);
+            const editor = await WSUtils.openNote(originNote);
             editor.selection = new vscode.Selection(7, 0, 7, 0);
             nextFunc();
           };
@@ -203,7 +204,7 @@ suite("MoveHeader", function () {
     describe("WHEN header is not select", () => {
       const onInitFunc = (nextFunc: Function) => {
         return async () => {
-          const editor = await VSCodeUtils.openNote(originNote);
+          const editor = await WSUtils.openNote(originNote);
           editor.selection = new vscode.Selection(8, 0, 8, 0);
           nextFunc();
         };

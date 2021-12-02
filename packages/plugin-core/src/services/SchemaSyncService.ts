@@ -4,7 +4,7 @@ import vscode, { Uri } from "vscode";
 import { SchemaParser } from "@dendronhq/engine-server";
 import { getDWorkspace, getVaultFromUri } from "../workspace";
 import path from "path";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 let SCHEMA_SYNC_SERVICE: SchemaSyncService | undefined;
 

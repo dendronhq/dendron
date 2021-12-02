@@ -1,14 +1,13 @@
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { note2String } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import _ from "lodash";
 import { describe } from "mocha";
-import { NoteUtils, NoteProps } from "@dendronhq/common-all";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { RenameHeaderCommand } from "../../commands/RenameHeader";
-import { VSCodeUtils } from "../../utils";
+import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { note2String } from "@dendronhq/common-server";
 
 // TODO:
 // In a reference range (start & end)
@@ -57,7 +56,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -119,7 +118,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -184,7 +183,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -244,7 +243,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -298,7 +297,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -360,7 +359,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -422,7 +421,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -484,7 +483,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -552,7 +551,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon
@@ -623,7 +622,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
             line: 11,
           });
@@ -699,7 +698,7 @@ suite("RenameNote", function () {
           });
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
           const prompt = sinon

@@ -15,7 +15,7 @@ import {
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { getDWorkspace } from "../../workspace";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { Position } from "vscode";
 import { SchemaSyncService } from "../../services/SchemaSyncService";
 import * as _ from "lodash";
@@ -61,7 +61,7 @@ runSuiteButSkipForWindows()(
           const testNote = engine.notes["foo"];
           expect(testNote).toBeTruthy();
 
-          const opened = await VSCodeUtils.openSchema(engine.schemas.daily);
+          const opened = await WSUtils.openSchema(engine.schemas.daily);
 
           expect(doesSchemaExist("new_schema")).toBeFalsy();
 

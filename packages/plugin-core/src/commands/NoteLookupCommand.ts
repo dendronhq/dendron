@@ -57,7 +57,7 @@ import { Logger } from "../logger";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
 import {
   AUTO_COMPLETABLE_COMMAND_ID,

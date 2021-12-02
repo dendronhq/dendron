@@ -16,10 +16,10 @@ import _ from "lodash";
 import path from "path";
 import visit from "unist-util-visit";
 import * as vscode from "vscode";
-import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
-import { getExtension, getDWorkspace } from "../workspace";
+import { PreviewUtils } from "../views/utils";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getExtension } from "../workspace";
 
 let NOTE_SERVICE: NoteSyncService | undefined;
 
@@ -158,7 +158,7 @@ export class NoteSyncService {
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
     const noteClean = await engine.updateNote(note);
-    ShowPreviewCommand.refresh(noteClean);
+    PreviewUtils.refresh(noteClean);
     return noteClean;
   }
 

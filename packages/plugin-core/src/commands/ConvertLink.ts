@@ -1,9 +1,7 @@
-import { DENDRON_COMMANDS } from "../constants";
-import { BasicCommand } from "./base";
-import _ from "lodash";
 import { commands, Location, Position, Selection } from "vscode";
-import { VSCodeUtils } from "../utils";
-// import vscode from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {
   location: Location;

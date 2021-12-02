@@ -3,9 +3,11 @@ import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard } from "../utils";
 import { getAnchorAt } from "../utils/editor";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -42,9 +44,9 @@ export class CopyNoteURLCommand extends BasicCommand<
       window.showErrorMessage("no active document found");
       return;
     }
-    const vault = VSCodeUtils.getVaultFromDocument(maybeTextEditor.document);
+    const vault = WSUtils.getVaultFromDocument(maybeTextEditor.document);
 
-    const maybeNote = VSCodeUtils.getNoteFromDocument(maybeTextEditor.document);
+    const maybeNote = WSUtils.getNoteFromDocument(maybeTextEditor.document);
     if (_.isUndefined(maybeNote)) {
       window.showErrorMessage("You need to be in a note to use this command");
       return;

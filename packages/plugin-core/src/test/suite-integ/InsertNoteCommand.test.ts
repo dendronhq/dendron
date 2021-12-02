@@ -9,7 +9,7 @@ import sinon from "sinon";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { InsertNoteCommand } from "../../commands/InsertNoteCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 

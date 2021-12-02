@@ -8,11 +8,12 @@ import {
 } from "@dendronhq/common-all";
 import path from "path";
 import { TextEditor, window } from "vscode";
+import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
-import { getEngine, getExtension, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeutils";
+import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {

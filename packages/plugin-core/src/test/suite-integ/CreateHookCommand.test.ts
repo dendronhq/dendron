@@ -8,7 +8,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { CreateHookCommand } from "../../commands/CreateHookCommand";
 import { DENDRON_COMMANDS } from "../../constants";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 

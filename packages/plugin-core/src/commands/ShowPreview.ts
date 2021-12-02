@@ -4,15 +4,14 @@ import {
   DendronWebViewKey,
   DMessageEnum,
   DNoteAnchor,
-  ERROR_STATUS,
   ErrorFactory,
+  ERROR_STATUS,
   getStage,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   NoteViewMessage,
   NoteViewMessageEnum,
-  OnDidChangeActiveTextEditorMsg,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -21,21 +20,21 @@ import {
   WebViewCommonUtils,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import open from "open";
+import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { VSCodeUtils, WSUtils } from "../utils";
+import { PreviewUtils } from "../views/utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 import { QuickPickUtil } from "../utils/quickPick";
 
 type CommandOpts = {};
 type CommandOutput = any;
-
-const title = "Dendron Preview";
 
 export const extractHeaderAnchorIfExists = (
   link: string
@@ -50,30 +49,6 @@ export const extractHeaderAnchorIfExists = (
       value: anchorValue,
     };
   }
-};
-
-const tryGetNoteFromDocument = (
-  document: vscode.TextDocument
-): NoteProps | undefined => {
-  if (
-    !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
-  ) {
-    Logger.info({
-      uri: document.uri.fsPath,
-      msg: "not in workspace",
-    });
-    return;
-  }
-  try {
-    const note = VSCodeUtils.getNoteFromDocument(document);
-    return note;
-  } catch (err) {
-    Logger.info({
-      uri: document.uri.fsPath,
-      msg: "not a valid note",
-    });
-  }
-  return;
 };
 
 /**
@@ -350,29 +325,6 @@ export class ShowPreviewCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
-  static onDidChangeHandler(document: vscode.TextDocument) {
-    const maybeNote = tryGetNoteFromDocument(document);
-    if (!_.isUndefined(maybeNote)) ShowPreviewCommand.refresh(maybeNote);
-  }
-
-  static refresh(note: NoteProps) {
-    const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_PREVIEW);
-    Logger.debug({ ...ctx, state: "enter" });
-    if (panel) {
-      Logger.debug({ ...ctx, state: "panel found" });
-      panel.title = `${title} ${note.fname}`;
-      panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote: true,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
-    }
-  }
-
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -400,7 +352,7 @@ export class ShowPreviewCommand extends BasicCommand<
     }
     Logger.info({ ctx, msg: "creating new" });
 
-    const assetUri = WSUtils.getAssetUri(getExtension().context);
+    const assetUri = VSCodeUtils.getAssetUri(getExtension().context);
     const pkgRoot = path.dirname(
       findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
     );
@@ -450,14 +402,14 @@ export class ShowPreviewCommand extends BasicCommand<
         }
         case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
-          const note = VSCodeUtils.getActiveNote();
+          const note = WSUtils.getActiveNote();
           if (note) {
             Logger.debug({
               ctx,
               msg: "got active note",
               note: NoteUtils.toLogObj(note),
             });
-            ShowPreviewCommand.refresh(note);
+            PreviewUtils.refresh(note);
           }
           break;
         }
@@ -476,9 +428,9 @@ export class ShowPreviewCommand extends BasicCommand<
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const maybeNote = !_.isUndefined(activeTextEditor)
-            ? tryGetNoteFromDocument(activeTextEditor?.document)
+            ? WSUtils.tryGetNoteFromDocument(activeTextEditor?.document)
             : undefined;
-          if (!_.isUndefined(maybeNote)) ShowPreviewCommand.refresh(maybeNote);
+          if (!_.isUndefined(maybeNote)) PreviewUtils.refresh(maybeNote);
           break;
         }
         default:
@@ -522,7 +474,7 @@ function getWebviewContent({
   wsRoot: string;
   panel: vscode.WebviewPanel;
 }) {
-  const root = WSUtils.getAssetUri(getExtension().context);
+  const root = VSCodeUtils.getAssetUri(getExtension().context);
   const themes = ["light", "dark"];
   const themeMap: any = {};
   themes.map((th) => {

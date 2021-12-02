@@ -10,7 +10,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { TextEditor } from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
-import { VSCodeUtils } from "../../utils";
+import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -54,7 +54,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithTarget);
+          const editor = await WSUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
             NoteUtils.getFullPath({
@@ -73,7 +73,7 @@ suite("DefinitionProvider", function () {
         onInit: async ({ engine, wsRoot }) => {
           const note = engine.notes["alpha"];
           const beta = engine.notes["beta"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
             NoteUtils.getFullPath({ wsRoot, note: beta }).toLowerCase()
@@ -106,7 +106,7 @@ suite("DefinitionProvider", function () {
         },
         onInit: async ({ engine }) => {
           const note = engine.notes["beta"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -141,7 +141,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
             NoteUtils.getFullPath({
@@ -175,7 +175,7 @@ suite("DefinitionProvider", function () {
         },
         onInit: async ({ engine }) => {
           const note = engine.notes["beta"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -202,7 +202,7 @@ suite("DefinitionProvider", function () {
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
           const note = engine.notes["alpha"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
 
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
@@ -232,7 +232,7 @@ suite("DefinitionProvider", function () {
         },
         onInit: async ({ engine, vaults, wsRoot }) => {
           const note = engine.notes["alpha"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
 
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
@@ -275,7 +275,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const locations = (await provide(editor)) as vscode.Location[];
           expect(locations.length).toEqual(2);
           expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
@@ -314,7 +314,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -356,7 +356,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();

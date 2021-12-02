@@ -10,11 +10,12 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { window } from "vscode";
+import { WSUtils } from "../../WSUtils";
 
 suite("notes", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
@@ -25,7 +26,7 @@ suite("notes", function () {
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine, vaults, wsRoot }) => {
         const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
         await new DeleteNodeCommand().execute();
 
         const vaultFiles = fs.readdirSync(
@@ -47,7 +48,7 @@ suite("notes", function () {
         const windowSpy = sinonSandbox.spy(window, "showInformationMessage");
 
         const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
         await new DeleteNodeCommand().execute();
 
         const infoMsg = windowSpy.getCall(0).args[0];
@@ -70,7 +71,7 @@ suite("notes", function () {
       },
       onInit: async ({ engine, vaults, wsRoot }) => {
         const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
         const resp = await new DeleteNodeCommand().execute();
         const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
         const vaultDir = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));

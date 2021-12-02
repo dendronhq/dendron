@@ -7,13 +7,12 @@ import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
@@ -245,7 +244,7 @@ suite("GotoNote", function () {
         },
         onInit: async () => {
           // Open the note, select the hashtag, and use the command
-          await VSCodeUtils.openNote(note);
+          await WSUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection =
             new vscode.Selection(
               new vscode.Position(7, 1),
@@ -274,7 +273,7 @@ suite("GotoNote", function () {
         },
         onInit: async () => {
           // Open the note, select the hashtag, and use the command
-          await VSCodeUtils.openNote(note);
+          await WSUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection =
             new vscode.Selection(
               new vscode.Position(7, 1),
@@ -306,7 +305,7 @@ suite("GotoNote", function () {
           },
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
-            await VSCodeUtils.openNote(note);
+            await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(6, 8),
@@ -337,7 +336,7 @@ suite("GotoNote", function () {
           },
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
-            await VSCodeUtils.openNote(note);
+            await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(6, 8),
@@ -368,7 +367,7 @@ suite("GotoNote", function () {
           },
           onInit: async () => {
             // Open the note, select the hashtag, and use the command
-            await VSCodeUtils.openNote(note);
+            await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(8, 6),
@@ -393,7 +392,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ engine, vaults }) => {
           const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
           // foo.ch1.md
@@ -423,12 +422,12 @@ suite("GotoNote", function () {
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
             try {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
                 line: 7,
               });
               await new GotoNoteCommand().run();
-              const openedNote = VSCodeUtils.getNoteFromDocument(
+              const openedNote = WSUtils.getNoteFromDocument(
                 VSCodeUtils.getActiveTextEditorOrThrow().document
               );
               expect(openedNote?.fname).toEqual("eggs");
@@ -452,12 +451,12 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
+            const editor = await WSUtils.openNote(note);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 8,
             });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(
+            const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
             expect(openedNote?.fname).toEqual("eggs");
@@ -477,12 +476,12 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
+            const editor = await WSUtils.openNote(note);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 9,
             });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(
+            const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
             expect(openedNote?.fname).toEqual("eggs");
@@ -502,12 +501,12 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
+            const editor = await WSUtils.openNote(note);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 10,
             });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(
+            const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
             // Should have created the note in this vault
@@ -528,12 +527,12 @@ suite("GotoNote", function () {
             note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
           },
           onInit: async ({ vaults, wsRoot }) => {
-            const editor = await VSCodeUtils.openNote(note);
+            const editor = await WSUtils.openNote(note);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 11,
             });
             await new GotoNoteCommand().run();
-            const openedNote = VSCodeUtils.getNoteFromDocument(
+            const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
             // Should not have changed notes
@@ -563,7 +562,7 @@ suite("GotoNote", function () {
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vaults[1]));
           const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
           await new GotoNoteCommand().run({});
@@ -597,7 +596,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ engine, vaults }) => {
           const note = engine.notes["foo"];
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           // put cursor in location on 48
           editor.selection = new vscode.Selection(
             new vscode.Position(7, 48),

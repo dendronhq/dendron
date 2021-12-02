@@ -8,7 +8,7 @@ import {
   DECORATION_TYPE,
   updateDecorations,
 } from "../../features/windowDecorations";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describe } from "mocha";
 import {
@@ -16,6 +16,7 @@ import {
   runTestButSkipForWindows,
   setupBeforeAfter,
 } from "../testUtilsV3";
+import { WSUtils } from "../../WSUtils";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -90,7 +91,7 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const document = editor.document;
           const { allDecorations } = updateDecorations(editor);
 
@@ -239,7 +240,7 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const document = editor.document;
           const { allDecorations } = updateDecorations(editor);
 
@@ -309,7 +310,7 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const document = editor.document;
           const { allDecorations } = updateDecorations(editor);
 
@@ -382,7 +383,7 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const document = editor.document;
           const { allDecorations } = updateDecorations(editor);
 
@@ -419,7 +420,7 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const document = editor.document;
 
           const { allDecorations } = updateDecorations(editor);
@@ -466,7 +467,7 @@ suite("windowDecorations", function () {
           await writeFile(path, "foo bar");
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
@@ -496,7 +497,7 @@ suite("windowDecorations", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);
@@ -529,7 +530,7 @@ suite("windowDecorations", function () {
           );
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const { allWarnings } = updateDecorations(editor);
 
           expect(allWarnings!.length).toEqual(1);

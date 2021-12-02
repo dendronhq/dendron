@@ -1,6 +1,3 @@
-import { DENDRON_COMMANDS } from "../constants";
-import { BasicCommand } from "./base";
-import { VSCodeUtils } from "../utils";
 import {
   DVault,
   NoteProps,
@@ -8,17 +5,20 @@ import {
   SchemaModuleProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import path from "path";
+import { vault2Path } from "@dendronhq/common-server";
+import * as fs from "fs";
+import YAML from "js-yaml";
 import * as _ from "lodash";
-import { getDWorkspace } from "../workspace";
+import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
-import YAML from "js-yaml";
-import { PluginVaultUtils } from "../pluginVaultUtils";
-import { vault2Path } from "@dendronhq/common-server";
-import { SchemaSyncService } from "../services/SchemaSyncService";
-import * as fs from "fs";
+import { DENDRON_COMMANDS } from "../constants";
 import { PluginSchemaUtils } from "../pluginSchemaUtils";
+import { PluginVaultUtils } from "../pluginVaultUtils";
+import { SchemaSyncService } from "../services/SchemaSyncService";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace } from "../workspace";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {
   candidates?: readonly SchemaCandidate[];

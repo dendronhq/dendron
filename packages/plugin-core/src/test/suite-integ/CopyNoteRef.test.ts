@@ -7,9 +7,10 @@ import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { WSUtils } from "../../WSUtils";
 
 suite("CopyNoteRef", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -80,7 +81,7 @@ suite("CopyNoteRef", function () {
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine }) => {
         const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
         const link = await new CopyNoteRefCommand().run();
         expect(link).toEqual("![[foo]]");
         done();
@@ -106,7 +107,7 @@ suite("CopyNoteRef", function () {
       },
       onInit: async ({ engine }) => {
         const note = engine.notes["bar"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(7, 0, 7, 12);
         const link = await new CopyNoteRefCommand().run();
         expect(link).toEqual("![[bar#foo,1:#*]]");
@@ -133,7 +134,7 @@ suite("CopyNoteRef", function () {
       },
       onInit: async ({ engine }) => {
         const note = engine.notes["bar"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(7, 0, 7, 4);
         const link = await new CopyNoteRefCommand().run();
         expect(link).toEqual("![[bar#foo,1:#*]]");
@@ -160,7 +161,7 @@ suite("CopyNoteRef", function () {
       },
       onInit: async ({ engine }) => {
         const note = engine.notes["bar"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(7, 0, 7, 12);
         const link = await new CopyNoteRefCommand().run();
         expect(link).toEqual("![[bar#foo,1]]");
@@ -195,7 +196,7 @@ suite("CopyNoteRef", function () {
       },
       onInit: async ({ engine }) => {
         const note = engine.notes["bar"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 8, 0);
         const link = await new CopyNoteRefCommand().run();
         expect(link).toEqual("![[bar#^test-anchor]]");
@@ -241,7 +242,7 @@ suite("CopyNoteRef", function () {
       },
       onInit: async ({ engine }) => {
         const note = engine.notes["bar"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 11, 0);
         const link = await new CopyNoteRefCommand().run();
 

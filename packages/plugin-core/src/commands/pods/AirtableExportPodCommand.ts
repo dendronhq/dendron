@@ -18,7 +18,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 import { RateLimiter } from "limiter";

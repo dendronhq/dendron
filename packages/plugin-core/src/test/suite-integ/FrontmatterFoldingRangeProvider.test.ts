@@ -4,7 +4,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import path from "path";
 import * as vscode from "vscode";
 import FrontmatterFoldingRangeProvider from "../../features/FrontmatterFoldingRangeProvider";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,

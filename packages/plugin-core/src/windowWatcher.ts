@@ -15,12 +15,13 @@ import {
   TextEditorVisibleRangesChangeEvent,
   window,
 } from "vscode";
-import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { updateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
-import { VSCodeUtils } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
+import { PreviewUtils } from "./views/utils";
+import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
+import { WSUtils } from "./WSUtils";
 
 const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
@@ -150,7 +151,7 @@ export class WindowWatcher {
           return;
         }
 
-        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+        const note = WSUtils.getNoteFromDocument(activeEditor.document);
 
         noteGraphPanel.webview.postMessage({
           type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
@@ -177,7 +178,7 @@ export class WindowWatcher {
           return;
         }
 
-        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+        const note = WSUtils.getNoteFromDocument(activeEditor.document);
 
         schemaGraphPanel.webview.postMessage({
           type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
@@ -193,7 +194,7 @@ export class WindowWatcher {
   }
 
   async triggerNotePreviewUpdate({ document }: TextEditor) {
-    ShowPreviewCommand.onDidChangeHandler(document);
+    PreviewUtils.onDidChangeHandler(document);
     return;
   }
 

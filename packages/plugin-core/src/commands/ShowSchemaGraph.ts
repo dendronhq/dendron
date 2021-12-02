@@ -8,7 +8,7 @@ import _ from "lodash";
 import path from "path";
 import vscode, { Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "../views/utils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -116,7 +116,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
         //       // not in workspace
         //       return;
         //     }
-        //     const note = VSCodeUtils.getNoteFromDocument(document);
+        //     const note = WSUtils.getNoteFromDocument(document);
         //     if (note) {
         //       // refresh note
         //       this.refresh(note);

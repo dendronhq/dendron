@@ -3,10 +3,11 @@ import { AssertUtils } from "@dendronhq/common-test-utils";
 import * as vscode from "vscode";
 import { describe } from "mocha";
 import { InsertNoteIndexCommand } from "../../commands/InsertNoteIndexCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { ConfigUtils } from "@dendronhq/common-all";
+import { WSUtils } from "../../WSUtils";
 
 suite("InsertNoteIndex", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
@@ -22,7 +23,7 @@ suite("InsertNoteIndex", function () {
           const notes = engine.notes;
           const cmd = new InsertNoteIndexCommand();
 
-          await VSCodeUtils.openNote(notes["foo"]);
+          await WSUtils.openNote(notes["foo"]);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(9, 0, 9, 0);
           await cmd.execute({});
@@ -48,7 +49,7 @@ suite("InsertNoteIndex", function () {
           const notes = engine.notes;
           const cmd = new InsertNoteIndexCommand();
 
-          await VSCodeUtils.openNote(notes["foo"]);
+          await WSUtils.openNote(notes["foo"]);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(9, 0, 9, 0);
           await cmd.execute({ marker: true });
@@ -95,7 +96,7 @@ suite("InsertNoteIndex", function () {
           const notes = engine.notes;
           const cmd = new InsertNoteIndexCommand();
 
-          await VSCodeUtils.openNote(notes["foo"]);
+          await WSUtils.openNote(notes["foo"]);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(9, 0, 9, 0);
           await cmd.execute({});
@@ -133,7 +134,7 @@ suite("InsertNoteIndex", function () {
           const notes = engine.notes;
           const cmd = new InsertNoteIndexCommand();
 
-          await VSCodeUtils.openNote(notes["foo"]);
+          await WSUtils.openNote(notes["foo"]);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           editor.selection = new vscode.Selection(9, 0, 9, 0);
           await cmd.execute({});

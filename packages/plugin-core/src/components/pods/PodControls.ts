@@ -10,10 +10,8 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
-import { CodeCommandInstance } from "../../commands/base";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getExtension } from "../../workspace";
-import { PodCommandFactory } from "./PodCommandFactory";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -143,9 +141,7 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
-  public static async promptForPodTypeForCommand(): Promise<
-    CodeCommandInstance | undefined
-  > {
+  public static async promptForPodType(): Promise<PodV2Types | undefined> {
     const newConnectionOptions = Object.keys(PodV2Types)
       .filter((key) => Number.isNaN(Number(key)))
       .map<QuickPickItem>((value) => {
@@ -160,9 +156,11 @@ export class PodUIControls {
       return;
     }
 
-    return PodCommandFactory.createPodCommandForPodType(
-      picked.label as PodV2Types
-    );
+    return picked.label as PodV2Types;
+
+    // return PodCommandFactory.createPodCommandForPodType(
+    //   picked.label as PodV2Types
+    // );
   }
 
   /**

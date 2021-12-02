@@ -1,5 +1,5 @@
 import { NoteTestUtilsV4, TestPresetEntry } from "@dendronhq/common-test-utils";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getActiveEditorBasename } from "../testUtils";
 
 const ANCHOR = new TestPresetEntry({

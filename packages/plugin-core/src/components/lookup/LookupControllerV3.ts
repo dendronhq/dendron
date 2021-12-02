@@ -6,12 +6,11 @@ import {
 } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { QuickInputButton } from "vscode";
-import { CancellationTokenSource } from "vscode-languageclient";
+import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DENDRON_COMMANDS } from "../../constants";
 import { Logger } from "../../logger";
-import { VSCodeUtils } from "../../utils";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import {
   ButtonCategory,

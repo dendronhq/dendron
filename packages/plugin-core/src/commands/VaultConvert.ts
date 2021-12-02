@@ -9,7 +9,7 @@ import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 import { ProgressLocation, window } from "vscode";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { Logger } from "../logger";
 import { ReloadIndexCommand } from "./ReloadIndex";

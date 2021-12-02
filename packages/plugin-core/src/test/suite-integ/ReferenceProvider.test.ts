@@ -11,8 +11,8 @@ import path from "path";
 import * as vscode from "vscode";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
-import { VSCodeUtils } from "../../utils";
 import { getDWorkspace } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -50,7 +50,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithTarget1);
+          const editor = await WSUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
@@ -80,7 +80,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithTarget1);
+          const editor = await WSUtils.openNote(noteWithTarget1);
           const links = await provide(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
@@ -108,7 +108,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const links = await provide(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
@@ -137,7 +137,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const links = await provide(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
@@ -173,7 +173,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -207,7 +207,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -250,7 +250,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ wsRoot, vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -298,7 +298,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -342,7 +342,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -392,7 +392,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -440,7 +440,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -488,7 +488,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -544,7 +544,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -576,7 +576,7 @@ suite("ReferenceProvider", function () {
               note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
                 line: 7,
               });
@@ -606,7 +606,7 @@ suite("ReferenceProvider", function () {
               note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               const provider = new ReferenceHoverProvider();
               const hover = await provider.provideHover(
                 editor.document,
@@ -633,7 +633,7 @@ suite("ReferenceProvider", function () {
               note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               const provider = new ReferenceHoverProvider();
               const hover = await provider.provideHover(
                 editor.document,
@@ -660,7 +660,7 @@ suite("ReferenceProvider", function () {
               note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               const provider = new ReferenceHoverProvider();
               const hover = await provider.provideHover(
                 editor.document,
@@ -693,7 +693,7 @@ suite("ReferenceProvider", function () {
               note = await ENGINE_HOOKS_MULTI.setupMultiVaultSameFname(opts);
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(note);
+              const editor = await WSUtils.openNote(note);
               const provider = new ReferenceHoverProvider();
               const hover = await provider.provideHover(
                 editor.document,
@@ -742,7 +742,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -792,7 +792,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -840,7 +840,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -888,7 +888,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -939,7 +939,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -985,7 +985,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
+          const editor = await WSUtils.openNoteByPath({
             vault: vaults[0],
             fname: "source",
           });
@@ -1026,7 +1026,7 @@ suite("ReferenceProvider", function () {
           return config;
         },
         onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
+          const editor = await WSUtils.openNoteByPath({
             vault: vaults[0],
             fname: "source",
           });
@@ -1059,7 +1059,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
+          const editor = await WSUtils.openNoteByPath({
             vault: vaults[0],
             fname: "source",
           });
@@ -1100,7 +1100,7 @@ suite("ReferenceProvider", function () {
           return config;
         },
         onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
+          const editor = await WSUtils.openNoteByPath({
             vault: vaults[0],
             fname: "source",
           });
@@ -1136,7 +1136,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -1187,7 +1187,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -1228,7 +1228,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -1259,7 +1259,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });
@@ -1290,7 +1290,7 @@ suite("ReferenceProvider", function () {
             });
           },
           onInit: async ({ vaults }) => {
-            const editor = await VSCodeUtils.openNoteByPath({
+            const editor = await WSUtils.openNoteByPath({
               vault: vaults[0],
               fname: "source",
             });

@@ -5,7 +5,7 @@ import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { checkPreReq, NextJSPublishUtils } from "../utils/site";
 import { BasicCommand } from "./base";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 type CommandOpts = void;
 

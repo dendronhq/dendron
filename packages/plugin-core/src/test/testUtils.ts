@@ -11,7 +11,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { DendronBtn } from "../components/lookup/buttons";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 export function getActiveEditorBasename() {
   return path.basename(

@@ -14,10 +14,11 @@ import BacklinksTreeDataProvider, {
   Backlink,
   secondLevelRefsToBacklinks,
 } from "../../features/BacklinksTreeDataProvider";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { WSUtils } from "../../WSUtils";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
@@ -139,7 +140,7 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async ({ wsRoot, vaults }) => {
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
@@ -169,7 +170,7 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async () => {
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
         const { out: backlinks, provider } = await getRootChildrenBacklinks();
         const parentBacklink = backlinks[0];
 
@@ -221,7 +222,7 @@ suite("BacklinksTreeDataProvider", function () {
       onInit: async ({ wsRoot, vaults }) => {
         // re-initialize engine from cache
         await new ReloadIndexCommand().run();
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
@@ -265,7 +266,7 @@ suite("BacklinksTreeDataProvider", function () {
         expect(isLinkCandidateEnabled).toBeTruthy();
 
         await new ReloadIndexCommand().execute();
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
 
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
@@ -343,12 +344,12 @@ suite("BacklinksTreeDataProvider", function () {
           { wsRoot }
         );
 
-        await VSCodeUtils.openNote(alpha);
+        await WSUtils.openNote(alpha);
         const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
         expect(alphaOut).toEqual([]);
         expect(alpha.links).toEqual([]);
 
-        await VSCodeUtils.openNote(gamma);
+        await WSUtils.openNote(gamma);
         const gammaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
         expect(gammaOut).toEqual([]);
         expect(gamma.links).toEqual([]);
@@ -387,7 +388,7 @@ suite("BacklinksTreeDataProvider", function () {
         );
 
         await new ReloadIndexCommand().execute();
-        await VSCodeUtils.openNote(alpha);
+        await WSUtils.openNote(alpha);
         const { out, provider } = await getRootChildrenBacklinks();
         const outObj = backlinksToPlainObject(out) as any;
 
@@ -446,13 +447,13 @@ suite("BacklinksTreeDataProvider", function () {
       },
       onInit: async () => {
         await new ReloadIndexCommand().execute();
-        await VSCodeUtils.openNote(alpha);
+        await WSUtils.openNote(alpha);
 
         const { out: alphaOut } = await getRootChildrenBacklinks();
         const alphaOutObj = backlinksToPlainObject(alphaOut) as any;
         expect(_.isEmpty(alphaOutObj)).toBeTruthy();
 
-        await VSCodeUtils.openNote(beta);
+        await WSUtils.openNote(beta);
         const { out: betaOut } = await getRootChildrenBacklinks();
         const betaOutObj = backlinksToPlainObject(betaOut) as any;
         expect(betaOutObj[0].children.length).toEqual(1);
@@ -496,7 +497,7 @@ suite("BacklinksTreeDataProvider", function () {
         // need this until we move it out of the feature flag.
         await new ReloadIndexCommand().execute();
 
-        await VSCodeUtils.openNote(alpha);
+        await WSUtils.openNote(alpha);
         const { out } = await getRootChildrenBacklinks();
         const outObj = backlinksToPlainObject(out) as any;
 
@@ -572,7 +573,7 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async () => {
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
@@ -607,7 +608,7 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async ({ wsRoot }) => {
-        await VSCodeUtils.openNote(noteWithTarget);
+        await WSUtils.openNote(noteWithTarget);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         // assert.strictEqual(
         //   out[0].command.arguments[0].path.toLowerCase() as string,
@@ -647,7 +648,7 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async ({ wsRoot }) => {
-        await VSCodeUtils.openNote(noteTarget);
+        await WSUtils.openNote(noteTarget);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({

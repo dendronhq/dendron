@@ -3,7 +3,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { ConfigureCommand } from "../../commands/ConfigureCommand";
 import { CONFIG } from "../../constants";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 

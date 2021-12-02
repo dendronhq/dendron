@@ -3,7 +3,7 @@ import { DConfig, HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";

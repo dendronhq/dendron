@@ -19,8 +19,9 @@ import {
 import { DoctorScopeType } from "../components/doctor/types";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -163,7 +164,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       isNotUndefined(document) &&
-      isNotUndefined(VSCodeUtils.getNoteFromDocument(document))
+      isNotUndefined(WSUtils.getNoteFromDocument(document))
     ) {
       await document.save();
     }
@@ -177,7 +178,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (_.isUndefined(document)) {
         throw Error("No note open");
       }
-      note = VSCodeUtils.getNoteFromDocument(document);
+      note = WSUtils.getNoteFromDocument(document);
     }
 
     switch (opts.action) {

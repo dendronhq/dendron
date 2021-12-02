@@ -12,10 +12,10 @@ import { Position, Selection, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
-import { getExtension, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {

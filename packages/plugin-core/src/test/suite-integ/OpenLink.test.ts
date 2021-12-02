@@ -1,15 +1,15 @@
+import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import path from "path";
-import * as vscode from "vscode";
 import sinon from "sinon";
+import * as vscode from "vscode";
 import { OpenLinkCommand } from "../../commands/OpenLink";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { VSCodeUtils } from "../../utils";
-import { NoteProps } from "@dendronhq/common-all";
 
 suite("OpenLink", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -43,7 +43,7 @@ suite("OpenLink", function () {
       },
       onInit: async () => {
         // Open and select some text
-        const editor = await VSCodeUtils.openNote(noteWithLink);
+        const editor = await WSUtils.openNote(noteWithLink);
         editor.selection = new vscode.Selection(7, 1, 7, 10);
         const cmd = new OpenLinkCommand();
         const { error } = await cmd.execute();
@@ -69,7 +69,7 @@ suite("OpenLink", function () {
       },
       onInit: async () => {
         // Open and select some text
-        const editor = await VSCodeUtils.openNote(noteWithLink);
+        const editor = await WSUtils.openNote(noteWithLink);
         editor.selection = new vscode.Selection(8, 1, 8, 5);
         const cmd = new OpenLinkCommand();
         const avoidPopUp = sinon.stub(vscode.env, "openExternal");
@@ -97,7 +97,7 @@ suite("OpenLink", function () {
       },
       onInit: async () => {
         // Open and select some text
-        const editor = await VSCodeUtils.openNote(noteWithLink);
+        const editor = await WSUtils.openNote(noteWithLink);
         editor.selection = new vscode.Selection(8, 15, 8, 25);
         const cmd = new OpenLinkCommand();
         const { error } = await cmd.execute();

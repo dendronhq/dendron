@@ -28,13 +28,8 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { ALL_COMMANDS } from "./commands";
-import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { MoveNoteCommand } from "./commands/MoveNoteCommand";
-import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   DendronContext,
-  DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
@@ -42,17 +37,12 @@ import BacklinksTreeDataProvider, {
   Backlink,
   secondLevelRefsToBacklinks,
 } from "./features/BacklinksTreeDataProvider";
-import { codeActionProvider } from "./features/codeActionProvider";
-import { completionProvider } from "./features/completionProvider";
-import DefinitionProvider from "./features/DefinitionProvider";
-import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
-import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
-import ReferenceProvider from "./features/ReferenceProvider";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { CodeConfigKeys } from "./types";
-import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
+import { DisposableStore, resolvePath } from "./utils";
+import { VSCodeUtils } from "./vsCodeUtils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
@@ -378,8 +368,8 @@ export class DendronExtension {
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
-    this._setupCommands();
-    this.setupLanguageFeatures(context);
+    // this._setupCommands();
+    // this.setupLanguageFeatures(context);
     this.treeViews = {};
     this.webViews = {};
     this.setupViews(context);
@@ -607,90 +597,6 @@ export class DendronExtension {
 
     return backlinkTreeView;
   }
-
-  setupLanguageFeatures(context: vscode.ExtensionContext) {
-    const mdLangSelector = { language: "markdown", scheme: "*" };
-    vscode.languages.registerReferenceProvider(
-      mdLangSelector,
-      new ReferenceProvider()
-    );
-    vscode.languages.registerDefinitionProvider(
-      mdLangSelector,
-      new DefinitionProvider()
-    );
-    vscode.languages.registerHoverProvider(
-      mdLangSelector,
-      new ReferenceHoverProvider()
-    );
-    vscode.languages.registerFoldingRangeProvider(
-      mdLangSelector,
-      new FrontmatterFoldingRangeProvider()
-    );
-    completionProvider.activate(context);
-    codeActionProvider.activate(context);
-  }
-
-  _setupCommands() {
-    ALL_COMMANDS.map((Cmd) => {
-      const cmd = new Cmd();
-      this.context.subscriptions.push(
-        vscode.commands.registerCommand(
-          cmd.key,
-          sentryReportingCallback(async (args: any) => {
-            await cmd.run(args);
-          })
-        )
-      );
-    });
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RELOAD_INDEX.key,
-        sentryReportingCallback(async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().run({ silent });
-          if (!silent) {
-            vscode.window.showInformationMessage(`finish reload`);
-          }
-          return out;
-        })
-      )
-    );
-
-    // ---
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "next" });
-        })
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "prev" });
-        })
-      )
-    );
-
-    // RENAME is alias to MOVE
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RENAME_NOTE.key,
-        sentryReportingCallback(async (args: any) => {
-          await new MoveNoteCommand().run({
-            allowMultiselect: false,
-            useSameVault: true,
-            ...args,
-          });
-        })
-      )
-    );
-  }
-
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
     this.disposableStore.add(disposable);

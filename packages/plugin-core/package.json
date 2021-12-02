@@ -877,7 +877,7 @@
       }
     ]
   },
-  "icon": "assets/images/logo.png",
+  "icon": "media/logo.png",
   "scripts": {
     "webpack": "cross-env SKIP_SENTRY=1 DETECT_CIRCULAR_DEPS=1 webpack --config webpack.dev.js",
     "webpack:dev:watch": "yarn webpack --watch",

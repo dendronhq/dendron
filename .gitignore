@@ -7,7 +7,6 @@ lerna-debug.log
 local
 vendor
 dendron.code-workspace
-.jekyll-cache
 _site
 shell.code-snippets
 packages/pods-core/lib/index.d.ts

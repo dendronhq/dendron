@@ -100,6 +100,7 @@ suite("selection2Items", () => {
   });
   let active: NoteProps;
   let activeWithAmbiguousLink: NoteProps;
+  let activeWithNonUniqueLinks: NoteProps;
   describeMultiWS(
     "GIVEN an active note with selection that contains wikilinks",
     {
@@ -117,6 +118,12 @@ suite("selection2Items", () => {
           wsRoot,
           fname: "active-ambiguous",
           body: "[[pican]]",
+        });
+        activeWithNonUniqueLinks = await NoteTestUtilsV4.createNote({
+          vault: TestEngineUtils.vault1(vaults),
+          wsRoot,
+          fname: "active-dedupe",
+          body: "[[dendron.ginger]]\n\n[[Ginger|dendron.ginger]]\n\n[[Lots of Ginger|dendron.ginger]]\n\n",
         });
         await NoteTestUtilsV4.createNote({
           genRandomId: true,
@@ -153,7 +160,7 @@ suite("selection2Items", () => {
       },
     },
     () => {
-      test("quickpick is populated with notes that were selected.", async () => {
+      test("THEN quickpick is populated with notes that were selected.", async () => {
         const editor = await VSCodeUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 
@@ -182,7 +189,7 @@ suite("selection2Items", () => {
         expect(expectedItemLabels).toEqual(actualItemLabels);
       });
 
-      test("quickpick is populated with normal query results.", async () => {
+      test("THEN quickpick is populated with normal query results.", async () => {
         const editor = await VSCodeUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 
@@ -198,6 +205,7 @@ suite("selection2Items", () => {
           "root",
           "root",
           "active-ambiguous",
+          "active-dedupe",
           "active",
           "bar",
           "foo",
@@ -216,7 +224,7 @@ suite("selection2Items", () => {
         expect(expectedItemLabels.sort()).toEqual(actualItemLabels?.sort());
       });
 
-      test("if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
+      test("THEN if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
         const editor = await VSCodeUtils.openNote(activeWithAmbiguousLink);
         editor.selection = new Selection(7, 0, 8, 0);
 
@@ -229,6 +237,31 @@ suite("selection2Items", () => {
 
         const enrichOut = await cmd.enrichInputs(gatherOut);
         const expectedItemLabels = ["pican", "pican"];
+
+        expect(
+          !_.isUndefined(gatherOut.quickpick.itemsFromSelection)
+        ).toBeTruthy();
+
+        const actualItemLabels = enrichOut?.selectedItems.map(
+          (item) => item.label
+        );
+
+        expect(expectedItemLabels).toEqual(actualItemLabels);
+      });
+
+      test("THEN if selection contains links that point to same note, correctly dedupes them", async () => {
+        const editor = await VSCodeUtils.openNote(activeWithNonUniqueLinks);
+        editor.selection = new Selection(7, 0, 10, 0);
+
+        const cmd = new NoteLookupCommand();
+        const gatherOut = await cmd.gatherInputs({
+          noConfirm: true,
+          selectionType: "selection2Items",
+          initialValue: "",
+        });
+
+        const enrichOut = await cmd.enrichInputs(gatherOut);
+        const expectedItemLabels = ["dendron.ginger"];
 
         expect(
           !_.isUndefined(gatherOut.quickpick.itemsFromSelection)

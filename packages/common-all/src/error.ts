@@ -232,6 +232,7 @@ export class ErrorFactory {
       message: `unexpected event: '${this.safeStringify(event)}'`,
     });
   }
+
   static createInvalidStateError({
     message,
   }: {
@@ -266,6 +267,28 @@ export class ErrorFactory {
       return `Failed to stringify the given object. Due to '${exc.message}'`;
     }
   }
+
+  /** Wraps the error in DendronError WHEN the instance is not already a DendronError. */
+  static wrapIfNeeded(err: any): DendronError {
+    if (err instanceof DendronError) {
+      // If its already a dendron error we don't need to wrap it.
+      return err;
+    } else if (err instanceof Error) {
+      // If its an instance of some other error we will wrap it and keep track
+      // of the inner error which was the cause.
+      return new DendronError({
+        message: err.message,
+        innerError: err,
+      });
+    } else {
+      // Hopefully we aren't reaching this branch but in case someone throws
+      // some object that does not inherit from Error we will attempt to
+      // safe stringify it into message and wrap as DendronError.
+      return new DendronError({
+        message: this.safeStringify(err),
+      });
+    }
+  }
 }
 
 export class ErrorUtils {
@@ -277,6 +300,7 @@ export class ErrorUtils {
     return _.get(error, "name", "") === "DendronError";
   }
 }
+
 export function isTSError(err: any): err is Error {
   return (
     (err as Error).message !== undefined && (err as Error).name !== undefined

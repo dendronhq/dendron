@@ -338,13 +338,16 @@ export function debounceAsyncUntilComplete<I extends any[], O>({
       setTimeout(async () => {
         // timeout done, start executing
         states.set(key, "execute");
-        await fn(...args);
-        const lastState = states.get(key);
-        // execution complete, mark as not executing
-        states.delete(key);
-        if (lastState === "trailing") {
-          // but if we had a trailing execution scheduled, do that
-          debouncedFn(...args);
+        try {
+          await fn(...args);
+        } finally {
+          const lastState = states.get(key);
+          // execution complete, mark as not executing
+          states.delete(key);
+          if (lastState === "trailing") {
+            // but if we had a trailing execution scheduled, do that
+            debouncedFn(...args);
+          }
         }
       }, timeout);
     }

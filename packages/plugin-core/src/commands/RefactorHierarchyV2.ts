@@ -67,13 +67,21 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const wikiLinks = LinkUtils.extractWikiLinks(text as string);
     const shouldUseSelection = wikiLinks.length > 0;
 
+    // if we have a selection w/ wikilinks, selection2Items
+    if (!shouldUseSelection) {
+      return {
+        selectedItems: [this.entireWorkspaceQuickPickItem],
+        onAcceptHookResp: [],
+      };
+    }
+
     const lcOpts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: true,
       vaultSelectCanToggle: false,
       extraButtons: [
-        Selection2ItemsBtn.create(shouldUseSelection),
-        MultiSelectBtn.create(shouldUseSelection),
+        Selection2ItemsBtn.create({ pressed: true, canToggle: false }),
+        MultiSelectBtn.create({ pressed: true, canToggle: false }),
       ],
     };
     const controller = LookupControllerV3.create(lcOpts);
@@ -81,7 +89,6 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
-      extraItems: [this.entireWorkspaceQuickPickItem],
     });
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
@@ -104,6 +111,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         placeholder:
           "Query for scope. Select 'Entire Workspace' to use all notes.",
         provider,
+        selectAll: true,
       });
     });
   }

@@ -67,7 +67,6 @@
   "devDependencies": {
     "@types/js-yaml": "^3.12.5",
     "@types/nanoid-dictionary": "^4.2.0",
-    "@types/vscode": "^1.62.0",
     "coveralls": "^3.0.2",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",

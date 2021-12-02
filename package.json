@@ -41,7 +41,6 @@
     "lerna": "^3.19.0",
     "lint-staged": ">=10",
     "lodash": "^4.17.15",
-    "npm-cli-login": "^0.1.1",
     "prettier": "^2.0.4",
     "standard-version": "^8.0.0",
     "verdaccio": "^5.1.3",

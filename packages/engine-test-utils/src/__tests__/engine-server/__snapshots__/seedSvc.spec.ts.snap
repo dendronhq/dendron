@@ -95,6 +95,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds:
@@ -226,6 +227,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds:
@@ -340,6 +342,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
 preview:
@@ -432,6 +435,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
 preview:
@@ -537,6 +541,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
 preview:
@@ -652,6 +657,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds: {}
@@ -751,6 +757,7 @@ workspace:
     enableHashTags: true
     workspaceVaultSyncMode: noCommit
     enableAutoFoldFrontmatter: false
+    enableEditorDecorations: true
     maxPreviewsCached: 10
     maxNoteLength: 204800
     seeds: {}

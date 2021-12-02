@@ -283,8 +283,10 @@ function mapWikilink(
   decoration: DecorationWikilink | DecorationHashTag
 ): DecorationAndType | undefined {
   if (isDecorationHashTag(decoration)) {
+    const type = EDITOR_DECORATION_TYPES[decoration.type];
+    if (!type) return undefined;
     return {
-      type: EDITOR_DECORATION_TYPES.wikiLink,
+      type,
       decoration: {
         range: VSCodeUtils.toRangeObject(decoration.range),
         renderOptions: {

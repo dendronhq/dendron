@@ -64,7 +64,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   async promptScope(): Promise<NoteLookupProviderSuccessResp | undefined> {
     // see if we have a selection that contains wikilinks
     const { text } = VSCodeUtils.getSelection();
-    const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+    const wikiLinks = text ? LinkUtils.extractWikiLinks(text) : [];
     const shouldUseSelection = wikiLinks.length > 0;
 
     // if we have a selection w/ wikilinks, selection2Items
@@ -108,8 +108,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       });
       controller.show({
         title: "Decide the scope of refactor",
-        placeholder:
-          "Query for scope. Select 'Entire Workspace' to use all notes.",
+        placeholder: "Query for scope.",
         provider,
         selectAll: true,
       });

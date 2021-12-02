@@ -566,6 +566,9 @@ export async function _activate(
 
       MetadataService.instance().setDendronWorkspaceActivated();
 
+      const codeWorkspacePresent = await fs.pathExists(
+        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
+      );
       AnalyticsUtils.identify();
       AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
         duration: durationReloadWorkspace,
@@ -573,6 +576,7 @@ export async function _activate(
         numNotes,
         numVaults: _.size(getEngine().vaults),
         workspaceType: ws.type,
+        codeWorkspacePresent,
       });
       if (stage !== "test") {
         await ws.activateWatchers();

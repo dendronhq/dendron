@@ -14,6 +14,8 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { CodeCommandInstance } from "../../commands/base";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
+import { PodCommandFactory } from "./PodCommandFactory";
+import { assertUnreachable } from "@dendronhq/common-all";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -151,26 +153,45 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
-  public static async promptForPodType(): Promise<PodV2Types | undefined> {
-    const newConnectionOptions = Object.keys(PodV2Types)
-      .filter((key) => Number.isNaN(Number(key)))
-      .map<QuickPickItem>((value) => {
-        return {
-          label: value,
-          detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
-        };
-      });
-    const picked = await vscode.window.showQuickPick(newConnectionOptions, {
-      title: "Pick the Pod Type",
-      ignoreFocusOut: true,
-    });
+  public static async promptForPodTypeForCommand(): Promise<
+    CodeCommandInstance | undefined
+  > {
+    const picked = await PodUIControls.promptForPodType();
 
     if (!picked) {
       return;
     }
 
-    return picked.label as PodV2Types;
+    return PodCommandFactory.createPodCommandForPodType(
+      picked.label as PodV2Types
+    );
   }
+
+
+    /**
+   * Prompt user to pick a pod (v2) type
+   * @returns a runnable code command for the selected pod
+   */
+     public static async promptForPodType(): Promise<PodV2Types | undefined> {
+      const newConnectionOptions = Object.keys(PodV2Types)
+        .filter((key) => Number.isNaN(Number(key)))
+        .map<QuickPickItem>((value) => {
+          return {
+            label: value,
+            detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
+          };
+        });
+      const picked = await vscode.window.showQuickPick(newConnectionOptions, {
+        title: "Pick the Pod Type",
+        ignoreFocusOut: true,
+      });
+  
+      if (!picked) {
+        return;
+      }
+  
+      return picked.label as PodV2Types;
+    }
 
   /**
    * Prompt user to pick an {@link ExternalService}

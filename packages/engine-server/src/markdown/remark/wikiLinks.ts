@@ -79,7 +79,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const copts = _.defaults(opts || {}, {
     convertObsidianLinks: false,
     useId: false,
-    convertWikilinks: true,
   });
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
@@ -175,7 +174,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
           return `[${alias}](${copts.prefix || ""}${cleanValue}.md)`;
         }
         case DendronASTDest.HTML: {
-          console.log("here");
           const alias = data.alias ? data.alias : value;
           return `[${alias}](${copts.prefix || ""}${value}.html${
             data.anchorHeader ? "#" + data.anchorHeader : ""

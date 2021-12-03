@@ -1,8 +1,14 @@
+import { assertUnreachable } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { JSONSchemaType } from "..";
+import {
+  AirtableExportPodV2,
+  GoogleDocsExportPodV2,
+  MarkdownExportPodV2,
+  PodV2Types,
+} from "..";
 
 export class ConfigFileUtils {
   static getConfigByFPath({ fPath }: { fPath: string }): any {
@@ -23,7 +29,7 @@ export class ConfigFileUtils {
     setProperties,
   }: {
     fPath: string;
-    configSchema: JSONSchemaType<T>;
+    configSchema: any;
     force?: boolean;
     setProperties?: Partial<T>;
   }) {
@@ -71,8 +77,7 @@ export class ConfigFileUtils {
   static createExportConfig(opts: { required: string[]; properties: any }) {
     return {
       type: "object",
-      additionalProperties: false,
-      required: ["podId", "podType", ...opts.required],
+      required: ["podId", "podType", "exportScope", ...opts.required],
       properties: {
         podId: {
           description: "configuration ID",
@@ -86,7 +91,6 @@ export class ConfigFileUtils {
         exportScope: {
           description: "export scope of the pod",
           type: "string",
-          nullable: true,
         },
         podType: {
           description: "type of pod",
@@ -95,5 +99,18 @@ export class ConfigFileUtils {
         ...opts.properties,
       },
     };
+  }
+
+  static getConfigSchema(podType: PodV2Types): any {
+    switch (podType) {
+      case PodV2Types.AirtableExportV2:
+        return AirtableExportPodV2.config();
+      case PodV2Types.GoogleDocsExportV2:
+        return GoogleDocsExportPodV2.config();
+      case PodV2Types.MarkdownExportV2:
+        return MarkdownExportPodV2.config();
+      default:
+        assertUnreachable();
+    }
   }
 }

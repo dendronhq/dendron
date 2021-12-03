@@ -663,6 +663,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
   },
+  CONFIGURE_SERVICE_CONNECTION: {
+    key: "dendron.configureServiceConnection",
+    title: `${CMD_PREFIX} Configure Service Connection`,
+    group: "pods",
+    desc: "Update your service connection configuration",
+    docLink: "dendron.topic.pod.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+  },
+  CONFIGURE_EXPORT_POD_V2: {
+    key: "dendron.configureExportPodV2",
+    title: `${CMD_PREFIX} Configure Export Pod V2`,
+    group: "pods",
+    desc: "Update your export pod configuration",
+    docLink: "dendron.topic.pod.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+  },
   IMPORT_POD: {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,

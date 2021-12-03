@@ -6,6 +6,7 @@ import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   isExportPodConfigurationV2,
+  PodV2Types,
 } from "..";
 
 export class PodV2ConfigManager {
@@ -77,5 +78,19 @@ export class PodV2ConfigManager {
         .map((filename) => path.join(podsDir, filename));
     }
     return [];
+  }
+
+  /**
+   * Get all persisted configs for a particular type of pod
+   * @param type
+   * @returns
+   */
+  public static async getAllConfigsByType(opts: {
+    type: PodV2Types;
+    podsDir: string;
+  }): Promise<ExportPodConfigurationV2[]> {
+    const { type, podsDir } = opts;
+    const configs = PodV2ConfigManager.getAllPodConfigs(podsDir);
+    return configs.filter((config) => config.podType === type);
   }
 }

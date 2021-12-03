@@ -1070,10 +1070,10 @@ export class NoteUtils {
 
     let propsWithTrait: NoteProps & { traitIds?: string[] } = { ...cleanProps };
 
-    if (cleanProps.types) {
+    if (cleanProps.traits) {
       propsWithTrait = {
         ...cleanProps,
-        traitIds: cleanProps.types.map((value) => value.id),
+        traitIds: cleanProps.traits.map((value) => value.id),
       };
     }
 

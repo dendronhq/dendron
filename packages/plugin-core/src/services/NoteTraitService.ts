@@ -20,22 +20,22 @@ export type NoteTraitService = {
 
   /**
    * Register a New Note Trait
-   * @param type
+   * @param trait
    */
-  registerTrait(type: NoteTrait): RespV2<void>;
+  registerTrait(trait: NoteTrait): RespV2<void>;
 
   /**
    * Unregister an Existing Note Trait
-   * @param type
+   * @param trait
    */
-  unregisterTrait(type: NoteTrait): RespV2<void>;
+  unregisterTrait(trait: NoteTrait): RespV2<void>;
 
   /**
    * Returns the VS Code command that will create a note for the specified when
    * the command is run.
-   * @param type
+   * @param trait
    */
-  getRegisteredCommandForTrait(type: NoteTrait): string | undefined;
+  getRegisteredCommandForTrait(trait: NoteTrait): string | undefined;
 };
 
 export class NoteTraitManager implements NoteTraitService {
@@ -46,25 +46,25 @@ export class NoteTraitManager implements NoteTraitService {
     this.cmdRegistar = registrar;
   }
 
-  registerTrait(type: NoteTrait): RespV2<void> {
+  registerTrait(trait: NoteTrait): RespV2<void> {
     if (
-      this.registeredTraits.find((registered) => registered.id === type.id) !==
+      this.registeredTraits.find((registered) => registered.id === trait.id) !==
       undefined
     ) {
       return ResponseUtil.createUnhappyResponse({
         error: new DendronError({
-          message: `Type with ID ${type.id} has already been registered`,
+          message: `Type with ID ${trait.id} has already been registered`,
           severity: ERROR_SEVERITY.MINOR,
         }),
       });
     }
 
-    this.registeredTraits = this.registeredTraits.concat(type);
-    this.cmdRegistar.registerCommandForTrait(type);
+    this.registeredTraits = this.registeredTraits.concat(trait);
+    this.cmdRegistar.registerCommandForTrait(trait);
     return { error: null };
   }
 
-  unregisterTrait(_type: NoteTrait): RespV2<void> {
+  unregisterTrait(_trait: NoteTrait): RespV2<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -72,9 +72,9 @@ export class NoteTraitManager implements NoteTraitService {
     throw new Error("Method not implemented.");
   }
 
-  getRegisteredCommandForTrait(type: NoteTrait): string | undefined {
-    if (type.id in this.cmdRegistar.registeredCommands) {
-      return this.cmdRegistar.registeredCommands[type.id];
+  getRegisteredCommandForTrait(trait: NoteTrait): string | undefined {
+    if (trait.id in this.cmdRegistar.registeredCommands) {
+      return this.cmdRegistar.registeredCommands[trait.id];
     }
 
     return undefined;

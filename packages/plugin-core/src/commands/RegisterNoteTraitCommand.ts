@@ -4,11 +4,11 @@ import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { UserDefinedTraitV1 } from "../traits/UserDefinedTraitV1";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
-type CommandOpts = { typeId: string };
+type CommandOpts = { traitId: string };
 
 type CommandOutput = {} | undefined;
 
@@ -50,28 +50,28 @@ export class RegisterNoteTraitCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.REGISTER_NOTE_TYPE.key;
+  key = DENDRON_COMMANDS.REGISTER_NOTE_TRAIT.key;
 
   async gatherInputs() {
-    const typeId = await VSCodeUtils.showInputBox({
-      placeHolder: "name of type",
+    const traitId = await VSCodeUtils.showInputBox({
+      placeHolder: "name of trait",
     });
-    if (!typeId) {
+    if (!traitId) {
       return undefined;
     }
 
-    return { typeId };
+    return { traitId };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
-    vscode.window.showInformationMessage("Enter Your Type Functionality");
+    vscode.window.showInformationMessage("Enter Your Trait Functionality");
 
     const engine = getEngine();
     const { wsRoot } = engine;
     const scriptPath = path.join(
       wsRoot,
       CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE,
-      opts.typeId + ".js"
+      opts.traitId + ".js"
     );
 
     fs.ensureDirSync(path.dirname(scriptPath));
@@ -84,8 +84,8 @@ export class RegisterNoteTraitCommand extends BasicCommand<
     }
     fs.writeFileSync(scriptPath, noteTraitTemplate);
 
-    const newNoteType = new UserDefinedTraitV1(opts.typeId, scriptPath);
-    getExtension().typeRegistrar.registerTrait(newNoteType);
+    const newNoteTrait = new UserDefinedTraitV1(opts.traitId, scriptPath);
+    getExtension().traitRegistrar.registerTrait(newNoteTrait);
 
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(scriptPath));
     return;

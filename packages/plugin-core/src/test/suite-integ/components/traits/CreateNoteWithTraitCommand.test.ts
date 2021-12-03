@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import vscode from "vscode";
 import { CreateNoteWithTraitCommand } from "../../../../commands/CreateNoteWithTraitCommand";
-import { VSCodeUtils } from "../../../../utils";
+import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { getDWorkspace } from "../../../../workspace";
 import { expect } from "../../../testUtilsv2";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";

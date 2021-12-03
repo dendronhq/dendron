@@ -734,7 +734,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Delete a hook",
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  REGISTER_NOTE_TYPE: {
+  REGISTER_NOTE_TRAIT: {
     key: "dendron.registerNoteTrait",
     title: `${CMD_PREFIX} Register Note Trait`,
     group: "hooks",

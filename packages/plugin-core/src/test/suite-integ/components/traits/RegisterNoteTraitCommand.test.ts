@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import vscode from "vscode";
 import { RegisterNoteTraitCommand } from "../../../../commands/RegisterNoteTraitCommand";
-import { VSCodeUtils } from "../../../../utils";
+import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { getDWorkspace } from "../../../../workspace";
 import { expect } from "../../../testUtilsv2";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
@@ -30,7 +30,7 @@ suite("RegisterNoteTraitCommand tests", () => {
         const cmd = new RegisterNoteTraitCommand();
 
         await cmd.execute({
-          typeId: traitId,
+          traitId,
         });
 
         expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath).toEqual(

@@ -18,7 +18,7 @@ import {
 } from "../components/lookup/LookupProviderV3";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
@@ -38,17 +38,17 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   CommandInput
 > {
   key: string;
-  type: NoteTrait;
+  trait: NoteTrait;
 
-  constructor(commandId: string, type: NoteTrait) {
+  constructor(commandId: string, trait: NoteTrait) {
     super();
     this.key = commandId;
-    this.type = type;
+    this.trait = trait;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     // If there's no modifier, provide a regular lookup UI.
-    if (!this.type.OnWillCreate?.setNameModifier) {
+    if (!this.trait.OnWillCreate?.setNameModifier) {
       const resp = await this.getNoteNameFromLookup();
 
       if (!resp) {
@@ -66,7 +66,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       }
 
       const context = await this.getCreateContext();
-      const resp = this.type.OnWillCreate.setNameModifier(context);
+      const resp = this.trait.OnWillCreate.setNameModifier(context);
 
       let fname = resp.name;
 
@@ -100,17 +100,17 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
 
   async execute(opts: CommandOpts) {
     const { fname } = opts;
-    const ctx = "CreateTypedNoteCommand";
+    const ctx = "CreateNoteWithTraitCommand";
 
-    this.L.info(ctx);
+    this.L.info({ ctx, msg: "enter", opts });
 
     let title;
 
-    if (this.type.OnCreate?.setTitle && this.checkWorkspaceTrustAndWarn()) {
+    if (this.trait.OnCreate?.setTitle && this.checkWorkspaceTrustAndWarn()) {
       const context = await this.getCreateContext();
       context.currentNoteName = fname;
 
-      title = this.type.OnCreate.setTitle(context);
+      title = this.trait.OnCreate.setTitle(context);
     }
 
     const config = getDWorkspace().config;
@@ -143,8 +143,10 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     await new GotoNoteCommand().execute({
       qs: fname,
       vault,
-      overrides: { title, types: [this.type] },
+      overrides: { title, traits: [this.trait] },
     });
+
+    this.L.info({ ctx, msg: "exit" });
   }
 
   private async getNoteNameFromLookup(
@@ -153,15 +155,10 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     return new Promise<string | undefined>((resolve) => {
       const lookupCreateOpts: LookupControllerV3CreateOpts = {
         nodeType: "note",
-        // disableVaultSelection: opts?.useSameVault,
-        // If vault selection is enabled we alwaysPrompt selection mode,
-        // hence disable toggling.
-        // vaultSelectCanToggle: false,
-        // extraButtons: [MultiSelectBtn.create(false)],
       };
       const lc = LookupControllerV3.create(lookupCreateOpts);
 
-      const provider = new NoteLookupProvider("createTypedNote", {
+      const provider = new NoteLookupProvider("createNoteWithTrait", {
         allowNewNote: true,
         forceAsIsPickerValueUsage: true,
       });
@@ -190,12 +187,19 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
           ".md"
         );
 
-      lc.show({
-        title: `Create Note with Type ${"hello"}`,
+      lc.prepareQuickPick({
         placeholder: "Enter Note Name",
         provider,
         initialValue: defaultNoteName,
-        // nonInteractive: opts?.nonInteractive,
+        title: `Create Note with Trait`,
+        onDidHide: () => {
+          resolve(undefined);
+        },
+      }).then((qp) => {
+        lc.showQuickPick({
+          quickpick: qp.quickpick,
+          provider,
+        });
       });
     });
   }

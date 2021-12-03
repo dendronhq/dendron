@@ -6,7 +6,7 @@ import {
   onCreateProps,
   SetNameModifierResp,
 } from "@dendronhq/common-all";
-import { DendronClientUtilsV2 } from "../utils";
+import { DendronClientUtilsV2 } from "../clientUtils";
 import { getDWorkspace } from "../workspace";
 
 export class JournalNote implements NoteTrait {

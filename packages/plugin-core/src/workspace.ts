@@ -156,7 +156,7 @@ export class DendronExtension {
   public workspaceService?: WorkspaceService;
   protected treeViews: { [key: string]: vscode.WebviewViewProvider };
   protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
-  private _typeRegistrar: NoteTraitManager;
+  private _traitRegistrar: NoteTraitManager;
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -186,8 +186,8 @@ export class DendronExtension {
     return vscode.workspace.getConfiguration(section);
   }
 
-  get typeRegistrar(): NoteTraitService {
-    return this._typeRegistrar;
+  get traitRegistrar(): NoteTraitService {
+    return this._traitRegistrar;
   }
 
   async pauseWatchers<T = void>(cb: () => Promise<T>) {
@@ -383,35 +383,7 @@ export class DendronExtension {
     this.treeViews = {};
     this.webViews = {};
     this.setupViews(context);
-    this._typeRegistrar = new NoteTraitManager(new CommandRegistrar(context));
-
-    // Register any User Defined Note Types
-    const userTypesPath = vscode.workspace.workspaceFile
-      ? path.join(
-          path.dirname(vscode.workspace.workspaceFile?.fsPath),
-          CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE
-        )
-      : undefined;
-
-    if (userTypesPath && fs.pathExistsSync(userTypesPath)) {
-      const files = fs.readdirSync(userTypesPath);
-      files.forEach((file) => {
-        if (file.endsWith(".js")) {
-          const typeId = path.basename(file, ".js");
-          this.L.info("Registering User Defined Note Type with ID " + typeId);
-          const newNoteType = new UserDefinedTraitV1(
-            typeId,
-            path.join(userTypesPath, file)
-          );
-          const resp = this._typeRegistrar.registerTrait(newNoteType);
-          if (ResponseUtil.hasError(resp)) {
-            this.L.error({
-              msg: `Error registering trait for trait definition at ${file}`,
-            });
-          }
-        }
-      });
-    }
+    this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -582,6 +554,36 @@ export class DendronExtension {
         context.subscriptions.push(backlinkTreeView);
       }
     });
+  }
+
+  async setupTraits() {
+    // Register any User Defined Note Traits
+    const userTraitsPath = getDWorkspace().wsRoot
+      ? path.join(
+          getDWorkspace().wsRoot,
+          CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE
+        )
+      : undefined;
+
+    if (userTraitsPath && fs.pathExistsSync(userTraitsPath)) {
+      const files = fs.readdirSync(userTraitsPath);
+      files.forEach((file) => {
+        if (file.endsWith(".js")) {
+          const traitId = path.basename(file, ".js");
+          this.L.info("Registering User Defined Note Trait with ID " + traitId);
+          const newNoteTrait = new UserDefinedTraitV1(
+            traitId,
+            path.join(userTraitsPath, file)
+          );
+          const resp = this._traitRegistrar.registerTrait(newNoteTrait);
+          if (ResponseUtil.hasError(resp)) {
+            this.L.error({
+              msg: `Error registering trait for trait definition at ${file}`,
+            });
+          }
+        }
+      });
+    }
   }
 
   private setupBacklinkTreeView() {

@@ -21,11 +21,11 @@ export class UserDefinedTraitV1 implements NoteTrait {
 
   /**
    *
-   * @param typeId ID for the note type
+   * @param traitId ID for the note type
    * @param scriptPath - path to the .js file that will be dynamically run
    */
-  constructor(typeId: string, scriptPath: string) {
-    this.id = typeId;
+  constructor(traitId: string, scriptPath: string) {
+    this.id = traitId;
     this.scriptPath = scriptPath;
 
     this.OnCreate = UserDefinedTraitV1.getOnCreateProps(scriptPath);

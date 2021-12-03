@@ -11,13 +11,13 @@ export class CommandRegistrar {
   private context: vscode.ExtensionContext;
 
   private disposables: {
-    [typeId: string]: vscode.Disposable;
+    [traitId: string]: vscode.Disposable;
   };
 
   public CUSTOM_COMMAND_PREFIX = "dendron.customCommand.";
 
   readonly registeredCommands: {
-    [typeId: string]: string;
+    [traitId: string]: string;
   };
 
   constructor(context: vscode.ExtensionContext) {

@@ -104,6 +104,7 @@ type CommandEntry = {
   docAnchor?: string;
   docPreview?: string;
   when?: string;
+  enablement?: string;
 };
 
 const CMD_PREFIX = "Dendron:";
@@ -819,10 +820,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",
+      when: "dendron:pluginActive && dendron:hasLegacyPreview",
     },
     desc: "Show Markdown Preview (legacy)",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    enablement: "dendron:pluginActive && dendron:hasLegacyPreview",
   },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",
@@ -832,10 +835,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",
+      when: "dendron:pluginActive",
     },
     desc: "Show Markdown Preview",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    enablement: "dendron:pluginActive",
   },
   PASTE_FILE: {
     key: "dendron.pasteFile",

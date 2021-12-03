@@ -391,7 +391,7 @@
         "command": "dendron.publishExport",
         "title": "Dendron: Publish Export",
         "desc": "Export your notes for publishing.",
-        "docs": "This command works by running `dendron-cli` in the background.",
+        "docs": "",
         "docLink": "",
         "docPreview": ""
       },
@@ -399,7 +399,7 @@
         "command": "dendron.publishDev",
         "title": "Dendron: Publish Dev",
         "desc": "Preview your notes on localhost using publishing",
-        "docs": "This command works by running `dendron-cli` in the background.",
+        "docs": "",
         "docLink": "",
         "docPreview": ""
       },
@@ -800,7 +800,6 @@
       },
       {
         "command": "dendron.lookupNoteAutoComplete",
-        "mac": "Tab",
         "key": "Tab",
         "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
       },

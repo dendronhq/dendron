@@ -6,7 +6,7 @@ import {
 import { describe, before, after } from "mocha";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import sinon from "sinon";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { WorkspaceType } from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
 import { getDWorkspace } from "../../workspace";

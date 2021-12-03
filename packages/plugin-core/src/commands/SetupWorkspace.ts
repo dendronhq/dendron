@@ -5,7 +5,7 @@ import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { TemplateInitializer } from "../workspace/templateInitializer";
 import { TutorialInitializer } from "../workspace/tutorialInitializer";

@@ -39,15 +39,16 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { sentryReportingCallback } from "../utils/analytics";
 import { containsNonDendronUri } from "../utils/md";
 import { getFrontmatterTags, parseFrontmatter } from "../utils/yaml";
 import { getConfigValue, getDWorkspace } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import {
   checkAndWarnBadFrontmatter,
   warnMissingFrontmatter,
-} from "./codeActionProvider";
+} from "../utils/frontmatter";
 
 /** Wait this long in miliseconds before trying to update decorations. */
 const DECORATION_UPDATE_DELAY = 100;
@@ -148,7 +149,7 @@ export const updateDecorations = sentryReportingCallback(
     // Only show decorations & warnings for notes
     let note: NoteProps | undefined;
     try {
-      note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+      note = WSUtils.getNoteFromDocument(activeEditor.document);
       if (_.isUndefined(note)) return {};
     } catch (error) {
       Logger.info({
@@ -379,7 +380,7 @@ export function linkedNoteType({
   let matchingNotes: NoteProps[];
   // Same-file links have `fname` undefined or empty string
   if (!fname && document) {
-    const documentNote = VSCodeUtils.getNoteFromDocument(document);
+    const documentNote = WSUtils.getNoteFromDocument(document);
     matchingNotes = documentNote ? [documentNote] : [];
   } else if (fname) {
     try {
@@ -399,7 +400,7 @@ export function linkedNoteType({
       return DECORATION_TYPE.brokenWikilink;
     }
   } else {
-    matchingNotes = [VSCodeUtils.getNoteFromDocument(document!)!];
+    matchingNotes = [WSUtils.getNoteFromDocument(document!)!];
   }
 
   // Checking web URLs is not feasible, and checking wildcard references would be hard.

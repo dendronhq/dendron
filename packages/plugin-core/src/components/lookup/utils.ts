@@ -27,7 +27,7 @@ import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {

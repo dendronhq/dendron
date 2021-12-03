@@ -3,10 +3,11 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
 import { getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
+import { WSUtils } from "../../WSUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -66,7 +67,7 @@ suite("WindowWatcher", function () {
           watcher = new WindowWatcher();
           watcher.activate(ctx);
           // Open a note
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteByFnameV5({
               vault: vaults[0],
               notes: engine.notes,
@@ -98,7 +99,7 @@ suite("WindowWatcher", function () {
             wsRoot,
             fname: "root",
           })!;
-          await VSCodeUtils.openNote(first);
+          await WSUtils.openNote(first);
           checkPosition(7);
           // Move the selection so it's not where it has been auto-moved
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -114,10 +115,10 @@ suite("WindowWatcher", function () {
             wsRoot,
             fname: "root",
           })!;
-          await VSCodeUtils.openNote(second);
+          await WSUtils.openNote(second);
           checkPosition(7);
           // Switch back to first note again
-          await VSCodeUtils.openNote(first);
+          await WSUtils.openNote(first);
           // The selection should not have moved
           checkPosition(3);
           done();

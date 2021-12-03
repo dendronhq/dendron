@@ -4,18 +4,18 @@ import {
   SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   ExtensionEvents,
   getStage,
   InstallStatus,
+  MigrationEvents,
+  NativeWorkspaceEvents,
   Time,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
-  MigrationEvents,
-  ConfigUtils,
-  NativeWorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -25,12 +25,12 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
+  FileAddWatcher,
   HistoryService,
   MetadataService,
+  MigrationChangeSetStatus,
   WorkspaceService,
   WorkspaceUtils,
-  MigrationChangeSetStatus,
-  FileAddWatcher,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
@@ -41,22 +41,35 @@ import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import { ALL_COMMANDS } from "./commands";
+import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
+import { MoveNoteCommand } from "./commands/MoveNoteCommand";
+import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
   DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
 } from "./constants";
+import { codeActionProvider } from "./features/codeActionProvider";
+import { completionProvider } from "./features/completionProvider";
+import DefinitionProvider from "./features/DefinitionProvider";
+import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
+import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
+import ReferenceProvider from "./features/ReferenceProvider";
+import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
+import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
 import { setupSegmentClient } from "./telemetry";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
-import { KeybindingUtils, VSCodeUtils, WSUtils } from "./utils";
-import { AnalyticsUtils } from "./utils/analytics";
+import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { VSCodeUtils } from "./vsCodeUtils";
+import { showWelcome } from "./WelcomeUtils";
 import {
   DendronExtension,
   getDWorkspace,
@@ -66,6 +79,7 @@ import {
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
+import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -247,6 +261,7 @@ async function startServerProcess(): Promise<{
   return out;
 }
 
+// Only exported for test purposes
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
@@ -301,6 +316,11 @@ export async function _activate(
     const ws = await DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
+
+    // Setup the commands
+    _setupCommands(context);
+    _setupLanguageFeatures(context);
+
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
     // Probably also needed if the user switches from one workspace to the other.
     ws.type = await WorkspaceUtils.getWorkspaceType({
@@ -319,7 +339,7 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
-    const assetUri = WSUtils.getAssetUri(context);
+    const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
       ctx,
@@ -531,7 +551,7 @@ export async function _activate(
       }
       const durationStartServer = getDurationMilliseconds(start);
       Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-      WSUtils.updateEngineAPI(port);
+      updateEngineAPI(port);
       wsService.writePort(port);
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
@@ -754,7 +774,7 @@ async function showWelcomeOrWhatsNew({
       if (!SegmentClient.instance().hasOptedOut) {
         StateService.instance().showTelemetryNotice();
       }
-      await WSUtils.showWelcome(assetUri);
+      showWelcome(assetUri);
       break;
     }
     case InstallStatus.UPGRADED: {
@@ -824,7 +844,7 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
     .then(async (resp) => {
       if (resp?.title === START_TITLE) {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
-        WSUtils.showWelcome(assetUri);
+        showWelcome(assetUri);
       } else {
         AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
         const lapsedSurveySubmitted =
@@ -927,4 +947,116 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     !metaData.firstWsInitialize &&
     refreshMsg
   );
+}
+
+async function _setupCommands(context: vscode.ExtensionContext) {
+  const existingCommands = await vscode.commands.getCommands();
+
+  ALL_COMMANDS.map((Cmd) => {
+    const cmd = new Cmd();
+    if (!existingCommands.includes(cmd.key))
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          cmd.key,
+          sentryReportingCallback(async (args: any) => {
+            await cmd.run(args);
+          })
+        )
+      );
+  });
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RELOAD_INDEX.key,
+        sentryReportingCallback(async (silent?: boolean) => {
+          const out = await new ReloadIndexCommand().run({ silent });
+          if (!silent) {
+            vscode.window.showInformationMessage(`finish reload`);
+          }
+          return out;
+        })
+      )
+    );
+  }
+
+  // ---
+  if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
+        sentryReportingCallback(async () => {
+          await new GoToSiblingCommand().execute({ direction: "next" });
+        })
+      )
+    );
+  }
+  if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+        sentryReportingCallback(async () => {
+          await new GoToSiblingCommand().execute({ direction: "prev" });
+        })
+      )
+    );
+  }
+
+  // RENAME is alias to MOVE
+  if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RENAME_NOTE.key,
+        sentryReportingCallback(async (args: any) => {
+          await new MoveNoteCommand().run({
+            allowMultiselect: false,
+            useSameVault: true,
+            ...args,
+          });
+        })
+      )
+    );
+  }
+}
+
+function _setupLanguageFeatures(context: vscode.ExtensionContext) {
+  const mdLangSelector = { language: "markdown", scheme: "*" };
+  context.subscriptions.push(
+    vscode.languages.registerReferenceProvider(
+      mdLangSelector,
+      new ReferenceProvider()
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(
+      mdLangSelector,
+      new DefinitionProvider()
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      mdLangSelector,
+      new ReferenceHoverProvider()
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerFoldingRangeProvider(
+      mdLangSelector,
+      new FrontmatterFoldingRangeProvider()
+    )
+  );
+  completionProvider.activate(context);
+  codeActionProvider.activate(context);
+}
+
+function updateEngineAPI(port: number | string): void {
+  const ext = getExtension();
+  const svc = EngineAPIService.createEngine({
+    port,
+    enableWorkspaceTrust: vscode.workspace.isTrusted,
+  });
+  ext.setEngine(svc);
+  ext.port = _.toInteger(port);
+  // const engine = ext.getEngine();
+  // return engine;
 }

@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import path from "path";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 

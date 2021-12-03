@@ -42,11 +42,11 @@ import {
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
-import { VSCodeUtils } from "../utils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
+import { WSUtils } from "../WSUtils";
 
 export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -396,7 +396,7 @@ export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
     notes,
     wsRoot: getDWorkspace().wsRoot,
   });
-  return VSCodeUtils.openNote(note!);
+  return WSUtils.openNote(note!);
 };
 export const getNoteFromTextEditor = (): NoteProps => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;

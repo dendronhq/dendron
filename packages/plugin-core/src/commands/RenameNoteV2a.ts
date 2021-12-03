@@ -14,7 +14,7 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 

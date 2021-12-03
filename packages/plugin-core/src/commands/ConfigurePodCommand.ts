@@ -9,7 +9,7 @@ import {
 } from "@dendronhq/pods-core";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";

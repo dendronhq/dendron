@@ -13,7 +13,7 @@ import {
 } from "@dendronhq/pods-core";
 import path from "path";
 import * as vscode from "vscode";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { BaseCommand } from "../base";
 import { RateLimiter } from "limiter";

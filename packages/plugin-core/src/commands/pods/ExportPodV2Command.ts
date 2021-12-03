@@ -36,7 +36,12 @@ export class ExportPodV2Command extends BaseCommand<
     if (exportChoice === undefined) {
       return;
     } else if (exportChoice === "New Export") {
-      return PodUIControls.promptForPodTypeForCommand();
+      const podType = await PodUIControls.promptForPodType();
+
+      if (!podType) {
+        return;
+      }
+      return PodCommandFactory.createPodCommandForPodType(podType);
     } else {
       return PodCommandFactory.createPodCommandForStoredConfig(exportChoice);
     }

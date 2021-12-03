@@ -2,7 +2,7 @@ import path from "path";
 import os from "os";
 import fs from "fs-extra";
 import { Uri } from "vscode";
-import { VSCodeUtils } from "./utils";
+import { VSCodeUtils } from "./vsCodeUtils";
 
 // TODO: If you'd like to target a specific theme, pre-pend each class with either ".theme-dark" or ".theme-light"
 

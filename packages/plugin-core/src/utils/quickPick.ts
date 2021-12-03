@@ -1,6 +1,6 @@
-import { VSCodeUtils } from "../utils";
 import { DNodeUtils, NoteProps } from "@dendronhq/common-all";
 import { getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 export enum ProceedCancel {
   PROCEED = "proceed",

@@ -10,7 +10,8 @@ import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import {
   expect,
   LocationTestUtils,
@@ -51,7 +52,7 @@ suite("CopyNoteLink", function () {
         },
         onInit: async () => {
           // Open and select the header
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
@@ -77,7 +78,7 @@ suite("CopyNoteLink", function () {
         },
         onInit: async () => {
           // Open and select the header
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
@@ -109,7 +110,7 @@ suite("CopyNoteLink", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithTarget);
+          const editor = await WSUtils.openNote(noteWithTarget);
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
           const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
             char: 12,
@@ -140,7 +141,7 @@ suite("CopyNoteLink", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
             LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
@@ -177,7 +178,7 @@ suite("CopyNoteLink", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
             LocationTestUtils.getPresetWikiLinkPosition(),
@@ -213,7 +214,7 @@ suite("CopyNoteLink", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
             LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
@@ -253,7 +254,7 @@ suite("CopyNoteLink", function () {
         },
         onInit: async () => {
           // Open and select the header
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
@@ -334,7 +335,7 @@ suite("CopyNoteLink", function () {
             { wsRoot }
           );
 
-          const editor = await VSCodeUtils.openNote(noteWithTarget);
+          const editor = await WSUtils.openNote(noteWithTarget);
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
           const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
             char: 12,
@@ -353,7 +354,7 @@ suite("CopyNoteLink", function () {
             `[[H2|dendron://main/${noteWithTarget.fname}#h2]]`
           );
 
-          await VSCodeUtils.openNote(noteWithAnchor);
+          await WSUtils.openNote(noteWithAnchor);
           const link3 = await new CopyNoteLinkCommand().run();
           expect(link3).toEqual(
             `[[Beta|dendron://other/${noteWithAnchor.fname}]]`
@@ -386,7 +387,7 @@ suite("CopyNoteLink", function () {
             },
             { wsRoot }
           );
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
             LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
@@ -434,7 +435,7 @@ suite("CopyNoteLink", function () {
             },
             { wsRoot }
           );
-          const editor = await VSCodeUtils.openNote(note);
+          const editor = await WSUtils.openNote(note);
           const cmd = new CopyNoteLinkCommand();
           editor.selection = new vscode.Selection(
             LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),

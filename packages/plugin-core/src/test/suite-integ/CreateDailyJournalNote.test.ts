@@ -1,20 +1,20 @@
-import * as vscode from "vscode";
-import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
-import { expect } from "../testUtilsv2";
-import {
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-  withConfig,
-  EditorUtils,
-} from "../testUtilsV3";
 import { ConfigUtils, DVault, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { PickerUtilsV2 } from "../../components/lookup/utils";
-import { getActiveEditorBasename } from "../testUtils";
-import { CONFIG } from "../../constants";
-import { VSCodeUtils } from "../../utils";
 import sinon from "sinon";
+import * as vscode from "vscode";
+import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
+import { PickerUtilsV2 } from "../../components/lookup/utils";
+import { CONFIG } from "../../constants";
+import { WSUtils } from "../../WSUtils";
+import { getActiveEditorBasename } from "../testUtils";
+import { expect } from "../testUtilsv2";
+import {
+  EditorUtils,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+  withConfig,
+} from "../testUtilsV3";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
@@ -163,7 +163,7 @@ suite("Create Daily Journal Suite", function () {
           vault: vaults[0],
           fname: "foo.bar.baz",
         });
-        await VSCodeUtils.openNote(current);
+        await WSUtils.openNote(current);
         await new CreateDailyJournalCommand().run();
         const fname = getActiveEditorBasename();
         const today = new Date();

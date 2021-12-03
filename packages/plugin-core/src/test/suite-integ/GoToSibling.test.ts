@@ -5,7 +5,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { GoToSiblingCommand } from "../../commands/GoToSiblingCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 

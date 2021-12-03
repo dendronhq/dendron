@@ -9,7 +9,8 @@ import { ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import { StateService } from "../services/stateService";
 import { GOOGLE_OAUTH_ID } from "../types/global";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;

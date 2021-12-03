@@ -7,7 +7,8 @@ import { Selection, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 

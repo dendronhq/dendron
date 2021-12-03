@@ -1,17 +1,17 @@
+import { NoteProps } from "@dendronhq/common-all";
+import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 import { beforeEach, describe, it, suite } from "mocha";
-import { expect } from "../testUtilsv2";
+import { ExtensionContext, Selection } from "vscode";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
   shouldBubbleUpCreateNew,
   sortBySimilarity,
 } from "../../components/lookup/LookupProviderV3";
-import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { WSUtils } from "../../WSUtils";
+import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
-import { ExtensionContext, Selection } from "vscode";
-import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { VSCodeUtils } from "../../utils";
-import { NoteProps } from "@dendronhq/common-all";
-import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import _ from "lodash";
 
 suite("LookupProviderV3 utility methods:", () => {
   describe(`shouldBubbleUpCreateNew`, () => {
@@ -161,7 +161,7 @@ suite("selection2Items", () => {
     },
     () => {
       test("THEN quickpick is populated with notes that were selected.", async () => {
-        const editor = await VSCodeUtils.openNote(active);
+        const editor = await WSUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 
         const cmd = new NoteLookupCommand();
@@ -190,7 +190,7 @@ suite("selection2Items", () => {
       });
 
       test("THEN quickpick is populated with normal query results.", async () => {
-        const editor = await VSCodeUtils.openNote(active);
+        const editor = await WSUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 
         const cmd = new NoteLookupCommand();
@@ -225,7 +225,7 @@ suite("selection2Items", () => {
       });
 
       test("THEN if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
-        const editor = await VSCodeUtils.openNote(activeWithAmbiguousLink);
+        const editor = await WSUtils.openNote(activeWithAmbiguousLink);
         editor.selection = new Selection(7, 0, 8, 0);
 
         const cmd = new NoteLookupCommand();
@@ -250,7 +250,7 @@ suite("selection2Items", () => {
       });
 
       test("THEN if selection contains links that point to same note, correctly dedupes them", async () => {
-        const editor = await VSCodeUtils.openNote(activeWithNonUniqueLinks);
+        const editor = await WSUtils.openNote(activeWithNonUniqueLinks);
         editor.selection = new Selection(7, 0, 10, 0);
 
         const cmd = new NoteLookupCommand();

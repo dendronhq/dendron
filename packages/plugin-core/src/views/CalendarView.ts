@@ -14,8 +14,9 @@ import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { WebViewUtils } from "./utils";
 
 export class CalendarView implements vscode.WebviewViewProvider {
@@ -58,7 +59,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
       });
       return;
     }
-    const note = VSCodeUtils.getNoteFromDocument(document);
+    const note = WSUtils.getNoteFromDocument(document);
     if (note) {
       Logger.info({
         ctx,

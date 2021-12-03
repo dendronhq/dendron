@@ -9,11 +9,12 @@ import _ from "lodash";
 import { commands, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { GraphStyleService } from "../styles";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "../views/utils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
+import { WSUtils } from "../WSUtils";
 
 type CommandOpts = {};
 
@@ -100,7 +101,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const note =
             activeTextEditor &&
-            VSCodeUtils.getNoteFromDocument(activeTextEditor.document);
+            WSUtils.getNoteFromDocument(activeTextEditor.document);
           if (note) {
             ShowNoteGraphCommand.refresh(note);
           }

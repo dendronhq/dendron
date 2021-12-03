@@ -10,11 +10,13 @@ import {
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
+import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../utils";
+import { clipboard } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
-import { getEngine, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};

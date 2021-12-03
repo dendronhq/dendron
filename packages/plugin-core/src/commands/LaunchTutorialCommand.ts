@@ -1,5 +1,6 @@
 import { DENDRON_COMMANDS } from "../constants";
-import { WSUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { showWelcome } from "../WelcomeUtils";
 import { DendronExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -20,7 +21,7 @@ export class LaunchTutorialCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const assetUri = WSUtils.getAssetUri(DendronExtension.context());
-    await WSUtils.showWelcome(assetUri);
+    const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
+    await showWelcome(assetUri);
   }
 }

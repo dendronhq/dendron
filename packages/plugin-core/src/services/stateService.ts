@@ -5,7 +5,7 @@ import {
   WORKSPACE_STATE,
 } from "../constants";
 import * as vscode from "vscode";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import _ from "lodash";
 
 let _StateService: StateService | undefined;

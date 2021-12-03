@@ -16,7 +16,9 @@ import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { EngineAPIService } from "../../services/EngineAPIService";
 import { NoteSyncService } from "../../services/NoteSyncService";
-import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
+import { clipboard } from "../../utils";
+import { DendronClientUtilsV2 } from "../../clientUtils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import {
   DendronQuickPickerV2,
@@ -29,6 +31,7 @@ import {
   VaultSelectionMode,
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
+import { WSUtils } from "../../WSUtils";
 
 export type ButtonType =
   | LookupEffectType
@@ -152,7 +155,7 @@ const selectionToNoteProps = async (opts: {
           // sometimes can't update the current note with the link fast enough.
           // So we manually force the update here instead.
 
-          const currentNote = VSCodeUtils.getNoteFromDocument(editor.document);
+          const currentNote = WSUtils.getNoteFromDocument(editor.document);
           if (currentNote) {
             await NoteSyncService.instance().updateNoteContents({
               oldNote: currentNote,
@@ -516,7 +519,7 @@ export class TaskBtn extends DendronBtn {
     // If the lookup value ends up being identical to the current note, this will be confusing for the user because
     // they won't be able to create a new note. This can happen with the default settings of Task notes.
     // In that case, we add a trailing dot to suggest that they need to type something more.
-    const activeName = VSCodeUtils.getActiveNote()?.fname;
+    const activeName = WSUtils.getActiveNote()?.fname;
     if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {

@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { PasteLinkCommand } from "../../commands/PasteLink";
 import * as utils from "../../utils";
 import { clipboard } from "../../utils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -38,7 +39,7 @@ suite.skip("pasteLink", function () {
       onInit: async ({ engine }) => {
         // Need note to open
         const note = _.values(engine.notes)[0];
-        await utils.VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
 
         sinon
           .stub(clipboard, "readText")
@@ -59,7 +60,7 @@ suite.skip("pasteLink", function () {
       ctx,
       onInit: async ({ engine }) => {
         const note = _.values(engine.notes)[0];
-        await utils.VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
 
         sinon
           .stub(clipboard, "readText")

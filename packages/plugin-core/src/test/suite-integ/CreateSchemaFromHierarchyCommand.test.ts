@@ -10,7 +10,7 @@ import { TestNoteFactory } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import sinon from "sinon";
 import { beforeEach, describe, it } from "mocha";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DVault } from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";

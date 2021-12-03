@@ -7,7 +7,7 @@ import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { NoteSyncService } from "../../services/NoteSyncService";
-import { VSCodeUtils } from "../../utils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -38,7 +38,7 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
-          const editor = await VSCodeUtils.openNote(foo);
+          const editor = await WSUtils.openNote(foo);
           let changeSelection: vscode.Selection;
           const offset = `title: `.length;
           await editor?.edit((builder) => {
@@ -113,7 +113,7 @@ suite("NoteSyncService", function testSuite() {
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
-          const editor = await VSCodeUtils.openNote(foo);
+          const editor = await WSUtils.openNote(foo);
           await editor?.edit((builder) => {
             const pos = new vscode.Position(10, 0);
             const selection = new vscode.Selection(pos, pos);
@@ -148,7 +148,7 @@ suite("NoteSyncService", function testSuite() {
         },
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
-          const editor = await VSCodeUtils.openNote(foo);
+          const editor = await WSUtils.openNote(foo);
           await editor?.edit((builder) => {
             const pos = new vscode.Position(6, 0);
             builder.insert(pos, `tags: test\n`);
@@ -171,7 +171,7 @@ suite("NoteSyncService", function testSuite() {
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
-          const editor = await VSCodeUtils.openNote(foo);
+          const editor = await WSUtils.openNote(foo);
           const resp = await NoteSyncService.instance().onDidChange(
             editor.document
           );

@@ -6,9 +6,11 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { window } from "vscode";
+import { DendronClientUtilsV2 } from "../clientUtils";
 import { DENDRON_COMMANDS } from "../constants";
-import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
-import { getEngine, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getEngine } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -63,7 +65,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
       );
       return opts;
     }
-    const activeNote = VSCodeUtils.getNoteFromDocument(maybeEditor.document)!;
+    const activeNote = WSUtils.getNoteFromDocument(maybeEditor.document)!;
     if (_.isUndefined(activeNote)) {
       window.showErrorMessage("Active file is not a Dendron note.");
       return opts;
@@ -78,7 +80,8 @@ export class InsertNoteIndexCommand extends BasicCommand<
     }
     const config = getDWorkspace().config;
 
-    const insertNoteIndexConfig = ConfigUtils.getCommands(config).insertNoteIndex;
+    const insertNoteIndexConfig =
+      ConfigUtils.getCommands(config).insertNoteIndex;
     const maybeMarker = insertNoteIndexConfig.enableMarker;
 
     const noteIndex = this.genNoteIndex(children, {

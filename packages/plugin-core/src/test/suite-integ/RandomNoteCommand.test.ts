@@ -4,7 +4,7 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { RandomNoteCommand } from "../../commands/RandomNote";
 import { DENDRON_COMMANDS } from "../../constants";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,

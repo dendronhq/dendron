@@ -21,6 +21,11 @@ type PointOffset = { line?: number; column?: number };
 // NOTE: used for tests
 let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
 
+/**
+ * IMPORTANT: Do not import from  workspace.ts from this file. Any utils that
+ * depend on workspace must go into WSUtils, otherwise this will create circular
+ * dependencies.
+ */
 export class VSCodeUtils {
   /**
    * In development, this is `packages/plugin-core/assets`

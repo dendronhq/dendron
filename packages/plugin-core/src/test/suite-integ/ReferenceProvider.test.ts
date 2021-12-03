@@ -59,7 +59,7 @@ suite("ReferenceProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(activeNote);
+          const editor = await WSUtils.openNote(activeNote);
           const links = await provide(editor);
 
           expect(links?.length).toEqual(2);

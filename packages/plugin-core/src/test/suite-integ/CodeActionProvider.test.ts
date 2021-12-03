@@ -103,9 +103,9 @@ suite("Contextual UI Tests", function () {
           const end = new vscode.Position(7, 10);
           editor.selection = new vscode.Selection(start, end);
           expect(isBrokenWikilink()).toBeFalsy();
-          expect(getHeaderAt({ editor, position: start })).toNotEqual(
-            undefined
-          );
+          expect(
+            getHeaderAt({ document: editor.document, position: start })
+          ).toNotEqual(undefined);
           done();
         },
       });
@@ -130,7 +130,9 @@ suite("Contextual UI Tests", function () {
           const start = new vscode.Position(7, 0);
           const end = new vscode.Position(7, 18);
           editor.selection = new vscode.Selection(start, end);
-          expect(getHeaderAt({ editor, position: start })).toEqual(undefined);
+          expect(
+            getHeaderAt({ document: editor.document, position: start })
+          ).toEqual(undefined);
           expect(isBrokenWikilink()).toBeFalsy();
           done();
         },

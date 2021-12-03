@@ -17,6 +17,7 @@ import _ from "lodash";
 import vscode, {
   Position,
   Selection,
+  TextDocument,
   TextEditor,
   TextEditorDecorationType,
   TextEditorEdit,
@@ -37,15 +38,15 @@ export function isAnythingSelected(): boolean {
  * @returns the header text, or undefined if there wasn't a header
  */
 export function getHeaderAt({
-  editor,
+  document,
   position,
   engine: _engine,
 }: {
-  editor: TextEditor;
+  document: TextDocument;
   position: Position;
   engine?: DEngineClient;
 }): undefined | string {
-  const line = editor.document.lineAt(position.line);
+  const line = document.lineAt(position.line);
   const headerLine = _.trim(line.text);
   if (headerLine.startsWith("#")) {
     const proc = MDUtilsV5.procRemarkParse({ mode: ProcMode.NO_DATA }, {});
@@ -127,7 +128,11 @@ export function getAnchorAt(args: {
   position: Position;
   engine: DEngineClient;
 }): string | undefined {
-  return getHeaderAt(args) || getBlockAnchorAt(args);
+  const { editor } = args;
+  return (
+    getHeaderAt({ document: editor.document, ...args }) ||
+    getBlockAnchorAt(args)
+  );
 }
 
 export async function getSelectionAnchors(opts: {

@@ -12,7 +12,7 @@ import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeutils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 

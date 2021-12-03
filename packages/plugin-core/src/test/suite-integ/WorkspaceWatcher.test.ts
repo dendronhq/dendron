@@ -15,10 +15,10 @@ import {
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { getDWorkspace } from "../../workspace";
-import { VSCodeUtils } from "../../vsCodeUtils";
 import { Position } from "vscode";
 import { SchemaSyncService } from "../../services/SchemaSyncService";
 import * as _ from "lodash";
+import { WSUtils } from "../../WSUtils";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;

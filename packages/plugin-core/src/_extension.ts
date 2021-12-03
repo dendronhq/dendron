@@ -316,6 +316,11 @@ export async function _activate(
     const ws = await DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
+
+    // Setup the commands
+    _setupCommands(context);
+    _setupLanguageFeatures(context);
+
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
     // Probably also needed if the user switches from one workspace to the other.
     ws.type = await WorkspaceUtils.getWorkspaceType({
@@ -633,10 +638,6 @@ export async function _activate(
       }
     }
 
-    // Setup the commands
-    _setupCommands(context);
-    _setupLanguageFeatures(context);
-
     const backupPaths: string[] = [];
     let keybindingPath: string;
 
@@ -948,84 +949,101 @@ export function shouldDisplayLapsedUserMsg(): boolean {
   );
 }
 
-export function _setupCommands(context: vscode.ExtensionContext) {
+async function _setupCommands(context: vscode.ExtensionContext) {
+  const existingCommands = await vscode.commands.getCommands();
+
   ALL_COMMANDS.map((Cmd) => {
     const cmd = new Cmd();
+    if (!existingCommands.includes(cmd.key))
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          cmd.key,
+          sentryReportingCallback(async (args: any) => {
+            await cmd.run(args);
+          })
+        )
+      );
+  });
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        cmd.key,
-        sentryReportingCallback(async (args: any) => {
-          await cmd.run(args);
+        DENDRON_COMMANDS.RELOAD_INDEX.key,
+        sentryReportingCallback(async (silent?: boolean) => {
+          const out = await new ReloadIndexCommand().run({ silent });
+          if (!silent) {
+            vscode.window.showInformationMessage(`finish reload`);
+          }
+          return out;
         })
       )
     );
-  });
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.RELOAD_INDEX.key,
-      sentryReportingCallback(async (silent?: boolean) => {
-        const out = await new ReloadIndexCommand().run({ silent });
-        if (!silent) {
-          vscode.window.showInformationMessage(`finish reload`);
-        }
-        return out;
-      })
-    )
-  );
+  }
 
   // ---
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
-      sentryReportingCallback(async () => {
-        await new GoToSiblingCommand().execute({ direction: "next" });
-      })
-    )
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-      sentryReportingCallback(async () => {
-        await new GoToSiblingCommand().execute({ direction: "prev" });
-      })
-    )
-  );
+  if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
+        sentryReportingCallback(async () => {
+          await new GoToSiblingCommand().execute({ direction: "next" });
+        })
+      )
+    );
+  }
+  if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+        sentryReportingCallback(async () => {
+          await new GoToSiblingCommand().execute({ direction: "prev" });
+        })
+      )
+    );
+  }
 
   // RENAME is alias to MOVE
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.RENAME_NOTE.key,
-      sentryReportingCallback(async (args: any) => {
-        await new MoveNoteCommand().run({
-          allowMultiselect: false,
-          useSameVault: true,
-          ...args,
-        });
-      })
-    )
-  );
+  if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RENAME_NOTE.key,
+        sentryReportingCallback(async (args: any) => {
+          await new MoveNoteCommand().run({
+            allowMultiselect: false,
+            useSameVault: true,
+            ...args,
+          });
+        })
+      )
+    );
+  }
 }
 
-export function _setupLanguageFeatures(context: vscode.ExtensionContext) {
+function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   const mdLangSelector = { language: "markdown", scheme: "*" };
-  vscode.languages.registerReferenceProvider(
-    mdLangSelector,
-    new ReferenceProvider()
+  context.subscriptions.push(
+    vscode.languages.registerReferenceProvider(
+      mdLangSelector,
+      new ReferenceProvider()
+    )
   );
-  vscode.languages.registerDefinitionProvider(
-    mdLangSelector,
-    new DefinitionProvider()
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(
+      mdLangSelector,
+      new DefinitionProvider()
+    )
   );
-  vscode.languages.registerHoverProvider(
-    mdLangSelector,
-    new ReferenceHoverProvider()
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      mdLangSelector,
+      new ReferenceHoverProvider()
+    )
   );
-  vscode.languages.registerFoldingRangeProvider(
-    mdLangSelector,
-    new FrontmatterFoldingRangeProvider()
+  context.subscriptions.push(
+    vscode.languages.registerFoldingRangeProvider(
+      mdLangSelector,
+      new FrontmatterFoldingRangeProvider()
+    )
   );
   completionProvider.activate(context);
   codeActionProvider.activate(context);

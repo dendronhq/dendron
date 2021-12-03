@@ -5,7 +5,7 @@ import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WSUtils } from "../WSUtils";
-import { VSCodeUtils } from "../vsCodeutils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 

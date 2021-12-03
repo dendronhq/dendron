@@ -7,7 +7,7 @@ import path from "path";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { resolvePath } from "../utils";
-import { VSCodeUtils } from "../vsCodeutils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getURLAt } from "../utils/md";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";

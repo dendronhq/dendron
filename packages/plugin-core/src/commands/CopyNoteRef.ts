@@ -15,7 +15,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
-import { VSCodeUtils } from "../vsCodeutils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 

@@ -368,8 +368,6 @@ export class DendronExtension {
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
-    // this._setupCommands();
-    // this.setupLanguageFeatures(context);
     this.treeViews = {};
     this.webViews = {};
     this.setupViews(context);

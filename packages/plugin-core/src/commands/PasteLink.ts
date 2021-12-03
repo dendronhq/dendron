@@ -3,7 +3,7 @@ import ogs from "open-graph-scraper";
 import { Selection, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, getOpenGraphMetadata } from "../utils";
-import { VSCodeUtils } from "../vsCodeutils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {

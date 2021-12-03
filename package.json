@@ -41,7 +41,6 @@
     "lerna": "^3.19.0",
     "lint-staged": ">=10",
     "lodash": "^4.17.15",
-    "npm-cli-login": "^0.1.1",
     "prettier": "^2.0.4",
     "standard-version": "^8.0.0",
     "verdaccio": "^5.1.3",
@@ -51,8 +50,8 @@
   "scripts": {
     "setup": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build && yarn setup:cli",
     "setup:cli": "./bootstrap/scripts/chmod-cli.js",
-    "setup:npmlogin:local": "npm-cli-login -u dendron -p temporarydendronpassword -e test@dendron.com -r http://localhost:4873",
-    "setup:npmlogin:remote": "npm-cli-login -u $NPM_USERNAME -p $NPM_PWD -e $NPM_EMAIL -r https://registry.npmjs.org/",
+    "setup:npmlogin:local": "npm-cli-adduser -u dendron -p temporarydendronpassword -e test@dendron.com -r http://localhost:4873",
+    "setup:npmlogin:remote": "npm-cli-adduser -u $NPM_USERNAME -p $NPM_PWD -e $NPM_EMAIL -r https://registry.npmjs.org/",
     "build:prerelease:local": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=local ./bootstrap/scripts/buildPatch.sh",
     "build:prerelease:remote": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",
     "build:prerelease:remote:ci": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=remote BUILD_ENV=ci ./bootstrap/scripts/buildPatch.sh",
@@ -126,6 +125,7 @@
     "cross-env": "^7.0.3",
     "execa": "^5.0.0",
     "github-slugger": "^1.3.0",
+    "npm-cli-adduser": "^1.1.4",
     "typescript": "^4.1.5",
     "verdaccio-memory": "^10.0.1"
   }

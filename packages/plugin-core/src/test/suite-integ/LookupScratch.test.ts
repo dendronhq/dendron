@@ -11,8 +11,8 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
 } from "../../components/lookup/types";
-import { VSCodeUtils } from "../../utils";
 import { getDWorkspace } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 import {
   expect,
   getNoteFromFname,
@@ -43,7 +43,7 @@ suite("Scratch Notes", function () {
             vault,
             wsRoot: getDWorkspace().wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
           await new NoteLookupCommand().run({
@@ -114,7 +114,7 @@ suite("Scratch Notes", function () {
             vault,
             wsRoot: getDWorkspace().wsRoot,
           });
-          const editor = await VSCodeUtils.openNote(note!);
+          const editor = await WSUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
           await new NoteLookupCommand().run({

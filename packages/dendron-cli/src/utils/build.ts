@@ -215,7 +215,7 @@ export class BuildUtils {
       version = await this.getIncrementedVerForNightly();
       description =
         "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
-      icon = "assets/images/logo-bw.png";
+      icon = "media/logo-bw.png";
     }
 
     this.updatePkgMeta({

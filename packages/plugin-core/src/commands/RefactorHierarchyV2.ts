@@ -1,22 +1,44 @@
-import { DVault, NoteUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DNodeProps,
+  DNodePropsQuickInputV2,
+  DNodeUtils,
+  DVault,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
+import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3";
+import {
+  NoteLookupProvider,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3";
+import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
+import {
+  MultiSelectBtn,
+  Selection2ItemsBtn,
+} from "../components/lookup/buttons";
 
 const md = _md();
 
 type CommandOpts = {
+  scope?: NoteLookupProviderSuccessResp;
   match: string;
   replace: string;
+  noConfirm?: boolean;
 };
 
 type CommandOutput = any;
@@ -32,27 +54,140 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
-  async gatherInputs(): Promise<CommandOpts | undefined> {
-    let replace: string | undefined;
-    let value: string = "";
-    const editor = VSCodeUtils.getActiveTextEditor();
-    if (editor) {
-      value = NoteUtils.uri2Fname(editor.document.uri);
+
+  entireWorkspaceQuickPickItem = {
+    label: "Entire Workspace",
+    detail: "Scope refactor to entire workspace",
+    alwaysShow: true,
+  } as DNodePropsQuickInputV2;
+
+  async promptScope(): Promise<NoteLookupProviderSuccessResp | undefined> {
+    // see if we have a selection that contains wikilinks
+    const { text } = VSCodeUtils.getSelection();
+    const wikiLinks = text ? LinkUtils.extractWikiLinks(text) : [];
+    const shouldUseSelection = wikiLinks.length > 0;
+
+    // if we have a selection w/ wikilinks, selection2Items
+    if (!shouldUseSelection) {
+      return {
+        selectedItems: [this.entireWorkspaceQuickPickItem],
+        onAcceptHookResp: [],
+      };
     }
-    const match = await VSCodeUtils.showInputBox({
-      prompt: "Enter match text",
-      value,
+
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+      vaultSelectCanToggle: false,
+      extraButtons: [
+        Selection2ItemsBtn.create({ pressed: true, canToggle: false }),
+        MultiSelectBtn.create({ pressed: true, canToggle: false }),
+      ],
+    };
+    const controller = LookupControllerV3.create(lcOpts);
+
+    const provider = new NoteLookupProvider(this.key, {
+      allowNewNote: false,
+      noHidePickerOnAccept: false,
     });
-    if (match) {
-      replace = await VSCodeUtils.showInputBox({
-        prompt: "Enter replace prefix",
-        value: match,
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: this.key,
+        controller,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          resolve(data);
+        },
+        onHide: () => {
+          resolve(undefined);
+        },
       });
-    }
-    if (_.isUndefined(replace) || !match) {
+      controller.show({
+        title: "Decide the scope of refactor",
+        placeholder: "Query for scope.",
+        provider,
+        selectAll: true,
+      });
+    });
+  }
+
+  async promptMatchText() {
+    const match = await VSCodeUtils.showInputBox({
+      title: "Enter match text",
+      prompt:
+        "The matched portion of the file name will be the part that gets modified. The rest will remain unchanged. This support full range of regular expression. Leave blank to capture entire file name",
+    });
+
+    if (match === undefined) {
+      // immediately return if user cancels.
       return;
+    } else if (match.trim() === "") {
+      return "(.*)";
     }
+    return match;
+  }
+
+  async promptReplaceText() {
+    let done = false;
+    let replace: string | undefined;
+    do {
+      // eslint-disable-next-line no-await-in-loop
+      replace = await VSCodeUtils.showInputBox({
+        title: "Enter replace text",
+        prompt:
+          "This will replace the matched portion of the file name. If the matched text from previous step has named / unnamed captured groups, they are available here.",
+      });
+
+      if (replace === undefined) {
+        return;
+      } else if (replace.trim() === "") {
+        window.showWarningMessage("Please provide a replace text.");
+      } else {
+        done = true;
+      }
+    } while (!done);
+
+    return replace;
+  }
+
+  async gatherInputs(): Promise<CommandOpts | undefined> {
+    const scope = await this.promptScope();
+    if (_.isUndefined(scope)) {
+      window.showInformationMessage("No scope provided.");
+      return;
+    } else if (
+      scope.selectedItems &&
+      scope.selectedItems[0] === this.entireWorkspaceQuickPickItem
+    ) {
+      window.showInformationMessage("Refactor scoped to all notes.");
+    } else {
+      window.showInformationMessage(
+        `Refactor scoped to ${scope.selectedItems.length} selected note(s).`
+      );
+    }
+
+    const match = await this.promptMatchText();
+    if (_.isUndefined(match)) {
+      window.showErrorMessage("No match text provided.");
+      return;
+    } else {
+      window.showInformationMessage(`Matching: ${match}`);
+    }
+
+    const replace = await this.promptReplaceText();
+    if (_.isUndefined(replace) || replace.trim() === "") {
+      window.showErrorMessage("No replace text provided.");
+      return;
+    } else {
+      window.showInformationMessage(`Replacing with: ${replace}`);
+    }
+
     return {
+      scope,
       match,
       replace,
     };
@@ -114,45 +249,55 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     panel.webview.html = md.render(content);
   }
 
-  async execute(opts: CommandOpts): Promise<any> {
-    const ctx = "RefactorHierarchy:execute";
-    const { match, replace } = _.defaults(opts);
-    this.L.info({ ctx, opts, msg: "enter" });
-    const ext = getExtension();
-    const { engine } = getDWorkspace();
-    const notes = engine.notes;
-    const re = new RegExp(`(.*)(${match})(.*)`);
-    const candidates = _.filter(notes, (n) => {
-      if (n.stub) {
-        return false;
-      }
-      return !_.isNull(re.exec(n.fname));
-    });
-    const operations = candidates.map((note) => {
-      const matchObj = re.exec(note.fname);
-      // @ts-ignore
-      const [
-        src,
-        prefix,
-        // @ts-ignore
-        _replace,
-        suffix,
-        // @ts-ignore
-        ..._rest
-      ] = matchObj as RegExpExecArray;
-      const dst = [prefix, replace, suffix]
-        .filter((ent) => !_.isEmpty(ent))
-        .join("");
+  getCapturedNotes(opts: {
+    scope: NoteLookupProviderSuccessResp | undefined;
+    matchRE: RegExp;
+    engine: DEngineClient;
+  }) {
+    const { scope, matchRE, engine } = opts;
+    const { notes } = engine;
 
-      const wsRoot = getDWorkspace().wsRoot;
+    const scopedItems =
+      _.isUndefined(scope) ||
+      scope.selectedItems[0] === this.entireWorkspaceQuickPickItem
+        ? _.toArray(notes)
+        : scope.selectedItems.map(
+            (item) =>
+              _.omit(item, ["label", "detail", "alwasyShow"]) as DNodeProps
+          );
+
+    const capturedNotes: DNodeProps[] = scopedItems.filter((item) => {
+      const result = matchRE.exec(item.fname);
+      return result && !DNodeUtils.isRoot(item);
+    });
+
+    return capturedNotes;
+  }
+
+  getRenameOperations(opts: {
+    capturedNotes: DNodeProps[];
+    matchRE: RegExp;
+    replace: string;
+    wsRoot: string;
+  }) {
+    const { capturedNotes, matchRE, replace, wsRoot } = opts;
+    const operations = capturedNotes.map((note) => {
       const vault = note.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);
-      const oldUri = VSCodeUtils.joinPath(rootUri, src + ".md");
-      const newUri = VSCodeUtils.joinPath(rootUri, dst + ".md");
-      return { oldUri, newUri, vault: note.vault };
+      const source = note.fname;
+      const dest = note.fname.replace(matchRE, replace);
+      return {
+        oldUri: VSCodeUtils.joinPath(rootUri, source + ".md"),
+        newUri: VSCodeUtils.joinPath(rootUri, dest + ".md"),
+        vault,
+      };
     });
-    // NOTE: async version doesn't work, not sure why
+    return operations;
+  }
+
+  async hasExistingFiles(opts: { operations: RenameOperation[] }) {
+    const { operations } = opts;
     const filesThatExist: RenameOperation[] = _.filter(operations, (op) => {
       return fs.pathExistsSync(op.newUri.fsPath);
     });
@@ -161,18 +306,88 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       window.showErrorMessage(
         "refactored files would overwrite existing files"
       );
-      return;
+      return true;
     }
-    await this.showPreview(operations);
-    const options = ["proceed", "cancel"];
-    const shouldProceed = await VSCodeUtils.showQuickPick(options, {
-      placeHolder: "proceed",
+    return false;
+  }
+
+  async runOperations(opts: {
+    operations: RenameOperation[];
+    renameCmd: RenameNoteV2aCommand;
+  }) {
+    const { operations, renameCmd } = opts;
+    const ctx = "RefactorHierarchy:runOperations";
+    const out = await _.reduce<
+      typeof operations[0],
+      Promise<RenameNoteOutputV2a>
+    >(
+      operations,
+      async (resp, op) => {
+        const acc = await resp;
+        this.L.info({
+          ctx,
+          orig: op.oldUri.fsPath,
+          replace: op.newUri.fsPath,
+        });
+        const resp2 = await renameCmd.execute({
+          files: [op],
+          silent: true,
+          closeCurrentFile: false,
+          openNewFile: false,
+          noModifyWatcher: true,
+        });
+        acc.changed = resp2.changed.concat(acc.changed);
+        return acc;
+      },
+      Promise.resolve({
+        changed: [],
+      })
+    );
+    return out;
+  }
+
+  async promptConfirmation(noConfirm?: boolean) {
+    if (noConfirm) return true;
+    const options = ["Proceed", "Cancel"];
+    const resp = await VSCodeUtils.showQuickPick(options, {
+      placeHolder: "Proceed",
       ignoreFocusOut: true,
     });
-    if (shouldProceed !== "proceed") {
-      window.showInformationMessage("cancelled");
+    return resp === "Proceed";
+  }
+
+  async execute(opts: CommandOpts): Promise<any> {
+    const ctx = "RefactorHierarchy:execute";
+    const { scope, match, replace, noConfirm } = opts;
+    this.L.info({ ctx, opts, msg: "enter" });
+    const ext = getExtension();
+    const { engine } = getDWorkspace();
+    const matchRE = new RegExp(match);
+    const capturedNotes = this.getCapturedNotes({
+      scope,
+      matchRE,
+      engine,
+    });
+
+    const operations = this.getRenameOperations({
+      capturedNotes,
+      matchRE,
+      replace,
+      wsRoot: engine.wsRoot,
+    });
+
+    if (await this.hasExistingFiles({ operations })) {
       return;
     }
+
+    await this.showPreview(operations);
+
+    const shouldProceed = await this.promptConfirmation(noConfirm);
+    if (!shouldProceed) {
+      window.showInformationMessage("Cancelled");
+      return;
+    }
+
     try {
       if (ext.fileWatcher) {
         ext.fileWatcher.pause = true;
@@ -185,32 +400,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
           cancellable: false,
         },
         async () => {
-          const out = await _.reduce<
-            typeof operations[0],
-            Promise<RenameNoteOutputV2a>
-          >(
-            operations,
-            async (resp, op) => {
-              const acc = await resp;
-              this.L.info({
-                ctx,
-                orig: op.oldUri.fsPath,
-                replace: op.newUri.fsPath,
-              });
-              const resp2 = await renameCmd.execute({
-                files: [op],
-                silent: true,
-                closeCurrentFile: false,
-                openNewFile: false,
-                noModifyWatcher: true,
-              });
-              acc.changed = resp2.changed.concat(acc.changed);
-              return acc;
-            },
-            Promise.resolve({
-              changed: [],
-            })
-          );
+          const out = await this.runOperations({ operations, renameCmd });
           return out;
         }
       );
@@ -229,7 +419,11 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   async showResponse(res: CommandOutput) {
-    window.showInformationMessage("done refactoring");
+    if (_.isUndefined(res)) {
+      window.showInformationMessage("No note refactored.");
+      return;
+    }
+    window.showInformationMessage("Done refactoring.");
     const { changed } = res;
     if (changed.length > 0) {
       window.showInformationMessage(`Dendron updated ${changed.length} files`);

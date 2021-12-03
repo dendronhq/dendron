@@ -15,7 +15,7 @@ import {
 } from "../components/lookup/LookupProviderV3";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -49,7 +49,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     const lc = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection: true,
-      extraButtons: [MultiSelectBtn.create(copts.multiSelect)],
+      extraButtons: [MultiSelectBtn.create({ pressed: copts.multiSelect })],
     });
     const provider = new NoteLookupProvider(this.key, {
       allowNewNote: false,

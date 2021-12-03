@@ -7,7 +7,9 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { PasteFileCommand } from "../../commands/PasteFile";
-import { clipboard, VSCodeUtils } from "../../utils";
+import { clipboard } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -41,7 +43,7 @@ suite("PasteFile", function () {
         fs.writeFileSync(fakeAsset, "data");
         clipboard.writeText(fakeAsset);
         const note = engine.notes["foo"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 8, 12);
 
         // run cmd
@@ -76,7 +78,7 @@ suite("PasteFile", function () {
         fs.writeFileSync(fakeAsset, "data");
         clipboard.writeText(fakeAsset);
         const note = engine.notes["foo"];
-        const editor = await VSCodeUtils.openNote(note);
+        const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 8, 12);
 
         // run cmd

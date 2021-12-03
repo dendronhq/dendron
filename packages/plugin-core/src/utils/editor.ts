@@ -25,8 +25,9 @@ import vscode, {
   TextEditor,
   TextEditorEdit,
 } from "vscode";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
+import { WSUtils } from "../WSUtils";
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -196,7 +197,7 @@ export async function getSelectionAnchors(opts: {
 export function isBrokenWikilink(): boolean {
   const { editor, selection } = VSCodeUtils.getSelection();
   if (!editor || !selection) return false;
-  const note = VSCodeUtils.getNoteFromDocument(editor.document);
+  const note = WSUtils.getNoteFromDocument(editor.document);
   const { engine } = getDWorkspace();
   if (!note) return false;
   const line = editor.document.lineAt(selection.start.line).text;

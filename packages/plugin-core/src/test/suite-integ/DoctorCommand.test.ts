@@ -10,7 +10,8 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
@@ -119,7 +120,7 @@ suite("DoctorCommandTest", function () {
         });
       },
       onInit: async ({ wsRoot, engine, vaults }) => {
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
 
         const cmd = new DoctorCommand();
         sinon.stub(cmd, "gatherInputs").returns(
@@ -165,7 +166,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault,
           wsRoot,
         });
-        await VSCodeUtils.openNote(file);
+        await WSUtils.openNote(file);
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -211,7 +212,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault,
           wsRoot,
         });
-        await VSCodeUtils.openNote(file);
+        await WSUtils.openNote(file);
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -258,7 +259,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault,
           wsRoot,
         });
-        await VSCodeUtils.openNote(file);
+        await WSUtils.openNote(file);
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -309,7 +310,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault: vault1,
           wsRoot,
         });
-        await VSCodeUtils.openNote(file);
+        await WSUtils.openNote(file);
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -524,7 +525,7 @@ suite("REGENERATE_NOTE_ID", function () {
           wsRoot,
         });
         const oldId = oldNote.id;
-        await VSCodeUtils.openNote(oldNote);
+        await WSUtils.openNote(oldNote);
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({

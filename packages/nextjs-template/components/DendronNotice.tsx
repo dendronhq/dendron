@@ -17,9 +17,12 @@ export const DendronNotice = ({
     <>
       {val && (
         <Alert
-          style={{ textAlign: "center" }}
           type="info"
           banner
+          style={{
+            paddingLeft: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+            paddingRight: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2)`,
+          }}
           message={children}
           closable
           afterClose={() => toggle(false)}

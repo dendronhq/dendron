@@ -34,14 +34,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version:  14.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
 
       - name: Set Environment Variables
         run: |
-          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
@@ -53,18 +53,16 @@ jobs:
           NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
           NPM_PWD: ${{ secrets.NPM_PWD }}
         run: |
+          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           yarn build:minor:remote:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
         with:
           name: vsix
-          path: ./packages/plugin-core/*.vsix
-
-      - name: Prepare Package Manifest
-        run: |
-          DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
-          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget dendron
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error
 
       - name: Push Branch Commits to Github
         run: git push -u origin HEAD
@@ -73,16 +71,16 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:vscode
+        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
 
       - name: Publish to Open VSX Marketplace
         env:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:ovsx
+        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
 
       - name: Tag Release on Github
-        run: | 
+        run: |
           git tag $DENDRON_RELEASE_VERSION
           git push origin $DENDRON_RELEASE_VERSION
 

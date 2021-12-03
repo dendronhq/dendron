@@ -16,7 +16,7 @@ import {
 } from "@dendronhq/common-server";
 import { toPlainObject } from "@dendronhq/common-test-utils";
 import {
-  getPortFilePath,
+  EngineUtils,
   getWSMetaFilePath,
   MetadataService,
   openWSMetaFile,
@@ -40,11 +40,16 @@ import {
 } from "../../constants";
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
-import { KeybindingUtils, VSCodeUtils } from "../../utils";
+import { KeybindingUtils } from "../../KeybindingUtils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
-import { shouldDisplayLapsedUserMsg, _activate } from "../../_extension";
+import {
+  shouldDisplayInactiveUserSurvey,
+  shouldDisplayLapsedUserMsg,
+  _activate,
+} from "../../_extension";
 import {
   expect,
   genDefaultSettings,
@@ -100,6 +105,45 @@ function lapsedMessageTest({
   svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
   svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
   expect(shouldDisplayLapsedUserMsg()).toEqual(shouldDisplayMessage);
+  done();
+}
+
+async function inactiveMessageTest(opts: {
+  done: Mocha.Done;
+  firstInstall?: number;
+  firstWsInitialize?: number;
+  inactiveUserMsgSendTime?: number;
+  workspaceActivated?: boolean;
+  firstLookupTime?: number;
+  lastLookupTime?: number;
+  hasBeenPrompted: boolean;
+  shouldDisplayMessage: boolean;
+}) {
+  const {
+    done,
+    firstInstall,
+    firstWsInitialize,
+    inactiveUserMsgSendTime,
+    shouldDisplayMessage,
+    firstLookupTime,
+    lastLookupTime,
+    hasBeenPrompted,
+    workspaceActivated,
+  } = opts;
+  const svc = MetadataService.instance();
+  sinon
+    .stub(StateService.instance(), "getGlobalState")
+    .resolves(hasBeenPrompted ? "submitted" : undefined);
+
+  svc.setMeta("firstInstall", firstInstall);
+  svc.setMeta("firstWsInitialize", firstWsInitialize);
+  svc.setMeta("inactiveUserMsgSendTime", inactiveUserMsgSendTime);
+  svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
+  svc.setMeta("firstLookupTime", firstLookupTime);
+  svc.setMeta("lastLookupTime", lastLookupTime);
+  const expected = await shouldDisplayInactiveUserSurvey();
+  expect(expected).toEqual(shouldDisplayMessage);
+  sinon.restore();
   done();
 }
 
@@ -344,7 +388,7 @@ suite("Extension", function () {
           ctx,
           onInit: async ({ wsRoot, vaults, engine }) => {
             // check for meta
-            const port = getPortFilePath({ wsRoot });
+            const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
             const fpath = getWSMetaFilePath({ wsRoot });
             const meta = openWSMetaFile({ fpath });
             expect(
@@ -436,6 +480,78 @@ suite("Extension", function () {
             firstInstall: 1,
             firstWsInitialize: 1,
             shouldDisplayMessage: false,
+          });
+        });
+      });
+
+      describe("shouldDisplayInactiveUserSurvey", () => {
+        const ONE_WEEK = 604800;
+        const NOW = Time.now().toSeconds();
+        const ONE_WEEK_BEFORE = NOW - ONE_WEEK;
+        const FOUR_WEEKS_BEFORE = NOW - 4 * ONE_WEEK;
+        const FIVE_WEEKS_BEFORE = NOW - 5 * ONE_WEEK;
+        const EIGHT_WEEKS_BEFORE = NOW - 8 * ONE_WEEK;
+        const NINE_WEEKS_BEFORE = NOW - 9 * ONE_WEEK;
+        describe("GIVEN not prompted yet", () => {
+          describe("WHEN is first week active user AND inactive for less than a month", () => {
+            test("THEN should not display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: ONE_WEEK_BEFORE,
+                firstWsInitialize: ONE_WEEK_BEFORE,
+                firstLookupTime: ONE_WEEK_BEFORE,
+                lastLookupTime: ONE_WEEK_BEFORE,
+                workspaceActivated: true,
+                hasBeenPrompted: false,
+                shouldDisplayMessage: false,
+              });
+            });
+          });
+          describe("WHEN is first week active user AND inactive for at least a month", () => {
+            test("THEN should display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: FIVE_WEEKS_BEFORE,
+                firstWsInitialize: FIVE_WEEKS_BEFORE,
+                firstLookupTime: FIVE_WEEKS_BEFORE,
+                lastLookupTime: FOUR_WEEKS_BEFORE,
+                workspaceActivated: true,
+                hasBeenPrompted: false,
+                shouldDisplayMessage: true,
+              });
+            });
+          });
+        });
+        describe("GIVEN already prompted", () => {
+          describe("WHEN it has been another month since first prompt", () => {
+            test("THEN should display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: NINE_WEEKS_BEFORE,
+                firstWsInitialize: NINE_WEEKS_BEFORE,
+                firstLookupTime: NINE_WEEKS_BEFORE,
+                lastLookupTime: EIGHT_WEEKS_BEFORE,
+                inactiveUserMsgSendTime: FOUR_WEEKS_BEFORE,
+                workspaceActivated: true,
+                hasBeenPrompted: true,
+                shouldDisplayMessage: true,
+              });
+            });
+          });
+          describe("WHEN it hasn't been another month since first prompt", () => {
+            test("THEN should not display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: NINE_WEEKS_BEFORE,
+                firstWsInitialize: NINE_WEEKS_BEFORE,
+                firstLookupTime: NINE_WEEKS_BEFORE,
+                lastLookupTime: EIGHT_WEEKS_BEFORE,
+                inactiveUserMsgSendTime: ONE_WEEK_BEFORE,
+                workspaceActivated: true,
+                hasBeenPrompted: true,
+                shouldDisplayMessage: false,
+              });
+            });
           });
         });
       });

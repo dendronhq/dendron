@@ -7,7 +7,8 @@ import {
   CommandOutput,
   SchemaLookupCommand,
 } from "../../commands/SchemaLookupCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -84,7 +85,7 @@ suite("SchemaLookupCommand", function () {
         onInit: async ({ engine }) => {
           const cmd = new SchemaLookupCommand();
           const fooNote = engine.notes["foo"];
-          await VSCodeUtils.openNote(fooNote);
+          await WSUtils.openNote(fooNote);
           await cmd.run({ noConfirm: true, initialValue: "baz" });
           const editor = VSCodeUtils.getActiveTextEditor();
           expect(editor).toBeTruthy();

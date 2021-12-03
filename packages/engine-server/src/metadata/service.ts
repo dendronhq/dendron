@@ -17,9 +17,21 @@ type Metadata = Partial<{
    */
   lapsedUserMsgSendTime: number;
   /**
+   * When the last time the inactive user message was displayed to the user
+   */
+  inactiveUserMsgSendTime: number;
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
+  /**
+   * When the user first used lookup
+   */
+  firstLookupTime: number;
+  /**
+   * When the user last used lookup
+   */
+  lastLookupTime: number;
 }>;
 
 let _singleton: MetadataService | undefined;
@@ -68,5 +80,17 @@ export class MetadataService {
 
   setDendronWorkspaceActivated() {
     return this.setMeta("dendronWorkspaceActivated", Time.now().toSeconds());
+  }
+
+  setFirstLookupTime() {
+    return this.setMeta("firstLookupTime", Time.now().toSeconds());
+  }
+
+  setLastLookupTime() {
+    return this.setMeta("lastLookupTime", Time.now().toSeconds());
+  }
+
+  setInactiveUserMsgSendTime() {
+    return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
   }
 }

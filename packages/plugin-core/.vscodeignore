@@ -15,3 +15,6 @@ fixtures/**
 dist/extension.jsbak
 tmp
 CHANGELOG.md
+*.log
+*.old
+assets

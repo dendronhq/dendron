@@ -1,14 +1,14 @@
 import { describe } from "mocha";
 import sinon from "sinon";
-import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { TutorialInitializer } from "../../workspace/tutorialInitializer";
-import { getDWorkspace } from "../../workspace";
+import * as vscode from "vscode";
 import { StateService } from "../../services/stateService";
 import { SurveyUtils } from "../../survey";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { getDWorkspace } from "../../workspace";
+import { TutorialInitializer } from "../../workspace/tutorialInitializer";
 import { showLapsedUserMessage } from "../../_extension";
-import { WSUtils } from "../../utils";
-import * as vscode from "vscode";
+import { expect } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("SurveyUtils", function () {
   const ctx = setupBeforeAfter(this);
@@ -17,17 +17,19 @@ suite("SurveyUtils", function () {
       test("THEN: showInitialSurvey is called", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
-          preSetupHook: async() => {},
+          preSetupHook: async () => {},
           onInit: async () => {
-            sinon.stub(StateService.instance(), "getGlobalState").resolves(undefined);
-            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey")
+            sinon
+              .stub(StateService.instance(), "getGlobalState")
+              .resolves(undefined);
+            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey");
             const tutorialInitializer = new TutorialInitializer();
             const ws = getDWorkspace();
-            await tutorialInitializer.onWorkspaceOpen({ws});
+            await tutorialInitializer.onWorkspaceOpen({ ws });
             expect(surveySpy.calledOnce).toBeTruthy();
             done();
-          }
-        })
+          },
+        });
       });
     });
 
@@ -35,17 +37,19 @@ suite("SurveyUtils", function () {
       test("THEN: showInitialSurvey is not called", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
-          preSetupHook: async() => {},
+          preSetupHook: async () => {},
           onInit: async () => {
-            sinon.stub(StateService.instance(), "getGlobalState").resolves("submitted");
-            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey")
+            sinon
+              .stub(StateService.instance(), "getGlobalState")
+              .resolves("submitted");
+            const surveySpy = sinon.spy(SurveyUtils, "showInitialSurvey");
             const tutorialInitializer = new TutorialInitializer();
             const ws = getDWorkspace();
-            await tutorialInitializer.onWorkspaceOpen({ws});
+            await tutorialInitializer.onWorkspaceOpen({ ws });
             expect(surveySpy.calledOnce).toBeFalsy();
             done();
-          }
-        })
+          },
+        });
       });
     });
   });
@@ -58,10 +62,17 @@ suite("SurveyUtils", function () {
             ctx,
             preSetupHook: async () => {},
             onInit: async () => {
-              sinon.stub(StateService.instance(), "getGlobalState").resolves(undefined);
-              const lapsedSurveySpy = sinon.spy(SurveyUtils, "showLapsedUserSurvey");
-              sinon.stub(vscode.window, "showInformationMessage").resolves({ title: "foo"});
-              await showLapsedUserMessage(WSUtils.getAssetUri(ctx));
+              sinon
+                .stub(StateService.instance(), "getGlobalState")
+                .resolves(undefined);
+              const lapsedSurveySpy = sinon.spy(
+                SurveyUtils,
+                "showLapsedUserSurvey"
+              );
+              sinon
+                .stub(vscode.window, "showInformationMessage")
+                .resolves({ title: "foo" });
+              await showLapsedUserMessage(VSCodeUtils.getAssetUri(ctx));
               await new Promise((resolve: any) => {
                 setTimeout(() => {
                   resolve();
@@ -69,8 +80,8 @@ suite("SurveyUtils", function () {
               });
               expect(lapsedSurveySpy.calledOnce).toBeTruthy();
               done();
-            }
-          })
+            },
+          });
         });
       });
 
@@ -80,10 +91,17 @@ suite("SurveyUtils", function () {
             ctx,
             preSetupHook: async () => {},
             onInit: async () => {
-              sinon.stub(StateService.instance(), "getGlobalState").resolves("submitted");
-              const lapsedSurveySpy = sinon.spy(SurveyUtils, "showLapsedUserSurvey");
-              sinon.stub(vscode.window, "showInformationMessage").resolves({ title: "foo"});
-              await showLapsedUserMessage(WSUtils.getAssetUri(ctx));
+              sinon
+                .stub(StateService.instance(), "getGlobalState")
+                .resolves("submitted");
+              const lapsedSurveySpy = sinon.spy(
+                SurveyUtils,
+                "showLapsedUserSurvey"
+              );
+              sinon
+                .stub(vscode.window, "showInformationMessage")
+                .resolves({ title: "foo" });
+              await showLapsedUserMessage(VSCodeUtils.getAssetUri(ctx));
               await new Promise((resolve: any) => {
                 setTimeout(() => {
                   resolve();
@@ -91,10 +109,10 @@ suite("SurveyUtils", function () {
               });
               expect(lapsedSurveySpy.calledOnce).toBeFalsy();
               done();
-            }
-          })
+            },
+          });
         });
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

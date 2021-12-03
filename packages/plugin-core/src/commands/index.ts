@@ -29,6 +29,7 @@ import { InsertNoteLinkCommand } from "./InsertNoteLink";
 import { InsertNoteIndexCommand } from "./InsertNoteIndexCommand";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
+import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
 import { SchemaLookupCommand } from "./SchemaLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
@@ -66,6 +67,7 @@ import { SeedBrowseCommand } from "./SeedBrowseCommand";
 import { CreateTaskCommand } from "./CreateTask";
 import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { VaultConvertCommand } from "./VaultConvert";
+import { ExportPodV2Command } from "./pods/ExportPodV2Command";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -90,6 +92,7 @@ const ALL_COMMANDS = [
   DoctorCommand,
   DumpStateCommand,
   ExportPodCommand,
+  ExportPodV2Command,
   GoDownCommand,
   GoUpCommand,
   GotoNoteCommand,
@@ -98,6 +101,7 @@ const ALL_COMMANDS = [
   InsertNoteLinkCommand,
   InsertNoteIndexCommand,
   NoteLookupCommand,
+  NoteLookupAutoCompleteCommand,
   SchemaLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,

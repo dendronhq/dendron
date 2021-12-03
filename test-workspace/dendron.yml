@@ -64,6 +64,8 @@ workspace:
             visibility: private
         -
             fsPath: vault
+        -
+            fsPath: assets
     journal:
         dailyDomain: daily
         name: journal

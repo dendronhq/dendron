@@ -3,7 +3,7 @@ import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { CONSTANTS, WorkspaceType } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";

@@ -7,13 +7,11 @@ import {
   CodeActionContext,
   CodeActionKind,
   CodeActionProvider,
-  Diagnostic,
   ExtensionContext,
   languages,
   Range,
   Selection,
   TextDocument,
-  Uri,
 } from "vscode";
 import { CancellationToken } from "vscode-jsonrpc";
 import { CopyNoteRefCommand } from "../commands/CopyNoteRef";
@@ -23,23 +21,10 @@ import { NoteLookupCommand } from "../commands/NoteLookupCommand";
 import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
 import { LookupSelectionTypeEnum } from "../components/lookup/types";
-import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
-
-const FRONTMATTER_WARNING = languages.createDiagnosticCollection();
-
-/** Delay displaying any warnings while the user is still typing.
- *
- * The user is considered to have stopped typing if they didn't type anything after 500ms.
- */
-export const delayedFrontmatterWarning = _.debounce(
-  (uri: Uri, diagnostics: Diagnostic[]) => {
-    FRONTMATTER_WARNING.set(uri, diagnostics);
-  },
-  500
-);
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(

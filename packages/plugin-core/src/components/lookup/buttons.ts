@@ -16,7 +16,9 @@ import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { EngineAPIService } from "../../services/EngineAPIService";
 import { NoteSyncService } from "../../services/NoteSyncService";
-import { clipboard, DendronClientUtilsV2, VSCodeUtils } from "../../utils";
+import { clipboard } from "../../utils";
+import { DendronClientUtilsV2 } from "../../clientUtils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import {
   DendronQuickPickerV2,
@@ -29,6 +31,7 @@ import {
   VaultSelectionMode,
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
+import { WSUtils } from "../../WSUtils";
 
 export type ButtonType =
   | LookupEffectType
@@ -152,7 +155,7 @@ const selectionToNoteProps = async (opts: {
           // sometimes can't update the current note with the link fast enough.
           // So we manually force the update here instead.
 
-          const currentNote = VSCodeUtils.getNoteFromDocument(editor.document);
+          const currentNote = WSUtils.getNoteFromDocument(editor.document);
           if (currentNote) {
             await NoteSyncService.instance().updateNoteContents({
               oldNote: currentNote,
@@ -321,7 +324,11 @@ export class SelectionExtractBtn extends DendronBtn {
 }
 
 export class Selection2ItemsBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new Selection2ItemsBtn({
       title: "Selection to Items",
       description:
@@ -330,6 +337,7 @@ export class Selection2ItemsBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "selection2Items",
       pressed,
+      canToggle,
     });
   }
 
@@ -381,9 +389,13 @@ export class Selection2ItemsBtn extends DendronBtn {
     // get selection
     const { text } = VSCodeUtils.getSelection();
     const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+
+    // dedupe wikilinks by value
+    const uniqueWikiLinks = _.uniqBy(wikiLinks, "value");
+
     // make a list of picker items from wikilinks
     const notesFromWikiLinks = this.getNotesFromWikiLinks({
-      wikiLinks,
+      wikiLinks: uniqueWikiLinks,
       engine,
     });
     const pickerItemsFromSelection = notesFromWikiLinks.map(
@@ -507,7 +519,7 @@ export class TaskBtn extends DendronBtn {
     // If the lookup value ends up being identical to the current note, this will be confusing for the user because
     // they won't be able to create a new note. This can happen with the default settings of Task notes.
     // In that case, we add a trailing dot to suggest that they need to type something more.
-    const activeName = VSCodeUtils.getActiveNote()?.fname;
+    const activeName = WSUtils.getActiveNote()?.fname;
     if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {
@@ -585,7 +597,11 @@ export class DirectChildFilterBtn extends DendronBtn {
 }
 
 export class MultiSelectBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new MultiSelectBtn({
       title: "Multi-Select",
       description: "Select multiple notes at once",
@@ -593,6 +609,7 @@ export class MultiSelectBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "multiSelect" as LookupEffectType,
       pressed,
+      canToggle,
     });
   }
 
@@ -696,12 +713,12 @@ export function createAllButtons(
   typesToTurnOn: ButtonType[] = []
 ): DendronBtn[] {
   const buttons = [
-    MultiSelectBtn.create(),
+    MultiSelectBtn.create({}),
     CopyNoteLinkBtn.create(),
     DirectChildFilterBtn.create(),
     SelectionExtractBtn.create(),
     Selection2LinkBtn.create(),
-    Selection2ItemsBtn.create(),
+    Selection2ItemsBtn.create({}),
     JournalBtn.create(),
     ScratchBtn.create(),
     HorizontalSplitBtn.create(),

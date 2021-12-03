@@ -11,16 +11,16 @@ import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
+import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
-import { VSCodeUtils, WSUtils } from "../utils";
+import { SurveyUtils } from "../survey";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getExtension } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { DendronExtension, getExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
-import { SurveyUtils } from "../survey";
-import { ShowPreviewCommand } from "../commands/ShowPreview";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -41,7 +41,7 @@ export class TutorialInitializer
       WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
     );
 
-    const assetUri = WSUtils.getAssetUri(getExtension().context);
+    const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
     const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });

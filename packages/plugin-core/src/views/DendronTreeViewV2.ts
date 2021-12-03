@@ -14,10 +14,11 @@ import path from "path";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "../utils/analytics";
 import { getEngine, getExtension } from "../workspace";
 import { WebViewUtils } from "./utils";
+import { WSUtils } from "../WSUtils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
@@ -45,7 +46,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       return;
     }
     if (basename.endsWith(".md")) {
-      const note = VSCodeUtils.getNoteFromDocument(editor.document);
+      const note = WSUtils.getNoteFromDocument(editor.document);
       if (note) {
         this.refresh(note);
       }
@@ -95,7 +96,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
               });
               return;
             }
-            const note = VSCodeUtils.getNoteFromDocument(document);
+            const note = WSUtils.getNoteFromDocument(document);
             if (note) {
               Logger.info({
                 ctx: "onDidReceiveMessage",

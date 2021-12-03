@@ -4,7 +4,7 @@ import _ from "lodash";
 // @ts-ignore
 import visit from "unist-util-visit";
 import vscode, { FoldingRangeKind } from "vscode";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 export default class FrontmatterFoldingRangeProvider
   implements vscode.FoldingRangeProvider

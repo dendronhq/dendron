@@ -29,9 +29,10 @@ import {
 } from "vscode";
 import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
-import { VSCodeUtils } from "../utils";
 import { getConfigValue, getDWorkspace } from "../workspace";
-import { delayedFrontmatterWarning } from "./codeActionProvider";
+import { delayedFrontmatterWarning } from "../utils/frontmatter";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtils } from "../WSUtils";
 
 /** Wait this long in miliseconds before trying to update decorations when a command forces a decoration update. */
 const DECORATION_UPDATE_DELAY = 100;
@@ -130,7 +131,7 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     // Only show decorations & warnings for notes
     let note: NoteProps | undefined;
     try {
-      note = VSCodeUtils.getNoteFromDocument(editor.document);
+      note = WSUtils.getNoteFromDocument(editor.document);
       if (_.isUndefined(note)) return {};
     } catch (error) {
       Logger.info({

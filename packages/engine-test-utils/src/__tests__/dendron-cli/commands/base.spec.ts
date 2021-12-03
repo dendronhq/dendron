@@ -1,8 +1,12 @@
-import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
+import {
+  SegmentClient,
+  SegmentUtils,
+  TelemetryStatus,
+} from "@dendronhq/common-server";
 import { CLICommand, CLIAnalyticsUtils } from "@dendronhq/dendron-cli";
 import { TestEngineUtils } from "../../..";
 import yargs from "yargs";
-import Sinon from "sinon";
+import sinon from "sinon";
 
 class DummyCLICommand extends CLICommand<any> {
   constructor() {
@@ -34,17 +38,17 @@ describe("GIVEN any command, no telemetry set before", () => {
   });
 
   afterEach(() => {
-    Sinon.restore();
+    sinon.restore();
   });
 
   test("THEN setupSegmentClient is called when executed", async () => {
-    const setupSpy = Sinon.spy(dummy, "setUpSegmentClient");
+    const setupSpy = sinon.spy(dummy, "setUpSegmentClient");
     await dummy.eval({});
     expect(setupSpy.called).toBeTruthy();
   });
 
   test("AND notice is shown", async () => {
-    const noticeSpy = Sinon.spy(CLIAnalyticsUtils, "showTelemetryMessage");
+    const noticeSpy = sinon.spy(CLIAnalyticsUtils, "showTelemetryMessage");
     await dummy.eval({});
     expect(noticeSpy.called).toBeTruthy();
   });
@@ -54,5 +58,57 @@ describe("GIVEN any command, no telemetry set before", () => {
     expect(SegmentClient.getStatus()).toEqual(
       TelemetryStatus.ENABLED_BY_CLI_DEFAULT
     );
+  });
+});
+
+describe("CLIAnalyticsUtils", () => {
+  describe("GIVEN GITHUB_ACTIONS === true", () => {
+    beforeEach(() => {
+      process.env.GITHUB_ACTIONS = "true";
+    });
+    afterEach(() => {
+      delete process.env.GITHUB_ACTIONS;
+    });
+    test("THEN SegmentUtils.track is not called", (done) => {
+      const trackSpy = sinon.spy(SegmentUtils, "track");
+      CLIAnalyticsUtils.track("dummy", { dummy: true });
+
+      expect(trackSpy.called).toBeFalsy();
+      trackSpy.restore();
+      done();
+    });
+
+    test("THEN SegmentUtils.trackSync is not called", async (done) => {
+      const trackSyncSpy = sinon.spy(SegmentUtils, "trackSync");
+      await CLIAnalyticsUtils.trackSync("dummy", { dummy: true });
+
+      expect(trackSyncSpy.called).toBeFalsy();
+      trackSyncSpy.restore();
+      done();
+    });
+  });
+
+  describe("GIVEN GITHUB_ACTIONS is not set", () => {
+    beforeEach(() => {
+      delete process.env.GITHUB_ACTIONS;
+    });
+
+    test("THEN SegmentUtils.track is called", (done) => {
+      const fakeTrack = sinon.stub(SegmentUtils, "track").callsFake(() => {});
+      CLIAnalyticsUtils.track("dummy", { dummy: true });
+      expect(fakeTrack.called).toBeTruthy();
+      fakeTrack.restore();
+      done();
+    });
+
+    test("THEN SegmentUtils.trackSync is called", async (done) => {
+      const fakeTrackSync = sinon
+        .stub(SegmentUtils, "trackSync")
+        .callsFake(async () => {});
+      await CLIAnalyticsUtils.trackSync("dummy", { dummy: true });
+      expect(fakeTrackSync.called).toBeTruthy();
+      fakeTrackSync.restore();
+      done();
+    });
   });
 });

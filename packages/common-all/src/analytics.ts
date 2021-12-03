@@ -18,6 +18,7 @@ export enum VSCodeEvents {
   LapsedUserMessageAccepted = "Lapsed_User_Msg_Accepted",
   LapsedUserMessageRejected = "Show_Lapsed_User_Rejected",
   UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked",
+  ShowInactiveUserMessage = "Show_Inactive_User_Message",
 }
 
 export enum CLIEvents {
@@ -42,8 +43,8 @@ export enum ExtensionEvents {
 }
 
 export enum LookupEvents {
-  LookupModifierSetByController = "Lookup_Modifier_Set_By_Controller",
   LookupModifierToggledByUser = "Lookup_Modifier_Toggled_By_User",
+  LookupModifiersSetOnAccept = "Lookup_Modifiers_Set_On_Accept",
 }
 
 export enum SurveyEvents {
@@ -71,6 +72,17 @@ export enum SurveyEvents {
   LapsedUserAdditionalCommentRejected = "Lapsed_User_Additional_Comment_Rejected",
   LapsedUserDiscordPlugAnswered = "Lapsed_User_Discord_Plug_Answered",
   LapsedUserDiscordPlugRejected = "Lapsed_User_Discord_Plug_Rejected",
+  InactiveUserReasonAnswered = "Inactive_User_Reason_Answered",
+  InactiveUserReasonRejected = "Inactive_User_Reason_Rejected",
+  InactiveUserGettingStartedHelpAnswered = "Inactive_User_Getting_Started_Help_Answered",
+  InactiveUserGettingStartedHelpRejected = "Inactive_User_Getting_Started_Help_Rejected",
+  InactiveUserAdditionalCommentAnswered = "Inactive_User_Additional_Comment_Answered",
+  InactiveUserAdditionalCommentRejected = "Inactive_User_Additional_Comment_Rejected",
+  InactiveUserDiscordPlugAnswered = "Inactive_User_Discord_Plug_Answered",
+  InactiveUserDiscordPlugRejected = "Inactive_User_Discord_Plug_Rejected",
+  InactiveUserSurveyPrompted = "Inactive_User_Survey_Prompted",
+  InactiveUserSurveyAccepted = "Inactive_User_Survey_Accepted",
+  InactiveUserSurveyRejected = "Inactive_User_Survey_Rejected",
 }
 
 export enum ConfigEvents {

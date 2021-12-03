@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-plugin-views",
-  "version": "0.70.0",
+  "version": "0.71.3",
   "private": true,
   "workspaces": {
     "nohoist": [
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@babel/core": "7.12.3",
-    "@dendronhq/common-all": "^0.70.0",
-    "@dendronhq/common-frontend": "^0.70.0",
-    "@dendronhq/common-server": "^0.70.0",
+    "@dendronhq/common-all": "^0.71.3",
+    "@dendronhq/common-frontend": "^0.71.3",
+    "@dendronhq/common-server": "^0.71.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -97,7 +97,7 @@
     "start": "yarn build:index && node scripts/start.js",
     "setup": "yarn build:index && yarn build:styles",
     "build": "yarn build:dev && yarn build:styles",
-    "build:dev": "yarn setup && env BUILD_DEV=1 node scripts/build.js",
+    "build:dev": "yarn setup && npx cross-env BUILD_DEV=1 node scripts/build.js",
     "build:prod": "yarn setup && node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
     "build:index": "node scripts/buildIndex.js",
@@ -183,6 +183,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.176",
-    "@types/mermaid": "^8.2.7"
+    "@types/mermaid": "^8.2.7",
+    "cross-env": "^7.0.3"
   }
 }

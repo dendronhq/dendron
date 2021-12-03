@@ -1,3 +1,4 @@
+
 //
 // Base
 //
@@ -15,18 +16,18 @@
 
 // Portal Start
 $base-line-height: 1 !default;
-$spacing-unit: 30px !default;
-$text-color: #111 !default;
+$spacing-unit:     30px !default;
+$text-color:       #111 !default;
 // Portal end
 @import "portal.scss";
 
 // TODO: new
 #__next {
-  height: 100%; // or min-height
+	height: 100%; // or min-height
 }
 
 hr {
-  height: "1px";
+	height: "1px";
 }
 
 // Components
@@ -34,80 +35,74 @@ hr {
 // DendronLayout
 
 // from from packages/dendron-next-server/assets/themes/light-theme.less
-$layout-header-background: #f5f7f9; // @layout-header-background
-$text-color: "rgba(0,0,0,.85)"; // @text-color
+$layout-header-background: #F5F7F9; // @layout-header-background
+$text-color: 'rgba(0,0,0,.85)'; // @text-color
 
 .site-layout-sidebar.ant-layout {
-  background-color: $layout-header-background;
-  .ant-menu.ant-menu-inline {
-    background-color: $layout-header-background;
-  }
+	background-color: $layout-header-background;
+	.ant-menu.ant-menu-inline {
+		background-color: $layout-header-background;
+	}
 }
 
 // DendronTreeMenu
 
 .dendron-tree-menu.ant-menu {
-  background-color: #f5f7f9;
+	.ant-menu-submenu-title {
+		[data-expandedicon="true"] {
+			position: absolute;
+			top: 0;
+			right: 3px;
+			height: 100%;
+			margin: 0;
+			padding: 10px;
+			display: flex;
+			align-items: center;
+		}
+	}
 
-  .ant-menu-submenu-title {
-    [data-expandedicon="true"] {
-      position: absolute;
-      top: 0;
-      right: 3px;
-      height: 100%;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-    }
-  }
+	.ant-menu-item-selected {
+		color: rgba(0,0,0,.85);
+	}
 
-  .ant-menu-item-selected {
-    color: rgba(0, 0, 0, 0.85);
-  }
+	&.ant-menu-inline {
+		.ant-menu-title-content:hover {
+			text-decoration: underline;
+		}
+		[data-expandedicon="true"]:hover {
+			background-color: rgba(0, 0, 0, 0.05);
+		}
+	}
 
-  &.ant-menu-inline {
-    .ant-menu-title-content:hover {
-      text-decoration: underline;
-    }
-    [data-expandedicon="true"]:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-  }
+	&.ant-menu-inline-collapsed {
+		[data-expandedicon="true"] {
+			// remove submenu icon in collapsed Menu for first level
+			display: none;
+		}
+	}
 
-  &.ant-menu-inline-collapsed {
-    [data-expandedicon="true"] {
-      // remove submenu icon in collapsed Menu for first level
-      display: none;
-    }
-  }
+	.ant-menu-submenu {
+		> .ant-menu-submenu-title:after {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			border-right: 3px solid rgb(67, 176, 42); // antd's @border-color-split
+			transform: scaleY(0.0001);
+			opacity: 0;
+			content: '';
+			pointer-events: none; // makes open/close arrows touch-area bigger by giving it "space" to the right from this after element
+		}
+	}
 
-  .ant-menu-submenu {
-    > .ant-menu-submenu-title:after {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      border-right: 3px solid rgb(67, 176, 42); // antd's @border-color-split
-      transform: scaleY(0.0001);
-      opacity: 0;
-      content: "";
-      pointer-events: none; // makes open/close arrows touch-area bigger by giving it "space" to the right from this after element
-    }
-  }
+	.ant-menu-submenu.dendron-ant-menu-submenu-selected {
+		> .ant-menu-submenu-title {
+			background-color: rgb(230, 240, 225);  // antd's @menu-item-active-bg with ich @primary-1
+		}
 
-  .ant-menu-submenu.dendron-ant-menu-submenu-selected {
-    > .ant-menu-submenu-title {
-      background-color: rgb(
-        230,
-        240,
-        225
-      ); // antd's @menu-item-active-bg with ich @primary-1
-    }
-
-    > .ant-menu-submenu-title:after {
-      transform: scaleY(1);
-      opacity: 1;
-    }
-  }
+		> .ant-menu-submenu-title:after {
+			transform: scaleY(1);
+			opacity: 1;
+		}
+	}
 }

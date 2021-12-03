@@ -1,7 +1,7 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
 

@@ -44,7 +44,12 @@ function handleImage({
     node.url = fpath;
     return;
   }
-  const port = EngineUtils.getEnginePort({ wsRoot });
+  const resp = EngineUtils.getEnginePort({ wsRoot });
+  if (resp.error) {
+    logger.error(resp.error);
+    return;
+  }
+  const port: number = resp.data;
   const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
   const params: AssetGetRequest = {
     fpath,

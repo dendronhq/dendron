@@ -1,41 +1,34 @@
 import {
-  IntermediateDendronConfig,
+  ConfigUtils,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  IntermediateDendronConfig,
+  LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
   Time,
-  LookupSelectionModeEnum,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
+  EngineTestUtilsV4,
   FileTestUtils,
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
-  EngineTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   TestEngineUtils,
 } from "@dendronhq/engine-test-utils";
+import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, Done } from "mocha";
 import path from "path";
-import sinon from "sinon";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
+import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
-import {
-  DendronQuickPickerV2,
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
-  LookupSplitTypeEnum,
-} from "../../components/lookup/types";
 import {
   CommandOutput,
   CommandRunOpts,
@@ -51,23 +44,31 @@ import {
   SelectionExtractBtn,
   TaskBtn,
 } from "../../components/lookup/buttons";
+import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
+import {
+  DendronQuickPickerV2,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+  LookupSplitTypeEnum,
+} from "../../components/lookup/types";
 import {
   createNoActiveItem,
   NotePickerUtils,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
-import { clipboard, VSCodeUtils } from "../../utils";
+import { StateService } from "../../services/stateService";
+import { clipboard } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
-import { expect } from "../testUtilsv2";
+import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
-import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
-import assert from "assert";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: "vault1" });
@@ -310,7 +311,7 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document);
+          const actualNote = WSUtils.getNoteFromDocument(editor!.document);
           const expectedNote = engine.notes["foo"];
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
@@ -336,7 +337,7 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.ch1",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = VSCodeUtils.getNoteFromDocument(editor!.document);
+          const actualNote = WSUtils.getNoteFromDocument(editor!.document);
           const expectedNote = engine.notes["foo.ch1"];
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
@@ -393,7 +394,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const opts = (await cmd.run({ noConfirm: true }))!;
           expect(opts.quickpick.value).toEqual("foo");
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
@@ -591,7 +592,7 @@ suite("NoteLookupCommand", function () {
             fname: "foobar",
           });
           expect(
-            VSCodeUtils.getNoteFromDocument(
+            WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             )?.fname
           ).toEqual("foobar");
@@ -643,7 +644,7 @@ suite("NoteLookupCommand", function () {
           })!;
           const barFromEngine = engine.notes["bar"];
           const editor = VSCodeUtils.getActiveTextEditor()!;
-          const activeNote = VSCodeUtils.getNoteFromDocument(editor.document);
+          const activeNote = WSUtils.getNoteFromDocument(editor.document);
           expect(activeNote).toEqual(barFromEngine);
           expect(
             DNodeUtils.isRoot(engine.notes[barFromEngine.parent as string])
@@ -739,7 +740,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          const newNote = WSUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("ch1 template");
           expect(newNote?.tags).toEqual("tag-foo");
 
@@ -763,7 +764,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          const newNote = WSUtils.getNoteFromDocument(document!);
           expect(newNote?.fname).toEqual("foo.ch1");
 
           done();
@@ -800,7 +801,7 @@ suite("NoteLookupCommand", function () {
             quickpick: mockQuickPick,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = VSCodeUtils.getNoteFromDocument(document!);
+          const newNote = WSUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("Template text");
 
           done();
@@ -915,7 +916,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.journal,
             noConfirm: true,
@@ -929,7 +930,7 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value).toEqual(noteName);
 
           // note title should be overriden.
-          const note = VSCodeUtils.getNoteFromDocument(
+          const note = WSUtils.getNoteFromDocument(
             VSCodeUtils.getActiveTextEditor()!.document
           );
 
@@ -954,7 +955,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.scratch,
             noConfirm: true,
@@ -986,7 +987,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const createScratch = async () => {
             const out = (await cmd.run({
@@ -1019,7 +1020,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.task,
             noConfirm: true,
@@ -1043,7 +1044,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.journal,
             initialValue: "gamma",
@@ -1058,7 +1059,7 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value).toEqual(noteName);
 
           // note title should be overriden.
-          const note = VSCodeUtils.getNoteFromDocument(
+          const note = WSUtils.getNoteFromDocument(
             VSCodeUtils.getActiveTextEditor()!.document
           );
           const titleOverride = today.split(".").join("-");
@@ -1076,7 +1077,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1114,7 +1115,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1152,7 +1153,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1192,7 +1193,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1321,7 +1322,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1336,9 +1337,7 @@ suite("NoteLookupCommand", function () {
           // should create foo.foo-body.md with an empty body.
           expect(getActiveEditorBasename().endsWith("foo.foo-body.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(
-            newNoteEditor.document
-          );
+          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
           expect(newNote?.body).toEqual("");
 
           // should change selection to link with alais.
@@ -1363,7 +1362,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -1404,7 +1403,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1420,9 +1419,7 @@ suite("NoteLookupCommand", function () {
           // should create foo.extracted.md with an selected text as body.
           expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(
-            newNoteEditor.document
-          );
+          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
           expect(newNote?.body.trim()).toEqual("foo body");
 
           // should remove selection
@@ -1448,7 +1445,7 @@ suite("NoteLookupCommand", function () {
           );
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1464,9 +1461,7 @@ suite("NoteLookupCommand", function () {
           // should create foo.extracted.md with an selected text as body.
           expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(
-            newNoteEditor.document
-          );
+          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
           expect(newNote?.body.trim()).toEqual("foo body");
           // should remove selection
           const changedText = fooNoteEditor.document.getText();
@@ -1506,9 +1501,7 @@ suite("NoteLookupCommand", function () {
           });
 
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = VSCodeUtils.getNoteFromDocument(
-            newNoteEditor.document
-          );
+          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
           expect(newNote?.body.trim()).toEqual("non vault content");
 
           const nonVaultFileEditor = (await VSCodeUtils.openFileInEditor(
@@ -1529,7 +1522,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -1568,7 +1561,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -1623,7 +1616,7 @@ suite("NoteLookupCommand", function () {
           // close all editors before running.
           VSCodeUtils.closeAllEditors();
 
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           await cmd.run({
             initialValue: "bar",
             splitType: "horizontal",
@@ -1707,7 +1700,7 @@ suite("NoteLookupCommand", function () {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
 
-      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
       // selects "foo body"
       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1853,7 +1846,7 @@ suite("NoteLookupCommand", function () {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
 
-      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
       // selects "foo body"
       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1997,7 +1990,7 @@ suite("NoteLookupCommand", function () {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
 
-      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
       // selects "foo body"
       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -2129,7 +2122,7 @@ suite("NoteLookupCommand", function () {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
 
-      const fooNoteEditor = await VSCodeUtils.openNote(engine.notes["foo"]);
+      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
       // selects "foo body"
       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -2272,7 +2265,7 @@ suite("NoteLookupCommand", function () {
           // make clean slate.
           VSCodeUtils.closeAllEditors();
 
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
           const { cmd } = await prepareCommandFunc({
             wsRoot,
             vaults,
@@ -2314,7 +2307,7 @@ suite("NoteLookupCommand", function () {
           // make clean slate.
           VSCodeUtils.closeAllEditors();
 
-          await VSCodeUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote(engine.notes["foo"]);
 
           const { cmd } = await prepareCommandFunc({
             wsRoot,
@@ -2339,6 +2332,81 @@ suite("NoteLookupCommand", function () {
               "[[Ipsum|ipsum]]",
             ].join("\n")
           );
+          done();
+        },
+      });
+    });
+  });
+});
+
+suite("stateService", function () {
+  let homeDirStub: SinonStub;
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async (ctx) => {
+      new StateService(ctx);
+      await resetCodeWorkspace();
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+    },
+    noSetInstallStatus: true,
+  });
+  describe("GIVEN user accepts lookup for the first time", () => {
+    test("THEN global states firstLookupTime and lastLookupTime are set correctly", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          VSCodeUtils.closeAllEditors();
+
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          let metaData = MetadataService.instance().getMeta();
+          expect(_.isUndefined(metaData.firstLookupTime)).toBeTruthy();
+          expect(_.isUndefined(metaData.lastLookupTime)).toBeTruthy();
+          await cmd.run({
+            noConfirm: true,
+          });
+          metaData = MetadataService.instance().getMeta();
+          expect(_.isUndefined(metaData.firstLookupTime)).toBeFalsy();
+          expect(_.isUndefined(metaData.lastLookupTime)).toBeFalsy();
+
+          done();
+        },
+      });
+    });
+  });
+
+  describe("GIVEN user accepts subsequent lookup", () => {
+    test("THEN global state lastLookupTime is set correctly", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        onInit: async ({ vaults }) => {
+          VSCodeUtils.closeAllEditors();
+
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          await cmd.run({
+            noConfirm: true,
+          });
+          let metaData = MetadataService.instance().getMeta();
+          const firstLookupTime = metaData.firstLookupTime;
+          const lastLookupTime = metaData.lastLookupTime;
+          expect(_.isUndefined(firstLookupTime)).toBeFalsy();
+          expect(_.isUndefined(lastLookupTime)).toBeFalsy();
+
+          await cmd.run({
+            noConfirm: true,
+          });
+
+          metaData = MetadataService.instance().getMeta();
+          expect(metaData.firstLookupTime).toEqual(firstLookupTime);
+          expect(metaData.lastLookupTime).toNotEqual(lastLookupTime);
+
           done();
         },
       });

@@ -69,6 +69,14 @@ export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
 
 export class NextjsExportPodUtils {
+  static async buildSiteMap(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+    const cmdDev = "npm run build:sitemap";
+    const out = $$(cmdDev, { cwd: nextPath });
+    out.stdout?.pipe(process.stdout);
+    return out.pid;
+  }
+
   static getDendronConfigPath = (dest: URI) => {
     const podDstDir = path.join(dest.fsPath, "data");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");

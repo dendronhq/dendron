@@ -15,7 +15,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { PublishPodCommand } from "../../commands/PublishPod";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,

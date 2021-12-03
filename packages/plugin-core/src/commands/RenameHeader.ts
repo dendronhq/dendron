@@ -11,10 +11,11 @@ import _ from "lodash";
 import { Range, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
+import { WSUtils } from "../WSUtils";
 
 type CommandOpts =
   | {
@@ -97,7 +98,7 @@ export class RenameHeaderCommand extends BasicCommand<
     const editor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(newHeader) || _.isUndefined(oldHeader) || !editor) return;
     const document = editor.document;
-    const note = VSCodeUtils.getNoteFromDocument(document);
+    const note = WSUtils.getNoteFromDocument(document);
     if (!note) return;
 
     const noteLoc = {

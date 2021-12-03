@@ -3,8 +3,8 @@ import { test } from "mocha";
 import sinon from "sinon";
 import { ExtensionContext } from "vscode";
 import { ShowLegacyPreviewCommand } from "../../commands/ShowLegacyPreview";
-import { VSCodeUtils } from "../../utils";
 import { MarkdownUtils } from "../../utils/md";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -18,7 +18,7 @@ suite("ShowLegacyPreview", function () {
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine }) => {
         const note = engine.notes["foo"];
-        await VSCodeUtils.openNote(note);
+        await WSUtils.openNote(note);
         sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true);
         const showLegacyPreview = sinon.stub(
           MarkdownUtils,

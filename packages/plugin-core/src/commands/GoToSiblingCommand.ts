@@ -12,7 +12,7 @@ import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 

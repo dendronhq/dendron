@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { MarkdownUtils } from "../utils/md";
 import { BasicCommand } from "./base";
 

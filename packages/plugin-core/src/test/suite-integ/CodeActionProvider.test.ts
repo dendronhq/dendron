@@ -1,11 +1,11 @@
 import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { VSCodeUtils } from "../../utils";
-import { LocationTestUtils, runSingleVaultTest, expect } from "../testUtilsv2";
-import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import * as vscode from "vscode";
 import { describe } from "mocha";
+import * as vscode from "vscode";
 import { getHeaderAt, isBrokenWikilink } from "../../utils/editor";
+import { WSUtils } from "../../WSUtils";
+import { expect, LocationTestUtils, runSingleVaultTest } from "../testUtilsv2";
+import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Contextual UI Tests", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -23,7 +23,7 @@ suite("Contextual UI Tests", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
@@ -47,7 +47,7 @@ suite("Contextual UI Tests", function () {
             });
           },
           onInit: async () => {
-            const editor = await VSCodeUtils.openNote(noteWithLink);
+            const editor = await WSUtils.openNote(noteWithLink);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
             expect(isBrokenWikilink()).toBeTruthy();
             done();
@@ -73,7 +73,7 @@ suite("Contextual UI Tests", function () {
               return config;
             },
             onInit: async () => {
-              const editor = await VSCodeUtils.openNote(noteWithLink);
+              const editor = await WSUtils.openNote(noteWithLink);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
               expect(isBrokenWikilink()).toBeFalsy();
               done();
@@ -98,7 +98,7 @@ suite("Contextual UI Tests", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = new vscode.Position(7, 2);
           const end = new vscode.Position(7, 10);
           editor.selection = new vscode.Selection(start, end);
@@ -126,7 +126,7 @@ suite("Contextual UI Tests", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const editor = await WSUtils.openNote(noteWithLink);
           const start = new vscode.Position(7, 0);
           const end = new vscode.Position(7, 18);
           editor.selection = new vscode.Selection(start, end);

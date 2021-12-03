@@ -34,7 +34,7 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import _ from "lodash";
 import path from "path";
@@ -49,6 +49,7 @@ import {
   PickerUtilsV2,
 } from "../components/lookup/utils";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { WSUtils } from "../WSUtils";
 
 type CommandInput =
   | {
@@ -121,7 +122,7 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!selection) throw this.headerNotSelectedError;
 
     const line = editor.document.lineAt(selection.start.line).text;
-    const maybeNote = VSCodeUtils.getNoteFromDocument(editor.document);
+    const maybeNote = WSUtils.getNoteFromDocument(editor.document);
     if (!maybeNote) {
       throw this.noActiveNoteError;
     }

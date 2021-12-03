@@ -146,6 +146,15 @@ export function FooterText() {
           )}
         </Col>
       </Row>
+      <Col sm={24} md={12} style={{ textAlign: "right" }}>
+        <Text>
+          {" "}
+          🌱 with 💕 using{" "}
+          <Link href="https://www.dendron.so/" target="_blank">
+            Dendron 🌲
+          </Link>
+        </Text>
+      </Col>
     </Row>
   );
 }

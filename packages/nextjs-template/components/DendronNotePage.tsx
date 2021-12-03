@@ -82,7 +82,7 @@ export default function Note({
 
   const noteBody = id === note.id ? body : bodyFromState;
 
-  if (_.isUndefined(noteBody) || engine.loading === LoadingStatus.PENDING) {
+  if (_.isUndefined(noteBody)) {
     return <DendronSpinner />;
   }
 

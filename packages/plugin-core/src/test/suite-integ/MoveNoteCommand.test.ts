@@ -21,12 +21,13 @@ import {
 } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
 import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import sinon from "sinon";
 import {
   createEngineFactory,
   runLegacyMultiWorkspaceTest,
@@ -181,7 +182,7 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-        await VSCodeUtils.openNote(tagNote);
+        await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -233,7 +234,7 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-        await VSCodeUtils.openNote(tagNote);
+        await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -285,7 +286,7 @@ suite("MoveNoteCommand", function () {
         });
       },
       onInit: async ({ vaults, wsRoot, engine }) => {
-        await VSCodeUtils.openNote(tagNote);
+        await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -335,7 +336,7 @@ suite("MoveNoteCommand", function () {
           vault: vaultFrom,
           wsRoot,
         }) as NoteProps;
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
           moves: [
@@ -409,7 +410,7 @@ suite("MoveNoteCommand", function () {
           vault: vaultFrom,
           wsRoot,
         }) as NoteProps;
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         HistoryService.instance().subscribev2("lookupProvider", {
           id: "move",
@@ -449,7 +450,7 @@ suite("MoveNoteCommand", function () {
           vault: vault1,
           wsRoot,
         }) as NoteProps;
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
           moves: [
@@ -497,7 +498,7 @@ suite("MoveNoteCommand", function () {
           vault: vault1,
           wsRoot,
         }) as NoteProps;
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
           moves: [
@@ -579,7 +580,7 @@ suite("MoveNoteCommand", function () {
           wsRoot,
         }) as NoteProps;
 
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
 
         sinon
@@ -702,7 +703,7 @@ suite("MoveNoteCommand", function () {
           wsRoot,
         }) as NoteProps;
 
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
 
         sinon
@@ -822,7 +823,7 @@ suite("MoveNoteCommand", function () {
           wsRoot,
         }) as NoteProps;
 
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const lc = LookupControllerV3.create({
           nodeType: "note",
         });
@@ -860,7 +861,7 @@ suite("MoveNoteCommand", function () {
           wsRoot,
         }) as NoteProps;
 
-        await VSCodeUtils.openNote(fooNote);
+        await WSUtils.openNote(fooNote);
         const lc = LookupControllerV3.create({
           nodeType: "note",
         });

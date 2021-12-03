@@ -941,6 +941,42 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "LukeCarrier",
+      "name": "Luke Carrier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/597015?v=4",
+      "profile": "https://luke.carrier.im/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "maximilianigl",
+      "name": "maximilianigl",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4333579?v=4",
+      "profile": "https://github.com/maximilianigl",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "byronwall",
+      "name": "byron wall",
+      "avatar_url": "https://avatars.githubusercontent.com/u/495404?v=4",
+      "profile": "http://byroni.us",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ccamara",
+      "name": "Carlos Cámara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/706549?v=4",
+      "profile": "http://carloscamara.es/en",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

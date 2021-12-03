@@ -1,5 +1,5 @@
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
-import { getPortFilePath } from "@dendronhq/engine-server";
+import { EngineUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { runEngineTestV5 } from "../../../engine";
 
@@ -10,8 +10,12 @@ describe("GIVEN LaunchEngineServer cmd", () => {
         async ({ wsRoot }) => {
           const cmd = new LaunchEngineServerCommand();
           await cmd.enrichArgs({ wsRoot });
-          const portFile = getPortFilePath({ wsRoot });
-          expect(fs.existsSync(portFile)).toBeTruthy();
+          const cliPortFile = EngineUtils.getPortFilePathForCLI({ wsRoot });
+          const wsPortFile = EngineUtils.getPortFilePathForWorkspace({
+            wsRoot,
+          });
+          expect(fs.existsSync(cliPortFile)).toBeTruthy();
+          expect(fs.existsSync(wsPortFile)).toBeFalsy();
         },
         {
           expect,
@@ -25,8 +29,8 @@ describe("GIVEN LaunchEngineServer cmd", () => {
           async ({ wsRoot }) => {
             const cmd = new LaunchEngineServerCommand();
             await cmd.enrichArgs({ wsRoot, noWritePort: true });
-            const portFile = getPortFilePath({ wsRoot });
-            expect(fs.existsSync(portFile)).toBeFalsy();
+            const cliPortFile = EngineUtils.getPortFilePathForCLI({ wsRoot });
+            expect(fs.existsSync(cliPortFile)).toBeFalsy();
           },
           {
             expect,

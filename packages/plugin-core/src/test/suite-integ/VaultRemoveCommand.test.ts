@@ -16,7 +16,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
 import {

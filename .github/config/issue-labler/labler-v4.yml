@@ -1,0 +1,22 @@
+scope.workspace:
+  - '- \[ ?(?:x|X) ?\] Workspace.'
+scope.lookup:
+  - '- \[ ?(?:x|X) ?\] Lookup.'
+scope.views:
+  - '- \[ ?(?:x|X) ?\] Views.'
+scope.schema:
+  - '- \[ ?(?:x|X) ?\] Schema.'
+scope.pod:
+  - '- \[ ?(?:x|X) ?\] Pod.'
+scope.publish:
+  - '- \[ ?(?:x|X) ?\] Publish.'
+scope.markdown:
+  - '- \[ ?(?:x|X) ?\] Markdown.'
+type.bug:
+  - '- \[ ?(?:x|X) ?\] Bug'
+type.enhancement:
+  - '- \[ ?(?:x|X) ?\] Enhancement of an existing Feature.'
+type.feature:
+  - '- \[ ?(?:x|X) ?\] Request of a new feature.'
+status.triage-needed:
+  - '- \[ ] IsTriaged'

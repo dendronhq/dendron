@@ -1,11 +1,10 @@
 import path from "path";
-// import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import {
-  NoteLookupCommand,
   CommandOutput as NoteLookupCommandOut,
+  NoteLookupCommand,
 } from "./NoteLookupCommand";
 
 type CommandOpts = {

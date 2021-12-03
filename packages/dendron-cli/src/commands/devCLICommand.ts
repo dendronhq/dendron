@@ -10,6 +10,7 @@ import {
   SegmentClient,
   TelemetryStatus,
   readYAML,
+  readJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import path from "path";
 import yargs from "yargs";
@@ -479,7 +480,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const configPath = DConfig.configPath(opts.wsRoot!);
     const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
     const dendronConfig = readYAML(configPath);
-    const wsConfig = fs.readJSONSync(wsConfigPath);
+    const wsConfig = readJSONWithCommentsSync(wsConfigPath);
     const changes = await MigrationServce.applyMigrationRules({
       currentVersion,
       previousVersion: "0.0.0",

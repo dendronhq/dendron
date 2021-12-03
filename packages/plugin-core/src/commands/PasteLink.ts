@@ -2,12 +2,13 @@ import _ from "lodash";
 import ogs from "open-graph-scraper";
 import { Selection, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { clipboard, getOpenGraphMetadata, VSCodeUtils } from "../utils";
+import { clipboard, getOpenGraphMetadata } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
-  link?: string
-  selection? : Selection
+  link?: string;
+  selection?: Selection;
 };
 type CommandOutput = string;
 
@@ -44,7 +45,9 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // First, get web address from clipboard
     let url = "";
     try {
-      url = link ? link.trim() : await clipboard.readText().then((r) => r.trim()) 
+      url = link
+        ? link.trim()
+        : await clipboard.readText().then((r) => r.trim());
     } catch (err) {
       this.L.error({ err, url });
       throw err;
@@ -73,9 +76,9 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // Write text to document with Edit Builder: https://github.com/Microsoft/vscode-extension-samples/tree/main/document-editing-sample
     const position = textEditor.selection.active;
 
-    if(!_.isUndefined(selection)){
-       textEditor.edit((eb) => {
-          eb.replace(selection, formattedLink);
+    if (!_.isUndefined(selection)) {
+      textEditor.edit((eb) => {
+        eb.replace(selection, formattedLink);
       });
     } else {
       textEditor.edit((eb) => {

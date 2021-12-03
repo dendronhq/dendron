@@ -33,7 +33,7 @@ import vscode, {
   Selection,
 } from "vscode";
 
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 

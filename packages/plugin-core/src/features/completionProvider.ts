@@ -37,9 +37,10 @@ import {
   TextEdit,
 } from "vscode";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
 import { sentryReportingCallback } from "../utils/analytics";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 
 function padWithZero(n: number): string {
   if (n > 99) return String(n);
@@ -138,7 +139,7 @@ export const provideCompletionItems = sentryReportingCallback(
     const { engine } = getDWorkspace();
     const notes = engine.notes;
     const completionItems: CompletionItem[] = [];
-    const currentVault = VSCodeUtils.getNoteFromDocument(document)?.vault;
+    const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     const wsRoot = engine.wsRoot;
     Logger.debug({
       ctx,
@@ -353,7 +354,7 @@ export async function provideBlockCompletionItems(
     otherFile = true;
   } else {
     // This anchor is to the same file, e.g. [[#
-    note = VSCodeUtils.getNoteFromDocument(document);
+    note = WSUtils.getNoteFromDocument(document);
   }
 
   if (_.isUndefined(note) || token?.isCancellationRequested) return;

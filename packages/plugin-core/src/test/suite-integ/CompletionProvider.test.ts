@@ -1,17 +1,3 @@
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
-import {
-  runLegacyMultiWorkspaceTest,
-  runTestButSkipForWindows,
-  setupBeforeAfter,
-} from "../testUtilsV3";
-import _ from "lodash";
-import {
-  provideBlockCompletionItems,
-  provideCompletionItems,
-} from "../../features/completionProvider";
-import { VSCodeUtils } from "../../utils";
-import { CompletionItem, Position } from "vscode";
 import {
   CONSTANTS,
   NoteUtils,
@@ -19,8 +5,23 @@ import {
   USERS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { expect } from "../testUtilsv2";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
+import { describe } from "mocha";
+import { CompletionItem, Position } from "vscode";
+import {
+  provideBlockCompletionItems,
+  provideCompletionItems,
+} from "../../features/completionProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
+import { expect } from "../testUtilsv2";
+import {
+  runLegacyMultiWorkspaceTest,
+  runTestButSkipForWindows,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("completionProvider", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -31,7 +32,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
               vault: vaults[1],
@@ -109,7 +110,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
               vault: vaults[1],
@@ -160,7 +161,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
               vault: vaults[1],
@@ -211,7 +212,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
               vault: vaults[1],
@@ -264,7 +265,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "root",
               vault: vaults[0],
@@ -293,7 +294,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[^]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "test",
               vault: vaults[0],
@@ -338,7 +339,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[^]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "test",
               vault: vaults[0],
@@ -386,7 +387,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[test2#]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "test",
               vault: vaults[0],
@@ -441,7 +442,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[test2#^]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "test",
               vault: vaults[0],
@@ -509,7 +510,7 @@ suite("completionProvider", function () {
         ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[^]]
-          await VSCodeUtils.openNote(
+          await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
               fname: "test",
               vault: vaults[0],

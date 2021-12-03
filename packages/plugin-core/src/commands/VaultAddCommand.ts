@@ -20,7 +20,7 @@ import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import fs from "fs-extra";

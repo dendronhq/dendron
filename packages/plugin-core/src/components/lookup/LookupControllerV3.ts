@@ -6,11 +6,11 @@ import {
 } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { QuickInputButton } from "vscode";
-import { CancellationTokenSource } from "vscode-languageclient";
+import { CancellationTokenSource, QuickInputButton } from "vscode";
+import { DENDRON_COMMANDS } from "../../constants";
 import { Logger } from "../../logger";
-import { VSCodeUtils } from "../../utils";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import {
   ButtonCategory,
@@ -155,8 +155,13 @@ export class LookupControllerV3 {
   async prepareQuickPick(opts: PrepareQuickPickOpts) {
     const ctx = "prepareQuickPick";
     Logger.info({ ctx, msg: "enter" });
-    const { provider } = _.defaults(opts, {
+    const { provider, title, selectAll } = _.defaults(opts, {
       nonInteractive: false,
+      title: [
+        `Lookup (${this.nodeType})`,
+        `- version: ${DendronExtension.version()}`,
+      ].join(" "),
+      selectAll: false,
     });
     this._provider = provider;
     const { buttonsPrev, buttons } = this.state;
@@ -167,6 +172,10 @@ export class LookupControllerV3 {
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
     quickpick.onDidHide(() => {
+      if (opts.onDidHide) {
+        opts.onDidHide();
+      }
+
       Logger.debug({ ctx: "quickpick", msg: "onHide" });
       quickpick.dispose();
       HistoryService.instance().add({
@@ -176,17 +185,9 @@ export class LookupControllerV3 {
         data: { action: "hide" },
       });
     });
-    quickpick.title = [
-      `Lookup (${this.nodeType})`,
-      `- version: ${DendronExtension.version()}`,
-    ].join(" ");
+    quickpick.title = title;
 
-    quickpick.buttons.forEach((button: DendronBtn) => {
-      AnalyticsUtils.track(LookupEvents.LookupModifierSetByController, {
-        command: opts.provider.id,
-        button,
-      });
-    });
+    quickpick.selectAll = quickpick.canSelectMany && selectAll;
 
     Logger.info({ ctx, msg: "exit" });
     return { quickpick };
@@ -268,6 +269,20 @@ export class LookupControllerV3 {
         ent.pressed = false;
       });
     }
+
+    // when selection2Items is toggled in refactor command,
+    // mirror the pressed state to multiselect button
+    if (
+      btnTriggered.type === "selection2Items" &&
+      this.provider.id === DENDRON_COMMANDS.REFACTOR_HIERARCHY.key
+    ) {
+      const multiSelectBtn = _.filter(this.state.buttons, (button) => {
+        return button.type === "multiSelect";
+      })[0];
+      multiSelectBtn.pressed = btnTriggered.pressed;
+      btnsToRefresh.push(multiSelectBtn);
+    }
+
     btnsToRefresh.push(btnTriggered);
     // update button state
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });

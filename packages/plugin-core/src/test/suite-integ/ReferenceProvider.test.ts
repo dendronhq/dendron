@@ -31,6 +31,57 @@ suite("ReferenceProvider", function () {
     beforeHook: () => {},
   });
 
+  describe("GIVEN a note with some header, and some note that references that header", () => {
+    let activeNote: NoteProps;
+    let refNote1: NoteProps;
+    let refNote2: NoteProps;
+    test("THEN reference to that header is correctly provided", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          activeNote = await NoteTestUtilsV4.createNote({
+            fname: "active",
+            vault: vaults[0],
+            wsRoot,
+            body: "## Foo",
+          });
+          refNote1 = await NoteTestUtilsV4.createNote({
+            fname: "ref-one",
+            vault: vaults[0],
+            wsRoot,
+            body: "[[Foo|active#foo]]\n\n[[Foo|active#four]]",
+          });
+          refNote2 = await NoteTestUtilsV4.createNote({
+            fname: "ref-two",
+            vault: vaults[0],
+            wsRoot,
+            body: "[[active#foo]]",
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(activeNote);
+          const links = await provide(editor);
+
+          expect(links?.length).toEqual(2);
+          const firstLineRange = new vscode.Range(
+            new vscode.Position(7, 0),
+            new vscode.Position(8, 0)
+          );
+          expect(links!.map((l) => l.range)).toEqual([
+            firstLineRange,
+            firstLineRange,
+          ]);
+          expect(links!.map((l) => l.uri.fsPath)).toEqual(
+            [refNote1, refNote2].map((note) =>
+              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
+            )
+          );
+          done();
+        },
+      });
+    });
+  });
+
   describe("provides correct links", () => {
     test("basic", (done) => {
       let noteWithTarget1: NoteProps;

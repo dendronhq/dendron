@@ -59,7 +59,7 @@ import {
 import { CONFIG } from "../../constants";
 import { StateService } from "../../services/stateService";
 import { clipboard } from "../../utils";
-import { VSCodeUtils } from "../../vsCodeutils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";

@@ -41,7 +41,7 @@ import {
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils } from "../../KeybindingUtils";
-import { VSCodeUtils } from "../../vsCodeutils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";

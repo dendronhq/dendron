@@ -18,7 +18,7 @@ import { EngineAPIService } from "../../services/EngineAPIService";
 import { NoteSyncService } from "../../services/NoteSyncService";
 import { clipboard } from "../../utils";
 import { DendronClientUtilsV2 } from "../../clientUtils";
-import { VSCodeUtils } from "../../vsCodeutils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import {
   DendronQuickPickerV2,

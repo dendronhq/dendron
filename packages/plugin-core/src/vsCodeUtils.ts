@@ -31,12 +31,14 @@ let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
 export class VSCodeUtils {
   /**
    * In development, this is `packages/plugin-core/assets`
-   * In production, this is `$HOME/$VSCODE_DIR/{path-to-app}/assets
+   * In production, this is `$HOME/$VSCODE_DIR/{path-to-app}/dist/
    * @param context
    * @returns
    */
   static getAssetUri(context: vscode.ExtensionContext) {
-    return VSCodeUtils.joinPath(context.extensionUri, "assets");
+    if (getStage() === "dev")
+      return VSCodeUtils.joinPath(context.extensionUri, "assets");
+    return VSCodeUtils.joinPath(context.extensionUri, "dist");
   }
 
   static closeCurrentFileEditor() {

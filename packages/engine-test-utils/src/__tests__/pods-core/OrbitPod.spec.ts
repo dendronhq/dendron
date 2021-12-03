@@ -42,6 +42,19 @@ describe("Given Orbit Import Pod", () => {
               website: null,
             },
           },
+          {
+            attributes: {
+              name: null,
+              github: null,
+              discord: null,
+              linkedin: null,
+              id: "njdek",
+              twitter: null,
+              hn: null,
+              website: null,
+              email: "fooxyz@bar.com",
+            },
+          },
         ],
         links: {
           next: null,
@@ -69,7 +82,7 @@ describe("Given Orbit Import Pod", () => {
               workspaceSlug: "dendron-discord",
             },
           });
-          expect(importedNotes.length).toEqual(2);
+          expect(importedNotes.length).toEqual(3);
           expect(importedNotes[0].fname).toContain("people");
         },
         {
@@ -130,6 +143,36 @@ describe("Given Orbit Import Pod", () => {
             },
           });
           expect(importedNotes[1].fname).toEqual("people.foobar");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("WHEN name is not present for an orbit member and only email is not null", () => {
+    test("THEN note should have people.{email} as fname", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const pod = new OrbitImportPod();
+          const vaultName = VaultUtils.getName(vaults[0]);
+          const mockedAxios = axios as jest.Mocked<typeof axios>;
+          mockedAxios.get.mockResolvedValue(response);
+          const { importedNotes } = await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            utilityMethods,
+            config: {
+              src: "orbit",
+              token: "xyzabcd",
+              vaultName,
+              workspaceSlug: "dendron-discord",
+            },
+          });
+          expect(importedNotes[2].fname).toEqual("people.fooxyz");
         },
         {
           expect,

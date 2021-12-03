@@ -62,9 +62,9 @@
     {
       "label": "orbit-import-pod",
       "type": "shell",
-      "command": "node --inspect dendron_setup/dendron/packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ~/Dendron --podId dendron.orbit --podSource builtin",
+      "command": "node --inspect packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ${workspaceFolder}/../test-workspace --podId dendron.orbit --podSource builtin",
       "options": {
-        "cwd": "D:/"
+        "cwd": "D:/dendron_setup/dendron/"
       },
       "problemMatcher": []
     }

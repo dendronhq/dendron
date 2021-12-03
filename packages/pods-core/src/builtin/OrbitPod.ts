@@ -8,7 +8,6 @@ import {
   DNodeUtils,
   DVault,
   ERROR_SEVERITY,
-  getSlugger,
   MergeConflictOptions,
   NoteProps,
   NoteUtils,
@@ -43,6 +42,18 @@ type MembersOpts = {
   twitter: string;
   hn: string;
   website: string;
+  email: string;
+};
+
+type UpdateNotesOpts = {
+  note: NoteProps;
+  engine: DEngineClient;
+  social: Partial<MembersOpts>;
+};
+
+export type OrbitImportPodResp = {
+  importedNotes: NoteProps[];
+  errors: NoteProps[];
 };
 
 export type OrbitImportPodPlantOpts = ImportPodPlantOpts;
@@ -90,11 +101,19 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       const response = await axios.get(link, { headers });
       response.data.data.forEach((member: any) => {
         const attributes = member.attributes;
-        const { id, name, github, discord, linkedin, twitter, hn, website } =
-          attributes;
-        const slugger = getSlugger();
+        const {
+          id,
+          name,
+          github,
+          discord,
+          linkedin,
+          twitter,
+          hn,
+          website,
+          email,
+        } = attributes;
         members.push({
-          name: slugger.slug(name),
+          name,
           github,
           discord,
           linkedin,
@@ -102,6 +121,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
           hn,
           website,
           orbitId: id,
+          email,
         });
         next = response.data.links.next;
       });
@@ -121,7 +141,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
    * - updates previously imported notes if there are no conflicts
    */
   async membersToNotes(opts: {
-    members: any;
+    members: MembersOpts[];
     vault: DVault;
     engine: DEngineClient;
     wsRoot: string;
@@ -130,27 +150,21 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const { vault, members, engine, wsRoot, config } = opts;
     const conflicts: Conflict[] = [];
     const create: NoteProps[] = [];
-    members.forEach(async (member: any) => {
-      const { orbitId, name, github, discord, linkedin, twitter, hn, website } =
-        member;
-      member = {
-        custom: {
-          ...config.frontmatter,
-          orbitId,
-          social: {
-            linkedin,
-            github,
-            twitter,
-            discord,
-            hn,
-            website,
-          },
-        },
-      };
-      let noteName = name || github || discord;
+    const notesToUpdate: UpdateNotesOpts[] = [];
+    members.map((member) => {
+      const { orbitId, github, discord, twitter } = member;
+      const { name, email, ...social } = member;
+      let noteName =
+        name || github || discord || twitter || this.getNameFromEmail(email);
       noteName = DNodeUtils.cleanFname(noteName);
+      this.L.debug({
+        ctx: "membersToNotes",
+        name,
+        github,
+        discord,
+        noteName,
+      });
       let fname;
-
       const note = NoteUtils.getNoteByFnameV5({
         fname: `people.${noteName}`,
         notes: engine.notes,
@@ -159,40 +173,64 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       });
 
       if (!_.isUndefined(note)) {
-        if (!_.isUndefined(note.custom.orbitId)) {
-          const conflictData = this.getConflictedData({ note, member });
-          if (conflictData.length > 0) {
-            fname = `people.orbit.duplicate.${Time.now().toFormat(
-              "y.MM.dd"
-            )}.${noteName}`;
-            conflicts.push({
-              conflictNote: note,
-              conflictEntry: NoteUtils.create({ ...member, fname, vault }),
-              conflictData,
-            });
-          } else {
-            await this.updateNoteData({ note, member, engine });
-          }
+        const conflictData = this.getConflictedData({ note, social });
+        if (conflictData.length > 0) {
+          fname = `people.orbit.duplicate.${Time.now().toFormat(
+            "y.MM.dd"
+          )}.${noteName}`;
+          conflicts.push({
+            conflictNote: note,
+            conflictEntry: NoteUtils.create({
+              fname,
+              vault,
+              custom: { ...config.frontmatter, orbitId, social },
+            }),
+            conflictData,
+          });
+        } else {
+          notesToUpdate.push({ note, social, engine });
         }
       } else {
         fname = `people.${noteName}`;
-        create.push(NoteUtils.create({ ...member, fname, vault }));
+        create.push(
+          NoteUtils.create({
+            fname,
+            vault,
+            custom: {
+              ...config.frontmatter,
+              orbitId,
+              social,
+            },
+          })
+        );
       }
     });
+    await Promise.all(
+      notesToUpdate.map(({ note, social, engine }) => {
+        return this.updateNoteData({ note, social, engine });
+      })
+    );
 
     return { create, conflicts };
+  }
+
+  getNameFromEmail(email: string): string {
+    return email.split("@")[0];
   }
 
   /**
    * returns all the conflicted entries in custom.social FM field of note
    */
-  getConflictedData = (opts: { note: NoteProps; member: any }) => {
-    const { note, member } = opts;
-    const customKeys = Object.keys(member.custom.social);
-    return customKeys.filter((key: string) => {
+  getConflictedData = (opts: {
+    note: NoteProps;
+    social: Partial<MembersOpts>;
+  }) => {
+    const { note, social } = opts;
+    const customKeys = Object.keys(social);
+    return customKeys.filter((key) => {
       return (
         note.custom.social[key] !== null &&
-        member.custom.social[key] !== note.custom.social[key]
+        social[key as keyof MembersOpts] !== note.custom.social[key]
       );
     });
   };
@@ -202,18 +240,18 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
    */
   updateNoteData = async (opts: {
     note: NoteProps;
-    member: any;
+    social: Partial<MembersOpts>;
     engine: DEngineClient;
   }) => {
-    const { note, member, engine } = opts;
-    const customKeys = Object.keys(member.custom?.social);
+    const { note, social, engine } = opts;
+    const customKeys = Object.keys(social);
     let shouldUpdate = false;
-    customKeys.forEach((key: string) => {
+    customKeys.forEach((key) => {
       if (
         note.custom?.social[key] === null &&
-        member.custom.social[key] !== null
+        social[key as keyof MembersOpts] !== null
       ) {
-        note.custom.social[key] = member.custom.social[key];
+        note.custom.social[key] = social[key as keyof MembersOpts];
         shouldUpdate = true;
       }
     });
@@ -326,7 +364,11 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const conflictNoteArray = conflicts.map(
       (conflict) => conflict.conflictNote
     );
-
+    this.L.debug({
+      ctx: "createdAndConflictedNotes",
+      created: create.length,
+      conflicted: conflicts.length,
+    });
     await engine.bulkAddNotes({ notes: create });
     const { handleConflict } = utilityMethods as ConflictHandler;
     const conflictResolveOpts: PodConflictResolveOpts = {

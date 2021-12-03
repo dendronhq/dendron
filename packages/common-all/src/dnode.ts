@@ -337,11 +337,10 @@ export class DNodeUtils {
   }
 
   static cleanFname(fname: string) {
-    if (_.isUndefined(fname) || fname === "null") return;
     if (fname.indexOf(" ") >= 0) {
       fname = _.replace(fname, /\s/g, "-");
     }
-    return _.trim(fname).toLowerCase();
+    return _.kebabCase(fname);
   }
 }
 

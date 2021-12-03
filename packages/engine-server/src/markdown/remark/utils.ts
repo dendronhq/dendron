@@ -970,6 +970,12 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
   }
 
+  static isNodeWithPosition<N extends Node>(
+    node: N
+  ): node is N & { position: Position } {
+    return node.position !== undefined;
+  }
+
   // --- conversion
 
   static convertLinksToDotNotation(

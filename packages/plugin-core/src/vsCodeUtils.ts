@@ -3,8 +3,10 @@ import {
   DendronError,
   getStage,
   InstallStatus,
+  newRange,
   Point,
   Position,
+  VSRange,
 } from "@dendronhq/common-all";
 import { goUpTo, resolvePath, tmpDir } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -421,6 +423,26 @@ export class VSCodeUtils {
       out.push(earliest);
     }
     return out;
+  }
+
+  /** Converts any range similar to a VSCode range into an actual VSCode range, which is needed for VSCode APIs. */
+  static toRangeObject(range: VSRange): vscode.Range {
+    return new vscode.Range(
+      range.start.line,
+      range.start.character,
+      range.end.line,
+      range.end.character
+    );
+  }
+
+  /** Opposite of `toRangeObject`, which is required to call Dendron APIs. */
+  static toPlainRange(range: vscode.Range): VSRange {
+    return newRange(
+      range.start.line,
+      range.start.character,
+      range.end.line,
+      range.end.character
+    );
   }
 
   /** Fold the foldable region at the given line for the active editor.

@@ -180,6 +180,10 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable Auto Fold Frontmatter",
     desc: "Enable Automatically folding frontmatter block when opening a new note.",
   },
+  enableEditorDecorations: {
+    label: "Enable Editor Decorations",
+    desc: "Enable editor decorations, which highlight wikilinks, add colors for hashtags and more as you write your code.",
+  },
   maxPreviewsCached: {
     label: "Max Preview Cached",
     desc: "Maximum number of rendered previews to cache.",

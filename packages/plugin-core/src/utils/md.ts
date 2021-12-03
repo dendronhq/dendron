@@ -35,7 +35,7 @@ import vscode, {
 
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
-import { getFrontmatterTags, parseFrontmatter } from "./yaml";
+import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 
 export type RefT = {
   label: string;
@@ -92,8 +92,6 @@ export const otherExts = [
   "flac",
 ];
 
-/** Kind-of parses a URI and extracts the scheme. Not an actual parser and will accept invalid URIs. */
-export const uriRegex = /^(?<scheme>[\w+.-]+):(\/\/)?\S+/;
 export const imageExts = ["png", "jpg", "jpeg", "svg", "gif", "webp"];
 const imageExtsRegex = new RegExp(`[.](${imageExts.join("|")})$`, "i");
 export const isUncPath = (path: string): boolean => uncPathRegex.test(path);
@@ -572,11 +570,3 @@ export const fsPathToRef = ({
 
 export const containsImageExt = (pathParam: string): boolean =>
   !!imageExtsRegex.exec(path.parse(pathParam).ext);
-
-/** Returns true if this is a non-dendron uri, false if it is dendron://, undefined if it's not a URI */
-export const containsNonDendronUri = (uri: string): boolean | undefined => {
-  const groups = uriRegex.exec(uri)?.groups;
-  if (_.isUndefined(groups) || _.isUndefined(groups.scheme)) return undefined;
-  if (groups.scheme === "dendron") return false;
-  return true;
-};

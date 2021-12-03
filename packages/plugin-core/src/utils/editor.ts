@@ -1,4 +1,8 @@
-import { DEngineClient, genUUIDInsecure } from "@dendronhq/common-all";
+import {
+  DECORATION_TYPES,
+  DEngineClient,
+  genUUIDInsecure,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -12,16 +16,15 @@ import {
   WikiLinkNoteV4,
   UserTag,
   HashTag,
+  linkedNoteType,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
   Position,
   Selection,
   TextEditor,
-  TextEditorDecorationType,
   TextEditorEdit,
 } from "vscode";
-import { DECORATION_TYPE, linkedNoteType } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
@@ -209,7 +212,7 @@ export function isBrokenWikilink(): boolean {
   );
   const parsedLine = proc.parse(line);
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
-  let type: TextEditorDecorationType | undefined;
+  let type: DECORATION_TYPES | undefined;
   let fname: string;
   visit(
     parsedLine,
@@ -222,9 +225,9 @@ export function isBrokenWikilink(): boolean {
       link = linkvalue;
       if (!link) return false;
       fname = link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
-      type = linkedNoteType({ fname });
+      type = linkedNoteType({ fname, engine }).type;
       return false;
     }
   );
-  return type === DECORATION_TYPE.brokenWikilink;
+  return type === DECORATION_TYPES.brokenWikilink;
 }

@@ -33,6 +33,7 @@ export type DendronWorkspaceConfig = {
   // performance related
   maxPreviewsCached: number;
   maxNoteLength: number;
+  enableEditorDecorations: boolean;
   //
   feedback?: boolean;
   apiEndpoint?: string;
@@ -69,6 +70,7 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     enableHashTags: true,
     workspaceVaultSyncMode: VaultSyncModeEnum.noCommit,
     enableAutoFoldFrontmatter: false,
+    enableEditorDecorations: true,
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
   };

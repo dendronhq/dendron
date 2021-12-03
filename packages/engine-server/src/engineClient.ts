@@ -20,6 +20,8 @@ import {
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   FuseEngine,
+  GetDecorationsOpts,
+  GetDecorationsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteOptsV2,
@@ -430,6 +432,16 @@ export class DendronEngineClient implements DEngineClient {
     const out = await this.api.getNoteBlocks({
       id,
       filterByAnchorType,
+      ws: this.ws,
+    });
+    return out;
+  }
+
+  async getDecorations(
+    opts: GetDecorationsOpts
+  ): Promise<GetDecorationsPayload> {
+    const out = await this.api.getDecorations({
+      ...opts,
       ws: this.ws,
     });
     return out;

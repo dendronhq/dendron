@@ -314,6 +314,7 @@ suite("Extension", function () {
             enableRemoteVaultInit: true,
             workspaceVaultSyncMode: "noCommit",
             enableAutoFoldFrontmatter: false,
+            enableEditorDecorations: true,
             enableHashTags: true,
             enableUserTags: true,
             maxPreviewsCached: 10,

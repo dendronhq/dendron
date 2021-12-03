@@ -28,10 +28,12 @@ import { ThemeTarget, ThemeType } from "./constants";
 import { DendronError } from "./error";
 import {
   DEngineInitPayload,
+  GetDecorationsPayload,
   GetNoteBlocksPayload,
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
+  VSRange,
 } from "./types";
 
 // === Types
@@ -152,6 +154,14 @@ export type GetNoteBlocksRequest = {
   id: string;
   filterByAnchorType?: "header" | "block";
 } & WorkspaceRequest;
+
+export type GetDecorationsRequest = {
+  id: string;
+  ranges: {
+    range: VSRange;
+    text: string;
+  }[];
+} & Partial<WorkspaceRequest>;
 
 export type SchemaDeleteRequest = {
   id: string;
@@ -489,6 +499,17 @@ export class DendronAPI extends API {
   ): Promise<GetNoteBlocksPayload> {
     const resp = await this._makeRequest({
       path: "note/blocks",
+      method: "get",
+      qs: req,
+    });
+    return resp;
+  }
+
+  async getDecorations(
+    req: GetDecorationsRequest
+  ): Promise<GetDecorationsPayload> {
+    const resp = await this._makeRequest({
+      path: "note/decorations",
       method: "get",
       qs: req,
     });

@@ -50,6 +50,8 @@ import {
   WriteNoteResp,
   ConfigUtils,
   RefreshNotesOpts,
+  GetDecorationsOpts,
+  newRange,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -63,6 +65,7 @@ import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { MDUtilsV5, ProcFlavor } from "./markdown";
+import { getDecorations } from "./markdown/decorations";
 import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -709,6 +712,51 @@ export class DendronEngineV2 implements DEngine {
         );
       }
       return { data: blocks, error: null };
+    } catch (err: any) {
+      return {
+        error: err,
+        data: undefined,
+      };
+    }
+  }
+
+  async getDecorations(opts: GetDecorationsOpts) {
+    const note = this.notes[opts.id];
+    try {
+      if (_.isUndefined(note))
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_STATE,
+          message: `${opts.id} does not exist`,
+        });
+      // Very weirdly, these range numbers turn into strings when getting called in through the API.
+      // Not sure if I'm missing something.
+      opts.ranges = opts.ranges.map((item) => {
+        return {
+          text: item.text,
+          range: newRange(
+            _.toNumber(item.range.start.line),
+            _.toNumber(item.range.start.character),
+            _.toNumber(item.range.end.line),
+            _.toNumber(item.range.end.character)
+          ),
+        };
+      });
+      const {
+        allDecorations: decorations,
+        allDiagnostics: diagnostics,
+        allErrors: errors,
+      } = getDecorations({ ...opts, note, engine: this });
+      let error: IDendronError | null = null;
+      if (errors && errors.length > 1)
+        error = new DendronCompositeError(errors);
+      else if (errors && errors.length === 1) error = errors[0];
+      return {
+        data: {
+          decorations,
+          diagnostics,
+        },
+        error,
+      };
     } catch (err: any) {
       return {
         error: err,

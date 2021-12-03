@@ -1,5 +1,5 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
-import { DoctorActions } from "@dendronhq/engine-server";
+import { BAD_FRONTMATTER_CODE, DoctorActions } from "@dendronhq/engine-server";
 import isUrl from "is-url";
 import _ from "lodash";
 import {
@@ -25,9 +25,6 @@ import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
-
-/** Used to match the warnings to code actions. Also displayed for users along with the warning message. */
-const BAD_FRONTMATTER_CODE = "bad frontmatter";
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(

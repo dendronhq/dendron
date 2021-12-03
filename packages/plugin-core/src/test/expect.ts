@@ -87,6 +87,6 @@ export function expect(value: any) {
         threwException,
         `Expected exception to be thrown. None were thrown.`
       );
-    }
+    },
   };
 }

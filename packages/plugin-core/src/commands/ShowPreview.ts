@@ -6,7 +6,6 @@ import {
   DNoteAnchor,
   ErrorFactory,
   ERROR_STATUS,
-  getStage,
   NoteProps,
   NotePropsDict,
   NoteUtils,
@@ -14,24 +13,20 @@ import {
   NoteViewMessageEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  findUpTo,
-  vault2Path,
-  WebViewCommonUtils,
-} from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { PreviewUtils } from "../views/utils";
+import { QuickPickUtil } from "../utils/quickPick";
+import { PreviewUtils, WebViewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
-import { QuickPickUtil } from "../utils/quickPick";
 
 type CommandOpts = {};
 type CommandOutput = any;
@@ -338,6 +333,8 @@ export class ShowPreviewCommand extends BasicCommand<
     const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
+    const port = ext.port!;
+    const wsRoot = ext.getEngine().wsRoot;
 
     // show existing panel if exist
     if (!_.isUndefined(existingPanel)) {
@@ -352,18 +349,9 @@ export class ShowPreviewCommand extends BasicCommand<
     }
     Logger.info({ ctx, msg: "creating new" });
 
-    const assetUri = VSCodeUtils.getAssetUri(getExtension().context);
-    const pkgRoot = path.dirname(
-      findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
-    );
-    const pluginViewsRoot: vscode.Uri =
-      getStage() === "dev"
-        ? vscode.Uri.file(
-            path.join(pkgRoot, "..", "dendron-plugin-views", "build")
-          )
-        : assetUri;
+    const name = "notePreview";
     const panel = vscode.window.createWebviewPanel(
-      "dendronPreview",
+      name,
       "Dendron Preview",
       {
         viewColumn,
@@ -373,24 +361,11 @@ export class ShowPreviewCommand extends BasicCommand<
         enableScripts: true,
         retainContextWhenHidden: true,
         enableFindWidget: true,
-        localResourceRoots: [assetUri, pluginViewsRoot],
+        localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
       }
     );
 
-    const name = "notePreview";
-    const jsSrc = vscode.Uri.joinPath(
-      pluginViewsRoot,
-      "static",
-      "js",
-      `${name}.bundle.js`
-    );
-    const cssSrc = vscode.Uri.joinPath(
-      pluginViewsRoot,
-      "static",
-      "css",
-      `${name}.styles.css`
-    );
-    const port = getExtension().port!;
+    const webViewAssets = WebViewUtils.getJsAndCss(name);
     panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
       Logger.debug({ ctx, msgType: msg.type });
@@ -438,14 +413,12 @@ export class ShowPreviewCommand extends BasicCommand<
       }
     });
 
-    const html = getWebviewContent({
-      jsSrc,
-      cssSrc,
+    const html = WebViewUtils.getWebviewContent({
+      ...webViewAssets,
       port,
-      wsRoot: ext.getEngine().wsRoot,
+      wsRoot,
       panel,
     });
-
     panel.webview.html = html;
 
     // Update workspace-wide panel
@@ -459,39 +432,4 @@ export class ShowPreviewCommand extends BasicCommand<
       ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
     });
   }
-}
-
-function getWebviewContent({
-  jsSrc,
-  cssSrc,
-  port,
-  wsRoot,
-  panel,
-}: {
-  jsSrc: vscode.Uri;
-  cssSrc: vscode.Uri;
-  port: number;
-  wsRoot: string;
-  panel: vscode.WebviewPanel;
-}) {
-  const root = VSCodeUtils.getAssetUri(getExtension().context);
-  const themes = ["light", "dark"];
-  const themeMap: any = {};
-  themes.map((th) => {
-    themeMap[th] = panel.webview
-      .asWebviewUri(
-        vscode.Uri.joinPath(root, "static", "css", "themes", `${th}.css`)
-      )
-      .toString();
-  });
-  const out = WebViewCommonUtils.genVSCodeHTMLIndex({
-    jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
-    cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
-    port,
-    wsRoot,
-    browser: false,
-    acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
-    themeMap,
-  });
-  return out;
 }

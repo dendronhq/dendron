@@ -5,13 +5,14 @@ import {
   NotePropsDict,
   stringifyError,
   APIUtils,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 // @ts-ignore
-import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal"
+import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
 /**
  * Equivalent to engine.init
  */
@@ -135,6 +136,15 @@ export const engineSlice = createSlice({
       const note = action.payload;
       if (!state.notes) {
         state.notes = {};
+      }
+      // this is a new node
+      if (!state.notes[note.id]) {
+        NoteUtils.addParent({
+          note,
+          notesList: _.values(state.notes),
+          createStubs: true,
+          wsRoot: state.wsRoot!,
+        });
       }
       state.notes[note.id] = note;
     },

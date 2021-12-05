@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import {
@@ -70,15 +71,23 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           logger.info({
             ctx,
             msg: "syncEngine:pre",
+            sync,
           });
           await ideDispatch(engineSlice.initNotes(workspace));
         }
         if (syncChangedNote && note) {
+          // skip the initial ?
+          logger.info({
+            ctx,
+            msg: "syncNote:pre",
+            sync,
+            note: note ? NoteUtils.toLogObj(note) : "no note",
+          });
           await ideDispatch(engineSlice.syncNote({ ...workspace, note }));
         }
-        logger.info({ ctx, msg: "syncEngine:post" });
+        logger.info({ ctx, msg: "setNoteActive:pre" });
         ideDispatch(ideSlice.actions.setNoteActive(note));
-        logger.info({ ctx, msg: "setNote:post" });
+        logger.info({ ctx, msg: "setNoteActive:post" });
         break;
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
@@ -94,10 +103,17 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   return <Component {...props} />;
 }
 
-function DendronApp(props: { Component: DendronComponent }) {
+export type DendronAppProps = {
+  opts: { padding?: "inherit" };
+  Component: DendronComponent;
+};
+
+function DendronApp(props: DendronAppProps) {
+  const opts = _.defaults(props.opts, { padding: "33px" });
+
   return (
     <Provider store={combinedStore}>
-      <Layout style={{ padding: "33px" }}>
+      <Layout style={{ padding: opts.padding }}>
         <Content>
           <DendronVSCodeApp {...props} />
         </Content>

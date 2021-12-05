@@ -1,7 +1,7 @@
 import { renderOnDOM } from "../bootstrap";
 import DendronNotePage from "../components/DendronNotePage";
 
-renderOnDOM(DendronNotePage)
+renderOnDOM(DendronNotePage, {});
 
 // dummy export
-export {};
+export default DendronNotePage;

@@ -2,23 +2,24 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import DendronApp from "./components/DendronApp";
+import DendronApp, { DendronAppProps } from "./components/DendronApp";
 import { DendronComponent } from "./types";
 
-function renderWithDendronApp(
-  props: { Component: DendronComponent }
-) {
+function renderWithDendronApp(props: DendronAppProps) {
   return <DendronApp {...props} />;
 }
 
 /**
  * Render standalone react app
- * @param props 
+ * @param opts.padding: override default padding
  */
-export function renderOnDOM(Component: DendronComponent) {
+export function renderOnDOM(
+  Component: DendronComponent,
+  opts: DendronAppProps["opts"]
+) {
   ReactDOM.render(
     <React.StrictMode>
-      {renderWithDendronApp({Component})}
+      {renderWithDendronApp({ Component, opts })}
     </React.StrictMode>,
     document.getElementById("root")
   );

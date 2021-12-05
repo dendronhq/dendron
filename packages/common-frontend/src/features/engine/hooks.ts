@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { useEffect } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { EngineSliceUtils } from ".";
+import { engineSliceUtils } from ".";
 import { createLogger } from "../../utils";
 import { EngineState, InitNoteOpts, initNotes } from "./slice";
 import { AppDispatch, RootState } from "./store";
@@ -32,7 +32,7 @@ export const useEngine = ({
     if (engineState.error) {
       return engineState.error;
     }
-    if (!EngineSliceUtils.hasInitialized(engineState) || opts.force) {
+    if (!engineSliceUtils.hasInitialized(engineState) || opts.force) {
       logger.info({ msg: "dispatch notes", force: opts.force });
       if (_.isUndefined(opts.port)) {
         return;

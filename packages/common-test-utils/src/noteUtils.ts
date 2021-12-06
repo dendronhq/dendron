@@ -81,6 +81,27 @@ export class TestNoteFactory {
     });
   }
 
+  async createNoteInputWithFNames(
+    fnames: string[]
+  ): Promise<DNodePropsQuickInputV2[]> {
+    const items = [];
+
+    // eslint-disable-next-line guard-for-in,no-restricted-syntax
+    for (const name of fnames) {
+      // eslint-disable-next-line no-await-in-loop
+      items.push(await this.createNoteInputWithFName(name));
+    }
+
+    return items;
+  }
+
+  createNoteInputWithFName(fname: string): Promise<DNodePropsQuickInputV2> {
+    return NoteTestUtilsV4.createNotePropsInput({
+      fname,
+      ...this._defaults,
+    });
+  }
+
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
     const noteProps: NoteProps[] = [];
     // eslint-disable-next-line no-plusplus

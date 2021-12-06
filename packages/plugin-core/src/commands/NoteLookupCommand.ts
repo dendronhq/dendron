@@ -58,7 +58,6 @@ import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
 import {
   AUTO_COMPLETABLE_COMMAND_ID,
   AutoCompleter,
@@ -164,19 +163,8 @@ export class NoteLookupCommand extends BaseCommand<
 
   async onAutoComplete() {
     if (this._quickPick) {
-      let activeItemValue = this._quickPick.value;
-      if (this._quickPick.activeItems.length >= 1) {
-        activeItemValue = this._quickPick.activeItems[0].fname;
-      }
-
-      const fnames = this._quickPick.items
-        .filter((item) => item.detail !== CREATE_NEW_DETAIL)
-        .map((item) => item.fname);
-
-      this._quickPick.value = AutoCompleter.autoCompleteNoteLookup(
-        this._quickPick.value,
-        activeItemValue,
-        fnames
+      this._quickPick.value = AutoCompleter.getAutoCompletedValue(
+        this._quickPick
       );
 
       await this.provider.onUpdatePickerItems({

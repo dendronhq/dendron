@@ -4,6 +4,8 @@
 import { ErrorFactory, FuseEngine } from "@dendronhq/common-all";
 import { BaseCommand } from "../commands/base";
 import * as _ from "lodash";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
 
 type AutoCompletableCmd = BaseCommand<any> & {
   onAutoComplete: () => Promise<void>;
@@ -170,5 +172,39 @@ export class AutoCompleter {
     } else {
       return topPick.substring(0, idx) + currentValue;
     }
+  }
+
+  static getAutoCompletedValue(_quickPick: DendronQuickPickerV2): string {
+    // Keep only distinct items since that allows us to move past multiple
+    // same names in a row to allow digging deeper into note hierarchy.
+    // Example:
+    //   User typed value: 'languages'
+    //   Items: [languages(vaultA), languages(vaultB), languages.python...)]
+    // We want to be able to move past the duplicate language and auto complete to languages.python
+    const fnames = _.uniq(
+      _quickPick.items
+        // Remove create new since it does not make sense for name auto completion.
+        .filter((item) => item.detail !== CREATE_NEW_DETAIL)
+        .map((item) => item.fname)
+    );
+
+    // Account for user selecting a file name with arrow keys
+    let activeItemValue = _quickPick.value;
+    if (_quickPick.activeItems.length >= 1) {
+      const candidate = _quickPick.activeItems[0].fname;
+
+      // Even if the user has not selected an item with arrow keys the focus
+      // of the drop down will be on the first item hence we only want to switch
+      // the active item if we detect that arrow key selection has happened.
+      if (_.isEmpty(fnames) || candidate !== fnames[0]) {
+        activeItemValue = candidate;
+      }
+    }
+
+    return AutoCompleter.autoCompleteNoteLookup(
+      _quickPick.value,
+      activeItemValue,
+      fnames
+    );
   }
 }

@@ -252,6 +252,28 @@ describe(`schemaParser tests:`, () => {
       expect(payload.errors).toEqual(null);
     });
 
+    describe(`AND parsing non line part of schema which uses local child id`, () => {
+      let plainSchema: SchemaProps;
+
+      beforeAll(() => {
+        plainSchema = inlined.schemas["plain_schema"];
+      });
+
+      it("THEN schema is found and has child schema", () => {
+        expect(plainSchema.children[0]).toEqual("plain_schema_child");
+      });
+
+      it("THEN child of plain schema has a valid template", () => {
+        expect(
+          inlined.schemas[plainSchema.children[0]].data?.template?.id
+        ).toEqual("templates.example");
+      });
+
+      it("THEN plain schema is able to have inline schema as a child", () => {
+        expect(plainSchema.children[1]).toEqual("daily");
+      });
+    });
+
     describe(`AND parsing non inline part of schema which contains imported id`, () => {
       let foosParent: SchemaProps;
 
@@ -270,14 +292,14 @@ describe(`schemaParser tests:`, () => {
 
     describe(`AND inline schema is parsed`, () => {
       it(`THEN inlined root has daily id`, () => {
-        expect(inlined.root.id).toEqual("daily");
+        expect(inlined.schemas["daily"]).toBeDefined();
       });
 
       describe(`AND daily has journal child`, () => {
         let journal: SchemaProps;
 
         beforeAll(() => {
-          journal = inlined.schemas[inlined.root.children[0]];
+          journal = inlined.schemas["journal"];
         });
 
         it(`THEN patternless journal id is equal to journal`, () => {

@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
-import { getThresholdValue } from "@dendronhq/common-all";
+import { getCleanThresholdValue } from "@dendronhq/common-all";
 
 type TestData = {
   fname: string;
@@ -74,17 +74,17 @@ const queryTestV1 = ({
 };
 
 describe("Fuse utility function tests", () => {
-  describe(`getThresholdValue`, () => {
+  describe(`getCleanThresholdValue`, () => {
     it("WHEN val is specified but too small THEN use fallback", () => {
-      expect(getThresholdValue(-1)).toEqual(0.2);
+      expect(getCleanThresholdValue(-1)).toEqual(0.2);
     });
 
     it("WHEN val is specified but too large THEN use fallback", () => {
-      expect(getThresholdValue(1.1)).toEqual(0.2);
+      expect(getCleanThresholdValue(1.1)).toEqual(0.2);
     });
 
     it("WHEN val is within range THEN use the configured value", () => {
-      expect(getThresholdValue(0.1234)).toEqual(0.1234);
+      expect(getCleanThresholdValue(0.1234)).toEqual(0.1234);
     });
   });
 

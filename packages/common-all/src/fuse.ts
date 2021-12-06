@@ -11,6 +11,7 @@ import {
   NoteUtils,
   DNodeUtils,
   DEngineClient,
+  ConfigUtils,
 } from ".";
 import { DVault } from "./types";
 
@@ -99,14 +100,14 @@ type FuseEngineOpts = {
   fuzzThreshold: number;
 };
 
-export const getThresholdValue = (configThreshold: number) => {
-  // Setting it to fallback threshold value in case configuration is incorrect.
-  let threshold = 0.2;
-  if (configThreshold >= 0 && configThreshold <= 1) {
-    threshold = configThreshold;
+export const getCleanThresholdValue = (configThreshold: number) => {
+  if (configThreshold < 0 || configThreshold > 1) {
+    // Setting threshold to fallback threshold value in case configuration is incorrect.
+    return ConfigUtils.getLookup(ConfigUtils.genDefaultConfig()).note
+      .fuzzThreshold;
   }
 
-  return threshold;
+  return configThreshold;
 };
 
 export class FuseEngine {
@@ -135,7 +136,7 @@ export class FuseEngine {
 
   constructor(opts: FuseEngineOpts) {
     this.threshold =
-      opts.mode === "exact" ? 0.0 : getThresholdValue(opts.fuzzThreshold);
+      opts.mode === "exact" ? 0.0 : getCleanThresholdValue(opts.fuzzThreshold);
 
     this.notesIndex = createFuse<NoteProps>([], {
       preset: "note",

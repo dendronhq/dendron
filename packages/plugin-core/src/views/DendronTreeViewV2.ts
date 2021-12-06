@@ -14,11 +14,11 @@ import path from "path";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "../utils/analytics";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
-import { WebViewUtils } from "./utils";
 import { WSUtils } from "../WSUtils";
+import { WebViewUtils } from "./utils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
@@ -62,14 +62,17 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     this._view = webviewView;
     const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
+
     webviewView.webview.options = {
       enableScripts: true,
-      enableCommandUris: true,
-      localResourceRoots: [],
+      enableCommandUris: false,
+      localResourceRoots: WebViewUtils.getLocalResourceRoots(
+        getExtension().context
+      ),
     };
-    webviewView.webview.html = await this._getHtmlForWebview(
-      webviewView.webview
-    );
+    webviewView.webview.html = await this._getHtmlForWebview(webviewView);
+    const duration = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "genHtml:post", duration });
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
       Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {
@@ -117,7 +120,6 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           break;
         }
         default:
-          console.log("got data", msg);
           break;
       }
     });
@@ -137,10 +139,17 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
   }
 
-  private _getHtmlForWebview(_webview: vscode.Webview) {
-    return WebViewUtils.genHTMLForTreeView({
-      title: "Tree View",
-      view: DendronTreeViewKey.TREE_VIEW_V2,
+  private _getHtmlForWebview(_webview: vscode.WebviewView) {
+    const name = "treePanelView";
+    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const ext = getExtension();
+    const port = ext.port!;
+    const html = WebViewUtils.getWebviewContent({
+      ...webViewAssets,
+      port,
+      wsRoot: ext.getEngine().wsRoot,
+      panel: _webview,
     });
+    return html;
   }
 }

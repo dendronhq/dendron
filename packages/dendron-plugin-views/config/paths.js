@@ -67,6 +67,7 @@ module.exports = {
     .map((ent) => ent.split(".tsx")[0]),
   appPages: {
     notePreview: resolveApp("src/views/DendronNotePageView"),
+    treePanelView: resolveApp("src/views/DendronTreeExplorerPanelView"),
   },
   yarnLockFile: resolveApp("yarn.lock"),
   testsSetup: resolveModule(resolveApp, "src/setupTests"),

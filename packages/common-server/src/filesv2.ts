@@ -453,4 +453,60 @@ export function dot2Slash(fname: string) {
   return fname.replace(/\./g, "/");
 }
 
+/** Checks that the `path` contains a file. */
+export async function fileExists(path: string) {
+  try {
+    const stat = await fs.stat(path);
+    return stat.isFile();
+  } catch {
+    return false;
+  }
+}
+
+/** Finds if a file `fpath` is located in any vault.
+ *
+ * @param fpath A file name or relative path that we are searching inside vaults.
+ */
+async function findFileVault({
+  fpath,
+  wsRoot,
+  vaults,
+}: {
+  fpath: string;
+  wsRoot: string;
+  vaults: DVault[];
+}): Promise<{ vault: DVault; fullPath: string } | undefined> {
+  // Assets from later vaults will overwrite earlier ones.
+  vaults = [...vaults].reverse();
+  for (const vault of vaults) {
+    const fullPath = path.join(wsRoot, vault.fsPath, fpath);
+    // Doing this sequentially to simulate how publishing handles conflicting assets.
+    // eslint-disable-next-line no-await-in-loop
+    if (await fileExists(fullPath)) {
+      return { vault, fullPath };
+    }
+  }
+  return;
+}
+
+export async function findNonNoteFile(opts: {
+  fpath: string;
+  wsRoot: string;
+  vaults: DVault[];
+}): Promise<{ vault?: DVault; fullPath: string } | undefined> {
+  let { fpath } = opts;
+  // Especially for assets, `/assets` and `assets` refers to the same place.
+  fpath = _.trim(fpath, "/\\");
+  // Check if this is an asset first
+  if (fpath.startsWith("assets")) {
+    const out = await findFileVault(opts);
+    if (out !== undefined) return out;
+  }
+  // If not an asset, or if we couldn't find it in assets, then check from wsRoot for out-of-vault files
+  const fullPath = path.join(opts.wsRoot, fpath);
+  if (await fileExists(fullPath)) return { fullPath };
+  // Otherwise, it just doesn't exist
+  return undefined;
+}
+
 export { tmp, DirResult };

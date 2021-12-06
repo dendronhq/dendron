@@ -69,7 +69,8 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
           qs: refAtPos.ref,
           anchor: refAtPos.anchorStart,
         });
-        if (_.isUndefined(out)) {
+        if (out?.type !== "note") {
+          // Wasn't able to create, or not a note file
           return;
         }
         const { note, pos } = out;

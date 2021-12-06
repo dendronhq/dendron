@@ -7,7 +7,9 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
+import path from "path";
 import { Position, Selection, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -16,11 +18,13 @@ import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
   qs?: string;
-  vault?: DVault;
+  /** `null` only for non-note files outside of all vaults */
+  vault?: DVault | null;
   anchor?: DNoteAnchor;
   overrides?: Partial<NoteProps>;
   /**
@@ -33,7 +37,10 @@ type CommandOpts = {
 export { CommandOpts as GotoNoteCommandOpts };
 
 type CommandOutput =
-  | { note: NoteProps; pos?: Position; source?: string }
+  // When opening a note
+  | { type: "note"; note: NoteProps; pos?: Position; source?: string }
+  // When opening a non-note file
+  | { type: "non-note"; fullPath: string; vault?: DVault }
   | undefined;
 
 export const findAnchorPos = (opts: {
@@ -101,8 +108,18 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         opts.qs = link.value;
       } else {
         // Same-file block reference, implicitly current file
-        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-        opts.qs = NoteUtils.uri2Fname(editor.document.uri);
+        const note = WSUtils.getActiveNote();
+        if (note) {
+          opts.qs = note.fname;
+          opts.vault = note.vault;
+        } else {
+          // Same file link within non-note file
+          opts.qs = path.relative(
+            engine.wsRoot,
+            VSCodeUtils.getActiveTextEditorOrThrow().document.fileName
+          );
+          opts.vault = null;
+        }
       }
     }
 
@@ -120,7 +137,6 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         // exists in some vault, we might be able to use that.
         const notes = NoteUtils.getNotesByFname({
           fname: opts.qs,
-          vault: opts.vault,
           notes: engine.notes,
         });
         if (notes.length === 1) {
@@ -135,27 +151,42 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           if (_.isUndefined(resp)) return;
           opts.vault = resp;
         } else {
-          // This is a new note. Depending on the config, we can either
-          // automatically pick the vault or we'll prompt for it.
-          const confirmVaultSetting =
-            getDWorkspace().config["lookupConfirmVaultOnCreate"];
-          const selectionMode =
-            confirmVaultSetting !== true
-              ? VaultSelectionMode.smart
-              : VaultSelectionMode.alwaysPrompt;
-
-          const currentVault = PickerUtilsV2.getVaultForOpenEditor();
-          const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
-            vault: currentVault,
-            fname: opts.qs,
-            vaultSelectionMode: selectionMode,
+          // Not an existing note
+          const nonNoteFile = await findNonNoteFile({
+            fpath: opts.qs,
+            wsRoot: engine.wsRoot,
+            vaults: engine.vaults,
           });
+          if (nonNoteFile?.vault !== undefined) {
+            // This is a non-note file inside a vault's assets
+            opts.vault = nonNoteFile.vault;
+          } else if (nonNoteFile?.fullPath !== undefined) {
+            // This is a non-note file outside all vaults
+            opts.vault = null;
+          } else {
+            // This is a new note. Depending on the config, we can either
+            // automatically pick the vault or we'll prompt for it.
+            const confirmVaultSetting =
+              getDWorkspace().config["lookupConfirmVaultOnCreate"];
+            const selectionMode =
+              confirmVaultSetting !== true
+                ? VaultSelectionMode.smart
+                : VaultSelectionMode.alwaysPrompt;
 
-          // If we prompted the user and they selected nothing, then they want to cancel
-          if (_.isUndefined(selectedVault)) {
-            return;
+            const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+            const selectedVault =
+              await PickerUtilsV2.getOrPromptVaultForNewNote({
+                vault: currentVault,
+                fname: opts.qs,
+                vaultSelectionMode: selectionMode,
+              });
+
+            // If we prompted the user and they selected nothing, then they want to cancel
+            if (_.isUndefined(selectedVault)) {
+              return;
+            }
+            opts.vault = selectedVault;
           }
-          opts.vault = selectedVault;
         }
       }
     }
@@ -180,10 +211,33 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
     const client = getExtension().getEngine();
+    const { wsRoot } = getDWorkspace();
 
     const { qs, vault } = (await this.processInputs(opts)) || opts;
     if (_.isUndefined(qs) || _.isUndefined(vault)) {
       // There was an error or the user cancelled a prompt
+      return;
+    }
+
+    const nonNoteFile = await findNonNoteFile({
+      fpath: qs,
+      vaults: vault === null ? [] : [vault],
+      wsRoot,
+    });
+    if (nonNoteFile) {
+      await VSCodeUtils.openFileInEditor(Uri.parse(nonNoteFile.fullPath));
+      return {
+        type: "non-note",
+        fullPath: nonNoteFile.fullPath,
+        vault: nonNoteFile.vault,
+      };
+    }
+    if (vault === null) {
+      this.L.error({
+        ctx,
+        opts,
+        msg: "Vault explicitly null, but not a non-note file",
+      });
       return;
     }
 
@@ -198,7 +252,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const note = data?.note as NoteProps;
       const npath = NoteUtils.getFullPath({
         note,
-        wsRoot: getDWorkspace().wsRoot,
+        wsRoot,
       });
       const uri = Uri.file(npath);
       const editor = await VSCodeUtils.openFileInEditor(uri, {
@@ -210,7 +264,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         editor.selection = new Selection(pos, pos);
         editor.revealRange(editor.selection);
       }
-      return { note, pos, source: opts.source };
+      return { type: "note", note, pos, source: opts.source };
     });
     return out;
   }

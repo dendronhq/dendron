@@ -611,5 +611,74 @@ suite("GotoNote", function () {
         },
       });
     });
+
+    test("non-note file", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          // Create a note with a hashtag in it
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "[[/test.txt]]",
+          });
+          await fs.writeFile(
+            path.join(wsRoot, "test.txt"),
+            "Et voluptatem autem sunt."
+          );
+        },
+        onInit: async () => {
+          // Open the note, select the hashtag, and use the command
+          await WSUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+
+          await new GotoNoteCommand().run();
+          // Make sure this took us to the tag note
+          expect(getActiveEditorBasename()).toEqual("test.txt");
+          expect(
+            VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+          ).toEqual("Et voluptatem autem sunt.");
+          done();
+        },
+      });
+    });
+
+    test("non-note asset file", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          // Create a note with a hashtag in it
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "[[/assets/test.txt]]",
+          });
+          await fs.ensureDir(path.join(wsRoot, vaults[1].fsPath, "assets"));
+          await fs.writeFile(
+            path.join(wsRoot, vaults[1].fsPath, "assets", "test.txt"),
+            "Et hic est voluptatem eum quia quas pariatur."
+          );
+        },
+        onInit: async () => {
+          // Open the note, select the hashtag, and use the command
+          await WSUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+
+          await new GotoNoteCommand().run();
+          // Make sure this took us to the tag note
+          expect(getActiveEditorBasename()).toEqual("test.txt");
+          expect(
+            VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+          ).toEqual("Et hic est voluptatem eum quia quas pariatur.");
+          done();
+        },
+      });
+    });
   });
 });

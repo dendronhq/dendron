@@ -303,8 +303,8 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
 
   async plant(opts: GithubIssueImportPodPlantOpts) {
     const ctx = "GithubIssuePod";
-    this.L.info({ ctx, opts, msg: "enter" });
     const { wsRoot, engine, vault, config } = opts;
+    this.L.info({ ctx, msg: "enter", wsRoot });
     const {
       owner,
       repository,
@@ -329,6 +329,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
     }
 
     while (hasNextPage) {
+      // eslint-disable-next-line no-await-in-loop
       const result: any = await this.getDataFromGithub({
         owner,
         repository,

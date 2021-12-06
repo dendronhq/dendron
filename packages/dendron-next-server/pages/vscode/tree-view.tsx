@@ -17,7 +17,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  engineSlice,
+  engineSliceUtils,
   ideHooks,
   postVSCodeMessage,
   TreeViewUtils as CommonTreeViewUtils,
@@ -110,8 +110,6 @@ class TreeViewUtils {
   }
 }
 
-const { EngineSliceUtils } = engineSlice;
-
 function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
   const logger = createLogger("treeViewContainer");
   const isDiff = _.some([
@@ -158,7 +156,7 @@ function TreeViewParent({ engine, ide }: DendronProps) {
       );
     }
   };
-  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
+  const engineInitialized = engineSliceUtils.hasInitialized(engine);
   // what keys shod be open
   const { noteActive } = ide;
   // --- effects

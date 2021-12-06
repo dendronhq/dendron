@@ -1,50 +1,77 @@
-import {
-  combinedStore,
-  engineHooks,
-  engineSlice,
-} from "@dendronhq/common-frontend";
-import { render as rtlRender, waitFor } from "@testing-library/react";
-import { NoteProps } from "@dendronhq/common-all";
-import React from "react";
-import { Provider } from "react-redux";
+import { combinedStore, engineSlice } from "@dendronhq/common-frontend";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../../engine";
 import { ENGINE_HOOKS } from "../../../../presets";
 
-function render(
-  ui: any,
-  { preloadedState, store = combinedStore, ...renderOptions } = {} as any
-) {
-  function Wrapper({ children }: { children: any }) {
-    return <Provider store={store}>{children}</Provider>;
-  }
-  return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
-}
-const App = (props: { port: number; ws: string; note: NoteProps }) => {
-  const dispatch = engineHooks.useEngineAppDispatch();
-  dispatch(engineSlice.syncNote(props));
-  const engine = engineHooks.useEngineAppSelector((state) => state.engine);
+describe("GIVEN syncNote", () => {
+  afterEach(() => {
+    combinedStore.dispatch(engineSlice.tearDown());
+  });
 
-  return <div data-testid="resp">{JSON.stringify(engine.notes)}</div>;
-};
+  describe("WHEN sync new note", () => {
+    test("THEN note is added to parent", async () => {
+      await runEngineTestV5(
+        async ({ port, wsRoot, engine, vaults }) => {
+          // --- setup
+          // add a new note to the engine
+          const newNote = await NoteTestUtilsV4.createNote({
+            fname: "foo.newchild",
+            vault: vaults[0],
+            wsRoot,
+            props: {
+              parent: "foo",
+              contentHash: undefined,
+            },
+          });
+          await engine.updateNote(newNote, { newNode: true });
 
-describe("syncNote", () => {
-  test("basic", async () => {
-    await runEngineTestV5(
-      async ({ port, wsRoot, engine }) => {
-        const note = engine.notes["foo"];
-        const { getByTestId } = render(
-          <App port={port!} ws={wsRoot} note={note} />
-        );
-        await waitFor(() =>
-          expect(getByTestId("resp").innerHTML).not.toEqual("{}")
-        );
-        expect(JSON.parse(getByTestId("resp").innerHTML)["foo"]).toEqual(note);
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-        createEngine: createEngineFromServer,
-      }
-    );
+          // --- setup engineSlice
+          // sync new note to redux engine
+          const initNotesOpts = { ws: wsRoot, port: port! };
+          await combinedStore.dispatch(engineSlice.initNotes(initNotesOpts));
+          await combinedStore.dispatch(
+            engineSlice.syncNote({ ...initNotesOpts, note: newNote })
+          );
+
+          // check results
+          const engineSliceNotes = combinedStore.getState().engine.notes;
+          // new note exists
+          expect(engineSliceNotes[newNote.fname]).toEqual(newNote);
+          // new note is child of foo
+          expect(engineSliceNotes["foo"].children).toEqual([
+            "foo.ch1",
+            "foo.newchild",
+          ]);
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          createEngine: createEngineFromServer,
+        }
+      );
+    });
+  });
+
+  describe("WHEN sync existing note", () => {
+    test("THEN note is retrieved", async () => {
+      await runEngineTestV5(
+        async ({ port, wsRoot, engine }) => {
+          const note = engine.notes["foo"];
+
+          const initNotesOpts = { ws: wsRoot, port: port! };
+          await combinedStore.dispatch(engineSlice.initNotes(initNotesOpts));
+          await combinedStore.dispatch(
+            engineSlice.syncNote({ ...initNotesOpts, note })
+          );
+          const notesDict = combinedStore.getState().engine.notes;
+          expect(notesDict["foo"]).toEqual(note);
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+          createEngine: createEngineFromServer,
+        }
+      );
+    });
   });
 });

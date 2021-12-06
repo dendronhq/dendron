@@ -5,13 +5,14 @@ import {
   NotePropsDict,
   stringifyError,
   APIUtils,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 // @ts-ignore
-import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal"
+import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
 /**
  * Equivalent to engine.init
  */
@@ -98,17 +99,20 @@ type InitialState = InitializedState;
 type InitializedState = EngineSliceState & {
   notesRendered: { [key: string]: string | undefined };
 };
+const initialState: InitialState = {
+  loading: LoadingStatus.IDLE,
+  currentRequestId: undefined,
+  vaults: [],
+  notes: {},
+  schemas: {},
+  notesRendered: {},
+  error: null,
+};
 
 export type EngineState = InitializedState;
 export const engineSlice = createSlice({
   name: "engine",
-  initialState: {
-    loading: "idle" as const,
-    notes: {},
-    schemas: {},
-    notesRendered: {},
-    error: null,
-  } as InitialState,
+  initialState,
   reducers: {
     setFromInit: (state, action: PayloadAction<DEngineInitPayload>) => {
       const { notes, wsRoot, schemas, vaults, config } = action.payload;
@@ -124,6 +128,18 @@ export const engineSlice = createSlice({
     setError: (state, action: PayloadAction<any>) => {
       state.error = action.payload;
     },
+    /**
+     * Reset all state
+     */
+    tearDown: (state) => {
+      state.loading = LoadingStatus.IDLE;
+      state.currentRequestId = undefined;
+      state.vaults = [];
+      state.notes = {};
+      state.schemas = {};
+      state.notesRendered = {};
+      state.error = null;
+    },
     setRenderNote: (
       state,
       action: PayloadAction<{ id: string; body: string }>
@@ -135,6 +151,15 @@ export const engineSlice = createSlice({
       const note = action.payload;
       if (!state.notes) {
         state.notes = {};
+      }
+      // this is a new node
+      if (!state.notes[note.id]) {
+        NoteUtils.addParent({
+          note,
+          notesList: _.values(state.notes),
+          createStubs: true,
+          wsRoot: state.wsRoot!,
+        });
       }
       state.notes[note.id] = note;
     },
@@ -163,15 +188,12 @@ export const engineSlice = createSlice({
   },
 });
 
-export class EngineSliceUtils {
-  static hasInitialized(engine: InitialState) {
-    return (
-      engine.loading === "idle" &&
-      !_.isUndefined(engine.notes) &&
-      !_.isUndefined(engine.vaults)
-    );
-  }
-}
-export const { setNotes, setError, setFromInit, setRenderNote, updateNote } =
-  engineSlice.actions;
+export const {
+  setNotes,
+  setError,
+  setFromInit,
+  setRenderNote,
+  updateNote,
+  tearDown,
+} = engineSlice.actions;
 export const reducer = engineSlice.reducer;

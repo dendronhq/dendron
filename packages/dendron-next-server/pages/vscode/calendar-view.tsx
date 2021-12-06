@@ -7,22 +7,21 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  engineSlice,
+  engineSliceUtils,
   postVSCodeMessage,
 } from "@dendronhq/common-frontend";
 import {
-  CalendarProps as AntdCalendarProps,
-  Spin,
-  Button,
-  Divider,
   Badge,
+  Button,
+  CalendarProps as AntdCalendarProps,
   ConfigProvider,
+  Divider,
+  Spin,
 } from "antd";
-
 import generateCalendar from "antd/lib/calendar/generateCalendar";
 import classNames from "classnames";
 import _ from "lodash";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import luxonGenerateConfig from "../../lib/luxon";
 import { DendronProps } from "../../lib/types";
 
@@ -60,7 +59,6 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
 }
 
 const today = luxonGenerateConfig.getNow();
-const { EngineSliceUtils } = engineSlice;
 
 function CalendarView({ engine, ide }: DendronProps) {
   // --- init
@@ -76,7 +74,7 @@ function CalendarView({ engine, ide }: DendronProps) {
 
   const [activeMode, setActiveMode] = useState<CalendarProps["mode"]>("month");
 
-  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
+  const engineInitialized = engineSliceUtils.hasInitialized(engine);
 
   const { notes, config } = engine;
   const { noteActive } = ide;

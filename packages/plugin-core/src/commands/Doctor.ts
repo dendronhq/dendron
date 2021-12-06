@@ -143,6 +143,40 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     panel.webview.html = md.render(content.join("\n"));
   }
 
+  async showBrokenLinkPreview(
+    brokenLinks: {
+      file: string;
+      vault: string;
+      links: {
+        value: string;
+        line: number;
+        column: number;
+      }[];
+    }[]
+  ) {
+    let content = [
+      "# Broken Links Preview",
+      "",
+      `## The following files have broken links`,
+    ];
+    _.forEach(_.sortBy(brokenLinks, ["file"]), (ent) => {
+      content = content.concat(`${ent.file}\n`);
+      ent.links.forEach((link) => {
+        content = content.concat(
+          `- ${link.value} at line ${link.line} column ${link.column}\n`
+        );
+      });
+    });
+
+    const panel = window.createWebviewPanel(
+      "doctorBrokenLinksPreview",
+      "Create Broken Links Preview",
+      ViewColumn.One,
+      {}
+    );
+    panel.webview.html = md.render(content.join("\n"));
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
@@ -229,6 +263,25 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         if (ext.fileWatcher) {
           ext.fileWatcher.pause = false;
         }
+        break;
+      }
+      case DoctorActions.FIND_BROKEN_LINKS: {
+        let notes;
+        if (_.isUndefined(note)) {
+          notes = _.values(engine.notes);
+          notes = notes.filter((note) => !note.stub);
+        } else {
+          notes = [note];
+        }
+        const ds = new DoctorService();
+        const out = await ds.executeDoctorActions({
+          action: opts.action,
+          candidates: notes,
+          engine,
+          exit: false,
+          quiet: true,
+        });
+        await this.showBrokenLinkPreview(out.resp);
         break;
       }
       default: {

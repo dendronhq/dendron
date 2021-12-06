@@ -281,6 +281,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           exit: false,
           quiet: true,
         });
+        if (out.resp.length === 0) {
+          window.showInformationMessage(`There are no broken links!`);
+          break;
+        }
         await this.showBrokenLinkPreview(out.resp);
         break;
       }

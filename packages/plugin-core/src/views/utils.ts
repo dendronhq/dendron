@@ -3,6 +3,7 @@ import {
   DendronWebViewKey,
   DMessageEnum,
   DUtils,
+  getStage,
   NoteProps,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
@@ -10,10 +11,94 @@ import _ from "lodash";
 import { title } from "process";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension, getDWorkspace } from "../workspace";
+import path from "path";
+import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
 
 export class WebViewUtils {
+  /**
+   * Get root uri where web view assets are store
+   * When running in development, this is in the build folder of `dendron-plugin-views`
+   * @returns
+   */
+  static getViewRootUri() {
+    const assetUri = VSCodeUtils.getAssetUri(getExtension().context);
+    const pkgRoot = path.dirname(
+      findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
+    );
+    return getStage() === "dev"
+      ? vscode.Uri.file(
+          path.join(pkgRoot, "..", "dendron-plugin-views", "build")
+        )
+      : assetUri;
+  }
+
+  static getJsAndCss(name: string) {
+    const pluginViewsRoot = WebViewUtils.getViewRootUri();
+    const jsSrc = vscode.Uri.joinPath(
+      pluginViewsRoot,
+      "static",
+      "js",
+      `${name}.bundle.js`
+    );
+    const cssSrc = vscode.Uri.joinPath(
+      pluginViewsRoot,
+      "static",
+      "css",
+      `${name}.styles.css`
+    );
+    return { jsSrc, cssSrc };
+  }
+
+  static getLocalResourceRoots(context: vscode.ExtensionContext) {
+    const assetUri = VSCodeUtils.getAssetUri(context);
+    const pluginViewsRoot = WebViewUtils.getViewRootUri();
+    return [assetUri, pluginViewsRoot];
+  }
+
+  /**
+   *
+   * @param panel: required to convert asset URLs to VSCode Webview Extension format
+   * @returns
+   *
+   */
+  static getWebviewContent({
+    jsSrc,
+    cssSrc,
+    port,
+    wsRoot,
+    panel,
+  }: {
+    jsSrc: vscode.Uri;
+    cssSrc: vscode.Uri;
+    port: number;
+    wsRoot: string;
+    panel: vscode.WebviewPanel | vscode.WebviewView;
+  }) {
+    const root = VSCodeUtils.getAssetUri(getExtension().context);
+    const themes = ["light", "dark"];
+    const themeMap: any = {};
+    themes.map((th) => {
+      themeMap[th] = panel.webview
+        .asWebviewUri(
+          vscode.Uri.joinPath(root, "static", "css", "themes", `${th}.css`)
+        )
+        .toString();
+    });
+    const out = WebViewCommonUtils.genVSCodeHTMLIndex({
+      jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
+      cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
+      port,
+      wsRoot,
+      browser: false,
+      acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
+      themeMap,
+    });
+    return out;
+  }
+
   static genHTMLForView = async ({
     title,
     view,

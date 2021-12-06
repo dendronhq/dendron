@@ -682,3 +682,39 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     });
   });
 });
+
+describe("FIND_BROKEN_LINKS", () => {
+  const action = DoctorActions.FIND_BROKEN_LINKS;
+
+  describe("WHEN broken link (wild link) exists", () => {
+    test("THEN findBrokenLinks finds it", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const foundWildLinks = out.resp;
+          expect(foundWildLinks).toEqual([
+            {
+              file: "foo.bar",
+              vault: "vault1",
+              links: [{ column: 1, line: 1, value: "fake.link" }],
+            },
+            {
+              file: "baz.qaaz",
+              vault: "vault2",
+              links: [{ column: 1, line: 1, value: "fake" }],
+            },
+          ]);
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: setupMultiWithWikilink,
+        }
+      );
+    });
+  });
+});

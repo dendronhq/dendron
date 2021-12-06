@@ -223,7 +223,9 @@ export class AirtableUtils {
       )) {
         // handle legacy mapping
         if (_.isString(fieldMapping)) {
-          const val = _.get(note, `${fieldMapping}`);
+          const val =
+            _.get(note, `${fieldMapping}`) ??
+            _.get(note.custom, `${fieldMapping}`);
           if (!_.isUndefined(val)) {
             fields = {
               ...fields,

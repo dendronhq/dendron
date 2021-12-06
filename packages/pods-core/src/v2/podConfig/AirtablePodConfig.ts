@@ -43,6 +43,7 @@ export function isRunnableAirtableV2PodConfig(
     "baseId" in object &&
     "tableName" in object &&
     "sourceFieldMapping" in object &&
+    object["sourceFieldMapping"] &&
     "exportScope" in object
   );
 }

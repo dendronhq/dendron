@@ -34,6 +34,7 @@ export type DoctorServiceOpts = {
   limit?: number;
   dryRun?: boolean;
   exit?: boolean;
+  quiet?: boolean;
   engine: DEngineClient;
 };
 export class DoctorService {
@@ -325,7 +326,7 @@ export class DoctorService {
       Promise.resolve()
     );
     this.L.info({ msg: "doctor done", numChanges });
-    if (action === DoctorActions.FIND_BROKEN_LINKS) {
+    if (action === DoctorActions.FIND_BROKEN_LINKS && !opts.quiet) {
       console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
     }
     return { exit, resp };

@@ -99,7 +99,7 @@ export const refactorProvider: CodeActionProvider = {
       if (!editor || !selection) return;
 
       const header = getHeaderAt({
-        editor,
+        document: editor.document,
         position: selection.start,
       });
 

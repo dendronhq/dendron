@@ -24,6 +24,7 @@ export enum DoctorActions {
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
   CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
   REGENERATE_NOTE_ID = "regenerateNoteId",
+  FIND_BROKEN_LINKS = "findBrokenLinks",
 }
 
 export type DoctorServiceOpts = {
@@ -42,52 +43,63 @@ export class DoctorService {
     this.L = createLogger("DoctorService");
   }
 
-  getWildLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
+  findWildLinks(note: NoteProps, notes: NoteProps[], engine: DEngineClient) {
     const { wsRoot, vaults } = engine;
+    const links = note.links;
+    if (_.isEmpty(links)) {
+      return [];
+    }
+
+    const out = _.filter(links, (link) => {
+      if (link.type !== "wiki") {
+        return false;
+      }
+
+      const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
+      let vaultPrefix: DVault | undefined;
+      if (hasVaultPrefix) {
+        vaultPrefix = VaultUtils.getVaultByName({
+          vaults,
+          vname: link.to!.vaultName!,
+        });
+        if (!vaultPrefix) return false;
+      }
+      const isMultiVault = vaults.length > 1;
+      const noteExists = NoteUtils.getNoteByFnameV5({
+        fname: link.to!.fname as string,
+        vault: hasVaultPrefix ? vaultPrefix! : note.vault,
+        notes,
+        wsRoot,
+      });
+      if (hasVaultPrefix) {
+        // true: link w/ vault prefix that points to nothing. (candidate for sure)
+        // false: link w/ vault prefix that points to a note. (valid link)
+        return !noteExists;
+      }
+
+      if (!noteExists) {
+        // true: no vault prefix and single vault. (candidate for sure)
+        // false: no vault prefix and multi vault. (ambiguous)
+        return !isMultiVault;
+      }
+
+      // (valid link)
+      return false;
+    });
+    return out;
+  }
+
+  getWildLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
+    const { vaults } = engine;
     let wildWikiLinks: DLink[] = [];
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
         return;
       }
-      wildWikiLinks = wildWikiLinks.concat(
-        _.filter(links, (link) => {
-          if (link.type !== "wiki") {
-            return false;
-          }
+      const wildLinks = this.findWildLinks(note, notes, engine);
+      wildWikiLinks = wildWikiLinks.concat(wildLinks);
 
-          const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
-          let vaultPrefix: DVault | undefined;
-          if (hasVaultPrefix) {
-            vaultPrefix = VaultUtils.getVaultByName({
-              vaults,
-              vname: link.to!.vaultName!,
-            });
-            if (!vaultPrefix) return false;
-          }
-          const isMultiVault = vaults.length > 1;
-          const noteExists = NoteUtils.getNoteByFnameV5({
-            fname: link.to!.fname as string,
-            vault: hasVaultPrefix ? vaultPrefix! : note.vault,
-            notes,
-            wsRoot,
-          });
-          if (hasVaultPrefix) {
-            // true: link w/ vault prefix that points to nothing. (candidate for sure)
-            // false: link w/ vault prefix that points to a note. (valid link)
-            return !noteExists;
-          }
-
-          if (!noteExists) {
-            // true: no vault prefix and single vault. (candidate for sure)
-            // false: no vault prefix and multi vault. (ambiguous)
-            return !isMultiVault;
-          }
-
-          // (valid link)
-          return false;
-        })
-      );
       return true;
     });
     const uniqueCandidates: NoteProps[] = _.map(
@@ -123,6 +135,7 @@ export class DoctorService {
     notes = notes.filter((n) => !n.stub);
     // this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
+    let resp: any;
     const engineWrite = dryRun
       ? () => {}
       : throttle(_.bind(engine.writeNote, engine), 300, {
@@ -270,6 +283,29 @@ export class DoctorService {
         };
         break;
       }
+      case DoctorActions.FIND_BROKEN_LINKS: {
+        resp = [];
+        doctorAction = async (note: NoteProps) => {
+          const wildLinks = this.findWildLinks(note, notes, engine);
+          if (wildLinks.length > 0) {
+            resp.push({
+              file: note.fname,
+              vault: VaultUtils.getName(note.vault),
+              links: wildLinks.map((link) => {
+                return {
+                  value: link.value,
+                  line: link.position?.start.line,
+                  column: link.position?.start.column,
+                };
+              }),
+            });
+            return wildLinks;
+          } else {
+            return;
+          }
+        };
+        break;
+      }
       default:
         throw new DendronError({
           message:
@@ -289,6 +325,9 @@ export class DoctorService {
       Promise.resolve()
     );
     this.L.info({ msg: "doctor done", numChanges });
-    return { exit };
+    if (action === DoctorActions.FIND_BROKEN_LINKS) {
+      console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
+    }
+    return { exit, resp };
   }
 }

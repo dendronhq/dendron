@@ -188,7 +188,12 @@ suite("MoveHeader", function () {
               useSameVault: true,
               nonInteractive: true,
             });
-            await new Promise((res) => setTimeout(res, 100));
+            // await new Promise((res) => setTimeout(res, 100));
+            await new Promise<void>((resolve) => {
+              setTimeout(() => {
+                resolve();
+              }, 100);
+            });
             expect(
               out!.updated[0].body.includes("[[Foo|dest#foo-header]]")
             ).toBeTruthy();

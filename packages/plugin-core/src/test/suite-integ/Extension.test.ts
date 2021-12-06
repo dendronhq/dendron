@@ -256,6 +256,7 @@ suite("Extension", function () {
                 confirmVaultOnCreate: false,
                 leaveTrace: false,
                 bubbleUpCreateNew: true,
+                fuzzThreshold: 0.2,
               },
             },
             randomNote: {},

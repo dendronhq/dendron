@@ -1,4 +1,10 @@
-import { FuseEngine, NoteProps, NotePropsDict } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  FuseEngine,
+  IntermediateDendronConfig,
+  NoteProps,
+  NotePropsDict,
+} from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { Grid } from "antd";
 import _ from "lodash";
@@ -52,12 +58,17 @@ export function useDendronRouter() {
  * @param setNoteIndex
  */
 export function useDendronLookup() {
-  const [noteIndex, setNoteIndex] =
-    React.useState<FuseEngine | undefined>(undefined);
+  const engine = useEngineAppSelector((state) => state.engine);
+  const config = engine.config as IntermediateDendronConfig;
+  const fuzzThreshold = ConfigUtils.getLookup(config).note.fuzzThreshold;
+
+  const [noteIndex, setNoteIndex] = React.useState<FuseEngine | undefined>(
+    undefined
+  );
   React.useEffect(() => {
     fetchNotes().then(async (noteData) => {
       const { notes } = noteData;
-      const noteIndex = new FuseEngine({ mode: "fuzzy" });
+      const noteIndex = new FuseEngine({ mode: "fuzzy", fuzzThreshold });
       noteIndex.updateNotesIndex(notes);
       setNoteIndex(noteIndex);
     });

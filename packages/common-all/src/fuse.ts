@@ -11,6 +11,7 @@ import {
   NoteUtils,
   DNodeUtils,
   DEngineClient,
+  ConfigUtils,
 } from ".";
 import { DVault } from "./types";
 
@@ -27,43 +28,6 @@ export type NoteIndexProps = {
 export const FuseExtendedSearchConstants = {
   PrefixExactMatch: "^",
 };
-
-/**
- * Experimentally set.
- *
- * At the time of testing:
- *
- * At previous threshold of 0.5 string 'dendron' matched
- * 'scratch.2021.06.15.104331.make-sure-seeds-are-initialized-on-startup' with score 0.42.
- * Which is too fuzzy of a match.
- *
- * 'rename' fuzzy matches 'dendron.scratch.2020.11.07.publish-under-original-filenames' with 0.16.
- *
- * For reference
- * 'dendron rename' matches 'dendron.dev.design.commands.rename' with 0.001.
- *
- * Having this score too high gets too unrelated matches which pushes the
- * 'Create New' entry out of the view.
- * --------------------------------------------------------------------------------
- *
- * Note if you are going to be tweaking this value it is highly suggested to add a
- * temporary piece of code To be able to see the all the results that are matched by
- * fuse engine along with their scores, inside {@link FuseEngine.queryNote}
- * */
-//       const dir = `<YOUR-DIR>/${qs}`;
-//       try{
-//         require('fs').mkdirSync(dir)
-//       }catch (e){
-//       }
-//       const data = JSON.stringify(
-//         {
-//           qs: qs,
-//           fuseQueryString: fuseQueryString,
-//           results:results
-//         });
-//       const path = `${dir}/${THRESHOLD_VALUE}_${new Date().getTime()}.json`;
-//       require('fs').writeFile(path, data, ()=>{});
-const THRESHOLD_VALUE = 0.2;
 
 function createFuse<T>(
   initList: T[],
@@ -132,6 +96,18 @@ export type SerializedFuseIndex = ReturnType<
 
 type FuseEngineOpts = {
   mode?: DEngineMode;
+  /** If specified must be within 0-1 range. */
+  fuzzThreshold: number;
+};
+
+export const getCleanThresholdValue = (configThreshold: number) => {
+  if (configThreshold < 0 || configThreshold > 1) {
+    // Setting threshold to fallback threshold value in case configuration is incorrect.
+    return ConfigUtils.getLookup(ConfigUtils.genDefaultConfig()).note
+      .fuzzThreshold;
+  }
+
+  return configThreshold;
 };
 
 export class FuseEngine {
@@ -159,7 +135,8 @@ export class FuseEngine {
   private readonly threshold: number;
 
   constructor(opts: FuseEngineOpts) {
-    this.threshold = opts.mode === "exact" ? 0.0 : THRESHOLD_VALUE;
+    this.threshold =
+      opts.mode === "exact" ? 0.0 : getCleanThresholdValue(opts.fuzzThreshold);
 
     this.notesIndex = createFuse<NoteProps>([], {
       preset: "note",

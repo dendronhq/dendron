@@ -42,6 +42,7 @@ commands:
             confirmVaultOnCreate: false
             leaveTrace: false
             bubbleUpCreateNew: true
+            fuzzThreshold: 0.2
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -174,6 +175,7 @@ commands:
             confirmVaultOnCreate: false
             leaveTrace: false
             bubbleUpCreateNew: true
+            fuzzThreshold: 0.2
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -300,6 +302,7 @@ commands:
             confirmVaultOnCreate: false
             leaveTrace: false
             bubbleUpCreateNew: true
+            fuzzThreshold: 0.2
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -391,6 +394,7 @@ commands:
             confirmVaultOnCreate: false
             leaveTrace: false
             bubbleUpCreateNew: true
+            fuzzThreshold: 0.2
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -497,6 +501,7 @@ commands:
             confirmVaultOnCreate: false
             leaveTrace: false
             bubbleUpCreateNew: true
+            fuzzThreshold: 0.2
     randomNote: {}
     insertNote:
         initialValue: templates

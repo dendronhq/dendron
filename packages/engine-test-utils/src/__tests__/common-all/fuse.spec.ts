@@ -5,6 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
+import { getCleanThresholdValue } from "@dendronhq/common-all";
 
 type TestData = {
   fname: string;
@@ -47,7 +48,7 @@ function assertDoesNotHaveFName(queryResult: NoteIndexProps[], fname: string) {
 }
 
 async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
-  const fuseEngine = new FuseEngine({});
+  const fuseEngine = new FuseEngine({ fuzzThreshold: 0.2 });
   const notePropsDict: NotePropsDict = await testDataToNotePropsDict(testData);
   await fuseEngine.updateNotesIndex(notePropsDict);
   return fuseEngine;
@@ -73,6 +74,20 @@ const queryTestV1 = ({
 };
 
 describe("Fuse utility function tests", () => {
+  describe(`getCleanThresholdValue`, () => {
+    it("WHEN val is specified but too small THEN use fallback", () => {
+      expect(getCleanThresholdValue(-1)).toEqual(0.2);
+    });
+
+    it("WHEN val is specified but too large THEN use fallback", () => {
+      expect(getCleanThresholdValue(1.1)).toEqual(0.2);
+    });
+
+    it("WHEN val is within range THEN use the configured value", () => {
+      expect(getCleanThresholdValue(0.1234)).toEqual(0.1234);
+    });
+  });
+
   describe(`doesContainSpecialQueryChars`, () => {
     test.each([
       // Fuse doesn't treat * specially but we map * to ' ' hence we treat it as special character.

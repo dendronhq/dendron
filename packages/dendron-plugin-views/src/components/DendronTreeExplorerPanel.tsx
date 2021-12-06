@@ -2,7 +2,7 @@ import {
   DMessageSource,
   DNodeUtils,
   TreeViewMessage,
-  TreeViewMessageType,
+  TreeViewMessageEnum,
 } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
@@ -87,7 +87,7 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     const id = node.key;
     logger.info({ ctx: "onSelect", id });
     postVSCodeMessage({
-      type: TreeViewMessageType.onSelect,
+      type: TreeViewMessageEnum.onSelect,
       data: { id },
       source: DMessageSource.webClient,
     } as TreeViewMessage);

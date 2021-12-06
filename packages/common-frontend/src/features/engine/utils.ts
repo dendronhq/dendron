@@ -4,7 +4,7 @@ import { EngineState } from "./slice";
 export const hasInitialized = (engine: EngineState) => {
   return (
     engine.loading === "idle" &&
-    !_.isUndefined(engine.notes) &&
-    !_.isUndefined(engine.vaults)
+    !_.isEmpty(engine.notes) &&
+    !_.isEmpty(engine.vaults)
   );
 };

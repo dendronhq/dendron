@@ -646,12 +646,15 @@ export enum DMessageSource {
 }
 
 export enum DMessageEnum {
+  /**
+   * View is ready
+   */
   INIT = "init",
   ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
 }
 
-export enum TreeViewMessageType {
+export enum TreeViewMessageEnum {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
   "onGetActiveEditor" = "onGetActiveEditor",
@@ -701,13 +704,15 @@ export type OnDidChangeActiveTextEditorData = {
   syncChangedNote?: boolean;
 };
 
+export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
+export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;
+
 export type VSCodeMessage = DMessage;
 export type OnDidChangeActiveTextEditorMsg = DMessage<
   "onDidChangeActiveTextEditor",
   OnDidChangeActiveTextEditorData
 >;
 
-export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 export type GraphViewMessage = DMessage<
   GraphViewMessageType,
   { id: string; vault?: string }
@@ -722,8 +727,7 @@ export type NoteViewMessage = DMessage<
   NoteViewMessageType,
   { id?: string; href?: string }
 >;
-
-export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
+export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 
 export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,

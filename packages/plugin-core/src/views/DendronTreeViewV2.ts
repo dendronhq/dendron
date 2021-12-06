@@ -5,7 +5,7 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   TreeViewMessage,
-  TreeViewMessageType,
+  TreeViewMessageEnum,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
@@ -76,7 +76,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
       Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {
-        case TreeViewMessageType.onSelect: {
+        case TreeViewMessageEnum.onSelect: {
           const note = getEngine().notes[msg.data.id];
           await new GotoNoteCommand().execute({
             qs: note.fname,
@@ -84,7 +84,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           });
           break;
         }
-        case TreeViewMessageType.onGetActiveEditor: {
+        case TreeViewMessageEnum.onGetActiveEditor: {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           if (document) {
             if (
@@ -111,12 +111,16 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           }
           break;
         }
-        case TreeViewMessageType.onReady: {
+        case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           const profile = getDurationMilliseconds(start);
           Logger.info({ ctx, msg: "treeViewLoaded", profile, start });
           AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
             duration: profile,
           });
+          const note = WSUtils.getActiveNote();
+          if (note) {
+            this.refresh(note);
+          }
           break;
         }
         default:

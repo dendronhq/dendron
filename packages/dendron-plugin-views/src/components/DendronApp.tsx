@@ -34,7 +34,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const [workspace] = useWorkspaceProps();
   const logger = createLogger("DendronApp");
 
-  logger.info({ ctx, workspace });
+  logger.info({ ctx, msg: "enter", workspace });
   // used to initialize the engine
   useEngine({ engineState: engine, opts: workspace });
 
@@ -54,7 +54,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       data: { src: ctx },
       source: DMessageSource.webClient,
     });
-    logger.info({ ctx, msg: "postVSCodeMessage" });
+    logger.info({ ctx, msg: "postVSCodeMessage:post" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

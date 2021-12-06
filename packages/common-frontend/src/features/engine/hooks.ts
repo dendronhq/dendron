@@ -43,7 +43,9 @@ export const useEngine = ({
         return;
       }
       logger.info({ ctx: "useEffect", state: "initEngine" });
-      dispatch(initNotes({ port: parseInt(opts.port as any), ws: opts.ws }));
+      dispatch(
+        initNotes({ port: parseInt(opts.port as any, 10), ws: opts.ws })
+      );
     }
     logger.info({ ctx: "useEffect", state: "exit", engineState });
     return;

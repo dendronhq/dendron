@@ -1,5 +1,5 @@
 import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
-import { NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableExportPodV2,
@@ -171,10 +171,11 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
     const { exportReturnValue } = opts;
 
     if (ResponseUtil.hasError(exportReturnValue)) {
-      this.L.error(exportReturnValue.error);
-      window.showErrorMessage(
-        "Error while running Airtable Export Pod: " + exportReturnValue
-      );
+      const errorMsg = `Error while running Airtable Export Pod: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
       return;
     }
 
@@ -186,11 +187,11 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
       this.updateNoteWithAirtableId(exportReturnValue.data?.updated);
     }
 
-    const createdCount = exportReturnValue.data?.created ?? 0;
-    const updatedCount = exportReturnValue.data?.updated ?? 0;
+    const createdCount = exportReturnValue.data?.created?.length ?? 0;
+    const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
 
     window.showInformationMessage(
-      `Finished Running Airtable Export Pod. ${createdCount} records created; ${updatedCount} records updated.`
+      `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
     );
   }
 

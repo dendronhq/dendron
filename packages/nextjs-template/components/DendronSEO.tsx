@@ -1,10 +1,11 @@
 import {
-  IntermediateDendronConfig,
+  ConfigUtils,
   DendronSiteConfig,
+  IntermediateDendronConfig,
   NoteProps,
+  PublishUtils,
   SEOProps,
   Time,
-  PublishUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NextSeo, NextSeoProps } from "next-seo";
@@ -52,6 +53,7 @@ export default function DendronSEO({
 }) {
   const dendronRouter = useDendronRouter();
   const path = dendronRouter.router.asPath;
+  const siteConfig = ConfigUtils.getSite(config);
 
   // don't generate for following pages
   if (
@@ -68,7 +70,8 @@ export default function DendronSEO({
 
   const title = cleanSeoProps.title;
   const description = cleanSeoProps.excerpt;
-  const images = cleanSeoProps?.image ? [cleanSeoProps.image] : [];
+  const defaultImages = siteConfig?.image ? [siteConfig.image] : [];
+  const images = cleanSeoProps?.image ? [cleanSeoProps.image] : defaultImages;
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps: cleanSeoProps,

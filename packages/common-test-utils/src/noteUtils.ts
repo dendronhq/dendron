@@ -81,14 +81,23 @@ export class TestNoteFactory {
     });
   }
 
+  async createNoteInputWithFNames(
+    fnames: string[]
+  ): Promise<DNodePropsQuickInputV2[]> {
+    return await Promise.all(
+      fnames.map((name) => this.createNoteInputWithFName(name))
+    );
+  }
+
+  createNoteInputWithFName(fname: string): Promise<DNodePropsQuickInputV2> {
+    return NoteTestUtilsV4.createNotePropsInput({
+      fname,
+      ...this._defaults,
+    });
+  }
+
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
-    const noteProps: NoteProps[] = [];
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < fnames.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      noteProps.push(await this.createForFName(fnames[i]));
-    }
-    return noteProps;
+    return await Promise.all(fnames.map((name) => this.createForFName(name)));
   }
 
   toNotePropsDict(notes: NoteProps[]): NotePropsDict {

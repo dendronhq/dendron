@@ -160,6 +160,10 @@ export async function runSingleVaultTest(
     await onInit({ vault, wsRoot });
   });
   await _activate(ctx);
+
+  opts.ctx.subscriptions.forEach((disposable) => {
+    disposable.dispose();
+  });
 }
 
 export async function runMultiVaultTest(
@@ -173,6 +177,10 @@ export async function runMultiVaultTest(
     await opts.onInit({ wsRoot, vaults });
   });
   await _activate(ctx);
+
+  opts.ctx.subscriptions.forEach((disposable) => {
+    disposable.dispose();
+  });
 }
 
 export async function runWorkspaceTestV3(
@@ -190,6 +198,10 @@ export async function runWorkspaceTestV3(
     await opts.preActivateHook();
   }
   await _activate(ctx);
+
+  opts.ctx.subscriptions.forEach((disposable) => {
+    disposable.dispose();
+  });
 }
 
 /**

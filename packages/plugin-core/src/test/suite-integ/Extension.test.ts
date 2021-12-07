@@ -24,7 +24,7 @@ import {
 import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, beforeEach, it } from "mocha";
+import { describe, beforeEach, it, afterEach } from "mocha";
 import os from "os";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
@@ -197,6 +197,12 @@ suite("Extension", function () {
   });
 
   describe("setup CODE workspace", () => {
+    afterEach(() => {
+      ctx.subscriptions.forEach((disposable) => {
+        disposable.dispose();
+      });
+    });
+
     it("not active", (done) => {
       _activate(ctx).then((resp) => {
         expect(resp).toBeFalsy();
@@ -560,6 +566,12 @@ suite("Extension", function () {
   });
 
   describe("setup NATIVE workspace", () => {
+    afterEach(() => {
+      ctx.subscriptions.forEach((disposable) => {
+        disposable.dispose();
+      });
+    });
+
     it("not active, initial create ws", (done) => {
       const wsRoot = tmpDir().name;
 

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-plugin-views",
-  "version": "0.71.3",
+  "version": "0.72.0",
   "private": true,
   "workspaces": {
     "nohoist": [
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@babel/core": "7.12.3",
-    "@dendronhq/common-all": "^0.71.3",
-    "@dendronhq/common-frontend": "^0.71.3",
-    "@dendronhq/common-server": "^0.71.3",
+    "@dendronhq/common-all": "^0.72.0",
+    "@dendronhq/common-frontend": "^0.72.0",
+    "@dendronhq/common-server": "^0.72.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",

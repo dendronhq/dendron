@@ -61,7 +61,7 @@ runSuiteButSkipForWindows()(
           const testNote = engine.notes["foo"];
           expect(testNote).toBeTruthy();
 
-          const opened = await WSUtils.openSchema(engine.schemas.daily);
+          const opened = await WSUtils.openSchema(engine.schemas.plain_schema);
 
           expect(doesSchemaExist("new_schema")).toBeFalsy();
 

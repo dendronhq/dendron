@@ -84,15 +84,9 @@ export class TestNoteFactory {
   async createNoteInputWithFNames(
     fnames: string[]
   ): Promise<DNodePropsQuickInputV2[]> {
-    const items = [];
-
-    // eslint-disable-next-line guard-for-in,no-restricted-syntax
-    for (const name of fnames) {
-      // eslint-disable-next-line no-await-in-loop
-      items.push(await this.createNoteInputWithFName(name));
-    }
-
-    return items;
+    return await Promise.all(
+      fnames.map((name) => this.createNoteInputWithFName(name))
+    );
   }
 
   createNoteInputWithFName(fname: string): Promise<DNodePropsQuickInputV2> {
@@ -103,13 +97,7 @@ export class TestNoteFactory {
   }
 
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
-    const noteProps: NoteProps[] = [];
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < fnames.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      noteProps.push(await this.createForFName(fnames[i]));
-    }
-    return noteProps;
+    return await Promise.all(fnames.map((name) => this.createForFName(name)));
   }
 
   toNotePropsDict(notes: NoteProps[]): NotePropsDict {

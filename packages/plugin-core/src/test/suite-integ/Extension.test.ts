@@ -57,6 +57,7 @@ import {
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
+  cleanupVSCodeContextSubscriptions,
   describeMultiWS,
   runLegacySingleWorkspaceTest,
   runTestButSkipForWindows,
@@ -198,9 +199,7 @@ suite("Extension", function () {
 
   describe("setup CODE workspace", () => {
     afterEach(() => {
-      ctx.subscriptions.forEach((disposable) => {
-        disposable.dispose();
-      });
+      cleanupVSCodeContextSubscriptions(ctx);
     });
 
     it("not active", (done) => {
@@ -567,9 +566,7 @@ suite("Extension", function () {
 
   describe("setup NATIVE workspace", () => {
     afterEach(() => {
-      ctx.subscriptions.forEach((disposable) => {
-        disposable.dispose();
-      });
+      cleanupVSCodeContextSubscriptions(ctx);
     });
 
     it("not active, initial create ws", (done) => {

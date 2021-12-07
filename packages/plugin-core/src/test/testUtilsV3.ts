@@ -1,14 +1,14 @@
 import {
-  IntermediateDendronConfig,
+  ConfigUtils,
   DEngineClient,
   InstallStatus,
+  IntermediateDendronConfig,
   isNotUndefined,
+  VaultRemoteSource,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
   WorkspaceType,
-  ConfigUtils,
-  VaultRemoteSource,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -35,7 +35,7 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, before, describe, after } from "mocha";
+import { after, afterEach, before, beforeEach, describe } from "mocha";
 import os from "os";
 import sinon from "sinon";
 import { ExtensionContext, Uri, WorkspaceFolder } from "vscode";
@@ -275,10 +275,7 @@ export async function runLegacySingleWorkspaceTest(
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  // Release all registered resouces such as commands and providers
-  opts.ctx.subscriptions.forEach((disposable) => {
-    disposable.dispose();
-  });
+  cleanupVSCodeContextSubscriptions(opts.ctx);
 }
 
 /**
@@ -292,10 +289,7 @@ export async function runLegacyMultiWorkspaceTest(
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  // Release all registered resouces such as commands and providers
-  opts.ctx.subscriptions.forEach((disposable) => {
-    disposable.dispose();
-  });
+  cleanupVSCodeContextSubscriptions(opts.ctx);
 }
 
 export function addDebugServerOverride() {
@@ -471,9 +465,7 @@ export function describeMultiWS(
 
     // Release all registered resouces such as commands and providers
     after(() => {
-      opts.ctx.subscriptions.forEach((disposable) => {
-        disposable.dispose();
-      });
+      cleanupVSCodeContextSubscriptions(opts.ctx);
     });
   });
 }
@@ -493,9 +485,18 @@ export function describeSingleWS(
 
     // Release all registered resouces such as commands and providers
     after(() => {
-      opts.ctx.subscriptions.forEach((disposable) => {
-        disposable.dispose();
-      });
+      cleanupVSCodeContextSubscriptions(opts.ctx);
     });
+  });
+}
+
+/**
+ *  Releases all registered VS Code Extension resouces such as commands and
+ *  providers
+ * @param ctx
+ */
+export function cleanupVSCodeContextSubscriptions(ctx: ExtensionContext) {
+  ctx.subscriptions.forEach((disposable) => {
+    disposable.dispose();
   });
 }

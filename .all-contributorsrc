@@ -977,6 +977,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "garranplum",
+      "name": "Garran Plum",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9744747?v=4",
+      "profile": "https://github.com/garranplum",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

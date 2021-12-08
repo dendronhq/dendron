@@ -193,7 +193,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/maximilianigl"><img src="https://avatars.githubusercontent.com/u/4333579?v=4?s=100" width="100px;" alt=""/><br /><sub><b>maximilianigl</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amaximilianigl" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://byroni.us"><img src="https://avatars.githubusercontent.com/u/495404?v=4?s=100" width="100px;" alt=""/><br /><sub><b>byron wall</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=byronwall" title="Documentation">📖</a></td>
     <td align="center"><a href="http://carloscamara.es/en"><img src="https://avatars.githubusercontent.com/u/706549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Carlos Cámara</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=ccamara" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/garranplum"><img src="https://avatars.githubusercontent.com/u/9744747?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Garran Plum</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agarranplum" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/garranplum"><img src="https://avatars.githubusercontent.com/u/9744747?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Garran Plum</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agarranplum" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=garranplum" title="Code">💻</a></td>
   </tr>
 </table>
 

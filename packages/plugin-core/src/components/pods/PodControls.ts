@@ -1,3 +1,4 @@
+import { assertUnreachable } from "@dendronhq/common-all";
 import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
@@ -56,10 +57,17 @@ export class PodUIControls {
   > {
     return new Promise<PodExportScope | undefined>((resolve) => {
       const qp = vscode.window.createQuickPick();
+      qp.ignoreFocusOut = true;
+      qp.title = "Select the Export Scope";
       qp.items = Object.keys(PodExportScope)
         .filter((key) => Number.isNaN(Number(key)))
         .map<QuickPickItem>((value) => {
-          return { label: value };
+          return {
+            label: value,
+            detail: PodUIControls.getDescriptionForScope(
+              value as PodExportScope
+            ),
+          };
         });
 
       qp.onDidAccept(() => {
@@ -120,6 +128,7 @@ export class PodUIControls {
       const inputBox = vscode.window.createInputBox();
       inputBox.title = "Select a unique ID for your configuration";
       inputBox.placeholder = "my-id";
+      inputBox.ignoreFocusOut = true;
       let id;
       inputBox.onDidAccept(() => {
         id = inputBox.value;
@@ -145,7 +154,10 @@ export class PodUIControls {
     const newConnectionOptions = Object.keys(PodV2Types)
       .filter((key) => Number.isNaN(Number(key)))
       .map<QuickPickItem>((value) => {
-        return { label: value };
+        return {
+          label: value,
+          detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
+        };
       });
     const picked = await vscode.window.showQuickPick(newConnectionOptions, {
       title: "Pick the Pod Type",
@@ -157,10 +169,6 @@ export class PodUIControls {
     }
 
     return picked.label as PodV2Types;
-
-    // return PodCommandFactory.createPodCommandForPodType(
-    //   picked.label as PodV2Types
-    // );
   }
 
   /**
@@ -285,5 +293,53 @@ export class PodUIControls {
 
     qp.items = items;
     return qp;
+  }
+
+  /**
+   * Small helper method to get descriptions for {@link promptForExportScope}
+   * @param scope
+   * @returns
+   */
+  private static getDescriptionForScope(scope: PodExportScope): string {
+    switch (scope) {
+      case PodExportScope.Clipboard:
+        return "Exports the current contents of your clipboard";
+
+      case PodExportScope.Selection:
+        return "Exports the current contents of the selected portion of text in the open note editor";
+
+      case PodExportScope.Note:
+        return "Exports the currently opened note";
+
+      case PodExportScope.Hierarchy:
+        return "Exports all notes that fall under a hierarchy";
+
+      case PodExportScope.Vault:
+        return "Exports all notes within a vault";
+
+      case PodExportScope.Workspace:
+        return "Exports all notes in the Dendron workspace";
+
+      default:
+        assertUnreachable();
+    }
+  }
+
+  /**
+   * Small helper method to get descriptions for {@link promptForExportScope}
+   * @param type
+   * @returns
+   */
+  private static getDescriptionForPodType(type: PodV2Types): string {
+    switch (type) {
+      case PodV2Types.AirtableExportV2:
+        return "Exports notes to rows in an Airtable";
+
+      case PodV2Types.MarkdownExportV2:
+        return "Formats Dendron markdown and exports it to the clipboard or local file system";
+
+      default:
+        assertUnreachable();
+    }
   }
 }

@@ -564,15 +564,6 @@ export class ConfigUtils {
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }
 
-  static getAutomaticallyShowPreview(
-    config: IntermediateDendronConfig,
-    shouldApplyPublishRules?: boolean
-  ): boolean | undefined {
-    return shouldApplyPublishRules
-      ? ConfigUtils.getProp(config, "useNoteTitleForLink") // TODO fix
-      : ConfigUtils.getPreview(config).automaticallyShowPreview;
-  }
-
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

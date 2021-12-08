@@ -234,7 +234,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           notes = [note];
         }
         const ds = new DoctorService();
-        const uniqueCandidates = ds.getWildLinkDestinations(notes, engine);
+        const uniqueCandidates = ds.getBrokenLinkDestinations(notes, engine);
         if (uniqueCandidates.length > 0) {
           // show preview before creating
           await this.showMissingNotePreview(uniqueCandidates);

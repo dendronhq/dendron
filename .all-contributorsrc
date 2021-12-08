@@ -1005,6 +1005,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "jsamr",
+      "name": "Jules Sam. Randolph",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3646758?v=4",
+      "profile": "https://github.com/jsamr",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

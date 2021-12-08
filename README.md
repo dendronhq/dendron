@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-105-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-106-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -195,6 +195,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="http://carloscamara.es/en"><img src="https://avatars.githubusercontent.com/u/706549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Carlos Cámara</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=ccamara" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/garranplum"><img src="https://avatars.githubusercontent.com/u/9744747?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Garran Plum</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agarranplum" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=garranplum" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/tma66"><img src="https://avatars.githubusercontent.com/u/1160589?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tma66</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=tma66" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/not-so-smart"><img src="https://avatars.githubusercontent.com/u/43360094?v=4?s=100" width="100px;" alt=""/><br /><sub><b>not-so-smart</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=not-so-smart" title="Documentation">📖</a></td>
   </tr>
 </table>
 

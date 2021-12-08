@@ -1,6 +1,7 @@
 import {
   DendronTreeViewKey,
   DMessageEnum,
+  getWebTreeViewEntry,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -144,7 +145,8 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(_webview: vscode.WebviewView) {
-    const name = "treePanelView";
+    const viewEntry = getWebTreeViewEntry(DendronTreeViewKey.TREE_VIEW_V2);
+    const name = viewEntry.bundleName;
     const webViewAssets = WebViewUtils.getJsAndCss(name);
     const ext = getExtension();
     const port = ext.port!;

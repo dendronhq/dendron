@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   ERROR_SEVERITY,
   SeedBrowserMessageType,
 } from "@dendronhq/common-all";
@@ -49,7 +49,7 @@ export abstract class SeedCommandBase<
 
   protected postSeedStateToWebview() {
     const existingPanel = getExtension().getWebView(
-      DendronWebViewKey.SEED_BROWSER
+      DendronEditorViewKey.SEED_BROWSER
     );
 
     existingPanel?.webview.postMessage({

@@ -4,7 +4,7 @@ import {
   CONSTANTS,
   DendronError,
   DendronTreeViewKey,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
@@ -472,11 +472,11 @@ export class DendronExtension {
     this.treeViews[key] = view;
   }
 
-  getWebView(key: DendronWebViewKey) {
+  getWebView(key: DendronEditorViewKey) {
     return this.webViews[key];
   }
 
-  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel | undefined) {
+  setWebView(key: DendronEditorViewKey, view: vscode.WebviewPanel | undefined) {
     this.webViews[key] = view;
   }
 

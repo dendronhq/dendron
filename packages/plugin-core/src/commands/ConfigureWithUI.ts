@@ -1,4 +1,4 @@
-import { DendronWebViewKey, getStage } from "@dendronhq/common-all";
+import { DendronEditorViewKey, getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import { env, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -80,7 +80,7 @@ export class ConfigureWithUICommand extends BasicCommand<
     if (getStage() === "dev") {
       resp = await WebViewUtils.genHTMLForWebView({
         title: "Dendron Config",
-        view: DendronWebViewKey.CONFIGURE,
+        view: DendronEditorViewKey.CONFIGURE,
       });
     } else {
       resp = await getWebviewContent2({ title });

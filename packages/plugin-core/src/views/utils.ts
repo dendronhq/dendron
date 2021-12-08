@@ -1,6 +1,6 @@
 import {
   DendronTreeViewKey,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   DUtils,
   getStage,
@@ -103,7 +103,7 @@ export class WebViewUtils {
     view,
   }: {
     title: string;
-    view: DendronTreeViewKey | DendronWebViewKey;
+    view: DendronTreeViewKey | DendronEditorViewKey;
   }) => {
     const { wsRoot, config } = getDWorkspace();
     const ext = getExtension();
@@ -221,7 +221,7 @@ export class WebViewUtils {
     view,
   }: {
     title: string;
-    view: DendronWebViewKey;
+    view: DendronEditorViewKey;
   }) => {
     /**
      * Implementation might differ in the future
@@ -241,7 +241,7 @@ export class PreviewUtils {
 
   static refresh(note: NoteProps) {
     const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const panel = getExtension().getWebView(DendronEditorViewKey.NOTE_PREVIEW);
     Logger.debug({ ...ctx, state: "enter" });
     if (panel) {
       Logger.debug({ ...ctx, state: "panel found" });

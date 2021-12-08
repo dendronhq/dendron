@@ -733,21 +733,3 @@ export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,
   { data: any }
 >;
-
-// --- Views
-
-export enum DendronWebViewKey {
-  CONFIGURE = "dendron.configure",
-  NOTE_GRAPH = "dendron.graph-note",
-  SCHEMA_GRAPH = "dendron.graph-schema",
-  NOTE_PREVIEW = "dendron.note-preview",
-  SEED_BROWSER = "dendron.seed-browser",
-}
-
-export enum DendronTreeViewKey {
-  SAMPLE_VIEW = "dendron.sample",
-  TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.tree-view",
-  BACKLINKS = "dendron.backlinks",
-  CALENDAR_VIEW = "dendron.calendar-view",
-}

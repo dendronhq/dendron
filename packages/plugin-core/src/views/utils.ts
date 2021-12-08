@@ -8,7 +8,6 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { title } from "process";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
 import { getExtension, getDWorkspace } from "../workspace";
@@ -246,7 +245,7 @@ export class PreviewUtils {
     Logger.debug({ ...ctx, state: "enter" });
     if (panel) {
       Logger.debug({ ...ctx, state: "panel found" });
-      panel.title = `${title} ${note.fname}`;
+      panel.title = `${note.fname}`;
       panel.webview.postMessage({
         type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {

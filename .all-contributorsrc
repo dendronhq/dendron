@@ -996,6 +996,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "not-so-smart",
+      "name": "not-so-smart",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43360094?v=4",
+      "profile": "https://github.com/not-so-smart",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

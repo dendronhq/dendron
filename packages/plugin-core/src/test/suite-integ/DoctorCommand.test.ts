@@ -244,7 +244,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("wild link with alias", (done) => {
+  test("broken link with alias", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
@@ -291,7 +291,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("xvault wild links", (done) => {
+  test("xvault broken links", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -357,7 +357,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         await NoteTestUtilsV4.createNote({
           fname: "first",
           body: [
-            "[[wild]]",
+            "[[broken]]",
             "[[somenote|somenote]]",
             "[[some note|something]]",
           ].join("\n"),
@@ -367,7 +367,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         await NoteTestUtilsV4.createNote({
           fname: "second",
           body: [
-            "[[wild2]]",
+            "[[broken2]]",
             "[[somenote|somenote2]]",
             "[[some note|something2]]",
           ].join("\n"),
@@ -391,7 +391,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           await cmd.run();
           const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
           const firstVaultFileNames = [
-            "wild.md",
+            "broken.md",
             "somenote.md",
             "something.md",
           ];
@@ -404,7 +404,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           });
           const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
           const secondVaultFileNames = [
-            "wild2.md",
+            "broken2.md",
             "somenote2.md",
             "something2.md",
           ];
@@ -424,7 +424,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     });
   });
 
-  test("wild links in multiple vaults with workspace scope", (done) => {
+  test("broken links in multiple vaults with workspace scope", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async (opts) => {
@@ -437,7 +437,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           fname: "first",
           body: [
             "[[dendron://vault2/cross2]]",
-            "[[dendron://vault1/wild]]",
+            "[[dendron://vault1/broken]]",
             "[[somenote|dendron://vault1/somenote]]",
             "[[some note|dendron://vault1/something]]",
           ].join("\n"),
@@ -448,7 +448,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           fname: "second",
           body: [
             "[[dendron://vault1/cross1]]",
-            "[[dendron://vault2/wild2]]",
+            "[[dendron://vault2/broken2]]",
             "[[somenote|dendron://vault2/somenote2]]",
             "[[some note|dendron://vault2/something2]]",
           ].join("\n"),
@@ -474,7 +474,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           const firstVaultPath = vault2Path({ vault: vault1, wsRoot });
           const firstVaultFileNames = [
             "cross1.md",
-            "wild.md",
+            "broken.md",
             "somenote.md",
             "something.md",
           ];
@@ -488,7 +488,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           const secondVaultPath = vault2Path({ vault: vault2, wsRoot });
           const secondVaultFileNames = [
             "cross2.md",
-            "wild2.md",
+            "broken2.md",
             "somenote2.md",
             "something2.md",
           ];

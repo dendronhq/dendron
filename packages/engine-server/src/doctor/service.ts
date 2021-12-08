@@ -24,6 +24,7 @@ export enum DoctorActions {
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
   CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
   REGENERATE_NOTE_ID = "regenerateNoteId",
+  FIND_BROKEN_LINKS = "findBrokenLinks",
 }
 
 export type DoctorServiceOpts = {
@@ -33,6 +34,7 @@ export type DoctorServiceOpts = {
   limit?: number;
   dryRun?: boolean;
   exit?: boolean;
+  quiet?: boolean;
   engine: DEngineClient;
 };
 export class DoctorService {
@@ -42,56 +44,67 @@ export class DoctorService {
     this.L = createLogger("DoctorService");
   }
 
-  getWildLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
+  findBrokenLinks(note: NoteProps, notes: NoteProps[], engine: DEngineClient) {
     const { wsRoot, vaults } = engine;
-    let wildWikiLinks: DLink[] = [];
+    const links = note.links;
+    if (_.isEmpty(links)) {
+      return [];
+    }
+
+    const out = _.filter(links, (link) => {
+      if (link.type !== "wiki") {
+        return false;
+      }
+
+      const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
+      let vault: DVault | undefined;
+      if (hasVaultPrefix) {
+        vault = VaultUtils.getVaultByName({
+          vaults,
+          vname: link.to!.vaultName!,
+        });
+        if (!vault) return false;
+      }
+      const isMultiVault = vaults.length > 1;
+      const noteExists = NoteUtils.getNoteByFnameV5({
+        fname: link.to!.fname as string,
+        vault: hasVaultPrefix ? vault! : note.vault,
+        notes,
+        wsRoot,
+      });
+      if (hasVaultPrefix) {
+        // true: link w/ vault prefix that points to nothing. (candidate for sure)
+        // false: link w/ vault prefix that points to a note. (valid link)
+        return !noteExists;
+      }
+
+      if (!noteExists) {
+        // true: no vault prefix and single vault. (candidate for sure)
+        // false: no vault prefix and multi vault. (ambiguous)
+        return !isMultiVault;
+      }
+
+      // (valid link)
+      return false;
+    });
+    return out;
+  }
+
+  getBrokenLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
+    const { vaults } = engine;
+    let brokenWikiLinks: DLink[] = [];
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
         return;
       }
-      wildWikiLinks = wildWikiLinks.concat(
-        _.filter(links, (link) => {
-          if (link.type !== "wiki") {
-            return false;
-          }
+      const brokenLinks = this.findBrokenLinks(note, notes, engine);
+      brokenWikiLinks = brokenWikiLinks.concat(brokenLinks);
 
-          const hasVaultPrefix = LinkUtils.hasVaultPrefix(link);
-          let vaultPrefix: DVault | undefined;
-          if (hasVaultPrefix) {
-            vaultPrefix = VaultUtils.getVaultByName({
-              vaults,
-              vname: link.to!.vaultName!,
-            });
-            if (!vaultPrefix) return false;
-          }
-          const isMultiVault = vaults.length > 1;
-          const noteExists = NoteUtils.getNoteByFnameV5({
-            fname: link.to!.fname as string,
-            vault: hasVaultPrefix ? vaultPrefix! : note.vault,
-            notes,
-            wsRoot,
-          });
-          if (hasVaultPrefix) {
-            // true: link w/ vault prefix that points to nothing. (candidate for sure)
-            // false: link w/ vault prefix that points to a note. (valid link)
-            return !noteExists;
-          }
-
-          if (!noteExists) {
-            // true: no vault prefix and single vault. (candidate for sure)
-            // false: no vault prefix and multi vault. (ambiguous)
-            return !isMultiVault;
-          }
-
-          // (valid link)
-          return false;
-        })
-      );
       return true;
     });
     const uniqueCandidates: NoteProps[] = _.map(
-      _.uniqBy(wildWikiLinks, "to.fname"),
+      _.uniqBy(brokenWikiLinks, "to.fname"),
       (link) => {
         const destVault = link.to?.vaultName
           ? VaultUtils.getVaultByName({ vaults, vname: link.to.vaultName })!
@@ -123,6 +136,7 @@ export class DoctorService {
     notes = notes.filter((n) => !n.stub);
     // this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
+    let resp: any;
     const engineWrite = dryRun
       ? () => {}
       : throttle(_.bind(engine.writeNote, engine), 300, {
@@ -247,7 +261,7 @@ export class DoctorService {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        notes = this.getWildLinkDestinations(notes, engine);
+        notes = this.getBrokenLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
           await engineGetNoteByPath({
             npath: note.fname,
@@ -270,6 +284,29 @@ export class DoctorService {
         };
         break;
       }
+      case DoctorActions.FIND_BROKEN_LINKS: {
+        resp = [];
+        doctorAction = async (note: NoteProps) => {
+          const brokenLinks = this.findBrokenLinks(note, notes, engine);
+          if (brokenLinks.length > 0) {
+            resp.push({
+              file: note.fname,
+              vault: VaultUtils.getName(note.vault),
+              links: brokenLinks.map((link) => {
+                return {
+                  value: link.value,
+                  line: link.position?.start.line,
+                  column: link.position?.start.column,
+                };
+              }),
+            });
+            return brokenLinks;
+          } else {
+            return;
+          }
+        };
+        break;
+      }
       default:
         throw new DendronError({
           message:
@@ -289,6 +326,9 @@ export class DoctorService {
       Promise.resolve()
     );
     this.L.info({ msg: "doctor done", numChanges });
-    return { exit };
+    if (action === DoctorActions.FIND_BROKEN_LINKS && !opts.quiet) {
+      console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
+    }
+    return { exit, resp };
   }
 }

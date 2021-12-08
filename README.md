@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-106-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-107-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -198,6 +198,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/not-so-smart"><img src="https://avatars.githubusercontent.com/u/43360094?v=4?s=100" width="100px;" alt=""/><br /><sub><b>not-so-smart</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=not-so-smart" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/jsamr"><img src="https://avatars.githubusercontent.com/u/3646758?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jules Sam. Randolph</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajsamr" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

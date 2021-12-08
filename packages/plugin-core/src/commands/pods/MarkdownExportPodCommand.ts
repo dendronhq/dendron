@@ -12,6 +12,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
@@ -78,9 +79,16 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
           }),
         });
 
-        vscode.window.showInformationMessage(
-          `Configuration saved to ${configPath}`
-        );
+        vscode.window
+          .showInformationMessage(
+            `Configuration saved to ${configPath}`,
+            "Open Config"
+          )
+          .then((selectedItem) => {
+            if (selectedItem) {
+              VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
+            }
+          });
       }
     }
 

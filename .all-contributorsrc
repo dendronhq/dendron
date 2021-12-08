@@ -1014,6 +1014,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "blu3r4y",
+      "name": "Mario Kahlhofer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10400532?v=4",
+      "profile": "https://github.com/blu3r4y",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

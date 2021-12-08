@@ -1,5 +1,4 @@
 import {
-  ConfigUtils,
   DendronSiteConfig,
   IntermediateDendronConfig,
   NoteProps,
@@ -53,7 +52,6 @@ export default function DendronSEO({
 }) {
   const dendronRouter = useDendronRouter();
   const path = dendronRouter.router.asPath;
-  const siteConfig = ConfigUtils.getSite(config);
 
   // don't generate for following pages
   if (
@@ -70,8 +68,7 @@ export default function DendronSEO({
 
   const title = cleanSeoProps.title;
   const description = cleanSeoProps.excerpt;
-  const defaultImages = siteConfig?.image ? [siteConfig.image] : [];
-  const images = cleanSeoProps?.image ? [cleanSeoProps.image] : defaultImages;
+  const images = cleanSeoProps?.image ? [cleanSeoProps.image] : [];
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps: cleanSeoProps,

@@ -388,11 +388,12 @@ export class PublishUtils {
   static getSEOPropsFromConfig(
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
-    const { title, twitter, description: excerpt } = config.site;
+    const { title, twitter, description: excerpt, image } = config.site;
     return {
       title,
       twitter,
       excerpt,
+      image,
     };
   }
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
@@ -561,6 +562,15 @@ export class ConfigUtils {
     return shouldApplyPublishRules
       ? ConfigUtils.getSite(config).usePrettyRefs
       : ConfigUtils.getPreview(config).enablePrettyRefs;
+  }
+
+  static getAutomaticallyShowPreview(
+    config: IntermediateDendronConfig,
+    shouldApplyPublishRules?: boolean
+  ): boolean | undefined {
+    return shouldApplyPublishRules
+      ? ConfigUtils.getProp(config, "useNoteTitleForLink") // TODO fix
+      : ConfigUtils.getPreview(config).automaticallyShowPreview;
   }
 
   // set

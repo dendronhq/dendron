@@ -31,12 +31,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import {
-  SeedBrowseCommand,
-  WebViewPanelFactory,
-} from "./commands/SeedBrowseCommand";
-import {
   DendronContext,
-  DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
@@ -389,7 +384,6 @@ export class DendronExtension {
     this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
 
     const ctx = "DendronExtension";
-    this.commandRegistrationV2();
     this.L.info({ ctx, msg: "initialized" });
   }
 
@@ -681,25 +675,5 @@ export class DendronExtension {
     const ctx = "deactivateWorkspace";
     this.L.info({ ctx });
     this._disposableStore.dispose();
-  }
-
-  private async commandRegistrationV2() {
-    const existingCommands = await vscode.commands.getCommands();
-
-    if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
-      this.context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.SEED_BROWSE.key,
-          sentryReportingCallback(async () => {
-            const panel = WebViewPanelFactory.create(
-              this.workspaceService!.seedService
-            );
-            const cmd = new SeedBrowseCommand(panel);
-
-            return cmd.run();
-          })
-        )
-      );
-    }
   }
 }

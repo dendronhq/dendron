@@ -45,6 +45,10 @@ import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import {
+  SeedBrowseCommand,
+  WebViewPanelFactory,
+} from "./commands/SeedBrowseCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
@@ -1064,6 +1068,22 @@ async function _setupCommands(
           await new ShowNoteGraphCommand(
             NoteGraphPanelFactory.create(ws)
           ).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SEED_BROWSE.key,
+        sentryReportingCallback(async () => {
+          const panel = WebViewPanelFactory.create(
+            ws.workspaceService!.seedService
+          );
+          const cmd = new SeedBrowseCommand(panel);
+
+          return cmd.run();
         })
       )
     );

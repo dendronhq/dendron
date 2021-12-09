@@ -310,7 +310,6 @@ export class ShowPreviewCommand extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
-    // const ctx = "ShowPreview";
     const ext = getExtension();
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;

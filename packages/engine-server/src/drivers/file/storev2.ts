@@ -26,6 +26,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
+  NoteFNamesDict,
   NotesCache,
   NotesCacheEntryMap,
   NoteUtils,
@@ -79,6 +80,7 @@ export class FileStorage implements DStore {
    * the backlink data in this dictionary hence it starts to contain stale backlink data.
    *  */
   public notes: NotePropsDict;
+  public noteFnames: NoteFNamesDict;
   public schemas: SchemaModuleDict;
   public notesCache: NotesCache;
   public logger: DLogger;
@@ -96,6 +98,7 @@ export class FileStorage implements DStore {
     this.configRoot = wsRoot;
     this.vaults = vaults;
     this.notes = {};
+    this.noteFnames = new NoteFNamesDict();
     this.schemas = {};
     this.notesCache = {
       version: 0,
@@ -124,6 +127,7 @@ export class FileStorage implements DStore {
       errors = errors.concat(initErrors);
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
+        this.noteFnames.add(ent);
       });
 
       const { notes, schemas } = this;
@@ -239,6 +243,7 @@ export class FileStorage implements DStore {
       );
       // delete from note dictionary
       delete this.notes[noteToDelete.id];
+      this.noteFnames.delete(noteToDelete);
       // if parent note is not a stub, update it
       if (!parentNote.stub) {
         out.push({ note: parentNote, status: "update" });
@@ -930,6 +935,10 @@ export class FileStorage implements DStore {
     }
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
     this.notes[note.id] = note;
+    if (maybeNote) {
+      this.noteFnames.delete(maybeNote);
+      this.noteFnames.add(note);
+    }
     return note;
   }
 
@@ -974,6 +983,7 @@ export class FileStorage implements DStore {
       note.children = maybeNote.children;
       // delete maybeNote
       delete this.notes[maybeNote.id];
+      this.noteFnames.delete(maybeNote);
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created

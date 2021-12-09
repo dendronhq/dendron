@@ -14,6 +14,7 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
+import type { NoteFNamesDict } from "../utils";
 
 export enum ResponseCode {
   OK = 200,
@@ -329,6 +330,8 @@ export type GetDecorationsOpts = {
 export type DCommonProps = {
   /** Dictionary where key is the note id. */
   notes: NotePropsDict;
+  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname. */
+  noteFnames: NoteFNamesDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
   /**

@@ -28,6 +28,7 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
+  NoteFNamesDict,
   NoteProps,
   NotePropsDict,
   NoteUtils,
@@ -60,6 +61,7 @@ type DendronEngineClientOpts = {
 
 export class DendronEngineClient implements DEngineClient {
   public notes: NotePropsDict;
+  public noteFnames: NoteFNamesDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
   public links: DLink[];
@@ -116,6 +118,7 @@ export class DendronEngineClient implements DEngineClient {
   } & DendronEngineClientOpts) {
     this.api = api;
     this.notes = {};
+    this.noteFnames = new NoteFNamesDict();
     this.schemas = {};
     this.links = [];
     this.vaults = vaults;
@@ -157,6 +160,7 @@ export class DendronEngineClient implements DEngineClient {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
+    this.noteFnames = new NoteFNamesDict(_.values(notes));
     this.schemas = schemas;
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
@@ -209,6 +213,7 @@ export class DendronEngineClient implements DEngineClient {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
+    this.noteFnames = new NoteFNamesDict(_.values(notes));
     this.schemas = schemas;
     this.fuseEngine.updateNotesIndex(notes);
     this.fuseEngine.updateSchemaIndex(schemas);
@@ -295,6 +300,7 @@ export class DendronEngineClient implements DEngineClient {
       const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
       if (ent.status === "delete") {
         delete this.notes[id];
+        this.noteFnames.delete(ent.note);
         // eslint-disable-next-line no-unused-expressions
         this.history &&
           this.history.add({ source: "engine", action: "delete", uri });
@@ -318,8 +324,15 @@ export class DendronEngineClient implements DEngineClient {
           );
         }
         this.notes[id] = ent.note;
+        this.noteFnames.add(ent.note);
       }
     });
+    // There's a limitation with updates: we know what the new note is, but we don't know what the old note was.
+    // If the note was renamed, then we can't remove the old name from `noteFnames` because we don't know the old fname.
+    // To get around this, we'll just refresh the entire dict.
+    if (notes.some((note) => note.status === "update")) {
+      this.noteFnames = new NoteFNamesDict(_.values(this.notes));
+    }
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
@@ -352,6 +365,7 @@ export class DendronEngineClient implements DEngineClient {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
+    this.noteFnames = new NoteFNamesDict(_.values(notes));
     this.schemas = schemas;
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);

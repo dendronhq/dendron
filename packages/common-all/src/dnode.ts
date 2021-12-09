@@ -800,6 +800,21 @@ export class NoteUtils {
     return out;
   }
 
+  static getNotesByFnameV2({
+    fname,
+    engine,
+    vault,
+  }: {
+    fname: string;
+    engine: DEngineClient;
+    vault?: DVault;
+  }): NoteProps[] {
+    let notes = engine.noteFnames.get(engine.notes, fname);
+    if (vault)
+      notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
+    return notes;
+  }
+
   static getNoteByFnameV5({
     fname,
     notes,
@@ -821,6 +836,14 @@ export class NoteUtils {
       );
     });
     return out;
+  }
+
+  static getNoteByFnameV6(opts: {
+    fname: string;
+    vault: DVault;
+    engine: DEngineClient;
+  }): NoteProps | undefined {
+    return this.getNotesByFnameV2(opts)[0];
   }
 
   /** If `to vault` is defined, returns note from that vault

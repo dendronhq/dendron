@@ -10,6 +10,7 @@ import {
   DVault,
   DHookDict,
   DendronSiteConfig,
+  NotePropsDict,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
@@ -202,6 +203,65 @@ export class DefaultMap<K, V> {
 
   public get size() {
     return this._internalMap.size;
+  }
+}
+
+/** Maps a `K` to a list of `V`s. */
+export class ListMap<K, V> {
+  private _internalMap = new Map<K, V[]>();
+
+  public get(key: K) {
+    return this._internalMap.get(key);
+  }
+
+  public add(key: K, ...toAdd: V[]) {
+    let values = this._internalMap.get(key);
+    if (values === undefined) values = [];
+    values.push(...toAdd);
+    this._internalMap.set(key, values);
+  }
+
+  public delete(key: K, ...toDelete: V[]) {
+    const values = this._internalMap.get(key);
+    if (values === undefined) return;
+    _.pull(values, ...toDelete);
+    if (values.length === 0) {
+      this._internalMap.delete(key);
+    } else {
+      this._internalMap.set(key, values);
+    }
+  }
+
+  public has(key: K, value: V) {
+    const values = this._internalMap.get(key);
+    if (values === undefined) return false;
+    return values.includes(value);
+  }
+}
+
+export class NoteFNamesDict {
+  private _internalMap = new ListMap<string, string>();
+
+  public constructor(initialNotes?: NoteProps[]) {
+    if (initialNotes) this.add(...initialNotes);
+  }
+
+  public get(notes: Readonly<NotePropsDict>, fname: string) {
+    const keys = this._internalMap.get(fname.toLowerCase());
+    if (keys === undefined) return [];
+    return keys.map((key) => notes[key]).filter(isNotUndefined);
+  }
+
+  public add(...toAdd: NoteProps[]) {
+    toAdd.forEach((note) => {
+      this._internalMap.add(note.fname.toLowerCase(), note.id);
+    });
+  }
+
+  public delete(...toDelete: NoteProps[]) {
+    toDelete.forEach((note) => {
+      this._internalMap.delete(note.fname.toLowerCase(), note.id);
+    });
   }
 }
 

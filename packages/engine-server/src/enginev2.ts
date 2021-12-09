@@ -193,6 +193,9 @@ export class DendronEngineV2 implements DEngine {
   get notes(): NotePropsDict {
     return this.store.notes;
   }
+  get noteFnames() {
+    return this.store.noteFnames;
+  }
   get schemas(): SchemaModuleDict {
     return this.store.schemas;
   }

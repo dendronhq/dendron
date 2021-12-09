@@ -1,84 +1,39 @@
-import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
-import { cleanName } from "@dendronhq/common-server";
+import { ConfigUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
-import * as vscode from "vscode";
-import { DendronClientUtilsV2 } from "../clientUtils";
-import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { JournalNote } from "../traits/journal";
 import { getDWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
-import { GotoNoteCommand } from "./GotoNote";
-
-type CommandOpts = {
-  fname: string;
-};
-
-type CommandInput = {
-  title: string;
-};
-
-export class CreateDailyJournalCommand extends BaseCommand<
+import {
   CommandOpts,
-  any,
-  CommandInput
-> {
-  key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const config = getDWorkspace().config;
-    const journalConfig = ConfigUtils.getJournal(config);
-    const dailyJournalDomain = journalConfig.dailyDomain;
-    const { noteName: fname } = DendronClientUtilsV2.genNoteName("JOURNAL", {
-      overrides: { domain: dailyJournalDomain },
-    });
-    return { title: fname };
+  CreateNoteWithTraitCommand,
+} from "./CreateNoteWithTraitCommand";
+
+export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
+  constructor() {
+    super("dendron.journal", new JournalNote());
+
+    // override the key to maintain compatibility
+    this.key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   }
 
-  async enrichInputs(inputs: CommandInput) {
-    const { title } = inputs;
-    return {
-      title,
-      fname: `${cleanName(title)}`,
-    };
-  }
-
-  async execute(opts: CommandOpts) {
-    const { fname } = opts;
-    const ctx = "CreateDailyJournal";
+  override execute(opts: CommandOpts): Promise<void> {
     const config = getDWorkspace().config;
     const journalConfig = ConfigUtils.getJournal(config);
-    const journalName = journalConfig.name;
-    this.L.info({ ctx, journalName, fname });
-    const title = NoteUtils.genJournalNoteTitle({
-      fname,
-      journalName,
-    });
 
-    const confirmVaultOnCreate =
-      ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
     const { engine } = getDWorkspace();
-    let vault;
-    if (_.isUndefined(journalConfig.dailyVault) && confirmVaultOnCreate) {
-      vault = await PickerUtilsV2.promptVault(engine.vaults);
-      if (vault === undefined) {
-        vscode.window.showInformationMessage(
-          "Daily Journal creation cancelled"
-        );
-        return;
-      }
+
+    if (_.isUndefined(journalConfig.dailyVault)) {
+      return super.execute({ ...opts });
     } else {
       const dailyVault = journalConfig.dailyVault;
-      vault = dailyVault
+      const vault = dailyVault
         ? VaultUtils.getVaultByName({
             vaults: engine.vaults,
             vname: dailyVault,
           })
         : undefined;
-    }
 
-    await new GotoNoteCommand().execute({
-      qs: fname,
-      vault,
-      overrides: { title },
-    });
+      return super.execute({ ...opts, vaultOverride: vault });
+    }
   }
 }

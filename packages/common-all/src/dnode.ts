@@ -1068,8 +1068,17 @@ export class NoteUtils {
         )}`,
       });
 
+    let propsWithTrait: NoteProps & { traitIds?: string[] } = { ...cleanProps };
+
+    if (cleanProps.traits) {
+      propsWithTrait = {
+        ...cleanProps,
+        traitIds: cleanProps.traits.map((value) => value.id),
+      };
+    }
+
     // Separate custom and builtin props
-    const builtinProps = _.pick(cleanProps, [
+    const builtinProps = _.pick(propsWithTrait, [
       "id",
       "title",
       "desc",
@@ -1081,7 +1090,9 @@ export class NoteUtils {
       "color",
       "tags",
       "image",
+      "traitIds",
     ]);
+
     const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };
     return meta;

@@ -2,7 +2,6 @@ import { DendronWebViewKey, getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import { env, Uri, ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { EngineAPIService } from "../services/EngineAPIService";
 import { WebViewUtils } from "../views/utils";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
@@ -11,14 +10,6 @@ type CommandOpts = {};
 
 type CommandOutput = void;
 
-export async function getWebviewContent(): Promise<string> {
-  const engine = getExtension().getEngine() as EngineAPIService;
-  const resp = await engine.api._makeRequest({
-    path: "static",
-    method: "get",
-  });
-  return resp.data as string;
-}
 
 async function getWebviewContent2(opts: { title: string }) {
   const port = getExtension().port;

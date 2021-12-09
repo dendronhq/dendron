@@ -379,6 +379,11 @@ export async function _activate(
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
 
+      // Only set up note traits after workspaceImpl has been set, so that the
+      // wsRoot path is known for locating the note trait definition location.
+      // TODO: Unwind and simplify dependency ordering logic
+      ws.setupTraits();
+
       // --- Get Version State
       const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
         previousWorkspaceVersion,

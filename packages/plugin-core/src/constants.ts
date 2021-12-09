@@ -734,6 +734,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Delete a hook",
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  REGISTER_NOTE_TRAIT: {
+    key: "dendron.registerNoteTrait",
+    title: `${CMD_PREFIX} Register Note Trait`,
+    group: "hooks",
+    desc: "Register a new Note Trait in Dendron's Trait System",
+  },
+  CREATE_USER_DEFINED_NOTE: {
+    key: "dendron.createNoteWithTraits",
+    title: `${CMD_PREFIX} Create Note with Custom Traits`,
+    group: "hooks",
+    desc: "Create a New Note with a User-Defined Trait Applied",
+  },
   // --- Publishing
   PUBLISH_EXPORT: {
     key: "dendron.publishExport",

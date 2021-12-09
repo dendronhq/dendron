@@ -564,6 +564,16 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
+      },
+      {
+        "command": "dendron.registerNoteTrait",
+        "title": "Dendron: Register Note Trait",
+        "desc": "Register a new Note Trait"
+      },
+      {
+        "command": "dendron.createNoteWithTraits",
+        "title": "Dendron: Create Note with Custom Traits",
+        "desc": "Create a New Note with a User-Defined Traits Applied"
       }
     ],
     "menus": {

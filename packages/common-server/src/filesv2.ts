@@ -467,7 +467,7 @@ export async function fileExists(path: string) {
  *
  * @param fpath A file name or relative path that we are searching inside vaults.
  */
-async function findFileVault({
+async function findFileInVault({
   fpath,
   wsRoot,
   vaults,
@@ -479,7 +479,7 @@ async function findFileVault({
   // Assets from later vaults will overwrite earlier ones.
   vaults = [...vaults].reverse();
   for (const vault of vaults) {
-    const fullPath = path.join(wsRoot, vault.fsPath, fpath);
+    const fullPath = path.join(wsRoot, VaultUtils.getRelPath(vault), fpath);
     // Doing this sequentially to simulate how publishing handles conflicting assets.
     // eslint-disable-next-line no-await-in-loop
     if (await fileExists(fullPath)) {
@@ -499,7 +499,7 @@ export async function findNonNoteFile(opts: {
   fpath = _.trim(fpath, "/\\");
   // Check if this is an asset first
   if (fpath.startsWith("assets")) {
-    const out = await findFileVault(opts);
+    const out = await findFileInVault(opts);
     if (out !== undefined) return out;
   }
   // If not an asset, or if we couldn't find it in assets, then check from wsRoot for out-of-vault files

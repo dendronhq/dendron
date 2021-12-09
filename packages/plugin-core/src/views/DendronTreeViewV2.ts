@@ -63,14 +63,12 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
 
-    webviewView.webview.options = {
-      enableScripts: true,
-      enableCommandUris: false,
-      localResourceRoots: WebViewUtils.getLocalResourceRoots(
-        getExtension().context
-      ),
-    };
-    webviewView.webview.html = await this._getHtmlForWebview(webviewView);
+    WebViewUtils.prepareTreeView({
+      ext: getExtension(),
+      key: DendronTreeViewKey.TREE_VIEW_V2,
+      webviewView,
+    });
+
     const duration = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "genHtml:post", duration });
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
@@ -141,19 +139,5 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);
     }
-  }
-
-  private _getHtmlForWebview(_webview: vscode.WebviewView) {
-    const name = "treePanelView";
-    const webViewAssets = WebViewUtils.getJsAndCss(name);
-    const ext = getExtension();
-    const port = ext.port!;
-    const html = WebViewUtils.getWebviewContent({
-      ...webViewAssets,
-      port,
-      wsRoot: ext.getEngine().wsRoot,
-      panel: _webview,
-    });
-    return html;
   }
 }

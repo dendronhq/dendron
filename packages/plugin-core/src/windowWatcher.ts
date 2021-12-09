@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -135,7 +135,7 @@ export class WindowWatcher {
 
   async triggerNoteGraphViewUpdate() {
     const noteGraphPanel = getExtension().getWebView(
-      DendronWebViewKey.NOTE_GRAPH
+      DendronEditorViewKey.NOTE_GRAPH
     );
     if (!_.isUndefined(noteGraphPanel)) {
       if (noteGraphPanel.visible) {
@@ -162,7 +162,7 @@ export class WindowWatcher {
   }
   async triggerSchemaGraphViewUpdate() {
     const schemaGraphPanel = getExtension().getWebView(
-      DendronWebViewKey.SCHEMA_GRAPH
+      DendronEditorViewKey.SCHEMA_GRAPH
     );
     if (!_.isUndefined(schemaGraphPanel)) {
       if (schemaGraphPanel.visible) {

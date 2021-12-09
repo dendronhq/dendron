@@ -1,5 +1,5 @@
 import {
-  DendronWebViewKey,
+  DendronEditorViewKey,
   GraphViewMessage,
   GraphViewMessageType,
   VaultUtils,
@@ -32,7 +32,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     const ext = getExtension();
 
     // If panel already exists
-    const existingPanel = ext.getWebView(DendronWebViewKey.SCHEMA_GRAPH);
+    const existingPanel = ext.getWebView(DendronEditorViewKey.SCHEMA_GRAPH);
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -61,7 +61,7 @@ export class ShowSchemaGraphCommand extends BasicCommand<
 
     const resp: string = await WebViewUtils.genHTMLForWebView({
       title: "Schema Graph",
-      view: DendronWebViewKey.SCHEMA_GRAPH,
+      view: DendronEditorViewKey.SCHEMA_GRAPH,
     });
 
     panel.webview.html = resp;
@@ -139,6 +139,6 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ext.setWebView(DendronWebViewKey.SCHEMA_GRAPH, panel);
+    ext.setWebView(DendronEditorViewKey.SCHEMA_GRAPH, panel);
   }
 }

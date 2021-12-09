@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   DendronError,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   DNoteAnchor,
   ErrorFactory,
@@ -12,6 +12,7 @@ import {
   NoteViewMessage,
   NoteViewMessageEnum,
   VaultUtils,
+  getWebEditorViewEntry,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -333,7 +334,7 @@ export class ShowPreviewCommand extends BasicCommand<
   async execute(_opts?: CommandOpts) {
     const ctx = "ShowPreview";
     const ext = getExtension();
-    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const existingPanel = ext.getWebView(DendronEditorViewKey.NOTE_PREVIEW);
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
     const port = ext.port!;
@@ -352,10 +353,12 @@ export class ShowPreviewCommand extends BasicCommand<
     }
     Logger.info({ ctx, msg: "creating new" });
 
-    const name = "notePreview";
+    const { bundleName: name, label } = getWebEditorViewEntry(
+      DendronEditorViewKey.NOTE_PREVIEW
+    );
     const panel = vscode.window.createWebviewPanel(
       name,
-      "Dendron Preview",
+      label,
       {
         viewColumn,
         preserveFocus,
@@ -425,14 +428,14 @@ export class ShowPreviewCommand extends BasicCommand<
     panel.webview.html = html;
 
     // Update workspace-wide panel
-    ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+    ext.setWebView(DendronEditorViewKey.NOTE_PREVIEW, panel);
 
     // remove webview from workspace when user closes it
     // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewCommand#refresh`
     panel.onDidDispose(() => {
       const ctx = "ShowPreview:onDidDispose";
       Logger.debug({ ctx, state: "dispose preview" });
-      ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
+      ext.setWebView(DendronEditorViewKey.NOTE_PREVIEW, undefined);
     });
   }
 }

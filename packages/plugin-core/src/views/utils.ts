@@ -1,16 +1,17 @@
 import {
   DendronTreeViewKey,
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   DUtils,
   getStage,
   NoteProps,
   OnDidChangeActiveTextEditorMsg,
+  getWebTreeViewEntry,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "../workspace";
 import path from "path";
 import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -61,7 +62,6 @@ export class WebViewUtils {
    *
    * @param panel: required to convert asset URLs to VSCode Webview Extension format
    * @returns
-   *
    */
   static getWebviewContent({
     jsSrc,
@@ -97,13 +97,44 @@ export class WebViewUtils {
     });
     return out;
   }
+  static prepareTreeView({
+    ext,
+    key,
+    webviewView,
+  }: {
+    ext: DendronExtension;
+    key: DendronTreeViewKey;
+    webviewView: vscode.WebviewView;
+  }) {
+    const viewEntry = getWebTreeViewEntry(key);
+    const name = viewEntry.bundleName;
+    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const port = ext.port!;
+    webviewView.webview.options = {
+      enableScripts: true,
+      enableCommandUris: false,
+      localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
+    };
+    const html = WebViewUtils.getWebviewContent({
+      ...webViewAssets,
+      port,
+      wsRoot: ext.getEngine().wsRoot,
+      panel: webviewView,
+    });
+    webviewView.webview.html = html;
+  }
 
+  /**
+   * @deprecated Use `{@link WebviewUtils.getWebviewContent}`
+   * @param param0
+   * @returns
+   */
   static genHTMLForView = async ({
     title,
     view,
   }: {
     title: string;
-    view: DendronTreeViewKey | DendronWebViewKey;
+    view: DendronTreeViewKey | DendronEditorViewKey;
   }) => {
     const { wsRoot, config } = getDWorkspace();
     const ext = getExtension();
@@ -221,7 +252,7 @@ export class WebViewUtils {
     view,
   }: {
     title: string;
-    view: DendronWebViewKey;
+    view: DendronEditorViewKey;
   }) => {
     /**
      * Implementation might differ in the future
@@ -241,7 +272,7 @@ export class PreviewUtils {
 
   static refresh(note: NoteProps) {
     const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_PREVIEW);
+    const panel = getExtension().getWebView(DendronEditorViewKey.NOTE_PREVIEW);
     Logger.debug({ ...ctx, state: "enter" });
     if (panel) {
       Logger.debug({ ...ctx, state: "panel found" });

@@ -1,5 +1,5 @@
 import {
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   SeedBrowserMessage,
   SeedBrowserMessageType,
@@ -27,7 +27,7 @@ export class SeedBrowseCommand extends SeedCommandBase<
   }
   async execute() {
     const existingPanel = getExtension().getWebView(
-      DendronWebViewKey.SEED_BROWSER
+      DendronEditorViewKey.SEED_BROWSER
     );
 
     if (!_.isUndefined(existingPanel)) {
@@ -52,7 +52,7 @@ export class SeedBrowseCommand extends SeedCommandBase<
 
     const resp = await WebViewUtils.genHTMLForWebView({
       title: "Seed Browser",
-      view: DendronWebViewKey.SEED_BROWSER,
+      view: DendronEditorViewKey.SEED_BROWSER,
     });
 
     panel.webview.html = resp;
@@ -84,10 +84,10 @@ export class SeedBrowseCommand extends SeedCommandBase<
       }
     });
 
-    getExtension().setWebView(DendronWebViewKey.SEED_BROWSER, panel);
+    getExtension().setWebView(DendronEditorViewKey.SEED_BROWSER, panel);
 
     panel.onDidDispose(() => {
-      getExtension().setWebView(DendronWebViewKey.SEED_BROWSER, undefined);
+      getExtension().setWebView(DendronEditorViewKey.SEED_BROWSER, undefined);
     });
   }
 }

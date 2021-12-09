@@ -1,5 +1,5 @@
 import {
-  DendronWebViewKey,
+  DendronEditorViewKey,
   DMessageEnum,
   GraphViewMessage,
   GraphViewMessageType,
@@ -29,7 +29,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     return {};
   }
   static refresh(note: NoteProps) {
-    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const panel = getExtension().getWebView(DendronEditorViewKey.NOTE_GRAPH);
     if (panel) {
       // panel.title = `${title} ${note.fname}`;
       panel.webview.postMessage({
@@ -49,7 +49,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     const ext = getExtension();
 
     // If panel already exists
-    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const existingPanel = ext.getWebView(DendronEditorViewKey.NOTE_GRAPH);
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -78,7 +78,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
 
     const resp: string = await WebViewUtils.genHTMLForWebView({
       title: "Dendron Graph",
-      view: DendronWebViewKey.NOTE_GRAPH,
+      view: DendronEditorViewKey.NOTE_GRAPH,
     });
 
     panel.webview.html = resp;
@@ -136,6 +136,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ext.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);
+    ext.setWebView(DendronEditorViewKey.NOTE_GRAPH, panel);
   }
 }

@@ -1,4 +1,8 @@
-import { DendronTreeViewKey } from "@dendronhq/common-all";
+import {
+  DendronTreeViewKey,
+  isWebViewEntry,
+  TREE_VIEWS,
+} from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
@@ -13,35 +17,44 @@ export enum DendronContext {
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
 }
 
+const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
+  const entry = TREE_VIEWS[id];
+  const out: {
+    id: string;
+    name: string;
+    contextualTitle: string;
+    type?: "webview";
+  } = {
+    id,
+    name: entry.label,
+    contextualTitle: entry.label,
+  };
+  if (isWebViewEntry(entry)) {
+    out.type = "webview";
+  }
+  return out;
+};
+
 export const DENDRON_VIEWS = [
   {
-    id: DendronTreeViewKey.SAMPLE_VIEW,
-    name: "Sample View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.SAMPLE_VIEW),
     when: DendronContext.DEV_MODE,
     where: "explorer",
-    type: "webview",
   },
   {
-    id: DendronTreeViewKey.CALENDAR_VIEW,
-    name: "Calendar View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
     where: "explorer",
-    type: "webview",
   },
   {
-    id: DendronTreeViewKey.TREE_VIEW,
-    name: "Tree View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
-    contextualTitle: "Tree View",
     icon: "media/icons/dendron-vscode.svg",
   },
   {
-    id: DendronTreeViewKey.TREE_VIEW_V2,
-    name: "Tree View V2",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW_V2),
     when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
-    type: "webview",
-    contextualTitle: "Tree View",
     icon: "media/icons/dendron-vscode.svg",
   },
   {

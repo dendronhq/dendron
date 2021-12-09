@@ -4,7 +4,6 @@ import {
   CONSTANTS,
   DendronError,
   DendronTreeViewKey,
-  DendronEditorViewKey,
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
@@ -25,12 +24,19 @@ import {
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
+import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { Uri } from "vscode";
+import {
+  SeedBrowseCommand,
+  WebViewPanelFactory,
+} from "./commands/SeedBrowseCommand";
 import {
   DendronContext,
+  DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
@@ -40,25 +46,23 @@ import BacklinksTreeDataProvider, {
 } from "./features/BacklinksTreeDataProvider";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
+import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
 import {
   NoteTraitManager,
   NoteTraitService,
 } from "./services/NoteTraitService";
+import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath } from "./utils";
-import { VSCodeUtils } from "./vsCodeUtils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
+import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
-import { Uri } from "vscode";
-import * as Sentry from "@sentry/node";
-import { CommandRegistrar } from "./services/CommandRegistrar";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -148,15 +152,25 @@ export class DendronExtension {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
+  private _engine?: EngineAPIService;
+  private _disposableStore: DisposableStore;
+  private _traitRegistrar: NoteTraitService;
+  private L: typeof Logger;
+  private treeViews: { [key: string]: vscode.WebviewViewProvider };
+
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
   public dendronTreeView: DendronTreeView | undefined;
   public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
-  protected treeViews: { [key: string]: vscode.WebviewViewProvider };
-  protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
-  private _traitRegistrar: NoteTraitManager;
+
+  public context: vscode.ExtensionContext;
+  public windowWatcher?: WindowWatcher;
+  public workspaceWatcher?: WorkspaceWatcher;
+  public serverWatcher?: vscode.FileSystemWatcher;
+  public type: WorkspaceType;
+  public workspaceImpl?: DWorkspaceV2;
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -334,16 +348,6 @@ export class DendronExtension {
     );
   }
 
-  public context: vscode.ExtensionContext;
-  public windowWatcher?: WindowWatcher;
-  public workspaceWatcher?: WorkspaceWatcher;
-  public serverWatcher?: vscode.FileSystemWatcher;
-  public L: typeof Logger;
-  public _enginev2?: EngineAPIService;
-  public type: WorkspaceType;
-  private disposableStore: DisposableStore;
-  public workspaceImpl?: DWorkspaceV2;
-
   static async getOrCreate(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
@@ -379,13 +383,13 @@ export class DendronExtension {
     this.type = WorkspaceType.CODE;
     _DendronWorkspace = this;
     this.L = Logger;
-    this.disposableStore = new DisposableStore();
+    this._disposableStore = new DisposableStore();
     this.treeViews = {};
-    this.webViews = {};
     this.setupViews(context);
     this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
 
     const ctx = "DendronExtension";
+    this.commandRegistrationV2();
     this.L.info({ ctx, msg: "initialized" });
   }
 
@@ -478,31 +482,15 @@ export class DendronExtension {
     return wsFolders[0] as vscode.WorkspaceFolder;
   }
 
-  getTreeView(key: DendronTreeViewKey) {
-    return this.treeViews[key];
-  }
-
-  setTreeView(key: DendronTreeViewKey, view: vscode.WebviewViewProvider) {
-    this.treeViews[key] = view;
-  }
-
-  getWebView(key: DendronEditorViewKey) {
-    return this.webViews[key];
-  }
-
-  setWebView(key: DendronEditorViewKey, view: vscode.WebviewPanel | undefined) {
-    this.webViews[key] = view;
-  }
-
   getEngine(): EngineAPIService {
-    if (!this._enginev2) {
+    if (!this._engine) {
       throw Error("engine not set");
     }
-    return this._enginev2;
+    return this._engine;
   }
 
   setEngine(engine: EngineAPIService) {
-    this._enginev2 = engine;
+    this._engine = engine;
     this.getWorkspaceImplOrThrow().engine = engine;
   }
 
@@ -512,8 +500,10 @@ export class DendronExtension {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
         const provider = new DendronTreeViewV2();
-        // TODO:
         const sampleView = new SampleView();
+
+        this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
+
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             SampleView.viewType,
@@ -641,7 +631,7 @@ export class DendronExtension {
   }
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
-    this.disposableStore.add(disposable);
+    this._disposableStore.add(disposable);
   }
 
   // === Workspace
@@ -659,6 +649,7 @@ export class DendronExtension {
     }
 
     const windowWatcher = new WindowWatcher();
+
     windowWatcher.activate(this.context);
     for (const editor of vscode.window.visibleTextEditors) {
       windowWatcher.triggerUpdateDecorations(editor);
@@ -689,6 +680,26 @@ export class DendronExtension {
   async deactivate() {
     const ctx = "deactivateWorkspace";
     this.L.info({ ctx });
-    this.disposableStore.dispose();
+    this._disposableStore.dispose();
+  }
+
+  private async commandRegistrationV2() {
+    const existingCommands = await vscode.commands.getCommands();
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
+      this.context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SEED_BROWSE.key,
+          sentryReportingCallback(async () => {
+            const panel = WebViewPanelFactory.create(
+              this.workspaceService!.seedService
+            );
+            const cmd = new SeedBrowseCommand(panel);
+
+            return cmd.run();
+          })
+        )
+      );
+    }
   }
 }

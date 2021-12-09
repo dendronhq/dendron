@@ -12,6 +12,7 @@ import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
+import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
@@ -84,7 +85,9 @@ export class TutorialInitializer
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          new ShowPreviewCommand().execute();
+          new ShowPreviewCommand(
+            PreviewPanelFactory.create(getExtension())
+          ).execute();
         }, 1000);
       }
     } else {

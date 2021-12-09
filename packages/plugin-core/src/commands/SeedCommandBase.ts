@@ -1,9 +1,4 @@
-import {
-  DendronError,
-  DendronEditorViewKey,
-  ERROR_SEVERITY,
-  SeedBrowserMessageType,
-} from "@dendronhq/common-all";
+import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
 import { SeedService } from "@dendronhq/engine-server";
 import { commands } from "vscode";
 import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
@@ -45,20 +40,6 @@ export abstract class SeedCommandBase<
     }
 
     return this.seedSvc;
-  }
-
-  protected postSeedStateToWebview() {
-    const existingPanel = getExtension().getWebView(
-      DendronEditorViewKey.SEED_BROWSER
-    );
-
-    existingPanel?.webview.postMessage({
-      type: SeedBrowserMessageType.onSeedStateChange,
-      data: {
-        msg: this.getSeedSvc().getSeedsInWorkspace(),
-      },
-      source: "vscode",
-    });
   }
 
   protected async onUpdatingWorkspace() {

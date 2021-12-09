@@ -12,10 +12,9 @@ import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("WindowWatcher", function () {
-  let ctx: vscode.ExtensionContext;
   let watcher: WindowWatcher;
 
-  ctx = setupBeforeAfter(this, {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
@@ -91,6 +90,7 @@ suite("WindowWatcher", function () {
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
           watcher = new WindowWatcher();
+
           watcher.activate(ctx);
           // Open a note
           const first = NoteUtils.getNoteByFnameV5({

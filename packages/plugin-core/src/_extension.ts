@@ -45,6 +45,12 @@ import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
+import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
+import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import {
   CONFIG,
   DendronContext,
@@ -318,7 +324,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands(context);
+    _setupCommands(ws, context);
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -954,7 +960,10 @@ export function shouldDisplayLapsedUserMsg(): boolean {
   );
 }
 
-async function _setupCommands(context: vscode.ExtensionContext) {
+async function _setupCommands(
+  ws: DendronExtension,
+  context: vscode.ExtensionContext
+) {
   const existingCommands = await vscode.commands.getCommands();
 
   ALL_COMMANDS.map((Cmd) => {
@@ -1018,6 +1027,43 @@ async function _setupCommands(context: vscode.ExtensionContext) {
             useSameVault: true,
             ...args,
           });
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_PREVIEW.key,
+        sentryReportingCallback(async () => {
+          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
+        sentryReportingCallback(async () => {
+          await new ShowSchemaGraphCommand(
+            SchemaGraphViewFactory.create(ws)
+          ).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
+        sentryReportingCallback(async () => {
+          await new ShowNoteGraphCommand(
+            NoteGraphPanelFactory.create(ws)
+          ).run();
         })
       )
     );

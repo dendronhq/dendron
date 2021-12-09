@@ -1,10 +1,4 @@
-import {
-  ConfigUtils,
-  DendronEditorViewKey,
-  DMessageEnum,
-  NoteUtils,
-  OnDidChangeActiveTextEditorMsg,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
 import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
@@ -18,10 +12,8 @@ import {
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
-import { PreviewUtils } from "./views/utils";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
-import { WSUtils } from "./WSUtils";
 
 const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
@@ -82,9 +74,6 @@ export class WindowWatcher {
         }
         Logger.info({ ctx, editor: uri.fsPath });
         this.triggerUpdateDecorations(editor);
-        this.triggerNoteGraphViewUpdate();
-        this.triggerSchemaGraphViewUpdate();
-        this.triggerNotePreviewUpdate(editor);
 
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
@@ -130,66 +119,6 @@ export class WindowWatcher {
     // This may be the active editor, but could be another editor that's open side by side without being selected.
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
     debouncedUpdateDecorations.debouncedFn(editor);
-    return;
-  }
-
-  async triggerNoteGraphViewUpdate() {
-    const noteGraphPanel = getExtension().getWebView(
-      DendronEditorViewKey.NOTE_GRAPH
-    );
-    if (!_.isUndefined(noteGraphPanel)) {
-      if (noteGraphPanel.visible) {
-        // TODO Logic here + test
-
-        const activeEditor = window.activeTextEditor;
-        if (!activeEditor) {
-          return;
-        }
-
-        const note = WSUtils.getNoteFromDocument(activeEditor.document);
-
-        noteGraphPanel.webview.postMessage({
-          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-          data: {
-            note,
-            sync: true,
-          },
-          source: "vscode",
-        } as OnDidChangeActiveTextEditorMsg);
-      }
-    }
-    return;
-  }
-  async triggerSchemaGraphViewUpdate() {
-    const schemaGraphPanel = getExtension().getWebView(
-      DendronEditorViewKey.SCHEMA_GRAPH
-    );
-    if (!_.isUndefined(schemaGraphPanel)) {
-      if (schemaGraphPanel.visible) {
-        // TODO Logic here + test
-
-        const activeEditor = window.activeTextEditor;
-        if (!activeEditor) {
-          return;
-        }
-
-        const note = WSUtils.getNoteFromDocument(activeEditor.document);
-
-        schemaGraphPanel.webview.postMessage({
-          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-          data: {
-            note,
-            sync: true,
-          },
-          source: "vscode",
-        } as OnDidChangeActiveTextEditorMsg);
-      }
-    }
-    return;
-  }
-
-  async triggerNotePreviewUpdate({ document }: TextEditor) {
-    PreviewUtils.onDidChangeHandler(document);
     return;
   }
 

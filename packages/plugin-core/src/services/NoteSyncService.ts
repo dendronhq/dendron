@@ -17,8 +17,8 @@ import _ from "lodash";
 import path from "path";
 import visit from "unist-util-visit";
 import * as vscode from "vscode";
+import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { Logger } from "../logger";
-import { PreviewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 
@@ -159,7 +159,10 @@ export class NoteSyncService {
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
     const noteClean = await engine.updateNote(note);
-    PreviewUtils.refresh(noteClean);
+
+    // Temporary workaround until NoteSyncService is no longer a singleton
+    PreviewPanelFactory.getProxy().updateForNote(noteClean);
+
     return noteClean;
   }
 

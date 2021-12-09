@@ -14,9 +14,9 @@ import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { CreateHookCommand } from "./CreateHookCommand";
+import { CreateNoteWithUserDefinedTrait } from "./CreateNoteWithUserDefinedTrait";
 import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { CreateTaskCommand } from "./CreateTask";
-import { CreateNoteWithUserDefinedTrait } from "./CreateNoteWithUserDefinedTrait";
 import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
@@ -54,14 +54,10 @@ import { RestoreVaultCommand } from "./RestoreVault";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SchemaLookupCommand } from "./SchemaLookupCommand";
 import { SeedAddCommand } from "./SeedAddCommand";
-import { SeedBrowseCommand } from "./SeedBrowseCommand";
 import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowLegacyPreviewCommand } from "./ShowLegacyPreview";
-import { ShowNoteGraphCommand } from "./ShowNoteGraph";
-import { ShowPreviewCommand } from "./ShowPreview";
-import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
 import { SnapshotVaultCommand } from "./SnapshotVault";
@@ -71,6 +67,10 @@ import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 
+/**
+ * Note: this does not contain commands that have parametered constructors, as
+ * those cannot be cast to the CodeCommandConstructor interface.
+ */
 const ALL_COMMANDS = [
   AddAndCommit,
   ArchiveHierarchyCommand,
@@ -119,10 +119,7 @@ const ALL_COMMANDS = [
   RestoreVaultCommand,
   SetupWorkspaceCommand,
   ShowHelpCommand,
-  ShowNoteGraphCommand,
-  ShowSchemaGraphCommand,
   ShowLegacyPreviewCommand,
-  ShowPreviewCommand,
   SignInCommand,
   SignUpCommand,
   PublishExportCommand,
@@ -139,7 +136,6 @@ const ALL_COMMANDS = [
   SeedAddCommand,
   SeedRemoveCommand,
   RunMigrationCommand,
-  SeedBrowseCommand,
   CreateTaskCommand,
   RegisterNoteTraitCommand,
   CreateNoteWithUserDefinedTrait,

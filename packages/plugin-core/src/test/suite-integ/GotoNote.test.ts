@@ -1,6 +1,10 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -617,7 +621,6 @@ suite("GotoNote", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
-          // Create a note with a hashtag in it
           note = await NoteTestUtilsV4.createNote({
             wsRoot,
             vault: vaults[0],
@@ -630,17 +633,90 @@ suite("GotoNote", function () {
           );
         },
         onInit: async () => {
-          // Open the note, select the hashtag, and use the command
           await WSUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection =
             new vscode.Selection(7, 1, 7, 1);
 
           await new GotoNoteCommand().run();
-          // Make sure this took us to the tag note
+          // Make sure this took us to the file
           expect(getActiveEditorBasename()).toEqual("test.txt");
           expect(
             VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
           ).toEqual("Et voluptatem autem sunt.");
+          done();
+        },
+      });
+    });
+
+    test("non-note file, without slash in link", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "[[test.txt]]",
+          });
+          await fs.writeFile(
+            path.join(wsRoot, "test.txt"),
+            "Et voluptatem autem sunt."
+          );
+        },
+        onInit: async () => {
+          await WSUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+
+          await new GotoNoteCommand().run();
+          // Make sure this took us to the file
+          expect(getActiveEditorBasename()).toEqual("test.txt");
+          expect(
+            VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+          ).toEqual("Et voluptatem autem sunt.");
+          done();
+        },
+      });
+    });
+
+    test("note and non-note file with same name", (done) => {
+      let note: NoteProps;
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "[[test.txt]]",
+          });
+          note = await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.txt",
+            body: "Accusantium id et sunt cum esse.",
+          });
+          await fs.writeFile(
+            path.join(wsRoot, "test.txt"),
+            "Voluptatibus et totam qui eligendi qui quaerat."
+          );
+        },
+        onInit: async () => {
+          await WSUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+
+          await new GotoNoteCommand().run();
+          // Make sure this took us to the note, and not the file
+          expect(getActiveEditorBasename()).toEqual("test.txt.md");
+          expect(
+            AssertUtils.assertInString({
+              body: VSCodeUtils.getActiveTextEditorOrThrow().document.getText(),
+              match: ["Accusantium id et sunt cum esse."],
+              nomatch: ["Voluptatibus et totam qui eligendi qui quaerat."],
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -651,7 +727,6 @@ suite("GotoNote", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
-          // Create a note with a hashtag in it
           note = await NoteTestUtilsV4.createNote({
             wsRoot,
             vault: vaults[0],
@@ -665,13 +740,12 @@ suite("GotoNote", function () {
           );
         },
         onInit: async () => {
-          // Open the note, select the hashtag, and use the command
           await WSUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection =
             new vscode.Selection(7, 1, 7, 1);
 
           await new GotoNoteCommand().run();
-          // Make sure this took us to the tag note
+          // Make sure this took us to the file
           expect(getActiveEditorBasename()).toEqual("test.txt");
           expect(
             VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()

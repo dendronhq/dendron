@@ -552,7 +552,11 @@ export type DendronSiteConfig = {
   description?: string;
   author?: string;
   twitter?: string;
-  image?: string;
+  /** Default SEO image for published pages */
+  image?: {
+    url: string;
+    alt: string;
+  };
 
   /**
    * Use {@link https://github.com/Nevenall/remark-containers} in published site

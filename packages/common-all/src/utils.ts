@@ -388,11 +388,12 @@ export class PublishUtils {
   static getSEOPropsFromConfig(
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
-    const { title, twitter, description: excerpt } = config.site;
+    const { title, twitter, description: excerpt, image } = config.site;
     return {
       title,
       twitter,
       excerpt,
+      image,
     };
   }
   static getSEOPropsFromNote(note: NoteProps): SEOProps {

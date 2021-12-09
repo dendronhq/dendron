@@ -1,10 +1,10 @@
 import {
-  IntermediateDendronConfig,
   DendronSiteConfig,
+  IntermediateDendronConfig,
   NoteProps,
+  PublishUtils,
   SEOProps,
   Time,
-  PublishUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NextSeo, NextSeoProps } from "next-seo";

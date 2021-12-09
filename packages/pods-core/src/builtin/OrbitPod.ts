@@ -163,6 +163,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         github,
         discord,
         noteName,
+        member,
       });
       let fname;
       const note = NoteUtils.getNoteByFnameV5({
@@ -340,7 +341,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
 
   async plant(opts: OrbitImportPodPlantOpts) {
     const ctx = "OrbitImportPod";
-    this.L.info({ ctx, opts, msg: "enter" });
+    this.L.info({ ctx, msg: "enter" });
     const { vault, config, engine, wsRoot, utilityMethods } = opts;
     const { token, workspaceSlug } = config as OrbitImportPodConfig;
     let next = "";

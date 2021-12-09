@@ -292,7 +292,10 @@ export const handleLink = async ({
       }
     }
     case LinkType.WEBSITE: {
-      return VSCodeUtils.openLink(data.href!);
+      // Updated preview appears to already open the external links in the browser by itself
+      // Hence running `VSCodeUtils.openLink(data.href!);` causes double opening
+      // of the link within the browser.
+      return;
     }
     case LinkType.MARKDOWN: {
       // assume local note - open relative to current vault

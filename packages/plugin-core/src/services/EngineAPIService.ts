@@ -14,6 +14,8 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  GetDecorationsOpts,
+  GetDecorationsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteOptsV2,
@@ -234,16 +236,24 @@ export class EngineAPIService implements DEngineClient {
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     return this.internalEngine.renameNote(opts);
   }
+
   renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
     return this.internalEngine.renderNote(opts);
   }
+
   getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
     return this.internalEngine.getNoteBlocks(opts);
   }
+
   writeConfig(opts: ConfigWriteOpts): Promise<RespV2<void>> {
     return this.internalEngine.writeConfig(opts);
   }
+
   getConfig(): Promise<RespV2<IntermediateDendronConfig>> {
     return this.internalEngine.getConfig();
+  }
+
+  getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {
+    return this.internalEngine.getDecorations(opts);
   }
 }

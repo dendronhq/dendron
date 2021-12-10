@@ -1,4 +1,4 @@
-import { SurveyEvents } from "@dendronhq/common-all";
+import { getStage, SurveyEvents } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
 import _ from "lodash";
@@ -623,6 +623,9 @@ export class SurveyUtils {
    * Asks three questions about background, use case, and prior tools used.
    */
   static async showInitialSurvey() {
+    if (getStage() === "test") {
+      return;
+    }
     AnalyticsUtils.track(SurveyEvents.InitialSurveyPrompted);
     vscode.window
       .showInformationMessage(
@@ -683,6 +686,9 @@ export class SurveyUtils {
   }
 
   static async showLapsedUserSurvey() {
+    if (getStage() === "test") {
+      return;
+    }
     AnalyticsUtils.track(SurveyEvents.LapsedUserSurveyPrompted);
     await vscode.window
       .showInformationMessage(
@@ -749,6 +755,10 @@ export class SurveyUtils {
   }
 
   static async showInactiveUserSurvey() {
+    // do not show in test
+    if (getStage() === "test") {
+      return;
+    }
     AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPrompted);
     await vscode.window
       .showInformationMessage(

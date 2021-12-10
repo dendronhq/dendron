@@ -17,7 +17,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { window } from "vscode";
 import { WSUtils } from "../../WSUtils";
 
-suite("notes", function () {
+suite("DeleteNodeCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("basic", (done) => {
@@ -97,7 +97,7 @@ suite("notes", function () {
             ],
             (ent) => {
               if (!_.isEqual(ent.actual, ent.expected)) {
-                throw `issue with ${JSON.stringify(ent)}`;
+                throw new Error(`issue with ${JSON.stringify(ent)}`);
               }
               return true;
             }

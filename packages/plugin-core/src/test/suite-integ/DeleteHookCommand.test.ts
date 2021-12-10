@@ -4,7 +4,6 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { describe } from "mocha";
 import path from "path";
-import * as vscode from "vscode";
 import { CreateHookCommand } from "../../commands/CreateHookCommand";
 import { DeleteHookCommand } from "../../commands/DeleteHookCommand";
 import { DENDRON_COMMANDS } from "../../constants";
@@ -12,8 +11,7 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this);
+  const ctx = setupBeforeAfter(this);
   describe("main", () => {
     test("basic", (done) => {
       const hookName = "foo";

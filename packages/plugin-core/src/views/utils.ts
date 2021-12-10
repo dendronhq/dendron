@@ -1,21 +1,16 @@
 import {
-  DendronTreeViewKey,
   DendronEditorViewKey,
-  DMessageEnum,
+  DendronTreeViewKey,
   DUtils,
   getStage,
-  NoteProps,
-  OnDidChangeActiveTextEditorMsg,
   getWebTreeViewEntry,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
+import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { getExtension, getDWorkspace, DendronExtension } from "../workspace";
-import path from "path";
-import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
+import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 
 export class WebViewUtils {
   /**
@@ -259,32 +254,4 @@ export class WebViewUtils {
      */
     return WebViewUtils.genHTMLForView({ title, view });
   };
-}
-
-/**
- * Utils assisting with the preview
- */
-export class PreviewUtils {
-  static onDidChangeHandler(document: vscode.TextDocument) {
-    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
-    if (!_.isUndefined(maybeNote)) PreviewUtils.refresh(maybeNote);
-  }
-
-  static refresh(note: NoteProps) {
-    const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getExtension().getWebView(DendronEditorViewKey.NOTE_PREVIEW);
-    Logger.debug({ ...ctx, state: "enter" });
-    if (panel) {
-      Logger.debug({ ...ctx, state: "panel found" });
-      panel.title = `${note.fname}`;
-      panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote: true,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
-    }
-  }
 }

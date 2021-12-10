@@ -42,19 +42,6 @@ describe("Given Orbit Import Pod", () => {
               website: null,
             },
           },
-          {
-            attributes: {
-              name: null,
-              github: null,
-              discord: null,
-              linkedin: null,
-              id: "njdek",
-              twitter: null,
-              hn: null,
-              website: null,
-              email: "fooxyz@bar.com",
-            },
-          },
         ],
         links: {
           next: null,
@@ -82,7 +69,7 @@ describe("Given Orbit Import Pod", () => {
               workspaceSlug: "dendron-discord",
             },
           });
-          expect(importedNotes.length).toEqual(3);
+          expect(importedNotes.length).toEqual(2);
           expect(importedNotes[0].fname).toContain("people");
         },
         {
@@ -158,6 +145,19 @@ describe("Given Orbit Import Pod", () => {
         async ({ engine, vaults, wsRoot }) => {
           const pod = new OrbitImportPod();
           const vaultName = VaultUtils.getName(vaults[0]);
+          response.data.data.push({
+            attributes: {
+              name: null,
+              github: null,
+              discord: null,
+              linkedin: null,
+              id: "sddsnjdek",
+              twitter: null,
+              hn: null,
+              website: null,
+              email: "fooxyz@gmail.com",
+            },
+          });
           const mockedAxios = axios as jest.Mocked<typeof axios>;
           mockedAxios.get.mockResolvedValue(response);
           const { importedNotes } = await pod.execute({
@@ -179,6 +179,48 @@ describe("Given Orbit Import Pod", () => {
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
+    });
+
+    describe("WHEN name is not present for an orbit member and all attributes are null", () => {
+      test("THEN no new note is created for that entry", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const pod = new OrbitImportPod();
+            const vaultName = VaultUtils.getName(vaults[0]);
+            const mockedAxios = axios as jest.Mocked<typeof axios>;
+            response.data.data.push({
+              attributes: {
+                name: null,
+                github: null,
+                discord: null,
+                linkedin: null,
+                id: "sddsnjdek",
+                twitter: null,
+                hn: null,
+                website: null,
+              },
+            });
+            mockedAxios.get.mockResolvedValue(response);
+            const { importedNotes } = await pod.execute({
+              engine,
+              vaults,
+              wsRoot,
+              utilityMethods,
+              config: {
+                src: "orbit",
+                token: "xyzabcd",
+                vaultName,
+                workspaceSlug: "dendron-discord",
+              },
+            });
+            expect(importedNotes.length).toEqual(2);
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupBasic,
+          }
+        );
+      });
     });
   });
 });

@@ -151,7 +151,9 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       const { name, email, orbitId, ...social } = member;
 
       if (
-        _.values(social).every((val) => _.isNull(val) || _.isUndefined(val))
+        _.values({ ...social, email }).every(
+          (val) => _.isNull(val) || _.isUndefined(val)
+        )
       ) {
         this.L.error({ ctx: "memberToNotes", member });
       } else {

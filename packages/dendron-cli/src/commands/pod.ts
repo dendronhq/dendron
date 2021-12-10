@@ -1,8 +1,14 @@
 /* eslint-disable import/no-dynamic-require */
-import { DendronError, RespV3 } from "@dendronhq/common-all";
+import {
+  Conflict,
+  DendronError,
+  PodConflictResolveOpts,
+  RespV3,
+} from "@dendronhq/common-all";
 import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
+import prompts from "prompts";
 import yargs from "yargs";
 import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
@@ -210,3 +216,21 @@ export enum PodSource {
   CUSTOM = "custom",
   BUILTIN = "builtin",
 }
+
+export const handleConflict = async (
+  conflict: Conflict,
+  conflictResolveOpts: PodConflictResolveOpts
+) => {
+  const options = conflictResolveOpts.options();
+  let optionsMessage = "What would you like to do? Choose 0/1..";
+  options.map((option: string, index: number) => {
+    optionsMessage = optionsMessage.concat(`\n${index}: ${option}`);
+  });
+  const resp = await prompts({
+    type: "text",
+    name: "choice",
+    message: `${conflictResolveOpts.message(conflict)}\n${optionsMessage}`,
+    validate: (choice) => conflictResolveOpts.validate(choice, options),
+  });
+  return options[resp.choice];
+};

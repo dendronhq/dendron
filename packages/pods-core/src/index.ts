@@ -21,6 +21,7 @@ import { NextjsExportPod } from "./builtin/NextjsExportPod";
 import { PodClassEntryV4 } from "./types";
 import { NotionExportPod } from "./builtin/NotionPod";
 import { JSONSchemaType } from "ajv";
+import { OrbitImportPod } from "./builtin/OrbitPod";
 
 export * from "./basev3";
 export * from "./builtin";
@@ -65,6 +66,7 @@ export function getAllImportPods(): PodClassEntryV4[] {
     MarkdownImportPod,
     GithubIssueImportPod,
     GDocImportPod,
+    OrbitImportPod,
   ];
 }
 

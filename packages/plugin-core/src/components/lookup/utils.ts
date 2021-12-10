@@ -384,7 +384,7 @@ export class PickerUtilsV2 {
       )
     ) {
       Logger.info({ ctx, activeDocument: activeDocument.fileName });
-      vault = VaultUtils.getVaultByNotePath({
+      vault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: activeDocument.uri.fsPath,

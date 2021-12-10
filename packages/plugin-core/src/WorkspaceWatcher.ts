@@ -347,14 +347,14 @@ export class WorkspaceWatcher {
       const files = args.files[0];
       const { vaults, wsRoot } = getDWorkspace();
       const { oldUri, newUri } = files;
-      const oldVault = VaultUtils.getVaultByNotePath({
+      const oldVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: oldUri.fsPath,
       });
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
 
-      const newVault = VaultUtils.getVaultByNotePath({
+      const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: newUri.fsPath,
@@ -396,7 +396,7 @@ export class WorkspaceWatcher {
       const fname = DNodeUtils.fname(newUri.fsPath);
       const engine = getExtension().getEngine();
       const { vaults, wsRoot } = getDWorkspace();
-      const newVault = VaultUtils.getVaultByNotePath({
+      const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: newUri.fsPath,

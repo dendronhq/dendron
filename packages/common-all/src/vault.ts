@@ -113,7 +113,7 @@ export class VaultUtils {
     return vault;
   }
 
-  static getVaultByNotePath({
+  static getVaultByFilePath({
     vaults,
     wsRoot,
     fsPath,

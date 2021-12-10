@@ -69,7 +69,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
       Logger.error({ error });
       return { error };
     }
-    const vault = VaultUtils.getVaultByNotePath({
+    const vault = VaultUtils.getVaultByFilePath({
       vaults,
       wsRoot,
       fsPath: uri.fsPath,

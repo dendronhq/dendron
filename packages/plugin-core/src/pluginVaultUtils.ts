@@ -22,7 +22,7 @@ export class PluginVaultUtils {
       vaults = getDWorkspace().vaults;
     }
 
-    return VaultUtils.getVaultByNotePath({
+    return VaultUtils.getVaultByFilePath({
       vaults,
       wsRoot,
       fsPath,

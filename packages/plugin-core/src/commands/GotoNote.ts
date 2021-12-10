@@ -106,7 +106,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           wsRoot,
           VSCodeUtils.getActiveTextEditorOrThrow().document.fileName
         );
-        opts.vault = VaultUtils.getVaultByNotePath({
+        opts.vault = VaultUtils.getVaultByFilePath({
           wsRoot,
           vaults,
           fsPath: opts.qs,

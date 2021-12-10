@@ -114,7 +114,7 @@ export class WorkspaceUtils {
     fpath,
   }: { fpath: string } & WorkspaceOpts) {
     try {
-      VaultUtils.getVaultByNotePath({
+      VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: fpath,

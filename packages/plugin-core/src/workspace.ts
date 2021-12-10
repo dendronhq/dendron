@@ -126,7 +126,7 @@ export function resolveRelToWSRoot(fpath: string): string {
 /** Given file uri that is within a vault within the current workspace returns the vault. */
 export function getVaultFromUri(fileUri: Uri) {
   const { vaults } = getDWorkspace();
-  const vault = VaultUtils.getVaultByNotePath({
+  const vault = VaultUtils.getVaultByFilePath({
     fsPath: fileUri.fsPath,
     vaults,
     wsRoot: getDWorkspace().wsRoot,

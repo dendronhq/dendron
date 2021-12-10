@@ -1,8 +1,10 @@
 import {
+  DendronEditorViewKey,
   DendronError,
   DNoteAnchor,
   ErrorFactory,
   ERROR_STATUS,
+  getWebEditorViewEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
@@ -316,7 +318,9 @@ export class ShowPreviewCommand extends BasicCommand<
     const port = ext.port!;
     const wsRoot = ext.getEngine().wsRoot;
 
-    const name = "notePreview";
+    const { bundleName: name } = getWebEditorViewEntry(
+      DendronEditorViewKey.NOTE_PREVIEW
+    );
 
     const webViewAssets = WebViewUtils.getJsAndCss(name);
 

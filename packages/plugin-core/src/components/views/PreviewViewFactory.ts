@@ -1,6 +1,8 @@
 import {
   assertUnreachable,
+  DendronEditorViewKey,
   DMessageEnum,
+  getWebEditorViewEntry,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
@@ -97,11 +99,13 @@ export class PreviewPanelFactory {
       return this._panel;
     }
 
-    const name = "notePreview";
+    const { bundleName: name, label } = getWebEditorViewEntry(
+      DendronEditorViewKey.NOTE_PREVIEW
+    );
 
     this._panel = vscode.window.createWebviewPanel(
       name,
-      "Dendron Preview",
+      label,
       {
         viewColumn,
         preserveFocus,

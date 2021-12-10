@@ -8,5 +8,11 @@
   "plugins": ["@typescript-eslint"],
   "env": {
     "mocha": true
+  },
+  "rules": {
+    // 1. allow anonymous functions inside of mocha tests
+    "prefer-arrow-callback": 0,
+    "func-names": "off"
+    // 1. end
   }
 }

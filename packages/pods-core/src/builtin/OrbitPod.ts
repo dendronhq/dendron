@@ -51,11 +51,6 @@ type UpdateNotesOpts = {
   social: Partial<MembersOpts>;
 };
 
-export type OrbitImportPodResp = {
-  importedNotes: NoteProps[];
-  errors: NoteProps[];
-};
-
 export type OrbitImportPodPlantOpts = ImportPodPlantOpts;
 
 export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
@@ -152,58 +147,58 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const create: NoteProps[] = [];
     const notesToUpdate: UpdateNotesOpts[] = [];
     members.map((member) => {
-      const { orbitId, github, discord, twitter } = member;
-      const { name, email, ...social } = member;
-      let noteName =
-        name || github || discord || twitter || this.getNameFromEmail(email);
-      noteName = DNodeUtils.cleanFname(noteName);
-      this.L.debug({
-        ctx: "membersToNotes",
-        name,
-        github,
-        discord,
-        noteName,
-        member,
-      });
-      let fname;
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: `people.${noteName}`,
-        notes: engine.notes,
-        vault,
-        wsRoot,
-      });
+      const { github, discord, twitter } = member;
+      const { name, email, orbitId, ...social } = member;
 
-      if (!_.isUndefined(note)) {
-        const conflictData = this.getConflictedData({ note, social });
-        if (conflictData.length > 0) {
-          fname = `people.orbit.duplicate.${Time.now().toFormat(
-            "y.MM.dd"
-          )}.${noteName}`;
-          conflicts.push({
-            conflictNote: note,
-            conflictEntry: NoteUtils.create({
+      if (
+        _.values(social).every((val) => _.isNull(val) || _.isUndefined(val))
+      ) {
+        this.L.error({ ctx: "memberToNotes", member });
+      } else {
+        let noteName =
+          name || github || discord || twitter || this.getNameFromEmail(email);
+        noteName = DNodeUtils.cleanFname(noteName);
+        this.L.debug({ ctx: "membersToNotes", msg: "enter", member });
+        let fname;
+        const note = NoteUtils.getNoteByFnameV5({
+          fname: `people.${noteName}`,
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        });
+
+        if (!_.isUndefined(note)) {
+          const conflictData = this.getConflictedData({ note, social });
+          if (conflictData.length > 0) {
+            fname = `people.orbit.duplicate.${Time.now().toFormat(
+              "y.MM.dd"
+            )}.${noteName}`;
+            conflicts.push({
+              conflictNote: note,
+              conflictEntry: NoteUtils.create({
+                fname,
+                vault,
+                custom: { ...config.frontmatter, orbitId, social },
+              }),
+              conflictData,
+            });
+          } else {
+            notesToUpdate.push({ note, social, engine });
+          }
+        } else {
+          fname = `people.${noteName}`;
+          create.push(
+            NoteUtils.create({
               fname,
               vault,
-              custom: { ...config.frontmatter, orbitId, social },
-            }),
-            conflictData,
-          });
-        } else {
-          notesToUpdate.push({ note, social, engine });
+              custom: {
+                ...config.frontmatter,
+                orbitId,
+                social,
+              },
+            })
+          );
         }
-      } else {
-        fname = `people.${noteName}`;
-        create.push(
-          NoteUtils.create({
-            fname,
-            vault,
-            custom: {
-              ...config.frontmatter,
-              orbitId,
-              social,
-            },
-          })
-        );
       }
     });
     await Promise.all(

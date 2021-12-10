@@ -250,7 +250,9 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // Non-note files use `qs` for full path, and set vault to null
     if (vault === null) {
-      await VSCodeUtils.openFileInEditor(Uri.parse(qs));
+      await VSCodeUtils.openFileInEditor(
+        Uri.from({ scheme: "file", path: qs })
+      );
       return {
         kind: "nonNote",
         fullPath: qs,

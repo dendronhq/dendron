@@ -119,8 +119,8 @@ export default class RenameProvider implements vscode.RenameProvider {
   }
 
   public async provideRenameEdits(
-    document: vscode.TextDocument,
-    position: vscode.Position,
+    _document: vscode.TextDocument,
+    _position: vscode.Position,
     newName: string,
     _token: vscode.CancellationToken
   ) {
@@ -155,6 +155,21 @@ export default class RenameProvider implements vscode.RenameProvider {
         openNewFile: false,
         noModifyWatcher: true,
       });
+
+      const changed = resp.changed;
+      if (changed.length > 0) {
+        const createdCount = changed.filter(
+          (change) => change.status === "create"
+        ).length;
+        const updatedCount = changed.filter(
+          (change) => change.status === "update"
+        ).length;
+        const deletedCount = changed.filter(
+          (change) => change.status === "delete"
+        ).length;
+        const msg = `Created ${createdCount}, updated ${updatedCount}, and deleted ${deletedCount} files.`;
+        vscode.window.showInformationMessage(msg);
+      }
     }
     // return a dummy edit.
     return new vscode.WorkspaceEdit();

@@ -16,7 +16,11 @@ import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
@@ -384,6 +388,45 @@ suite("GotoNote", function () {
   });
 
   describe("using selection", () => {
+    let note: NoteProps;
+    describeMultiWS(
+      "WHEN in a code block",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "test.target",
+            vault: vaults[0],
+            wsRoot,
+            body: "In aut veritatis odit tempora aut ipsa quo.",
+          });
+          note = await NoteTestUtilsV4.createNote({
+            fname: "test.note",
+            vault: vaults[0],
+            wsRoot,
+            body: [
+              "```tsx",
+              "const x = 1;",
+              "// see [[test target|test.target]]",
+              "const y = x + 1;",
+              "```",
+            ].join("\n"),
+          });
+        },
+      },
+      () => {
+        test("THEN opens the note", async () => {
+          const editor = await WSUtils.openNote(note);
+          editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+            line: 9,
+            char: 23,
+          });
+          await new GotoNoteCommand().run();
+          expect(getActiveEditorBasename()).toEqual("test.target.md");
+        });
+      }
+    );
+
     test("xvault", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

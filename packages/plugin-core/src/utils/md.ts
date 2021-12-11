@@ -226,7 +226,7 @@ export const isInCodeSpan = (
 export const getReferenceAtPosition = (
   document: vscode.TextDocument,
   position: vscode.Position,
-  partial?: boolean
+  opts?: { partial?: boolean; allowInCodeBlocks: boolean }
 ): {
   range: vscode.Range;
   ref: string;
@@ -240,8 +240,9 @@ export const getReferenceAtPosition = (
 } | null => {
   let refType: DLinkType | undefined;
   if (
-    isInFencedCodeBlock(document, position.line) ||
-    isInCodeSpan(document, position.line, position.character)
+    opts?.allowInCodeBlocks !== true &&
+    (isInFencedCodeBlock(document, position.line) ||
+      isInCodeSpan(document, position.line, position.character))
   ) {
     return null;
   }
@@ -260,7 +261,7 @@ export const getReferenceAtPosition = (
   }
 
   // this should be a wikilink or reference
-  const re = partial ? partialRefPattern : refPattern;
+  const re = opts?.partial ? partialRefPattern : refPattern;
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
   if (!range) {
     const { enableUserTags, enableHashTags } = ConfigUtils.getWorkspace(

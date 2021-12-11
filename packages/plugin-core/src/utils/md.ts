@@ -222,11 +222,7 @@ export const isInCodeSpan = (
   return /`[^`]*$/gm.test(textBefore);
 };
 
-export const getReferenceAtPosition = (
-  document: vscode.TextDocument,
-  position: vscode.Position,
-  opts?: { partial?: boolean; allowInCodeBlocks: boolean }
-): {
+export type getReferenceAtPositionResp = {
   range: vscode.Range;
   ref: string;
   label: string;
@@ -236,7 +232,13 @@ export const getReferenceAtPosition = (
   vaultName?: string;
   /** The full text inside the ref, e.g. for [[alias|foo.bar#anchor]] this is alias|foo.bar#anchor */
   refText: string;
-} | null => {
+};
+
+export const getReferenceAtPosition = (
+  document: vscode.TextDocument,
+  position: vscode.Position,
+  opts?: { partial?: boolean; allowInCodeBlocks: boolean }
+): getReferenceAtPositionResp | null => {
   let refType: DLinkType | undefined;
   if (
     opts?.allowInCodeBlocks !== true &&
@@ -284,6 +286,7 @@ export const getReferenceAtPosition = (
           label: match[0],
           ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
           refText: docText,
+          refType: "hashtag",
         };
       }
     }
@@ -302,6 +305,7 @@ export const getReferenceAtPosition = (
           label: match[0],
           ref: `${USERS_HIERARCHY}${match.groups!.userTagContents}`,
           refText: docText,
+          refType: "usertag",
         };
       }
     }
@@ -334,6 +338,7 @@ export const getReferenceAtPosition = (
             label: tag.value,
             ref: `${TAGS_HIERARCHY}${tag.value}`,
             refText: tag.value,
+            refType: "fmtag",
           };
         }
       }
@@ -358,8 +363,11 @@ export const getReferenceAtPosition = (
     new Position(rangeWithLink.start.line, Math.max(0, startChar - 1)),
     new Position(rangeWithLink.start.line, startChar + 2)
   );
-  if (document.getText(prefixRange).indexOf("![[") >= 0) {
+  const prefix = document.getText(prefixRange);
+  if (prefix.indexOf("![[") >= 0) {
     refType = "refv2";
+  } else if (prefix.indexOf("[[") >= 0) {
+    refType = "wiki";
   }
 
   return {

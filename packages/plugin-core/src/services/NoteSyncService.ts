@@ -101,7 +101,7 @@ export class NoteSyncService {
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });
-    const vault = VaultUtils.getVaultByNotePath({
+    const vault = VaultUtils.getVaultByFilePath({
       vaults: engine.vaults,
       wsRoot: getDWorkspace().wsRoot,
       fsPath: uri.fsPath,

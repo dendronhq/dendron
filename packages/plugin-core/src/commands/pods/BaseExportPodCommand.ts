@@ -203,7 +203,7 @@ export abstract class BaseExportPodCommand<
 
     const { vaults, engine, wsRoot } = getDWorkspace();
 
-    const vault = VaultUtils.getVaultByNotePath({
+    const vault = VaultUtils.getVaultByFilePath({
       vaults,
       wsRoot,
       fsPath,

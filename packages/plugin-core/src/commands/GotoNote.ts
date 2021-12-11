@@ -7,7 +7,9 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
+import path from "path";
 import { Position, Selection, Uri, ViewColumn, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -16,11 +18,12 @@ import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
   qs?: string;
-  vault?: DVault;
+  vault?: DVault | null;
   anchor?: DNoteAnchor;
   overrides?: Partial<NoteProps>;
   /**
@@ -33,7 +36,10 @@ type CommandOpts = {
 export { CommandOpts as GotoNoteCommandOpts };
 
 type CommandOutput =
-  | { note: NoteProps; pos?: Position; source?: string }
+  // When opening a note
+  | { kind: "note"; note: NoteProps; pos?: Position; source?: string }
+  // When opening a non-note file
+  | { kind: "nonNote"; fullPath: string }
   | undefined;
 
 export const findAnchorPos = (opts: {
@@ -51,6 +57,10 @@ export const findAnchorPos = (opts: {
   if (_.isUndefined(found)) return new Position(0, 0);
   return new Position(found.line, found.column);
 };
+
+type FoundLinkSelection = NonNullable<
+  ReturnType<GotoNoteCommand["getLinkFromSelection"]>
+>;
 
 /**
  * Open or create a note. See {@link GotoNoteCommand.execute} for details
@@ -78,9 +88,97 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     };
   }
 
+  private getQs(opts: CommandOpts, link: FoundLinkSelection): CommandOpts {
+    if (link.value) {
+      // Reference to another file
+      opts.qs = link.value;
+    } else {
+      // Same file block reference, implicitly current file
+      const note = WSUtils.getActiveNote();
+      if (note) {
+        // Same file link within note
+        opts.qs = note.fname;
+        opts.vault = note.vault;
+      } else {
+        const { wsRoot, vaults } = getDWorkspace().engine;
+        // Same file link within non-note file
+        opts.qs = path.relative(
+          wsRoot,
+          VSCodeUtils.getActiveTextEditorOrThrow().document.fileName
+        );
+        opts.vault = VaultUtils.getVaultByFilePath({
+          wsRoot,
+          vaults,
+          fsPath: opts.qs,
+        });
+      }
+    }
+    return opts;
+  }
+
+  private async maybeSetOptsFromExistingNote(opts: CommandOpts) {
+    const { engine } = getDWorkspace();
+    const notes = NoteUtils.getNotesByFname({
+      fname: opts.qs!,
+      notes: engine.notes,
+    });
+    if (notes.length === 1) {
+      // There's just one note, so that's the one we'll go with.
+      opts.vault = notes[0].vault;
+    } else if (notes.length > 1) {
+      // It's ambiguous which note the user wants to go to, so we have to
+      // guess or prompt.
+      const resp = await PickerUtilsV2.promptVault(
+        notes.map((ent) => ent.vault)
+      );
+      if (_.isUndefined(resp)) return null;
+      opts.vault = resp;
+    }
+    // Not an existing note
+    return opts;
+  }
+
+  private async maybeSetOptsFromNonNote(opts: CommandOpts) {
+    const { vaults, wsRoot } = getDWorkspace().engine;
+    const nonNote = await findNonNoteFile({
+      fpath: opts.qs!,
+      wsRoot,
+      vaults,
+    });
+    if (nonNote) {
+      opts.qs = nonNote.fullPath;
+      opts.vault = null;
+    }
+    return opts;
+  }
+
+  private async setOptsFromNewNote(opts: CommandOpts) {
+    // Depending on the config, we can either
+    // automatically pick the vault or we'll prompt for it.
+    const confirmVaultSetting =
+      getDWorkspace().config["lookupConfirmVaultOnCreate"];
+    const selectionMode =
+      confirmVaultSetting !== true
+        ? VaultSelectionMode.smart
+        : VaultSelectionMode.alwaysPrompt;
+
+    const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+    const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
+      vault: currentVault,
+      fname: opts.qs!,
+      vaultSelectionMode: selectionMode,
+    });
+
+    // If we prompted the user and they selected nothing, then they want to cancel
+    if (_.isUndefined(selectedVault)) {
+      return null;
+    }
+    opts.vault = selectedVault;
+    return opts;
+  }
+
   private async processInputs(opts: CommandOpts) {
     if (opts.qs && opts.vault) return opts;
-    const { engine } = getDWorkspace();
 
     if (opts.qs && !opts.vault) {
       // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
@@ -91,73 +189,33 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const link = this.getLinkFromSelection();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
-      return;
+      return null;
     }
 
-    // no fname provided, get it from selected link
-    if (!opts.qs) {
-      if (link.value) {
-        // Reference to another file
-        opts.qs = link.value;
-      } else {
-        // Same-file block reference, implicitly current file
-        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-        opts.qs = NoteUtils.uri2Fname(editor.document.uri);
-      }
-    }
-
+    // Get missing opts from the selected link, if possible
+    if (!opts.qs) opts = this.getQs(opts, link);
+    if (!opts.vault && link.vaultName)
+      opts.vault = VaultUtils.getVaultByNameOrThrow({
+        vaults: getDWorkspace().vaults,
+        vname: link.vaultName,
+      });
     if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;
 
-    if (!opts.vault) {
-      if (link.vaultName) {
-        // if vault is defined on the link, then it's always that one
-        opts.vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: getDWorkspace().vaults,
-          vname: link.vaultName,
-        });
-      } else {
-        // Otherwise, we need to guess or prompt the vault. If linked note
-        // exists in some vault, we might be able to use that.
-        const notes = NoteUtils.getNotesByFname({
-          fname: opts.qs,
-          vault: opts.vault,
-          notes: engine.notes,
-        });
-        if (notes.length === 1) {
-          // There's just one note, so that's the one we'll go with.
-          opts.vault = notes[0].vault;
-        } else if (notes.length > 1) {
-          // It's ambiguous which note the user wants to go to, so we have to
-          // guess or prompt.
-          const resp = await PickerUtilsV2.promptVault(
-            notes.map((ent) => ent.vault)
-          );
-          if (_.isUndefined(resp)) return;
-          opts.vault = resp;
-        } else {
-          // This is a new note. Depending on the config, we can either
-          // automatically pick the vault or we'll prompt for it.
-          const confirmVaultSetting =
-            getDWorkspace().config["lookupConfirmVaultOnCreate"];
-          const selectionMode =
-            confirmVaultSetting !== true
-              ? VaultSelectionMode.smart
-              : VaultSelectionMode.alwaysPrompt;
-
-          const currentVault = PickerUtilsV2.getVaultForOpenEditor();
-          const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
-            vault: currentVault,
-            fname: opts.qs,
-            vaultSelectionMode: selectionMode,
-          });
-
-          // If we prompted the user and they selected nothing, then they want to cancel
-          if (_.isUndefined(selectedVault)) {
-            return;
-          }
-          opts.vault = selectedVault;
-        }
-      }
+    // If vault is missing, then we haven't found the note yet. Go through possible options until we find it.
+    if (opts.vault === undefined) {
+      const existingNote = await this.maybeSetOptsFromExistingNote(opts);
+      // User cancelled prompt
+      if (existingNote === null) return null;
+      opts = existingNote;
+    }
+    if (opts.vault === undefined) {
+      opts = await this.maybeSetOptsFromNonNote(opts);
+    }
+    if (opts.vault === undefined) {
+      const newNote = await this.setOptsFromNewNote(opts);
+      // User cancelled prompt
+      if (newNote === null) return null;
+      opts = newNote;
     }
 
     return opts;
@@ -180,13 +238,28 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
     const client = getExtension().getEngine();
+    const { wsRoot } = getDWorkspace();
 
-    const { qs, vault } = (await this.processInputs(opts)) || opts;
-    if (_.isUndefined(qs) || _.isUndefined(vault)) {
+    const processedOpts = await this.processInputs(opts);
+    if (processedOpts === null) return; // User cancelled a prompt, or did not have a valid link selected
+    const { qs, vault } = processedOpts;
+    if (qs === undefined || vault === undefined) {
       // There was an error or the user cancelled a prompt
       return;
     }
 
+    // Non-note files use `qs` for full path, and set vault to null
+    if (vault === null) {
+      await VSCodeUtils.openFileInEditor(
+        Uri.from({ scheme: "file", path: qs })
+      );
+      return {
+        kind: "nonNote",
+        fullPath: qs,
+      };
+    }
+
+    // Otherwise, it's a regular note
     let pos: undefined | Position;
     const out = await getExtension().pauseWatchers<CommandOutput>(async () => {
       const { data } = await client.getNoteByPath({
@@ -198,7 +271,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const note = data?.note as NoteProps;
       const npath = NoteUtils.getFullPath({
         note,
-        wsRoot: getDWorkspace().wsRoot,
+        wsRoot,
       });
       const uri = Uri.file(npath);
       const editor = await VSCodeUtils.openFileInEditor(uri, {
@@ -210,7 +283,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         editor.selection = new Selection(pos, pos);
         editor.revealRange(editor.selection);
       }
-      return { note, pos, source: opts.source };
+      return { kind: "note", note, pos, source: opts.source };
     });
     return out;
   }

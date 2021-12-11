@@ -104,7 +104,7 @@ export class WSUtils {
   static getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
     const { wsRoot, vaults } = getDWorkspace();
-    const vault = VaultUtils.getVaultByNotePath({
+    const vault = VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
       fsPath: txtPath,

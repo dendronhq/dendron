@@ -114,7 +114,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
       }
       const engine = ext.getEngine();
       const oldFname = DNodeUtils.fname(oldUri.fsPath);
-      const vault = VaultUtils.getVaultByNotePath({
+      const vault = VaultUtils.getVaultByFilePath({
         fsPath: oldUri.fsPath,
         wsRoot: getDWorkspace().wsRoot,
         vaults: engine.vaults,

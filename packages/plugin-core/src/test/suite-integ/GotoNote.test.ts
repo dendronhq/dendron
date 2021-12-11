@@ -1,10 +1,14 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe } from "mocha";
+import { describe, before } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -16,7 +20,11 @@ import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
@@ -610,6 +618,145 @@ suite("GotoNote", function () {
           done();
         },
       });
+    });
+
+    describe("GIVEN non-note files", () => {
+      describeMultiWS("WHEN used on a link to a non-note file", { ctx }, () => {
+        before(async () => {
+          const { wsRoot, vaults } = getDWorkspace();
+          await fs.writeFile(
+            path.join(wsRoot, "test.txt"),
+            "Et voluptatem autem sunt."
+          );
+          await fs.ensureDir(
+            path.join(wsRoot, VaultUtils.getRelPath(vaults[1]), "assets")
+          );
+          await fs.writeFile(
+            path.join(
+              wsRoot,
+              VaultUtils.getRelPath(vaults[1]),
+              "assets",
+              "test.txt"
+            ),
+            "Et hic est voluptatem eum quia quas pariatur."
+          );
+        });
+
+        test("THEN opens the non-note file", async () => {
+          const { vaults, wsRoot, engine } = getDWorkspace();
+          const note = await NoteTestUtilsV4.createNoteWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test.note",
+            body: "[[/test.txt]]",
+            engine,
+          });
+
+          await WSUtils.openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+          await new GotoNoteCommand().run();
+
+          expect(getActiveEditorBasename()).toEqual("test.txt");
+          expect(
+            VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+          ).toEqual("Et voluptatem autem sunt.");
+        });
+
+        describe("AND the link doesn't include a slash", () => {
+          before(async () => {
+            const { vaults, wsRoot, engine } = getDWorkspace();
+            const note = await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "[[test.txt]]",
+              engine,
+            });
+
+            await WSUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(7, 1, 7, 1);
+            await new GotoNoteCommand().run();
+          });
+
+          test("THEN opens the non-note file", async () => {
+            expect(getActiveEditorBasename()).toEqual("test.txt");
+            expect(
+              VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+            ).toEqual("Et voluptatem autem sunt.");
+          });
+        });
+
+        describe("AND the link starts with assets", () => {
+          before(async () => {
+            const { vaults, wsRoot, engine } = getDWorkspace();
+            const note = await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note2",
+              body: "[[assets/test.txt]]",
+              engine,
+            });
+
+            await WSUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(7, 1, 7, 1);
+            await new GotoNoteCommand().run();
+          });
+
+          test("THEN opens the non-note file inside assets", async () => {
+            expect(getActiveEditorBasename()).toEqual("test.txt");
+            expect(
+              VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+            ).toEqual("Et hic est voluptatem eum quia quas pariatur.");
+          });
+        });
+      });
+
+      describeMultiWS(
+        "WHEN there's a note and non-note file with the same name",
+        { ctx },
+        () => {
+          before(async () => {
+            const { wsRoot, vaults, engine } = getDWorkspace();
+            const note = await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "[[test.txt]]",
+              engine,
+            });
+            await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.txt",
+              body: "Accusantium id et sunt cum esse.",
+              engine,
+            });
+            await fs.writeFile(
+              path.join(wsRoot, "test.txt"),
+              "Et voluptatem autem sunt."
+            );
+
+            await WSUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(7, 1, 7, 1);
+            await new GotoNoteCommand().run();
+          });
+
+          test("THEN opens the note", async () => {
+            expect(getActiveEditorBasename()).toEqual("test.txt.md");
+            expect(
+              AssertUtils.assertInString({
+                body: VSCodeUtils.getActiveTextEditorOrThrow().document.getText(),
+                match: ["Accusantium id et sunt cum esse."],
+                nomatch: ["Voluptatibus et totam qui eligendi qui quaerat."],
+              })
+            ).toBeTruthy();
+          });
+        }
+      );
     });
   });
 });

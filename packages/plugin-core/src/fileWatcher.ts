@@ -110,7 +110,7 @@ export class FileWatcher {
         this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
         const { vaults, engine } = getDWorkspace();
         const { wsRoot } = getDWorkspace();
-        const vault = VaultUtils.getVaultByNotePath({
+        const vault = VaultUtils.getVaultByFilePath({
           vaults,
           fsPath,
           wsRoot,

@@ -116,7 +116,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async getExistingNote(opts: CommandOpts) {
+  private async maybeSetOptsFromExistingNote(opts: CommandOpts) {
     const { engine } = getDWorkspace();
     const notes = NoteUtils.getNotesByFname({
       fname: opts.qs!,
@@ -138,7 +138,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async getExistingNonNoteFile(opts: CommandOpts) {
+  private async maybeSetOptsFromNonNote(opts: CommandOpts) {
     const { vaults, wsRoot } = getDWorkspace().engine;
     const nonNote = await findNonNoteFile({
       fpath: opts.qs!,
@@ -152,7 +152,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async getNewNote(opts: CommandOpts) {
+  private async setOptsFromNewNote(opts: CommandOpts) {
     // Depending on the config, we can either
     // automatically pick the vault or we'll prompt for it.
     const confirmVaultSetting =
@@ -203,16 +203,16 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // If vault is missing, then we haven't found the note yet. Go through possible options until we find it.
     if (opts.vault === undefined) {
-      const existingNote = await this.getExistingNote(opts);
+      const existingNote = await this.maybeSetOptsFromExistingNote(opts);
       // User cancelled prompt
       if (existingNote === null) return null;
       opts = existingNote;
     }
     if (opts.vault === undefined) {
-      opts = await this.getExistingNonNoteFile(opts);
+      opts = await this.maybeSetOptsFromNonNote(opts);
     }
     if (opts.vault === undefined) {
-      const newNote = await this.getNewNote(opts);
+      const newNote = await this.setOptsFromNewNote(opts);
       // User cancelled prompt
       if (newNote === null) return null;
       opts = newNote;

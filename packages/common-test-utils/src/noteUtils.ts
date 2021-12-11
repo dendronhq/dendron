@@ -7,6 +7,8 @@ import {
   SchemaUtils,
   DNodePropsQuickInputV2,
   NotePropsDict,
+  DEngineClient,
+  EngineWriteOptsV2,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -152,6 +154,24 @@ export class NoteTestUtilsV4 {
     }
     return note;
   };
+
+  /** This is like `createNote`, except it will make sure the engine is updated with the note.
+   *
+   * Prefer this over `createNote` if you are creating a note when the engine is
+   * already active. For example, when you are using `describeMultiWs` or
+   * `describeSingleWs` where the engine is already active inside the block.
+   *
+   * Avoid using this to update an existing note, this may cause issues.
+   */
+  static async createNoteWithEngine(
+    opts: Omit<CreateNoteOptsV4, "noWrite"> & { engine: DEngineClient } & {
+      engineWriteNoteOverride?: EngineWriteOptsV2;
+    }
+  ) {
+    const note = await this.createNote({ ...opts, noWrite: true });
+    await opts.engine.writeNote(note, opts.engineWriteNoteOverride);
+    return note;
+  }
 
   static async createNotePropsInput(
     opts: CreateNoteInputOpts

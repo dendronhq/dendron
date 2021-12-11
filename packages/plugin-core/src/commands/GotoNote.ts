@@ -78,7 +78,11 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return;
     const currentLine = editor?.document.lineAt(selection.start.line).text;
     if (!currentLine) return;
-    const reference = getReferenceAtPosition(editor!.document, selection.start);
+    const reference = getReferenceAtPosition(
+      editor!.document,
+      selection.start,
+      { allowInCodeBlocks: true }
+    );
     if (!reference) return;
     return {
       alias: reference?.label,

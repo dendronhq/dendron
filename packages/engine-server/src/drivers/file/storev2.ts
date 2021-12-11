@@ -696,6 +696,22 @@ export class FileStorage implements DStore {
           });
         }
 
+        // only modify links that have same _to_ vault name
+        // explicitly same: has vault prefix
+        // implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
+        allLinks = allLinks.filter((link) => {
+          const oldLocVaultName = oldLoc.vaultName as string;
+          const explicitlySameVault = link.to?.vaultName === oldLocVaultName;
+          const oldLocVault = VaultUtils.getVaultByName({
+            vaults: this.vaults,
+            vname: oldLocVaultName,
+          });
+          const implicitlySameVault =
+            _.isUndefined(link.to?.vaultName) &&
+            _.isEqual(n.vault, oldLocVault);
+          return explicitlySameVault || implicitlySameVault;
+        });
+
         const noteMod = _.reduce(
           allLinks,
           (note: NoteProps, link: DLink) => {

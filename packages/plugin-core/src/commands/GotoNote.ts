@@ -151,7 +151,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
     if (nonNote) {
       opts.qs = nonNote.fullPath;
-      opts.vault = null;
+      opts.vault = undefined;
     }
     return opts;
   }

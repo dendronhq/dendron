@@ -53,7 +53,7 @@
     "@dendronhq/common-all": "^0.72.0",
     "@dendronhq/common-server": "^0.72.0",
     "@dendronhq/engine-server": "^0.72.0",
-    "@instantish/martian": "^1.0.3",
+    "@instantish/martian": "1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",
     "@types/airtable": "^0.10.1",

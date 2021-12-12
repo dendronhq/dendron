@@ -1,6 +1,6 @@
 import {
   assertUnreachable,
-  DNoteAnchor,
+  DNoteAnchorBasic,
   DVault,
   getSlugger,
   NoteProps,
@@ -23,8 +23,8 @@ import { BasicCommand } from "./base";
 
 type CommandOpts = {
   qs?: string;
-  vault?: DVault | null;
-  anchor?: DNoteAnchor;
+  vault?: DVault;
+  anchor?: DNoteAnchorBasic;
   overrides?: Partial<NoteProps>;
   /**
    * What {@link vscode.ViewColumn} to open note in
@@ -43,14 +43,14 @@ type CommandOutput =
   | undefined;
 
 export const findAnchorPos = (opts: {
-  anchor: DNoteAnchor;
+  anchor: DNoteAnchorBasic;
   note: NoteProps;
 }): Position => {
   const { anchor: findAnchor, note } = opts;
   let key: string;
   if (findAnchor.type === "header") key = getSlugger().slug(findAnchor.value);
   else if (findAnchor.type === "block") key = `^${findAnchor.value}`;
-  else assertUnreachable(findAnchor.type);
+  else assertUnreachable(findAnchor);
 
   const found = note.anchors[key];
 

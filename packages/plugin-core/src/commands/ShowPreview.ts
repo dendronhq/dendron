@@ -37,6 +37,7 @@ export const extractHeaderAnchorIfExists = (
     return {
       type: "header",
       value: anchorValue,
+      depth: tokens.length - 1,
     };
   }
 };

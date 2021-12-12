@@ -47,13 +47,24 @@ export type DNoteLoc = {
   anchorHeader?: string;
 };
 
-export type DNoteAnchor = {
-  /**
-   * In the future, we could have ID based anchors
-   */
-  type: "header" | "block";
+export type DNoteAnchor = DNoteBlockAnchor | DNoteHeaderAnchor;
+/**
+ * Anchor without {@link DNoteHeaderAnchor.depth} info
+ */
+export type DNoteAnchorBasic =
+  | DNoteBlockAnchor
+  | Omit<DNoteHeaderAnchor, "depth">;
+
+export type DNoteBlockAnchor = {
+  type: "block";
   text?: string; //original text for the anchor
   value: string;
+};
+export type DNoteHeaderAnchor = {
+  type: "header";
+  text?: string; //original text for the anchor
+  value: string;
+  depth: number;
 };
 
 export type DNoteAnchorPositioned = DNoteAnchor & {

@@ -1,6 +1,7 @@
 {
   "name": "root",
   "private": true,
+  "engines" : { "node" : ">=0.14" },
   "workspaces": {
     "packages": [
       "packages/common-all",

@@ -48,8 +48,10 @@ export type DNoteLoc = {
 };
 
 export type DNoteAnchor = DNoteBlockAnchor | DNoteHeaderAnchor;
+
 /**
  * Anchor without {@link DNoteHeaderAnchor.depth} info
+ * @todo see migration [[DNoteAnchorBasic|dendron://dendron.docs/dev.changelog#dnoteanchorbasic]]
  */
 export type DNoteAnchorBasic =
   | DNoteBlockAnchor
@@ -60,6 +62,13 @@ export type DNoteBlockAnchor = {
   text?: string; //original text for the anchor
   value: string;
 };
+
+/**
+ * This represents a markdown header
+ * ```md
+ * # H1
+ * ```
+ */
 export type DNoteHeaderAnchor = {
   type: "header";
   text?: string; //original text for the anchor

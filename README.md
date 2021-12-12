@@ -151,6 +151,10 @@ Follow the instructions [here](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-
 
 To stay up to date on Dendron developments and all things knowledge management, you can follow us at [@dendronhq](https://twitter.com/dendronhq) or join us on [discord](https://discord.gg/6j85zNX)!
 
+## Developer Getting Started
+
+If you checked out this repo and would like to get started with the code, please see the [docs README](./docs/README.md) to get started.
+
 ## Contributors ✨
 
 Dendron wouldn't be what it is today without help from these wonderful gardeners 👨‍🌾👩‍🌾
@@ -313,7 +317,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. We welcome community contributions and pull requests. See [CONTRIBUTING](https://github.com/dendronhq/dendron/blob/master/docs/CONTRIBUTING.md) for information on how to set up a development environment and submit code.
 
-# License
+## License
 
 Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 

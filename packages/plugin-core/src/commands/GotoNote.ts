@@ -1,6 +1,6 @@
 import {
   assertUnreachable,
-  DNoteAnchor,
+  DNoteAnchorBasic,
   DVault,
   getSlugger,
   NoteProps,
@@ -23,9 +23,10 @@ import { BasicCommand } from "./base";
 
 type CommandOpts = {
   qs?: string;
-  vault?: DVault | null;
-  anchor?: DNoteAnchor;
+  vault?: DVault;
+  anchor?: DNoteAnchorBasic;
   overrides?: Partial<NoteProps>;
+  kind?: TargetKind;
   /**
    * What {@link vscode.ViewColumn} to open note in
    */
@@ -35,22 +36,27 @@ type CommandOpts = {
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
+enum TargetKind {
+  NOTE = "note",
+  NON_NOTE = "nonNote",
+}
+
 type CommandOutput =
   // When opening a note
-  | { kind: "note"; note: NoteProps; pos?: Position; source?: string }
+  | { kind: TargetKind.NOTE; note: NoteProps; pos?: Position; source?: string }
   // When opening a non-note file
-  | { kind: "nonNote"; fullPath: string }
+  | { kind: TargetKind.NON_NOTE; fullPath: string }
   | undefined;
 
 export const findAnchorPos = (opts: {
-  anchor: DNoteAnchor;
+  anchor: DNoteAnchorBasic;
   note: NoteProps;
 }): Position => {
   const { anchor: findAnchor, note } = opts;
   let key: string;
   if (findAnchor.type === "header") key = getSlugger().slug(findAnchor.value);
   else if (findAnchor.type === "block") key = `^${findAnchor.value}`;
-  else assertUnreachable(findAnchor.type);
+  else assertUnreachable(findAnchor);
 
   const found = note.anchors[key];
 
@@ -151,7 +157,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
     if (nonNote) {
       opts.qs = nonNote.fullPath;
-      opts.vault = null;
+      opts.kind = TargetKind.NON_NOTE;
     }
     return opts;
   }
@@ -215,7 +221,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.vault === undefined) {
       opts = await this.maybeSetOptsFromNonNote(opts);
     }
-    if (opts.vault === undefined) {
+    // vault undefined and we're not targeting a {@link TargetKind.NON_NOTE}
+    if (opts.vault === undefined && opts.kind !== TargetKind.NON_NOTE) {
       const newNote = await this.setOptsFromNewNote(opts);
       // User cancelled prompt
       if (newNote === null) return null;
@@ -247,20 +254,21 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const processedOpts = await this.processInputs(opts);
     if (processedOpts === null) return; // User cancelled a prompt, or did not have a valid link selected
     const { qs, vault } = processedOpts;
-    if (qs === undefined || vault === undefined) {
-      // There was an error or the user cancelled a prompt
-      return;
-    }
 
     // Non-note files use `qs` for full path, and set vault to null
-    if (vault === null) {
+    if (opts.kind === TargetKind.NON_NOTE && qs) {
       await VSCodeUtils.openFileInEditor(
         Uri.from({ scheme: "file", path: qs })
       );
       return {
-        kind: "nonNote",
+        kind: TargetKind.NON_NOTE,
         fullPath: qs,
       };
+    }
+
+    if (qs === undefined || vault === undefined) {
+      // There was an error or the user cancelled a prompt
+      return;
     }
 
     // Otherwise, it's a regular note
@@ -287,7 +295,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         editor.selection = new Selection(pos, pos);
         editor.revealRange(editor.selection);
       }
-      return { kind: "note", note, pos, source: opts.source };
+      return { kind: TargetKind.NOTE, note, pos, source: opts.source };
     });
     return out;
   }

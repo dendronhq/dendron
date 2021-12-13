@@ -30,6 +30,7 @@ import {
   DVault,
   USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
+  DNoteAnchorBasic,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type {
@@ -782,8 +783,9 @@ export class AnchorUtils {
 
     const { line, column } = node.position.start;
     if (node.type === DendronASTTypes.HEADING) {
-      const text = this.headerText(node as Heading);
-      const value = slugger.slug(this.headerText(node as Heading));
+      const headerNode = node as Heading;
+      const text = this.headerText(headerNode);
+      const value = slugger.slug(this.headerText(headerNode));
       return [
         value,
         {
@@ -792,6 +794,7 @@ export class AnchorUtils {
           value,
           line: line - 1,
           column: column - 1,
+          depth: headerNode.depth,
         },
       ];
     } else if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
@@ -837,10 +840,10 @@ export class AnchorUtils {
     }
   }
 
-  static anchor2string(anchor: DNoteAnchor): string {
+  static anchor2string(anchor: DNoteAnchor | DNoteAnchorBasic): string {
     if (anchor.type === "block") return `^${anchor.value}`;
     if (anchor.type === "header") return anchor.value;
-    assertUnreachable(anchor.type);
+    assertUnreachable(anchor);
   }
 }
 

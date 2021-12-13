@@ -1,6 +1,7 @@
 import {
   EngineDeletePayload,
   NoteChangeEntry,
+  NoteProps,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
@@ -16,6 +17,7 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { window } from "vscode";
 import { WSUtils } from "../../WSUtils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("DeleteNodeCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
@@ -27,7 +29,7 @@ suite("DeleteNodeCommand", function () {
       onInit: async ({ engine, vaults, wsRoot }) => {
         const note = engine.notes["foo"];
         await WSUtils.openNote(note);
-        await new DeleteNodeCommand().execute();
+        await new DeleteNodeCommand().execute({ noConfirm: true });
 
         const vaultFiles = fs.readdirSync(
           path.join(wsRoot, VaultUtils.getRelPath(vaults[0]))
@@ -49,12 +51,78 @@ suite("DeleteNodeCommand", function () {
 
         const note = engine.notes["foo"];
         await WSUtils.openNote(note);
-        await new DeleteNodeCommand().execute();
+        await new DeleteNodeCommand().execute({ noConfirm: true });
 
         const infoMsg = windowSpy.getCall(0).args[0];
         expect(infoMsg).toEqual("foo.md (vault1) deleted");
 
         sinonSandbox.restore();
+        done();
+      },
+    });
+  });
+
+  test.only("WHEN note to be deleted has outstanding links to it THEN show preview of broken links", (done) => {
+    let activeNote: NoteProps;
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        activeNote = await NoteTestUtilsV4.createNote({
+          fname: "note-to-be-deleted",
+          vault: vaults[0],
+          wsRoot,
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "implicit-same-vault-link",
+          vault: vaults[0],
+          body: ["[[note-to-be-deleted]]", "[[dummy]]"].join("\n"),
+          wsRoot,
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "explicit-same-vault-link",
+          vault: vaults[0],
+          body: ["[[dendron://vault/note-to-be-deleted]]", "[[dummy]]"].join(
+            "\n"
+          ),
+          wsRoot,
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "implicit-different-vault-link",
+          vault: vaults[1],
+          body: ["[[note-to-be-deleted]]", "[[dummy]]"].join("\n"),
+          wsRoot,
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "explicit-same-vault-link",
+          vault: vaults[1],
+          body: ["[[dendron://vault/note-to-be-deleted]]", "[[dummy]]"].join(
+            "\n"
+          ),
+          wsRoot,
+        });
+      },
+      onInit: async () => {
+        await WSUtils.openNote(activeNote);
+        const cmd = new DeleteNodeCommand();
+
+        const sandbox = sinon.createSandbox();
+        const previewSpy = sandbox.spy(cmd, "showNoteDeletePreview");
+
+        await cmd.execute({ noConfirm: true });
+
+        const previewArgs = previewSpy.getCall(0).args;
+        const previewContent = await previewSpy.getCall(0).returnValue;
+
+        expect(previewArgs[0].fname).toEqual("note-to-be-deleted");
+        expect(previewArgs[0].vault).toEqual({ fsPath: "vault1" });
+        expect(previewArgs[1].length).toEqual(4);
+        expect(previewContent.includes("dummy")).toBeFalsy();
+        sandbox.restore();
         done();
       },
     });
@@ -72,7 +140,7 @@ suite("DeleteNodeCommand", function () {
       onInit: async ({ engine, vaults, wsRoot }) => {
         const note = engine.notes["foo"];
         await WSUtils.openNote(note);
-        const resp = await new DeleteNodeCommand().execute();
+        const resp = await new DeleteNodeCommand().execute({ noConfirm: true });
         const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
         const vaultDir = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
         const notes = engine.notes;
@@ -180,6 +248,7 @@ suite("Contextual-UI", function () {
           const vaultRoot = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
           const opts = {
             _fsPath: path.join(vaultRoot, "foo.md"),
+            noConfirm: true,
           };
           await new DeleteNodeCommand().execute(opts);
 

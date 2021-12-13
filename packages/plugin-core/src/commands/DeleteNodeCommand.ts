@@ -56,7 +56,7 @@ export class DeleteNodeCommand extends BasicCommand<
       `# of backlinks to this note: ${backlinks.length}`,
       "```",
       "## Broken links after deletion",
-      `These links will be broken after deleting _*${note.fname}*_`,
+      `These links will be broken after deleting **${note.fname}**`,
       "",
       `Make sure to convert the broken links listed below accordingly.`,
       "",
@@ -78,6 +78,7 @@ export class DeleteNodeCommand extends BasicCommand<
       {}
     );
     panel.webview.html = md.render(content.join("\n"));
+    return content.join("\n");
   }
 
   async promptConfirmation(title: string, noConfirm?: boolean) {

@@ -1,6 +1,7 @@
 import {
   assertUnreachable,
   DendronError,
+  NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -18,8 +19,12 @@ import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
 
 export default class RenameProvider implements vscode.RenameProvider {
-  private targetNote: NoteProps | undefined;
+  private _targetNote: NoteProps | undefined;
   private refAtPos: getReferenceAtPositionResp | undefined;
+
+  set targetNote(value: NoteProps) {
+    this._targetNote = value;
+  }
 
   private getRangeForReference(opts: {
     reference: getReferenceAtPositionResp;
@@ -49,7 +54,7 @@ export default class RenameProvider implements vscode.RenameProvider {
           message: `Cannot rename note ${ref} that doesn't exist.`,
         });
       }
-      this.targetNote = targetNote;
+      this._targetNote = targetNote;
       const currentNote = WSUtils.getNoteFromDocument(document);
       if (_.isEqual(currentNote, targetNote)) {
         throw new DendronError({
@@ -101,39 +106,23 @@ export default class RenameProvider implements vscode.RenameProvider {
     return;
   }
 
-  public async prepareRename(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-    _token: vscode.CancellationToken
-  ) {
-    const reference = getReferenceAtPosition(document, position);
-    if (reference !== null) {
-      this.refAtPos = reference;
-      const range = this.getRangeForReference({ reference, document });
-      return range;
-    } else {
-      throw new DendronError({
-        message: "Rename is not supported for this symbol",
-      });
-    }
-  }
-
-  public async provideRenameEdits(
-    _document: vscode.TextDocument,
-    _position: vscode.Position,
-    newName: string,
-    _token: vscode.CancellationToken
-  ) {
-    if (this.targetNote !== undefined) {
+  public async executeRename(opts: { newName: string }): Promise<
+    | {
+        changed: NoteChangeEntry[];
+      }
+    | undefined
+  > {
+    const { newName } = opts;
+    if (this._targetNote !== undefined) {
       const { engine } = getDWorkspace();
       const { wsRoot } = engine;
       const renameCmd = new RenameNoteV2aCommand();
-      const targetVault = this.targetNote.vault;
+      const targetVault = this._targetNote.vault;
       const vpath = vault2Path({ wsRoot, vault: targetVault });
       const rootUri = vscode.Uri.file(vpath);
       const oldUri = VSCodeUtils.joinPath(
         rootUri,
-        `${this.targetNote.fname}.md`
+        `${this._targetNote.fname}.md`
       );
       let newNamePrefix = "";
       if (
@@ -170,7 +159,33 @@ export default class RenameProvider implements vscode.RenameProvider {
         const msg = `Created ${createdCount}, updated ${updatedCount}, and deleted ${deletedCount} files.`;
         vscode.window.showInformationMessage(msg);
       }
+      return resp;
     }
+    return;
+  }
+
+  public async prepareRename(
+    document: vscode.TextDocument,
+    position: vscode.Position
+  ) {
+    const reference = getReferenceAtPosition(document, position);
+    if (reference !== null) {
+      this.refAtPos = reference;
+      const range = this.getRangeForReference({ reference, document });
+      return range;
+    } else {
+      throw new DendronError({
+        message: "Rename is not supported for this symbol",
+      });
+    }
+  }
+
+  public async provideRenameEdits(
+    _document: vscode.TextDocument,
+    _position: vscode.Position,
+    newName: string
+  ) {
+    await this.executeRename({ newName });
     // return a dummy edit.
     return new vscode.WorkspaceEdit();
   }

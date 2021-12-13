@@ -1,23 +1,24 @@
 import {
   ConfigUtils,
+  DendronError,
   DVault,
   NoteTrait,
   OnCreateContext,
-  RespV2,
 } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
 import {
   LookupControllerV3,
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  OnAcceptHook,
-} from "../components/lookup/LookupProviderV3";
+import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import { VaultSelectionMode } from "../components/lookup/types";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import {
+  NoteLookupProviderUtils,
+  PickerUtilsV2,
+} from "../components/lookup/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
@@ -155,6 +156,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     return new Promise<string | undefined>((resolve) => {
       const lookupCreateOpts: LookupControllerV3CreateOpts = {
         nodeType: "note",
+        disableVaultSelection: true,
       };
       const lc = LookupControllerV3.create(lookupCreateOpts);
 
@@ -163,23 +165,6 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
         forceAsIsPickerValueUsage: true,
       });
 
-      const onAccepted: OnAcceptHook = async ({
-        selectedItems,
-      }): Promise<RespV2<any>> => {
-        if (!selectedItems || selectedItems.length === 0) {
-          resolve(undefined);
-        } else {
-          const selected = selectedItems[0].fname;
-          resolve(selected);
-        }
-
-        return {
-          error: null,
-        };
-      };
-
-      provider.registerOnAcceptHook(onAccepted);
-
       const defaultNoteName =
         initialValue ??
         path.basename(
@@ -187,19 +172,44 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
           ".md"
         );
 
-      lc.prepareQuickPick({
+      NoteLookupProviderUtils.subscribe({
+        id: "createNoteWithTrait",
+        controller: lc,
+        logger: this.L,
+        onHide: () => {
+          resolve(undefined);
+          NoteLookupProviderUtils.cleanup({
+            id: "createNoteWithTrait",
+            controller: lc,
+          });
+        },
+        onDone: (event: HistoryEvent) => {
+          const data = event.data;
+          if (data.cancel) {
+            resolve(undefined);
+          } else {
+            resolve(data.selectedItems[0].fname);
+          }
+          NoteLookupProviderUtils.cleanup({
+            id: "createNoteWithTrait",
+            controller: lc,
+          });
+        },
+        onError: (event: HistoryEvent) => {
+          const error = event.data.error as DendronError;
+          vscode.window.showErrorMessage(error.message);
+          resolve(undefined);
+          NoteLookupProviderUtils.cleanup({
+            id: "createNoteWithTrait",
+            controller: lc,
+          });
+        },
+      });
+      lc.show({
         placeholder: "Enter Note Name",
         provider,
         initialValue: defaultNoteName,
         title: `Create Note with Trait`,
-        onDidHide: () => {
-          resolve(undefined);
-        },
-      }).then((qp) => {
-        lc.showQuickPick({
-          quickpick: qp.quickpick,
-          provider,
-        });
       });
     });
   }

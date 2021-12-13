@@ -33,12 +33,14 @@ export class UserDefinedTraitV1 implements NoteTrait {
   }
 
   private static getOnWillCreateProps(noteTypeScriptPath: string) {
-    const req: NoteTrait = require(noteTypeScriptPath);
+    const hack = require(`./webpack-require-hack.js`);
+    const req: NoteTrait = hack(noteTypeScriptPath);
     return req.OnWillCreate;
   }
 
   private static getOnCreateProps(noteTypeScriptPath: string) {
-    const req: NoteTrait = require(noteTypeScriptPath);
+    const hack = require(`./webpack-require-hack.js`);
+    const req: NoteTrait = hack(noteTypeScriptPath);
     return req.OnCreate;
   }
 }

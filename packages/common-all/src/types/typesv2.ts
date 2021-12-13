@@ -81,7 +81,7 @@ export type DNoteAnchorPositioned = DNoteAnchor & {
   column: number;
 };
 
-export type DLinkType = "wiki" | "refv2";
+export type DLinkType = "wiki" | "refv2" | "hashtag" | "usertag" | "fmtag";
 
 export type DNoteLinkData = {
   // TODO: should be backfilled to be mandatory

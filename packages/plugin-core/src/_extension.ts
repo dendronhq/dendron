@@ -67,6 +67,7 @@ import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
+import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -1114,6 +1115,12 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
     vscode.languages.registerFoldingRangeProvider(
       mdLangSelector,
       new FrontmatterFoldingRangeProvider()
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerRenameProvider(
+      mdLangSelector,
+      new RenameProvider()
     )
   );
   completionProvider.activate(context);

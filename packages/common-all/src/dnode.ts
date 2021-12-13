@@ -26,6 +26,7 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
+  Position,
   REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,

@@ -24,6 +24,7 @@ import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtils } from "../WSUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
@@ -116,10 +117,15 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   async promptMatchText() {
+    const editor = VSCodeUtils.getActiveTextEditor();
+    const value = editor?.document
+      ? WSUtils.getNoteFromDocument(editor.document)?.fname
+      : "";
     const match = await VSCodeUtils.showInputBox({
       title: "Enter match text",
       prompt:
-        "The matched portion of the file name will be the part that gets modified. The rest will remain unchanged. This support full range of regular expression. Leave blank to capture entire file name",
+        "The matched portion of the file name will be the part that gets modified. The rest will remain unchanged. This supports full range of regular expression. Leave blank to capture entire file name",
+      value,
     });
 
     if (match === undefined) {

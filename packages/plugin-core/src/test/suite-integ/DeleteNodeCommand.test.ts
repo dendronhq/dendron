@@ -62,7 +62,7 @@ suite("DeleteNodeCommand", function () {
     });
   });
 
-  test.only("WHEN note to be deleted has outstanding links to it THEN show preview of broken links", (done) => {
+  test("WHEN note to be deleted has outstanding links to it THEN show preview of broken links", (done) => {
     let activeNote: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,

@@ -70,7 +70,7 @@ export function isBlockAnchor(anchor?: string): boolean {
   return !!anchor && anchor[0] === "^";
 }
 
-export function isFileAnchor(anchor?: string): boolean {
+export function isLineAnchor(anchor?: string): boolean {
   // not undefined, not an empty string, and the first character is L, and is followed by numbers
   return !!anchor && /L\d+/.test(anchor);
 }

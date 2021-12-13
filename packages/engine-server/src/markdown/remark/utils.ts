@@ -843,6 +843,7 @@ export class AnchorUtils {
   static anchor2string(anchor: DNoteAnchor | DNoteAnchorBasic): string {
     if (anchor.type === "block") return `^${anchor.value}`;
     if (anchor.type === "header") return anchor.value;
+    if (anchor.type === "line") return `L${anchor.line}`;
     assertUnreachable(anchor);
   }
 }

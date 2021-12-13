@@ -3,6 +3,8 @@ import {
   DLink,
   DLinkType,
   DNoteAnchorBasic,
+  isBlockAnchor,
+  isLineAnchor,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
@@ -404,8 +406,16 @@ export const parseAnchor = (
   // If undefined or empty string
   if (!anchorValue) return undefined;
 
-  if (anchorValue[0] === "^") {
+  if (isBlockAnchor(anchorValue)) {
     return { type: "block", value: anchorValue.slice(1) };
+  } else if (isLineAnchor(anchorValue)) {
+    const value = anchorValue.slice(1);
+    return {
+      type: "line",
+      value,
+      text: anchorValue,
+      line: _.toInteger(value),
+    };
   } else {
     return { type: "header", value: anchorValue };
   }

@@ -291,6 +291,9 @@ export const handleLink = async ({
   }
 };
 
+// eslint-disable-next-line import/no-mutable-exports
+export let UI_SHOW_PREVIEW_CMD: ShowPreviewCommand | undefined;
+
 export class ShowPreviewCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
@@ -301,6 +304,23 @@ export class ShowPreviewCommand extends BasicCommand<
   constructor(previewPanel: vscode.WebviewPanel) {
     super();
     this._panel = previewPanel;
+
+    if (UI_SHOW_PREVIEW_CMD === undefined) {
+      UI_SHOW_PREVIEW_CMD = this;
+    }
+  }
+
+  async syncEditorToPreviewPlacement(
+    cleanedText: string,
+    elementOffset: number
+  ) {
+    if (this._panel && this._panel.webview) {
+      this._panel.webview.postMessage({
+        type: "sync-editor-to-preview",
+        text: cleanedText,
+        elementOffset,
+      });
+    }
   }
 
   async sanityCheck() {

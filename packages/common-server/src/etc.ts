@@ -102,6 +102,25 @@ export class WebViewCommonUtils {
         document.head.appendChild(link);
     }
       ${acquireVsCodeApi}
+    
+    
+     window.addEventListener('message', event => {
+        const targetText = event.data.text;
+        const targetOffset = event.data.elementOffset;
+        
+        const allElements = document.querySelectorAll('*');
+        
+        var myElements = [];
+        for (var i = 0; i < allElements.length; i++) { 
+            if (allElements[i].innerHTML.includes(targetText)) {
+                myElements.push(allElements[i]);
+            }
+        }
+        
+        const lastElement = myElements[targetOffset];
+        lastElement.scrollIntoView();        
+    });
+    
     </script>
 
     <body onload="onload()" class="vscode-${initialTheme || "light"}">

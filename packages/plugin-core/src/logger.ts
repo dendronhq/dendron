@@ -144,6 +144,16 @@ export class Logger {
     });
   }
 
+  static warn(payload: any, show?: boolean): void {
+    Logger.log(payload, "warn", { show });
+
+    Sentry.addBreadcrumb({
+      category: "plugin",
+      message: customStringify(payload),
+      level: Sentry.Severity.Warning,
+    });
+  }
+
   static info(payload: any, show?: boolean): void {
     Logger.log(payload, "info", { show });
 

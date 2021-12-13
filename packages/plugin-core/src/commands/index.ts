@@ -58,6 +58,7 @@ import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowLegacyPreviewCommand } from "./ShowLegacyPreview";
+import { SyncPreviewCommand } from "./SyncPreviewCommand";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
 import { SnapshotVaultCommand } from "./SnapshotVault";
@@ -120,6 +121,7 @@ const ALL_COMMANDS = [
   SetupWorkspaceCommand,
   ShowHelpCommand,
   ShowLegacyPreviewCommand,
+  SyncPreviewCommand,
   SignInCommand,
   SignUpCommand,
   PublishExportCommand,

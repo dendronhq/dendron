@@ -867,6 +867,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
     enablement: "dendron:pluginActive",
   },
+  SYNC_PREVIEW: {
+    key: "dendron.syncPreview",
+    title: `${CMD_PREFIX} Sync Preview`,
+    group: "notes",
+    keybindings: {
+      windows: "ctrl+windows+s",
+      mac: "ctrl+cmd+s",
+    },
+    desc: "Sync Preview With Editor",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,

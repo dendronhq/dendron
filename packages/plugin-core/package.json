@@ -470,6 +470,13 @@
         "enablement": "dendron:pluginActive"
       },
       {
+        "command": "dendron.syncPreview",
+        "title": "Dendron: Sync Preview",
+        "desc": "Sync Preview With Editor",
+        "docLink": "dendron.topic.commands.md",
+        "docPreview": ""
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File",
         "desc": "Paste file"
@@ -877,6 +884,11 @@
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"
+      },
+      {
+        "command": "dendron.syncPreview",
+        "windows": "ctrl+windows+s",
+        "mac": "ctrl+cmd+s"
       }
     ],
     "markdown.previewStyles": [

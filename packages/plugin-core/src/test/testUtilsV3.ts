@@ -38,7 +38,12 @@ import _ from "lodash";
 import { after, afterEach, before, beforeEach, describe } from "mocha";
 import os from "os";
 import sinon from "sinon";
-import { ExtensionContext, Uri, WorkspaceFolder } from "vscode";
+import {
+  ExtensionContext,
+  Uri,
+  WorkspaceFolder,
+  CancellationToken,
+} from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -499,4 +504,15 @@ export function cleanupVSCodeContextSubscriptions(ctx: ExtensionContext) {
   ctx.subscriptions.forEach((disposable) => {
     disposable.dispose();
   });
+}
+
+export function stubCancellationToken(): CancellationToken {
+  return {
+    isCancellationRequested: false,
+    onCancellationRequested: () => {
+      return {
+        dispose: () => {},
+      };
+    },
+  };
 }

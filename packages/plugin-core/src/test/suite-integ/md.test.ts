@@ -44,7 +44,7 @@ suite("WHEN getReferenceAtPosition", function () {
           ),
           ref: "foo",
           refText: "foo#foo1",
-          refType: undefined,
+          refType: "wiki",
           vaultName: undefined,
         });
         return;

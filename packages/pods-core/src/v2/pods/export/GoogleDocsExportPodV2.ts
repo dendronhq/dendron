@@ -25,6 +25,10 @@ export type GoogleDocsExportReturnType = RespV2<{
    * Document Id of the exported Note
    */
   documentId?: string;
+  /**
+   * Revision Id of the exported Note
+   */
+  revisionId?: string;
 }>;
 
 /**
@@ -121,6 +125,7 @@ export class GoogleDocsExportPodV2
   }): Promise<GoogleDocsExportReturnType> {
     try {
       const { content, name, accessToken } = opts;
+      let revisionId = "";
       //metadata is used by drive API to understand the required MIME type
       const metadata = {
         name,
@@ -141,9 +146,16 @@ export class GoogleDocsExportPodV2
         },
         data: formData,
       });
+      if (response) {
+        revisionId = await this.getRevisionId({
+          documentId: response.data.id,
+          accessToken,
+        });
+      }
       return ResponseUtil.createHappyResponse({
         data: {
           documentId: response.data.id,
+          revisionId,
         },
       });
     } catch (err: any) {
@@ -165,6 +177,7 @@ export class GoogleDocsExportPodV2
   }): Promise<GoogleDocsExportReturnType> {
     const { content, accessToken, documentId } = opts;
     const fileSize = content.length;
+    let revisionId = "";
     try {
       const response = await axios({
         method: "PUT",
@@ -176,9 +189,13 @@ export class GoogleDocsExportPodV2
         },
         data: content,
       });
+      if (response) {
+        revisionId = await this.getRevisionId({ documentId, accessToken });
+      }
       return ResponseUtil.createHappyResponse({
         data: {
           documentId: response.data.id,
+          revisionId,
         },
       });
     } catch (err: any) {
@@ -188,10 +205,35 @@ export class GoogleDocsExportPodV2
     }
   }
 
+  async getRevisionId(opts: { accessToken: string; documentId: string }) {
+    const { accessToken, documentId } = opts;
+    try {
+      const result = await axios.get(
+        `https://docs.googleapis.com/v1/documents/${documentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return result.data.revisionId;
+    } catch (err: any) {
+      return ResponseUtil.createUnhappyResponse({
+        error: err as DendronError,
+      });
+    }
+  }
+
   static config(): JSONSchemaType<GoogleDocsV2PodConfig> {
     return ConfigFileUtils.createExportConfig({
-      required: [],
-      properties: {},
+      required: ["connectionId"],
+      properties: {
+        connectionId: {
+          description: "ID of the Airtable Connected Service",
+          type: "string",
+        },
+      },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;
   }
 }

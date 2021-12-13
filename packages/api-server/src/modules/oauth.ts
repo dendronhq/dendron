@@ -78,7 +78,7 @@ export class GoogleAuthController implements TokenMethods {
       };
       engine.addAccessTokensToPodConfig(opts);
       resp =
-        "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
+        "Authorization completed. Please return to your workspace and then run the pod again. Please specify vaultName in config.import.yml if you are running the import pod. You can now close this window.";
     } else {
       throw new DendronError({
         message:

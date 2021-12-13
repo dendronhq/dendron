@@ -74,7 +74,7 @@ export class ConfigFileUtils {
     return fPath;
   }
 
-  static createExportConfig(opts: { required: string[]; properties: any }) {
+  static createExportConfig<T>(opts: { required: (keyof T)[]; properties: T }) {
     return {
       type: "object",
       required: ["podId", "podType", "exportScope", ...opts.required],

@@ -17,7 +17,9 @@ import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { clipboard, VSCodeUtils } from "../../utils";
+import { clipboard } from "../../utils";
+import { launchGoogleOAuthFlow } from "../../utils/pods";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
@@ -111,26 +113,48 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       expirationTime,
       connectionId,
     };
-    if (!isRunnableGoogleDocsV2PodConfig(inputs)) {
-      let id = inputs?.podId;
-      if (!id) {
-        const picked = await PodUIControls.promptForGenericId();
 
-        if (!picked) {
-          return;
-        }
-        id = picked;
+    // If this is not an already saved pod config, then prompt user whether they
+    // want to save as a new config or just run it one-time
+    if (!opts?.podId) {
+      const choice = await PodUIControls.promptToSaveInputChoicesAsNewConfig();
+
+      if (choice !== undefined && choice !== false) {
+        const configPath = ConfigFileUtils.genConfigFileV2({
+          fPath: path.join(
+            getExtension().podsDir,
+            "custom",
+            `config.${choice}.yml`
+          ),
+          configSchema: GoogleDocsExportPodV2.config(),
+          setProperties: _.merge(inputs, {
+            podId: choice,
+            podType: PodV2Types.GoogleDocsExportV2,
+            connectionId: inputs.connectionId,
+          }),
+        });
+
+        vscode.window
+          .showInformationMessage(
+            `Configuration saved to ${configPath}`,
+            "Open Config"
+          )
+          .then((selectedItem) => {
+            if (selectedItem) {
+              VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
+            }
+          });
       }
-      const configPath = ConfigFileUtils.genConfigFileV2({
-        fPath: path.join(getExtension().podsDir, "custom", `config.${id}.yml`),
-        configSchema: GoogleDocsExportPodV2.config(),
-        setProperties: _.merge(inputs, {
-          podId: id,
-          connectionId: inputs.connectionId,
-        }),
-      });
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
-      //TODO: Modify message:
+    }
+
+    if (!isRunnableGoogleDocsV2PodConfig(inputs)) {
+      const id = await PodUIControls.promptToCreateNewServiceConfig(
+        ExternalService.GoogleDocs
+      );
+      await launchGoogleOAuthFlow(id);
+      vscode.window.showInformationMessage(
+        "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+      );
       return;
     } else {
       return inputs;
@@ -150,28 +174,32 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       );
       return;
     }
-    if (exportReturnValue.data?.documentId) {
+    const { documentId, revisionId } = exportReturnValue.data!;
+    if (documentId && revisionId) {
       await this.updateNoteWithDocumentId({
-        documentId: exportReturnValue.data?.documentId,
+        documentId,
+        revisionId,
         note: payload,
       });
     }
     const gdocLink = `https://docs.google.com/document/d/${exportReturnValue.data?.documentId}`;
     clipboard.writeText(gdocLink);
     vscode.window.showInformationMessage(
-      `Finished running Google Docs export pod. The doc ${payload.fname} is created in your selected google docs account and link is copied to the clipboard.`
+      `The doc ${payload.fname} has been created. Its link has been copied to the clipboard.`
     );
   }
 
-  async updateNoteWithDocumentId(opts: {
+  private async updateNoteWithDocumentId(opts: {
     documentId: string;
+    revisionId: string;
     note: NoteProps;
   }) {
-    const { documentId, note } = opts;
+    const { documentId, revisionId, note } = opts;
     const engine = getEngine();
     note.custom = {
       ...note.custom,
       documentId,
+      revisionId,
     };
     await engine.writeNote(note, { updateExisting: true });
   }

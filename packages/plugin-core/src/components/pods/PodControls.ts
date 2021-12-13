@@ -162,36 +162,33 @@ export class PodUIControls {
       return;
     }
 
-    return PodCommandFactory.createPodCommandForPodType(
-      picked.label as PodV2Types
-    );
+    return PodCommandFactory.createPodCommandForPodType(picked);
   }
 
-
-    /**
+  /**
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
-     public static async promptForPodType(): Promise<PodV2Types | undefined> {
-      const newConnectionOptions = Object.keys(PodV2Types)
-        .filter((key) => Number.isNaN(Number(key)))
-        .map<QuickPickItem>((value) => {
-          return {
-            label: value,
-            detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
-          };
-        });
-      const picked = await vscode.window.showQuickPick(newConnectionOptions, {
-        title: "Pick the Pod Type",
-        ignoreFocusOut: true,
+  public static async promptForPodType(): Promise<PodV2Types | undefined> {
+    const newConnectionOptions = Object.keys(PodV2Types)
+      .filter((key) => Number.isNaN(Number(key)))
+      .map<QuickPickItem>((value) => {
+        return {
+          label: value,
+          detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
+        };
       });
-  
-      if (!picked) {
-        return;
-      }
-  
-      return picked.label as PodV2Types;
+    const picked = await vscode.window.showQuickPick(newConnectionOptions, {
+      title: "Pick the Pod Type",
+      ignoreFocusOut: true,
+    });
+
+    if (!picked) {
+      return;
     }
+
+    return picked.label as PodV2Types;
+  }
 
   /**
    * Prompt user to pick an {@link ExternalService}
@@ -258,7 +255,7 @@ export class PodUIControls {
           const id = await this.promptToCreateNewServiceConfig(
             ExternalService.GoogleDocs
           );
-          launchGoogleOAuthFlow(id);
+          await launchGoogleOAuthFlow(id);
           vscode.window.showInformationMessage(
             "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
           );
@@ -376,6 +373,9 @@ export class PodUIControls {
 
       case PodV2Types.MarkdownExportV2:
         return "Formats Dendron markdown and exports it to the clipboard or local file system";
+
+      case PodV2Types.GoogleDocsExportV2:
+        return "Formats Dendron note to google doc";
 
       default:
         assertUnreachable();

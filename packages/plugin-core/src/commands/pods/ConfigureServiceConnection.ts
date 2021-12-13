@@ -6,7 +6,7 @@ import path from "path";
 import { QuickPickItem, Uri, window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getExtension } from "../../workspace";
 import { BasicCommand } from "../base";
 

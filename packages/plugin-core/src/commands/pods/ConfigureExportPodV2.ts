@@ -7,7 +7,7 @@ import path from "path";
 import { QuickPickItem, Uri, window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
-import { VSCodeUtils } from "../../utils";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getExtension } from "../../workspace";
 import { BasicCommand } from "../base";
 
@@ -27,7 +27,7 @@ export class ConfigureExportPodV2 extends BasicCommand<
     const podType = await PodUIControls.promptForPodType();
     if (!podType) return;
     return {
-      podType: podType.label as PodV2Types,
+      podType,
     };
   }
 

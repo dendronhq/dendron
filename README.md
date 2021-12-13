@@ -11,15 +11,18 @@ Dendron is an **open-source, local-first, markdown-based, note-taking tool**. It
 
 ## Why
 
-Most PKM tools will help you create notes but hit a wall trying to retrieve them past some threshold. That threshold varies with the tool — 100, 1000, 10 000, virtually everything stops working past 10k notes unless the human was super diligent about organizing their knowledge. Past this threshold, entropy wins and every query becomes a keyword search and scrolling through pages of results.
+
+Most PKM tools help you create notes but slam into a wall retrieving them once your knowledge base reaches a certain size threshold. That threshold varies with the tool, but virtually everything stops working past 10k notes unless the user was extremely diligent about organizing their knowledge. Past this threshold, entropy wins and every query becomes a keyword search and scrolling through pages of results.
+
 
 > Dendron's mission is to help **humans organize, find, and work with any amount of knowledge**.
 
-It not only helps you create notes, but also retrieve them - retrieval works as well with ten notes as it does with ten thousand.
+It not only helps you create notes but also retrieve them - retrieval works as well with ten notes as it does with ten thousand.
 
 ## How
 
-Dendron builds on top of the past five decades of language design and developer tooling. We apply the key lessons from software to the management of general knowledge. We make managing general knowledge more like managing code, and your PKM more like an IDE for general knowledge.
+Dendron builds on top of the past five decades of programming languages and developer tooling. We apply the key lessons from software to the management of general knowledge. 
+We make managing general knowledge like managing code and your PKM like an IDE.
 
 ## Design Principles
 
@@ -27,7 +30,7 @@ Dendron builds on top of the past five decades of language design and developer 
 
 Dendron aims to create a world class developer experience for managing knowledge.
 
-Our goal is to provide a tool with the efficiency of vim, the extensibility of emacs, and the approcahbility of VSCode.
+Our goal is to provide a tool with the efficiency of vim, the extensibility of emacs, and the approachability of VSCode.
 
 What this means:
 

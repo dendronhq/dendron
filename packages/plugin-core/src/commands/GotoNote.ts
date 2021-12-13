@@ -36,7 +36,7 @@ type CommandOpts = {
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
-enum TargetKind {
+export enum TargetKind {
   NOTE = "note",
   NON_NOTE = "nonNote",
 }

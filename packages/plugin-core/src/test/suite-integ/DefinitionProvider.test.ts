@@ -5,15 +5,24 @@ import {
   ENGINE_HOOKS_MULTI,
   SETUP_HOOK_KEYS,
 } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
+import { describe, before } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { TextEditor } from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+  stubCancellationToken,
+} from "../testUtilsV3";
+import fs from "fs-extra";
+import { getActiveEditorBasename } from "../testUtils";
 
 async function provide(editor: TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -27,9 +36,7 @@ async function provide(editor: TextEditor) {
 }
 
 suite("DefinitionProvider", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
@@ -374,6 +381,46 @@ suite("DefinitionProvider", function () {
           done();
         },
       });
+    });
+  });
+
+  describeSingleWS("WHEN used on a link to a non-note file", { ctx }, () => {
+    before(async () => {
+      const { wsRoot } = getDWorkspace();
+      await fs.writeFile(
+        path.join(wsRoot, "test.txt"),
+        "Et voluptatem autem sunt."
+      );
+    });
+
+    test("THEN opens the non-note file", async () => {
+      const { vaults, wsRoot, engine } = getDWorkspace();
+      const note = await NoteTestUtilsV4.createNoteWithEngine({
+        wsRoot,
+        vault: vaults[0],
+        fname: "test.note",
+        body: "[[/test.txt]]",
+        engine,
+      });
+
+      await WSUtils.openNote(note);
+      VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(
+        7,
+        1,
+        7,
+        1
+      );
+      const { document } = VSCodeUtils.getActiveTextEditorOrThrow();
+      const pos = LocationTestUtils.getPresetWikiLinkPosition();
+      await new DefinitionProvider().provideDefinition(
+        document,
+        pos,
+        stubCancellationToken()
+      );
+      expect(getActiveEditorBasename()).toEqual("test.txt");
+      expect(
+        VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
+      ).toEqual("Et voluptatem autem sunt.");
     });
   });
 });

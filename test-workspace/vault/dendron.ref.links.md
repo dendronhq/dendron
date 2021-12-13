@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1639211658107
+updated: 1639381655936
 created: 1608518909864
 ---
 
@@ -135,3 +135,7 @@ The following link won't be highlighted since it's inside the code block, but Go
 const x = 1;
 // see more here:[[dendron.ref.links.target-1]]
 ```
+
+## Link to a non-note file
+
+[[/vault/root.schema.yml]]

@@ -413,7 +413,6 @@ export const parseAnchor = (
     return {
       type: "line",
       value,
-      text: anchorValue,
       line: _.toInteger(value),
     };
   } else {

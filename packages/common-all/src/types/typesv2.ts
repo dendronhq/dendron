@@ -88,7 +88,6 @@ export type DNoteLineAnchor = {
   type: "line";
   /** 1-indexed line number. */
   line: number;
-  text: string;
   value: string;
 };
 

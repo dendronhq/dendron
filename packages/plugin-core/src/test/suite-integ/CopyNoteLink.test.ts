@@ -1,4 +1,4 @@
-import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -18,7 +18,9 @@ import {
   runMultiVaultTest,
   runSingleVaultTest,
 } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { describeSingleWS, setupBeforeAfter } from "../testUtilsV3";
+import fs from "fs-extra";
+import { getDWorkspace } from "../../workspace";
 
 suite("CopyNoteLink", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -458,6 +460,69 @@ suite("CopyNoteLink", function () {
 
           done();
         },
+      });
+    });
+  });
+
+  describeSingleWS("WHEN in a non-note file", { ctx }, () => {
+    test("THEN creates a link to that file", async () => {
+      const { wsRoot } = getDWorkspace();
+      const fsPath = path.join(wsRoot, "test.js");
+      await fs.writeFile(
+        fsPath,
+        "const x = 'Pariatur officiis voluptatem molestiae.'"
+      );
+      await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+      const link = await new CopyNoteLinkCommand().run();
+      expect(link).toEqual("[[test.js]]");
+    });
+
+    describe("AND the file is in assets", () => {
+      test("THEN creates a link using assets", async () => {
+        const { wsRoot, vaults } = getDWorkspace();
+        const dirPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "assets"
+        );
+        await fs.ensureDir(dirPath);
+        const fsPath = path.join(dirPath, "test.py");
+        await fs.writeFile(
+          fsPath,
+          "x = 'Pariatur officiis voluptatem molestiae.'"
+        );
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+        const link = await new CopyNoteLinkCommand().run();
+        expect(link).toEqual("[[assets/test.py]]");
+      });
+    });
+
+    describe("AND the file is in a nested folder", () => {
+      test("THEN creates a link to that file", async () => {
+        const { wsRoot } = getDWorkspace();
+        const dirPath = path.join(wsRoot, "src", "clj");
+        await fs.ensureDir(dirPath);
+        const fsPath = path.join(dirPath, "test.clj");
+        await fs.writeFile(fsPath, "(set! x 1)");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+        const link = await new CopyNoteLinkCommand().run();
+        expect(link).toEqual("[[src/clj/test.clj]]");
+      });
+    });
+
+    describe("AND a line is selected", () => {
+      test("THEN creates a link to that file", async () => {
+        const { wsRoot } = getDWorkspace();
+        const dirPath = path.join(wsRoot, "src");
+        await fs.ensureDir(dirPath);
+        const fsPath = path.join(dirPath, "test.hs");
+        await fs.writeFile(
+          fsPath,
+          "fibs = 0 : 1 : zipWith (+) fibs (tail fibs)"
+        );
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+        const link = await new CopyNoteLinkCommand().run();
+        expect(link).toEqual("[[src/test.hs]]");
       });
     });
   });

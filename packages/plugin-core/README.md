@@ -64,7 +64,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - edit in anything that works on text files (eg. vim)
 
 <a href="https://www.loom.com/share/67b90027de974702a78753158822e96b">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/67b90027de974702a78753158822e96b-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/67b90027de974702a78753158822e96b.gif">
 </a>
 
 ### Markdown and More
@@ -74,7 +74,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - embed notes (and parts of notes) in multiple places using note references
 
 <a href="https://www.loom.com/share/f7e710a3c3454e75a2938d2cbed359d9">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/f7e710a3c3454e75a2938d2cbed359d9-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/f7e710a3c3454e75a2938d2cbed359d9.gif">
 </a>
 
 ### Lookup
@@ -83,7 +83,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - quickly traverse and create new hierarchies
 
 <a href="https://www.loom.com/share/29ec0fe0964648feae08387a7bb8c45f">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/29ec0fe0964648feae08387a7bb8c45f-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/29ec0fe0964648feae08387a7bb8c45f.gif">
 </a>
 
 ### Schema
@@ -93,7 +93,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - automatically apply common templates to notes on creation
 
 <a href="https://www.loom.com/share/faee68959647441e86b9c4c183384ce5">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/faee68959647441e86b9c4c183384ce5-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/faee68959647441e86b9c4c183384ce5.gif">
 </a>
 
 ### Navigation
@@ -103,7 +103,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - visualize your knowledge base using the graph view
 
 <a href="https://www.loom.com/share/2d365d965c104af2a1501d789aa2d2b1">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/2d365d965c104af2a1501d789aa2d2b1-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/2d365d965c104af2a1501d789aa2d2b1.gif">
   </a>
 
 ### Refactor
@@ -113,7 +113,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - rename and move individual sections within notes
 
 <a href="https://www.loom.com/share/b1a84decc53f4639b5bc60c885c56543">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/b1a84decc53f4639b5bc60c885c56543-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/b1a84decc53f4639b5bc60c885c56543.gif">
 </a>
 
 ### Vaults
@@ -123,7 +123,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - publish vaults on git to collaborate and share knowledge with others
 
 <a href="https://www.loom.com/share/c51e457ac2b0415ca91a8929411add64">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/c51e457ac2b0415ca91a8929411add64-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/c51e457ac2b0415ca91a8929411add64.gif">
   </a>
 
 ### Publish
@@ -133,7 +133,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 - manage what you publish using fine grained permissions on a per vault, per hiearchy and per note basis
 
 <a href="https://www.loom.com/share/727537e0fd49481cac2accc2b3362fa3">
-    <img style="" src="https://cdn.loom.com/sessions/thumbnails/727537e0fd49481cac2accc2b3362fa3-with-play.gif">
+    <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/727537e0fd49481cac2accc2b3362fa3.gif">
   </a>
 
 ## Use Cases

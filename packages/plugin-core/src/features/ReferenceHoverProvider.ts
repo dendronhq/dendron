@@ -6,7 +6,7 @@ import {
   VaultUtils,
   containsNonDendronUri,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { findNonNoteFile, vault2Path } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -22,7 +22,6 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { Logger } from "../logger";
 import {
   containsImageExt,
-  containsOtherKnownExts,
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
@@ -33,8 +32,10 @@ const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 export default class ReferenceHoverProvider implements vscode.HoverProvider {
   private async provideHoverNonNote({
     refAtPos,
+    vault,
   }: {
     refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>;
+    vault?: DVault;
   }): Promise<string> {
     const vpath = vault2Path({
       vault: PickerUtilsV2.getVaultForOpenEditor(),
@@ -59,10 +60,12 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       return `![](${foundUri.toString()}|height=${HOVER_IMAGE_MAX_HEIGHT})`;
     }
 
-    if (containsOtherKnownExts(foundUri.fsPath)) {
-      // This is some other kind of file that we can't preview
-      const ext = path.parse(foundUri.fsPath).ext;
-      return `Preview is not supported for "${ext}" file type. [Click to open in the default app](${foundUri.toString()}).`;
+    // Could be some other type of non-note file.
+    const nonNoteFile = await this.maybeFindNonNoteFile(refAtPos, vault);
+    if (nonNoteFile) {
+      return `Preview is not supported for "${path.extname(
+        nonNoteFile
+      )}" file type. [Click to open in the default app](${nonNoteFile}).`;
     }
 
     // Otherwise, this is a note link, but the note doesn't exist (otherwise `provideHover` wouldn't call this function).
@@ -86,6 +89,21 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     if (_.isUndefined(maybe) || !maybe) return undefined;
     // Otherwise, this is a URI like http://example.com or mailto:user@example.com
     return `Preview is not supported for this link. [Click to open in the default app.](${maybeUri}).`;
+  }
+
+  private async maybeFindNonNoteFile(
+    refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>,
+    vault?: DVault
+  ) {
+    const { vaults, wsRoot } = getDWorkspace();
+    // This could be a non-note file
+    // Could be a non-note file link
+    const nonNoteFile = await findNonNoteFile({
+      fpath: refAtPos.ref,
+      vaults: vault ? [vault] : vaults,
+      wsRoot,
+    });
+    return nonNoteFile?.fullPath;
   }
 
   public async provideHover(

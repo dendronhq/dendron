@@ -87,6 +87,9 @@ export class WebViewUtils {
       port,
       wsRoot,
       browser: false,
+      // acquireVsCodeApi() Documentation: This function can only be invoked once per session.
+      // You must hang onto the instance of the VS Code API returned by this method,
+      // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
       themeMap,
     });

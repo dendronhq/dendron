@@ -63,7 +63,6 @@ export class WebViewCommonUtils {
       var theme = 'unknown';
 
       function onload() {
-        console.log("calling onLoad");
         applyTheme(document.body.className);
     
         var observer = new MutationObserver(function(mutations) {
@@ -157,7 +156,7 @@ export class WebViewCommonUtils {
         const item = new ClipboardItem({"text/html": blob});
  
         navigator.clipboard.write([item]).then(function() {
-          console.log("Copied to clipboard successfully!");
+          
         }, function(error) {
           console.error("Unable to write to clipboard. Error:");
           console.log(error);

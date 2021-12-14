@@ -16,6 +16,7 @@ import { AnchorUtils } from "../remark";
 import _ from "lodash";
 import { WikiLinkNoteV4 } from "../types";
 import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
+import { findNonNoteFile } from "@dendronhq/common-server";
 
 export type DecorationWikilink = Decoration & {
   type: DECORATION_TYPES.wikiLink | DECORATION_TYPES.brokenWikilink;
@@ -34,14 +35,14 @@ type DecorationsForDecorateWikilink =
 export const decorateWikilink: Decorator<
   WikiLinkNoteV4,
   DecorationsForDecorateWikilink
-> = (opts) => {
+> = async (opts) => {
   const { node: wikiLink, engine, note, noteText } = opts;
   const { position } = wikiLink;
 
   const fname: string | undefined = wikiLink.value;
   const vaultName = wikiLink.data.vaultName;
 
-  const { type, errors } = linkedNoteType({
+  const { type, errors } = await linkedNoteType({
     fname,
     anchorStart: wikiLink.data.anchorHeader,
     vaultName,
@@ -92,7 +93,22 @@ export const decorateWikilink: Decorator<
   return { decorations, errors };
 };
 
-export function linkedNoteType({
+function checkIfAnchorIsValid({
+  anchor,
+  allAnchors,
+}: {
+  anchor?: string;
+  allAnchors: string[];
+}): boolean {
+  // if there's no anchor, there's nothing that could be invalid
+  if (!anchor) return true;
+  // wildcard header anchor or line anchor. These are hard to check, so let's just say they exist.
+  if (anchor && /^[*L]/.test(anchor)) return true;
+  // otherwise, check that the anchor actually exists inside the note
+  return allAnchors.includes(anchor);
+}
+
+export async function linkedNoteType({
   fname,
   anchorStart,
   anchorEnd,
@@ -106,10 +122,10 @@ export function linkedNoteType({
   vaultName?: string;
   note?: NoteProps;
   engine: DEngine | DEngineClient;
-}): {
+}): Promise<{
   type: DECORATION_TYPES.brokenWikilink | DECORATION_TYPES.wikiLink;
   errors: IDendronError[];
-} {
+}> {
   const ctx = "linkedNoteType";
   const { notes, vaults } = engine;
   const vault = vaultName
@@ -164,13 +180,24 @@ export function linkedNoteType({
     )
       .filter(isNotUndefined)
       .map(AnchorUtils.anchor2string);
-    if (anchorStart && anchorStart !== "*" && !allAnchors.includes(anchorStart))
+    if (!checkIfAnchorIsValid({ anchor: anchorStart, allAnchors }))
       return { type: DECORATION_TYPES.brokenWikilink, errors: [] };
-    if (anchorEnd && anchorEnd !== "*" && !allAnchors.includes(anchorEnd))
+    if (!checkIfAnchorIsValid({ anchor: anchorEnd, allAnchors }))
       return { type: DECORATION_TYPES.brokenWikilink, errors: [] };
   }
 
-  if (matchingNotes.length > 0)
+  if (matchingNotes.length > 0) {
     return { type: DECORATION_TYPES.wikiLink, errors: [] };
-  else return { type: DECORATION_TYPES.brokenWikilink, errors: [] };
+  }
+  // Could be a non-note file too
+  if (fname) {
+    const nonNoteFile = await findNonNoteFile({
+      fpath: fname,
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
+    });
+    if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  }
+  //
+  return { type: DECORATION_TYPES.brokenWikilink, errors: [] };
 }

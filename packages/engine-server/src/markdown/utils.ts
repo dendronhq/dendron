@@ -12,6 +12,7 @@ import {
   NoteUtils,
   VaultUtils,
   ConfigUtils,
+  FIFOQueue,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
@@ -41,7 +42,7 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
-import { hierarchies } from "./remark";
+import { hierarchies, RemarkUtils } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { NoteRefsOpts } from "./remark/noteRefs";
@@ -191,6 +192,39 @@ export class MDUtilsV4 {
     }
     // Start recursion with no ancestors (everything is top level)
     recursiveTraversal(nodes, []);
+  }
+
+  /** Similar to `unist-utils-visit`, but allows async visitors.
+   *
+   * Children are visited in-order, not concurrently. See `visitAsyncConcurrent` for that.
+   *
+   * @param test Use an empty list to visit all nodes, otherwise specify node types to be visited.
+   * @param visitor Similar to `unist-util-visit`, returning true or undefined continues traversal, false stops traversal, and "skip" skips the children of that node.
+   *
+   * Depth-first pre-order traversal, same as `unist-util-visits`.
+   */
+  static async visitAsync(
+    tree: Node,
+    test: string[],
+    visitor: (
+      node: Node
+    ) =>
+      | void
+      | undefined
+      | boolean
+      | "skip"
+      | Promise<void | undefined | boolean | "skip">
+  ) {
+    const visitQueue = new FIFOQueue([tree]);
+    while (visitQueue.length > 0) {
+      const node = visitQueue.dequeue()!;
+      if (test.length > 0 && !test.includes(node.type)) continue;
+      // eslint-disable-next-line no-await-in-loop
+      const out = await visitor(node);
+      if (out === false) return;
+      if (out === "skip") continue;
+      if (RemarkUtils.isParent(node)) visitQueue.enqueueAll(node.children);
+    }
   }
 
   static genMDMsg(msg: string): Parent {

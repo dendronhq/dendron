@@ -210,6 +210,30 @@ export class DefaultMap<K, V> {
   }
 }
 
+export class FIFOQueue<T> {
+  private _internalQueue: T[] = [];
+
+  public constructor(init?: T[]) {
+    if (init) this._internalQueue = init;
+  }
+
+  public enqueue(item: T) {
+    this._internalQueue.push(item);
+  }
+
+  public enqueueAll(items: T[]) {
+    for (const item of items) this.enqueue(item);
+  }
+
+  public dequeue() {
+    return this._internalQueue.shift();
+  }
+
+  public get length() {
+    return this._internalQueue.length;
+  }
+}
+
 /** Similar to lodash `_.groupBy`, except not limited to string keys. */
 export function groupBy<K, V>(
   collection: V[],

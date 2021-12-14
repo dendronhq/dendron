@@ -63,9 +63,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     // Could be some other type of non-note file.
     const nonNoteFile = await this.maybeFindNonNoteFile(refAtPos, vault);
     if (nonNoteFile) {
-      return `Preview is not supported for "${path.extname(
-        nonNoteFile
-      )}" file type. [Click to open in the default app](${nonNoteFile}).`;
+      return `Preview is not supported for this link. [Click to open in the default app](${nonNoteFile}).`;
     }
 
     // Otherwise, this is a note link, but the note doesn't exist (otherwise `provideHover` wouldn't call this function).

@@ -6,10 +6,12 @@ import {
   AirtableExportReturnType,
   AirtableV2PodConfig,
   ConfigFileUtils,
+  createRunnableAirtableV2PodConfigSchema,
   ExportPodV2,
   ExternalConnectionManager,
   ExternalService,
   isRunnableAirtableV2PodConfig,
+  JSONSchemaType,
   PodV2Types,
   RunnableAirtableV2PodConfig,
 } from "@dendronhq/pods-core";
@@ -41,6 +43,10 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
       new Airtable({ apiKey: config.apiKey }),
       config
     );
+  }
+
+  public getRunnableSchema(): JSONSchemaType<RunnableAirtableV2PodConfig> {
+    return createRunnableAirtableV2PodConfigSchema();
   }
 
   /**

@@ -10,6 +10,8 @@ import {
   PodExportScope,
   ExportPodFactory,
   RunnablePodConfigV2,
+  JSONSchemaType,
+  PodUtils,
 } from "@dendronhq/pods-core";
 import path from "path";
 import * as vscode from "vscode";
@@ -45,6 +47,11 @@ export abstract class BaseExportPodCommand<
    * @param config
    */
   public abstract createPod(config: Config): ExportPodV2<R>;
+
+  /**
+   * Provide a method to get ajv schema of runnable pod config
+   */
+  public abstract getRunnableSchema(): JSONSchemaType<Config>;
 
   /**
    * Optionally specify a level of throttling to reduce the rate of calling
@@ -121,7 +128,7 @@ export abstract class BaseExportPodCommand<
    */
   async execute(opts: { config: Config; payload: string | NoteProps[] }) {
     const pod = this.createPod(opts.config);
-
+    PodUtils.validate(opts.config, this.getRunnableSchema());
     switch (opts.config.exportScope) {
       case PodExportScope.Clipboard:
       case PodExportScope.Selection: {

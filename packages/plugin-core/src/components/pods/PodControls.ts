@@ -10,6 +10,7 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
+import { KeybindingUtils } from "../../KeybindingUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { CodeCommandInstance } from "../../commands/base";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
@@ -314,10 +315,20 @@ export class PodUIControls {
     );
 
     configs.forEach((config) => {
+      const keybinding = KeybindingUtils.getKeybindingForPodIfExists(
+        config.podId
+      );
+
+      let description = config.podType.toString();
+
+      if (keybinding) {
+        description = description + "  " + keybinding;
+      }
+
       items.push({
         label: config.podId,
         detail: config.description ?? undefined,
-        description: config.podType,
+        description,
       });
     });
 

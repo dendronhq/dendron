@@ -127,60 +127,73 @@ export abstract class BaseExportPodCommand<
    * @param opts
    */
   async execute(opts: { config: Config; payload: string | NoteProps[] }) {
-    const pod = this.createPod(opts.config);
-    PodUtils.validate(opts.config, this.getRunnableSchema());
-    switch (opts.config.exportScope) {
-      case PodExportScope.Clipboard:
-      case PodExportScope.Selection: {
-        if (!pod.exportText) {
-          throw new Error("Text export not supported by this pod!");
-        } else if (typeof opts.payload === "string") {
-          const strPayload = opts.payload;
-          pod.exportText(strPayload).then((result) => {
-            this.onExportComplete({
-              exportReturnValue: result,
-              payload: strPayload,
-              config: opts.config,
-            });
-          });
-        } else {
-          throw new Error("Invalid Payload Type in Text Export");
-        }
-        break;
-      }
-      case PodExportScope.Note:
-      case PodExportScope.Hierarchy:
-      case PodExportScope.Workspace: {
-        const promises = [];
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Running Export...",
+        cancellable: true,
+      },
+      async (_progress, token) => {
+        token.onCancellationRequested(() => {
+          return;
+        });
 
-        for (const noteProp of opts.payload) {
-          if (typeof noteProp === "string") {
-            throw new Error("Invalid Payload Type in Pod Note Export");
-          } else if (pod.exportNote) {
-            if (this.getLimiter) {
-              // eslint-disable-next-line no-await-in-loop
-              await this.getLimiter().removeTokens(1);
-            }
-            promises.push(
-              pod.exportNote(noteProp).then((result) => {
+        const pod = this.createPod(opts.config);
+        PodUtils.validate(opts.config, this.getRunnableSchema());
+        
+        switch (opts.config.exportScope) {
+          case PodExportScope.Clipboard:
+          case PodExportScope.Selection: {
+            if (!pod.exportText) {
+              throw new Error("Text export not supported by this pod!");
+            } else if (typeof opts.payload === "string") {
+              const strPayload = opts.payload;
+              pod.exportText(strPayload).then((result) => {
                 this.onExportComplete({
                   exportReturnValue: result,
-                  payload: noteProp,
+                  payload: strPayload,
                   config: opts.config,
                 });
-              })
-            );
-          } else {
-            throw new Error("Note export not supported by this pod!");
+              });
+            } else {
+              throw new Error("Invalid Payload Type in Text Export");
+            }
+            break;
           }
-        }
-        await Promise.all(promises);
-        break;
-      }
+          case PodExportScope.Note:
+          case PodExportScope.Hierarchy:
+          case PodExportScope.Workspace: {
+            const promises = [];
 
-      default:
-        assertUnreachable();
-    }
+            for (const noteProp of opts.payload) {
+              if (typeof noteProp === "string") {
+                throw new Error("Invalid Payload Type in Pod Note Export");
+              } else if (pod.exportNote) {
+                if (this.getLimiter) {
+                  // eslint-disable-next-line no-await-in-loop
+                  await this.getLimiter().removeTokens(1);
+                }
+                promises.push(
+                  pod.exportNote(noteProp).then((result) => {
+                    this.onExportComplete({
+                      exportReturnValue: result,
+                      payload: noteProp,
+                      config: opts.config,
+                    });
+                  })
+                );
+              } else {
+                throw new Error("Note export not supported by this pod!");
+              }
+            }
+            return Promise.all(promises);
+          }
+          default:
+            assertUnreachable();
+        }
+        return;
+      }
+    );
   }
 
   /**

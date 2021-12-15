@@ -3637,7 +3637,7 @@
   resolved "https://registry.npmjs.org/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
-"@instantish/martian@^1.0.3":
+"@instantish/martian@1.0.3":
   version "1.0.3"
   resolved "https://registry.npmjs.org/@instantish/martian/-/martian-1.0.3.tgz#aa9bedfb41a53b0328289c3e791c636df044110f"
   integrity sha512-VLH1vpEHqia90gHWWZw2iEFISi/frLw5ZT99pWB2MM8rCOmm6hca2FUv8ns9AxiBAVj0epFRoxcjRtec+evxlw==

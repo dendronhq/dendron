@@ -100,11 +100,11 @@ export default function Note({
       <Row>
         <Col span={24}>
           <Row gutter={20}>
-            <Col xs={24} md={20}>
+            <Col xs={24} md={18}>
               <DendronNote noteContent={noteBody} config={config} />
               {maybeCollection}
             </Col>
-            <Col xs={0} md={4}>
+            <Col xs={0} md={6}>
               <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />
             </Col>
           </Row>

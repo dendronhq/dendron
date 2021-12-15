@@ -36,9 +36,6 @@ jobs:
         with:
           node-version: 14.x
 
-      - name: Yarn Setup
-        run: yarn setup
-
       - name: Set Environment Variables
         run: |
           echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
@@ -46,12 +43,17 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+          echo "NPM_TOKEN=${{ secrets.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Yarn Setup
+        run: yarn setup
 
       - name: Build the VSIX and Publish to NPM Registry
         env:
           NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
           NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
           NPM_PWD: ${{ secrets.NPM_PWD }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV

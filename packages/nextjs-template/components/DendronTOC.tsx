@@ -23,7 +23,7 @@ export const DendronTOC = ({
 } & ComponentProps<typeof Anchor>) => {
   return (
     <>
-      <Anchor style={{ zIndex: 1 }} {...rest}>
+      <Anchor style={{ zIndex: 1 }} className="dendron-toc" {...rest}>
         {Object.entries(note?.anchors).map(([key, entry]) =>
           entry?.type === "header" ? (
             <Link

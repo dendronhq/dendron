@@ -63,16 +63,15 @@ export class WebViewCommonUtils {
       var theme = 'unknown';
 
       function onload() {
-          console.log("calling onLoad");
-          applyTheme(document.body.className);
-      
-          var observer = new MutationObserver(function(mutations) {
-              mutations.forEach(function(mutationRecord) {
-                  applyTheme(mutationRecord.target.className);
-              });    
-          });
-          var target = document.body;
-          observer.observe(target, { attributes : true, attributeFilter : ['class'] });
+        applyTheme(document.body.className);
+    
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutationRecord) {
+                applyTheme(mutationRecord.target.className);
+            });    
+        });
+        var target = document.body;
+        observer.observe(target, { attributes : true, attributeFilter : ['class'] });
       }
 
       function applyTheme(newTheme) {
@@ -100,10 +99,71 @@ export class WebViewCommonUtils {
         link.setAttribute('rel', 'stylesheet');
         link.setAttribute('href', themeMap[newTheme]);
         document.head.appendChild(link);
-    }
+      }
       ${acquireVsCodeApi}
     </script>
-
+     
+    <!-- Javascript to handle copy event: to take the html of the copy without taking the theming. -->
+    <script type="text/javascript">
+      document.addEventListener('copy', (e) => {
+        const htmlSelection = getHTMLOfSelection();
+        
+        if (htmlSelection !== undefined){
+          copyToClipboard(htmlSelection);            
+        }  
+      });
+      
+      /** 
+       * Based off of: https://stackoverflow.com/a/5084044/7858768
+       * */
+      function getHTMLOfSelection () {
+        let range;
+        if (document.selection && document.selection.createRange) {
+          range = document.selection.createRange();
+          return range.htmlText;
+        }
+        else if (window.getSelection) {
+          const selection = window.getSelection();
+          if (selection.rangeCount > 0) {
+            range = selection.getRangeAt(0);
+            const clonedSelection = range.cloneContents();
+            const div = document.createElement('div');
+            div.appendChild(clonedSelection);
+            return div.innerHTML;
+          }
+          else {
+            return undefined;
+          }
+        }
+        else {
+          return undefined;
+        }
+      }
+      
+      /**
+      Based off of: 
+      * https://stackoverflow.com/a/64711198/7858768
+      * https://stackoverflow.com/a/57279336/7858768
+      */
+      function copyToClipboard(html) {
+        const container = document.createElement('div');
+        container.innerHTML = html;
+        container.style.position = 'fixed';
+        container.style.pointerEvents = 'none';
+        container.style.opacity = 0;
+        
+        const blob = new Blob([html], {type: "text/html"});
+        const item = new ClipboardItem({"text/html": blob});
+ 
+        navigator.clipboard.write([item]).then(function() {
+          
+        }, function(error) {
+          console.error("Unable to write to clipboard. Error:");
+          console.log(error);
+        });
+      }
+    </script>
+    
     <body onload="onload()" class="vscode-${initialTheme || "light"}">
       <div id="main-content-wrap" class="main-content-wrap">
         <div id="main-content" class="main-content">

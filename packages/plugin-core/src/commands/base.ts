@@ -32,6 +32,10 @@ export interface BaseCommand<
 }
 
 /**
+ * Base class for all Dendron Plugin Commands.
+ *
+ * Initialization Lifecycle: [[dendron://dendron.docs/pkg.plugin-core.t.commands]]
+ *
  * Generics:
  *   - TOpts: passed into {@link BaseCommand.execute}
  *   - TOut: returned by {@link BaseCommand.execute}

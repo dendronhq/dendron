@@ -196,7 +196,7 @@ export class MDUtilsV4 {
 
   /** Similar to `unist-utils-visit`, but allows async visitors.
    *
-   * Children are visited in-order, not concurrently. See `visitAsyncConcurrent` for that.
+   * Children are visited in-order, not concurrently.
    *
    * @param test Use an empty list to visit all nodes, otherwise specify node types to be visited.
    * @param visitor Similar to `unist-util-visit`, returning true or undefined continues traversal, false stops traversal, and "skip" skips the children of that node.
@@ -218,11 +218,12 @@ export class MDUtilsV4 {
     const visitQueue = new FIFOQueue([tree]);
     while (visitQueue.length > 0) {
       const node = visitQueue.dequeue()!;
-      if (test.length > 0 && !test.includes(node.type)) continue;
-      // eslint-disable-next-line no-await-in-loop
-      const out = await visitor(node);
-      if (out === false) return;
-      if (out === "skip") continue;
+      if (test.length === 0 || test.includes(node.type)) {
+        // eslint-disable-next-line no-await-in-loop
+        const out = await visitor(node);
+        if (out === false) return;
+        if (out === "skip") continue;
+      }
       if (RemarkUtils.isParent(node)) visitQueue.enqueueAll(node.children);
     }
   }

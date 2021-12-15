@@ -219,7 +219,7 @@ export async function isBrokenWikilink(): Promise<boolean> {
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
   let type: DECORATION_TYPES | undefined;
   let fname: string;
-  MDUtilsV4.visitAsync(
+  await MDUtilsV4.visitAsync(
     parsedLine,
     [
       DendronASTTypes.WIKI_LINK,

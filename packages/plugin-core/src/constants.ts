@@ -188,6 +188,12 @@ export const DENDRON_MENUS = {
       command: "dendron.moveNote",
       group: "2_workspace",
     },
+    {
+      command: "dendron.showPreview",
+      // when is the same as the built-in preview, plus pluginActive
+      when: "resourceLangId == markdown && dendron:pluginActive",
+      group: "navigation",
+    },
   ],
   "editor/context": [
     {
@@ -202,6 +208,13 @@ export const DENDRON_MENUS = {
       // when is the same as the built-in preview, plus pluginActive
       when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
       group: "navigation",
+    },
+  ],
+  "editor/title/context": [
+    {
+      command: "dendron.showPreview",
+      when: "resourceLangId == markdown && dendron:pluginActive",
+      group: "1_open",
     },
   ],
 };

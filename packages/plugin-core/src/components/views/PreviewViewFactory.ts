@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigUtils,
   DendronEditorViewKey,
   DMessageEnum,
   getWebEditorViewEntry,
@@ -11,12 +12,16 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { handleLink, LinkType } from "../../commands/ShowPreview";
+import {
+  handleLink,
+  LinkType,
+  ShowPreviewCommand,
+} from "../../commands/ShowPreview";
 import { Logger } from "../../logger";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension } from "../../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 /**
@@ -28,6 +33,17 @@ export interface PreviewProxy {
    * @param note Note Props to update the preview contents with
    */
   updateForNote(note: NoteProps): void;
+
+  /**
+   * Show preview panel if applicable and update
+   * @param note Note to display in preview panel
+   */
+  showPreviewAndUpdate(note: NoteProps): void;
+
+  /**
+   * Return current panel. Can be undefined.
+   */
+  getPanel(): vscode.WebviewPanel | undefined;
 }
 
 export class PreviewPanelFactory {
@@ -87,6 +103,37 @@ export class PreviewPanelFactory {
             source: "vscode",
           } as OnDidChangeActiveTextEditorMsg);
         }
+      },
+
+      showPreviewAndUpdate(note) {
+        const ctx = {
+          ctx: "ShowPreview:showPreviewAndRefresh",
+          fname: note.fname,
+        };
+        const config = getDWorkspace().config;
+
+        // If preview panel does not exist and automaticallyShowPreview = true, show preview before updating
+        // Otherwise, update if panel exists
+        if (
+          !PreviewPanelFactory._panel &&
+          ConfigUtils.getPreview(config).automaticallyShowPreview
+        ) {
+          Logger.debug({
+            ...ctx,
+            state: "panel not found and automaticallyShowPreview = true",
+          });
+          new ShowPreviewCommand(PreviewPanelFactory.create(getExtension()))
+            .execute()
+            .then(() => {
+              this.updateForNote(note);
+            });
+        } else {
+          this.updateForNote(note);
+        }
+      },
+
+      getPanel() {
+        return PreviewPanelFactory._panel;
       },
     };
   }

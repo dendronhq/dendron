@@ -9,11 +9,13 @@ import {
   TextEditorVisibleRangesChangeEvent,
   window,
 } from "vscode";
+import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
+import { WSUtils } from "./WSUtils";
 
 const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
@@ -74,6 +76,7 @@ export class WindowWatcher {
         }
         Logger.info({ ctx, editor: uri.fsPath });
         this.triggerUpdateDecorations(editor);
+        this.triggerNotePreviewUpdate(editor);
 
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
@@ -119,6 +122,17 @@ export class WindowWatcher {
     // This may be the active editor, but could be another editor that's open side by side without being selected.
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
     debouncedUpdateDecorations.debouncedFn(editor);
+    return;
+  }
+
+  /**
+   * Show note preview panel if applicable
+   */
+  async triggerNotePreviewUpdate({ document }: TextEditor) {
+    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
+    if (maybeNote)
+      PreviewPanelFactory.getProxy().showPreviewAndUpdate(maybeNote);
+
     return;
   }
 

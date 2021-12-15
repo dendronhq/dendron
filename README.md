@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-109-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-110-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -308,6 +308,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/jsamr"><img src="https://avatars.githubusercontent.com/u/3646758?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jules Sam. Randolph</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajsamr" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/blu3r4y"><img src="https://avatars.githubusercontent.com/u/10400532?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mario Kahlhofer</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ablu3r4y" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/tolikkostin"><img src="https://avatars.githubusercontent.com/u/26538478?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Anatoliy Kostin</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Atolikkostin" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/r-good"><img src="https://avatars.githubusercontent.com/u/95871742?v=4?s=100" width="100px;" alt=""/><br /><sub><b>r-good</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ar-good" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

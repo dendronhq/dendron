@@ -1041,6 +1041,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "sagarbehere",
+      "name": "Sagar Behere",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1622959?v=4",
+      "profile": "http://sagar.se",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

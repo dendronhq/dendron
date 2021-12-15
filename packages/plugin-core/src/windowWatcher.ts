@@ -9,7 +9,7 @@ import {
   TextEditorVisibleRangesChangeEvent,
   window,
 } from "vscode";
-import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
+import { PreviewProxy } from "./components/views/PreviewViewFactory";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
@@ -22,6 +22,12 @@ const context = (scope: string) => {
   return ROOT_CTX + ":" + scope;
 };
 export class WindowWatcher {
+  private _previewProxy: PreviewProxy;
+
+  constructor(previewProxy: PreviewProxy) {
+    this._previewProxy = previewProxy;
+  }
+
   private onDidChangeActiveTextEditorHandlers: ((
     e: TextEditor | undefined
   ) => void)[] = [];
@@ -130,8 +136,9 @@ export class WindowWatcher {
    */
   async triggerNotePreviewUpdate({ document }: TextEditor) {
     const maybeNote = WSUtils.tryGetNoteFromDocument(document);
-    if (maybeNote)
-      PreviewPanelFactory.getProxy().showPreviewAndUpdate(maybeNote);
+    if (maybeNote) {
+      this._previewProxy.showPreviewAndUpdate(maybeNote);
+    }
 
     return;
   }

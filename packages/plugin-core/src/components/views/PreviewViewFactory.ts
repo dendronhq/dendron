@@ -30,18 +30,13 @@ import { WSUtils } from "../../WSUtils";
 export interface PreviewProxy {
   /**
    * Method to update the preview with the passed in NoteProps.
+   * If automaticallyShowPreview is set to true, show preview panel if it doesn't exist
    * @param note Note Props to update the preview contents with
-   */
-  updateForNote(note: NoteProps): void;
-
-  /**
-   * Show preview panel if applicable and update
-   * @param note Note to display in preview panel
    */
   showPreviewAndUpdate(note: NoteProps): void;
 
   /**
-   * Return current panel. Can be undefined.
+   * Return current panel. Can be undefined. Exposed for testing only
    */
   getPanel(): vscode.WebviewPanel | undefined;
 }
@@ -90,21 +85,21 @@ export class PreviewPanelFactory {
     }
   }
 
+  private static updateForNote(note: NoteProps) {
+    if (PreviewPanelFactory._panel) {
+      PreviewPanelFactory._panel.webview.postMessage({
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        data: {
+          note,
+          syncChangedNote: true,
+        },
+        source: "vscode",
+      } as OnDidChangeActiveTextEditorMsg);
+    }
+  }
+
   static getProxy(): PreviewProxy {
     return {
-      updateForNote(note) {
-        if (PreviewPanelFactory._panel) {
-          PreviewPanelFactory._panel.webview.postMessage({
-            type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-            data: {
-              note,
-              syncChangedNote: true,
-            },
-            source: "vscode",
-          } as OnDidChangeActiveTextEditorMsg);
-        }
-      },
-
       showPreviewAndUpdate(note) {
         const ctx = {
           ctx: "ShowPreview:showPreviewAndRefresh",
@@ -125,10 +120,10 @@ export class PreviewPanelFactory {
           new ShowPreviewCommand(PreviewPanelFactory.create(getExtension()))
             .execute()
             .then(() => {
-              this.updateForNote(note);
+              PreviewPanelFactory.updateForNote(note);
             });
         } else {
-          this.updateForNote(note);
+          PreviewPanelFactory.updateForNote(note);
         }
       },
 

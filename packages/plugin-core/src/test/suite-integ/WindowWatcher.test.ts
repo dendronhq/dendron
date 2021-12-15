@@ -27,7 +27,9 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 };
 
 suite("WindowWatcher: GIVEN the dendron extension is running", function () {
-  let watcher: WindowWatcher;
+  const watcher: WindowWatcher = new WindowWatcher(
+    PreviewPanelFactory.getProxy()
+  );
 
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
@@ -40,7 +42,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         postSetupHook: setupBasic,
         onInit: async ({ vault, wsRoot }) => {
           const vaultPath = vault.fsPath;
-          watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
@@ -69,7 +70,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         test("THEN preview panel is not shown", async () => {
           const { wsRoot, vaults } = getDWorkspace();
           const vaultPath = vaults[0].fsPath;
-          watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
@@ -95,7 +95,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         test("THEN preview panel is shown", async () => {
           const { wsRoot, vaults } = getDWorkspace();
           const vaultPath = vaults[0].fsPath;
-          watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
@@ -127,7 +126,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
 
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher = new WindowWatcher();
           watcher.activate(ctx);
           // Open a note
           await WSUtils.openNote(
@@ -153,7 +151,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           await VSCodeUtils.closeAllEditors();
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher = new WindowWatcher();
 
           watcher.activate(ctx);
           // Open a note

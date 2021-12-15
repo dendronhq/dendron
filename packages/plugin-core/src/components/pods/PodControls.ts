@@ -1,4 +1,3 @@
-import { assertUnreachable } from "@dendronhq/common-all";
 import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
@@ -12,7 +11,11 @@ import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { CodeCommandInstance } from "../../commands/base";
+import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
+import { PodCommandFactory } from "./PodCommandFactory";
+import { assertUnreachable } from "@dendronhq/common-all";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -150,6 +153,22 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
+  public static async promptForPodTypeForCommand(): Promise<
+    CodeCommandInstance | undefined
+  > {
+    const picked = await PodUIControls.promptForPodType();
+
+    if (!picked) {
+      return;
+    }
+
+    return PodCommandFactory.createPodCommandForPodType(picked);
+  }
+
+  /**
+   * Prompt user to pick a pod (v2) type
+   * @returns a runnable code command for the selected pod
+   */
   public static async promptForPodType(): Promise<PodV2Types | undefined> {
     const newConnectionOptions = Object.keys(PodV2Types)
       .filter((key) => Number.isNaN(Number(key)))
@@ -224,10 +243,26 @@ export class PodUIControls {
     }
 
     if (selectedServiceOption.label === createNewOptionString) {
-      await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
-      vscode.window.showInformationMessage(
-        `First setup a new ${connectionType} connection and then re-run the pod command.`
-      );
+      switch (connectionType) {
+        case ExternalService.Airtable: {
+          await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
+          vscode.window.showInformationMessage(
+            `First setup a new ${connectionType} connection and then re-run the pod command.`
+          );
+          break;
+        }
+        case ExternalService.GoogleDocs: {
+          const id = await this.promptToCreateNewServiceConfig(
+            ExternalService.GoogleDocs
+          );
+          await launchGoogleOAuthFlow(id);
+          vscode.window.showInformationMessage(
+            "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+          );
+          break;
+        }
+        default:
+      }
       return;
     } else {
       const config = mngr.getConfigById<T>({ id: selectedServiceOption.label });
@@ -262,6 +297,7 @@ export class PodUIControls {
 
     const newFile = await mngr.createNewConfig({ serviceType, id });
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(newFile));
+    return id;
   }
 
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {
@@ -337,6 +373,9 @@ export class PodUIControls {
 
       case PodV2Types.MarkdownExportV2:
         return "Formats Dendron markdown and exports it to the clipboard or local file system";
+
+      case PodV2Types.GoogleDocsExportV2:
+        return "Formats Dendron note to google doc";
 
       default:
         assertUnreachable();

@@ -16,6 +16,7 @@ import path from "path";
 import { PodClassEntryV4, PodItemV4 } from "./types";
 import { docs_v1 as docsV1 } from "googleapis";
 import download from "image-downloader";
+import axios from "axios";
 
 export * from "./builtin";
 export * from "./types";
@@ -516,4 +517,29 @@ export class PodUtils {
     }
     return text;
   };
+
+  static async refreshGoogleAccessToken(
+    wsRoot: string,
+    refreshToken: string,
+    connectionId?: string
+  ) {
+    const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
+      encoding: "utf8",
+    });
+    try {
+      const result = await axios.get(
+        `http://localhost:${port}/api/oauth/refreshToken`,
+        {
+          params: {
+            refreshToken,
+            service: "google",
+            connectionId,
+          },
+        }
+      );
+      return result.data as string;
+    } catch (err: any) {
+      throw new DendronError({ message: stringifyError(err) });
+    }
+  }
 }

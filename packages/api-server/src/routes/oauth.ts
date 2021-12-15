@@ -31,6 +31,7 @@ router.get(
     ) {
       resp = await oauthHandlers[req.query.service].getToken({
         code: req.query.code as string,
+        connectionId: req.query?.connectionId as string,
       });
     } else {
       throw new DendronError({
@@ -55,6 +56,7 @@ router.get(
     ) {
       resp = await oauthHandlers[req.query.service].refreshToken({
         refreshToken: req.query.refreshToken as string,
+        connectionId: req.query?.connectionId as string,
       });
     } else {
       throw new DendronError({

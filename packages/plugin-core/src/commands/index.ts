@@ -66,6 +66,8 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { ConfigureServiceConnection } from "./pods/ConfigureServiceConnection";
+import { ConfigureExportPodV2 } from "./pods/ConfigureExportPodV2";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -78,6 +80,8 @@ const ALL_COMMANDS = [
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,
+  ConfigureServiceConnection,
+  ConfigureExportPodV2,
   ConfigureGraphStylesCommand,
   ContributeCommand,
   CopyNoteLinkCommand,

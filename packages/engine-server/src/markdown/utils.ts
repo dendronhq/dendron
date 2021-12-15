@@ -393,12 +393,10 @@ export class MDUtilsV4 {
       .use(abbrPlugin)
       .use(variables)
       .use(footnotes)
-      .use(wikiLinks, opts.wikiLinksOpts)
       .use(hierarchies, {
         hierarchyDisplayTitle: config.hierarchyDisplayTitle,
         hierarchyDisplay: config.hierarchyDisplay,
       })
-      .use(backlinks)
       .use(blockAnchors, _.merge(opts.blockAnchorsOpts))
       .use(hashtags)
       .use(userTags)
@@ -409,6 +407,14 @@ export class MDUtilsV4 {
         prettyRefs: usePrettyRefs,
         insertTitle,
       });
+
+    //do not convert wikilinks if set to true. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
+    if (
+      _.isUndefined(opts.wikiLinksOpts?.convertLinks) ||
+      opts.wikiLinksOpts?.convertLinks
+    ) {
+      proc = proc.use(wikiLinks, opts.wikiLinksOpts).use(backlinks);
+    }
 
     if (
       opts.mathOpts?.katex ||

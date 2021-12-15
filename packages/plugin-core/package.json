@@ -324,6 +324,20 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
       },
       {
+        "command": "dendron.configureServiceConnection",
+        "title": "Dendron: Configure Service Connection",
+        "desc": "Update your service connection configuration",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
+      },
+      {
+        "command": "dendron.configureExportPodV2",
+        "title": "Dendron: Configure Export Pod V2",
+        "desc": "Update your export pod configuration",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
+      },
+      {
         "command": "dendron.importPod",
         "title": "Dendron: Import Pod",
         "desc": "Import notes from an external data source. Currently, only the local file system is supported",

@@ -1,7 +1,7 @@
 ---
 id: DO_RXSlAbwNwbz-ILKoQa
 title: Taking Notes
-desc: ''
+desc: ""
 updated: 1624934082241
 created: 1624333266168
 ---
@@ -34,7 +34,15 @@ You'll notice in the tree view that there is now a `+` sign next to `italian` an
 
 ![Tree View](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-tree-view.png)
 
-Following this recipes example, you can try creating other notes that might be relevant. Some examples: `recipes.italian.appetizers`, `recipes.chinese`, `recipes.chinese.appetizers`, `recipes.ingredients.favorites`, `recipes.ingredients.shopping-list`. Hierarchies are flexible, and you can create them in whichever way works best for you. Dendron allows you to easily change the hierarchies later if you change your mind on how to organize your notes.
+Following this recipes example, you can try creating other notes that might be relevant. Some examples:
+
+- `recipes.italian.appetizers`
+- `recipes.chinese`
+- `recipes.chinese.appetizers`
+- `recipes.ingredients.favorites`
+- `recipes.ingredients.shopping-list`
+
+Hierarchies are flexible, and you can create them in whichever way works best for you. Dendron allows you to easily change the hierarchies later if you change your mind on how to organize your notes.
 
 ### Finding Notes
 
@@ -42,7 +50,7 @@ To find notes, we use the same lookup interface that we used to create them.
 
 > 🌱 Open Lookup, and type `vege`. This will find your `recipes.vegetarian` note. Hit `Enter` to open that note.
 
-The lookup uses fuzzy search which means you can type out partial results and still see the results. Searching with * wildcards is also supported.
+The lookup uses fuzzy search which means you can type out partial results and still see the results. Searching with \* wildcards is also supported.
 
 When combined with hierarchies, this fast lookup system enables you to find your notes very quickly, even if you have thousands of notes in your vaults.
 
@@ -53,4 +61,5 @@ If you want to search for content within the notes, you can use VS Code's built-
 - Tutorial Step 3: [[Linking Your Notes|tutorial.3-linking-your-notes]]
 
 ---
+
 [[Tutorial Home Page| tutorial]]

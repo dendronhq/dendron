@@ -30,6 +30,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
+import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import {
   DendronContext,
   extensionQualifiedId,
@@ -642,7 +643,7 @@ export class DendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher();
+    const windowWatcher = new WindowWatcher(PreviewPanelFactory.getProxy());
 
     windowWatcher.activate(this.context);
     for (const editor of vscode.window.visibleTextEditors) {

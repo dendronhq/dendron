@@ -252,13 +252,17 @@
         },
         "bubbleUpCreateNew": {
           "type": "boolean"
+        },
+        "fuzzThreshold": {
+          "type": "number"
         }
       },
       "required": [
         "selectionMode",
         "confirmVaultOnCreate",
         "leaveTrace",
-        "bubbleUpCreateNew"
+        "bubbleUpCreateNew",
+        "fuzzThreshold"
       ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  NoteLookupCommand }"
@@ -425,6 +429,9 @@
         "maxNoteLength": {
           "type": "number"
         },
+        "enableEditorDecorations": {
+          "type": "boolean"
+        },
         "feedback": {
           "type": "boolean"
         },
@@ -446,7 +453,8 @@
         "enableUserTags",
         "enableHashTags",
         "maxPreviewsCached",
-        "maxNoteLength"
+        "maxNoteLength",
+        "enableEditorDecorations"
       ],
       "additionalProperties": false,
       "description": "Namespace for configurations that affect the workspace"
@@ -773,6 +781,9 @@
         },
         "enableKatex": {
           "type": "boolean"
+        },
+        "automaticallyShowPreview": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -780,7 +791,8 @@
         "enableNoteTitleForLink",
         "enableMermaid",
         "enablePrettyRefs",
-        "enableKatex"
+        "enableKatex",
+        "automaticallyShowPreview"
       ],
       "additionalProperties": false,
       "description": "Namespace for all preview related configurations"

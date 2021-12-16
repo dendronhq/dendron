@@ -14,4 +14,8 @@ export const PREVIEW: DendronConfigEntryCollection<DendronPreviewConfig> = {
   enableMermaid: ENABLE_MERMAID("preview"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("preview"),
   enableKatex: ENABLE_KATEX("preview"),
+  automaticallyShowPreview: {
+    label: "Automatically Show Preview",
+    desc: "Automatically show preview when opening VSCode and switching between notes.",
+  },
 };

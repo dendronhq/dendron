@@ -62,9 +62,20 @@ jobs:
 
       - name: Build the VSIX
         run: |
-          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/nightly-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           yarn build:patch:local:ci
+
+      - name: Check for VSIX
+        run: |
+          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
+          if [ $vsixCount = 1 ]; then
+            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
+            echo "found a single .vsix file named $vsix" 
+            echo "VSIX_FILE_NAME=$vsix" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=./packages/plugin-core/$vsix" >> $GITHUB_ENV
+            else
+            echo "error: expected 1 .vsix file, found $vsixCount"
+            exit 1
+          fi
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
@@ -72,11 +83,6 @@ jobs:
           name: vsix
           path: ${{ env.VSIX_RELATIVE_PATH }}
           if-no-files-found: error
-
-      # - name: Prepare Package Manifest
-      #   run: |
-      #     DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
-      #     LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
       # - name: Publish to VS Code Marketplace
       #   env:

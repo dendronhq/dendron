@@ -1223,7 +1223,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   WATCH_FOR_NATIVE_WS: {
     key: "dendron.watchForNativeWorkspace",
     type: "boolean",
-    default: true,
+    default: false,
     description:
       "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace.",
   },

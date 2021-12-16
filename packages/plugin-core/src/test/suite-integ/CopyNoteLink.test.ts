@@ -493,7 +493,7 @@ suite("CopyNoteLink", function () {
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
         const link = await new CopyNoteLinkCommand().run();
-        expect(link).toEqual("[[assets/test.py]]");
+        expect(link).toEqual(path.join("[[assets", "test.py]]"));
       });
     });
 
@@ -506,7 +506,7 @@ suite("CopyNoteLink", function () {
         await fs.writeFile(fsPath, "(set! x 1)");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
         const link = await new CopyNoteLinkCommand().run();
-        expect(link).toEqual("[[src/clj/test.clj]]");
+        expect(link).toEqual(path.join("[[src", "clj", "test.clj]]"));
       });
     });
 
@@ -522,7 +522,7 @@ suite("CopyNoteLink", function () {
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
         const link = await new CopyNoteLinkCommand().run();
-        expect(link).toEqual("[[src/test.hs]]");
+        expect(link).toEqual(path.join("[[src", "test.hs]]"));
       });
     });
   });

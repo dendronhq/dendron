@@ -100,25 +100,21 @@ export class WSUtils {
     }
   }
 
-  //moved
-  static getVaultFromDocument(document: vscode.TextDocument) {
-    const txtPath = document.uri.fsPath;
+  static getVaultFromPath(fsPath: string) {
     const { wsRoot, vaults } = getDWorkspace();
-    const vault = VaultUtils.getVaultByFilePath({
+    return VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
-      fsPath: txtPath,
+      fsPath,
     });
-    return vault;
   }
 
-  static getNoteFromDocument(document: vscode.TextDocument) {
+  static getNoteFromPath(fsPath: string) {
     const { engine, wsRoot } = getDWorkspace();
-    const txtPath = document.uri.fsPath;
-    const fname = path.basename(txtPath, ".md");
+    const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
-      vault = this.getVaultFromDocument(document);
+      vault = this.getVaultFromPath(fsPath);
     } catch (err) {
       // No vault
       return undefined;
@@ -129,6 +125,15 @@ export class WSUtils {
       wsRoot,
       notes: engine.notes,
     });
+  }
+
+  //moved
+  static getVaultFromDocument(document: vscode.TextDocument) {
+    return this.getVaultFromPath(document.uri.fsPath);
+  }
+
+  static getNoteFromDocument(document: vscode.TextDocument) {
+    return this.getNoteFromPath(document.uri.fsPath);
   }
 
   static tryGetNoteFromDocument = (

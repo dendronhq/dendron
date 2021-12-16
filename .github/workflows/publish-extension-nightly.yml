@@ -70,8 +70,8 @@ jobs:
           if [ $vsixCount = 1 ]; then
             vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
             echo "found a single .vsix file named $vsix" 
-            echo "VSIX_FILE_NAME=$vsix" >> $GITHUB_ENV
-            echo "VSIX_RELATIVE_PATH=./packages/plugin-core/$vsix" >> $GITHUB_ENV
+            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
             else
             echo "error: expected 1 .vsix file, found $vsixCount"
             exit 1

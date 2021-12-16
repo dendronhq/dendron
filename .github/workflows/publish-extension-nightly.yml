@@ -63,7 +63,7 @@ jobs:
       - name: Build the VSIX
         run: |
           echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/nightly-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact

@@ -60,6 +60,10 @@ export type LookupControllerV3CreateOpts = {
   fuzzThreshold?: number;
 };
 
+/**
+ * For initialization lifecycle,
+ * see [[dendron://dendron.docs/pkg.plugin-core.t.lookup.arch]]
+ */
 export class LookupControllerV3 {
   public state: LookupControllerState;
   public nodeType: DNodeType;

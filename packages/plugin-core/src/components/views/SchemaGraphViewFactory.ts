@@ -84,10 +84,17 @@ export class SchemaGraphViewFactory {
           }
           break;
         }
+        // not handled
+        case GraphViewMessageType.onRequestGraphStyle: {
+          break;
+        }
+        // TODO: these should be handled
         default:
-          Logger.error({
+          Logger.info({
             ctx,
-            msg: "Unexpected message type from SchemaGraph Webview: " + msg,
+            msg:
+              "Unexpected message type from SchemaGraph Webview: " +
+              JSON.stringify(msg),
           });
           break;
       }

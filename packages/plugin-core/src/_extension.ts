@@ -736,6 +736,12 @@ export async function _activate(
         source: "extension",
         action: "activate",
       });
+      // If automaticallyShowPreview = true, display preview panel on start up
+      const note = WSUtils.getActiveNote();
+      if (note) {
+        PreviewPanelFactory.getProxy().showPreviewAndUpdate(note);
+      }
+
       return true;
     }
     return false;

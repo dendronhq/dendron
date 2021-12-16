@@ -113,6 +113,7 @@ preview:
     enableMermaid: true
     enablePrettyRefs: true
     enableKatex: true
+    automaticallyShowPreview: false
 "
 `;
 
@@ -249,6 +250,7 @@ preview:
     enableMermaid: true
     enablePrettyRefs: true
     enableKatex: true
+    automaticallyShowPreview: false
 "
 `;
 
@@ -360,6 +362,7 @@ preview:
     enableMermaid: true
     enablePrettyRefs: true
     enableKatex: true
+    automaticallyShowPreview: false
 "
 `;
 
@@ -454,6 +457,7 @@ preview:
     enableMermaid: true
     enablePrettyRefs: true
     enableKatex: true
+    automaticallyShowPreview: false
 "
 `;
 
@@ -561,6 +565,7 @@ preview:
     enableMermaid: true
     enablePrettyRefs: true
     enableKatex: true
+    automaticallyShowPreview: false
 "
 `;
 

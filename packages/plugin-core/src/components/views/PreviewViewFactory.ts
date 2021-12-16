@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigUtils,
   DendronEditorViewKey,
   DMessageEnum,
   getWebEditorViewEntry,
@@ -11,12 +12,16 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { handleLink, LinkType } from "../../commands/ShowPreview";
+import {
+  handleLink,
+  LinkType,
+  ShowPreviewCommand,
+} from "../../commands/ShowPreview";
 import { Logger } from "../../logger";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension } from "../../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 /**
@@ -25,11 +30,17 @@ import { WSUtils } from "../../WSUtils";
 export interface PreviewProxy {
   /**
    * Method to update the preview with the passed in NoteProps.
+   * If automaticallyShowPreview is set to true, show preview panel if it doesn't exist
    * @param note Note Props to update the preview contents with
    */
-  updateForNote(
+  showPreviewAndUpdate(
     note: NoteProps
-  ): ReturnType<typeof PreviewPanelFactory["maybeSendRefreshMessage"]>;
+  ): ReturnType<typeof PreviewPanelFactory["updateForNote"]>;
+
+  /**
+   * Return current panel. Can be undefined. Exposed for testing only
+   */
+  getPanel(): vscode.WebviewPanel | undefined;
 }
 
 export class PreviewPanelFactory {
@@ -48,16 +59,6 @@ export class PreviewPanelFactory {
       },
       source: "vscode",
     } as OnDidChangeActiveTextEditorMsg);
-  }
-
-  private static maybeSendRefreshMessage(note: NoteProps) {
-    if (PreviewPanelFactory._panel) {
-      return PreviewPanelFactory.sendRefreshMessage(
-        PreviewPanelFactory._panel,
-        note
-      );
-    }
-    return undefined;
   }
 
   private static classifyLink({ href }: NoteViewMessage["data"]): LinkType {
@@ -86,10 +87,43 @@ export class PreviewPanelFactory {
     }
   }
 
+  private static async updateForNote(note: NoteProps) {
+    if (PreviewPanelFactory._panel) {
+      return this.sendRefreshMessage(PreviewPanelFactory._panel, note);
+    }
+    return undefined;
+  }
+
   static getProxy(): PreviewProxy {
     return {
-      updateForNote(note) {
-        return PreviewPanelFactory.maybeSendRefreshMessage(note);
+      async showPreviewAndUpdate(note) {
+        const ctx = {
+          ctx: "ShowPreview:showPreviewAndRefresh",
+          fname: note.fname,
+        };
+        const config = getDWorkspace().config;
+
+        // If preview panel does not exist and automaticallyShowPreview = true, show preview before updating
+        // Otherwise, update if panel exists
+        if (
+          !PreviewPanelFactory._panel &&
+          ConfigUtils.getPreview(config).automaticallyShowPreview
+        ) {
+          Logger.debug({
+            ...ctx,
+            state: "panel not found and automaticallyShowPreview = true",
+          });
+          await new ShowPreviewCommand(
+            PreviewPanelFactory.create(getExtension())
+          ).execute();
+          return PreviewPanelFactory.updateForNote(note);
+        } else {
+          return PreviewPanelFactory.updateForNote(note);
+        }
+      },
+
+      getPanel() {
+        return PreviewPanelFactory._panel;
       },
     };
   }
@@ -99,7 +133,7 @@ export class PreviewPanelFactory {
   /** If the preview is ready, the note will be shown immediately. If not, the note will be shown once */
   public static showNoteWhenReady(note: NoteProps) {
     this.initWithNote = note;
-    return this.maybeSendRefreshMessage(note);
+    return this.updateForNote(note);
   }
 
   static create(ext: DendronExtension): vscode.WebviewPanel {

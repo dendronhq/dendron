@@ -1,39 +1,47 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
+import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
-import { getExtension } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
-suite("WindowWatcher", function () {
-  let watcher: WindowWatcher;
+const setupBasic = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    fname: "bar",
+    body: "bar body",
+    vault: vaults[0],
+    wsRoot,
+  });
+};
+
+suite("WindowWatcher: GIVEN the dendron extension is running", function () {
+  const watcher: WindowWatcher = new WindowWatcher(
+    PreviewPanelFactory.getProxy()
+  );
 
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
-  describe("onDidChange", () => {
+  describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
     test("basic", (done) => {
       runSingleVaultTest({
         ctx,
-        postSetupHook: async ({ vaults, wsRoot }) => {
-          const vault = vaults[0];
-          await NoteTestUtilsV4.createNote({
-            fname: "bar",
-            body: "bar body",
-            vault,
-            wsRoot,
-          });
-        },
+        postSetupHook: setupBasic,
         onInit: async ({ vault, wsRoot }) => {
           const vaultPath = vault.fsPath;
-          watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
@@ -43,6 +51,61 @@ suite("WindowWatcher", function () {
         },
       });
     });
+
+    describeSingleWS(
+      "AND WHEN automaticallyShowPreview is set to false",
+      {
+        postSetupHook: setupBasic,
+        ctx,
+        modConfigCb: (config) => {
+          ConfigUtils.setPreviewProps(
+            config,
+            "automaticallyShowPreview",
+            false
+          );
+          return config;
+        },
+      },
+      () => {
+        test("THEN preview panel is not shown", async () => {
+          const { wsRoot, vaults } = getDWorkspace();
+          const vaultPath = vaults[0].fsPath;
+          const notePath = path.join(wsRoot, vaultPath, "bar.md");
+          const uri = vscode.Uri.file(notePath);
+          const editor = await VSCodeUtils.openFileInEditor(uri);
+          await watcher.triggerNotePreviewUpdate(editor!);
+
+          const maybePanel = PreviewPanelFactory.getProxy().getPanel();
+          expect(maybePanel).toBeFalsy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "AND WHEN automaticallyShowPreview is set to true",
+      {
+        postSetupHook: setupBasic,
+        ctx,
+        modConfigCb: (config) => {
+          ConfigUtils.setPreviewProps(config, "automaticallyShowPreview", true);
+          return config;
+        },
+      },
+      () => {
+        test("THEN preview panel is shown", async () => {
+          const { wsRoot, vaults } = getDWorkspace();
+          const vaultPath = vaults[0].fsPath;
+          const notePath = path.join(wsRoot, vaultPath, "bar.md");
+          const uri = vscode.Uri.file(notePath);
+          const editor = await VSCodeUtils.openFileInEditor(uri);
+          await watcher.triggerNotePreviewUpdate(editor!);
+
+          const maybePanel = PreviewPanelFactory.getProxy().getPanel();
+          expect(maybePanel).toBeTruthy();
+          expect(maybePanel?.active).toBeTruthy();
+        });
+      }
+    );
   });
 
   // NOTE: flaky tests
@@ -63,7 +126,6 @@ suite("WindowWatcher", function () {
 
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher = new WindowWatcher();
           watcher.activate(ctx);
           // Open a note
           await WSUtils.openNote(
@@ -89,7 +151,6 @@ suite("WindowWatcher", function () {
           await VSCodeUtils.closeAllEditors();
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher = new WindowWatcher();
 
           watcher.activate(ctx);
           // Open a note

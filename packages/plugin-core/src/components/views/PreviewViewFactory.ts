@@ -27,7 +27,9 @@ export interface PreviewProxy {
    * Method to update the preview with the passed in NoteProps.
    * @param note Note Props to update the preview contents with
    */
-  updateForNote(note: NoteProps): void;
+  updateForNote(
+    note: NoteProps
+  ): ReturnType<typeof PreviewPanelFactory["maybeSendRefreshMessage"]>;
 }
 
 export class PreviewPanelFactory {
@@ -38,7 +40,7 @@ export class PreviewPanelFactory {
     panel: vscode.WebviewPanel,
     note: NoteProps
   ) {
-    panel.webview.postMessage({
+    return panel.webview.postMessage({
       type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
       data: {
         note,
@@ -46,6 +48,16 @@ export class PreviewPanelFactory {
       },
       source: "vscode",
     } as OnDidChangeActiveTextEditorMsg);
+  }
+
+  private static maybeSendRefreshMessage(note: NoteProps) {
+    if (PreviewPanelFactory._panel) {
+      return PreviewPanelFactory.sendRefreshMessage(
+        PreviewPanelFactory._panel,
+        note
+      );
+    }
+    return undefined;
   }
 
   private static classifyLink({ href }: NoteViewMessage["data"]): LinkType {
@@ -77,18 +89,17 @@ export class PreviewPanelFactory {
   static getProxy(): PreviewProxy {
     return {
       updateForNote(note) {
-        if (PreviewPanelFactory._panel) {
-          PreviewPanelFactory._panel.webview.postMessage({
-            type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-            data: {
-              note,
-              syncChangedNote: true,
-            },
-            source: "vscode",
-          } as OnDidChangeActiveTextEditorMsg);
-        }
+        return PreviewPanelFactory.maybeSendRefreshMessage(note);
       },
     };
+  }
+
+  private static initWithNote: NoteProps | undefined;
+
+  /** If the preview is ready, the note will be shown immediately. If not, the note will be shown once */
+  public static showNoteWhenReady(note: NoteProps) {
+    this.initWithNote = note;
+    return this.maybeSendRefreshMessage(note);
   }
 
   static create(ext: DendronExtension): vscode.WebviewPanel {
@@ -129,13 +140,25 @@ export class PreviewPanelFactory {
         }
         case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
-          const note = WSUtils.getActiveNote();
-          if (note) {
+          let note: NoteProps | undefined;
+          if (PreviewPanelFactory.initWithNote !== undefined) {
+            note = PreviewPanelFactory.initWithNote;
             Logger.debug({
               ctx,
-              msg: "got active note",
+              msg: "got pre-set note",
               note: NoteUtils.toLogObj(note),
             });
+          } else {
+            note = WSUtils.getActiveNote();
+            if (note) {
+              Logger.debug({
+                ctx,
+                msg: "got active note",
+                note: NoteUtils.toLogObj(note),
+              });
+            }
+          }
+          if (note) {
             PreviewPanelFactory.sendRefreshMessage(this._panel!, note);
           }
           break;

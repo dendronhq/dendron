@@ -72,6 +72,13 @@
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
+          "id": "dendron.lookup-view",
+          "name": "Lookup View",
+          "contextualTitle": "Lookup View",
+          "type": "webview",
+          "when": "dendron:webUIEnabled"
+        },
+        {
           "id": "dendron.backlinks",
           "name": "Backlinks",
           "when": "dendron:pluginActive"

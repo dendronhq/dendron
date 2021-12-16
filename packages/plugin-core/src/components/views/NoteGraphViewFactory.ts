@@ -31,7 +31,7 @@ export class NoteGraphPanelFactory {
         {
           enableScripts: true,
           retainContextWhenHidden: true,
-          enableFindWidget: true,
+          enableFindWidget: false,
         }
       );
 

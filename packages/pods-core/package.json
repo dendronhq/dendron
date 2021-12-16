@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.73.0",
+  "version": "0.73.1",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -34,6 +34,7 @@
     "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "devDependencies": {
+    "@types/form-data": "^2.5.0",
     "@types/fs-extra": "^9.0.1",
     "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.161",
@@ -50,9 +51,9 @@
   },
   "dependencies": {
     "@dendronhq/airtable": "^0.11.1",
-    "@dendronhq/common-all": "^0.73.0",
-    "@dendronhq/common-server": "^0.73.0",
-    "@dendronhq/engine-server": "^0.73.0",
+    "@dendronhq/common-all": "^0.73.1",
+    "@dendronhq/common-server": "^0.73.1",
+    "@dendronhq/engine-server": "^0.73.1",
     "@instantish/martian": "1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",

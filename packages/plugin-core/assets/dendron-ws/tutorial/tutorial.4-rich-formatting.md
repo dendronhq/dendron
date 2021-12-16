@@ -1,20 +1,20 @@
 ---
 id: vAy0awBTwDaxKGHWUdSaP
 title: Rich Formatting
-desc: 'Text Formatting, Images, Formulas, and Diagrams'
+desc: "Text Formatting, Images, Formulas, and Diagrams"
 updated: 1624865905667
 created: 1624352425213
 ---
 
-Dendron supports an extended Markdown syntax, which provides a lot of options for rich formatting. Take a look at some examples in this note to see what's possible.  Have the preview pane opened (`Dendron: Show Preview`) to see how these will get rendered.
+Dendron supports an extended Markdown syntax, which provides a lot of options for rich formatting. Take a look at some examples in this note to see what's possible. Have the preview pane opened (`Dendron: Show Preview`) to see how these will get rendered.
 
 #### Markdown Formatting Options
 
-|Formatting|Example|
-|:---|:---:|
-|Bold|**Hello World**|
-|Italics|_Hello World_|
-|Strikethrough|~~Hello World~~|
+| Formatting    |     Example     |
+| :------------ | :-------------: |
+| Bold          | **Hello World** |
+| Italics       |  _Hello World_  |
+| Strikethrough | ~~Hello World~~ |
 
 #### Images
 
@@ -59,7 +59,7 @@ sequenceDiagram
 
 You can link to a specific section of a different note and have the content in-lined into the current note.
 
-![[Join the community of Dendrologists|tutorial.5-conclusion#join-the-community-of-dendrologists:#^discord-block-ref]]
+![[tutorial#welcome-to-dendron:#*]]
 
 [References Docs](https://wiki.dendron.so/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference)
 
@@ -68,4 +68,5 @@ You can link to a specific section of a different note and have the content in-l
 - [[Conclude the Tutorial|tutorial.5-conclusion]]
 
 ---
+
 [[Tutorial Home Page| tutorial]]

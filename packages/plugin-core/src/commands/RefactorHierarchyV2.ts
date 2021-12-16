@@ -4,6 +4,7 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -277,7 +278,20 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return result && !DNodeUtils.isRoot(item);
     });
 
-    return capturedNotes;
+    // filter out notes that are not in fs (virtual stub notes)
+    return capturedNotes.filter((note) => {
+      if (note.stub) {
+        // if a stub is captured, see if it actually exists in the file system.
+        // if it is in the file system, we should include it should be part of the refactor
+        // otherwise, this should be omitted.
+        // as the virtual stubs will automatically be handled by the rename operation.
+        const notePath = NoteUtils.getFullPath({ wsRoot: engine.wsRoot, note });
+        const existsInFileSystem = fs.existsSync(notePath);
+        return existsInFileSystem;
+      } else {
+        return true;
+      }
+    });
   }
 
   getRenameOperations(opts: {

@@ -62,6 +62,7 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
   fast?: boolean;
+  extensionTarget: ExtensionTarget;
 } & BumpVersionOpts &
   PrepPluginOpts;
 
@@ -255,6 +256,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             BuildUtils.installPluginDependencies();
           }
 
+          this.print("compiling plugin...");
+          await BuildUtils.compilePlugin(opts);
+
           this.print("package deps...");
           await BuildUtils.packagePluginDependencies(opts);
           return { error: null };
@@ -350,6 +354,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
+
+    this.print("compiling plugin...");
+    await BuildUtils.compilePlugin(opts);
+
+    if (opts.extensionTarget === ExtensionTarget.NIGHTLY) {
+      this.print("modifying plugin manifest for nightly target...");
+      await BuildUtils.prepPluginPkg(ExtensionTarget.NIGHTLY);
+    }
 
     this.print("package deps...");
     await BuildUtils.packagePluginDependencies(opts);

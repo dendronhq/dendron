@@ -8,7 +8,7 @@ name: Publish Extension - Nightly
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 7 * * 2-6'
+    - cron: "0 7 * * 2-6"
 
 jobs:
   build:
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version:  14.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
@@ -62,44 +62,30 @@ jobs:
 
       - name: Build the VSIX
         run: |
+          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           yarn build:patch:local:ci
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
         with:
           name: vsix
-          path: ./packages/plugin-core/*.vsix
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error
 
-      - name: Prepare Package Manifest
-        run: |
-          DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
-          LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
+      # - name: Prepare Package Manifest
+      #   run: |
+      #     DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
+      #     LOG_LEVEL=info $DENDRON_CLI dev prep_plugin --extensionTarget nightly
 
-      # yarn deploy:vscode (vsce publish) attempts to pull dependencies, so
-      # verdaccio must be running. Verdaccio starts up slowly in the build
-      # environment, so give it time to start up.
-      - name: Publish to VS Code Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-        working-directory: ./packages/plugin-core
-        run: |
-          npx verdaccio > verdaccio.log  2>&1 &
-          sleep 60
-          echo "checking verdaccio log"
-          cat verdaccio.log
-          echo "Setting registry to local"
-          yarn config set registry http://localhost:4873
-          npm set registry http://localhost:4873/
-          echo "running deploy:vscode"
-          yarn deploy:vscode
+      # - name: Publish to VS Code Marketplace
+      #   env:
+      #     VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+      #   working-directory: ./packages/plugin-core
+      #   run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
 
-      - name: Publish to Open VSX Marketplace
-        env:
-          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
-        working-directory: ./packages/plugin-core
-        run: |
-          echo "Setting registry to local"
-          yarn config set registry http://localhost:4873
-          npm set registry http://localhost:4873/
-          echo "running deploy:ovsx"
-          yarn deploy:ovsx
+      # - name: Publish to Open VSX Marketplace
+      #   env:
+      #     OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
+      #   working-directory: ./packages/plugin-core
+      #   run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}

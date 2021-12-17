@@ -1118,7 +1118,8 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.languages.registerHoverProvider(
-      mdLangSelector,
+      // Allows hover provider to work for wikilinks in non-note files
+      anyLangSelector,
       new ReferenceHoverProvider()
     )
   );

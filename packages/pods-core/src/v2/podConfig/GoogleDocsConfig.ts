@@ -1,3 +1,4 @@
+import { JSONSchemaType } from "ajv";
 import { ExternalTarget } from "../external-services/ExternalConnectionManager";
 import { GoogleDocsConnection } from "../external-services/GoogleDocsConnection";
 import { ExportPodConfigurationV2 } from "./PodV2Types";
@@ -42,4 +43,38 @@ export function isRunnableGoogleDocsV2PodConfig(
     object.exportScope &&
     object.connectionId
   );
+}
+
+export function createRunnableGoogleDocsV2PodConfigSchema(): JSONSchemaType<RunnableGoogleDocsV2PodConfig> {
+  return {
+    type: "object",
+    required: [
+      "accessToken",
+      "refreshToken",
+      "expirationTime",
+      "exportScope",
+      "connectionId",
+    ],
+    properties: {
+      accessToken: {
+        type: "string",
+      },
+      refreshToken: {
+        type: "string",
+      },
+      expirationTime: {
+        type: "number",
+      },
+      connectionId: {
+        type: "string",
+      },
+      exportScope: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+        nullable: true,
+      },
+    },
+  };
 }

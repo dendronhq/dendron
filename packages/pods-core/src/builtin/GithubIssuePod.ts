@@ -395,6 +395,19 @@ type GithubIssuePublishPodCustomOpts = {
    * if set to false, starts a discussion without the contents of note body
    */
   includeNoteBodyInDiscussion?: boolean;
+  /**
+   * aliasMapping for frontmatter
+   */
+  aliasMapping?: AliasMapping;
+};
+
+type AliasMapping = {
+  assignees: AliasMappingLvl2;
+  status: AliasMappingLvl2;
+};
+type AliasMappingLvl2 = {
+  value?: { [key: string]: string };
+  alias?: string;
 };
 
 type HashMap = {
@@ -428,6 +441,11 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
           description:
             "if set to false, starts a discussion without the contents of note body",
           default: true,
+        },
+        aliasMapping: {
+          type: "object",
+          nullable: true,
+          description: "mapping of issue FM fields with the task note",
         },
       },
     }) as JSONSchemaType<GithubIssuePublishPodConfig>;
@@ -784,6 +802,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
       repository,
       token,
       includeNoteBodyInDiscussion = true,
+      aliasMapping,
     } = config as GithubIssuePublishPodConfig;
     const { showMessage } = utilityMethods as GithubIssueUtilMethods;
 
@@ -793,7 +812,23 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
     if (_.isUndefined(note.custom)) {
       note.custom = {};
     }
-    const { issueID, status, milestone, category, assignees } = note.custom;
+    const { issueID, milestone, category } = note.custom;
+    let { assignees, status } = note.custom;
+
+    //if assignees field not present in FM, check for its alias
+    assignees =
+      assignees ?? _.get(note.custom, `${aliasMapping?.assignees?.alias}`);
+    const assigneesVal = aliasMapping?.assignees.value;
+
+    // checks for aliasMapping of values if username in github and task note is different
+    if (assigneesVal && assigneesVal[assignees]) {
+      assignees = assigneesVal[assignees];
+    }
+
+    const statusValue = aliasMapping?.status.value;
+    if (status && statusValue && statusValue[status]) {
+      status = statusValue[status];
+    }
 
     const githubDataHashMap = await this.getDataFromGithub({
       owner,

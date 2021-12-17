@@ -1107,10 +1107,13 @@ export class NoteUtils {
 
   static serialize(
     props: NoteProps,
-    opts?: { writeHierarchy?: boolean }
+    opts?: { writeHierarchy?: boolean; excludeStub?: boolean }
   ): string {
     const body = props.body;
     let blacklist = ["parent", "children"];
+    if (opts?.excludeStub) {
+      blacklist.push("stub");
+    }
     if (opts?.writeHierarchy) {
       blacklist = [];
     }

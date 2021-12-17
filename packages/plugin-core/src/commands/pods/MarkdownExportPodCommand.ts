@@ -1,8 +1,10 @@
 import { NoteProps } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
+  createRunnableMarkdownV2PodConfigSchema,
   ExportPodV2,
   isRunnableMarkdownV2PodConfig,
+  JSONSchemaType,
   MarkdownExportPodV2,
   MarkdownV2PodConfig,
   PodV2Types,
@@ -130,6 +132,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       engine: getEngine(),
       dendronConfig: getDWorkspace().config,
     });
+  }
+
+  public getRunnableSchema(): JSONSchemaType<RunnableMarkdownV2PodConfig> {
+    return createRunnableMarkdownV2PodConfigSchema();
   }
 
   /*

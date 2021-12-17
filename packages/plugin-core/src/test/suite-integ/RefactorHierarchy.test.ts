@@ -17,6 +17,7 @@ import sinon from "sinon";
 import { getEngine } from "../../workspace";
 import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 
 suite("RefactorHiearchy", function () {
   let ctx: vscode.ExtensionContext;
@@ -264,6 +265,64 @@ suite("RefactorHiearchy", function () {
               expect(newFname.endsWith(".ref")).toBeTruthy();
               expect(oldFname.split(".")[2]).toEqual(newFname.split(".")[2]);
             });
+            done();
+          },
+        });
+      });
+    });
+
+    describe("WHEN match would capture fname of note that is a stub", () => {
+      test("THEN: stub notes are not part of notes that are being refactored", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const cmd = new RefactorHierarchyCommandV2();
+            const engine = getEngine();
+            const capturedNotes = cmd.getCapturedNotes({
+              scope: undefined,
+              matchRE: new RegExp("dendron.ref"),
+              engine,
+            });
+
+            // none of the captured notes should have stub: true
+            // stub notes in this test are:
+            // dendron.ref, dendron.ref.foo, dendron.ref.bar, dendron.ref.egg
+            const numberOfNotesThatAreStubs = capturedNotes.filter(
+              (note) => note.stub
+            ).length;
+            expect(numberOfNotesThatAreStubs).toEqual(0);
+
+            done();
+          },
+        });
+      });
+
+      test("THEN: stub note is captured if it exists in the file system.", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: async () => {
+            const lookup = new NoteLookupCommand();
+            await lookup.run({
+              noConfirm: true,
+              initialValue: "dendron.ref.foo",
+            });
+
+            const cmd = new RefactorHierarchyCommandV2();
+            const engine = getEngine();
+            const capturedNotes = cmd.getCapturedNotes({
+              scope: undefined,
+              matchRE: new RegExp("dendron.ref"),
+              engine,
+            });
+
+            // only the note `dendron.ref.foo`, that is a stub note but has an actual file created
+            // should be part of the captured notes.
+            const capturedStubNotes = capturedNotes.filter((note) => note.stub);
+            expect(capturedStubNotes.length).toEqual(1);
+            expect(capturedStubNotes[0].fname).toEqual("dendron.ref.foo");
+
             done();
           },
         });

@@ -35,6 +35,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14.x
+      
+      - name: Configure NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
 
       - name: Set Environment Variables
         run: |

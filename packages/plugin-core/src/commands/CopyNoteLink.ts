@@ -44,9 +44,9 @@ export class CopyNoteLinkCommand extends BasicCommand<
     fsPath = path.relative(wsRoot, fsPath);
     // Check if the file is in the assets of any vault. If it is, we can shorten the link.
     for (const vault of vaults) {
-      const vaultPath = VaultUtils.getRelPath(vault);
+      const vaultPath = path.join(VaultUtils.getRelPath(vault), "assets");
       if (isInsidePath(vaultPath, fsPath)) {
-        fsPath = path.relative(vaultPath, fsPath);
+        fsPath = path.relative(VaultUtils.getRelPath(vault), fsPath);
         break;
       }
     }

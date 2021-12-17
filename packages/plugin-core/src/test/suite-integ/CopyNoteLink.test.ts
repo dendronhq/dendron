@@ -477,6 +477,17 @@ suite("CopyNoteLink", function () {
       expect(link).toEqual("[[test.js]]");
     });
 
+    describe("AND the file name starts with a dot", async () => {
+      test("THEN creates a link to that file", async () => {
+        const { wsRoot } = getDWorkspace();
+        const fsPath = path.join(wsRoot, ".config.yaml");
+        await fs.writeFile(fsPath, "x: 1");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+        const link = await new CopyNoteLinkCommand().run();
+        expect(link).toEqual("[[.config.yaml]]");
+      });
+    });
+
     describe("AND the file is in assets", () => {
       test("THEN creates a link using assets", async () => {
         const { wsRoot, vaults } = getDWorkspace();
@@ -494,6 +505,18 @@ suite("CopyNoteLink", function () {
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
         const link = await new CopyNoteLinkCommand().run();
         expect(link).toEqual(path.join("[[assets", "test.py]]"));
+      });
+    });
+
+    describe("AND the file is in a vault, but not in assets", () => {
+      test("THEN creates a link from root", async () => {
+        const { wsRoot, vaults } = getDWorkspace();
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
+        const fsPath = path.join(path.join(wsRoot, vaultPath), "test.rs");
+        await fs.writeFile(fsPath, "let x = 123;");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
+        const link = await new CopyNoteLinkCommand().run();
+        expect(link).toEqual(path.join(`[[${vaultPath}`, "test.rs]]"));
       });
     });
 

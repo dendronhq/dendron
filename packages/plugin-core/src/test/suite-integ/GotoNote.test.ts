@@ -841,6 +841,80 @@ suite("GotoNote", function () {
           });
         }
       );
+
+      describeMultiWS(
+        "WHEN linked to a file starting with a dot",
+        { ctx },
+        () => {
+          before(async () => {
+            const { wsRoot, vaults, engine } = getDWorkspace();
+            const note = await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "[[.test/file.test]]",
+              engine,
+            });
+            await fs.ensureDir(path.join(wsRoot, ".test"));
+            await fs.writeFile(
+              path.join(wsRoot, ".test", "file.test"),
+              ["Et corporis assumenda quia libero illo."].join("\n")
+            );
+
+            await WSUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(7, 1, 7, 1);
+            await new GotoNoteCommand().run();
+          });
+
+          test("THEN opens that file", async () => {
+            expect(getActiveEditorBasename()).toEqual("file.test");
+            expect(
+              AssertUtils.assertInString({
+                body: VSCodeUtils.getActiveTextEditorOrThrow().document.getText(),
+                match: ["Et corporis assumenda quia libero illo."],
+              })
+            ).toBeTruthy();
+          });
+        }
+      );
+
+      describeMultiWS(
+        "WHEN linked to a file under assets where assets is in root and not a vault",
+        { ctx },
+        () => {
+          before(async () => {
+            const { wsRoot, vaults, engine } = getDWorkspace();
+            const note = await NoteTestUtilsV4.createNoteWithEngine({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "[[assets/file.txt]]",
+              engine,
+            });
+            await fs.ensureDir(path.join(wsRoot, "assets"));
+            await fs.writeFile(
+              path.join(wsRoot, "assets", "file.txt"),
+              ["Dolorum sed earum enim rem expedita nemo."].join("\n")
+            );
+
+            await WSUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(7, 1, 7, 1);
+            await new GotoNoteCommand().run();
+          });
+
+          test("THEN opens that file", async () => {
+            expect(getActiveEditorBasename()).toEqual("file.txt");
+            expect(
+              AssertUtils.assertInString({
+                body: VSCodeUtils.getActiveTextEditorOrThrow().document.getText(),
+                match: ["Dolorum sed earum enim rem expedita nemo."],
+              })
+            ).toBeTruthy();
+          });
+        }
+      );
     });
   });
 });

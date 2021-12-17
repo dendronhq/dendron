@@ -56,10 +56,6 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
 
-      - name: Clear Verdaccio Cache
-        run: |
-          if [ -d ~/.config/verdaccio/storage/@dendronhq ]; then echo "Clearing Existing Verdaccio Cache" && rm -Rf ~/.config/verdaccio/storage/@dendronhq; fi
-
       - name: Build the VSIX
         run: |
           yarn build:patch:local:ci
@@ -84,14 +80,14 @@ jobs:
           path: ${{ env.VSIX_RELATIVE_PATH }}
           if-no-files-found: error
 
-      # - name: Publish to VS Code Marketplace
-      #   env:
-      #     VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-      #   working-directory: ./packages/plugin-core
-      #   run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+        working-directory: ./packages/plugin-core
+        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
 
-      # - name: Publish to Open VSX Marketplace
-      #   env:
-      #     OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
-      #   working-directory: ./packages/plugin-core
-      #   run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
+      - name: Publish to Open VSX Marketplace
+        env:
+          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
+        working-directory: ./packages/plugin-core
+        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}

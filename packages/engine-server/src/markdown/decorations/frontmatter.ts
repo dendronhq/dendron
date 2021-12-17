@@ -23,7 +23,7 @@ type DecorationsForDecorateFrontmatter =
 export const decorateFrontmatter: Decorator<
   FrontmatterContent,
   DecorationsForDecorateFrontmatter
-> = (opts) => {
+> = async (opts) => {
   const { node: frontmatter, engine } = opts;
   const { value: contents, position } = frontmatter;
   // Decorate the timestamps
@@ -63,16 +63,18 @@ export const decorateFrontmatter: Decorator<
   const tags = getFrontmatterTags(parseFrontmatter(contents));
   const tagDecorations: DecorationHashTag[] = [];
   const errors: IDendronError[] = [];
-  tags.forEach((tag) => {
-    const { errors, decorations } = decorateTag({
-      fname: `${TAGS_HIERARCHY}${tag.value}`,
-      position: tag.position,
-      lineOffset,
-      engine,
-    });
-    tagDecorations.push(...decorations);
-    errors.push(...errors);
-  });
+  Promise.all(
+    tags.map(async (tag) => {
+      const { errors, decorations } = await decorateTag({
+        fname: `${TAGS_HIERARCHY}${tag.value}`,
+        position: tag.position,
+        lineOffset,
+        engine,
+      });
+      tagDecorations.push(...decorations);
+      errors.push(...errors);
+    })
+  );
   const decorations: DecorationsForDecorateFrontmatter[] = [
     ...tagDecorations,
     ...timestampDecorations,

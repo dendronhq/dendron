@@ -6,15 +6,20 @@ import {
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import { describe } from "mocha";
+import { describe, before } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 async function provide(editor: vscode.TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -1359,6 +1364,62 @@ suite("ReferenceProvider", function () {
           },
         });
       });
+
+      describeSingleWS(
+        "WHEN used on a link to a non-note file",
+        { ctx },
+        () => {
+          before(async () => {
+            const { wsRoot, vaults } = getDWorkspace();
+            await fs.writeFile(
+              path.join(wsRoot, "test.txt"),
+              "Et nam velit laboriosam."
+            );
+            const note = await NoteTestUtilsV4.createNote({
+              vault: vaults[0],
+              wsRoot,
+              fname: "source",
+              body: ["[[test.txt]]", "[[test.txt#L1]]"].join("\n"),
+            });
+            await WSUtils.openNote(note);
+          });
+
+          test("THEN displays message to open it with the default app", async () => {
+            const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+            const provider = new ReferenceHoverProvider();
+            const hover = await provider.provideHover(
+              editor.document,
+              new vscode.Position(7, 4)
+            );
+            expect(hover).toBeTruthy();
+            expect(
+              AssertUtils.assertInString({
+                body: hover!.contents.join(""),
+                match: ["test.txt"],
+              })
+            ).toBeTruthy();
+          });
+
+          describe("AND the link has a line anchor", () => {
+            test("THEN displays message to open it with the default app", async () => {
+              const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+              const provider = new ReferenceHoverProvider();
+              const hover = await provider.provideHover(
+                editor.document,
+                new vscode.Position(8, 4)
+              );
+              expect(hover).toBeTruthy();
+              expect(
+                AssertUtils.assertInString({
+                  body: hover!.contents.join(""),
+                  match: ["test.txt"],
+                  nomatch: ["L6"],
+                })
+              ).toBeTruthy();
+            });
+          });
+        }
+      );
     });
   });
 });

@@ -70,7 +70,7 @@ export function isBlockAnchor(anchor?: string): boolean {
   return !!anchor && anchor[0] === "^";
 }
 
-export function isFileAnchor(anchor?: string): boolean {
+export function isLineAnchor(anchor?: string): boolean {
   // not undefined, not an empty string, and the first character is L, and is followed by numbers
   return !!anchor && /L\d+/.test(anchor);
 }
@@ -207,6 +207,30 @@ export class DefaultMap<K, V> {
 
   public get size() {
     return this._internalMap.size;
+  }
+}
+
+export class FIFOQueue<T> {
+  private _internalQueue: T[] = [];
+
+  public constructor(init?: T[]) {
+    if (init) this._internalQueue = init;
+  }
+
+  public enqueue(item: T) {
+    this._internalQueue.push(item);
+  }
+
+  public enqueueAll(items: T[]) {
+    for (const item of items) this.enqueue(item);
+  }
+
+  public dequeue() {
+    return this._internalQueue.shift();
+  }
+
+  public get length() {
+    return this._internalQueue.length;
   }
 }
 

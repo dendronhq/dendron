@@ -54,9 +54,18 @@ export const findAnchorPos = (opts: {
 }): Position => {
   const { anchor: findAnchor, note } = opts;
   let key: string;
-  if (findAnchor.type === "header") key = getSlugger().slug(findAnchor.value);
-  else if (findAnchor.type === "block") key = `^${findAnchor.value}`;
-  else assertUnreachable(findAnchor);
+  switch (findAnchor.type) {
+    case "line":
+      return new Position(findAnchor.line - 1, 0);
+    case "block":
+      key = `^${findAnchor.value}`;
+      break;
+    case "header":
+      key = getSlugger().slug(findAnchor.value);
+      break;
+    default:
+      assertUnreachable(findAnchor);
+  }
 
   const found = note.anchors[key];
 
@@ -257,9 +266,21 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // Non-note files use `qs` for full path, and set vault to null
     if (opts.kind === TargetKind.NON_NOTE && qs) {
-      await VSCodeUtils.openFileInEditor(
-        Uri.from({ scheme: "file", path: qs })
+      const editor = await VSCodeUtils.openFileInEditor(
+        Uri.from({ scheme: "file", path: qs }),
+        {
+          column: opts.column,
+        }
       );
+      if (opts.anchor?.type === "line" && editor) {
+        // non-note files only support line based references right now
+        const position = new Position(
+          opts.anchor.line - 1 /* line anchors are 1-indexed */,
+          0
+        );
+        editor.selection = new Selection(position, position);
+        editor.revealRange(editor.selection);
+      }
       return {
         kind: TargetKind.NON_NOTE,
         fullPath: qs,

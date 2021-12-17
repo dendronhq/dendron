@@ -21,6 +21,10 @@ const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
   return ROOT_CTX + ":" + scope;
 };
+
+/**
+ * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
+ */
 export class WindowWatcher {
   private _previewProxy: PreviewProxy;
 
@@ -35,6 +39,7 @@ export class WindowWatcher {
   activate(context: ExtensionContext) {
     const extension = getExtension();
 
+    // provide logging whenever window changes
     extension.addDisposable(
       window.onDidChangeVisibleTextEditors(
         sentryReportingCallback((editors: TextEditor[]) => {
@@ -84,10 +89,13 @@ export class WindowWatcher {
         this.triggerUpdateDecorations(editor);
         this.triggerNotePreviewUpdate(editor);
 
+        // other components can register handlers for window watcher
+        // those handlers get called here
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
         );
 
+        // we have custom logic for newly opened documents
         if (
           getExtension().workspaceWatcher?.getNewlyOpenedDocument(
             editor.document

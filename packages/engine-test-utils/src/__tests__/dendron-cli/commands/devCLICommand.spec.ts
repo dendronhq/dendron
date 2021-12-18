@@ -70,6 +70,9 @@ describe("build", () => {
           BuildUtils,
           "installPluginDependencies"
         ).returns({} as any);
+        const compilePluginStub = stub(BuildUtils, "compilePlugin").returns(
+          {} as any
+        );
         const packagePluginDependenciesStub = stub(
           BuildUtils,
           "packagePluginDependencies"
@@ -96,6 +99,7 @@ describe("build", () => {
           syncStaticAssetsToNextjsTemplateStub,
           prepPluginPkgStub,
           installPluginDependenciesStub,
+          compilePluginStub,
           packagePluginDependenciesStub,
           setRegRemoteStub,
           restorePluginPkgJsonStub,

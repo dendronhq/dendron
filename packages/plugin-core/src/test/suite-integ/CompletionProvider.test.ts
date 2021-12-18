@@ -8,16 +8,18 @@ import {
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe } from "mocha";
-import { CompletionItem, Position } from "vscode";
+import { describe, before } from "mocha";
+import { CompletionItem, Position, Range } from "vscode";
 import {
   provideBlockCompletionItems,
   provideCompletionItems,
 } from "../../features/completionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacyMultiWorkspaceTest,
   runTestButSkipForWindows,
   setupBeforeAfter,
@@ -257,6 +259,50 @@ suite("completionProvider", function () {
         },
       });
     });
+
+    describeMultiWS(
+      "WHEN completing a wikilink without closing brackets",
+      { ctx },
+      () => {
+        let items: CompletionItem[] | undefined;
+        before(async () => {
+          const { vaults, wsRoot, engine } = getDWorkspace();
+          await WSUtils.openNote(
+            NoteUtils.getNoteOrThrow({
+              fname: "root",
+              vault: vaults[1],
+              wsRoot,
+              notes: engine.notes,
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
+          });
+          items = provideCompletionItems(editor.document, new Position(8, 10));
+        });
+
+        test("THEN it finds completions", () => {
+          expect(items?.length).toEqual(3);
+        });
+
+        test("THEN it doesn't erase any text following the wikilink", async () => {
+          for (const item of items!) {
+            const range = item.range! as Range;
+            // Since there's no text, start and end of range is at the same place.
+            // The end doesn't go over the following text to avoid deleting them, since those are not part of the wikilink.
+            expect(range.start.character).toEqual(10);
+            expect(range.end.character).toEqual(10);
+          }
+        });
+
+        test("THEN it adds the closing brackets", async () => {
+          for (const item of items!) {
+            expect(item.insertText!.toString().endsWith("]]")).toBeTruthy();
+          }
+        });
+      }
+    );
   });
 
   runTestButSkipForWindows()("blocks", () => {

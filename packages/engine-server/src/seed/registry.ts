@@ -65,7 +65,7 @@ export const SEED_REGISTRY: SeedRegistryDict = {
   "dendron.xkcd": {
     name: "xkcd",
     publisher: "dendron",
-    description: "CLI Docs",
+    description: "xkcd comics",
     license: "Creative Commons Attribution-NonCommercial 2.5 License",
     root: "vault",
     repository: {

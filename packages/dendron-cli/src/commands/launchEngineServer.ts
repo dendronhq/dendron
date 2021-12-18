@@ -27,6 +27,10 @@ type CommandCLIOpts = {
   port?: number;
   init?: boolean;
   wsRoot: string;
+  /**
+   * Fast boot mode for engine. Don't index
+   */
+  fast?: boolean;
 } & CommandCLIOnlyOpts;
 
 export { CommandCLIOpts as LaunchEngineServerCLIOpts };
@@ -56,13 +60,18 @@ export class LaunchEngineServerCommand extends CLICommand<
       describe: "don't write the port to a file",
       type: "boolean",
     });
+    args.option("fast", {
+      describe: "launch engine without indexing",
+      type: "boolean",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {
     const ctx = "enrichArgs";
-    const { port, init, noWritePort } = _.defaults(args, {
+    const { port, init, noWritePort, fast } = _.defaults(args, {
       init: false,
       noWritePort: false,
+      fast: false,
     });
     const wsRoot = resolvePath(args.wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
@@ -102,6 +111,7 @@ export class LaunchEngineServerCommand extends CLICommand<
         engine,
         wsRoot,
         init,
+        fast,
         vaults: vaultPaths,
         port: _port,
         server,

@@ -41,9 +41,9 @@ const pathsToBacklinkSourceTreeItems = async (
   fsPath: string,
   isLinkCandidateEnabled: boolean | undefined
 ) => {
-  const refFromFilename = path.parse(fsPath).name;
+  const fileName = path.parse(fsPath).name;
   const referencesByPath = _.groupBy(
-    await findReferences(refFromFilename, [fsPath]),
+    await findReferences(fileName, [fsPath]),
     ({ location }) => location.uri.fsPath
   );
 

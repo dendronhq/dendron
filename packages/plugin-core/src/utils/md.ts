@@ -469,15 +469,20 @@ export const noteLinks2Locations = (note: NoteProps) => {
   return refs;
 };
 
+/**
+ *  ^find-references
+ * @param fname
+ * @param excludePaths
+ * @returns
+ */
 export const findReferences = async (
-  ref: string,
+  fname: string,
   excludePaths: string[] = []
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
   const { engine } = getDWorkspace();
   // clean for anchor
-  const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
   const notesWithRefs = await Promise.all(
     notes.flatMap((note) => {

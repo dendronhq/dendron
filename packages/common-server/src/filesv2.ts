@@ -64,7 +64,7 @@ export async function createFileWatcher(
   const { numTries, fpath, onChange } = _.defaults(opts, {
     numTries: 5,
   });
-  let didCreate = false;
+  const didCreate = false;
 
   return new Promise(async (resolve, _reject) => {
     if (!fs.existsSync(fpath)) {
@@ -217,10 +217,10 @@ export function file2NoteWithCache({
   // if hash matches, note hasn't changed
   if (matchHash) {
     // since we don't store the note body in the cache file, we need to re-parse the body
-    let capture = content.match(/^---[\s\S]+?---/);
+    const capture = content.match(/^---[\s\S]+?---/);
     if (capture) {
-      let offset = capture[0].length;
-      let body = content.slice(offset + 1);
+      const offset = capture[0].length;
+      const body = content.slice(offset + 1);
       // vault can change without note changing so we need to add this
       // add `contentHash` to this signature because its not saved with note
       note = { ...cache.notes[name].data, body, vault, contentHash: sig };

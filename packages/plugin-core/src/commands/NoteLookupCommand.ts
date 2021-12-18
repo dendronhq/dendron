@@ -63,6 +63,7 @@ import {
   AutoCompleter,
   UIAutoCompletableCmds,
 } from "../utils/autoCompleter";
+import { VaultSelectionModeKeeper } from "../components/lookup/vaultSelectionModeKeeper";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -204,6 +205,11 @@ export class NoteLookupCommand extends BaseCommand<
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
       selectionType,
     } as CommandRunOpts);
+
+    const vaultButtonPressed =
+      VaultSelectionModeKeeper.vaultButtonPressedInitialState({
+        optionsOverride: copts.vaultSelectionMode,
+      });
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
@@ -211,8 +217,7 @@ export class NoteLookupCommand extends BaseCommand<
     this._controller = LookupControllerV3.create({
       nodeType: "note",
       disableVaultSelection,
-      vaultButtonPressed:
-        copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
+      vaultButtonPressed,
       extraButtons: [
         MultiSelectBtn.create({ pressed: copts.multiSelect }),
         CopyNoteLinkBtn.create(copts.copyNoteLink),

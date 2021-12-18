@@ -32,6 +32,7 @@ import {
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 import { WSUtils } from "../../WSUtils";
+import { VaultSelectionModeKeeper } from "./vaultSelectionModeKeeper";
 
 export type ButtonType =
   | LookupEffectType
@@ -701,11 +702,23 @@ export class VaultSelectButton extends DendronBtn {
   }
 
   async onEnable({ quickPick }: ButtonHandleOpts) {
-    this.setNextPicker({ quickPick, mode: VaultSelectionMode.alwaysPrompt });
+    await this.setMode({ quickPick, mode: VaultSelectionMode.alwaysPrompt });
   }
 
   async onDisable({ quickPick }: ButtonHandleOpts) {
-    this.setNextPicker({ quickPick, mode: VaultSelectionMode.smart });
+    await this.setMode({ quickPick, mode: VaultSelectionMode.smart });
+  }
+
+  private async setMode({
+    quickPick,
+    mode,
+  }: {
+    quickPick: DendronQuickPickerV2;
+    mode: VaultSelectionMode;
+  }) {
+    VaultSelectionModeKeeper.detectDeviationFromConfig(mode);
+
+    this.setNextPicker({ quickPick, mode });
   }
 }
 

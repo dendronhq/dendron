@@ -716,7 +716,7 @@ export class VaultSelectButton extends DendronBtn {
     quickPick: DendronQuickPickerV2;
     mode: VaultSelectionMode;
   }) {
-    VaultSelectionModeKeeper.detectDeviationFromConfig(mode);
+    VaultSelectionModeKeeper.recordDeviationFromConfig(mode);
 
     this.setNextPicker({ quickPick, mode });
   }

@@ -55,7 +55,7 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
   },
   selectVaultModeOnCreate: {
     label: "Vault selection mode on note creation.",
-    desc: "When new note is created this configures whether Dendron should smartly guess the vault for the note or always prompt to select a vault.",
+    desc: "When new note is created this configures whether Dendron should smartly guess the vault for the note or always prompt to select a vault. Values:[smart, alwaysPrompt].",
   },
   leaveTrace: {
     label: "Leave Trace",

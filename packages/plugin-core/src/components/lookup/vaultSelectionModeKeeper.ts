@@ -23,7 +23,7 @@ export class VaultSelectionModeKeeper {
   /**
    * Function to record user set deviation from configuration of vault selection mode.
    * */
-  public static detectDeviationFromConfig(mode: VaultSelectionMode) {
+  public static recordDeviationFromConfig(mode: VaultSelectionMode) {
     const configMode = this.configVaultSelectionMode();
 
     if (mode === VaultSelectionMode.alwaysPrompt && configMode === "smart") {

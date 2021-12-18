@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigUtils,
   DendronEditorViewKey,
   DMessageEnum,
   getWebEditorViewEntry,
@@ -11,12 +12,16 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { handleLink, LinkType } from "../../commands/ShowPreview";
+import {
+  handleLink,
+  LinkType,
+  ShowPreviewCommand,
+} from "../../commands/ShowPreview";
 import { Logger } from "../../logger";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension } from "../../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 /**
@@ -25,9 +30,15 @@ import { WSUtils } from "../../WSUtils";
 export interface PreviewProxy {
   /**
    * Method to update the preview with the passed in NoteProps.
+   * If automaticallyShowPreview is set to true, show preview panel if it doesn't exist
    * @param note Note Props to update the preview contents with
    */
-  updateForNote(note: NoteProps): void;
+  showPreviewAndUpdate(note: NoteProps): void;
+
+  /**
+   * Return current panel. Can be undefined. Exposed for testing only
+   */
+  getPanel(): vscode.WebviewPanel | undefined;
 }
 
 export class PreviewPanelFactory {
@@ -74,19 +85,50 @@ export class PreviewPanelFactory {
     }
   }
 
+  private static updateForNote(note: NoteProps) {
+    if (PreviewPanelFactory._panel) {
+      PreviewPanelFactory._panel.webview.postMessage({
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        data: {
+          note,
+          syncChangedNote: true,
+        },
+        source: "vscode",
+      } as OnDidChangeActiveTextEditorMsg);
+    }
+  }
+
   static getProxy(): PreviewProxy {
     return {
-      updateForNote(note) {
-        if (PreviewPanelFactory._panel) {
-          PreviewPanelFactory._panel.webview.postMessage({
-            type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-            data: {
-              note,
-              syncChangedNote: true,
-            },
-            source: "vscode",
-          } as OnDidChangeActiveTextEditorMsg);
+      showPreviewAndUpdate(note) {
+        const ctx = {
+          ctx: "ShowPreview:showPreviewAndRefresh",
+          fname: note.fname,
+        };
+        const config = getDWorkspace().config;
+
+        // If preview panel does not exist and automaticallyShowPreview = true, show preview before updating
+        // Otherwise, update if panel exists
+        if (
+          !PreviewPanelFactory._panel &&
+          ConfigUtils.getPreview(config).automaticallyShowPreview
+        ) {
+          Logger.debug({
+            ...ctx,
+            state: "panel not found and automaticallyShowPreview = true",
+          });
+          new ShowPreviewCommand(PreviewPanelFactory.create(getExtension()))
+            .execute()
+            .then(() => {
+              PreviewPanelFactory.updateForNote(note);
+            });
+        } else {
+          PreviewPanelFactory.updateForNote(note);
         }
+      },
+
+      getPanel() {
+        return PreviewPanelFactory._panel;
       },
     };
   }

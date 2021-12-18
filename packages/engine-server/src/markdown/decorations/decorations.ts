@@ -20,6 +20,7 @@ import {
   NoteRefNoteV4,
   WikiLinkNoteV4,
 } from "../types";
+import { MDUtilsV4 } from "../utils";
 import { decorateHashTag } from "./hashTags";
 import { decorateReference } from "./references";
 import { Decoration, DecoratorIn, DecoratorOut } from "./utils";
@@ -28,7 +29,6 @@ import { decorateFrontmatter } from "./frontmatter";
 import { decorateBlockAnchor } from "./blockAnchors";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { FrontmatterContent } from "mdast";
-import visit from "unist-util-visit";
 import {
   checkAndWarnBadFrontmatter,
   warnMissingFrontmatter,
@@ -36,7 +36,9 @@ import {
 import _ from "lodash";
 
 /** Dispatches the correct decorator based on the type of AST node. */
-function runDecorator(opts: DecoratorIn): DecoratorOut | undefined {
+function runDecorator(
+  opts: DecoratorIn
+): DecoratorOut | Promise<DecoratorOut> | undefined {
   const { node } = opts;
   switch (node.type) {
     case DendronASTTypes.BLOCK_ANCHOR:
@@ -58,7 +60,7 @@ function runDecorator(opts: DecoratorIn): DecoratorOut | undefined {
 }
 
 /** Get all decorations within the visible ranges for given note. */
-export function getDecorations(
+export async function runAllDecorators(
   opts: Omit<GetDecorationsOpts, "id"> & { note: NoteProps; engine: DEngine }
 ) {
   const { note, ranges, engine } = opts;
@@ -97,12 +99,13 @@ export function getDecorations(
     const tree = proc.parse(text);
     let frontmatter: FrontmatterContent | undefined;
 
-    visit(tree, (nodeIn) => {
+    // eslint-disable-next-line no-await-in-loop
+    await MDUtilsV4.visitAsync(tree, [], async (nodeIn) => {
       // This was parsed, it must have a position
       const node = nodeIn as NonOptional<DendronASTNode, "position">;
 
       // Need to update node position with the added offset from the range
-      const decoratorOut = runDecorator({
+      const decoratorOut = await runDecorator({
         ...opts,
         node,
         note,

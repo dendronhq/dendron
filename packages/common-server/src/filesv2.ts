@@ -344,6 +344,21 @@ export async function findDownTo(opts: {
   return undefined;
 }
 
+/** Returns true if `inner` is inside of `outer`, and false otherwise.
+ *
+ * If `inner === outer`, then that also returns false.
+ */
+export function isInsidePath(outer: string, inner: string) {
+  // When going from `outer` to `inner`
+  const relPath = path.relative(outer, inner);
+  // If we have to leave `outer`, or if we have to switch to a
+  // different drive with an absolute path, then `inner` can't be
+  // inside `outer` (or `inner` and `outer` are identical)
+  return (
+    !relPath.startsWith("..") && !path.isAbsolute(relPath) && relPath !== ""
+  );
+}
+
 /** Returns the list of unique, outermost folders. No two folders returned are nested within each other. */
 export function uniqueOutermostFolders(folders: string[]) {
   // Avoid duplicates
@@ -351,14 +366,8 @@ export function uniqueOutermostFolders(folders: string[]) {
   if (folders.length === 1) return folders;
   return folders.filter((currentFolder) =>
     folders.every((otherFolder) => {
-      // When going from the other folder to this folder
-      const relPath = path.relative(otherFolder, currentFolder);
-      // If we have to leave otherFolder, or if we have to switch to a
-      // different drive with an absolute path, then currentFolder can't be
-      // inside otherFolder (or current and other folder are identical)
-      return (
-        relPath.startsWith("..") || path.isAbsolute(relPath) || relPath === ""
-      );
+      // `currentFolder` is not inside any other folder
+      return !isInsidePath(otherFolder, currentFolder);
     })
   );
 }

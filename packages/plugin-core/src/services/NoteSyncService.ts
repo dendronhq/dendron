@@ -161,7 +161,7 @@ export class NoteSyncService {
     const noteClean = await engine.updateNote(note);
 
     // Temporary workaround until NoteSyncService is no longer a singleton
-    PreviewPanelFactory.getProxy().updateForNote(noteClean);
+    PreviewPanelFactory.getProxy().showPreviewAndUpdate(noteClean);
 
     return noteClean;
   }

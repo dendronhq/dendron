@@ -52,6 +52,7 @@ import {
   RefreshNotesOpts,
   GetDecorationsOpts,
   newRange,
+  GetDecorationsPayload,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -65,7 +66,7 @@ import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { MDUtilsV5, ProcFlavor } from "./markdown";
-import { getDecorations } from "./markdown/decorations";
+import { runAllDecorators } from "./markdown/decorations";
 import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
@@ -722,7 +723,9 @@ export class DendronEngineV2 implements DEngine {
     }
   }
 
-  async getDecorations(opts: GetDecorationsOpts) {
+  async getDecorations(
+    opts: GetDecorationsOpts
+  ): Promise<GetDecorationsPayload> {
     const note = this.notes[opts.id];
     try {
       if (_.isUndefined(note))
@@ -747,7 +750,7 @@ export class DendronEngineV2 implements DEngine {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
         allErrors: errors,
-      } = getDecorations({ ...opts, note, engine: this });
+      } = await runAllDecorators({ ...opts, note, engine: this });
       let error: IDendronError | null = null;
       if (errors && errors.length > 1)
         error = new DendronCompositeError(errors);

@@ -1,6 +1,7 @@
 import { NoteProps, ResponseUtil } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
+  createRunnableGoogleDocsV2PodConfigSchema,
   ExportPodV2,
   ExternalConnectionManager,
   ExternalService,
@@ -9,6 +10,7 @@ import {
   GoogleDocsExportReturnType,
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
+  JSONSchemaType,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
 } from "@dendronhq/pods-core";
@@ -45,6 +47,10 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       wsRoot,
       vaults,
     });
+  }
+
+  public getRunnableSchema(): JSONSchemaType<RunnableGoogleDocsV2PodConfig> {
+    return createRunnableGoogleDocsV2PodConfigSchema();
   }
 
   async gatherInputs(

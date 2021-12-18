@@ -3,13 +3,13 @@ import { UserTag } from "../types";
 import { Decorator } from "./utils";
 import { DecorationWikilink, linkedNoteType } from "./wikilinks";
 
-export const decorateUserTag: Decorator<UserTag, DecorationWikilink> = (
+export const decorateUserTag: Decorator<UserTag, DecorationWikilink> = async (
   opts
 ) => {
   const { node: userTag, engine } = opts;
   const position = userTag.position;
 
-  const { type, errors } = linkedNoteType({
+  const { type, errors } = await linkedNoteType({
     fname: userTag.fname,
     engine,
   });

@@ -26,4 +26,4 @@ export type DecoratorIn<N extends Omit<DendronASTNode, "children"> = Node> = {
 export type Decorator<
   N extends Omit<DendronASTNode, "children">,
   D extends Decoration = Decoration
-> = (opts: DecoratorIn<N>) => DecoratorOut<D>;
+> = (opts: DecoratorIn<N>) => DecoratorOut<D> | Promise<DecoratorOut<D>>;

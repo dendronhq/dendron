@@ -1,3 +1,4 @@
+import { JSONSchemaType } from "ajv";
 import { SrcFieldMapping } from "../../builtin/AirtablePod";
 import { AirtableConnection } from "../external-services/AirtableConnection";
 import { ExternalTarget } from "../external-services/ExternalConnectionManager";
@@ -46,4 +47,39 @@ export function isRunnableAirtableV2PodConfig(
     object["sourceFieldMapping"] &&
     "exportScope" in object
   );
+}
+
+export function createRunnableAirtableV2PodConfigSchema(): JSONSchemaType<RunnableAirtableV2PodConfig> {
+  return {
+    type: "object",
+    required: [
+      "apiKey",
+      "baseId",
+      "tableName",
+      "sourceFieldMapping",
+      "exportScope",
+    ],
+    properties: {
+      apiKey: {
+        type: "string",
+      },
+      baseId: {
+        type: "string",
+      },
+      tableName: {
+        type: "string",
+      },
+      sourceFieldMapping: {
+        type: "object",
+        required: [],
+      },
+      exportScope: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+        nullable: true,
+      },
+    },
+  };
 }

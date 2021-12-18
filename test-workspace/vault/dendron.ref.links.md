@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1639381655936
+updated: 1639433681546
 created: 1608518909864
 ---
 
@@ -139,3 +139,6 @@ const x = 1;
 ## Link to a non-note file
 
 [[/vault/root.schema.yml]]
+
+And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
+

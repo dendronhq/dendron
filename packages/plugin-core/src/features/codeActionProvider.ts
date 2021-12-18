@@ -85,7 +85,7 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
  */
 export const refactorProvider: CodeActionProvider = {
   provideCodeActions: sentryReportingCallback(
-    (
+    async (
       _document: TextDocument,
       _range: Range | Selection,
       _context: CodeActionContext,
@@ -170,7 +170,7 @@ export const refactorProvider: CodeActionProvider = {
 
       if (_range.isEmpty) {
         //return a code action for create note if user clicked next to a broken wikilink
-        if (isBrokenWikilink()) {
+        if (await isBrokenWikilink()) {
           return [brokenWikilinkAction];
         }
 

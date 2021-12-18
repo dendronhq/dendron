@@ -1,10 +1,10 @@
 import {
+  ConfigUtils,
   CONSTANTS,
   InstallStatus,
   isNotUndefined,
   Time,
   VaultUtils,
-  ConfigUtils,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
@@ -332,6 +332,7 @@ suite("Extension", function () {
             enableMermaid: true,
             enablePrettyRefs: true,
             enableKatex: true,
+            automaticallyShowPreview: false,
           },
         });
 

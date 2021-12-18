@@ -1,3 +1,4 @@
+import { JSONSchemaType } from "ajv";
 import { ExportPodConfigurationV2 } from "./PodV2Types";
 
 /**
@@ -31,4 +32,32 @@ export function isRunnableMarkdownV2PodConfig(
   return (
     object !== undefined && "destination" in object && "exportScope" in object
   );
+}
+
+/**
+ *
+ * @returns
+ * creates an AJV schema for runnable config
+ */
+export function createRunnableMarkdownV2PodConfigSchema(): JSONSchemaType<RunnableMarkdownV2PodConfig> {
+  return {
+    type: "object",
+    required: ["destination", "exportScope"],
+    properties: {
+      destination: {
+        type: "string",
+      },
+      exportScope: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+        nullable: true,
+      },
+      wikiLinkToURL: {
+        type: "boolean",
+        nullable: true,
+      },
+    },
+  };
 }

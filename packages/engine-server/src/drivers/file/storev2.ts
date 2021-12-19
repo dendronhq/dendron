@@ -1151,7 +1151,6 @@ export class FileStorage implements DStore {
     });
     // check if note might already exist
     const maybeNote = this.getNoteByFname(note);
-    debugger;
     this.logger.info({
       ctx,
       msg: "check:existing",

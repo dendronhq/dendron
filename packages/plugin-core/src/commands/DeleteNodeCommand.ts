@@ -3,6 +3,7 @@ import {
   DVault,
   EngineDeletePayload,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   SchemaUtils,
   VaultUtils,
@@ -18,6 +19,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import _md from "markdown-it";
+import fs from "fs-extra";
 
 type CommandOpts = {
   _fsPath?: string;
@@ -47,6 +49,33 @@ export class DeleteNodeCommand extends BasicCommand<
     return {};
   }
 
+  getBacklinkFrontmatterLineOffset(opts: {
+    link: DLink;
+    vaults: DVault[];
+    notes: NotePropsDict;
+    wsRoot: string;
+  }) {
+    const { link, vaults, notes, wsRoot } = opts;
+    const vault = VaultUtils.getVaultByName({
+      vaults,
+      vname: link.from.vaultName as string,
+    }) as DVault;
+    const noteWithLink = NoteUtils.getNoteByFnameV5({
+      fname: link.from.fname as string,
+      vault,
+      notes,
+      wsRoot,
+    }) as NoteProps;
+    const fsPath = NoteUtils.getFullPath({
+      note: noteWithLink,
+      wsRoot,
+    });
+    const fileContent = fs.readFileSync(fsPath).toString();
+    const lines = fileContent.split("\n");
+    lines.shift();
+    return lines.indexOf("---") + 2;
+  }
+
   async showNoteDeletePreview(note: NoteProps, backlinks: DLink[]) {
     let content = [
       "# Delete Node Preview",
@@ -62,10 +91,21 @@ export class DeleteNodeCommand extends BasicCommand<
       "",
     ];
 
+    const { wsRoot, engine } = getDWorkspace();
+    const { vaults, notes } = engine;
+
     _.forEach(_.sortBy(backlinks, ["from.vaultName"]), (backlink) => {
+      const fmLineOffset = this.getBacklinkFrontmatterLineOffset({
+        link: backlink,
+        vaults,
+        notes,
+        wsRoot,
+      });
       const entry = [
         `- in **${backlink.from.vaultName}/${backlink.from.fname}**`,
-        `  - line *${backlink.position?.start.line}* column *${backlink.position?.start.column}*`,
+        `  - line *${backlink.position!.start.line + fmLineOffset}* column *${
+          backlink.position?.start.column
+        }*`,
         `  - alias: \`${backlink.alias ? backlink.alias : "None"}\``,
       ].join("\n");
       content = content.concat(entry);

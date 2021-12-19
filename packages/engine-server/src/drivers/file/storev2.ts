@@ -43,6 +43,9 @@ import {
   WriteNoteResp,
   ConfigUtils,
   USER_MESSAGES,
+  RespV3,
+  ErrorUtils,
+  ErrorFactory,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -70,6 +73,30 @@ export type FileMeta = {
   fpath: string;
 };
 export type FileMetaDict = { [key: string]: FileMeta[] };
+
+class FileUtils {
+  /**
+   * Get a note by reading it from disk
+   * @param param0
+   * @returns
+   */
+  static getNoteByFile({
+    fname,
+    vault,
+    wsRoot,
+  }: {
+    fname: string;
+    vault: DVault;
+    wsRoot: string;
+  }): NoteProps | undefined {
+    const vpath = vault2Path({ vault, wsRoot });
+    const fpath = path.join(vpath, fname + ".md");
+    if (!fs.existsSync(fpath)) {
+      return undefined;
+    }
+    return file2Note(fpath, vault, true);
+  }
+}
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -110,6 +137,98 @@ export class FileStorage implements DStore {
     this.engine = props.engine;
   }
 
+  protected enrichWithSchemaData({ note }: { note: NoteProps }) {
+    const ctx = "addSchema";
+    const schemaMatch = SchemaUtils.matchPath({
+      notePath: note.fname,
+      schemaModDict: this.schemas,
+    });
+    if (schemaMatch) {
+      this.logger.info({
+        ctx,
+        msg: "pre:addSchema",
+      });
+      const { schema, schemaModule } = schemaMatch;
+      NoteUtils.addSchema({ note, schema, schemaModule });
+    }
+    return note;
+  }
+
+  private getNoteByFname({ fname, vault }: { fname: string; vault: DVault }) {
+    if (this.engine.fastMode) {
+      return FileUtils.getNoteByFile({ fname, vault, wsRoot: this.wsRoot });
+    }
+    const maybeNote = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes: this.notes,
+      vault,
+      wsRoot: this.wsRoot,
+    });
+    return maybeNote;
+  }
+
+  /**
+   * Used when writing
+   */
+  protected async runHooks({
+    runHooks,
+    note,
+  }: {
+    runHooks: boolean;
+    note: NoteProps;
+  }): Promise<RespV3<NoteProps>> {
+    const ctx = "runHooks";
+    if (runHooks === false) {
+      this.logger.info({
+        ctx,
+        msg: "hooks disabled for write",
+      });
+    } else {
+      const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
+        NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+      );
+      const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
+        hooks,
+        async (notePromise, hook) => {
+          const { note } = await notePromise;
+          const script = HookUtils.getHookScriptPath({
+            wsRoot: this.wsRoot,
+            basename: hook.id + ".js",
+          });
+          return HookUtils.requireHook({
+            note,
+            fpath: script,
+            wsRoot: this.wsRoot,
+          });
+        },
+        Promise.resolve({ note })
+      ).catch(
+        (err) =>
+          new DendronError({
+            severity: ERROR_SEVERITY.MINOR,
+            message: "error with hook",
+            payload: stringifyError(err),
+          })
+      );
+      if (ErrorUtils.isDendronError(resp)) {
+        this.logger.error({ ctx, error: stringifyError(resp) });
+        return { error: resp };
+      } else {
+        const valResp = NoteUtils.validate(resp.note);
+        if (valResp instanceof DendronError) {
+          const error = valResp;
+          this.logger.error({ ctx, error: stringifyError(error) });
+          return { error };
+        } else {
+          note = resp.note;
+          this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+          return { data: note };
+        }
+      }
+    }
+    return { data: note };
+  }
+
   async init(): Promise<DEngineInitResp> {
     let errors: DendronError[] = [];
     try {
@@ -120,7 +239,9 @@ export class FileStorage implements DStore {
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
-      const { notes: _notes, errors: initErrors } = await this.initNotes();
+      const { notes: _notes, errors: initErrors } = this.engine.fastMode
+        ? { notes: [], errors: [] }
+        : await this.initNotes();
       errors = errors.concat(initErrors);
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
@@ -157,7 +278,7 @@ export class FileStorage implements DStore {
       fileName = USER_MESSAGES.UNKNOWN;
     }
 
-    let fullPath = undefined;
+    let fullPath;
     try {
       if (resp.error && resp.error.payload) {
         fullPath = JSON.parse(
@@ -424,9 +545,9 @@ export class FileStorage implements DStore {
     notesWithLinks.forEach((noteFrom) => {
       try {
         noteFrom.links.forEach((link) => {
-          const fname = link.to?.fname;
-          if (fname) {
-            const notes = noteCache.getNotesByFileNameIgnoreCase(fname);
+          const fnameTo = link.to?.fname;
+          if (fnameTo) {
+            const notes = noteCache.getNotesByFileNameIgnoreCase(fnameTo);
 
             notes.forEach((noteTo: NoteProps) => {
               NoteUtils.addBacklink({
@@ -999,7 +1120,7 @@ export class FileStorage implements DStore {
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
     // this is the default behavior
-    if (!opts?.noAddParent) {
+    if (!opts?.noAddParent && !this.engine.fastMode) {
       changed = NoteUtils.addParent({
         note,
         notesList: _.values(this.notes),
@@ -1029,12 +1150,8 @@ export class FileStorage implements DStore {
       note: NoteUtils.toLogObj(note),
     });
     // check if note might already exist
-    const maybeNote = NoteUtils.getNoteByFnameV5({
-      fname: note.fname,
-      notes: this.notes,
-      vault: note.vault,
-      wsRoot: this.wsRoot,
-    });
+    const maybeNote = this.getNoteByFname(note);
+    debugger;
     this.logger.info({
       ctx,
       msg: "check:existing",
@@ -1045,7 +1162,18 @@ export class FileStorage implements DStore {
     // we need to preserve the ids, otherwise can result in data conflict
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
-      note = { ...maybeNote, ...note };
+      // sanity check
+      if (_.isUndefined(maybeNote)) {
+        // error, shouldn't happen
+        return {
+          error: ErrorFactory.createInvalidStateError({
+            message: `expected existing note with name ${note.fname} but no note found`,
+          }),
+          data: [],
+        };
+      }
+
+      note = { ...maybeNote, ..._.omit(note, "id") };
       noDelete = true;
     } else {
       changed = await this._writeNewNote({
@@ -1055,62 +1183,22 @@ export class FileStorage implements DStore {
       });
     }
 
-    // add schema if applicable
-    const schemaMatch = SchemaUtils.matchPath({
-      notePath: note.fname,
-      schemaModDict: this.schemas,
+    // run hooks if applicable
+    const resp = await this.runHooks({
+      runHooks: (opts?.runHooks || false) && !this.engine.fastMode,
+      note,
     });
+    if (resp.error) {
+      error = resp.error;
+    } else {
+      note = resp.data;
+    }
+
     this.logger.info({
       ctx,
       msg: "pre:note2File",
     });
 
-    if (opts?.runHooks === false) {
-      this.logger.info({
-        ctx,
-        msg: "hooks disabled for write",
-      });
-    } else {
-      const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
-        NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
-      );
-      const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
-        hooks,
-        async (notePromise, hook) => {
-          const { note } = await notePromise;
-          const script = HookUtils.getHookScriptPath({
-            wsRoot: this.wsRoot,
-            basename: hook.id + ".js",
-          });
-          return HookUtils.requireHook({
-            note,
-            fpath: script,
-            wsRoot: this.wsRoot,
-          });
-        },
-        Promise.resolve({ note })
-      ).catch(
-        (err) =>
-          new DendronError({
-            severity: ERROR_SEVERITY.MINOR,
-            message: "error with hook",
-            payload: stringifyError(err),
-          })
-      );
-      if (resp instanceof DendronError) {
-        error = resp;
-        this.logger.error({ ctx, error: stringifyError(error) });
-      } else {
-        const valResp = NoteUtils.validate(resp.note);
-        if (valResp instanceof DendronError) {
-          error = valResp;
-          this.logger.error({ ctx, error: stringifyError(error) });
-        } else {
-          note = resp.note;
-          this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
-        }
-      }
-    }
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,
@@ -1120,14 +1208,8 @@ export class FileStorage implements DStore {
 
     // schema metadata is only applicable at runtime
     // we therefore write it after we persist note to store
-    if (schemaMatch) {
-      this.logger.info({
-        ctx,
-        msg: "pre:addSchema",
-      });
-      const { schema, schemaModule } = schemaMatch;
-      NoteUtils.addSchema({ note, schema, schemaModule });
-    }
+    // add schema if applicable
+    note = this.engine.fastMode ? note : this.enrichWithSchemaData({ note });
 
     // if we added a new note and it overwrote an existing note
     // we now need to update the metadata of existing notes ^change

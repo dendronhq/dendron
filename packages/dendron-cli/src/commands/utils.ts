@@ -76,7 +76,7 @@ export async function setupEngine(
   // instead of spwaning an engine in a separate process, create one
   // in memory
   if (useLocalEngine) {
-    const engine = DendronEngineV2.create({ wsRoot, logger });
+    const engine = DendronEngineV2.create({ wsRoot, logger, fast: opts.fast });
     await engine.init();
     return {
       wsRoot,

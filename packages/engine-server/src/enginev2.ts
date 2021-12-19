@@ -79,6 +79,7 @@ type DendronEngineOptsV2 = {
   mode?: DEngineMode;
   logger?: DLogger;
   config: IntermediateDendronConfig;
+  fast?: boolean;
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
@@ -139,6 +140,7 @@ export class DendronEngineV2 implements DEngine {
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
+  public fastMode: boolean;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -159,9 +161,18 @@ export class DendronEngineV2 implements DEngine {
     };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(this.config, this.logger);
+    this.fastMode = props.fast;
   }
 
-  static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
+  static create({
+    wsRoot,
+    logger,
+    fast,
+  }: {
+    logger?: DLogger;
+    wsRoot: string;
+    fast?: boolean;
+  }) {
     const LOGGER = logger || createLogger();
     const cpath = DConfig.configPath(wsRoot);
     const config = _.defaultsDeep(
@@ -181,6 +192,7 @@ export class DendronEngineV2 implements DEngine {
       mode: "fuzzy",
       logger: LOGGER,
       config,
+      fast: fast || false,
     });
   }
 
@@ -595,10 +607,10 @@ export class DendronEngineV2 implements DEngine {
     return { error: null };
   }
 
-  async refreshNotesV2(notes: NoteChangeEntry[]) {
+  async refreshNotesV2(noteChangeEntries: NoteChangeEntry[]) {
     const notesMap = NoteUtils.createFnameNoteMap(_.values(this.notes), true);
     await Promise.all(
-      notes.map(async (ent: NoteChangeEntry) => {
+      noteChangeEntries.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
         if (ent.status === "delete") {
           delete this.notes[id];

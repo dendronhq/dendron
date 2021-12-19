@@ -1,7 +1,18 @@
-import { commands, Location, Position, Selection } from "vscode";
+import {
+  commands,
+  Location,
+  Position,
+  QuickPickItem,
+  Selection,
+  TextEditor,
+} from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
+import { getReferenceAtPosition } from "../utils/md";
+import { DendronError, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { getDWorkspace } from "../workspace";
+import { WSUtils } from "../WSUtils";
 
 type CommandOpts = {
   location: Location;
@@ -16,7 +27,90 @@ export class ConvertLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONVERT_LINK.key;
 
+  async promptConvertOptions() {
+    const options: QuickPickItem[] = [
+      {
+        label: "Alias",
+        description: "Convert broken link to alias text.",
+        detail: "sdfsdf",
+      },
+      {
+        label: "Hierarchy",
+        description: "Convert broken link to hierarchy.",
+        detail: "sdf",
+      },
+      {
+        label: "Note name",
+        description:
+          "Convert broken link to note name excluding hierarchy except the basename.",
+        detail: "sdfoijweg",
+      },
+      {
+        label: "Prompt",
+        description: "Input plaintext to convert broken link to.",
+        detail: "Wefoijweg",
+      },
+      {
+        label: "Create",
+        description: "Create new note where the broken link is pointing to.",
+        detail: "weofijweg",
+      },
+      {
+        label: "Change destination",
+        description:
+          "Lookup existing note to link instead of current broken link.",
+        detail: "weoifjwef",
+      },
+    ];
+    await VSCodeUtils.showQuickPick(options, {
+      title: "Pick how you want to convert the broken link.",
+      ignoreFocusOut: true,
+      canPickMany: false,
+    });
+  }
+
   async gatherInputs(_opts: CommandOpts): Promise<CommandOpts> {
+    const { engine } = getDWorkspace();
+    const { vaults, wsRoot, notes } = engine;
+    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+    const { document, selection } = editor;
+    const reference = getReferenceAtPosition(document, selection.start);
+
+    console.log({ reference });
+
+    if (reference === null) {
+      throw new DendronError({
+        message: `No link at cursor position.`,
+      });
+    }
+
+    const { ref, vaultName } = reference;
+    const targetVault = vaultName
+      ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
+      : WSUtils.getVaultFromDocument(document);
+
+    if (targetVault === undefined) {
+      console.log("this link points to a note in a vault that doesn't exist");
+    } else {
+      const targetNote = NoteUtils.getNoteByFnameV5({
+        fname: ref,
+        notes,
+        vault: targetVault,
+        wsRoot,
+      });
+
+      if (targetNote === undefined) {
+        console.log("this link points to a note that doesn't exist.");
+        await this.promptConvertOptions();
+      } else {
+        // we can potentially enhance this case to
+        // support general link manipulation features
+        throw new DendronError({
+          message: `Link at cursor position is not a broken link.`,
+        });
+      }
+    }
+
     return _opts;
   }
 

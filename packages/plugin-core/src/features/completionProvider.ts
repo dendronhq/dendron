@@ -361,7 +361,7 @@ export async function provideBlockCompletionItems(
   if (found.groups?.note) {
     // This anchor will be to another note, e.g. [[note#
     // `groups.note` may have vault name, so let's try to parse that
-    const link = LinkUtils.parseLinkV2(found.groups.note);
+    const link = LinkUtils.parseLinkV2({ linkString: found.groups.note });
     const vault = link?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,

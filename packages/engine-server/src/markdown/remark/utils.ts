@@ -443,8 +443,17 @@ export class LinkUtils {
   /** Either value or anchorHeader will always be present if the function did not
    *  return null. A missing value means that the file containing this link is
    *  the value.
+   *
+   *  if `explicitAlias` is false, non-existent alias will be
+   *  implicitly assumed to be the value of the link.
    */
-  static parseLinkV2(linkString: string): ParseLinkV2Resp | null {
+  static parseLinkV2(opts: {
+    linkString: string;
+    explicitAlias?: boolean;
+  }): ParseLinkV2Resp | null {
+    const { linkString, explicitAlias } = _.defaults(opts, {
+      explicitAlias: false,
+    });
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out && out.groups) {
@@ -454,7 +463,7 @@ export class LinkUtils {
       let vaultName: string | undefined;
       if (value) {
         ({ vaultName, link: value } = this.parseDendronURI(value));
-        if (!alias) {
+        if (!alias && !explicitAlias) {
           alias = value;
         }
         alias = _.trim(alias);
@@ -708,7 +717,7 @@ export class LinkUtils {
     // chop up the source.
     const regExp = new RegExp("\\[\\[(.+?)?\\]\\]", "g");
     const matched = [...source.matchAll(regExp)].map((match) => {
-      return LinkUtils.parseLinkV2(match[1]);
+      return LinkUtils.parseLinkV2({ linkString: match[1] });
     });
 
     return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];

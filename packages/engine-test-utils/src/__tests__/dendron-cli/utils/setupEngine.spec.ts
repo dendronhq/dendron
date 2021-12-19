@@ -10,7 +10,7 @@ import {
 const createEngine = createEngineFromServer;
 
 describe("GIVEN setupEngine", () => {
-  describe.only("WHEN --fast option", () => {
+  describe("WHEN --fast option", () => {
     let resp: SetupEngineResp;
     let wsRoot: string;
     let vault: DVault;
@@ -58,7 +58,7 @@ describe("GIVEN setupEngine", () => {
       expect(resp.engine.notes).toEqual({ [sampleNote.id]: sampleNote });
     });
 
-    test.only("THEN write existing note should update existing note", async () => {
+    test("THEN write existing note should update existing note", async () => {
       // notes should be equal
       const sampleNote = NoteUtils.create({
         fname: "foo",

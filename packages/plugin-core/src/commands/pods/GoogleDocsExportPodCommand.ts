@@ -18,6 +18,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
+import { QuickPickHeirarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { clipboard } from "../../utils";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
@@ -35,6 +36,10 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   GoogleDocsExportReturnType
 > {
   public key = "dendron.googledocsexport";
+
+  public constructor() {
+    super(new QuickPickHeirarchySelector());
+  }
 
   public createPod(
     config: RunnableGoogleDocsV2PodConfig

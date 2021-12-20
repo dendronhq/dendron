@@ -6,19 +6,20 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  ExportPodV2,
-  PodExportScope,
   ExportPodFactory,
-  RunnablePodConfigV2,
+  ExportPodV2,
   JSONSchemaType,
+  PodExportScope,
   PodUtils,
+  RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
+import { RateLimiter } from "limiter";
 import path from "path";
 import * as vscode from "vscode";
+import { HierarchySelector } from "../../components/lookup/HierarchySelector";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { BaseCommand } from "../base";
-import { RateLimiter } from "limiter";
 
 /**
  * Abstract base class for export pod commands. This class will defer input
@@ -41,6 +42,19 @@ export abstract class BaseExportPodCommand<
   >
   implements ExportPodFactory<Config, R>
 {
+  private hierarchySelector: HierarchySelector;
+
+  /**
+   *
+   * @param hierarchySelector a user control that can return a selected
+   * hierarchy to export. Should use {@link QuickPickHeirarchySelector} by
+   * default
+   */
+  constructor(hierarchySelector: HierarchySelector) {
+    super();
+    this.hierarchySelector = hierarchySelector;
+  }
+
   /**
    * Provide a pod factory method to instantiate the pod instance with the
    * passed in configuration
@@ -107,10 +121,22 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Hierarchy: {
-        throw new Error("Export Scope Not Yet Implemented");
+        payload = await this.getHierarchyProps();
+
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get note payload.");
+          return;
+        }
+        break;
       }
       case PodExportScope.Workspace: {
-        throw new Error("Export Scope Not Yet Implemented");
+        payload = this.getWorkspaceProps();
+
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get note payload.");
+          return;
+        }
+        break;
       }
       default:
         assertUnreachable();
@@ -211,6 +237,30 @@ export abstract class BaseExportPodCommand<
     config: Config;
   }): void;
 
+  /**
+   * Gets notes matching the selected hierarchy
+   * @returns
+   */
+  private async getHierarchyProps(): Promise<
+    DNodeProps<any, any>[] | undefined
+  > {
+    return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {
+      this.hierarchySelector.getHierarchy().then((selection) => {
+        if (!selection) {
+          return resolve(undefined);
+        }
+
+        const notes = getExtension().getEngine().notes;
+
+        resolve(
+          Object.values(notes).filter(
+            (value) => value.fname.startsWith(selection) && value.stub !== true
+          )
+        );
+      });
+    });
+  }
+
   private getNoteProps(): DNodeProps[] | undefined {
     //TODO: Switch this to a lookup controller, allow multiselect
     const fsPath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
@@ -242,5 +292,14 @@ export abstract class BaseExportPodCommand<
       vscode.window.showErrorMessage("couldn't find the note somehow");
     }
     return [maybeNote!];
+  }
+
+  /**
+   *
+   * @returns all notes in the workspace
+   */
+  private getWorkspaceProps(): DNodeProps[] | undefined {
+    const { engine } = getDWorkspace();
+    return Object.values(engine.notes);
   }
 }

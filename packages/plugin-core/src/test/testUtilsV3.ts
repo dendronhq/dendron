@@ -39,10 +39,10 @@ import { after, afterEach, before, beforeEach, describe } from "mocha";
 import os from "os";
 import sinon from "sinon";
 import {
+  CancellationToken,
   ExtensionContext,
   Uri,
   WorkspaceFolder,
-  CancellationToken,
 } from "vscode";
 import {
   SetupWorkspaceCommand,

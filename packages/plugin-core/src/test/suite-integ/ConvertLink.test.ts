@@ -1,11 +1,11 @@
-import { DendronError, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { before, beforeEach, describe, afterEach } from "mocha";
+import { beforeEach, afterEach } from "mocha";
 import sinon from "sinon";
 import vscode from "vscode";
 import { ConvertLinkCommand } from "../../commands/ConvertLink";
@@ -14,7 +14,6 @@ import {
   getReferenceAtPositionResp,
 } from "../../utils/md";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";

@@ -1,4 +1,4 @@
-import { QuickPickItem, Range, TextDocument, TextEditor } from "vscode";
+import { QuickPickItem, Range, TextEditor } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -274,7 +274,7 @@ export class ConvertLinkCommand extends BasicCommand<
       });
     }
 
-    const { ref, vaultName, refType, range } = reference;
+    const { ref, vaultName, range } = reference;
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
       : WSUtils.getVaultFromDocument(document);

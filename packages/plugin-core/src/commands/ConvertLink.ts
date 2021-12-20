@@ -44,12 +44,27 @@ export class ConvertLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONVERT_LINK.key;
 
+  noAvailableOperationError = new DendronError({
+    message: `No available convert operation for link at cursor position.`,
+  });
+
+  noVaultError = new DendronError({
+    message: "this link points to a note in a vault that doesn't exist",
+  });
+
+  noLinkError = new DendronError({
+    message: `No link at cursor position.`,
+  });
+
+  noTextError = new DendronError({
+    message: "Failed to determine text to replace broken link.",
+  });
+
   prepareBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
     const parsedLink = LinkUtils.parseLinkV2({
       linkString: reference.refText,
       explicitAlias: true,
     }) as ParseLinkV2Resp;
-
     const aliasOption: QuickPickItem = {
       label: "Alias",
       description: parsedLink?.alias,
@@ -57,12 +72,18 @@ export class ConvertLinkCommand extends BasicCommand<
     };
     const hierarchyOption: QuickPickItem = {
       label: "Hierarchy",
-      description: parsedLink?.value,
+      description:
+        reference.refType === "usertag" || reference.refType === "hashtag"
+          ? reference.ref
+          : parsedLink?.value,
       detail: "Convert broken link to hierarchy.",
     };
     const noteNameOption: QuickPickItem = {
       label: "Note name",
-      description: _.last(parsedLink?.value?.split(".")),
+      description:
+        reference.refType === "usertag" || reference.refType === "hashtag"
+          ? _.last(reference.ref.split("."))
+          : _.last(parsedLink?.value?.split(".")),
       detail:
         "Convert broken link to note name excluding hierarchy except the basename.",
     };
@@ -152,8 +173,9 @@ export class ConvertLinkCommand extends BasicCommand<
   async prepareBrokenLinkOperation(opts: {
     option: QuickPickItem | undefined;
     parsedLink: ParseLinkV2Resp;
+    reference: getReferenceAtPositionResp;
   }) {
-    const { option, parsedLink } = opts;
+    const { option, parsedLink, reference } = opts;
     if (_.isUndefined(option)) return;
     let text;
     switch (option.label) {
@@ -163,10 +185,22 @@ export class ConvertLinkCommand extends BasicCommand<
       }
       case "Hierarchy": {
         text = parsedLink.value;
+        if (
+          reference.refType === "hashtag" ||
+          reference.refType === "usertag"
+        ) {
+          text = reference.ref;
+        }
         break;
       }
       case "Note name": {
         text = _.last(parsedLink.value!.split("."));
+        if (
+          reference.refType === "hashtag" ||
+          reference.refType === "usertag"
+        ) {
+          text = _.last(reference.ref.split("."));
+        }
         break;
       }
       case "Prompt": {
@@ -228,9 +262,7 @@ export class ConvertLinkCommand extends BasicCommand<
         }
 
         if (_.isUndefined(tagType)) {
-          throw new DendronError({
-            message: `No available convert operation for link at cursor position.`,
-          });
+          throw this.noAvailableOperationError;
         }
 
         const shouldProceed = await this.promptConfirmation({
@@ -248,9 +280,7 @@ export class ConvertLinkCommand extends BasicCommand<
       }
       case "fmtag":
       case "refv2": {
-        throw new DendronError({
-          message: `No available convert operation for link at cursor position.`,
-        });
+        throw this.noAvailableOperationError;
       }
       default: {
         assertUnreachable();
@@ -269,20 +299,19 @@ export class ConvertLinkCommand extends BasicCommand<
     const reference = getReferenceAtPosition(document, selection.start);
 
     if (reference === null) {
-      throw new DendronError({
-        message: `No link at cursor position.`,
-      });
+      throw this.noLinkError;
     }
 
-    const { ref, vaultName, range } = reference;
+    const { ref, vaultName, range, refType } = reference;
+    if (refType === "fmtag") {
+      throw this.noAvailableOperationError;
+    }
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
       : WSUtils.getVaultFromDocument(document);
 
     if (targetVault === undefined) {
-      throw new DendronError({
-        message: "this link points to a note in a vault that doesn't exist",
-      });
+      throw this.noVaultError;
     } else {
       const targetNote = NoteUtils.getNoteByFnameV5({
         fname: ref,
@@ -297,11 +326,10 @@ export class ConvertLinkCommand extends BasicCommand<
         const text = await this.prepareBrokenLinkOperation({
           option,
           parsedLink,
+          reference,
         });
         if (_.isUndefined(text)) {
-          throw new DendronError({
-            message: "Failed to determine text to replace broken link.",
-          });
+          throw this.noTextError;
         }
         return {
           range,

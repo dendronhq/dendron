@@ -9,6 +9,7 @@ import { ConfigurePodCommand } from "./ConfigurePodCommand";
 import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
 import { ConvertLinkCommand } from "./ConvertLink";
+import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
@@ -137,6 +138,7 @@ const ALL_COMMANDS = [
   VaultConvertCommand,
   LaunchTutorialCommand,
   ConvertLinkCommand,
+  ConvertCandidateLinkCommand,
   SeedAddCommand,
   SeedRemoveCommand,
   RunMigrationCommand,

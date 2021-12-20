@@ -124,7 +124,7 @@ export abstract class BaseExportPodCommand<
         payload = await this.getHierarchyProps();
 
         if (!payload) {
-          vscode.window.showErrorMessage("Unable to get note payload.");
+          vscode.window.showErrorMessage("Unable to get hierarchy payload.");
           return;
         }
         break;
@@ -133,7 +133,7 @@ export abstract class BaseExportPodCommand<
         payload = this.getWorkspaceProps();
 
         if (!payload) {
-          vscode.window.showErrorMessage("Unable to get note payload.");
+          vscode.window.showErrorMessage("Unable to get workspace payload.");
           return;
         }
         break;

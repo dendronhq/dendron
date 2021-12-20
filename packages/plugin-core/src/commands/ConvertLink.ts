@@ -44,7 +44,7 @@ export class ConvertLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONVERT_LINK.key;
 
-  async promptBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
+  prepareBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
     const parsedLink = LinkUtils.parseLinkV2({
       linkString: reference.refText,
       explicitAlias: true,
@@ -86,6 +86,12 @@ export class ConvertLinkCommand extends BasicCommand<
       options.unshift(aliasOption);
     }
 
+    return { options, parsedLink };
+  }
+
+  async promptBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
+    const { options, parsedLink } =
+      this.prepareBrokenLinkConvertOptions(reference);
     const option = await VSCodeUtils.showQuickPick(options, {
       title: "Pick how you want to convert the broken link.",
       ignoreFocusOut: true,
@@ -132,6 +138,17 @@ export class ConvertLinkCommand extends BasicCommand<
     });
   }
 
+  async promptBrokenLinkUserInput() {
+    const text = await VSCodeUtils.showInputBox({
+      ignoreFocusOut: true,
+      placeHolder: "text to use.",
+      prompt:
+        "The text submitted here will be used to replace the broken link.",
+      title: "Input plaintext to convert broken link to.",
+    });
+    return text;
+  }
+
   async prepareBrokenLinkOperation(opts: {
     option: QuickPickItem | undefined;
     parsedLink: ParseLinkV2Resp;
@@ -153,13 +170,7 @@ export class ConvertLinkCommand extends BasicCommand<
         break;
       }
       case "Prompt": {
-        text = await VSCodeUtils.showInputBox({
-          ignoreFocusOut: true,
-          placeHolder: "text to use.",
-          prompt:
-            "The text submitted here will be used to replace the broken link.",
-          title: "Input plaintext to convert broken link to.",
-        });
+        text = this.promptBrokenLinkUserInput();
         break;
       }
       case "Change destination": {
@@ -190,6 +201,64 @@ export class ConvertLinkCommand extends BasicCommand<
       title,
     });
     return resp === "Proceed";
+  }
+
+  async prepareValidLinkOperation(reference: getReferenceAtPositionResp) {
+    const { refType, range, ref } = reference;
+    switch (refType) {
+      case "hashtag":
+      case "usertag": {
+        const shouldProceed = await this.promptConfirmation({
+          title: `Convert ${refType} to wikilink?`,
+        });
+        if (shouldProceed) {
+          return {
+            range,
+            text: `[[${ref}]]`,
+          };
+        }
+        break;
+      }
+      case "wiki": {
+        let tagType;
+        if (ref.startsWith("user")) {
+          tagType = "usertag";
+        } else if (ref.startsWith("tags")) {
+          tagType = "hashtag";
+        }
+
+        if (_.isUndefined(tagType)) {
+          throw new DendronError({
+            message: `No available convert operation for link at cursor position.`,
+          });
+        }
+
+        const shouldProceed = await this.promptConfirmation({
+          title: `Convert wikilink to ${tagType}?`,
+        });
+        if (shouldProceed) {
+          const label = _.drop(ref.split(".")).join(".");
+          const text = tagType === "usertag" ? `@${label}` : `#${label}`;
+          return {
+            range,
+            text,
+          };
+        }
+        break;
+      }
+      case "fmtag":
+      case "refv2": {
+        throw new DendronError({
+          message: `No available convert operation for link at cursor position.`,
+        });
+      }
+      default: {
+        assertUnreachable();
+      }
+    }
+    throw new DendronError({
+      message: "cancelled.",
+    });
   }
 
   async gatherInputs(): Promise<CommandOpts> {
@@ -239,60 +308,8 @@ export class ConvertLinkCommand extends BasicCommand<
           text,
         };
       } else {
-        switch (refType) {
-          case "hashtag":
-          case "usertag": {
-            const shouldProceed = await this.promptConfirmation({
-              title: `Convert ${refType} to wikilink?`,
-            });
-            if (shouldProceed) {
-              return {
-                range,
-                text: `[[${ref}]]`,
-              };
-            }
-            break;
-          }
-          case "wiki": {
-            let tagType;
-            if (ref.startsWith("user")) {
-              tagType = "usertag";
-            } else if (ref.startsWith("tags")) {
-              tagType = "hashtag";
-            }
-
-            if (_.isUndefined(tagType)) {
-              throw new DendronError({
-                message: `No available convert operation for link at cursor position.`,
-              });
-            }
-
-            const shouldProceed = await this.promptConfirmation({
-              title: `Convert wikilink to ${tagType}?`,
-            });
-            if (shouldProceed) {
-              const label = _.drop(ref.split(".")).join(".");
-              const text = tagType === "usertag" ? `@${label}` : `#${label}`;
-              return {
-                range,
-                text,
-              };
-            }
-            break;
-          }
-          case "fmtag":
-          case "refv2": {
-            throw new DendronError({
-              message: `No available convert operation for link at cursor position.`,
-            });
-          }
-          default: {
-            assertUnreachable();
-          }
-        }
-        throw new DendronError({
-          message: "cancelled.",
-        });
+        const resp = await this.prepareValidLinkOperation(reference);
+        return resp;
       }
     }
   }

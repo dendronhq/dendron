@@ -1,3 +1,4 @@
+import { DendronError } from "@dendronhq/common-all";
 import { readJSONWithCommentsSync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _, { assign } from "lodash";
@@ -139,4 +140,39 @@ export class KeybindingUtils {
     migratedKeybindings = assign(keybindings, migratedKeybindings);
     return { keybindingConfigPath, migratedKeybindings };
   }
+
+  /**
+   * For the given pod ID, returns a user-configured shortcut (in VSCode
+   * settings) if it exists. Otherwise, returns undefined.
+   * @param podId
+   * @returns
+   */
+  static getKeybindingForPodIfExists(podId: string) {
+    const { keybindingConfigPath } = this.getKeybindingConfigPath();
+
+    if (!fs.existsSync(keybindingConfigPath)) {
+      return;
+    }
+
+    const keybindings: Array<any> =
+      readJSONWithCommentsSync(keybindingConfigPath);
+
+    const result = keybindings.filter(
+      (item) =>
+        item.command &&
+        item.command === DENDRON_COMMANDS.EXPORT_POD_V2.key &&
+        item.args === podId
+    );
+
+    if (result.length === 1 && result[0].key) {
+      return result[0].key;
+    } else if (result.length > 1) {
+      throw new DendronError({
+        message: KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT,
+      });
+    }
+  }
+
+  static MULTIPLE_KEYBINDINGS_MSG_FMT =
+    "Multiple keybindings found for pod command shortcut.";
 }

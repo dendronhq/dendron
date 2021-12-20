@@ -1,12 +1,4 @@
-import {
-  commands,
-  Location,
-  Position,
-  QuickPickItem,
-  Selection,
-  TextDocument,
-  TextEditor,
-} from "vscode";
+import { QuickPickItem, Range, TextDocument, TextEditor } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -14,16 +6,34 @@ import {
   getReferenceAtPosition,
   getReferenceAtPositionResp,
 } from "../utils/md";
-import { DendronError, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DendronError,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
-import { LinkUtils } from "@dendronhq/engine-server";
+import {
+  HistoryEvent,
+  LinkUtils,
+  ParseLinkV2Resp,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3";
+import {
+  NoteLookupProvider,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3";
+import { NoteLookupProviderUtils } from "../components/lookup/utils";
 
 type CommandOpts = {
-  document: TextDocument;
-  selection: Selection;
-  option?: QuickPickItem;
+  range: Range;
+  text: string;
 };
 
 type CommandOutput = void;
@@ -34,11 +44,12 @@ export class ConvertLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONVERT_LINK.key;
 
-  async promptConvertOptions(reference: getReferenceAtPositionResp) {
+  async promptBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
     const parsedLink = LinkUtils.parseLinkV2({
       linkString: reference.refText,
       explicitAlias: true,
-    });
+    }) as ParseLinkV2Resp;
+
     const aliasOption: QuickPickItem = {
       label: "Alias",
       description: parsedLink?.alias,
@@ -59,10 +70,6 @@ export class ConvertLinkCommand extends BasicCommand<
       label: "Prompt",
       detail: "Input plaintext to convert broken link to.",
     };
-    const createOption: QuickPickItem = {
-      label: "Create",
-      detail: "Create new note where the broken link is pointing to.",
-    };
     const changeDestinationOption: QuickPickItem = {
       label: "Change destination",
       detail: "Lookup existing note to link instead of current broken link.",
@@ -72,7 +79,6 @@ export class ConvertLinkCommand extends BasicCommand<
       hierarchyOption,
       noteNameOption,
       promptOption,
-      createOption,
       changeDestinationOption,
     ];
 
@@ -85,7 +91,105 @@ export class ConvertLinkCommand extends BasicCommand<
       ignoreFocusOut: true,
       canPickMany: false,
     });
-    return option;
+
+    return { option, parsedLink };
+  }
+
+  async lookupNewDestination(): Promise<
+    NoteLookupProviderSuccessResp | undefined
+  > {
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+      vaultSelectCanToggle: false,
+    };
+    const controller = LookupControllerV3.create(lcOpts);
+    const provider = new NoteLookupProvider(this.key, {
+      allowNewNote: false,
+      noHidePickerOnAccept: false,
+    });
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: this.key,
+        controller,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          resolve(data);
+        },
+        onHide: () => {
+          resolve(undefined);
+        },
+      });
+      controller.show({
+        title: "Select new note for link destination",
+        placeholder: "new note",
+        provider,
+      });
+    });
+  }
+
+  async prepareBrokenLinkOperation(opts: {
+    option: QuickPickItem | undefined;
+    parsedLink: ParseLinkV2Resp;
+  }) {
+    const { option, parsedLink } = opts;
+    if (_.isUndefined(option)) return;
+    let text;
+    switch (option.label) {
+      case "Alias": {
+        text = parsedLink.alias;
+        break;
+      }
+      case "Hierarchy": {
+        text = parsedLink.value;
+        break;
+      }
+      case "Note name": {
+        text = _.last(parsedLink.value!.split("."));
+        break;
+      }
+      case "Prompt": {
+        text = await VSCodeUtils.showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: "text to use.",
+          prompt:
+            "The text submitted here will be used to replace the broken link.",
+          title: "Input plaintext to convert broken link to.",
+        });
+        break;
+      }
+      case "Change destination": {
+        const resp = await this.lookupNewDestination();
+        if (_.isUndefined(resp)) {
+          break;
+        }
+        text = NoteUtils.createWikiLink({
+          note: resp?.selectedItems[0] as NoteProps,
+          alias: { mode: "title" },
+        });
+        break;
+      }
+      default: {
+        assertUnreachable();
+      }
+    }
+    return text;
+  }
+
+  async promptConfirmation(opts: { title: string; noConfirm?: boolean }) {
+    const { title, noConfirm } = opts;
+    if (noConfirm) return true;
+    const options = ["Proceed", "Cancel"];
+    const resp = await VSCodeUtils.showQuickPick(options, {
+      placeHolder: "Proceed",
+      ignoreFocusOut: true,
+      title,
+    });
+    return resp === "Proceed";
   }
 
   async gatherInputs(): Promise<CommandOpts> {
@@ -95,22 +199,21 @@ export class ConvertLinkCommand extends BasicCommand<
     const { document, selection } = editor;
     const reference = getReferenceAtPosition(document, selection.start);
 
-    console.log({ reference });
-
     if (reference === null) {
       throw new DendronError({
         message: `No link at cursor position.`,
       });
     }
 
-    const { ref, vaultName } = reference;
+    const { ref, vaultName, refType, range } = reference;
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
       : WSUtils.getVaultFromDocument(document);
 
-    let option;
     if (targetVault === undefined) {
-      console.log("this link points to a note in a vault that doesn't exist");
+      throw new DendronError({
+        message: "this link points to a note in a vault that doesn't exist",
+      });
     } else {
       const targetNote = NoteUtils.getNoteByFnameV5({
         fname: ref,
@@ -120,47 +223,86 @@ export class ConvertLinkCommand extends BasicCommand<
       });
 
       if (targetNote === undefined) {
-        console.log("this link points to a note that doesn't exist.");
-        option = await this.promptConvertOptions(reference);
+        const { option, parsedLink } =
+          await this.promptBrokenLinkConvertOptions(reference);
+        const text = await this.prepareBrokenLinkOperation({
+          option,
+          parsedLink,
+        });
+        if (_.isUndefined(text)) {
+          throw new DendronError({
+            message: "Failed to determine text to replace broken link.",
+          });
+        }
+        return {
+          range,
+          text,
+        };
       } else {
-        // we can potentially enhance this case to
-        // support general link manipulation features
+        switch (refType) {
+          case "hashtag":
+          case "usertag": {
+            const shouldProceed = await this.promptConfirmation({
+              title: `Convert ${refType} to wikilink?`,
+            });
+            if (shouldProceed) {
+              return {
+                range,
+                text: `[[${ref}]]`,
+              };
+            }
+            break;
+          }
+          case "wiki": {
+            let tagType;
+            if (ref.startsWith("user")) {
+              tagType = "usertag";
+            } else if (ref.startsWith("tags")) {
+              tagType = "hashtag";
+            }
+
+            if (_.isUndefined(tagType)) {
+              throw new DendronError({
+                message: `No available convert operation for link at cursor position.`,
+              });
+            }
+
+            const shouldProceed = await this.promptConfirmation({
+              title: `Convert wikilink to ${tagType}?`,
+            });
+            if (shouldProceed) {
+              const label = _.drop(ref.split(".")).join(".");
+              const text = tagType === "usertag" ? `@${label}` : `#${label}`;
+              return {
+                range,
+                text,
+              };
+            }
+            break;
+          }
+          case "fmtag":
+          case "refv2": {
+            throw new DendronError({
+              message: `No available convert operation for link at cursor position.`,
+            });
+          }
+          default: {
+            assertUnreachable();
+          }
+        }
         throw new DendronError({
-          message: `Link at cursor position is not a broken link.`,
+          message: "cancelled.",
         });
       }
     }
-
-    return {
-      document,
-      selection,
-      option,
-    };
   }
 
   async execute(opts: CommandOpts) {
-    const { document, selection, option } = opts;
-    console.log({ document, selection, option });
-    // const { location, text } = _opts;
-    // await commands.executeCommand("vscode.open", location.uri);
-    // const editor = VSCodeUtils.getActiveTextEditor()!;
-    // const selection = editor.document.getText(location.range);
-    // const preConversionOffset = selection.indexOf(text);
-    // const convertedSelection = selection.replace(text, `[[${text}]]`);
-    // await editor.edit((editBuilder) => {
-    //   editBuilder.replace(location.range, convertedSelection);
-    // });
-    // const postConversionSelectionRange = new Selection(
-    //   new Position(
-    //     location.range.start.line,
-    //     location.range.start.character + preConversionOffset
-    //   ),
-    //   new Position(
-    //     location.range.end.line,
-    //     location.range.start.character + preConversionOffset + text.length + 4
-    //   )
-    // );
-    // editor.selection = postConversionSelectionRange;
+    const { range, text } = opts;
+    const editor = VSCodeUtils.getActiveTextEditor()!;
+    await editor.edit((editBuilder) => {
+      editBuilder.replace(range, text);
+    });
     return;
   }
 }

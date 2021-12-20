@@ -44,7 +44,6 @@ import {
   LookupSelectionTypeEnum,
   LookupSplitType,
   LookupSplitTypeEnum,
-  VaultSelectionMode,
 } from "../components/lookup/types";
 import {
   node2Uri,
@@ -63,6 +62,7 @@ import {
   AutoCompleter,
   UIAutoCompletableCmds,
 } from "../utils/autoCompleter";
+import { VaultSelectionMode } from "../components/lookup/typeslight";
 
 export type CommandRunOpts = {
   initialValue?: string;

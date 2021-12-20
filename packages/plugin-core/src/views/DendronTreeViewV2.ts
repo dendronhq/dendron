@@ -16,18 +16,23 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
+import { getEngine } from "../workspace";
 import { WebViewUtils } from "./utils";
+import { IDendronTreeViewV2 } from "./DendronTreeViewV2Interface";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
-export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
+export class DendronTreeViewV2
+  implements vscode.WebviewViewProvider, IDendronTreeViewV2
+{
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
 
   private _view?: vscode.WebviewView;
+  private readonly extension: IDendronExtension;
 
-  constructor() {
-    getExtension().dendronTreeViewV2 = this;
-    getExtension().addDisposable(
+  constructor(extension: IDendronExtension) {
+    this.extension = extension;
+    this.extension.dendronTreeViewV2 = this;
+    this.extension.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }
@@ -41,19 +46,19 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const ext = getExtension();
+    const ext = this.extension;
     if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       return;
     }
     if (basename.endsWith(".md")) {
-      const note = WSUtils.getNoteFromDocument(editor.document);
+      const note = this.extension.wsUtils.getNoteFromDocument(editor.document);
       if (note) {
         this.refresh(note);
       }
     }
   }
 
-  public async resolveWebviewView(
+  async resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
@@ -64,7 +69,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     Logger.info({ ctx, msg: "enter", start });
 
     WebViewUtils.prepareTreeView({
-      ext: getExtension(),
+      ext: this.extension,
       key: DendronTreeViewKey.TREE_VIEW_V2,
       webviewView,
     });
@@ -76,7 +81,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       switch (msg.type) {
         case TreeViewMessageEnum.onSelect: {
           const note = getEngine().notes[msg.data.id];
-          await new GotoNoteCommand().execute({
+          await new GotoNoteCommand(this.extension).execute({
             qs: note.fname,
             vault: note.vault,
           });
@@ -86,7 +91,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           if (document) {
             if (
-              !getExtension().workspaceService?.isPathInWorkspace(
+              !this.extension.workspaceService?.isPathInWorkspace(
                 document.uri.fsPath
               )
             ) {
@@ -97,7 +102,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
               });
               return;
             }
-            const note = WSUtils.getNoteFromDocument(document);
+            const note = this.extension.wsUtils.getNoteFromDocument(document);
             if (note) {
               Logger.info({
                 ctx: "onDidReceiveMessage",
@@ -115,7 +120,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
             duration: profile,
           });
-          const note = WSUtils.getActiveNote();
+          const note = this.extension.wsUtils.getActiveNote();
           if (note) {
             this.refresh(note);
           }
@@ -127,7 +132,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     });
   }
 
-  public refresh(note: NoteProps) {
+  refresh(note: NoteProps) {
     if (this._view) {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
       this._view.webview.postMessage({

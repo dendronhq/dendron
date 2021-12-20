@@ -9,28 +9,41 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import {
-  HistoryService,
-  FileWatcherAdapter,
   EngineFileWatcher,
+  FileWatcherAdapter,
+  HistoryService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { NoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
-import { getDWorkspace, getExtension } from "./workspace";
+import { IFileWatcher } from "./fileWatcherInterface";
+import { IDendronExtension } from "./dendronExtensionInterface";
+import { WorkspaceOptsV2 } from "./types";
 
-export class FileWatcher {
-  public watchers: { vault: DVault; watcher: FileWatcherAdapter }[];
+export class FileWatcher implements IFileWatcher {
+  watchers: { vault: DVault; watcher: FileWatcherAdapter }[];
   /**
    * Should watching be paused
    */
   public pause: boolean;
   public L = Logger;
+  private readonly extension: IDendronExtension;
 
-  constructor(opts: WorkspaceOpts) {
+  private debouncedTreeRefreshFunc: () => void;
+
+  constructor(opts: WorkspaceOptsV2) {
     const { vaults, wsRoot } = opts;
+    this.extension = opts.extension;
+
+    this.debouncedTreeRefreshFunc = _.debounce(() => {
+      const ctx = "refreshTree";
+      Logger.info({ ctx });
+      this.extension.dendronTreeView?.treeProvider.refresh();
+      this.extension.backlinksDataProvider?.refresh();
+    }, 100);
+
     this.watchers = vaults.map((vault) => {
       const vpath = path.join(
         wsRoot,
@@ -41,7 +54,7 @@ export class FileWatcher {
 
       let watcher: FileWatcherAdapter;
       // For VSCode workspaces, or if forced in the config, use the VSCode watcher
-      if (FileWatcher.watcherType(opts) === "plugin") {
+      if (this.watcherTypeV2(opts) === "plugin") {
         watcher = new PluginFileWatcher(pattern);
       } else {
         watcher = new EngineFileWatcher(pattern.base, pattern.pattern);
@@ -52,12 +65,12 @@ export class FileWatcher {
     this.pause = false;
   }
 
-  static watcherType(opts: WorkspaceOpts): "plugin" | "engine" {
+  watcherTypeV2(opts: WorkspaceOpts): "plugin" | "engine" {
     const forceWatcherType = opts.dendronConfig?.dev?.forceWatcherType;
     // If a certain type of watcher has been forced, try to use that
     if (forceWatcherType !== undefined) return forceWatcherType;
 
-    const wsType = getDWorkspace().type;
+    const wsType = this.extension.getDWorkspace().type;
     // For VSCode workspaces, use the built-in VSCode watcher
     if (wsType === WorkspaceType.CODE) return "plugin";
     // Otherwise, use the engine watcher that works without VSCode
@@ -108,8 +121,8 @@ export class FileWatcher {
 
       try {
         this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-        const { vaults, engine } = getDWorkspace();
-        const { wsRoot } = getDWorkspace();
+        const { vaults, engine } = this.extension.getDWorkspace();
+        const { wsRoot } = this.extension.getDWorkspace();
         const vault = VaultUtils.getVaultByFilePath({
           vaults,
           fsPath,
@@ -135,7 +148,7 @@ export class FileWatcher {
         }
 
         // add note
-        note = await NoteSyncService.updateNoteMeta({
+        note = await this.extension.noteSyncService.updateNoteMeta({
           note,
           fmChangeOnly: false,
         });
@@ -147,7 +160,7 @@ export class FileWatcher {
         throw err;
       }
     } finally {
-      FileWatcher.refreshTree();
+      this.refreshTree();
       this.L.debug({ ctx, fsPath, msg: "refreshTree" });
     }
   }
@@ -181,7 +194,7 @@ export class FileWatcher {
         return;
       }
       try {
-        const { engine } = getDWorkspace();
+        const { engine } = this.extension.getDWorkspace();
         this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
         const nodeToDelete = _.find(engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {
@@ -200,16 +213,13 @@ export class FileWatcher {
         // this.L.error({ ctx, err: JSON.stringify(err) });
       }
     } finally {
-      FileWatcher.refreshTree();
+      this.refreshTree();
     }
   }
 
-  static refreshTree = _.debounce(() => {
-    const ctx = "refreshTree";
-    Logger.info({ ctx });
-    getExtension().dendronTreeView?.treeProvider.refresh();
-    getExtension().backlinksDataProvider?.refresh();
-  }, 100);
+  refreshTree() {
+    this.debouncedTreeRefreshFunc();
+  }
 }
 
 export class PluginFileWatcher implements FileWatcherAdapter {

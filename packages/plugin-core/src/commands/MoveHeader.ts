@@ -46,10 +46,11 @@ import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { findReferences, FoundRefT } from "../utils/md";
+import { findReferences } from "../utils/md";
 import { getEngine, getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
+import { FoundRefT } from "../utils/mdtypes";
 
 type CommandInput =
   | {

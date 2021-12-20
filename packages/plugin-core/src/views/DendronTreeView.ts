@@ -22,7 +22,12 @@ import vscode, {
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
+import {
+  IDendronTreeView,
+  IEngineNoteProvider,
+  ITreeNote,
+} from "./DendronTreeViewInterface";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)
@@ -40,7 +45,7 @@ function createTreeNote(note: NoteProps) {
   return tn;
 }
 
-export class TreeNote extends vscode.TreeItem {
+export class TreeNote extends vscode.TreeItem implements ITreeNote {
   public id: string;
   public note: NoteProps;
   public uri: Uri;
@@ -81,7 +86,9 @@ export class TreeNote extends vscode.TreeItem {
   }
 }
 
-export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
+export class EngineNoteProvider
+  implements vscode.TreeDataProvider<string>, IEngineNoteProvider
+{
   private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | void> =
     new vscode.EventEmitter<string | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<string | undefined | void> =
@@ -167,8 +174,8 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 }
 
-export class DendronTreeView {
-  public pause?: boolean;
+export class DendronTreeView implements IDendronTreeView {
+  pause?: boolean;
 
   static register(_context: ExtensionContext) {
     HistoryService.instance().subscribe(

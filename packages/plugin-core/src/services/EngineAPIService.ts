@@ -37,7 +37,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { getDWorkspace } from "../workspace";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 export class EngineAPIService implements DEngineClient {
   private internalEngine: DEngineClient;
@@ -47,11 +47,13 @@ export class EngineAPIService implements DEngineClient {
   static createEngine({
     port,
     enableWorkspaceTrust,
+    extension,
   }: {
     port: number | string;
     enableWorkspaceTrust?: boolean | undefined;
+    extension: IDendronExtension;
   }): EngineAPIService {
-    const { vaults, wsRoot } = getDWorkspace();
+    const { vaults, wsRoot } = extension.getDWorkspace();
     const history = HistoryService.instance();
 
     const api = new DendronAPI({

@@ -15,7 +15,6 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { EngineAPIService } from "../../services/EngineAPIService";
-import { NoteSyncService } from "../../services/NoteSyncService";
 import { clipboard } from "../../utils";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -28,10 +27,10 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSplitType,
-  VaultSelectionMode,
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
 import { WSUtils } from "../../WSUtils";
+import { VaultSelectionMode } from "./typeslight";
 
 export type ButtonType =
   | LookupEffectType
@@ -157,7 +156,7 @@ const selectionToNoteProps = async (opts: {
 
           const currentNote = WSUtils.getNoteFromDocument(editor.document);
           if (currentNote) {
-            await NoteSyncService.instance().updateNoteContents({
+            await getExtension().noteSyncService.updateNoteContents({
               oldNote: currentNote,
               content: editor.document.getText(),
               fmChangeOnly: false,

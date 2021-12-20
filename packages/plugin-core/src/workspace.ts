@@ -8,7 +8,6 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseUtil,
-  VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -37,7 +36,6 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import BacklinksTreeDataProvider, {
-  Backlink,
   secondLevelRefsToBacklinks,
 } from "./features/BacklinksTreeDataProvider";
 import { FileWatcher } from "./fileWatcher";
@@ -49,7 +47,11 @@ import {
   NoteTraitService,
 } from "./services/NoteTraitService";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
-import { CodeConfigKeys } from "./types";
+import {
+  CodeConfigKeys,
+  DendronWorkspaceSettings,
+  WorkspaceOptsV2,
+} from "./types";
 import { DisposableStore, resolvePath } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
@@ -59,27 +61,19 @@ import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
+import { IDendronExtension } from "./dendronExtensionInterface";
+import { VaultsResolver } from "./utils/VaultsResolver";
+import { IVaultsResolver } from "./utils/VaultsResolverInterface";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { SchemaSyncService } from "./services/SchemaSyncService";
+import { Backlink } from "./features/Backlink";
+import { IBacklinksTreeDataProvider } from "./features/BacklinksTreeDataProviderInterface";
+import { INoteSyncService } from "./services/NoteSyncServiceInterface";
+import { NoteSyncService } from "./services/NoteSyncService";
+import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { WSUtilsV2 } from "./WSUtilsV2";
 
 let _DendronWorkspace: DendronExtension | null;
-
-type DendronWorkspaceSettings = Partial<{
-  "dendron.dailyJournalDomain": string;
-  "dendron.defaultJournalName": string;
-  "dendron.defaultJournalDateFormat": string;
-  "dendron.defaultJournalAddBehavior": string;
-  "dendron.defaultScratchName": string;
-  "dendron.defaultScratchDateFormat": string;
-  "dendron.defaultScratchAddBehavior": string;
-  "dendron.copyNoteUrlRoot": string;
-  "dendron.linkSelectAutoTitleBehavior": string;
-  "dendron.defaultLookupCreateBehavior": string;
-  "dendron.defaultTimestampDecorationFormat": string;
-  "dendron.rootDir": string;
-  "dendron.dendronDir": string;
-  "dendron.logLevel": string;
-  "dendron.trace.server": string;
-  "dendron.serverPort": string;
-}>;
 
 export type ServerConfiguration = {
   serverPort: string;
@@ -130,31 +124,28 @@ export function resolveRelToWSRoot(fpath: string): string {
   return resolvePath(fpath, getDWorkspace().wsRoot as string);
 }
 
-/** Given file uri that is within a vault within the current workspace returns the vault. */
+/** Given file uri that is within a vault within the current workspace returns the vault.
+ *
+ *  Note: Prefer to use an instance of VaultsResolver instead of this function.*/
 export function getVaultFromUri(fileUri: Uri) {
-  const { vaults } = getDWorkspace();
-  const vault = VaultUtils.getVaultByFilePath({
-    fsPath: fileUri.fsPath,
-    vaults,
-    wsRoot: getDWorkspace().wsRoot,
-  });
-  return vault;
+  const vaultsResolver = new VaultsResolver(getExtension());
+  return vaultsResolver.getVaultFromUri(fileUri);
 }
 
 export const NO_WORKSPACE_IMPLEMENTATION = "no workspace implementation";
 
 // --- Main
-export class DendronExtension {
+export class DendronExtension implements IDendronExtension {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
   private _engine?: EngineAPIService;
   private _disposableStore: DisposableStore;
-  private _traitRegistrar: NoteTraitService;
+  private readonly _traitRegistrar: NoteTraitService;
   private L: typeof Logger;
-  private treeViews: { [key: string]: vscode.WebviewViewProvider };
+  private readonly treeViews: { [key: string]: vscode.WebviewViewProvider };
 
-  public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
+  public backlinksDataProvider: IBacklinksTreeDataProvider | undefined;
   public dendronTreeView: DendronTreeView | undefined;
   public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public fileWatcher?: FileWatcher;
@@ -167,6 +158,10 @@ export class DendronExtension {
   public serverWatcher?: vscode.FileSystemWatcher;
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
+  public vaultsResolver: IVaultsResolver;
+  public schemaSyncService: ISchemaSyncService;
+  public noteSyncService: INoteSyncService;
+  public wsUtils: IWSUtilsV2;
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -289,6 +284,10 @@ export class DendronExtension {
     }
   }
 
+  isActiveV2(_context?: vscode.ExtensionContext): boolean {
+    return DendronExtension.isActive(_context);
+  }
+
   /**
    * Checks if a Dendron workspace is currently active.
    */
@@ -386,6 +385,15 @@ export class DendronExtension {
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
+
+    this.vaultsResolver = new VaultsResolver(this);
+    this.schemaSyncService = new SchemaSyncService(this);
+    this.noteSyncService = new NoteSyncService(this);
+    this.wsUtils = new WSUtilsV2(this);
+  }
+
+  getDWorkspace(): DWorkspaceV2 {
+    return this.getWorkspaceImplOrThrow();
   }
 
   getWorkspaceImplOrThrow(): DWorkspaceV2 {
@@ -494,7 +502,7 @@ export class DendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2();
+        const provider = new DendronTreeViewV2(this);
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -624,6 +632,7 @@ export class DendronExtension {
 
     return backlinkTreeView;
   }
+
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
     this._disposableStore.add(disposable);
@@ -643,14 +652,28 @@ export class DendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher(PreviewPanelFactory.getProxy());
+    const windowWatcher = new WindowWatcher(
+      PreviewPanelFactory.getProxy(),
+      this
+    );
 
     windowWatcher.activate(this.context);
     for (const editor of vscode.window.visibleTextEditors) {
       windowWatcher.triggerUpdateDecorations(editor);
     }
     this.windowWatcher = windowWatcher;
-    const workspaceWatcher = new WorkspaceWatcher();
+    const realVaults = getDWorkspace().vaults;
+    const extension: IDendronExtension = this;
+    const optsV2: WorkspaceOptsV2 = {
+      wsRoot,
+      vaults: realVaults,
+      extension,
+    };
+
+    const fileWatcher = new FileWatcher(optsV2);
+    this.fileWatcher = fileWatcher;
+
+    const workspaceWatcher = new WorkspaceWatcher(extension);
     workspaceWatcher.activate(this.context);
     this.workspaceWatcher = workspaceWatcher;
 
@@ -662,14 +685,8 @@ export class DendronExtension {
       });
       throw Error("no folders set for workspace");
     }
-    const realVaults = getDWorkspace().vaults;
-    const fileWatcher = new FileWatcher({
-      wsRoot,
-      vaults: realVaults,
-    });
 
     fileWatcher.activate(getExtension().context);
-    this.fileWatcher = fileWatcher;
   }
 
   async deactivate() {

@@ -11,15 +11,14 @@ import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Position, Selection, Uri, ViewColumn, window } from "vscode";
-import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
+import { VaultSelectionMode } from "../components/lookup/typeslight";
 
 type CommandOpts = {
   qs?: string;
@@ -83,6 +82,8 @@ type FoundLinkSelection = NonNullable<
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.GOTO_NOTE.key;
 
+  private extension: IDendronExtension;
+
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
     if (
@@ -113,13 +114,13 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       opts.qs = link.value;
     } else {
       // Same file block reference, implicitly current file
-      const note = WSUtils.getActiveNote();
+      const note = this.extension.wsUtils.getActiveNote();
       if (note) {
         // Same file link within note
         opts.qs = note.fname;
         opts.vault = note.vault;
       } else {
-        const { wsRoot, vaults } = getDWorkspace().engine;
+        const { wsRoot, vaults } = this.extension.getDWorkspace().engine;
         // Same file link within non-note file
         opts.qs = path.relative(
           wsRoot,
@@ -136,7 +137,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   private async maybeSetOptsFromExistingNote(opts: CommandOpts) {
-    const { engine } = getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     const notes = NoteUtils.getNotesByFname({
       fname: opts.qs!,
       notes: engine.notes,
@@ -158,7 +159,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   private async maybeSetOptsFromNonNote(opts: CommandOpts) {
-    const { vaults, wsRoot } = getDWorkspace().engine;
+    const { vaults, wsRoot } = this.extension.getDWorkspace().engine;
     const nonNote = await findNonNoteFile({
       fpath: opts.qs!,
       wsRoot,
@@ -175,7 +176,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // Depending on the config, we can either
     // automatically pick the vault or we'll prompt for it.
     const confirmVaultSetting =
-      getDWorkspace().config["lookupConfirmVaultOnCreate"];
+      this.extension.getDWorkspace().config["lookupConfirmVaultOnCreate"];
     const selectionMode =
       confirmVaultSetting !== true
         ? VaultSelectionMode.smart
@@ -215,7 +216,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (!opts.qs) opts = this.getQs(opts, link);
     if (!opts.vault && link.vaultName)
       opts.vault = VaultUtils.getVaultByNameOrThrow({
-        vaults: getDWorkspace().vaults,
+        vaults: this.extension.getDWorkspace().vaults,
         vname: link.vaultName,
       });
     if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;
@@ -257,8 +258,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
-    const client = getExtension().getEngine();
-    const { wsRoot } = getDWorkspace();
+    const client = this.extension.getEngine();
+    const { wsRoot } = this.extension.getDWorkspace();
 
     const processedOpts = await this.processInputs(opts);
     if (processedOpts === null) return; // User cancelled a prompt, or did not have a valid link selected
@@ -294,7 +295,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // Otherwise, it's a regular note
     let pos: undefined | Position;
-    const out = await getExtension().pauseWatchers<CommandOutput>(async () => {
+    const out = await this.extension.pauseWatchers<CommandOutput>(async () => {
       const { data } = await client.getNoteByPath({
         npath: qs,
         createIfNew: true,
@@ -324,5 +325,10 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   addAnalyticsPayload(opts?: CommandOpts, resp?: CommandOutput) {
     const { source } = { ...opts, ...resp };
     return getAnalyticsPayload(source);
+  }
+
+  constructor(extension: IDendronExtension) {
+    super();
+    this.extension = extension;
   }
 }

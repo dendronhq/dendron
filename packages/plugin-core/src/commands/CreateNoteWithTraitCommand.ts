@@ -14,7 +14,6 @@ import {
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
-import { VaultSelectionMode } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
   PickerUtilsV2,
@@ -23,6 +22,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
+import { VaultSelectionMode } from "../components/lookup/typeslight";
 
 export type CommandOpts = {
   fname: string;
@@ -141,7 +141,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       }
     }
 
-    await new GotoNoteCommand().execute({
+    await new GotoNoteCommand(getExtension()).execute({
       qs: fname,
       vault,
       overrides: { title, traits: [this.trait] },

@@ -37,6 +37,7 @@ import vscode, {
 } from "vscode";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
+import { FoundRefT } from "./mdtypes";
 
 export type RefT = {
   label: string;
@@ -45,12 +46,6 @@ export type RefT = {
   anchorStart?: DNoteAnchorBasic;
   anchorEnd?: DNoteAnchorBasic;
   vaultName?: string;
-};
-
-export type FoundRefT = {
-  location: Location;
-  matchText: string;
-  isCandidate?: boolean;
 };
 
 const markdownExtRegex = /\.md$/i;

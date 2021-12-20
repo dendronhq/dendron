@@ -15,7 +15,7 @@ import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
@@ -27,6 +27,11 @@ import {
 } from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
+
+function createGoToNotCmd() {
+  return new GotoNoteCommand(getExtension());
+}
+
 suite("GotoNote", function () {
   const ctx = setupBeforeAfter(this, {});
 
@@ -38,7 +43,7 @@ suite("GotoNote", function () {
         onInit: async ({ vaults, engine }) => {
           const vault = vaults[0];
           const note = engine.notes["foo"];
-          const { note: out } = (await new GotoNoteCommand().run({
+          const { note: out } = (await createGoToNotCmd().run({
             qs: "foo",
             vault,
           })) as { note: NoteProps };
@@ -71,7 +76,7 @@ suite("GotoNote", function () {
             stub: true,
           });
 
-          const { note: out } = (await new GotoNoteCommand().run({
+          const { note: out } = (await createGoToNotCmd().run({
             qs: "foo",
             vault,
           })) as { note: NoteProps };
@@ -91,7 +96,7 @@ suite("GotoNote", function () {
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          const { note: out } = (await new GotoNoteCommand().run({
+          const { note: out } = (await createGoToNotCmd().run({
             qs: "foo.ch2",
             vault,
           })) as { note: NoteProps };
@@ -113,7 +118,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             qs: "bar.ch1",
             vault,
           });
@@ -134,7 +139,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             qs: "alpha",
             vault,
             anchor: {
@@ -165,7 +170,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             qs: "target-note",
             vault,
             anchor: {
@@ -192,7 +197,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             qs: "alpha",
             vault,
             anchor: {
@@ -220,7 +225,7 @@ suite("GotoNote", function () {
         },
         onInit: async ({ vaults }) => {
           const vault = vaults[0];
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             qs: "anchor-target",
             vault,
             anchor: {
@@ -258,7 +263,7 @@ suite("GotoNote", function () {
               new vscode.Position(7, 1),
               new vscode.Position(7, 1)
             );
-          await new GotoNoteCommand().run();
+          await createGoToNotCmd().run();
           // Make sure this took us to the tag note
           expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
           done();
@@ -287,7 +292,7 @@ suite("GotoNote", function () {
               new vscode.Position(7, 1),
               new vscode.Position(7, 1)
             );
-          await new GotoNoteCommand().run();
+          await createGoToNotCmd().run();
           // Make sure this took us to the tag note
           expect(getActiveEditorBasename()).toEqual("user.test.mctestface.md");
           done();
@@ -319,7 +324,7 @@ suite("GotoNote", function () {
                 new vscode.Position(6, 8),
                 new vscode.Position(6, 8)
               );
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
             done();
@@ -350,7 +355,7 @@ suite("GotoNote", function () {
                 new vscode.Position(6, 8),
                 new vscode.Position(6, 8)
               );
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.one.md");
             done();
@@ -381,7 +386,7 @@ suite("GotoNote", function () {
                 new vscode.Position(8, 6),
                 new vscode.Position(8, 6)
               );
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
             done();
@@ -425,7 +430,7 @@ suite("GotoNote", function () {
             line: 9,
             char: 23,
           });
-          await new GotoNoteCommand().run();
+          await createGoToNotCmd().run();
           expect(getActiveEditorBasename()).toEqual("test.target.md");
         });
       }
@@ -443,7 +448,7 @@ suite("GotoNote", function () {
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
           // foo.ch1.md
-          await new GotoNoteCommand().run({});
+          await createGoToNotCmd().run({});
           const editor2 = VSCodeUtils.getActiveTextEditorOrThrow();
           const suffix =
             path.join(
@@ -473,7 +478,7 @@ suite("GotoNote", function () {
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
                 line: 7,
               });
-              await new GotoNoteCommand().run();
+              await createGoToNotCmd().run();
               const openedNote = WSUtils.getNoteFromDocument(
                 VSCodeUtils.getActiveTextEditorOrThrow().document
               );
@@ -502,7 +507,7 @@ suite("GotoNote", function () {
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 8,
             });
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
@@ -527,7 +532,7 @@ suite("GotoNote", function () {
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 9,
             });
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
@@ -552,7 +557,7 @@ suite("GotoNote", function () {
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 10,
             });
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
@@ -578,7 +583,7 @@ suite("GotoNote", function () {
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
               line: 11,
             });
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
             const openedNote = WSUtils.getNoteFromDocument(
               VSCodeUtils.getActiveTextEditorOrThrow().document
             );
@@ -612,7 +617,7 @@ suite("GotoNote", function () {
           const editor = await WSUtils.openNote(note);
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
-          await new GotoNoteCommand().run({});
+          await createGoToNotCmd().run({});
           const editor2 = VSCodeUtils.getActiveTextEditorOrThrow();
           const suffix =
             path.join(
@@ -650,7 +655,7 @@ suite("GotoNote", function () {
             new vscode.Position(7, 48)
           );
           // foo.ch1.md
-          await new GotoNoteCommand().run({
+          await createGoToNotCmd().run({
             vault: vaults[0],
           });
           expect(getActiveEditorBasename()).toEqual("foo.ch1.md");
@@ -694,7 +699,7 @@ suite("GotoNote", function () {
           await WSUtils.openNote(note);
           VSCodeUtils.getActiveTextEditorOrThrow().selection =
             new vscode.Selection(7, 1, 7, 1);
-          await new GotoNoteCommand().run();
+          await createGoToNotCmd().run();
 
           expect(getActiveEditorBasename()).toEqual("test.txt");
           expect(
@@ -716,7 +721,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens the non-note file", async () => {
@@ -741,7 +746,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens the non-note file inside assets", async () => {
@@ -781,7 +786,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens the note", async () => {
@@ -823,7 +828,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens the file at that line", async () => {
@@ -864,7 +869,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens that file", async () => {
@@ -901,7 +906,7 @@ suite("GotoNote", function () {
             await WSUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(7, 1, 7, 1);
-            await new GotoNoteCommand().run();
+            await createGoToNotCmd().run();
           });
 
           test("THEN opens that file", async () => {

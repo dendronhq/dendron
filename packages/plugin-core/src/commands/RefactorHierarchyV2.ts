@@ -23,7 +23,6 @@ import {
 } from "../components/lookup/LookupProviderV3";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
 import { getExtension, getDWorkspace } from "../workspace";
@@ -430,7 +429,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         setTimeout(() => {
           if (ext.fileWatcher) {
             ext.fileWatcher.pause = false;
-            FileWatcher.refreshTree();
+            ext.fileWatcher.refreshTree();
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

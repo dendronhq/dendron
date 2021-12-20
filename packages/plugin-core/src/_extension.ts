@@ -978,7 +978,8 @@ async function _setupCommands(
   const existingCommands = await vscode.commands.getCommands();
 
   ALL_COMMANDS.map((Cmd) => {
-    const cmd = new Cmd();
+    const cmd = new Cmd(getExtension());
+
     if (!existingCommands.includes(cmd.key))
       context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -1144,6 +1145,7 @@ function updateEngineAPI(port: number | string): void {
   const svc = EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,
+    extension: ext,
   });
   ext.setEngine(svc);
   ext.port = _.toInteger(port);

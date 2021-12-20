@@ -20,9 +20,8 @@ import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
-
-let NOTE_SERVICE: NoteSyncService | undefined;
+import { INoteSyncService } from "./NoteSyncServiceInterface";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 const getFrontmatterPosition = (
   document: vscode.TextDocument
@@ -46,17 +45,12 @@ const getFrontmatterPosition = (
 /**
  * Keep notes on disk in sync with engine
  */
-export class NoteSyncService {
-  static instance() {
-    if (_.isUndefined(NOTE_SERVICE)) {
-      NOTE_SERVICE = new NoteSyncService();
-    }
-    return NOTE_SERVICE;
-  }
-
+export class NoteSyncService implements INoteSyncService {
   private L: DLogger;
+  private extension: IDendronExtension;
 
-  constructor() {
+  constructor(extension: IDendronExtension) {
+    this.extension = extension;
     this.L = Logger;
   }
 
@@ -75,10 +69,10 @@ export class NoteSyncService {
   ) {
     const ctx = "NoteSyncService:onDidChange";
     const uri = document.uri;
-    const { engine } = getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     const fname = path.basename(uri.fsPath, ".md");
 
-    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
@@ -103,14 +97,14 @@ export class NoteSyncService {
     this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtils.getVaultByFilePath({
       vaults: engine.vaults,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
       fsPath: uri.fsPath,
     });
     const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: engine.notes,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
     }) as NoteProps;
 
     const content = document.getText();
@@ -141,7 +135,7 @@ export class NoteSyncService {
   }) {
     const ctx = "NoteSyncService:updateNoteContents";
     const { content, fmChangeOnly, fname, vault, oldNote } = opts;
-    const { engine } = getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     // note is considered dirty, apply any necessary changes here
     // call `doc.getText` to get latest note
     let note = string2Note({
@@ -152,7 +146,7 @@ export class NoteSyncService {
     });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
 
-    note = await NoteSyncService.updateNoteMeta({ note, fmChangeOnly });
+    note = await this.updateNoteMeta({ note, fmChangeOnly });
 
     const now = NoteUtils.genUpdateTime();
     note.updated = now;
@@ -166,14 +160,14 @@ export class NoteSyncService {
     return noteClean;
   }
 
-  static async updateNoteMeta({
+  async updateNoteMeta({
     note,
     fmChangeOnly,
   }: {
     note: NoteProps;
     fmChangeOnly: boolean;
   }) {
-    const { engine } = getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     // Avoid calculating links/anchors if the note is too long
     if (
       note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
@@ -197,7 +191,7 @@ export class NoteSyncService {
       });
       note.anchors = anchors;
 
-      if (getDWorkspace().config.dev?.enableLinkCandidates) {
+      if (this.extension.getDWorkspace().config.dev?.enableLinkCandidates) {
         const linkCandidates = LinkUtils.findLinkCandidates({
           note,
           notesMap,

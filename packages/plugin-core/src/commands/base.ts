@@ -4,9 +4,10 @@ import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 export type CodeCommandConstructor = {
-  new (): CodeCommandInstance;
+  new (extension: IDendronExtension): CodeCommandInstance;
 };
 export type CodeCommandInstance = {
   key: string;

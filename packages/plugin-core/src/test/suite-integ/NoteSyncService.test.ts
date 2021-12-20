@@ -6,10 +6,10 @@ import { DateTime } from "luxon";
 import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { NoteSyncService } from "../../services/NoteSyncService";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { getExtension } from "../../workspace";
 
 async function wait1Millisecond(): Promise<void> {
   return new Promise((resolve) => {
@@ -52,7 +52,7 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
           });
 
           const beforeStamp = await millisNowAndWait1Milli();
-          const resp = await NoteSyncService.instance().onDidChange(
+          const resp = await getExtension().noteSyncService.onDidChange(
             editor.document,
             {
               contentChanges: [
@@ -119,7 +119,7 @@ suite("NoteSyncService", function testSuite() {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          const resp = await NoteSyncService.instance().onDidChange(
+          const resp = await getExtension().noteSyncService.onDidChange(
             editor.document
           );
           expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
@@ -153,7 +153,7 @@ suite("NoteSyncService", function testSuite() {
             const pos = new vscode.Position(6, 0);
             builder.insert(pos, `tags: test\n`);
           });
-          await NoteSyncService.instance().onDidChange(editor.document);
+          await getExtension().noteSyncService.onDidChange(editor.document);
 
           // "foo" should have the frontmatter link to "tags.test"
           const updatedFoo = engine.notes["foo"];
@@ -172,7 +172,7 @@ suite("NoteSyncService", function testSuite() {
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
           const editor = await WSUtils.openNote(foo);
-          const resp = await NoteSyncService.instance().onDidChange(
+          const resp = await getExtension().noteSyncService.onDidChange(
             editor.document
           );
           expect(_.isUndefined(resp)).toBeTruthy();

@@ -256,7 +256,7 @@ export const handleLink = async ({
           return;
         }
 
-        return new GotoNoteCommand().execute({
+        return new GotoNoteCommand(getExtension()).execute({
           qs: noteData.note.fname,
           vault: noteData.note.vault,
           column: vscode.ViewColumn.One,

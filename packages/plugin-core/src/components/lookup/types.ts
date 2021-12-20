@@ -158,24 +158,6 @@ export type LookupSplitType = "horizontal";
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
 export type LookupNoteExistBehavior = "open" | "overwrite";
 
-export enum VaultSelectionMode {
-  /**
-   * Never prompt the user. Useful for testing
-   */
-  auto,
-
-  /**
-   * Tries to determine the vault automatically, but will prompt the user if
-   * there is ambiguity
-   */
-  smart,
-
-  /**
-   * Always prompt the user if there is more than one vault
-   */
-  alwaysPrompt,
-}
-
 export type TransformedQueryString = {
   /** Transformed query string value.   */
   queryString: string;

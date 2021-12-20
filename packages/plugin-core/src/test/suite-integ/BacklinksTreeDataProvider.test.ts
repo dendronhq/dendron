@@ -11,7 +11,6 @@ import * as vscode from "vscode";
 import { ProviderResult, Uri } from "vscode";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import BacklinksTreeDataProvider, {
-  Backlink,
   secondLevelRefsToBacklinks,
 } from "../../features/BacklinksTreeDataProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -19,6 +18,7 @@ import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
+import { Backlink } from "../../features/Backlink";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 

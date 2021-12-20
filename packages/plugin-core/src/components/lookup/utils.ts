@@ -45,8 +45,8 @@ import {
   DendronQuickPickerV2,
   DendronQuickPickState,
   TransformedQueryString,
-  VaultSelectionMode,
 } from "./types";
+import { VaultSelectionMode } from "./typeslight";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {

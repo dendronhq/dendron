@@ -28,7 +28,8 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 
 suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   const watcher: WindowWatcher = new WindowWatcher(
-    PreviewPanelFactory.getProxy()
+    PreviewPanelFactory.getProxy(),
+    getExtension()
   );
 
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -124,7 +125,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
 
-          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher = new WorkspaceWatcher(
+            getExtension()
+          );
           getExtension().workspaceWatcher?.activate(ctx);
           watcher.activate(ctx);
           // Open a note
@@ -149,7 +152,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
-          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher = new WorkspaceWatcher(
+            getExtension()
+          );
           getExtension().workspaceWatcher?.activate(ctx);
 
           watcher.activate(ctx);

@@ -8,9 +8,10 @@ import {
 import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 
 export class WebViewUtils {
   /**
@@ -100,7 +101,7 @@ export class WebViewUtils {
     key,
     webviewView,
   }: {
-    ext: DendronExtension;
+    ext: IDendronExtension;
     key: DendronTreeViewKey;
     webviewView: vscode.WebviewView;
   }) {

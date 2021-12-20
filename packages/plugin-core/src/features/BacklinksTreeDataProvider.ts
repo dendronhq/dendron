@@ -1,36 +1,11 @@
 import vscode, { ProviderResult } from "vscode";
 import path from "path";
-import {
-  containsMarkdownExt,
-  findReferences,
-  FoundRefT,
-  sortPaths,
-} from "../utils/md";
+import { containsMarkdownExt, findReferences, sortPaths } from "../utils/md";
 import _ from "lodash";
 import { ICONS } from "../constants";
-
-export type BacklinkFoundRef = FoundRefT & {
-  parentBacklink: Backlink | undefined;
-};
-
-export class Backlink extends vscode.TreeItem {
-  public refs: BacklinkFoundRef[] | undefined;
-  public parentBacklink: Backlink | undefined;
-
-  constructor(
-    public readonly label: string,
-    refs: FoundRefT[] | undefined,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState
-  ) {
-    super(label, collapsibleState);
-
-    if (refs) {
-      this.refs = refs.map((r) => ({ ...r, parentBacklink: this }));
-    } else {
-      this.refs = undefined;
-    }
-  }
-}
+import { Backlink, BacklinkFoundRef } from "./Backlink";
+import { FoundRefT } from "../utils/mdtypes";
+import { IBacklinksTreeDataProvider } from "./BacklinksTreeDataProviderInterface";
 
 /**
  * Given the fsPath of current note, return the list of backlink sources as tree view items.
@@ -169,7 +144,7 @@ const refsToBacklinkTreeItems = (
 };
 
 export default class BacklinksTreeDataProvider
-  implements vscode.TreeDataProvider<Backlink>
+  implements IBacklinksTreeDataProvider
 {
   private _onDidChangeTreeData: vscode.EventEmitter<Backlink | undefined> =
     new vscode.EventEmitter<Backlink | undefined>();
@@ -181,7 +156,7 @@ export default class BacklinksTreeDataProvider
     this.isLinkCandidateEnabled = isLinkCandidateEnabled;
   }
 
-  refresh(): void {
+  public refresh(): void {
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -197,7 +172,9 @@ export default class BacklinksTreeDataProvider
     }
   }
 
-  public async getChildren(element?: Backlink) {
+  public async getChildren(
+    element?: Backlink
+  ): Promise<Backlink[] | undefined> {
     const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
 
     if (!element) {

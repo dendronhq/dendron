@@ -14,7 +14,7 @@ import {
   setupBeforeAfter,
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { getDWorkspace } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { Position } from "vscode";
 import { SchemaSyncService } from "../../services/SchemaSyncService";
 import * as _ from "lodash";
@@ -80,7 +80,7 @@ runSuiteButSkipForWindows()(
           // So for now we will call the instance of SchemaSyncService to make
           // sure at least that is working as expected.
           expect(await opened.document.save()).toBeTruthy();
-          await SchemaSyncService.instance().onDidSave({
+          await getExtension().schemaSyncService.onDidSave({
             document: opened.document,
           });
 
@@ -104,7 +104,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
-          watcher = new WorkspaceWatcher();
+          watcher = new WorkspaceWatcher(getExtension());
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
           const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
@@ -140,7 +140,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
-          watcher = new WorkspaceWatcher();
+          watcher = new WorkspaceWatcher(getExtension());
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
           const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");

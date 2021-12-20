@@ -15,9 +15,8 @@ import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { PluginSchemaUtils } from "../pluginSchemaUtils";
 import { PluginVaultUtils } from "../pluginVaultUtils";
-import { SchemaSyncService } from "../services/SchemaSyncService";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -595,7 +594,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
 
     fs.writeFileSync(uri!.fsPath, schemaBody);
 
-    await SchemaSyncService.instance().saveSchema({
+    await getExtension().schemaSyncService.saveSchema({
       uri: uri!,
       isBrandNewFile: true,
     });

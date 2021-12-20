@@ -10,6 +10,7 @@ import * as vscode from "vscode";
 import { FileWatcher } from "../../fileWatcher";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { getExtension } from "../../workspace";
 
 suite("GIVEN FileWatcher", function () {
   let watcher: FileWatcher;
@@ -34,6 +35,7 @@ suite("GIVEN FileWatcher", function () {
               wsRoot,
               vaults,
               dendronConfig: engine.config,
+              extension: getExtension(),
             });
 
             const notePath = path.join(wsRoot, vaults[0].fsPath, "newbar.md");
@@ -77,6 +79,7 @@ suite("GIVEN FileWatcher", function () {
               wsRoot,
               vaults,
               dendronConfig: engine.config,
+              extension: getExtension(),
             });
 
             const notePath = path.join(wsRoot, vaults[0].fsPath, "newbar.md");

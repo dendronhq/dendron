@@ -14,18 +14,21 @@ import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { getDWorkspace, getExtension } from "./workspace";
 import { WSUtils } from "./WSUtils";
+import { IWindowWatcher } from "./windowWatcherInterface";
+import { IDendronExtension } from "./dendronExtensionInterface";
 
 const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
   return ROOT_CTX + ":" + scope;
 };
-export class WindowWatcher {
+export class WindowWatcher implements IWindowWatcher {
   private _previewProxy: PreviewProxy;
+  private extension: IDendronExtension;
 
-  constructor(previewProxy: PreviewProxy) {
+  constructor(previewProxy: PreviewProxy, extension: IDendronExtension) {
     this._previewProxy = previewProxy;
+    this.extension = extension;
   }
 
   private onDidChangeActiveTextEditorHandlers: ((
@@ -33,9 +36,7 @@ export class WindowWatcher {
   ) => void)[] = [];
 
   activate(context: ExtensionContext) {
-    const extension = getExtension();
-
-    extension.addDisposable(
+    this.extension.addDisposable(
       window.onDidChangeVisibleTextEditors(
         sentryReportingCallback((editors: TextEditor[]) => {
           const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
@@ -46,14 +47,14 @@ export class WindowWatcher {
         })
       )
     );
-    extension.addDisposable(
+    this.extension.addDisposable(
       window.onDidChangeActiveTextEditor(
         this.onDidChangeActiveTextEditor,
         this,
         context.subscriptions
       )
     );
-    extension.addDisposable(
+    this.extension.addDisposable(
       window.onDidChangeTextEditorVisibleRanges(
         this.onDidChangeTextEditorVisibleRanges,
         this,
@@ -77,7 +78,7 @@ export class WindowWatcher {
           window.activeTextEditor?.document.uri.fsPath
       ) {
         const uri = editor.document.uri;
-        if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });
@@ -89,7 +90,7 @@ export class WindowWatcher {
         );
 
         if (
-          getExtension().workspaceWatcher?.getNewlyOpenedDocument(
+          this.extension.workspaceWatcher?.getNewlyOpenedDocument(
             editor.document
           )
         ) {
@@ -110,7 +111,7 @@ export class WindowWatcher {
         return;
       }
       const uri = editor.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
         return;
       }
       Logger.info({ ctx, editor: uri.fsPath });
@@ -150,7 +151,7 @@ export class WindowWatcher {
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     this.moveCursorPastFrontmatter(editor);
-    const config = getDWorkspace().config;
+    const config = this.extension.getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
     }

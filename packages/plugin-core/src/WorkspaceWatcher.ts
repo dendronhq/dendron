@@ -3,9 +3,9 @@ import {
   DNodeUtils,
   NoteProps,
   NoteUtils,
+  SchemaUtils,
   Time,
   VaultUtils,
-  SchemaUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -23,18 +23,12 @@ import {
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
-import { NoteSyncService } from "./services/NoteSyncService";
-import {
-  getExtension,
-  getDWorkspace,
-  DendronExtension,
-  getVaultFromUri,
-} from "./workspace";
 import * as Sentry from "@sentry/node";
-import { FileWatcher } from "./fileWatcher";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "./utils/analytics";
-import { SchemaSyncService } from "./services/SchemaSyncService";
+import { IWorkspaceWatcher } from "./WorkspaceWatcherInterface";
+import { IFileWatcher } from "./fileWatcherInterface";
+import { IDendronExtension } from "./dendronExtensionInterface";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -63,17 +57,22 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
   flush(): ReturnType<T> | undefined;
 }
 
-export class WorkspaceWatcher {
+export class WorkspaceWatcher implements IWorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument>;
-  private _debouncedOnDidChangeTextDocument: DebouncedFunc<
+  private readonly _debouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
-  private _quickDebouncedOnDidChangeTextDocument: DebouncedFunc<
+  private readonly _quickDebouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
 
-  constructor() {
+  private _fileWatcher: IFileWatcher;
+  private extension: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    this._fileWatcher = extension.fileWatcher!;
+    this.extension = extension;
     this._openedDocuments = new Map();
     this._debouncedOnDidChangeTextDocument = _.debounce(
       this.onDidChangeTextDocument,
@@ -86,9 +85,7 @@ export class WorkspaceWatcher {
   }
 
   activate(context: ExtensionContext) {
-    const extension = getExtension();
-
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onWillSaveTextDocument(
         this.onWillSaveTextDocument,
         this,
@@ -96,14 +93,14 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onDidChangeTextDocument(
         this._debouncedOnDidChangeTextDocument,
         this,
         context.subscriptions
       )
     );
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onDidChangeTextDocument(
         this._quickDebouncedOnDidChangeTextDocument,
         this,
@@ -111,7 +108,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onDidSaveTextDocument(
         this.onDidSaveTextDocument,
         this,
@@ -121,7 +118,7 @@ export class WorkspaceWatcher {
 
     // NOTE: currently, this is only used for logging purposes
     if (Logger.isDebug()) {
-      extension.addDisposable(
+      this.extension.addDisposable(
         workspace.onDidOpenTextDocument(
           this.onDidOpenTextDocument,
           this,
@@ -130,7 +127,7 @@ export class WorkspaceWatcher {
       );
     }
 
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onWillRenameFiles(
         this.onWillRenameFiles,
         this,
@@ -138,7 +135,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this.extension.addDisposable(
       workspace.onDidRenameFiles(
         this.onDidRenameFiles,
         this,
@@ -149,7 +146,7 @@ export class WorkspaceWatcher {
 
   async onDidSaveTextDocument(document: TextDocument) {
     if (SchemaUtils.isSchemaUri(document.uri)) {
-      await SchemaSyncService.instance().onDidSave({ document });
+      await this.extension.schemaSyncService.onDidSave({ document });
     }
   }
 
@@ -169,13 +166,13 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "enter" });
       this._debouncedOnDidChangeTextDocument.cancel();
       const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const contentChanges = event.contentChanges;
-      NoteSyncService.instance().onDidChange(event.document, {
+      await this.extension.noteSyncService.onDidChange(event.document, {
         contentChanges,
       });
       Logger.debug({ ...ctx, state: "exit" });
@@ -202,14 +199,14 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "enter" });
       this._quickDebouncedOnDidChangeTextDocument.cancel();
       const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const activeEditor = window.activeTextEditor;
       if (activeEditor?.document.uri.fsPath === event.document.uri.fsPath) {
-        getExtension().windowWatcher?.triggerUpdateDecorations(activeEditor);
+        this.extension.windowWatcher?.triggerUpdateDecorations(activeEditor);
       }
       Logger.debug({ ...ctx, state: "exit" });
       return;
@@ -244,7 +241,7 @@ export class WorkspaceWatcher {
         reason: TextDocumentSaveReason[event.reason],
         msg: "enter",
       });
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (!this.extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
         Logger.debug({
           ctx,
           uri: uri.fsPath,
@@ -269,18 +266,18 @@ export class WorkspaceWatcher {
     }
   }
 
-  private onWillSaveNote(event: TextDocumentWillSaveEvent) {
+  onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
-    const engineClient = getDWorkspace().engine;
+    const engineClient = this.extension.getDWorkspace().engine;
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
     const note = NoteUtils.getNoteByFnameV5({
       fname,
-      vault: getVaultFromUri(uri),
+      vault: this.extension.vaultsResolver.getVaultFromUri(uri),
       notes: engineClient.notes,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
     }) as NoteProps;
 
     const content = event.document.getText();
@@ -321,7 +318,7 @@ export class WorkspaceWatcher {
    *
    * Mind that this method is not idempotent, checking the same document twice will always return false for the second time.
    */
-  public getNewlyOpenedDocument(document: TextDocument): boolean {
+  getNewlyOpenedDocument(document: TextDocument): boolean {
     const key = document.uri.fsPath;
     if (this._openedDocuments?.has(key)) {
       Logger.debug({
@@ -340,12 +337,12 @@ export class WorkspaceWatcher {
    */
   onWillRenameFiles(args: FileWillRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this.extension.isActiveV2()) {
       return;
     }
     try {
       const files = args.files[0];
-      const { vaults, wsRoot } = getDWorkspace();
+      const { vaults, wsRoot } = this.extension.getDWorkspace();
       const { oldUri, newUri } = files;
       const oldVault = VaultUtils.getVaultByFilePath({
         vaults,
@@ -372,7 +369,7 @@ export class WorkspaceWatcher {
         isEventSourceEngine: false,
       };
       AnalyticsUtils.track(ContextualUIEvents.ContextualUIRename);
-      const engine = getExtension().getEngine();
+      const engine = this.extension.getEngine();
       const updateNoteReferences = engine.renameNote(opts);
       args.waitUntil(updateNoteReferences);
     } catch (error: any) {
@@ -387,15 +384,15 @@ export class WorkspaceWatcher {
    */
   async onDidRenameFiles(args: FileRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this.extension.isActiveV2()) {
       return;
     }
     try {
       const files = args.files[0];
       const { newUri } = files;
       const fname = DNodeUtils.fname(newUri.fsPath);
-      const engine = getExtension().getEngine();
-      const { vaults, wsRoot } = getDWorkspace();
+      const engine = this.extension.getEngine();
+      const { vaults, wsRoot } = this.extension.getDWorkspace();
       const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
@@ -414,7 +411,7 @@ export class WorkspaceWatcher {
       Sentry.captureException(error);
       throw error;
     } finally {
-      FileWatcher.refreshTree();
+      this._fileWatcher.refreshTree();
     }
   }
 }

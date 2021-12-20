@@ -315,9 +315,18 @@ export class PodUIControls {
     );
 
     configs.forEach((config) => {
-      const keybinding = KeybindingUtils.getKeybindingForPodIfExists(
-        config.podId
-      );
+      let keybinding;
+
+      try {
+        keybinding = KeybindingUtils.getKeybindingForPodIfExists(config.podId);
+      } catch (e: any) {
+        if (
+          e.message &&
+          e.message.includes(KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT)
+        ) {
+          keybinding = "Multiple Keybindings";
+        }
+      }
 
       let description = config.podType.toString();
 

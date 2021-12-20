@@ -84,7 +84,7 @@ suite("DeleteNodeCommand", function () {
         await NoteTestUtilsV4.createNote({
           fname: "explicit-same-vault-link",
           vault: vaults[0],
-          body: ["[[dendron://vault/note-to-be-deleted]]", "[[dummy]]"].join(
+          body: ["[[dendron://vault1/note-to-be-deleted]]", "[[dummy]]"].join(
             "\n"
           ),
           wsRoot,
@@ -98,9 +98,9 @@ suite("DeleteNodeCommand", function () {
         });
 
         await NoteTestUtilsV4.createNote({
-          fname: "explicit-same-vault-link",
+          fname: "explicit-same-vault-link2",
           vault: vaults[1],
-          body: ["[[dendron://vault/note-to-be-deleted]]", "[[dummy]]"].join(
+          body: ["[[dendron://vault1/note-to-be-deleted]]", "[[dummy]]"].join(
             "\n"
           ),
           wsRoot,

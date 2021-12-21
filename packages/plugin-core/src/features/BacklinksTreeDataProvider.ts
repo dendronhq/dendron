@@ -159,8 +159,8 @@ const refsToBacklinkTreeItems = (
     };
     if (ref.isCandidate) {
       backlink.command = {
-        command: "dendron.convertLink",
-        title: "Convert Link",
+        command: "dendron.convertCandidateLink",
+        title: "Convert Candidate Link",
         arguments: [{ location: ref.location, text: path.parse(fsPath).name }],
       };
     }

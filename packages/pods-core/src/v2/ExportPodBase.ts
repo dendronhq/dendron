@@ -18,4 +18,11 @@ export interface ExportPodV2<R> {
   exportText?(input: string): Promise<R>;
 
   exportNote?(input: NoteProps): Promise<R>;
+
+  /**
+   * Bulk export of notes. Allows for external API optimizations such as call
+   * batching
+   * @param input
+   */
+  exportNotes?(input: NoteProps[]): Promise<R>;
 }

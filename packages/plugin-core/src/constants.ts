@@ -159,6 +159,10 @@ export const DENDRON_MENUS = {
       command: "dendron.lookupNoteAutoComplete",
       when: "false",
     },
+    {
+      command: "dendron.convertCandidateLink",
+      when: "false",
+    },
   ],
   "view/title": [
     {
@@ -371,11 +375,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Move a header, and update all links to it.",
   },
+  CONVERT_CANDIDATE_LINK: {
+    key: "dendron.convertCandidateLink",
+    title: `${CMD_PREFIX} Convert Candidate Link`,
+    group: "notes",
+    desc: "Convert link candidate into backlink",
+  },
   CONVERT_LINK: {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,
     group: "notes",
-    desc: "Convert link candidate into backlink",
+    desc: "Convert links",
   },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",

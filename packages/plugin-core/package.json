@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.73.1",
+  "version": "0.74.0",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -46,27 +46,29 @@
         {
           "id": "dendron.sample",
           "name": "Sample View",
-          "when": "dendron:devMode",
-          "type": "webview"
+          "contextualTitle": "Sample View",
+          "type": "webview",
+          "when": "dendron:devMode"
         },
         {
           "id": "dendron.calendar-view",
           "name": "Calendar View",
+          "contextualTitle": "Calendar View",
           "type": "webview"
         },
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "when": "dendron:pluginActive && !dendron:webUIEnabled",
           "contextualTitle": "Tree View",
+          "when": "dendron:pluginActive && !dendron:webUIEnabled",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.tree-view",
-          "name": "Tree View V2",
-          "when": "dendron:webUIEnabled",
-          "type": "webview",
+          "name": "Tree View",
           "contextualTitle": "Tree View",
+          "type": "webview",
+          "when": "dendron:webUIEnabled",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
@@ -181,9 +183,14 @@
         "desc": "Move a header, and update all links to it."
       },
       {
+        "command": "dendron.convertCandidateLink",
+        "title": "Dendron: Convert Candidate Link",
+        "desc": "Convert link candidate into backlink"
+      },
+      {
         "command": "dendron.convertLink",
         "title": "Dendron: Convert Link",
-        "desc": "Convert link candidate into backlink"
+        "desc": "Convert links"
       },
       {
         "command": "dendron.lookupNote",
@@ -402,6 +409,16 @@
         "when": "dendron:pluginActive"
       },
       {
+        "command": "dendron.registerNoteTrait",
+        "title": "Dendron: Register Note Trait",
+        "desc": "Register a new Note Trait in Dendron's Trait System"
+      },
+      {
+        "command": "dendron.createNoteWithTraits",
+        "title": "Dendron: Create Note with Custom Traits",
+        "desc": "Create a New Note with a User-Defined Trait Applied"
+      },
+      {
         "command": "dendron.publishExport",
         "title": "Dendron: Publish Export",
         "desc": "Export your notes for publishing.",
@@ -578,22 +595,16 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
-      },
-      {
-        "command": "dendron.registerNoteTrait",
-        "title": "Dendron: Register Note Trait",
-        "desc": "Register a new Note Trait"
-      },
-      {
-        "command": "dendron.createNoteWithTraits",
-        "title": "Dendron: Create Note with Custom Traits",
-        "desc": "Create a New Note with a User-Defined Traits Applied"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "dendron.lookupNoteAutoComplete",
+          "when": "false"
+        },
+        {
+          "command": "dendron.convertCandidateLink",
           "when": "false"
         }
       ],
@@ -926,8 +937,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.73.1",
-    "@dendronhq/engine-test-utils": "^0.73.1",
+    "@dendronhq/common-test-utils": "^0.74.0",
+    "@dendronhq/engine-test-utils": "^0.74.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -963,11 +974,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.73.1",
-    "@dendronhq/common-all": "^0.73.1",
-    "@dendronhq/common-server": "^0.73.1",
-    "@dendronhq/engine-server": "^0.73.1",
-    "@dendronhq/pods-core": "^0.73.1",
+    "@dendronhq/api-server": "^0.74.0",
+    "@dendronhq/common-all": "^0.74.0",
+    "@dendronhq/common-server": "^0.74.0",
+    "@dendronhq/engine-server": "^0.74.0",
+    "@dendronhq/pods-core": "^0.74.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

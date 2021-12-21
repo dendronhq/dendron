@@ -1,13 +1,6 @@
-import {
-  DendronASTDest,
-  MDUtilsV5,
-  RemarkUtils,
-  UnistNode,
-} from "@dendronhq/engine-server";
+import { RemarkUtils } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
-// @ts-ignore
-import visit from "unist-util-visit";
 import vscode, { FoldingRangeKind } from "vscode";
 import { VSCodeUtils } from "../vsCodeUtils";
 

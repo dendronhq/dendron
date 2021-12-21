@@ -1,11 +1,6 @@
 import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
-import {
-  DendronASTDest,
-  MDUtilsV5,
-  RemarkUtils,
-} from "@dendronhq/engine-server";
+import { RemarkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import visit from "unist-util-visit";
 import {
   ExtensionContext,
   Selection,

@@ -47,7 +47,7 @@ export abstract class BaseExportPodCommand<
   /**
    *
    * @param hierarchySelector a user control that can return a selected
-   * hierarchy to export. Should use {@link QuickPickHeirarchySelector} by
+   * hierarchy to export. Should use {@link QuickPickHierarchySelector} by
    * default
    */
   constructor(hierarchySelector: HierarchySelector) {

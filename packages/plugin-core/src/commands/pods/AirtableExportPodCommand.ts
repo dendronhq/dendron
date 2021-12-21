@@ -24,7 +24,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 import { RateLimiter } from "limiter";
-import { QuickPickHeirarchySelector } from "../../components/lookup/HierarchySelector";
+import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 
 /**
  * VSCode command for running the Airtable Export Pod. It is not meant to be
@@ -38,7 +38,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   public key = "dendron.airtableexport";
 
   public constructor() {
-    super(new QuickPickHeirarchySelector());
+    super(new QuickPickHierarchySelector());
   }
 
   public createPod(

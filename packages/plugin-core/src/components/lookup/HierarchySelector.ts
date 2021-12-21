@@ -27,7 +27,7 @@ export interface HierarchySelector {
  * Implementation of HierarchySelector that prompts user to with a lookup
  * controller V3.
  */
-export class QuickPickHeirarchySelector implements HierarchySelector {
+export class QuickPickHierarchySelector implements HierarchySelector {
   getHierarchy(): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve) => {
       const lookupCreateOpts: LookupControllerV3CreateOpts = {

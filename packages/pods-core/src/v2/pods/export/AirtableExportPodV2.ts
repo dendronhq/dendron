@@ -1,5 +1,6 @@
 import Airtable, { Base, FieldSet, Records } from "@dendronhq/airtable";
 import {
+  DendronCompositeError,
   DendronError,
   NoteProps,
   ResponseUtil,
@@ -7,6 +8,8 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { JSONSchemaType } from "ajv";
+import { RateLimiter } from "limiter";
+import _ from "lodash";
 import {
   AirtableUtils,
   ConfigFileUtils,
@@ -46,44 +49,82 @@ export class AirtableExportPodV2
   }
 
   async exportNote(input: NoteProps): Promise<AirtableExportReturnType> {
-    const payload = this.getPayloadFromNote(input);
+    return this.exportNotes([input]);
+  }
 
-    try {
-      let updated;
-      let created;
-      if (payload.update && payload.update.length > 0) {
-        updated = await this._airtableBase(this._config.tableName).update(
-          payload.update
-        );
-      }
+  async exportNotes(input: NoteProps[]): Promise<AirtableExportReturnType> {
+    const limiter = new RateLimiter({
+      tokensPerInterval: 5,
+      interval: "second",
+    });
 
-      if (payload.create && payload.create.length > 0) {
-        created = await this._airtableBase(this._config.tableName).create(
-          payload.create
-        );
-      }
+    const chunks = _.chunk(input, 10);
 
+    const returnValue: Omit<AirtableExportReturnType, "error"> = {};
+
+    returnValue.data = {};
+
+    const errors: DendronError[] = [];
+
+    await Promise.all(
+      chunks.flatMap(async (notes) => {
+        await limiter.removeTokens(1);
+        const payload = this.getPayloadForNotes(notes);
+
+        try {
+          let updated;
+          let created;
+          if (payload.update && payload.update.length > 0) {
+            updated = await this._airtableBase(this._config.tableName).update(
+              payload.update
+            );
+
+            if (returnValue.data?.updated) {
+              returnValue.data.updated =
+                returnValue.data.updated.concat(updated);
+            } else {
+              returnValue.data!.updated = updated;
+            }
+          }
+
+          if (payload.create && payload.create.length > 0) {
+            created = await this._airtableBase(this._config.tableName).create(
+              payload.create
+            );
+
+            if (returnValue.data?.created) {
+              returnValue.data.created =
+                returnValue.data.created.concat(created);
+            } else {
+              returnValue.data!.created = created;
+            }
+          }
+        } catch (err: any) {
+          errors.push(err as DendronError);
+        }
+      })
+    );
+
+    if (errors.length > 0) {
+      return {
+        data: returnValue.data,
+        error: new DendronCompositeError(errors),
+      };
+    } else {
       return ResponseUtil.createHappyResponse({
-        data: {
-          created,
-          updated,
-        },
-      });
-    } catch (err: any) {
-      return ResponseUtil.createUnhappyResponse({
-        error: err as DendronError,
+        data: returnValue.data,
       });
     }
   }
 
-  private getPayloadFromNote(note: NoteProps): {
+  private getPayloadForNotes(notes: NoteProps[]): {
     create: AirtableFieldsMap[];
     update: any[];
   } {
     const logger = createLogger("AirtablePublishPodV2");
 
     const { update, create } = AirtableUtils.notesToSrcFieldMap({
-      notes: [note],
+      notes,
       srcFieldMapping: this._config.sourceFieldMapping,
       logger,
     });

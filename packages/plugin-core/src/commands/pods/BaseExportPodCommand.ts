@@ -6,19 +6,19 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  ExportPodV2,
-  PodExportScope,
   ExportPodFactory,
-  RunnablePodConfigV2,
+  ExportPodV2,
   JSONSchemaType,
+  PodExportScope,
   PodUtils,
+  RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
 import path from "path";
 import * as vscode from "vscode";
+import { HierarchySelector } from "../../components/lookup/HierarchySelector";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { BaseCommand } from "../base";
-import { RateLimiter } from "limiter";
 
 /**
  * Abstract base class for export pod commands. This class will defer input
@@ -41,6 +41,19 @@ export abstract class BaseExportPodCommand<
   >
   implements ExportPodFactory<Config, R>
 {
+  private hierarchySelector: HierarchySelector;
+
+  /**
+   *
+   * @param hierarchySelector a user control that can return a selected
+   * hierarchy to export. Should use {@link QuickPickHierarchySelector} by
+   * default
+   */
+  constructor(hierarchySelector: HierarchySelector) {
+    super();
+    this.hierarchySelector = hierarchySelector;
+  }
+
   /**
    * Provide a pod factory method to instantiate the pod instance with the
    * passed in configuration
@@ -52,13 +65,6 @@ export abstract class BaseExportPodCommand<
    * Provide a method to get ajv schema of runnable pod config
    */
   public abstract getRunnableSchema(): JSONSchemaType<Config>;
-
-  /**
-   * Optionally specify a level of throttling to reduce the rate of calling
-   * exportNote(). This may be required when invoking a network API in the
-   * export.
-   */
-  public getLimiter?(): RateLimiter;
 
   /**
    * Gather the appropriate input payload based on the specified export scope.
@@ -107,10 +113,22 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Hierarchy: {
-        throw new Error("Export Scope Not Yet Implemented");
+        payload = await this.getHierarchyProps();
+
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get hierarchy payload.");
+          return;
+        }
+        break;
       }
       case PodExportScope.Workspace: {
-        throw new Error("Export Scope Not Yet Implemented");
+        payload = this.getWorkspaceProps();
+
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get workspace payload.");
+          return;
+        }
+        break;
       }
       default:
         assertUnreachable();
@@ -140,7 +158,7 @@ export abstract class BaseExportPodCommand<
 
         const pod = this.createPod(opts.config);
         PodUtils.validate(opts.config, this.getRunnableSchema());
-        
+
         switch (opts.config.exportScope) {
           case PodExportScope.Clipboard:
           case PodExportScope.Selection: {
@@ -160,19 +178,13 @@ export abstract class BaseExportPodCommand<
             }
             break;
           }
-          case PodExportScope.Note:
-          case PodExportScope.Hierarchy:
-          case PodExportScope.Workspace: {
+          case PodExportScope.Note: {
             const promises = [];
 
             for (const noteProp of opts.payload) {
               if (typeof noteProp === "string") {
                 throw new Error("Invalid Payload Type in Pod Note Export");
               } else if (pod.exportNote) {
-                if (this.getLimiter) {
-                  // eslint-disable-next-line no-await-in-loop
-                  await this.getLimiter().removeTokens(1);
-                }
                 promises.push(
                   pod.exportNote(noteProp).then((result) => {
                     this.onExportComplete({
@@ -183,19 +195,36 @@ export abstract class BaseExportPodCommand<
                   })
                 );
               } else {
-                throw new Error("Note export not supported by this pod!");
+                throw new Error("Invalid Payload Type in Text Export");
               }
             }
-            return Promise.all(promises);
+            break;
           }
+          case PodExportScope.Hierarchy:
+          case PodExportScope.Workspace: {
+            if (typeof opts.payload === "string") {
+              throw new Error("Invalid Payload Type in Pod Note Export");
+            } else if (pod.exportNotes) {
+              pod.exportNotes(opts.payload).then((result) => {
+                this.onExportComplete({
+                  exportReturnValue: result,
+                  payload: opts.payload,
+                  config: opts.config,
+                });
+              });
+            } else {
+              throw new Error("Multi Note Export not supported by this pod!");
+            }
+
+            break;
+          }
+
           default:
             assertUnreachable();
         }
-        return;
       }
     );
   }
-
   /**
    * Executed after export is complete. If multiple notes are being exported,
    * this is invoked on each exported note.
@@ -207,9 +236,33 @@ export abstract class BaseExportPodCommand<
     config,
   }: {
     exportReturnValue: R;
-    payload: string | NoteProps;
+    payload: string | NoteProps | NoteProps[];
     config: Config;
   }): void;
+
+  /**
+   * Gets notes matching the selected hierarchy
+   * @returns
+   */
+  private async getHierarchyProps(): Promise<
+    DNodeProps<any, any>[] | undefined
+  > {
+    return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {
+      this.hierarchySelector.getHierarchy().then((selection) => {
+        if (!selection) {
+          return resolve(undefined);
+        }
+
+        const notes = getExtension().getEngine().notes;
+
+        resolve(
+          Object.values(notes).filter(
+            (value) => value.fname.startsWith(selection) && value.stub !== true
+          )
+        );
+      });
+    });
+  }
 
   private getNoteProps(): DNodeProps[] | undefined {
     //TODO: Switch this to a lookup controller, allow multiselect
@@ -242,5 +295,14 @@ export abstract class BaseExportPodCommand<
       vscode.window.showErrorMessage("couldn't find the note somehow");
     }
     return [maybeNote!];
+  }
+
+  /**
+   *
+   * @returns all notes in the workspace
+   */
+  private getWorkspaceProps(): DNodeProps[] | undefined {
+    const { engine } = getDWorkspace();
+    return Object.values(engine.notes);
   }
 }

@@ -83,7 +83,7 @@ export { LINK_CONTENTS, LINK_NAME, ALIAS_NAME };
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
   errors.push(err);
-  proc().data("errors", errors);
+  // no need to put errors back into proc, it's a mutable array
 }
 
 export function getNoteOrError(

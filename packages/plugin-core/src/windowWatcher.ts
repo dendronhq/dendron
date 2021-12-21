@@ -1,5 +1,12 @@
 import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
+import {
+  DendronASTDest,
+  MDUtilsV5,
+  WorkspaceUtils,
+  RemarkUtils
+} from "@dendronhq/engine-server";
 import { RemarkUtils } from "@dendronhq/engine-server";
+
 import _ from "lodash";
 import {
   ExtensionContext,
@@ -109,7 +116,10 @@ export class WindowWatcher {
         return;
       }
       const uri = editor.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      const { vaults, wsRoot } = getDWorkspace();
+      if (
+        !WorkspaceUtils.isPathInWorkspace({ fpath: uri.fsPath, vaults, wsRoot })
+      ) {
         return;
       }
       Logger.info({ ctx, editor: uri.fsPath });

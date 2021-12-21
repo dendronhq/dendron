@@ -1,5 +1,9 @@
 import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  MDUtilsV5,
+  RemarkUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import visit from "unist-util-visit";
 import {
@@ -162,23 +166,15 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_DENDRON }
+    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+      editor.document.getText()
     );
-    const parsed = proc.parse(editor.document.getText());
-    visit(parsed, ["yaml"], (node) => {
-      if (_.isUndefined(node.position)) return false; // Should never happen
-      const position = VSCodeUtils.point2VSCodePosition(
-        node.position.end,
-        // Move past frontmatter + one line after the end because otherwise this ends up inside frontmatter when folded.
-        // This also makes sense because the front
-        { line: 1 }
-      );
+    if (!_.isUndefined(nodePosition)) {
+      const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
+        line: 1,
+      });
       editor.selection = new Selection(position, position);
-      // Found the frontmatter already, stop traversing
-      return false;
-    });
+    }
   }
 
   private async foldFrontmatter() {

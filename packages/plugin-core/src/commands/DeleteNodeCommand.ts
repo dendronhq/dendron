@@ -5,6 +5,7 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  Position,
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -20,6 +21,7 @@ import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import _md from "markdown-it";
 import fs from "fs-extra";
+import { RemarkUtils } from "@dendronhq/engine-server";
 
 type CommandOpts = {
   _fsPath?: string;
@@ -37,8 +39,6 @@ function formatDeletedMsg({
 }) {
   return `${path.basename(fsPath)} (${VaultUtils.getName(vault)}) deleted`;
 }
-
-const md = _md();
 
 export class DeleteNodeCommand extends BasicCommand<
   CommandOpts,
@@ -71,9 +71,11 @@ export class DeleteNodeCommand extends BasicCommand<
       wsRoot,
     });
     const fileContent = fs.readFileSync(fsPath).toString();
-    const lines = fileContent.split("\n");
-    lines.shift();
-    return lines.indexOf("---") + 2;
+    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+      fileContent
+    ) as Position;
+
+    return nodePosition?.end.line;
   }
 
   async showNoteDeletePreview(note: NoteProps, backlinks: DLink[]) {
@@ -117,7 +119,7 @@ export class DeleteNodeCommand extends BasicCommand<
       ViewColumn.One,
       {}
     );
-    panel.webview.html = md.render(content.join("\n"));
+    panel.webview.html = _md().render(content.join("\n"));
     return content.join("\n");
   }
 

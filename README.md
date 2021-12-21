@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-115-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-116-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -316,6 +316,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/jquesada2016"><img src="https://avatars.githubusercontent.com/u/54370171?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jquesada2016</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajquesada2016" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=jquesada2016" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/phanirithvij"><img src="https://avatars.githubusercontent.com/u/29627898?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Phani Rithvij</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aphanirithvij" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/kzilla-git"><img src="https://avatars.githubusercontent.com/u/12721315?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kumudan</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akzilla-git" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/zersiax"><img src="https://avatars.githubusercontent.com/u/5076383?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Florian Beijers</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Azersiax" title="Bug reports">🐛</a> <a href="#a11y-zersiax" title="Accessibility">️️️️♿️</a></td>
   </tr>
 </table>
 

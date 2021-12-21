@@ -267,6 +267,8 @@ export class NoteFNamesDict {
     toDelete.forEach((note) => {
       this._internalMap.delete(note.fname.toLowerCase(), note.id);
     });
+  }
+}
 export class FIFOQueue<T> {
   private _internalQueue: T[] = [];
 

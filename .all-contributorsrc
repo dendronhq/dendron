@@ -1072,6 +1072,15 @@
         "bug",
         "doc"
       ]
+    },
+    {
+      "login": "phanirithvij",
+      "name": "Phani Rithvij",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29627898?v=4",
+      "profile": "https://github.com/phanirithvij",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1090,6 +1090,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "zersiax",
+      "name": "Florian Beijers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5076383?v=4",
+      "profile": "https://github.com/zersiax",
+      "contributions": [
+        "bug",
+        "a11y"
+      ]
     }
   ],
   "contributorsPerLine": 7,

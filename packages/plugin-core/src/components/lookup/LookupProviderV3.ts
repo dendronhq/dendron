@@ -621,7 +621,13 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
               });
             }
           });
-        //window.showErrorMessage("schemas can only be one level deep");
+
+        HistoryService.instance().add({
+          source: "lookupProvider",
+          action: "done",
+          id: this.id,
+          data: { cancel: true },
+        });
         return;
       }
       // last chance to cancel

@@ -1062,6 +1062,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jquesada2016",
+      "name": "jquesada2016",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54370171?v=4",
+      "profile": "https://github.com/jquesada2016",
+      "contributions": [
+        "bug",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

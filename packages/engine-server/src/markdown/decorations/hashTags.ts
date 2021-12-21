@@ -42,9 +42,9 @@ export function decorateTag({
   lineOffset?: number;
 }) {
   let color: string | undefined;
-  const { color: foundColor, type: colorType } = NoteUtils.color({
+  const { color: foundColor, type: colorType } = NoteUtils.colorV2({
     fname,
-    notes: engine.notes,
+    engine,
   });
   if (colorType === "configured" || !engine.config.noRandomlyColoredTags) {
     color = foundColor;

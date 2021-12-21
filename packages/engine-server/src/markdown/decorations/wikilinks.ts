@@ -111,7 +111,7 @@ export function linkedNoteType({
   errors: IDendronError[];
 } {
   const ctx = "linkedNoteType";
-  const { notes, vaults } = engine;
+  const { vaults } = engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
@@ -128,10 +128,10 @@ export function linkedNoteType({
     matchingNotes = note ? [note] : [];
   } else if (fname) {
     try {
-      matchingNotes = NoteUtils.getNotesByFname({
+      matchingNotes = NoteUtils.getNotesByFnameV2({
         fname,
         vault,
-        notes,
+        engine,
       });
     } catch (err) {
       return {

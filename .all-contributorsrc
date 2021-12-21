@@ -1100,6 +1100,15 @@
         "bug",
         "a11y"
       ]
+    },
+    {
+      "login": "rlh1994",
+      "name": "Ryan Hill",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8260415?v=4",
+      "profile": "https://github.com/rlh1994",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

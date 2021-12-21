@@ -19,12 +19,11 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
+import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
-import { RateLimiter } from "limiter";
-import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 
 /**
  * VSCode command for running the Airtable Export Pod. It is not meant to be
@@ -52,14 +51,6 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
 
   public getRunnableSchema(): JSONSchemaType<RunnableAirtableV2PodConfig> {
     return createRunnableAirtableV2PodConfigSchema();
-  }
-
-  /**
-   * Throttles Airtable API calls to 5 calls per second.
-   * @returns
-   */
-  public getLimiter(): RateLimiter {
-    return new RateLimiter({ tokensPerInterval: 5, interval: "second" });
   }
 
   async gatherInputs(
@@ -177,36 +168,35 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   public onExportComplete(opts: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
-    payload: string | NoteProps;
+    payload: string | NoteProps[];
   }): void {
     const { exportReturnValue } = opts;
 
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Error while running Airtable Export Pod: ${ErrorFactory.safeStringify(
-        exportReturnValue.error
-      )}`;
-
-      this.L.error(errorMsg);
-      return;
-    }
-
     if (exportReturnValue.data?.created) {
-      this.updateNoteWithAirtableId(exportReturnValue.data?.created);
+      this.updateNotesWithAirtableId(exportReturnValue.data?.created);
     }
 
     if (exportReturnValue.data?.updated) {
-      this.updateNoteWithAirtableId(exportReturnValue.data?.updated);
+      this.updateNotesWithAirtableId(exportReturnValue.data?.updated);
     }
 
     const createdCount = exportReturnValue.data?.created?.length ?? 0;
     const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
 
-    window.showInformationMessage(
-      `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
-    );
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      window.showInformationMessage(
+        `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
+      );
+    }
   }
 
-  private async updateNoteWithAirtableId(
+  private async updateNotesWithAirtableId(
     records: Records<FieldSet>
   ): Promise<void> {
     const engine = getEngine();

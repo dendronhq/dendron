@@ -13,7 +13,6 @@ import {
   PodUtils,
   RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
-import { RateLimiter } from "limiter";
 import path from "path";
 import * as vscode from "vscode";
 import { HierarchySelector } from "../../components/lookup/HierarchySelector";
@@ -66,13 +65,6 @@ export abstract class BaseExportPodCommand<
    * Provide a method to get ajv schema of runnable pod config
    */
   public abstract getRunnableSchema(): JSONSchemaType<Config>;
-
-  /**
-   * Optionally specify a level of throttling to reduce the rate of calling
-   * exportNote(). This may be required when invoking a network API in the
-   * export.
-   */
-  public getLimiter?(): RateLimiter;
 
   /**
    * Gather the appropriate input payload based on the specified export scope.
@@ -166,7 +158,7 @@ export abstract class BaseExportPodCommand<
 
         const pod = this.createPod(opts.config);
         PodUtils.validate(opts.config, this.getRunnableSchema());
-        
+
         switch (opts.config.exportScope) {
           case PodExportScope.Clipboard:
           case PodExportScope.Selection: {
@@ -186,19 +178,13 @@ export abstract class BaseExportPodCommand<
             }
             break;
           }
-          case PodExportScope.Note:
-          case PodExportScope.Hierarchy:
-          case PodExportScope.Workspace: {
+          case PodExportScope.Note: {
             const promises = [];
 
             for (const noteProp of opts.payload) {
               if (typeof noteProp === "string") {
                 throw new Error("Invalid Payload Type in Pod Note Export");
               } else if (pod.exportNote) {
-                if (this.getLimiter) {
-                  // eslint-disable-next-line no-await-in-loop
-                  await this.getLimiter().removeTokens(1);
-                }
                 promises.push(
                   pod.exportNote(noteProp).then((result) => {
                     this.onExportComplete({
@@ -209,19 +195,36 @@ export abstract class BaseExportPodCommand<
                   })
                 );
               } else {
-                throw new Error("Note export not supported by this pod!");
+                throw new Error("Invalid Payload Type in Text Export");
               }
             }
-            return Promise.all(promises);
+            break;
           }
+          case PodExportScope.Hierarchy:
+          case PodExportScope.Workspace: {
+            if (typeof opts.payload === "string") {
+              throw new Error("Invalid Payload Type in Pod Note Export");
+            } else if (pod.exportNotes) {
+              pod.exportNotes(opts.payload).then((result) => {
+                this.onExportComplete({
+                  exportReturnValue: result,
+                  payload: opts.payload,
+                  config: opts.config,
+                });
+              });
+            } else {
+              throw new Error("Multi Note Export not supported by this pod!");
+            }
+
+            break;
+          }
+
           default:
             assertUnreachable();
         }
-        return;
       }
     );
   }
-
   /**
    * Executed after export is complete. If multiple notes are being exported,
    * this is invoked on each exported note.
@@ -233,7 +236,7 @@ export abstract class BaseExportPodCommand<
     config,
   }: {
     exportReturnValue: R;
-    payload: string | NoteProps;
+    payload: string | NoteProps | NoteProps[];
     config: Config;
   }): void;
 

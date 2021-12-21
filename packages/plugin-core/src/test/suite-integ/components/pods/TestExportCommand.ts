@@ -80,6 +80,6 @@ export class TestExportPodCommand extends BaseExportPodCommand<
   public onExportComplete(_opts: {
     exportReturnValue: string;
     config: RunnablePodConfigV2;
-    payload: string | NoteProps;
+    payload: string | NoteProps | NoteProps[];
   }): void {}
 }

@@ -202,20 +202,20 @@ export const provideCompletionItems = sentryReportingCallback(
           // x will get sorted after numbers, so these will appear after notes without x
           item.sortText = "x" + item.sortText;
 
-        const sameNameNotes = NoteUtils.getNotesByFnameV2({
-          fname: note.fname,
-          engine,
-        }).length;
-        if (sameNameNotes > 1) {
-          // There are multiple notes with the same name in multiple vaults,
-          // and this note is in a different vault than the current note.
-          // To generate a link to this note, we have to do an xvault link.
-          item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
-            item.insertText
-          }`;
+          const sameNameNotes = NoteUtils.getNotesByFnameV2({
+            fname: note.fname,
+            engine,
+          }).length;
+          if (sameNameNotes > 1) {
+            // There are multiple notes with the same name in multiple vaults,
+            // and this note is in a different vault than the current note.
+            // To generate a link to this note, we have to do an xvault link.
+            item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
+              item.insertText
+            }`;
+          }
         }
       }
-
       completionItems.push(item);
     });
     Logger.info({ ctx, completionItemsLength: completionItems.length });

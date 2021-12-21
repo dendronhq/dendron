@@ -935,9 +935,9 @@ export class FileStorage implements DStore {
     }
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
     this.notes[note.id] = note;
+    this.noteFnames.add(note);
     if (maybeNote) {
       this.noteFnames.delete(maybeNote);
-      this.noteFnames.add(note);
     }
     return note;
   }

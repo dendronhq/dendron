@@ -44,21 +44,29 @@ export class ConvertLinkCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONVERT_LINK.key;
 
-  noAvailableOperationError = new DendronError({
-    message: `No available convert operation for link at cursor position.`,
-  });
+  static noAvailableOperationError() {
+    return new DendronError({
+      message: `No available convert operation for link at cursor position.`,
+    });
+  }
 
-  noVaultError = new DendronError({
-    message: "this link points to a note in a vault that doesn't exist",
-  });
+  static noVaultError() {
+    return new DendronError({
+      message: "this link points to a note in a vault that doesn't exist",
+    });
+  }
 
-  noLinkError = new DendronError({
-    message: `No link at cursor position.`,
-  });
+  static noLinkError() {
+    return new DendronError({
+      message: `No link at cursor position.`,
+    });
+  }
 
-  noTextError = new DendronError({
-    message: "Failed to determine text to replace broken link.",
-  });
+  static noTextError() {
+    return new DendronError({
+      message: "Failed to determine text to replace broken link.",
+    });
+  }
 
   prepareBrokenLinkConvertOptions(reference: getReferenceAtPositionResp) {
     const parsedLink = LinkUtils.parseLinkV2({
@@ -262,7 +270,7 @@ export class ConvertLinkCommand extends BasicCommand<
         }
 
         if (_.isUndefined(tagType)) {
-          throw this.noAvailableOperationError;
+          throw ConvertLinkCommand.noAvailableOperationError();
         }
 
         const shouldProceed = await this.promptConfirmation({
@@ -280,7 +288,7 @@ export class ConvertLinkCommand extends BasicCommand<
       }
       case "fmtag":
       case "refv2": {
-        throw this.noAvailableOperationError;
+        throw ConvertLinkCommand.noAvailableOperationError();
       }
       default: {
         assertUnreachable();
@@ -296,22 +304,24 @@ export class ConvertLinkCommand extends BasicCommand<
     const { vaults, wsRoot, notes } = engine;
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const { document, selection } = editor;
-    const reference = getReferenceAtPosition(document, selection.start);
+    const reference = getReferenceAtPosition(document, selection.start, {
+      allowInCodeBlocks: true,
+    });
 
     if (reference === null) {
-      throw this.noLinkError;
+      throw ConvertLinkCommand.noLinkError();
     }
 
     const { ref, vaultName, range, refType } = reference;
     if (refType === "fmtag") {
-      throw this.noAvailableOperationError;
+      throw ConvertLinkCommand.noAvailableOperationError();
     }
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
       : WSUtils.getVaultFromDocument(document);
 
     if (targetVault === undefined) {
-      throw this.noVaultError;
+      throw ConvertLinkCommand.noVaultError();
     } else {
       const targetNote = NoteUtils.getNoteByFnameV5({
         fname: ref,
@@ -329,7 +339,7 @@ export class ConvertLinkCommand extends BasicCommand<
           reference,
         });
         if (_.isUndefined(text)) {
-          throw this.noTextError;
+          throw ConvertLinkCommand.noTextError();
         }
         return {
           range,

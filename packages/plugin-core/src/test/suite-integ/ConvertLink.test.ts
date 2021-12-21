@@ -56,21 +56,20 @@ suite("ConvertLink", function () {
       },
     },
     () => {
+      let sandbox: sinon.SinonSandbox;
       beforeEach(async () => {
+        sandbox = sinon.createSandbox();
         activeNote = await NoteTestUtilsV4.createNote(activeNoteCreateOpts);
         await WSUtils.openNote(activeNote);
       });
 
       afterEach(async () => {
+        sandbox.restore();
         await VSCodeUtils.closeAllEditors();
       });
 
       test("WHEN broken link with no alias, THEN doesn't show option to use alias text.", async () => {
         const editor = vscode.window.activeTextEditor as vscode.TextEditor;
-        // editor.selection = new vscode.Selection(
-        //   noAliasBrokenLinkPosition,
-        //   noAliasBrokenLinkPosition
-        // );
         const cmd = new ConvertLinkCommand();
         const reference = getReferenceAtPosition(
           editor.document,
@@ -97,7 +96,6 @@ suite("ConvertLink", function () {
           editor.document,
           aliasBrokenLinkPosition
         ) as getReferenceAtPositionResp;
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Alias",
@@ -109,7 +107,6 @@ suite("ConvertLink", function () {
         });
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("broken link");
-        sandbox.restore();
       });
 
       test("WHEN note name option selected, THEN converts broken link to note name text", async () => {
@@ -123,7 +120,6 @@ suite("ConvertLink", function () {
           editor.document,
           aliasBrokenLinkPosition
         ) as getReferenceAtPositionResp;
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Note name",
@@ -135,7 +131,6 @@ suite("ConvertLink", function () {
         });
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("link");
-        sandbox.restore();
       });
 
       test("WHEN hierarchy option selected, THEN converts broken link to hierarchy text", async () => {
@@ -149,7 +144,6 @@ suite("ConvertLink", function () {
           editor.document,
           aliasBrokenLinkPosition
         ) as getReferenceAtPositionResp;
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Hierarchy",
@@ -161,7 +155,6 @@ suite("ConvertLink", function () {
         });
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("foo.bar.broken.link");
-        sandbox.restore();
       });
 
       test("WHEN prompt option selected, THEN prompts for user input and converts broken link to user input", async () => {
@@ -175,7 +168,6 @@ suite("ConvertLink", function () {
           editor.document,
           aliasBrokenLinkPosition
         ) as getReferenceAtPositionResp;
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Prompt",
@@ -188,7 +180,6 @@ suite("ConvertLink", function () {
         sandbox.stub(cmd, "promptBrokenLinkUserInput").resolves("user input");
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("user input");
-        sandbox.restore();
       });
 
       test("WHEN change destination option selected, THEN prompts lookup for new destination and converts broken link to new link", async () => {
@@ -202,7 +193,6 @@ suite("ConvertLink", function () {
           editor.document,
           aliasBrokenLinkPosition
         ) as getReferenceAtPositionResp;
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Change destination",
@@ -223,7 +213,6 @@ suite("ConvertLink", function () {
         });
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("[[Another|another]]");
-        sandbox.restore();
       });
     }
   );
@@ -277,12 +266,15 @@ suite("ConvertLink", function () {
       },
     },
     () => {
+      let sandbox: sinon.SinonSandbox;
       beforeEach(async () => {
+        sandbox = sinon.createSandbox();
         activeNote = await NoteTestUtilsV4.createNote(activeNoteCreateOpts);
         await WSUtils.openNote(activeNote);
       });
 
       afterEach(async () => {
+        sandbox.restore();
         await VSCodeUtils.closeAllEditors();
       });
 
@@ -293,11 +285,9 @@ suite("ConvertLink", function () {
           userTagPosition
         );
         const cmd = new ConvertLinkCommand();
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptConfirmation").resolves(true);
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("[[user.timothy]]");
-        sandbox.restore();
       });
 
       test("WHEN wikilink with user.* hierarchy, THEN convert to usertag", async () => {
@@ -307,11 +297,9 @@ suite("ConvertLink", function () {
           userWikiLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptConfirmation").resolves(true);
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("@timothy");
-        sandbox.restore();
       });
 
       test("WHEN hashtag, THEN convert to correct wikilink", async () => {
@@ -321,11 +309,9 @@ suite("ConvertLink", function () {
           hashTagPosition
         );
         const cmd = new ConvertLinkCommand();
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptConfirmation").resolves(true);
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("[[tags.foo]]");
-        sandbox.restore();
       });
 
       test("WHEN wikilink with tags.* hierarchy, THEN convert to hashtag", async () => {
@@ -335,11 +321,9 @@ suite("ConvertLink", function () {
           tagWikiLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const sandbox = sinon.createSandbox();
         sandbox.stub(cmd, "promptConfirmation").resolves(true);
         const gatherOut = await cmd.gatherInputs();
         expect(gatherOut.text).toEqual("#foo");
-        sandbox.restore();
       });
 
       test("WHEN regular valid link, THEN raise error", async () => {

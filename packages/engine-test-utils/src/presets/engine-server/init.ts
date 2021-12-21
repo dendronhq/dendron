@@ -4,6 +4,7 @@ import {
   ERROR_STATUS,
   NoteProps,
   NoteUtils,
+  Position,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
@@ -351,7 +352,7 @@ const NOTES = {
                   line: 1,
                   offset: 0,
                 },
-              },
+              } as Position,
               sameFile: false,
               to: {
                 anchorHeader: undefined,
@@ -363,6 +364,7 @@ const NOTES = {
               xvault: false,
             },
             {
+              alias: "alpha",
               from: {
                 fname: "beta",
                 vaultName: "vault1",

@@ -870,6 +870,21 @@ const NODE_TYPES_TO_EXTRACT = [
 ];
 
 export class RemarkUtils {
+  static getNodePositionPastFrontmatter(fileText: string) {
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.MD_DENDRON }
+    );
+    const parsed = proc.parse(fileText);
+    let out: Position | undefined;
+    visit(parsed, ["yaml"], (node) => {
+      if (_.isUndefined(node.position)) return false; // should never happen
+      out = node.position;
+      return false;
+    });
+    return out;
+  }
+
   static bumpHeadings(root: Parent, baseDepth: number) {
     const headings: Heading[] = [];
     walk(root, (node: Node) => {

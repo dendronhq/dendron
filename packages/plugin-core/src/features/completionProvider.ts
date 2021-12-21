@@ -1,6 +1,5 @@
 import {
   ALIAS_NAME,
-  DefaultMap,
   DNoteAnchor,
   ERROR_SEVERITY,
   genUUIDInsecure,

@@ -30,7 +30,7 @@ export const decorateHashTag: Decorator<HashTag, DecorationHashTag> = (
   });
 };
 
-export function decorateTag({
+export async function decorateTag({
   fname,
   engine,
   position,
@@ -50,7 +50,7 @@ export function decorateTag({
     color = foundColor;
   }
 
-  const { type, errors } = linkedNoteType({ fname, engine });
+  const { type, errors } = await linkedNoteType({ fname, engine });
   const decoration: DecorationHashTag = {
     type,
     range: position2VSCodeRange(position, { line: lineOffset }),

@@ -450,7 +450,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("wild link with alias", async () => {
+  test("broken link with alias", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -475,7 +475,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("wild link with alias pass candidates opts", async () => {
+  test("broken link with alias pass candidates opts", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
@@ -535,7 +535,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("xvaults wild links", async () => {
+  test("xvaults broken links", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];
@@ -565,7 +565,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     );
   });
 
-  test("xvaults wild links pass candidates opts", async () => {
+  test("xvaults broken links pass candidates opts", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault1 = vaults[0];
@@ -677,6 +677,42 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
             config.workspace!.enableUserTags = false;
             return config;
           },
+        }
+      );
+    });
+  });
+});
+
+describe("FIND_BROKEN_LINKS", () => {
+  const action = DoctorActions.FIND_BROKEN_LINKS;
+
+  describe("WHEN broken link exists", () => {
+    test("THEN findBrokenLinks finds it", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const foundBrokenLinks = out.resp;
+          expect(foundBrokenLinks).toEqual([
+            {
+              file: "foo.bar",
+              vault: "vault1",
+              links: [{ column: 1, line: 1, value: "fake.link" }],
+            },
+            {
+              file: "baz.qaaz",
+              vault: "vault2",
+              links: [{ column: 1, line: 1, value: "fake" }],
+            },
+          ]);
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: setupMultiWithWikilink,
         }
       );
     });

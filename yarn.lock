@@ -3637,7 +3637,7 @@
   resolved "https://registry.npmjs.org/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
-"@instantish/martian@^1.0.3":
+"@instantish/martian@1.0.3":
   version "1.0.3"
   resolved "https://registry.npmjs.org/@instantish/martian/-/martian-1.0.3.tgz#aa9bedfb41a53b0328289c3e791c636df044110f"
   integrity sha512-VLH1vpEHqia90gHWWZw2iEFISi/frLw5ZT99pWB2MM8rCOmm6hca2FUv8ns9AxiBAVj0epFRoxcjRtec+evxlw==
@@ -5539,6 +5539,13 @@
     "@types/express-serve-static-core" "^4.17.18"
     "@types/qs" "*"
     "@types/serve-static" "*"
+
+"@types/form-data@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.npmjs.org/@types/form-data/-/form-data-2.5.0.tgz#5025f7433016f923348434c40006d9a797c1b0e8"
+  integrity sha512-23/wYiuckYYtFpL+4RPWiWmRQH2BjFuqCUi2+N3amB1a1Drv+i/byTrGvlLwRVLFNAZbwpbQ7JvTK+VCAPMbcg==
+  dependencies:
+    form-data "*"
 
 "@types/fs-extra@^9.0.1", "@types/fs-extra@^9.0.12":
   version "9.0.13"
@@ -12978,6 +12985,15 @@ fork-ts-checker-webpack-plugin@4.1.6:
     tapable "^1.0.0"
     worker-rpc "^0.1.0"
 
+form-data@*, form-data@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
+  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    mime-types "^2.1.12"
+
 form-data@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmjs.org/form-data/-/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
@@ -18926,13 +18942,6 @@ npm-bundled@^1.0.1:
   integrity sha512-x5DHup0SuyQcmL3s7Rx/YQ8sbw/Hzg0rj48eN0dV7hf5cmQq5PXIeioroH3raV1QC1yh3uTYuMThvEQF3iKgGQ==
   dependencies:
     npm-normalize-package-bin "^1.0.1"
-
-npm-cli-adduser@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.npmjs.org/npm-cli-adduser/-/npm-cli-adduser-1.1.4.tgz#b5077986f64d3e4fdc48f18a7b42a7d8472e7bd4"
-  integrity sha512-0G/EqlhX62+D7ljtWz3kuuvYNIRizO5fqDC1PSR4bvgANtcE92lULfHLFnuuEJl6JJMss/M19yck+iWdN2TPBw==
-  dependencies:
-    commander "^2.19.0"
 
 npm-lifecycle@^3.1.2:
   version "3.1.5"

@@ -1,21 +1,16 @@
-import { Layout, Row, Col, Divider } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { Col, Divider, Layout, Row } from "antd";
+import Script from "next/script";
 import * as React from "react";
+import { useEngineAppSelector } from "../features/engine/hooks";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { DendronCommonProps } from "../utils/types";
 import { DendronBreadCrumb } from "./DendronBreadCrumb";
 import DendronLogoOrTitle from "./DendronLogoOrTitle";
 import { FooterText } from "./DendronNoteFooter";
-import DendronTreeMenu from "./DendronTreeMenu";
 import { DendronSearch } from "./DendronSearch";
-import Script from "next/script";
-import { useEngineAppSelector } from "../features/engine/hooks";
-import DendronNotice from "./DendronNotice";
-import {
-  ConfigUtils,
-  getStage,
-  IntermediateDendronConfig,
-} from "@dendronhq/common-all";
+import DendronTreeMenu from "./DendronTreeMenu";
 
 const { Header, Content, Sider, Footer } = Layout;
 const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
@@ -160,13 +155,6 @@ export default function DendronLayout(
           marginTop: 64,
         }}
       >
-        <DendronNotice show={getStage() === "dev"}>
-          NOTE: Pages are{" "}
-          <a href="https://wiki.dendron.so/notes/yYMuhi2TmTC63MysmtwqH.html#navigating-pages-is-slow-for-local-preview">
-            dynamically compiled in local preview
-          </a>{" "}
-          and will take a second to load.
-        </DendronNotice>
         <Layout className="site-layout" style={{ flexDirection: "row" }}>
           <Layout
             className="site-layout-sidebar"
@@ -190,7 +178,7 @@ export default function DendronLayout(
           <Layout
             className="side-layout-main"
             style={{
-              maxWidth: LAYOUT.CONTENT_MAX_WIDTH,
+              maxWidth: "1200px",
               display: !isCollapsed && isResponsive ? "none" : "initial",
             }}
           >

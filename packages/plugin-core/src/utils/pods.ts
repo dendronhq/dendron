@@ -1,4 +1,9 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import {
+  Conflict,
+  NoteProps,
+  NoteUtils,
+  PodConflictResolveOpts,
+} from "@dendronhq/common-all";
 import { PodItemV4 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -30,7 +35,7 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
   });
 };
 
-export const launchGoogleOAuthFlow = async () => {
+export const launchGoogleOAuthFlow = async (id?: string) => {
   const port = fs.readFileSync(
     path.join(getDWorkspace().wsRoot, ".dendron.port"),
     {
@@ -40,7 +45,7 @@ export const launchGoogleOAuthFlow = async () => {
 
   const stringifiedParams = queryString.stringify({
     client_id: GOOGLE_OAUTH_ID,
-    redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+    redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google&connectionId=${id}`,
     scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",
     access_type: "offline",
@@ -136,4 +141,18 @@ export const withProgressOpts = {
   withProgress: window.withProgress,
   location: ProgressLocation.Notification,
   showMessage: window.showInformationMessage,
+};
+
+export const handleConflict = async (
+  conflict: Conflict,
+  conflictResolveOpts: PodConflictResolveOpts
+) => {
+  const choices = conflictResolveOpts.options();
+  return window.showQuickPick(choices, {
+    title: conflictResolveOpts.message(conflict),
+    placeHolder: "What would you like to do?",
+    ignoreFocusOut: false,
+    matchOnDescription: true,
+    canPickMany: false,
+  });
 };

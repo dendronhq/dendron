@@ -2,12 +2,15 @@ import {
   ConfigUtils,
   DLink,
   DLinkType,
-  DNoteAnchor,
+  DNoteAnchorBasic,
+  isBlockAnchor,
+  isLineAnchor,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
 } from "@dendronhq/common-all";
+import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 import {
   DendronASTTypes,
   HASHTAG_REGEX_BASIC,
@@ -29,20 +32,18 @@ import vscode, {
   Location,
   Position,
   Range,
-  TextDocument,
   Selection,
+  TextDocument,
 } from "vscode";
-
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
-import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 
 export type RefT = {
   label: string;
   /** If undefined, then the file this reference is located in is the ref */
   ref?: string;
-  anchorStart?: DNoteAnchor;
-  anchorEnd?: DNoteAnchor;
+  anchorStart?: DNoteAnchorBasic;
+  anchorEnd?: DNoteAnchorBasic;
   vaultName?: string;
 };
 
@@ -223,25 +224,28 @@ export const isInCodeSpan = (
   return /`[^`]*$/gm.test(textBefore);
 };
 
-export const getReferenceAtPosition = (
-  document: vscode.TextDocument,
-  position: vscode.Position,
-  partial?: boolean
-): {
+export type getReferenceAtPositionResp = {
   range: vscode.Range;
   ref: string;
   label: string;
-  anchorStart?: DNoteAnchor;
-  anchorEnd?: DNoteAnchor;
+  anchorStart?: DNoteAnchorBasic;
+  anchorEnd?: DNoteAnchorBasic;
   refType?: DLinkType;
   vaultName?: string;
   /** The full text inside the ref, e.g. for [[alias|foo.bar#anchor]] this is alias|foo.bar#anchor */
   refText: string;
-} | null => {
+};
+
+export const getReferenceAtPosition = (
+  document: vscode.TextDocument,
+  position: vscode.Position,
+  opts?: { partial?: boolean; allowInCodeBlocks: boolean }
+): getReferenceAtPositionResp | null => {
   let refType: DLinkType | undefined;
   if (
-    isInFencedCodeBlock(document, position.line) ||
-    isInCodeSpan(document, position.line, position.character)
+    opts?.allowInCodeBlocks !== true &&
+    (isInFencedCodeBlock(document, position.line) ||
+      isInCodeSpan(document, position.line, position.character))
   ) {
     return null;
   }
@@ -260,9 +264,12 @@ export const getReferenceAtPosition = (
   }
 
   // this should be a wikilink or reference
-  const re = partial ? partialRefPattern : refPattern;
-  const range = document.getWordRangeAtPosition(position, new RegExp(re));
-  if (!range) {
+  const re = opts?.partial ? partialRefPattern : refPattern;
+  const rangeWithLink = document.getWordRangeAtPosition(
+    position,
+    new RegExp(re)
+  );
+  if (!rangeWithLink) {
     const { enableUserTags, enableHashTags } = ConfigUtils.getWorkspace(
       getDWorkspace().config
     );
@@ -281,6 +288,7 @@ export const getReferenceAtPosition = (
           label: match[0],
           ref: `${TAGS_HIERARCHY}${match.groups!.tagContents}`,
           refText: docText,
+          refType: "hashtag",
         };
       }
     }
@@ -299,6 +307,7 @@ export const getReferenceAtPosition = (
           label: match[0],
           ref: `${USERS_HIERARCHY}${match.groups!.userTagContents}`,
           refText: docText,
+          refType: "usertag",
         };
       }
     }
@@ -331,6 +340,7 @@ export const getReferenceAtPosition = (
             label: tag.value,
             ref: `${TAGS_HIERARCHY}${tag.value}`,
             refText: tag.value,
+            refType: "fmtag",
           };
         }
       }
@@ -340,7 +350,7 @@ export const getReferenceAtPosition = (
     return null;
   }
 
-  const docText = document.getText(range);
+  const docText = document.getText(rangeWithLink);
   const refText = docText
     .replace("![[", "")
     .replace("[[", "")
@@ -349,21 +359,24 @@ export const getReferenceAtPosition = (
   // don't incldue surrounding fluff for definition
   const { ref, label, anchorStart, anchorEnd, vaultName } = parseRef(refText);
 
-  const startChar = range.start.character;
+  const startChar = rangeWithLink.start.character;
   // because
   const prefixRange = new Range(
-    new Position(range.start.line, Math.max(0, startChar - 1)),
-    new Position(range.start.line, startChar + 2)
+    new Position(rangeWithLink.start.line, Math.max(0, startChar - 1)),
+    new Position(rangeWithLink.start.line, startChar + 2)
   );
-  if (document.getText(prefixRange).indexOf("![[") >= 0) {
+  const prefix = document.getText(prefixRange);
+  if (prefix.indexOf("![[") >= 0) {
     refType = "refv2";
+  } else if (prefix.indexOf("[[") >= 0) {
+    refType = "wiki";
   }
 
   return {
     // If ref is missing, it's implicitly the current file
     ref: ref || NoteUtils.uri2Fname(document.uri),
     label,
-    range,
+    range: rangeWithLink,
     anchorStart,
     anchorEnd,
     refType,
@@ -387,12 +400,21 @@ export const parseRef = (rawRef: string): RefT => {
   };
 };
 
-export const parseAnchor = (anchorValue?: string): DNoteAnchor | undefined => {
+export const parseAnchor = (
+  anchorValue?: string
+): DNoteAnchorBasic | undefined => {
   // If undefined or empty string
   if (!anchorValue) return undefined;
 
-  if (anchorValue[0] === "^") {
+  if (isBlockAnchor(anchorValue)) {
     return { type: "block", value: anchorValue.slice(1) };
+  } else if (isLineAnchor(anchorValue)) {
+    const value = anchorValue.slice(1);
+    return {
+      type: "line",
+      value,
+      line: _.toInteger(value),
+    };
   } else {
     return { type: "header", value: anchorValue };
   }
@@ -447,15 +469,20 @@ export const noteLinks2Locations = (note: NoteProps) => {
   return refs;
 };
 
+/**
+ *  ^find-references
+ * @param fname
+ * @param excludePaths
+ * @returns
+ */
 export const findReferences = async (
-  ref: string,
+  fname: string,
   excludePaths: string[] = []
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
   const { engine } = getDWorkspace();
   // clean for anchor
-  const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
   const notesWithRefs = await Promise.all(
     notes.flatMap((note) => {

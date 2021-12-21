@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
@@ -53,26 +54,24 @@ export function showWelcome(assetUri: vscode.Uri) {
               wsPath = wsPathPrimary;
             } else if (!fs.pathExistsSync(wsPathBackup)) {
               wsPath = wsPathBackup;
+            } else {
+              wsPath = await VSCodeUtils.gatherFolderPath({
+                default: path.join(resolveTilde("~"), "Dendron"),
+                override: {
+                  title: "Path for new Dendron Code Workspace",
+                },
+              });
             }
 
-            /*eslint-disable */
-            // This is a workaround to resolve circular dependency.
-            // TODO: fix importing around the package so that we have control over module loading sequence.
-            // eslint-disable-next-line global-require
-            const {
-              SetupWorkspaceCommand,
-            } = require("./commands/SetupWorkspace");
-            /*eslint-enable */
+            // User didn't pick a path, abort
             if (!wsPath) {
-              await new SetupWorkspaceCommand().run({
-                workspaceInitializer: new TutorialInitializer(),
-              });
-            } else {
-              await new SetupWorkspaceCommand().execute({
-                rootDirRaw: wsPath,
-                workspaceInitializer: new TutorialInitializer(),
-              });
+              return;
             }
+
+            await new SetupWorkspaceCommand().execute({
+              rootDirRaw: wsPath,
+              workspaceInitializer: new TutorialInitializer(),
+            });
 
             return;
           }

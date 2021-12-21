@@ -103,6 +103,7 @@ suite("ShowPreview utility methods", () => {
       expect(actual.anchor).toEqual({
         type: "header",
         value: "anch-val-1",
+        depth: 1,
       });
     });
 

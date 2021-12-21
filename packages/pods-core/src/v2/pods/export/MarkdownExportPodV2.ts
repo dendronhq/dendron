@@ -12,6 +12,7 @@ import {
 import { JSONSchemaType } from "ajv";
 import _ from "lodash";
 import {
+  ConfigFileUtils,
   ExportPodV2,
   MarkdownV2PodConfig,
   RunnableMarkdownV2PodConfig,
@@ -97,19 +98,9 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
   }
 
   static config(): JSONSchemaType<MarkdownV2PodConfig> {
-    return {
-      required: ["podId", "podType", "destination"],
-      type: "object",
-      additionalProperties: false,
+    return ConfigFileUtils.createExportConfig({
+      required: ["destination"],
       properties: {
-        podId: {
-          description: "configuration ID",
-          type: "string",
-        },
-        podType: {
-          description: "type of pod",
-          type: "string",
-        },
         wikiLinkToURL: {
           description: "How to convert the wikilinks",
           type: "boolean",
@@ -120,17 +111,7 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
             "export destination. Specify either a file path or 'clipboard' to export to your clipboard",
           type: "string",
         },
-        description: {
-          description: "optional description for the pod",
-          type: "string",
-          nullable: true,
-        },
-        exportScope: {
-          description: "export scope of the pod",
-          type: "string",
-          nullable: true,
-        },
       },
-    } as JSONSchemaType<MarkdownV2PodConfig>;
+    }) as JSONSchemaType<MarkdownV2PodConfig>;
   }
 }

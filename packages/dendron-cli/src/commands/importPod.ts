@@ -1,7 +1,7 @@
 import { getAllImportPods, PROMPT } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
-import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./pod";
+import { enrichPodArgs, handleConflict, PodCLIOpts, setupPodArgs } from "./pod";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import prompts from "prompts";
 import { DendronError } from "@dendronhq/common-all";
@@ -47,11 +47,15 @@ export class ImportPodCLICommand extends CLICommand<
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
     const vaults = engine.vaults;
     const pod = new PodClass();
+    const utilityMethods = {
+      handleConflict,
+    };
     await pod.execute({
       wsRoot,
       config,
       engine,
       vaults,
+      utilityMethods,
       onPrompt: async (type?: PROMPT) => {
         const resp =
           type === PROMPT.USERPROMPT

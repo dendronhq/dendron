@@ -1,30 +1,34 @@
 import {
   DendronError,
-  NoteProps,
-  NoteUtils,
-  VaultUtils,
-  getSlugger,
-  ERROR_SEVERITY,
-  DNoteLink,
   DLink,
+  DNoteLink,
   DVault,
+  ERROR_SEVERITY,
+  getSlugger,
+  NoteProps,
   NotePropsDict,
   NoteQuickInput,
+  NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 import {
+  Anchor,
+  AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
-  AnchorUtils,
+  Heading,
+  HistoryEvent,
+  LinkUtils,
+  MDUtilsV5,
+  Node,
   Processor,
   RemarkUtils,
-  MDUtilsV5,
   visit,
-  Heading,
-  Node,
-  Anchor,
-  LinkUtils,
-  HistoryEvent,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
+import path from "path";
+import { Location } from "vscode";
 import {
   LookupControllerV3,
   LookupControllerV3CreateOpts,
@@ -33,23 +37,19 @@ import {
   NoteLookupProvider,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
-import _ from "lodash";
-import path from "path";
-import { getEngine, getVaultFromUri } from "../workspace";
-import { EngineAPIService } from "../services/EngineAPIService";
-import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { findReferences, FoundRefT } from "../utils/md";
-import { Location } from "vscode";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
   PickerUtilsV2,
 } from "../components/lookup/utils";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { DENDRON_COMMANDS } from "../constants";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
+import { EngineAPIService } from "../services/EngineAPIService";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { findReferences, FoundRefT } from "../utils/md";
+import { getEngine, getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
+import { BasicCommand } from "./base";
 
 type CommandInput =
   | {

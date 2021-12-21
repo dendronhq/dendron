@@ -46,6 +46,16 @@ import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
+  SeedBrowseCommand,
+  WebViewPanelFactory,
+} from "./commands/SeedBrowseCommand";
+import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
+import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
+import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
+import {
   CONFIG,
   DendronContext,
   DENDRON_COMMANDS,
@@ -57,6 +67,7 @@ import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
+import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -318,7 +329,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands(context);
+    _setupCommands(ws, context);
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -378,6 +389,11 @@ export async function _activate(
       const wsImpl = getDWorkspace();
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
+
+      // Only set up note traits after workspaceImpl has been set, so that the
+      // wsRoot path is known for locating the note trait definition location.
+      // TODO: Unwind and simplify dependency ordering logic
+      ws.setupTraits();
 
       // --- Get Version State
       const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -720,6 +736,12 @@ export async function _activate(
         source: "extension",
         action: "activate",
       });
+      // If automaticallyShowPreview = true, display preview panel on start up
+      const note = WSUtils.getActiveNote();
+      if (note) {
+        PreviewPanelFactory.getProxy().showPreviewAndUpdate(note);
+      }
+
       return true;
     }
     return false;
@@ -949,7 +971,10 @@ export function shouldDisplayLapsedUserMsg(): boolean {
   );
 }
 
-async function _setupCommands(context: vscode.ExtensionContext) {
+async function _setupCommands(
+  ws: DendronExtension,
+  context: vscode.ExtensionContext
+) {
   const existingCommands = await vscode.commands.getCommands();
 
   ALL_COMMANDS.map((Cmd) => {
@@ -1017,10 +1042,67 @@ async function _setupCommands(context: vscode.ExtensionContext) {
       )
     );
   }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_PREVIEW.key,
+        sentryReportingCallback(async () => {
+          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
+        sentryReportingCallback(async () => {
+          await new ShowSchemaGraphCommand(
+            SchemaGraphViewFactory.create(ws)
+          ).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
+        sentryReportingCallback(async () => {
+          await new ShowNoteGraphCommand(
+            NoteGraphPanelFactory.create(ws)
+          ).run();
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SEED_BROWSE.key,
+        sentryReportingCallback(async () => {
+          const panel = WebViewPanelFactory.create(
+            ws.workspaceService!.seedService
+          );
+          const cmd = new SeedBrowseCommand(panel);
+
+          return cmd.run();
+        })
+      )
+    );
+  }
 }
 
 function _setupLanguageFeatures(context: vscode.ExtensionContext) {
-  const mdLangSelector = { language: "markdown", scheme: "*" };
+  const mdLangSelector: vscode.DocumentFilter = {
+    language: "markdown",
+    scheme: "*",
+  };
+  const anyLangSelector: vscode.DocumentFilter = { scheme: "*" };
   context.subscriptions.push(
     vscode.languages.registerReferenceProvider(
       mdLangSelector,
@@ -1029,13 +1111,15 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.languages.registerDefinitionProvider(
-      mdLangSelector,
+      // Allows definition provider to work for wikilinks in non-note files
+      anyLangSelector,
       new DefinitionProvider()
     )
   );
   context.subscriptions.push(
     vscode.languages.registerHoverProvider(
-      mdLangSelector,
+      // Allows hover provider to work for wikilinks in non-note files
+      anyLangSelector,
       new ReferenceHoverProvider()
     )
   );
@@ -1043,6 +1127,12 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
     vscode.languages.registerFoldingRangeProvider(
       mdLangSelector,
       new FrontmatterFoldingRangeProvider()
+    )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerRenameProvider(
+      mdLangSelector,
+      new RenameProvider()
     )
   );
   completionProvider.activate(context);

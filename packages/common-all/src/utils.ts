@@ -71,6 +71,11 @@ export function isBlockAnchor(anchor?: string): boolean {
   return !!anchor && anchor[0] === "^";
 }
 
+export function isLineAnchor(anchor?: string): boolean {
+  // not undefined, not an empty string, and the first character is L, and is followed by numbers
+  return !!anchor && /L\d+/.test(anchor);
+}
+
 /** A type guard for things that are not undefined.
  *
  * This is equivalent to !_.isUndefined(), except that it provides a type guard
@@ -262,6 +267,27 @@ export class NoteFNamesDict {
     toDelete.forEach((note) => {
       this._internalMap.delete(note.fname.toLowerCase(), note.id);
     });
+export class FIFOQueue<T> {
+  private _internalQueue: T[] = [];
+
+  public constructor(init?: T[]) {
+    if (init) this._internalQueue = init;
+  }
+
+  public enqueue(item: T) {
+    this._internalQueue.push(item);
+  }
+
+  public enqueueAll(items: T[]) {
+    for (const item of items) this.enqueue(item);
+  }
+
+  public dequeue() {
+    return this._internalQueue.shift();
+  }
+
+  public get length() {
+    return this._internalQueue.length;
   }
 }
 
@@ -448,11 +474,12 @@ export class PublishUtils {
   static getSEOPropsFromConfig(
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
-    const { title, twitter, description: excerpt } = config.site;
+    const { title, twitter, description: excerpt, image } = config.site;
     return {
       title,
       twitter,
       excerpt,
+      image,
     };
   }
   static getSEOPropsFromNote(note: NoteProps): SEOProps {

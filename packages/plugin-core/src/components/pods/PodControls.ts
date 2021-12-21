@@ -10,8 +10,13 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
+import { KeybindingUtils } from "../../KeybindingUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { CodeCommandInstance } from "../../commands/base";
+import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
+import { PodCommandFactory } from "./PodCommandFactory";
+import { assertUnreachable } from "@dendronhq/common-all";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -56,10 +61,17 @@ export class PodUIControls {
   > {
     return new Promise<PodExportScope | undefined>((resolve) => {
       const qp = vscode.window.createQuickPick();
+      qp.ignoreFocusOut = true;
+      qp.title = "Select the Export Scope";
       qp.items = Object.keys(PodExportScope)
         .filter((key) => Number.isNaN(Number(key)))
         .map<QuickPickItem>((value) => {
-          return { label: value };
+          return {
+            label: value,
+            detail: PodUIControls.getDescriptionForScope(
+              value as PodExportScope
+            ),
+          };
         });
 
       qp.onDidAccept(() => {
@@ -120,6 +132,7 @@ export class PodUIControls {
       const inputBox = vscode.window.createInputBox();
       inputBox.title = "Select a unique ID for your configuration";
       inputBox.placeholder = "my-id";
+      inputBox.ignoreFocusOut = true;
       let id;
       inputBox.onDidAccept(() => {
         id = inputBox.value;
@@ -141,11 +154,30 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
+  public static async promptForPodTypeForCommand(): Promise<
+    CodeCommandInstance | undefined
+  > {
+    const picked = await PodUIControls.promptForPodType();
+
+    if (!picked) {
+      return;
+    }
+
+    return PodCommandFactory.createPodCommandForPodType(picked);
+  }
+
+  /**
+   * Prompt user to pick a pod (v2) type
+   * @returns a runnable code command for the selected pod
+   */
   public static async promptForPodType(): Promise<PodV2Types | undefined> {
     const newConnectionOptions = Object.keys(PodV2Types)
       .filter((key) => Number.isNaN(Number(key)))
       .map<QuickPickItem>((value) => {
-        return { label: value };
+        return {
+          label: value,
+          detail: PodUIControls.getDescriptionForPodType(value as PodV2Types),
+        };
       });
     const picked = await vscode.window.showQuickPick(newConnectionOptions, {
       title: "Pick the Pod Type",
@@ -157,10 +189,6 @@ export class PodUIControls {
     }
 
     return picked.label as PodV2Types;
-
-    // return PodCommandFactory.createPodCommandForPodType(
-    //   picked.label as PodV2Types
-    // );
   }
 
   /**
@@ -216,10 +244,26 @@ export class PodUIControls {
     }
 
     if (selectedServiceOption.label === createNewOptionString) {
-      await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
-      vscode.window.showInformationMessage(
-        `First setup a new ${connectionType} connection and then re-run the pod command.`
-      );
+      switch (connectionType) {
+        case ExternalService.Airtable: {
+          await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
+          vscode.window.showInformationMessage(
+            `First setup a new ${connectionType} connection and then re-run the pod command.`
+          );
+          break;
+        }
+        case ExternalService.GoogleDocs: {
+          const id = await this.promptToCreateNewServiceConfig(
+            ExternalService.GoogleDocs
+          );
+          await launchGoogleOAuthFlow(id);
+          vscode.window.showInformationMessage(
+            "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+          );
+          break;
+        }
+        default:
+      }
       return;
     } else {
       const config = mngr.getConfigById<T>({ id: selectedServiceOption.label });
@@ -254,6 +298,7 @@ export class PodUIControls {
 
     const newFile = await mngr.createNewConfig({ serviceType, id });
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(newFile));
+    return id;
   }
 
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {
@@ -270,10 +315,29 @@ export class PodUIControls {
     );
 
     configs.forEach((config) => {
+      let keybinding;
+
+      try {
+        keybinding = KeybindingUtils.getKeybindingForPodIfExists(config.podId);
+      } catch (e: any) {
+        if (
+          e.message &&
+          e.message.includes(KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT)
+        ) {
+          keybinding = "Multiple Keybindings";
+        }
+      }
+
+      let description = config.podType.toString();
+
+      if (keybinding) {
+        description = description + "  " + keybinding;
+      }
+
       items.push({
         label: config.podId,
         detail: config.description ?? undefined,
-        description: config.podType,
+        description,
       });
     });
 
@@ -285,5 +349,56 @@ export class PodUIControls {
 
     qp.items = items;
     return qp;
+  }
+
+  /**
+   * Small helper method to get descriptions for {@link promptForExportScope}
+   * @param scope
+   * @returns
+   */
+  private static getDescriptionForScope(scope: PodExportScope): string {
+    switch (scope) {
+      case PodExportScope.Clipboard:
+        return "Exports the current contents of your clipboard";
+
+      case PodExportScope.Selection:
+        return "Exports the current contents of the selected portion of text in the open note editor";
+
+      case PodExportScope.Note:
+        return "Exports the currently opened note";
+
+      case PodExportScope.Hierarchy:
+        return "Exports all notes that fall under a hierarchy";
+
+      case PodExportScope.Vault:
+        return "Exports all notes within a vault";
+
+      case PodExportScope.Workspace:
+        return "Exports all notes in the Dendron workspace";
+
+      default:
+        assertUnreachable();
+    }
+  }
+
+  /**
+   * Small helper method to get descriptions for {@link promptForExportScope}
+   * @param type
+   * @returns
+   */
+  private static getDescriptionForPodType(type: PodV2Types): string {
+    switch (type) {
+      case PodV2Types.AirtableExportV2:
+        return "Exports notes to rows in an Airtable";
+
+      case PodV2Types.MarkdownExportV2:
+        return "Formats Dendron markdown and exports it to the clipboard or local file system";
+
+      case PodV2Types.GoogleDocsExportV2:
+        return "Formats Dendron note to google doc";
+
+      default:
+        assertUnreachable();
+    }
   }
 }

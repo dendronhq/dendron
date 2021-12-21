@@ -507,7 +507,7 @@ export class FileStorage implements DStore {
       store: this,
       cache,
       logger: this.logger,
-    }).parseFile(noteFiles, vault);
+    }).parseFiles(noteFiles, vault);
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
@@ -546,6 +546,8 @@ export class FileStorage implements DStore {
           n.anchors = {};
           return;
         }
+
+        // if note content is different, then we update all links and anchors ^link-anchor
         if (_.has(cacheUpdates, n.fname)) {
           try {
             const links = LinkUtils.findLinks({
@@ -700,6 +702,22 @@ export class FileStorage implements DStore {
             );
           });
         }
+
+        // only modify links that have same _to_ vault name
+        // explicitly same: has vault prefix
+        // implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
+        allLinks = allLinks.filter((link) => {
+          const oldLocVaultName = oldLoc.vaultName as string;
+          const explicitlySameVault = link.to?.vaultName === oldLocVaultName;
+          const oldLocVault = VaultUtils.getVaultByName({
+            vaults: this.vaults,
+            vname: oldLocVaultName,
+          });
+          const implicitlySameVault =
+            _.isUndefined(link.to?.vaultName) &&
+            _.isEqual(n.vault, oldLocVault);
+          return explicitlySameVault || implicitlySameVault;
+        });
 
         const noteMod = _.reduce(
           allLinks,
@@ -949,13 +967,16 @@ export class FileStorage implements DStore {
     // TODO: update notes
   }
 
+  /**
+   * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note
+   */
   async _writeNewNote({
     note,
-    maybeNote,
+    existingNote,
     opts,
   }: {
     note: NoteProps;
-    maybeNote?: NoteProps;
+    existingNote?: NoteProps;
     opts?: EngineWriteOptsV2;
   }): Promise<NoteProps[]> {
     const ctx = "_writeNewNote";
@@ -968,22 +989,22 @@ export class FileStorage implements DStore {
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
-    if (maybeNote) {
-      // update changed
-      const parentNote = this.notes[maybeNote.parent as string] as NoteProps;
+    if (existingNote) {
+      // need to update parent metadata since child id is changing
+      const parentNote = this.notes[existingNote.parent as string] as NoteProps;
 
       // remove existing note from parent's children
       parentNote.children = _.reject<string[]>(
         parentNote.children,
-        (ent: string) => ent === maybeNote.id
+        (ent: string) => ent === existingNote.id
       ) as string[];
       // update parent's children
-      this.notes[maybeNote.parent as string].children = parentNote.children;
-      // move maybeNote's children to newly written note
-      note.children = maybeNote.children;
-      // delete maybeNote
-      delete this.notes[maybeNote.id];
-      this.noteFnames.delete(maybeNote);
+      this.notes[existingNote.parent as string].children = parentNote.children;
+      // move existingNote's children to newly written note
+      note.children = existingNote.children;
+      // delete existingNote
+      delete this.notes[existingNote.id];
+      this.noteFnames.delete(existingNote);
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
@@ -1031,16 +1052,21 @@ export class FileStorage implements DStore {
     });
 
     // don't count as delete if we're updating existing note
+    // we need to preserve the ids, otherwise can result in data conflict
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
       noDelete = true;
     } else {
-      changed = await this._writeNewNote({ note, maybeNote, opts });
+      changed = await this._writeNewNote({
+        note,
+        existingNote: maybeNote,
+        opts,
+      });
     }
 
     // add schema if applicable
-    const match = SchemaUtils.matchPath({
+    const schemaMatch = SchemaUtils.matchPath({
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
@@ -1103,14 +1129,19 @@ export class FileStorage implements DStore {
       opts: { writeHierarchy: opts?.writeHierarchy },
     });
 
-    if (match) {
+    // schema metadata is only applicable at runtime
+    // we therefore write it after we persist note to store
+    if (schemaMatch) {
       this.logger.info({
         ctx,
         msg: "pre:addSchema",
       });
-      const { schema, schemaModule } = match;
+      const { schema, schemaModule } = schemaMatch;
       NoteUtils.addSchema({ note, schema, schemaModule });
     }
+
+    // if we added a new note and it overwrote an existing note
+    // we now need to update the metadata of existing notes ^change
     this.logger.info({
       ctx,
       msg: "pre:updateNotes",

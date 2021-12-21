@@ -335,6 +335,13 @@ export class DNodeUtils {
   static getLeafName(note: DNodeProps) {
     return _.split(note.fname, ".").pop();
   }
+
+  static cleanFname(fname: string) {
+    if (fname.indexOf(" ") >= 0) {
+      fname = _.replace(fname, /\s/g, "-");
+    }
+    return _.kebabCase(fname);
+  }
 }
 
 export class NoteUtils {
@@ -1091,8 +1098,17 @@ export class NoteUtils {
         )}`,
       });
 
+    let propsWithTrait: NoteProps & { traitIds?: string[] } = { ...cleanProps };
+
+    if (cleanProps.traits) {
+      propsWithTrait = {
+        ...cleanProps,
+        traitIds: cleanProps.traits.map((value) => value.id),
+      };
+    }
+
     // Separate custom and builtin props
-    const builtinProps = _.pick(cleanProps, [
+    const builtinProps = _.pick(propsWithTrait, [
       "id",
       "title",
       "desc",
@@ -1104,7 +1120,9 @@ export class NoteUtils {
       "color",
       "tags",
       "image",
+      "traitIds",
     ]);
+
     const { custom: customProps } = cleanProps;
     const meta = { ...builtinProps, ...customProps };
     return meta;
@@ -1112,10 +1130,13 @@ export class NoteUtils {
 
   static serialize(
     props: NoteProps,
-    opts?: { writeHierarchy?: boolean }
+    opts?: { writeHierarchy?: boolean; excludeStub?: boolean }
   ): string {
     const body = props.body;
     let blacklist = ["parent", "children"];
+    if (opts?.excludeStub) {
+      blacklist.push("stub");
+    }
     if (opts?.writeHierarchy) {
       blacklist = [];
     }

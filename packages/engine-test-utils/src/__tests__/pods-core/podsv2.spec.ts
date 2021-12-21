@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, Time } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
@@ -7,11 +7,13 @@ import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   ExternalService,
+  GoogleDocsExportPodV2,
   JSONSchemaType,
   MarkdownExportPodV2,
   PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
+  RunnableGoogleDocsV2PodConfig,
   RunnableMarkdownV2PodConfig,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -120,6 +122,12 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     exportScope: PodExportScope.Hierarchy,
   };
 
+  const podConfig3: ExportPodConfigurationV2 = {
+    podId: "foo-bar",
+    podType: PodV2Types.GoogleDocsExportV2,
+    exportScope: PodExportScope.Note,
+  };
+
   ConfigFileUtils.genConfigFileV2({
     fPath: path.join(podsDir, "foo.yml"),
     configSchema: AirtableExportPodV2.config(),
@@ -130,6 +138,12 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     fPath: path.join(podsDir, "bar.yml"),
     configSchema: MarkdownExportPodV2.config(),
     setProperties: podConfig2,
+  });
+
+  ConfigFileUtils.genConfigFileV2({
+    fPath: path.join(podsDir, "foo-bar.yml"),
+    configSchema: GoogleDocsExportPodV2.config(),
+    setProperties: podConfig3,
   });
 
   describe("WHEN getting a pod config by an existing ID", () => {
@@ -164,7 +178,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     test("THEN expect all pod configs to be returned", () => {
       const configs = PodV2ConfigManager.getAllPodConfigs(podsDir);
 
-      expect(configs.length).toEqual(2);
+      expect(configs.length).toEqual(3);
     });
   });
 });
@@ -216,15 +230,15 @@ describe("GIVEN an ExternalConnectionManager class", () => {
   });
 
   describe("WHEN creating a GoogleDocs config with a unique ID", () => {
-    const fn = async () => {
+    test("THEN expect the config to be created", async () => {
       await connectionManager.createNewConfig({
         serviceType: ExternalService.GoogleDocs,
         id: "foo",
       });
-    };
 
-    test("THEN expect an error to be thrown", async () => {
-      expect(fn).rejects.toThrowError();
+      const config = connectionManager.getConfigById({ id: "foo" });
+      expect(config?.connectionId).toEqual("foo");
+      expect(config?.serviceType).toEqual(ExternalService.GoogleDocs);
     });
   });
 
@@ -247,7 +261,20 @@ describe("GIVEN an ExternalConnectionManager class", () => {
     });
 
     test("AND non type-matching configs to NOT be returned", async () => {
-      //TODO: Implement when there is more than one valid ExternalService config type.
+      await connectionManager.createNewConfig({
+        serviceType: ExternalService.Airtable,
+        id: "airtable",
+      });
+
+      await connectionManager.createNewConfig({
+        serviceType: ExternalService.GoogleDocs,
+        id: "googledocs",
+      });
+
+      const configs = await connectionManager.getAllConfigsByType(
+        ExternalService.Airtable
+      );
+      expect(configs.length).toEqual(1);
     });
   });
 });
@@ -262,7 +289,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
         async (opts) => {
           const podConfig: RunnableMarkdownV2PodConfig = {
             exportScope: PodExportScope.Note,
-            destination: "",
+            destination: "clipboard",
           };
 
           const pod = new MarkdownExportPodV2({
@@ -280,6 +307,62 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
 
           const result = await pod.exportNote(props);
           expect(result.includes("[One](/simple-wikilink/one)")).toBeTruthy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+});
+
+/**
+ * GoogleDocsExportPod
+ */
+describe("GIVEN a Google Docs Export Pod with a particular config", () => {
+  describe("WHEN exporting a note", () => {
+    test("THEN expect gdoc to be created", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableGoogleDocsV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            accessToken: "test",
+            refreshToken: "test",
+            expirationTime: Time.now().toSeconds() + 5000,
+            connectionId: "foo",
+          };
+
+          const pod = new GoogleDocsExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            vaults: opts.vaults,
+            wsRoot: opts.wsRoot,
+          });
+          const response = {
+            data: {
+              documentId: "testdoc",
+            },
+          };
+          pod.createGdoc = jest.fn().mockResolvedValue(response);
+          const props = NoteUtils.getNoteByFnameV5({
+            fname: "simple-wikilink",
+            vault: opts.vaults[0],
+            notes: opts.engine.notes,
+            wsRoot: opts.wsRoot,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+          expect(result.data?.documentId).toEqual("testdoc");
         },
         {
           expect,

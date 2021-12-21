@@ -47,6 +47,7 @@ import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 import { WSUtils } from "../WSUtils";
+import { cleanupVSCodeContextSubscriptions } from "./testUtilsV3";
 
 export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -160,6 +161,8 @@ export async function runSingleVaultTest(
     await onInit({ vault, wsRoot });
   });
   await _activate(ctx);
+
+  cleanupVSCodeContextSubscriptions(opts.ctx);
 }
 
 export async function runMultiVaultTest(
@@ -173,6 +176,8 @@ export async function runMultiVaultTest(
     await opts.onInit({ wsRoot, vaults });
   });
   await _activate(ctx);
+
+  cleanupVSCodeContextSubscriptions(opts.ctx);
 }
 
 export async function runWorkspaceTestV3(
@@ -190,6 +195,8 @@ export async function runWorkspaceTestV3(
     await opts.preActivateHook();
   }
   await _activate(ctx);
+
+  cleanupVSCodeContextSubscriptions(ctx);
 }
 
 /**

@@ -7,6 +7,7 @@ export type DendronPreviewConfig = {
   enableMermaid: boolean;
   enablePrettyRefs: boolean;
   enableKatex: boolean;
+  automaticallyShowPreview: boolean;
 };
 
 /**
@@ -20,5 +21,6 @@ export function genDefaultPreviewConfig(): DendronPreviewConfig {
     enableMermaid: true,
     enablePrettyRefs: true,
     enableKatex: true,
+    automaticallyShowPreview: false,
   };
 }

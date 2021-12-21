@@ -48,21 +48,56 @@ export type DNoteLoc = {
   anchorHeader?: string;
 };
 
-export type DNoteAnchor = {
-  /**
-   * In the future, we could have ID based anchors
-   */
-  type: "header" | "block";
+export type DNoteAnchor =
+  | DNoteBlockAnchor
+  | DNoteHeaderAnchor
+  | DNoteLineAnchor;
+
+/**
+ * Anchor without {@link DNoteHeaderAnchor.depth} info
+ * @todo see migration [[DNoteAnchorBasic|dendron://dendron.docs/dev.changelog#dnoteanchorbasic]]
+ */
+export type DNoteAnchorBasic =
+  | DNoteBlockAnchor
+  | Omit<DNoteHeaderAnchor, "depth">
+  | DNoteLineAnchor;
+
+export type DNoteBlockAnchor = {
+  type: "block";
   text?: string; //original text for the anchor
   value: string;
 };
 
-export type DNoteAnchorPositioned = DNoteAnchor & {
+/**
+ * This represents a markdown header
+ * ```md
+ * # H1
+ * ```
+ */
+export type DNoteHeaderAnchor = {
+  type: "header";
+  text?: string; //original text for the anchor
+  value: string;
+  depth: number;
+};
+
+/** An anchor referring to a specific line in a file. These don't exist inside of files, they are implied by the link containing the anchor.
+ *
+ * Lines are indexed starting at 1, which is similar to how you refer to specific lines on Github.
+ */
+export type DNoteLineAnchor = {
+  type: "line";
+  /** 1-indexed line number. */
+  line: number;
+  value: string;
+};
+
+export type DNoteAnchorPositioned = (DNoteBlockAnchor | DNoteHeaderAnchor) & {
   line: number;
   column: number;
 };
 
-export type DLinkType = "wiki" | "refv2";
+export type DLinkType = "wiki" | "refv2" | "hashtag" | "usertag" | "fmtag";
 
 export type DNoteLinkData = {
   // TODO: should be backfilled to be mandatory
@@ -635,6 +670,33 @@ export type BasePodExecuteOpts<TConfig> = {
   utilityMethods?: any;
 };
 
+export enum MergeConflictOptions {
+  OVERWRITE_LOCAL = "Overwrite local value with remote value",
+  OVERWRITE_REMOTE = "Overwrite remote value with local value",
+  SKIP = "Skip this conflict(We will not merge, you'll resolve this manually)",
+  SKIP_ALL = "Skip All (you'll resolve all next conflicted entries manually) ",
+}
+
+export type Conflict = {
+  /**
+   * Existing note
+   */
+  conflictNote: NoteProps;
+  /**
+   * Newly written note
+   */
+  conflictEntry: NoteProps;
+  /**
+   * Conflicted Data
+   */
+  conflictData: string[];
+};
+
+export type PodConflictResolveOpts = {
+  options: () => string[];
+  message: (conflict: Conflict) => string;
+  validate: (choice: number, options: string[]) => any;
+};
 // --- Messages
 
 export type DMessage<TType = string, TData = any, TSource = DMessageSource> = {
@@ -736,21 +798,3 @@ export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,
   { data: any }
 >;
-
-// --- Views
-
-export enum DendronWebViewKey {
-  CONFIGURE = "dendron.configure",
-  NOTE_GRAPH = "dendron.graph-note",
-  SCHEMA_GRAPH = "dendron.graph-schema",
-  NOTE_PREVIEW = "dendron.note-preview",
-  SEED_BROWSER = "dendron.seed-browser",
-}
-
-export enum DendronTreeViewKey {
-  SAMPLE_VIEW = "dendron.sample",
-  TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.tree-view",
-  BACKLINKS = "dendron.backlinks",
-  CALENDAR_VIEW = "dendron.calendar-view",
-}

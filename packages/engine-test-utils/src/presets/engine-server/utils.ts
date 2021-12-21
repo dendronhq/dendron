@@ -344,6 +344,11 @@ version: 1
 imports: 
   - foo
 schemas:
+  - id: plain_schema
+    parent: root
+    children:
+      - plain_schema_child
+      - daily
   - id: daily
     parent: root
     children:
@@ -367,6 +372,8 @@ schemas:
     children:
       - pattern: has_untyped_template
         template: templates.untyped
+  - id: plain_schema_child
+    template: templates.example
 `
   );
 
@@ -374,6 +381,13 @@ schemas:
     wsRoot,
     body: "Template text",
     fname: "templates.day",
+    vault: vault1,
+  });
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "templates.example",
     vault: vault1,
   });
 

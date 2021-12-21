@@ -1,4 +1,8 @@
-import { DendronTreeViewKey } from "@dendronhq/common-all";
+import {
+  DendronTreeViewKey,
+  isWebViewEntry,
+  TREE_VIEWS,
+} from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
@@ -13,35 +17,44 @@ export enum DendronContext {
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
 }
 
+const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
+  const entry = TREE_VIEWS[id];
+  const out: {
+    id: string;
+    name: string;
+    contextualTitle: string;
+    type?: "webview";
+  } = {
+    id,
+    name: entry.label,
+    contextualTitle: entry.label,
+  };
+  if (isWebViewEntry(entry)) {
+    out.type = "webview";
+  }
+  return out;
+};
+
 export const DENDRON_VIEWS = [
   {
-    id: DendronTreeViewKey.SAMPLE_VIEW,
-    name: "Sample View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.SAMPLE_VIEW),
     when: DendronContext.DEV_MODE,
     where: "explorer",
-    type: "webview",
   },
   {
-    id: DendronTreeViewKey.CALENDAR_VIEW,
-    name: "Calendar View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
     where: "explorer",
-    type: "webview",
   },
   {
-    id: DendronTreeViewKey.TREE_VIEW,
-    name: "Tree View",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
     when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
-    contextualTitle: "Tree View",
     icon: "media/icons/dendron-vscode.svg",
   },
   {
-    id: DendronTreeViewKey.TREE_VIEW_V2,
-    name: "Tree View V2",
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW_V2),
     when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
-    type: "webview",
-    contextualTitle: "Tree View",
     icon: "media/icons/dendron-vscode.svg",
   },
   {
@@ -650,6 +663,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
   },
+  CONFIGURE_SERVICE_CONNECTION: {
+    key: "dendron.configureServiceConnection",
+    title: `${CMD_PREFIX} Configure Service Connection`,
+    group: "pods",
+    desc: "Update your service connection configuration",
+    docLink: "dendron.topic.pod.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+  },
+  CONFIGURE_EXPORT_POD_V2: {
+    key: "dendron.configureExportPodV2",
+    title: `${CMD_PREFIX} Configure Export Pod V2`,
+    group: "pods",
+    desc: "Update your export pod configuration",
+    docLink: "dendron.topic.pod.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+  },
   IMPORT_POD: {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,
@@ -733,6 +764,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "hooks",
     desc: "Delete a hook",
     when: DendronContext.PLUGIN_ACTIVE,
+  },
+  REGISTER_NOTE_TRAIT: {
+    key: "dendron.registerNoteTrait",
+    title: `${CMD_PREFIX} Register Note Trait`,
+    group: "hooks",
+    desc: "Register a new Note Trait in Dendron's Trait System",
+  },
+  CREATE_USER_DEFINED_NOTE: {
+    key: "dendron.createNoteWithTraits",
+    title: `${CMD_PREFIX} Create Note with Custom Traits`,
+    group: "hooks",
+    desc: "Create a New Note with a User-Defined Trait Applied",
   },
   // --- Publishing
   PUBLISH_EXPORT: {
@@ -1180,7 +1223,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   WATCH_FOR_NATIVE_WS: {
     key: "dendron.watchForNativeWorkspace",
     type: "boolean",
-    default: true,
+    default: false,
     description:
       "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace.",
   },

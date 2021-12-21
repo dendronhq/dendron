@@ -1,6 +1,14 @@
 {
   "folders": [
     {
+      "path": "docs/dendron-docs",
+      "name": "dendron-docs"
+    },
+    {
+      "path": "docs/seeds/dendron.dendron-site",
+      "name": "dendron.dendron-site"
+    },
+    {
       "path": ".",
       "name": "root"
     },
@@ -63,9 +71,6 @@
     },
     {
       "path": "test-workspace"
-    },
-    {
-      "path": "docs"
     }
   ],
   "settings": {
@@ -91,7 +96,6 @@
     "workbench.editor.showTabs": true,
     "editor.snippetSuggestions": "none",
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "liveFrame.url": "http://localhost:3000/proto",
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },

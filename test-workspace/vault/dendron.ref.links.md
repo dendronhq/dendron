@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1638356699074
+updated: 1639433681546
 created: 1608518909864
 ---
 
@@ -119,3 +119,26 @@ Vault2
 
 @user
 #hash
+
+## Broken Links
+
+`dendron doctor findBrokenLinks` and `dendron doctor createMissingLinkedNotes` does not work if no vault prefix is specified
+
+[[dendron://vault/broken.link.with.vault.prefix]]
+[[broken.link.without.vault.prefix]]
+
+## Inside a code block
+
+The following link won't be highlighted since it's inside the code block, but Goto Note will still work.
+
+```js
+const x = 1;
+// see more here:[[dendron.ref.links.target-1]]
+```
+
+## Link to a non-note file
+
+[[/vault/root.schema.yml]]
+
+And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
+

@@ -1,21 +1,16 @@
 import {
+  DendronEditorViewKey,
   DendronTreeViewKey,
-  DendronWebViewKey,
-  DMessageEnum,
   DUtils,
   getStage,
-  NoteProps,
-  OnDidChangeActiveTextEditorMsg,
+  getWebTreeViewEntry,
 } from "@dendronhq/common-all";
-import _ from "lodash";
-import { title } from "process";
+import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
+import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { getExtension, getDWorkspace } from "../workspace";
-import path from "path";
-import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
+import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 
 export class WebViewUtils {
   /**
@@ -62,7 +57,6 @@ export class WebViewUtils {
    *
    * @param panel: required to convert asset URLs to VSCode Webview Extension format
    * @returns
-   *
    */
   static getWebviewContent({
     jsSrc,
@@ -93,18 +87,52 @@ export class WebViewUtils {
       port,
       wsRoot,
       browser: false,
+      // acquireVsCodeApi() Documentation: This function can only be invoked once per session.
+      // You must hang onto the instance of the VS Code API returned by this method,
+      // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
       themeMap,
     });
     return out;
   }
+  static prepareTreeView({
+    ext,
+    key,
+    webviewView,
+  }: {
+    ext: DendronExtension;
+    key: DendronTreeViewKey;
+    webviewView: vscode.WebviewView;
+  }) {
+    const viewEntry = getWebTreeViewEntry(key);
+    const name = viewEntry.bundleName;
+    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const port = ext.port!;
+    webviewView.webview.options = {
+      enableScripts: true,
+      enableCommandUris: false,
+      localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
+    };
+    const html = WebViewUtils.getWebviewContent({
+      ...webViewAssets,
+      port,
+      wsRoot: ext.getEngine().wsRoot,
+      panel: webviewView,
+    });
+    webviewView.webview.html = html;
+  }
 
+  /**
+   * @deprecated Use `{@link WebviewUtils.getWebviewContent}`
+   * @param param0
+   * @returns
+   */
   static genHTMLForView = async ({
     title,
     view,
   }: {
     title: string;
-    view: DendronTreeViewKey | DendronWebViewKey;
+    view: DendronTreeViewKey | DendronEditorViewKey;
   }) => {
     const { wsRoot, config } = getDWorkspace();
     const ext = getExtension();
@@ -222,39 +250,11 @@ export class WebViewUtils {
     view,
   }: {
     title: string;
-    view: DendronWebViewKey;
+    view: DendronEditorViewKey;
   }) => {
     /**
      * Implementation might differ in the future
      */
     return WebViewUtils.genHTMLForView({ title, view });
   };
-}
-
-/**
- * Utils assisting with the preview
- */
-export class PreviewUtils {
-  static onDidChangeHandler(document: vscode.TextDocument) {
-    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
-    if (!_.isUndefined(maybeNote)) PreviewUtils.refresh(maybeNote);
-  }
-
-  static refresh(note: NoteProps) {
-    const ctx = { ctx: "ShowPreview:refresh", fname: note.fname };
-    const panel = getExtension().getWebView(DendronWebViewKey.NOTE_PREVIEW);
-    Logger.debug({ ...ctx, state: "enter" });
-    if (panel) {
-      Logger.debug({ ...ctx, state: "panel found" });
-      panel.title = `${title} ${note.fname}`;
-      panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote: true,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
-    }
-  }
 }

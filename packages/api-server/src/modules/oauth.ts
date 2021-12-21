@@ -22,10 +22,12 @@ type GetTokenPayload = string | undefined;
  */
 type GetTokenOpts = {
   code: string;
+  connectionId: string;
 };
 
 type RefreshTokenOpts = {
   refreshToken: string;
+  connectionId: string;
 };
 
 export class GoogleAuthController implements TokenMethods {
@@ -37,15 +39,19 @@ export class GoogleAuthController implements TokenMethods {
     this.clientSecret = clientSecret;
   }
   async getToken(opts: GetTokenOpts): Promise<RespV2<any> | GetTokenPayload> {
-    const { code } = opts;
+    const { code, connectionId } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
-    const configPath = path.join(
-      wsRoot,
-      "pods",
-      "dendron.gdoc",
-      "config.import.yml"
-    );
+    // getToken reads url from browser and filters the req query params,
+    // It receives string value `undefined` from req.query when the connectionId is set as undefined
+    const configPath = !_.isEqual(connectionId, "undefined")
+      ? path.join(
+          wsRoot,
+          "pods",
+          "service-connections",
+          `svcconfig.${connectionId}.yml`
+        )
+      : path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml");
     const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
       encoding: "utf8",
     });
@@ -56,7 +62,7 @@ export class GoogleAuthController implements TokenMethods {
       data: {
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google&connectionId=${connectionId}`,
         grant_type: "authorization_code",
         code,
       },
@@ -72,7 +78,7 @@ export class GoogleAuthController implements TokenMethods {
       };
       engine.addAccessTokensToPodConfig(opts);
       resp =
-        "Authorization completed. Please return to your workspace and specify vaultName in config.import.yml and then run the import pod again. You can now close this window.";
+        "Authorization completed. Please return to your workspace and then run the pod again. Please specify vaultName in config.import.yml if you are running the import pod. You can now close this window.";
     } else {
       throw new DendronError({
         message:
@@ -85,7 +91,7 @@ export class GoogleAuthController implements TokenMethods {
   }
 
   async refreshToken(opts: RefreshTokenOpts): Promise<RespV2<string>> {
-    const { refreshToken } = opts;
+    const { refreshToken, connectionId } = opts;
     const engine = MemoryStore.instance().getEngine();
     const { wsRoot } = engine;
     const port = await fs.readFile(path.join(wsRoot, ".dendron.port"), {
@@ -99,14 +105,21 @@ export class GoogleAuthController implements TokenMethods {
       data: {
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google`,
+        redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google&connectionId=${connectionId}`,
         grant_type: "refresh_token",
         refresh_token: refreshToken,
       },
     });
     if (!_.isEmpty(data)) {
       const opts = {
-        path: path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
+        path: !_.isUndefined(connectionId)
+          ? path.join(
+              wsRoot,
+              "pods",
+              "service-connections",
+              `svcconfig.${connectionId}.yml`
+            )
+          : path.join(wsRoot, "pods", "dendron.gdoc", "config.import.yml"),
         tokens: {
           accessToken: data.access_token,
           // expiration time of token is set to 55mins from now.

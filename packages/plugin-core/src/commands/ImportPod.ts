@@ -7,6 +7,7 @@ import {
   PodUtils,
   PROMPT,
 } from "@dendronhq/pods-core";
+import _ from "lodash";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
 import {
@@ -17,6 +18,7 @@ import {
   showInputBox,
   showPodQuickPickItemsV4,
   updateGlobalState,
+  handleConflict,
 } from "../utils/pods";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
@@ -65,6 +67,7 @@ export class ImportPodCommand extends BaseCommand<
       // config defined and not just the default placeholder config
       if (
         maybeConfig &&
+        !_.isEmpty(maybeConfig) &&
         (maybeConfig.src !== "TODO" || maybeConfig.vaultName !== "TODO")
       ) {
         return { podChoice, config: maybeConfig };
@@ -76,7 +79,7 @@ export class ImportPodCommand extends BaseCommand<
         (maybeConfig.accessToken === undefined ||
           maybeConfig.accessToken === "TODO")
       ) {
-        launchGoogleOAuthFlow();
+        await launchGoogleOAuthFlow();
         window.showInformationMessage(
           "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
         );
@@ -112,6 +115,7 @@ export class ImportPodCommand extends BaseCommand<
       showDocumentQuickPick,
       showInputBox,
       openFileInEditor,
+      handleConflict,
     };
     if (!wsRoot) {
       throw Error("ws root not defined");

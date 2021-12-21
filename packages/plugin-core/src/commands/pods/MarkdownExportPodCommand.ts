@@ -1,8 +1,10 @@
 import { NoteProps } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
+  createRunnableMarkdownV2PodConfigSchema,
   ExportPodV2,
   isRunnableMarkdownV2PodConfig,
+  JSONSchemaType,
   MarkdownExportPodV2,
   MarkdownV2PodConfig,
   PodV2Types,
@@ -11,7 +13,9 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
@@ -25,6 +29,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
   string
 > {
   public key = "dendron.markdownexportv2";
+
+  public constructor() {
+    super(new QuickPickHierarchySelector());
+  }
 
   public async gatherInputs(
     opts?: Partial<MarkdownV2PodConfig>
@@ -78,9 +86,16 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
           }),
         });
 
-        vscode.window.showInformationMessage(
-          `Configuration saved to ${configPath}`
-        );
+        vscode.window
+          .showInformationMessage(
+            `Configuration saved to ${configPath}`,
+            "Open Config"
+          )
+          .then((selectedItem) => {
+            if (selectedItem) {
+              VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
+            }
+          });
       }
     }
 
@@ -122,6 +137,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       engine: getEngine(),
       dendronConfig: getDWorkspace().config,
     });
+  }
+
+  public getRunnableSchema(): JSONSchemaType<RunnableMarkdownV2PodConfig> {
+    return createRunnableMarkdownV2PodConfigSchema();
   }
 
   /*

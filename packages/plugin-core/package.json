@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.71.3",
+  "version": "0.73.1",
   "engines": {
     "vscode": "^1.54.0"
   },
@@ -324,6 +324,20 @@
         "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
       },
       {
+        "command": "dendron.configureServiceConnection",
+        "title": "Dendron: Configure Service Connection",
+        "desc": "Update your service connection configuration",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
+      },
+      {
+        "command": "dendron.configureExportPodV2",
+        "title": "Dendron: Configure Export Pod V2",
+        "desc": "Update your export pod configuration",
+        "docLink": "dendron.topic.pod.md",
+        "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
+      },
+      {
         "command": "dendron.importPod",
         "title": "Dendron: Import Pod",
         "desc": "Import notes from an external data source. Currently, only the local file system is supported",
@@ -564,6 +578,16 @@
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial",
         "desc": "Launch the Tutorial"
+      },
+      {
+        "command": "dendron.registerNoteTrait",
+        "title": "Dendron: Register Note Trait",
+        "desc": "Register a new Note Trait"
+      },
+      {
+        "command": "dendron.createNoteWithTraits",
+        "title": "Dendron: Create Note with Custom Traits",
+        "desc": "Create a New Note with a User-Defined Traits Applied"
       }
     ],
     "menus": {
@@ -753,7 +777,7 @@
         },
         "dendron.watchForNativeWorkspace": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace."
         }
       }
@@ -902,8 +926,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.71.3",
-    "@dendronhq/engine-test-utils": "^0.71.3",
+    "@dendronhq/common-test-utils": "^0.73.1",
+    "@dendronhq/engine-test-utils": "^0.73.1",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -939,11 +963,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.71.3",
-    "@dendronhq/common-all": "^0.71.3",
-    "@dendronhq/common-server": "^0.71.3",
-    "@dendronhq/engine-server": "^0.71.3",
-    "@dendronhq/pods-core": "^0.71.3",
+    "@dendronhq/api-server": "^0.73.1",
+    "@dendronhq/common-all": "^0.73.1",
+    "@dendronhq/common-server": "^0.73.1",
+    "@dendronhq/engine-server": "^0.73.1",
+    "@dendronhq/pods-core": "^0.73.1",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

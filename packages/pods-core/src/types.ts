@@ -1,4 +1,9 @@
-import { DPod, NoteProps } from "@dendronhq/common-all";
+import {
+  Conflict,
+  DPod,
+  NoteProps,
+  PodConflictResolveOpts,
+} from "@dendronhq/common-all";
 
 export interface PodClassEntryV4 {
   id: string;
@@ -37,4 +42,11 @@ export type GithubIssueUtilMethods = {
 export type ShowMessageTypes = {
   info: (message: string) => void;
   warning: (message: string) => void;
+};
+
+export type ConflictHandler = {
+  handleConflict: (
+    conflict: Conflict,
+    conflictResolveOpts: PodConflictResolveOpts
+  ) => Promise<string | undefined>;
 };

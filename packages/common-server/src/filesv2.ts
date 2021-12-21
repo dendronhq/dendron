@@ -64,7 +64,7 @@ export async function createFileWatcher(
   const { numTries, fpath, onChange } = _.defaults(opts, {
     numTries: 5,
   });
-  let didCreate = false;
+  const didCreate = false;
 
   return new Promise(async (resolve, _reject) => {
     if (!fs.existsSync(fpath)) {
@@ -217,10 +217,10 @@ export function file2NoteWithCache({
   // if hash matches, note hasn't changed
   if (matchHash) {
     // since we don't store the note body in the cache file, we need to re-parse the body
-    let capture = content.match(/^---[\s\S]+?---/);
+    const capture = content.match(/^---[\s\S]+?---/);
     if (capture) {
-      let offset = capture[0].length;
-      let body = content.slice(offset + 1);
+      const offset = capture[0].length;
+      const body = content.slice(offset + 1);
       // vault can change without note changing so we need to add this
       // add `contentHash` to this signature because its not saved with note
       note = { ...cache.notes[name].data, body, vault, contentHash: sig };
@@ -344,6 +344,21 @@ export async function findDownTo(opts: {
   return undefined;
 }
 
+/** Returns true if `inner` is inside of `outer`, and false otherwise.
+ *
+ * If `inner === outer`, then that also returns false.
+ */
+export function isInsidePath(outer: string, inner: string) {
+  // When going from `outer` to `inner`
+  const relPath = path.relative(outer, inner);
+  // If we have to leave `outer`, or if we have to switch to a
+  // different drive with an absolute path, then `inner` can't be
+  // inside `outer` (or `inner` and `outer` are identical)
+  return (
+    !relPath.startsWith("..") && !path.isAbsolute(relPath) && relPath !== ""
+  );
+}
+
 /** Returns the list of unique, outermost folders. No two folders returned are nested within each other. */
 export function uniqueOutermostFolders(folders: string[]) {
   // Avoid duplicates
@@ -351,14 +366,8 @@ export function uniqueOutermostFolders(folders: string[]) {
   if (folders.length === 1) return folders;
   return folders.filter((currentFolder) =>
     folders.every((otherFolder) => {
-      // When going from the other folder to this folder
-      const relPath = path.relative(otherFolder, currentFolder);
-      // If we have to leave otherFolder, or if we have to switch to a
-      // different drive with an absolute path, then currentFolder can't be
-      // inside otherFolder (or current and other folder are identical)
-      return (
-        relPath.startsWith("..") || path.isAbsolute(relPath) || relPath === ""
-      );
+      // `currentFolder` is not inside any other folder
+      return !isInsidePath(otherFolder, currentFolder);
     })
   );
 }
@@ -451,6 +460,62 @@ export function writeJSONWithComments(fpath: string, data: any) {
  */
 export function dot2Slash(fname: string) {
   return fname.replace(/\./g, "/");
+}
+
+/** Checks that the `path` contains a file. */
+export async function fileExists(path: string) {
+  try {
+    const stat = await fs.stat(path);
+    return stat.isFile();
+  } catch {
+    return false;
+  }
+}
+
+/** Finds if a file `fpath` is located in any vault.
+ *
+ * @param fpath A file name or relative path that we are searching inside vaults.
+ */
+async function findFileInVault({
+  fpath,
+  wsRoot,
+  vaults,
+}: {
+  fpath: string;
+  wsRoot: string;
+  vaults: DVault[];
+}): Promise<{ vault: DVault; fullPath: string } | undefined> {
+  // Assets from later vaults will overwrite earlier ones.
+  vaults = [...vaults].reverse();
+  for (const vault of vaults) {
+    const fullPath = path.join(wsRoot, VaultUtils.getRelPath(vault), fpath);
+    // Doing this sequentially to simulate how publishing handles conflicting assets.
+    // eslint-disable-next-line no-await-in-loop
+    if (await fileExists(fullPath)) {
+      return { vault, fullPath };
+    }
+  }
+  return;
+}
+
+export async function findNonNoteFile(opts: {
+  fpath: string;
+  wsRoot: string;
+  vaults: DVault[];
+}): Promise<{ vault?: DVault; fullPath: string } | undefined> {
+  let { fpath } = opts;
+  // Especially for assets, `/assets` and `assets` refers to the same place.
+  fpath = _.trim(fpath, "/\\");
+  // Check if this is an asset first
+  if (fpath.startsWith("assets")) {
+    const out = await findFileInVault(opts);
+    if (out !== undefined) return out;
+  }
+  // If not an asset, or if we couldn't find it in assets, then check from wsRoot for out-of-vault files
+  const fullPath = path.join(opts.wsRoot, fpath);
+  if (await fileExists(fullPath)) return { fullPath };
+  // Otherwise, it just doesn't exist
+  return undefined;
 }
 
 export { tmp, DirResult };

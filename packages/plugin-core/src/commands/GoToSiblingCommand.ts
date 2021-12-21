@@ -46,7 +46,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     const { vaults, engine, wsRoot } = getDWorkspace();
     if (value === "root") {
-      const vault = VaultUtils.getVaultByNotePath({
+      const vault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: maybeTextEditor.document.uri.fsPath,

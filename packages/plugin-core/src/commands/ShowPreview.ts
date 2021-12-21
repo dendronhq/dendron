@@ -1,16 +1,14 @@
 import {
-  assertUnreachable,
+  DendronEditorViewKey,
   DendronError,
-  DendronWebViewKey,
-  DMessageEnum,
   DNoteAnchor,
   ErrorFactory,
   ERROR_STATUS,
+  getWebEditorViewEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   NoteViewMessage,
-  NoteViewMessageEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -21,10 +19,9 @@ import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { QuickPickUtil } from "../utils/quickPick";
-import { PreviewUtils, WebViewUtils } from "../views/utils";
+import { WebViewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 
@@ -42,6 +39,7 @@ export const extractHeaderAnchorIfExists = (
     return {
       type: "header",
       value: anchorValue,
+      depth: tokens.length - 1,
     };
   }
 };
@@ -81,28 +79,6 @@ export enum LinkType {
   MARKDOWN = "MARKDOWN",
   UNKNOWN = "UNKNOWN",
 }
-
-const classifyLink = ({ href }: NoteViewMessage["data"]): LinkType => {
-  if (href && href.startsWith("vscode-webview") && href.includes("/assets/")) {
-    // Note: currently even when the wiki link is fully vault qualified as example
-    // of [[dendron://assets/note-in-asset-vault]] When it is clicked within the preview
-    // the href will look along the lines of:
-    // `vscode-webview://72db5b4c-61f8-400b-808c-771184cb3d7f/r68Zw7OChUZWvbD10qqmY`
-    // href will contain the id of the note but it will NOT contain the vault
-    // hence we should avoid the issue of parsing 'assets' vault name even if someone names their
-    // vault 'assets'.
-    return LinkType.ASSET;
-  } else if (href && href.startsWith("vscode-webview")) {
-    return LinkType.WIKI;
-  } else if (
-    href &&
-    (href.startsWith("http://") || href.startsWith("https://"))
-  ) {
-    return LinkType.WEBSITE;
-  } else {
-    return LinkType.UNKNOWN;
-  }
-};
 
 /** This wrapper class is mostly here to allow easier stubbing for testing. */
 export class ShowPreviewNoteUtil {
@@ -292,7 +268,10 @@ export const handleLink = async ({
       }
     }
     case LinkType.WEBSITE: {
-      return VSCodeUtils.openLink(data.href!);
+      // Updated preview appears to already open the external links in the browser by itself
+      // Hence running `VSCodeUtils.openLink(data.href!);` causes double opening
+      // of the link within the browser.
+      return;
     }
     case LinkType.MARKDOWN: {
       // assume local note - open relative to current vault
@@ -320,6 +299,12 @@ export class ShowPreviewCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
+  _panel: vscode.WebviewPanel;
+  constructor(previewPanel: vscode.WebviewPanel) {
+    super();
+    this._panel = previewPanel;
+  }
+
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -328,108 +313,27 @@ export class ShowPreviewCommand extends BasicCommand<
   }
 
   async execute(_opts?: CommandOpts) {
-    const ctx = "ShowPreview";
     const ext = getExtension();
-    const existingPanel = ext.getWebView(DendronWebViewKey.NOTE_PREVIEW);
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
     const port = ext.port!;
     const wsRoot = ext.getEngine().wsRoot;
 
-    // show existing panel if exist
-    if (!_.isUndefined(existingPanel)) {
-      Logger.info({ ctx, msg: "reveal existing" });
-      try {
-        // If error, panel disposed and needs to be recreated
-        existingPanel.reveal(viewColumn, preserveFocus);
-        return;
-      } catch (error: any) {
-        Logger.error({ ctx, error });
-      }
-    }
-    Logger.info({ ctx, msg: "creating new" });
-
-    const name = "notePreview";
-    const panel = vscode.window.createWebviewPanel(
-      name,
-      "Dendron Preview",
-      {
-        viewColumn,
-        preserveFocus,
-      },
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        enableFindWidget: true,
-        localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
-      }
+    const { bundleName: name } = getWebEditorViewEntry(
+      DendronEditorViewKey.NOTE_PREVIEW
     );
 
     const webViewAssets = WebViewUtils.getJsAndCss(name);
-    panel.webview.onDidReceiveMessage(async (msg: NoteViewMessage) => {
-      const ctx = "ShowPreview:onDidReceiveMessage";
-      Logger.debug({ ctx, msgType: msg.type });
-      switch (msg.type) {
-        case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
-        case DMessageEnum.INIT: {
-          // do nothing
-          break;
-        }
-        case DMessageEnum.MESSAGE_DISPATCHER_READY: {
-          // if ready, get current note
-          const note = WSUtils.getActiveNote();
-          if (note) {
-            Logger.debug({
-              ctx,
-              msg: "got active note",
-              note: NoteUtils.toLogObj(note),
-            });
-            PreviewUtils.refresh(note);
-          }
-          break;
-        }
-        case NoteViewMessageEnum.onClick: {
-          const { data } = msg;
-          const linkType = classifyLink(data);
-          await handleLink({
-            linkType,
-            data,
-            wsRoot: getEngine().wsRoot,
-          });
-          break;
-        }
-        case NoteViewMessageEnum.onGetActiveEditor: {
-          // only entered on "init" in `plugin-core/src/views/utils.ts:87`
-          Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
-          const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-          const maybeNote = !_.isUndefined(activeTextEditor)
-            ? WSUtils.tryGetNoteFromDocument(activeTextEditor?.document)
-            : undefined;
-          if (!_.isUndefined(maybeNote)) PreviewUtils.refresh(maybeNote);
-          break;
-        }
-        default:
-          assertUnreachable(msg.type);
-      }
-    });
 
     const html = WebViewUtils.getWebviewContent({
       ...webViewAssets,
       port,
       wsRoot,
-      panel,
+      panel: this._panel,
     });
-    panel.webview.html = html;
 
-    // Update workspace-wide panel
-    ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, panel);
+    this._panel.webview.html = html;
 
-    // remove webview from workspace when user closes it
-    // this prevents throwing `Uncaught Error: Webview is disposed` in `ShowPreviewCommand#refresh`
-    panel.onDidDispose(() => {
-      const ctx = "ShowPreview:onDidDispose";
-      Logger.debug({ ctx, state: "dispose preview" });
-      ext.setWebView(DendronWebViewKey.NOTE_PREVIEW, undefined);
-    });
+    this._panel.reveal(viewColumn, preserveFocus);
   }
 }

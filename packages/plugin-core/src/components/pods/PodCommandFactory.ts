@@ -7,6 +7,7 @@ import {
 import path from "path";
 import { CodeCommandInstance } from "../../commands/base";
 import { AirtableExportPodCommand } from "../../commands/pods/AirtableExportPodCommand";
+import { GoogleDocsExportPodCommand } from "../../commands/pods/GoogleDocsExportPodCommand";
 import { MarkdownExportPodCommand } from "../../commands/pods/MarkdownExportPodCommand";
 import { getExtension } from "../../workspace";
 
@@ -54,6 +55,16 @@ export class PodCommandFactory {
         };
         break;
       }
+      case PodV2Types.GoogleDocsExportV2: {
+        const cmd = new GoogleDocsExportPodCommand();
+        cmdWithArgs = {
+          key: cmd.key,
+          run(): Promise<void> {
+            return cmd.run(storedConfig);
+          },
+        };
+        break;
+      }
 
       default:
         throw new Error(`Unsupported PodV2 Type: ${storedConfig.podType}`);
@@ -87,6 +98,15 @@ export class PodCommandFactory {
       case PodV2Types.MarkdownExportV2: {
         const cmd = new MarkdownExportPodCommand();
 
+        return {
+          key: cmd.key,
+          run(): Promise<void> {
+            return cmd.run();
+          },
+        };
+      }
+      case PodV2Types.GoogleDocsExportV2: {
+        const cmd = new GoogleDocsExportPodCommand();
         return {
           key: cmd.key,
           run(): Promise<void> {

@@ -1,13 +1,12 @@
 import { WorkspaceType } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { getDWorkspace } from "../../workspace";
+import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
   runSuiteButSkipForWindows,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { _activate } from "../../_extension";
-import { expect } from "../testUtilsv2";
 
 runSuiteButSkipForWindows()(
   "GIVEN testing code setupLegacyWorkspaceMulti",

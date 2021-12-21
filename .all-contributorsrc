@@ -977,6 +977,79 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "garranplum",
+      "name": "Garran Plum",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9744747?v=4",
+      "profile": "https://github.com/garranplum",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "tma66",
+      "name": "tma66",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1160589?v=4",
+      "profile": "https://github.com/tma66",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "not-so-smart",
+      "name": "not-so-smart",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43360094?v=4",
+      "profile": "https://github.com/not-so-smart",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "jsamr",
+      "name": "Jules Sam. Randolph",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3646758?v=4",
+      "profile": "https://github.com/jsamr",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "blu3r4y",
+      "name": "Mario Kahlhofer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10400532?v=4",
+      "profile": "https://github.com/blu3r4y",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "tolikkostin",
+      "name": "Anatoliy Kostin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26538478?v=4",
+      "profile": "https://github.com/tolikkostin",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "r-good",
+      "name": "r-good",
+      "avatar_url": "https://avatars.githubusercontent.com/u/95871742?v=4",
+      "profile": "https://github.com/r-good",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "sagarbehere",
+      "name": "Sagar Behere",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1622959?v=4",
+      "profile": "http://sagar.se",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -50,6 +50,7 @@ type CompilerOpts = {
   convertObsidianLinks?: boolean;
   useId?: boolean;
   prefix?: string;
+  convertLinks?: boolean;
 };
 
 function parseAnchorIfExist(link: string) {

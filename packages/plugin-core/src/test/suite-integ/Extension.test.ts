@@ -1,10 +1,10 @@
 import {
+  ConfigUtils,
   CONSTANTS,
   InstallStatus,
   isNotUndefined,
   Time,
   VaultUtils,
-  ConfigUtils,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
@@ -24,7 +24,7 @@ import {
 import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, beforeEach, it } from "mocha";
+import { describe, beforeEach, it, afterEach } from "mocha";
 import os from "os";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
@@ -57,6 +57,7 @@ import {
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
+  cleanupVSCodeContextSubscriptions,
   describeMultiWS,
   runLegacySingleWorkspaceTest,
   runTestButSkipForWindows,
@@ -197,6 +198,10 @@ suite("Extension", function () {
   });
 
   describe("setup CODE workspace", () => {
+    afterEach(() => {
+      cleanupVSCodeContextSubscriptions(ctx);
+    });
+
     it("not active", (done) => {
       _activate(ctx).then((resp) => {
         expect(resp).toBeFalsy();
@@ -327,6 +332,7 @@ suite("Extension", function () {
             enableMermaid: true,
             enablePrettyRefs: true,
             enableKatex: true,
+            automaticallyShowPreview: false,
           },
         });
 
@@ -560,6 +566,10 @@ suite("Extension", function () {
   });
 
   describe("setup NATIVE workspace", () => {
+    afterEach(() => {
+      cleanupVSCodeContextSubscriptions(ctx);
+    });
+
     it("not active, initial create ws", (done) => {
       const wsRoot = tmpDir().name;
 

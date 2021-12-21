@@ -4,14 +4,19 @@ import { CodeCommandConstructor } from "./base";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
+import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
 import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
+import { ConvertLinkCommand } from "./ConvertLink";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { CreateHookCommand } from "./CreateHookCommand";
+import { CreateNoteWithUserDefinedTrait } from "./CreateNoteWithUserDefinedTrait";
+import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
+import { CreateTaskCommand } from "./CreateTask";
 import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
@@ -25,50 +30,49 @@ import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
 import { InsertNoteCommand } from "./InsertNoteCommand";
-import { InsertNoteLinkCommand } from "./InsertNoteLink";
 import { InsertNoteIndexCommand } from "./InsertNoteIndexCommand";
+import { InsertNoteLinkCommand } from "./InsertNoteLink";
+import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
+import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
-import { NoteLookupCommand } from "./NoteLookupCommand";
 import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
-import { SchemaLookupCommand } from "./SchemaLookupCommand";
+import { NoteLookupCommand } from "./NoteLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteFileCommand } from "./PasteFile";
 import { PasteLinkCommand } from "./PasteLink";
+import { ExportPodV2Command } from "./pods/ExportPodV2Command";
+import { PublishDevCommand } from "./PublishDevCommand";
+import { PublishExportCommand } from "./PublishExportCommand";
 import { PublishPodCommand } from "./PublishPod";
+import { RandomNoteCommand } from "./RandomNote";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
+import { RegisterNoteTraitCommand } from "./RegisterNoteTraitCommand";
+import { RenameHeaderCommand } from "./RenameHeader";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
+import { RunMigrationCommand } from "./RunMigrationCommand";
+import { SchemaLookupCommand } from "./SchemaLookupCommand";
+import { SeedAddCommand } from "./SeedAddCommand";
+import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
-import { ShowNoteGraphCommand } from "./ShowNoteGraph";
-import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { ShowLegacyPreviewCommand } from "./ShowLegacyPreview";
-import { ShowPreviewCommand } from "./ShowPreview";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
-import { PublishExportCommand } from "./PublishExportCommand";
-import { PublishDevCommand } from "./PublishDevCommand";
 import { SnapshotVaultCommand } from "./SnapshotVault";
 import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
-import { VaultRemoveCommand } from "./VaultRemoveCommand";
-import { RandomNoteCommand } from "./RandomNote";
-import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
-import { ConvertLinkCommand } from "./ConvertLink";
-import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
-import { RenameHeaderCommand } from "./RenameHeader";
-import { MoveHeaderCommand } from "./MoveHeader";
-import { SeedAddCommand } from "./SeedAddCommand";
-import { SeedRemoveCommand } from "./SeedRemoveCommand";
-import { RunMigrationCommand } from "./RunMigrationCommand";
-import { SeedBrowseCommand } from "./SeedBrowseCommand";
-import { CreateTaskCommand } from "./CreateTask";
-import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
 import { VaultConvertCommand } from "./VaultConvert";
-import { ExportPodV2Command } from "./pods/ExportPodV2Command";
+import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { ConfigureServiceConnection } from "./pods/ConfigureServiceConnection";
+import { ConfigureExportPodV2 } from "./pods/ConfigureExportPodV2";
 
+/**
+ * Note: this does not contain commands that have parametered constructors, as
+ * those cannot be cast to the CodeCommandConstructor interface.
+ */
 const ALL_COMMANDS = [
   AddAndCommit,
   ArchiveHierarchyCommand,
@@ -76,6 +80,8 @@ const ALL_COMMANDS = [
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,
+  ConfigureServiceConnection,
+  ConfigureExportPodV2,
   ConfigureGraphStylesCommand,
   ContributeCommand,
   CopyNoteLinkCommand,
@@ -117,10 +123,7 @@ const ALL_COMMANDS = [
   RestoreVaultCommand,
   SetupWorkspaceCommand,
   ShowHelpCommand,
-  ShowNoteGraphCommand,
-  ShowSchemaGraphCommand,
   ShowLegacyPreviewCommand,
-  ShowPreviewCommand,
   SignInCommand,
   SignUpCommand,
   PublishExportCommand,
@@ -137,8 +140,9 @@ const ALL_COMMANDS = [
   SeedAddCommand,
   SeedRemoveCommand,
   RunMigrationCommand,
-  SeedBrowseCommand,
   CreateTaskCommand,
+  RegisterNoteTraitCommand,
+  CreateNoteWithUserDefinedTrait,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

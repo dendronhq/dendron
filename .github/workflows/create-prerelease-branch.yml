@@ -5,7 +5,7 @@ name: Create Prerelease Branch
 # Scheduled to run at 7 PM UTC on Thursdays
 on:
   schedule:
-    - cron:  '0 19 * * 4'
+    - cron: "0 19 * * 4"
 
 jobs:
   build:

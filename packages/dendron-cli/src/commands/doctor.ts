@@ -32,7 +32,7 @@ type CommandCLIOpts = {
 } & SetupEngineCLIOpts;
 
 type CommandOpts = CommandCLIOpts & SetupEngineOpts & CommandCommonProps;
-type CommandOutput = CommandCommonProps;
+type CommandOutput = { resp?: any } & CommandCommonProps;
 
 export { CommandOpts as DoctorCLICommandOpts };
 export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {

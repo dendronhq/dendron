@@ -3,6 +3,193 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.73.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.73.1) (2021-12-15)
+
+
+### Features Dendron
+
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* allow assets to open from preview view ([#1771](https://github.com/dendronhq/dendron/issues/1771)) ([f362bda](https://github.com/dendronhq/dendron/commit/f362bda9726c9dde2c96aa1954aa549c1f013136))
+* corner cases for auto complete ([#1843](https://github.com/dendronhq/dendron/issues/1843)) ([d6c51f3](https://github.com/dendronhq/dendron/commit/d6c51f3fd352412d9a763af8f60f34a2c0ebabda))
+* **lookup:** have schema exact match suggestion in lookup show up at the top of the list ([#1720](https://github.com/dendronhq/dendron/issues/1720)) ([41b07b9](https://github.com/dendronhq/dendron/commit/41b07b98612dbe29e0d82426fc6fa5ac40812973))
+* **lookup:** hierarchy look up when inside parts of the hierarchy are omitted ([#1522](https://github.com/dendronhq/dendron/issues/1522)) ([6c30af5](https://github.com/dendronhq/dendron/commit/6c30af5e5b76297334f15a435fd1f9ad09941e06))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* **schemas:** adding new command - create schema from hierarchy ([#1673](https://github.com/dendronhq/dendron/issues/1673)) ([14732ec](https://github.com/dendronhq/dendron/commit/14732ecbdd42511337ddaaf3fc91bde288c3036d))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+### Bug Fixes
+
+* **publish:** fix links in note reference --no-verify ([319d59b](https://github.com/dendronhq/dendron/commit/319d59b6930eaf44b7533b6fcc0939f2550d475d))
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* leading slash in markdown export pod ([#1136](https://github.com/dendronhq/dendron/issues/1136)) ([0f8ebbf](https://github.com/dendronhq/dendron/commit/0f8ebbf228f7af1bbbf677c9fea38989f87c635e))
+
+
+
+
+
+# [0.73.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.73.0) (2021-12-14)
+
+
+### Features Dendron
+
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* allow assets to open from preview view ([#1771](https://github.com/dendronhq/dendron/issues/1771)) ([f362bda](https://github.com/dendronhq/dendron/commit/f362bda9726c9dde2c96aa1954aa549c1f013136))
+* corner cases for auto complete ([#1843](https://github.com/dendronhq/dendron/issues/1843)) ([d6c51f3](https://github.com/dendronhq/dendron/commit/d6c51f3fd352412d9a763af8f60f34a2c0ebabda))
+* **lookup:** have schema exact match suggestion in lookup show up at the top of the list ([#1720](https://github.com/dendronhq/dendron/issues/1720)) ([41b07b9](https://github.com/dendronhq/dendron/commit/41b07b98612dbe29e0d82426fc6fa5ac40812973))
+* **lookup:** hierarchy look up when inside parts of the hierarchy are omitted ([#1522](https://github.com/dendronhq/dendron/issues/1522)) ([6c30af5](https://github.com/dendronhq/dendron/commit/6c30af5e5b76297334f15a435fd1f9ad09941e06))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* **schemas:** adding new command - create schema from hierarchy ([#1673](https://github.com/dendronhq/dendron/issues/1673)) ([14732ec](https://github.com/dendronhq/dendron/commit/14732ecbdd42511337ddaaf3fc91bde288c3036d))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+### Bug Fixes
+
+* **publish:** fix links in note reference --no-verify ([319d59b](https://github.com/dendronhq/dendron/commit/319d59b6930eaf44b7533b6fcc0939f2550d475d))
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* leading slash in markdown export pod ([#1136](https://github.com/dendronhq/dendron/issues/1136)) ([0f8ebbf](https://github.com/dendronhq/dendron/commit/0f8ebbf228f7af1bbbf677c9fea38989f87c635e))
+
+
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **views:** update webview title name ([16d1f0c](https://github.com/dendronhq/dendron/commit/16d1f0c2454e4056d56d988aa909c2ea70cf18b1))
+
+
+
+
+
 ## [0.71.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.71.3) (2021-11-30)
 
 

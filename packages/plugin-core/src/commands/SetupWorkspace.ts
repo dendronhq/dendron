@@ -1,18 +1,16 @@
 import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
+import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
-import { TemplateInitializer } from "../workspace/templateInitializer";
-import { TutorialInitializer } from "../workspace/tutorialInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
-import { Logger } from "../logger";
-import { resolveTilde } from "@dendronhq/common-server";
 
 type CommandInput = {
   rootDirRaw: string;
@@ -114,44 +112,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
       }
     }
 
-    const vaultType = await VSCodeUtils.showQuickPick([
-      {
-        label: "default",
-        picked: true,
-        detail: "An empty vault with a template gallery.",
-      },
-      {
-        label: "blank",
-        detail: "A completely empty workspace.",
-      },
-      { label: "tutorial", detail: "Contains the Dendron tutorial notes." },
-    ]);
-
-    if (!vaultType) {
-      return;
-    }
-    switch (vaultType.label) {
-      case "default":
-        return {
-          rootDirRaw,
-          workspaceType,
-          workspaceInitializer: new TemplateInitializer(),
-        };
-      case "blank":
-        return {
-          rootDirRaw,
-          workspaceType,
-          workspaceInitializer: new BlankInitializer(),
-        };
-      case "tutorial":
-        return {
-          rootDirRaw,
-          workspaceType,
-          workspaceInitializer: new TutorialInitializer(),
-        };
-      default:
-        return { rootDirRaw, workspaceType };
-    }
+    return {
+      rootDirRaw,
+      workspaceType,
+      workspaceInitializer: new BlankInitializer(),
+    };
   }
 
   handleExistingRoot = async ({
@@ -219,9 +184,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       rootDirRaw: rootDir,
       skipOpenWs,
       workspaceType,
-    } = _.defaults(opts, {
-      skipOpenWs: opts?.workspaceType === WorkspaceType.NATIVE,
-    });
+    } = _.defaults(opts, {});
     Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 
     if (
@@ -253,11 +216,16 @@ export class SetupWorkspaceCommand extends BasicCommand<
       });
     }
 
-    if (!opts.skipOpenWs) {
+    if (!skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");
-      VSCodeUtils.openWS(
-        vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
-      );
+      if (workspaceType === WorkspaceType.CODE) {
+        VSCodeUtils.openWS(
+          vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
+        );
+      } else if (workspaceType === WorkspaceType.NATIVE) {
+        // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
+        VSCodeUtils.reloadWindow();
+      }
     }
     return vaults;
   }

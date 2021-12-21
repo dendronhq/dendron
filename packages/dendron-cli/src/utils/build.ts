@@ -179,11 +179,7 @@ export class BuildUtils {
     ]);
   }
 
-  /**
-   * @param param0
-   * @returns
-   */
-  static async packagePluginDependencies({
+  static async compilePlugin({
     fast,
     quiet,
   }: {
@@ -195,6 +191,19 @@ export class BuildUtils {
       env: fast ? { SKIP_SENTRY: "true" } : {},
       quiet,
     });
+  }
+
+  /**
+   * @param param0
+   * @returns
+   */
+  static async packagePluginDependencies({
+    fast,
+    quiet,
+  }: {
+    fast?: boolean;
+    quiet?: boolean;
+  }) {
     await $$(`vsce package --yarn`, {
       cwd: this.getPluginRootPath(),
       env: fast ? { SKIP_SENTRY: "true" } : {},

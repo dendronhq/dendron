@@ -315,6 +315,10 @@ export class DendronExtension {
     return false;
   }
 
+  /**
+   * When in dev mode, version is equivalent to `package.json` that is checked out locally
+   * Otherwise, get from published extension `package.json`
+   */
   static version(): string {
     let version: string | undefined;
     if (VSCodeUtils.isDevMode()) {

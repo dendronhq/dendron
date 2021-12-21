@@ -427,6 +427,7 @@ export async function _activate(
       } else {
         // no migration changes.
         // see if we need to force a config migration.
+        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
         const configMigrationChanges =
           await wsService.runConfigMigrationIfNecessary({
             currentVersion,

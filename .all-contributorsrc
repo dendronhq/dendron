@@ -1081,6 +1081,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "kzilla-git",
+      "name": "Kumudan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12721315?v=4",
+      "profile": "https://github.com/kzilla-git",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

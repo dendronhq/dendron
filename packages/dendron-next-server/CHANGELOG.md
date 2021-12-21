@@ -3,6 +3,124 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.74.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.74.0) (2021-12-21)
+
+
+### Bug Fixes
+
+* use patterns when ids are auto generated and there is no manually set title for a schema ([c54e2bb](https://github.com/dendronhq/dendron/commit/c54e2bb90beac6d384ca0d6929cbf5a202808c63))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **markdown:** email parsed as user tag & option to disable user tags and hashtags ([#1562](https://github.com/dendronhq/dendron/issues/1562)) ([fd56f7e](https://github.com/dendronhq/dendron/commit/fd56f7ece1651ea6433ebf481f2c54386ab6fb16))
+* **markdown:** footnote links move view in publishing & preview ([#1568](https://github.com/dendronhq/dendron/issues/1568)) ([fbe659d](https://github.com/dendronhq/dendron/commit/fbe659d2be3d1f2534d7437d585e9fa38f1684da))
+* **markdown:** footnote rendering in note references ([#1520](https://github.com/dendronhq/dendron/issues/1520)) ([c4056f5](https://github.com/dendronhq/dendron/commit/c4056f5c4fc4c02dbc14cd4564032caa3619eae5))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **views:** tree view not initializing on load ([5590a3c](https://github.com/dendronhq/dendron/commit/5590a3c0aa7476e8984a1e9193697d9984ab00ee))
+* **views:** update web uis on note creation ([55a7ecd](https://github.com/dendronhq/dendron/commit/55a7ecd787461062f969804ef44b287af1cd05f5)), closes [/github.com/dendronhq/dendron-docs/blob/main/vault/pkg.dendron-plugin-views.dev.cook.md#L103](https://github.com//github.com/dendronhq/dendron-docs/blob/main/vault/pkg.dendron-plugin-views.dev.cook.md/issues/L103)
+
+
+### Features Dendron
+
+* decorator improvements ([#1770](https://github.com/dendronhq/dendron/issues/1770)) ([a7227fd](https://github.com/dendronhq/dendron/commit/a7227fd4d8991e44729989c821a22560dcb8348b))
+* **notes:** task notes (create modifier & editor highlighting) ([#1583](https://github.com/dendronhq/dendron/issues/1583)) ([e785efa](https://github.com/dendronhq/dendron/commit/e785efa8e2ce55bc39fb90cf34984d55035dd6ca))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+### Bug Fixes
+
+* tree view order ([#1459](https://github.com/dendronhq/dendron/issues/1459)) ([b7955a2](https://github.com/dendronhq/dendron/commit/b7955a2cc43b383b05f7e39dde504a6b3e05ec2e)), closes [#440](https://github.com/dendronhq/dendron/issues/440)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Features Dendron
+
+* **preview:** button for toggle local/global graph ([#1386](https://github.com/dendronhq/dendron/issues/1386)) ([31d905b](https://github.com/dendronhq/dendron/commit/31d905bb57294e268aa64c28b3a0a176d4839b41))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* issue with webpack devCLI ([a4ff4c9](https://github.com/dendronhq/dendron/commit/a4ff4c9ae28ff31ab6f9483c339ae78b5144e185))
+* links at top/bottom of reference aren't clickable ([#1282](https://github.com/dendronhq/dendron/issues/1282)) ([b2a00cc](https://github.com/dendronhq/dendron/commit/b2a00cc564299cdb17ae6060154b7616c04e630c))
+
+
+### Features Dendron
+
+* seed browser initial revision ([#1166](https://github.com/dendronhq/dendron/issues/1166)) ([588fba0](https://github.com/dendronhq/dendron/commit/588fba05bbd9e3dabadd5e02d9fde72d80ed8148))
+* tag colors in graph ([#1227](https://github.com/dendronhq/dendron/issues/1227)) ([cc95d0a](https://github.com/dendronhq/dendron/commit/cc95d0a1ae1f611f9162149db6163660b06fdfeb))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+### Bug Fixes
+
+* horizontal rule not rendering ([#1156](https://github.com/dendronhq/dendron/issues/1156)) ([a95b615](https://github.com/dendronhq/dendron/commit/a95b6157512cda56ce98fd3944dc439570182e5b))
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+### Features Dendron
+
+* **pubv3:** add more features to new publishing ([28a8a4f](https://github.com/dendronhq/dendron/commit/28a8a4f0ec8a02e6d6946833dec11c0117a3f783))
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* **calendar-view:** header selection throws error ([#1122](https://github.com/dendronhq/dendron/issues/1122)) ([5bc8ca1](https://github.com/dendronhq/dendron/commit/5bc8ca1a256328bd6d05f7d351e2c7ae7042580c)), closes [/ant.design/changelog#4](https://github.com//ant.design/changelog/issues/4)
+
+
+### Features Dendron
+
+* colored tags in tree view & tags at bottom ([#1119](https://github.com/dendronhq/dendron/issues/1119)) ([2577e01](https://github.com/dendronhq/dendron/commit/2577e0189e3ba0d813823bc4d81a340d91db440d))
+* **calendar-view:** allow journal settings deviating from defaults ([#1088](https://github.com/dendronhq/dendron/issues/1088)) ([74ce384](https://github.com/dendronhq/dendron/commit/74ce384f1b833abf68d3b145cbed55fe02fa8e1f))
+* generate json schema from config ([#1100](https://github.com/dendronhq/dendron/issues/1100)) ([53b189e](https://github.com/dendronhq/dendron/commit/53b189ec973a8d3d3ccf300a0e59908197f4efb1))
+
+
+
+
+
 ## [0.73.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.73.1) (2021-12-15)
 
 

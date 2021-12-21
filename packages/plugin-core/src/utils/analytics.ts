@@ -2,7 +2,7 @@ import { ContextualUIEvents } from "@dendronhq/common-all";
 import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import * as vscode from "vscode";
-import { DendronExtension } from "../workspace";
+import { VersionProvider } from "../versionProvider";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -16,7 +16,7 @@ export class AnalyticsUtils {
       type: "vscode" as const,
       ideVersion: vscode.version,
       ideFlavor: vscode.env.appName,
-      appVersion: DendronExtension.version(),
+      appVersion: VersionProvider.version(),
       userAgent: vscode.env.appName,
     };
   }

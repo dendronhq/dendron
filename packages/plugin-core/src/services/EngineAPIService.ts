@@ -38,8 +38,9 @@ import {
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { getDWorkspace } from "../workspace";
+import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
-export class EngineAPIService implements DEngineClient {
+export class EngineAPIService implements DEngineClient, IEngineAPIService {
   private internalEngine: DEngineClient;
 
   private _trustedWorkspace: boolean = true;
@@ -83,62 +84,71 @@ export class EngineAPIService implements DEngineClient {
   get trustedWorkspace(): boolean {
     return this._trustedWorkspace;
   }
+
   set trustedWorkspace(value: boolean) {
     this._trustedWorkspace = value;
   }
 
-  public get notes(): NotePropsDict {
+  get notes(): NotePropsDict {
     return this.internalEngine.notes;
   }
+
   public set notes(arg: NotePropsDict) {
     this.internalEngine.notes = arg;
   }
 
-  public get wsRoot(): string {
+  get wsRoot(): string {
     return this.internalEngine.wsRoot;
   }
+
   public set wsRoot(arg: string) {
     this.internalEngine.wsRoot = arg;
   }
 
-  public get schemas(): SchemaModuleDict {
+  get schemas(): SchemaModuleDict {
     return this.internalEngine.schemas;
   }
+
   public set schemas(arg: SchemaModuleDict) {
     this.internalEngine.schemas = arg;
   }
 
-  public get links(): DLink[] {
+  get links(): DLink[] {
     return this.internalEngine.links;
   }
+
   public set links(arg: DLink[]) {
     this.internalEngine.links = arg;
   }
 
-  public get vaults(): DVault[] {
+  get vaults(): DVault[] {
     return this.internalEngine.vaults;
   }
+
   public set vaults(arg: DVault[]) {
     this.internalEngine.vaults = arg;
   }
 
-  public get configRoot(): string {
+  get configRoot(): string {
     return this.internalEngine.configRoot;
   }
+
   public set configRoot(arg: string) {
     this.internalEngine.configRoot = arg;
   }
 
-  public get config(): IntermediateDendronConfig {
+  get config(): IntermediateDendronConfig {
     return this.internalEngine.config;
   }
+
   public set config(arg: IntermediateDendronConfig) {
     this.internalEngine.config = arg;
   }
 
-  public get hooks(): DHookDict {
+  get hooks(): DHookDict {
     return this.internalEngine.hooks;
   }
+
   public set hooks(arg: DHookDict) {
     this.internalEngine.hooks = arg;
   }
@@ -180,6 +190,7 @@ export class EngineAPIService implements DEngineClient {
   writeSchema(schema: SchemaModuleProps): Promise<void> {
     return this.internalEngine.writeSchema(schema);
   }
+
   init(): Promise<DEngineInitResp> {
     return this.internalEngine.init();
   }

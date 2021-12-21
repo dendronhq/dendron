@@ -12,7 +12,7 @@ import { Logger } from "../../logger";
 import { GraphStyleService } from "../../styles";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getEngine } from "../../workspace";
+import { DendronExtension, getEngine, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 export class NoteGraphPanelFactory {
@@ -45,7 +45,7 @@ export class NoteGraphPanelFactory {
             await commands.executeCommand(
               "workbench.action.focusFirstEditorGroup"
             );
-            await new GotoNoteCommand().execute({
+            await new GotoNoteCommand(getExtension()).execute({
               qs: note.fname,
               vault: note.vault,
             });

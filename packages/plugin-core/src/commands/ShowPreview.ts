@@ -23,10 +23,10 @@ import { WebViewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
-import { GotoNoteCommand } from "./GotoNote";
-
-type CommandOpts = {};
-type CommandOutput = any;
+import {
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput,
+} from "./ShowPreviewInterface";
 
 export const extractHeaderAnchorIfExists = (
   link: string
@@ -256,7 +256,7 @@ export const handleLink = async ({
           return;
         }
 
-        return new GotoNoteCommand().execute({
+        return getExtension().commandFactory.goToNoteCmd().execute({
           qs: noteData.note.fname,
           vault: noteData.note.vault,
           column: vscode.ViewColumn.One,
@@ -294,8 +294,8 @@ export const handleLink = async ({
 };
 
 export class ShowPreviewCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
@@ -312,7 +312,7 @@ export class ShowPreviewCommand extends BasicCommand<
     return;
   }
 
-  async execute(_opts?: CommandOpts) {
+  async execute(_opts?: ShowPreviewCommandOpts) {
     const ext = getExtension();
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;

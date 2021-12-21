@@ -141,7 +141,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       }
     }
 
-    await new GotoNoteCommand().execute({
+    await new GotoNoteCommand(getExtension()).execute({
       qs: fname,
       vault,
       overrides: { title, traits: [this.trait] },

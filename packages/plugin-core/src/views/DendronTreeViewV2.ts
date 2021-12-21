@@ -76,7 +76,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       switch (msg.type) {
         case TreeViewMessageEnum.onSelect: {
           const note = getEngine().notes[msg.data.id];
-          await new GotoNoteCommand().execute({
+          await new GotoNoteCommand(getExtension()).execute({
             qs: note.fname,
             vault: note.vault,
           });

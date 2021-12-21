@@ -29,7 +29,7 @@ export const LINK_REGEX_LOOSE = /\[\[([^\]\n]+)\]\]/;
 
 const parseWikiLink = (linkMatch: string) => {
   linkMatch = NoteUtils.normalizeFname(linkMatch);
-  return LinkUtils.parseLinkV2(linkMatch);
+  return LinkUtils.parseLinkV2({ linkString: linkMatch });
 };
 
 export const matchWikiLink = (text: string) => {
@@ -194,7 +194,7 @@ function attachParser(proc: Unified.Processor) {
   function parseLink(linkMatch: string) {
     const pOpts = MDUtilsV5.getProcOpts(proc);
     linkMatch = NoteUtils.normalizeFname(linkMatch);
-    const out = LinkUtils.parseLinkV2(linkMatch);
+    const out = LinkUtils.parseLinkV2({ linkString: linkMatch });
     if (_.isNull(out)) {
       throw new DendronError({ message: `link is null: ${linkMatch}` });
     }

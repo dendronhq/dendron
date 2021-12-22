@@ -145,6 +145,7 @@ export abstract class BaseExportPodCommand<
    * @param opts
    */
   async execute(opts: { config: Config; payload: string | NoteProps[] }) {
+    PodUtils.validate(opts.config, this.getRunnableSchema());
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -157,7 +158,6 @@ export abstract class BaseExportPodCommand<
         });
 
         const pod = this.createPod(opts.config);
-        PodUtils.validate(opts.config, this.getRunnableSchema());
 
         switch (opts.config.exportScope) {
           case PodExportScope.Clipboard:

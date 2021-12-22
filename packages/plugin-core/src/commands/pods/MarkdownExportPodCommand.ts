@@ -56,15 +56,17 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    const wikiLinkToURL = await this.promptUserForWikilinkToURLSetting();
-    if (wikiLinkToURL === undefined) {
-      return;
-    }
+    //use FM Title as h1 header
+    const addFMTitle = await this.promptUserForaddFMTitleSetting();
+    if (addFMTitle === undefined) return;
 
     const config = {
       exportScope,
-      wikiLinkToURL,
+      wikiLinkToURL: opts?.wikiLinkToURL || false,
       destination,
+      addFMTitle,
+      convertTagNotesToLinks: opts?.convertTagNotesToLinks || false,
+      convertUserNotesToLinks: opts?.convertUserNotesToLinks || false,
     };
 
     // If this is not an already saved pod config, then prompt user whether they
@@ -148,32 +150,6 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
    */
 
   /**
-   * Prompt user with simple quick pick on which wikilink conversion setting to
-   * use
-   * @returns
-   */
-  private async promptUserForWikilinkToURLSetting(): Promise<
-    boolean | undefined
-  > {
-    const items: vscode.QuickPickItem[] = [
-      {
-        label: "Convert wikilinks to URLs",
-        detail:
-          "Converts wikilinks to their corresponding URLs on a Dendron published site",
-      },
-      {
-        label: "Don't modify wikilinks",
-        detail: "Wikilinks will be preserved in their [[existing-format]]",
-      },
-    ];
-    const picked = await vscode.window.showQuickPick(items, {
-      title: "How would you like wikilinks to be formatted?",
-    });
-
-    return picked ? picked.label === "Convert wikilinks to URLs" : undefined;
-  }
-
-  /**
    * Prompt the user via Quick Pick(s) to select the destination of the export
    * @returns
    */
@@ -215,5 +191,28 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     }
 
     return;
+  }
+
+  /**
+   * Prompt user with simple quick pick to select whether to use FM title as h1 header or not
+   * @returns
+   */
+  private async promptUserForaddFMTitleSetting(): Promise<boolean | undefined> {
+    const items: vscode.QuickPickItem[] = [
+      {
+        label: "Post h1 header from FM",
+        detail: "Post frontmatter title property as h1 header of the note.",
+      },
+      {
+        label: "Don't Post h1 header from FM",
+        detail:
+          "The Frontmatter title will not be posted as header of the note",
+      },
+    ];
+    const picked = await vscode.window.showQuickPick(items, {
+      title: "Do you want to add Frontmatter title as h1 header?",
+    });
+
+    return picked ? picked.label === "Post h1 header from FM" : undefined;
   }
 }

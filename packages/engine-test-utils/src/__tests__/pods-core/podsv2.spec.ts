@@ -324,6 +324,123 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       );
     });
   });
+  describe("WHEN convertUserNotesToLinks is not configured explicitly", () => {
+    test("THEN expect user tags to remain unchanged", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameV5({
+            fname: "usertag",
+            vault: opts.vaults[0],
+            notes: opts.engine.notes,
+            wsRoot: opts.wsRoot,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+
+          expect(result.includes("@johndoe")).toBeTruthy();
+          expect(result.includes("[@johndoe](/user/johndoe)")).toBeFalsy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_USERTAG.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN addFMTitle is set to false", () => {
+    test("THEN expect title to not be present as h1 header", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+            addFMTitle: false,
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameV5({
+            fname: "usertag",
+            vault: opts.vaults[0],
+            notes: opts.engine.notes,
+            wsRoot: opts.wsRoot,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+
+          expect(result.indexOf("Usertag")).toEqual(-1);
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_USERTAG.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+  describe("WHEN convertTagNotesToLinks is set to false", () => {
+    test("THEN expect tags to remain unparsed", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameV5({
+            fname: "footag",
+            vault: opts.vaults[0],
+            notes: opts.engine.notes,
+            wsRoot: opts.wsRoot,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+          expect(result.includes("#foobar")).toBeTruthy();
+          expect(result.includes("[#foobar](/tags/foobar")).toBeFalsy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_TAG.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
 });
 
 /**

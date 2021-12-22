@@ -13,6 +13,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
@@ -28,6 +29,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
   string
 > {
   public key = "dendron.markdownexportv2";
+
+  public constructor() {
+    super(new QuickPickHierarchySelector());
+  }
 
   public async gatherInputs(
     opts?: Partial<MarkdownV2PodConfig>

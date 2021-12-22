@@ -5,14 +5,14 @@ import * as vscode from "vscode";
 import { getHeaderAt, isBrokenWikilink } from "../../utils/editor";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils, runSingleVaultTest } from "../testUtilsv2";
-import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Contextual UI Tests", function () {
   const ctx = setupBeforeAfter(this, {});
   describe("GIVEN only broken wikilink is selected in editor", () => {
     test("THEN code action for create new note is displayed", (done) => {
       let noteWithLink: NoteProps;
-      runSingleVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           noteWithLink = await NoteTestUtilsV4.createNote({
@@ -27,7 +27,7 @@ suite("Contextual UI Tests", function () {
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
-          expect(isBrokenWikilink()).toBeTruthy();
+          expect(await isBrokenWikilink()).toBeTruthy();
           done();
         },
       });
@@ -36,9 +36,9 @@ suite("Contextual UI Tests", function () {
     describe("AND selected link is a broken user tag", () => {
       test("THEN code action for create new note is displayed", (done) => {
         let noteWithLink: NoteProps;
-        runLegacySingleWorkspaceTest({
+        runLegacyMultiWorkspaceTest({
           ctx,
-          postSetupHook: async ({ wsRoot, vaults }) => {
+          preSetupHook: async ({ wsRoot, vaults }) => {
             noteWithLink = await NoteTestUtilsV4.createNote({
               fname: "test",
               vault: vaults[0],
@@ -49,7 +49,7 @@ suite("Contextual UI Tests", function () {
           onInit: async () => {
             const editor = await WSUtils.openNote(noteWithLink);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
-            expect(isBrokenWikilink()).toBeTruthy();
+            expect(await isBrokenWikilink()).toBeTruthy();
             done();
           },
         });
@@ -58,9 +58,9 @@ suite("Contextual UI Tests", function () {
       describe("AND user tags are disabled", () => {
         test("THEN code action for create new note is NOT displayed", (done) => {
           let noteWithLink: NoteProps;
-          runLegacySingleWorkspaceTest({
+          runLegacyMultiWorkspaceTest({
             ctx,
-            postSetupHook: async ({ wsRoot, vaults }) => {
+            preSetupHook: async ({ wsRoot, vaults }) => {
               noteWithLink = await NoteTestUtilsV4.createNote({
                 fname: "test",
                 vault: vaults[0],
@@ -75,7 +75,7 @@ suite("Contextual UI Tests", function () {
             onInit: async () => {
               const editor = await WSUtils.openNote(noteWithLink);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
-              expect(isBrokenWikilink()).toBeFalsy();
+              expect(await isBrokenWikilink()).toBeFalsy();
               done();
             },
           });
@@ -102,7 +102,7 @@ suite("Contextual UI Tests", function () {
           const start = new vscode.Position(7, 2);
           const end = new vscode.Position(7, 10);
           editor.selection = new vscode.Selection(start, end);
-          expect(isBrokenWikilink()).toBeFalsy();
+          expect(await isBrokenWikilink()).toBeFalsy();
           expect(
             getHeaderAt({ document: editor.document, position: start })
           ).toNotEqual(undefined);
@@ -133,7 +133,7 @@ suite("Contextual UI Tests", function () {
           expect(
             getHeaderAt({ document: editor.document, position: start })
           ).toEqual(undefined);
-          expect(isBrokenWikilink()).toBeFalsy();
+          expect(await isBrokenWikilink()).toBeFalsy();
           done();
         },
       });

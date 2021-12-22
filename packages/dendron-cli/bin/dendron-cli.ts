@@ -36,4 +36,5 @@ new WorkspaceCLICommand().buildCmd(buildYargs);
 new SeedCLICommand().buildCmd(buildYargs);
 new DevCLICommand().buildCmd(buildYargs);
 new PublishCLICommand().buildCmd(buildYargs);
+// eslint-disable-next-line no-unused-expressions
 buildYargs.demandCommand(1).help().argv;

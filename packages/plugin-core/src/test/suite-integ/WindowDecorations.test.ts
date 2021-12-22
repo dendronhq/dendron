@@ -75,6 +75,9 @@ suite("windowDecorations", function () {
               "![[root.*#head]]",
               "",
               "[[does.not.exist]]",
+              "",
+              "[[/test.txt]]",
+              "[[/test.txt#L3]]",
             ].join("\n"),
             props: {
               created: _.toInteger(CREATED),
@@ -83,6 +86,10 @@ suite("windowDecorations", function () {
             vault: vaults[0],
             wsRoot,
           });
+          await writeFile(
+            path.join(wsRoot, "test.txt"),
+            "et\nnam\nvelit\nlaboriosam\n"
+          );
         },
         onInit: async ({ vaults, engine, wsRoot }) => {
           const note = NoteUtils.getNoteByFnameV5({
@@ -125,7 +132,7 @@ suite("windowDecorations", function () {
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations!.length).toEqual(4);
+          expect(wikilinkDecorations!.length).toEqual(6);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -141,6 +148,12 @@ suite("windowDecorations", function () {
           ).toBeTruthy();
           expect(
             isTextDecorated("![[root.*#head]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("[[/test.txt]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated("[[/test.txt#L3]]", wikilinkDecorations!, document)
           ).toBeTruthy();
 
           const aliasDecorations = allDecorations!.get(
@@ -249,6 +262,7 @@ suite("windowDecorations", function () {
           const taskDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.taskNote
           );
+          taskDecorations?.sort((decoration) => decoration.range.start.line); // for easier testing
           expect(taskDecorations!.length).toEqual(3);
           // check that the decorations are at the right locations
           expect(
@@ -263,21 +277,21 @@ suite("windowDecorations", function () {
 
           expect(
             taskDecorations![0].renderOptions?.before?.contentText
-          ).toEqual("[x] ");
+          ).toEqual("[ ] ");
           expect(taskDecorations![0].renderOptions?.after?.contentText).toEqual(
-            " due:2021.10.29 @grace priority:high #foo"
+            " priority:low"
           );
           expect(
             taskDecorations![1].renderOptions?.before?.contentText
-          ).toBeFalsy();
+          ).toEqual("[x] ");
           expect(taskDecorations![1].renderOptions?.after?.contentText).toEqual(
-            " @grace priority:high #foo #bar"
+            " due:2021.10.29 @grace priority:high #foo"
           );
           expect(
             taskDecorations![2].renderOptions?.before?.contentText
-          ).toEqual("[ ] ");
+          ).toBeFalsy();
           expect(taskDecorations![2].renderOptions?.after?.contentText).toEqual(
-            " priority:low"
+            " @grace priority:high #foo #bar"
           );
 
           done();

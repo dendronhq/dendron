@@ -47,7 +47,10 @@ export type DNoteLoc = {
   anchorHeader?: string;
 };
 
-export type DNoteAnchor = DNoteBlockAnchor | DNoteHeaderAnchor;
+export type DNoteAnchor =
+  | DNoteBlockAnchor
+  | DNoteHeaderAnchor
+  | DNoteLineAnchor;
 
 /**
  * Anchor without {@link DNoteHeaderAnchor.depth} info
@@ -55,7 +58,8 @@ export type DNoteAnchor = DNoteBlockAnchor | DNoteHeaderAnchor;
  */
 export type DNoteAnchorBasic =
   | DNoteBlockAnchor
-  | Omit<DNoteHeaderAnchor, "depth">;
+  | Omit<DNoteHeaderAnchor, "depth">
+  | DNoteLineAnchor;
 
 export type DNoteBlockAnchor = {
   type: "block";
@@ -76,7 +80,18 @@ export type DNoteHeaderAnchor = {
   depth: number;
 };
 
-export type DNoteAnchorPositioned = DNoteAnchor & {
+/** An anchor referring to a specific line in a file. These don't exist inside of files, they are implied by the link containing the anchor.
+ *
+ * Lines are indexed starting at 1, which is similar to how you refer to specific lines on Github.
+ */
+export type DNoteLineAnchor = {
+  type: "line";
+  /** 1-indexed line number. */
+  line: number;
+  value: string;
+};
+
+export type DNoteAnchorPositioned = (DNoteBlockAnchor | DNoteHeaderAnchor) & {
   line: number;
   column: number;
 };

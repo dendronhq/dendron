@@ -83,7 +83,7 @@ export { LINK_CONTENTS, LINK_NAME, ALIAS_NAME };
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
   errors.push(err);
-  proc().data("errors", errors);
+  // no need to put errors back into proc, it's a mutable array
 }
 
 export function getNoteOrError(
@@ -443,8 +443,17 @@ export class LinkUtils {
   /** Either value or anchorHeader will always be present if the function did not
    *  return null. A missing value means that the file containing this link is
    *  the value.
+   *
+   *  if `explicitAlias` is false, non-existent alias will be
+   *  implicitly assumed to be the value of the link.
    */
-  static parseLinkV2(linkString: string): ParseLinkV2Resp | null {
+  static parseLinkV2(opts: {
+    linkString: string;
+    explicitAlias?: boolean;
+  }): ParseLinkV2Resp | null {
+    const { linkString, explicitAlias } = _.defaults(opts, {
+      explicitAlias: false,
+    });
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out && out.groups) {
@@ -454,7 +463,7 @@ export class LinkUtils {
       let vaultName: string | undefined;
       if (value) {
         ({ vaultName, link: value } = this.parseDendronURI(value));
-        if (!alias) {
+        if (!alias && !explicitAlias) {
           alias = value;
         }
         alias = _.trim(alias);
@@ -708,7 +717,7 @@ export class LinkUtils {
     // chop up the source.
     const regExp = new RegExp("\\[\\[(.+?)?\\]\\]", "g");
     const matched = [...source.matchAll(regExp)].map((match) => {
-      return LinkUtils.parseLinkV2(match[1]);
+      return LinkUtils.parseLinkV2({ linkString: match[1] });
     });
 
     return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];
@@ -843,6 +852,7 @@ export class AnchorUtils {
   static anchor2string(anchor: DNoteAnchor | DNoteAnchorBasic): string {
     if (anchor.type === "block") return `^${anchor.value}`;
     if (anchor.type === "header") return anchor.value;
+    if (anchor.type === "line") return `L${anchor.line}`;
     assertUnreachable(anchor);
   }
 }
@@ -869,6 +879,21 @@ const NODE_TYPES_TO_EXTRACT = [
 ];
 
 export class RemarkUtils {
+  static getNodePositionPastFrontmatter(fileText: string) {
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.MD_DENDRON }
+    );
+    const parsed = proc.parse(fileText);
+    let out: Position | undefined;
+    visit(parsed, ["yaml"], (node) => {
+      if (_.isUndefined(node.position)) return false; // should never happen
+      out = node.position;
+      return false;
+    });
+    return out;
+  }
+
   static bumpHeadings(root: Parent, baseDepth: number) {
     const headings: Heading[] = [];
     walk(root, (node: Node) => {

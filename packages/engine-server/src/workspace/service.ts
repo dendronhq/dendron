@@ -984,6 +984,11 @@ export class WorkspaceService implements Disposable {
     return changes;
   }
 
+  /**
+   * Check major version of configuration.
+   * Because Dendron workspace relies on major version to be the same, we force a migration if that's not
+   * the case
+   */
   async runConfigMigrationIfNecessary({
     currentVersion,
     dendronConfig,
@@ -994,6 +999,7 @@ export class WorkspaceService implements Disposable {
     let changes: MigrationChangeSetStatus[] = [];
     if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
       // we are on a legacy config.
+      // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: "0.70.0", // to force apply

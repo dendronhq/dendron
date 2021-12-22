@@ -15,7 +15,8 @@ type CommandOpts = CodeCommandInstance;
 export class ExportPodV2Command extends BaseCommand<
   CommandOpts,
   CommandOutput,
-  CommandInput
+  CommandInput,
+  string
 > {
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.EXPORT_POD_V2.key;
@@ -30,7 +31,12 @@ export class ExportPodV2Command extends BaseCommand<
    * @returns a CommandInput for a Pod Export Command to run in turn, or
    * undefined if the user didn't select anything.
    */
-  async gatherInputs(): Promise<CommandInput | undefined> {
+  async gatherInputs(podId: string): Promise<CommandInput | undefined> {
+    // If a podId is passed in, use this instead of prompting the user
+    if (podId) {
+      return PodCommandFactory.createPodCommandForStoredConfig({ podId });
+    }
+
     const exportChoice = await PodUIControls.promptForExportConfigOrNewExport();
 
     if (exportChoice === undefined) {

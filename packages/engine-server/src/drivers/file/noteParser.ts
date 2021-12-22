@@ -55,7 +55,7 @@ export class NoteParser extends ParserBase {
     this.cache = opts.cache;
   }
 
-  async parseFile(
+  async parseFiles(
     allPaths: string[],
     vault: DVault
   ): Promise<{
@@ -149,20 +149,24 @@ export class NoteParser extends ParserBase {
         .filter((ent) => {
           return !globMatch(["root.*"], ent.fpath);
         })
+        // eslint-disable-next-line no-loop-func
         .flatMap((ent) => {
           try {
-            const out = this.parseNoteProps({
+            const resp = this.parseNoteProps({
               fileMeta: ent,
               parents: prevNodes,
               notesByFname,
               addParent: true,
               vault,
             });
-            const notes = out.propsList;
-            if (!out.matchHash) {
+            const notes = resp.propsList;
+
+            // this indicates that the contents of the note was different
+            // then what was in the cache. need to update later ^cache-update
+            if (!resp.matchHash) {
               cacheUpdates[notes[0].fname] = createCacheEntry({
                 noteProps: notes[0],
-                hash: out.noteHash,
+                hash: resp.noteHash,
               });
             }
             // need to be inside this loop

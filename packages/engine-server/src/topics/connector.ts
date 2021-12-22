@@ -39,6 +39,7 @@ export type EngineConnectorInitOpts = {
   onReady?: (opts: { ws: EngineConnector }) => Promise<void>;
   numRetries?: number;
   portOverride?: number;
+  fast?: boolean;
 } & EngineConnectorCommonOpts;
 
 export class EngineConnector {

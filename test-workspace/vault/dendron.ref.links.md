@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1639381655936
+updated: 1639433681546
 created: 1608518909864
 ---
 
@@ -15,8 +15,10 @@ created: 1608518909864
 - [[diff note link to anchor|dendron.ref.figure#block]]
 
 ## Link in different vault without vault specified
+
 Should get a quick pick prompt to choose a note to navigate to when clicking on following link in preview. Upon choosing the the note in quick Dendron opens the note. If quick pick is cancelled NO errors should be shown.
-- [[dendron.ref.links.target-different-vault]] 
+
+- [[dendron.ref.links.target-different-vault]]
 
 ## XVault Link
 
@@ -39,7 +41,7 @@ Vault2
 
 - [[bar]]
 
-***
+---
 
 ## Note Refs
 
@@ -55,7 +57,7 @@ Vault2
 
 ![[dendron.welcome#header-special-chars]]
 
-***
+---
 
 ## Block References
 
@@ -65,14 +67,13 @@ Vault2
 
 ## Targeting a single list item without its children
 
-
 ## testing with ordered list
 
 1. first ^nPm286FpKzGj
-   1. first-a  ^0NFOQ4Hi4frn
+   1. first-a ^0NFOQ4Hi4frn
       1. first-a-1
 1. second
-   1.  second-a ^AKRCeAVwwIX2
+   1. second-a ^AKRCeAVwwIX2
 
 ![[#^0NFOQ4Hi4frn:#^0NFOQ4Hi4frn]]
 
@@ -92,18 +93,23 @@ Vault2
 ![[bar]]
 
 ## Recursive refs
+
 ![[dendron.ref.links.recursive-lvl-1]]
 
 ## Multiple refs in a row without list delineation
+
 ### Refs on each line
+
 ![[dendron.ref.links.target-1]]
 ![[dendron.ref.links.target-2]]
 ![[dendron.ref.links.target-3]]
 
 ### Back to back refs
+
 ![[dendron.ref.links.target-1]]![[dendron.ref.links.target-2]] ![[dendron.ref.links.target-3]]
 
 ## Link to a Website
+
 - https://dendron.so
 
 ## Link to PDF
@@ -116,7 +122,6 @@ Vault2
 
 [#dendron](https://twitter.com/hashtag/dendron)
 
-
 @user
 #hash
 
@@ -124,8 +129,13 @@ Vault2
 
 `dendron doctor findBrokenLinks` and `dendron doctor createMissingLinkedNotes` does not work if no vault prefix is specified
 
+These can be fixed using `Dendron: Convert Link` in various ways.
+
 [[dendron://vault/broken.link.with.vault.prefix]]
 [[broken.link.without.vault.prefix]]
+[[this is broken|broken.link]]
+@broken.usertag
+#broken.hashtag
 
 ## Inside a code block
 
@@ -139,3 +149,5 @@ const x = 1;
 ## Link to a non-note file
 
 [[/vault/root.schema.yml]]
+
+And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]

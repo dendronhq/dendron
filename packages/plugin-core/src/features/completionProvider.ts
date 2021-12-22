@@ -6,6 +6,7 @@ import {
   genUUIDInsecure,
   isNotUndefined,
   LINK_NAME,
+  LINK_NAME_NO_SPACES,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
@@ -59,17 +60,32 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
         // optional alias
         `(${ALIAS_NAME}(?=\\|)\\|)?` +
       ")" +
-      // note name
-      `(?<note>${LINK_NAME})?` +
+      // note name followed by brackets
+      "(" +
+        "(" +
+          `(?<note>${LINK_NAME})?` +
+          "(?<afterNote>" +
+            // anchor
+            "(?<hash>#+)(?<anchor>\\^)?" +
+            // text of the header or anchor
+            "[^\\[\\]]" +
+          ")?" +
+          // Must have ending brackets
+          "\\]\\]" +
+        ")|(?<noBracket>" +
+          // Or, note name with no spaces and no brackets.
+          // The distinction is needed to avoid consuming text following a link if there's no closing bracket.
+          `(?<noteNoSpace>${LINK_NAME_NO_SPACES})?` +
+          "(?<afterNoteNoSpace>" +
+            // anchor
+            "(?<hashNoSpace>#+)(?<anchorNoSpace>\\^)?" +
+            // text of the header or anchor
+            "[^\\[\\]]" +
+          ")?" +
+        ")" +
+        // No ending brackets
+      ")" +
     ")" +
-    "(?<afterNote>" +
-      // anchor
-      "(?<hash>#+)(?<anchor>\\^)?" +
-      // text of the header or anchor
-      "[^\\[\\]]" +
-    ")?" +
-    // May have ending brackets
-    "\\]?\\]?" +
     "|" + // or it may be a hashtag (potentially a hashtag that's empty)
     HASHTAG_REGEX_LOOSE.source + "?" +
     "|" + // or it may be a user tag
@@ -111,7 +127,7 @@ export const provideCompletionItems = sentryReportingCallback(
     Logger.debug({ ctx, found });
 
     if (
-      found.groups.hash &&
+      (found.groups.hash || found.groups.hashNoSpace) &&
       found.index + (found.groups.beforeAnchor?.length || 0) >
         position.character
     ) {
@@ -132,7 +148,9 @@ export const provideCompletionItems = sentryReportingCallback(
     } else {
       // This is a wikilink or a reference
       start = found.index + (found.groups.beforeNote?.length || 0);
-      end = start + (found.groups.note?.length || 0);
+      end =
+        start +
+        (found.groups.note?.length || found.groups.noteNoSpace?.length || 0);
     }
     const range = new Range(position.line, start, position.line, end);
 
@@ -178,22 +196,28 @@ export const provideCompletionItems = sentryReportingCallback(
         item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
         item.insertText = item.label;
         // user tags don't support xvault links, so we skip any special xvault handling
-      } else if (
-        currentVault &&
-        !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
-      ) {
-        // For notes from other vaults than the current note, sort them after notes from the current vault.
-        // x will get sorted after numbers, so these will appear after notes without x
-        item.sortText = "x" + item.sortText;
+      } else {
+        if (found?.groups?.noBracket !== undefined) {
+          // If the brackets are missing, then insert them too
+          item.insertText = `${item.insertText}]]`;
+        }
+        if (
+          currentVault &&
+          !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+        ) {
+          // For notes from other vaults than the current note, sort them after notes from the current vault.
+          // x will get sorted after numbers, so these will appear after notes without x
+          item.sortText = "x" + item.sortText;
 
-        const sameNameNotes = notesByFname.get(note.fname);
-        if (sameNameNotes > 1) {
-          // There are multiple notes with the same name in multiple vaults,
-          // and this note is in a different vault than the current note.
-          // To generate a link to this note, we have to do an xvault link.
-          item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
-            note.fname
-          }`;
+          const sameNameNotes = notesByFname.get(note.fname);
+          if (sameNameNotes > 1) {
+            // There are multiple notes with the same name in multiple vaults,
+            // and this note is in a different vault than the current note.
+            // To generate a link to this note, we have to do an xvault link.
+            item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
+              item.insertText
+            }`;
+          }
         }
       }
 
@@ -337,7 +361,7 @@ export async function provideBlockCompletionItems(
   if (found.groups?.note) {
     // This anchor will be to another note, e.g. [[note#
     // `groups.note` may have vault name, so let's try to parse that
-    const link = LinkUtils.parseLinkV2(found.groups.note);
+    const link = LinkUtils.parseLinkV2({ linkString: found.groups.note });
     const vault = link?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,

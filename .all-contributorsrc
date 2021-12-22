@@ -575,7 +575,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/26438549?v=4",
       "profile": "http://me-ding-fan.vercel.app",
       "contributions": [
-        "doc"
+        "doc",
+        "bug"
       ]
     },
     {
@@ -885,7 +886,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/14329097?v=4",
       "profile": "https://github.com/l2dy",
       "contributions": [
-        "code"
+        "code",
+        "bug"
       ]
     },
     {
@@ -903,7 +905,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/144799?v=4",
       "profile": "https://github.com/icedwater",
       "contributions": [
-        "bug"
+        "bug",
+        "code"
       ]
     },
     {
@@ -1049,6 +1052,62 @@
       "profile": "http://sagar.se",
       "contributions": [
         "bug"
+      ]
+    },
+    {
+      "login": "viddo",
+      "name": "Nicklas Gummesson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/978461?v=4",
+      "profile": "http://nicklas.gummesson.net",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "jquesada2016",
+      "name": "jquesada2016",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54370171?v=4",
+      "profile": "https://github.com/jquesada2016",
+      "contributions": [
+        "bug",
+        "doc"
+      ]
+    },
+    {
+      "login": "phanirithvij",
+      "name": "Phani Rithvij",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29627898?v=4",
+      "profile": "https://github.com/phanirithvij",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "kzilla-git",
+      "name": "Kumudan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12721315?v=4",
+      "profile": "https://github.com/kzilla-git",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "zersiax",
+      "name": "Florian Beijers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5076383?v=4",
+      "profile": "https://github.com/zersiax",
+      "contributions": [
+        "bug",
+        "a11y"
+      ]
+    },
+    {
+      "login": "rlh1994",
+      "name": "Ryan Hill",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8260415?v=4",
+      "profile": "https://github.com/rlh1994",
+      "contributions": [
+        "doc"
       ]
     }
   ],

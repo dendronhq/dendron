@@ -41,9 +41,9 @@ const pathsToBacklinkSourceTreeItems = async (
   fsPath: string,
   isLinkCandidateEnabled: boolean | undefined
 ) => {
-  const refFromFilename = path.parse(fsPath).name;
+  const fileName = path.parse(fsPath).name;
   const referencesByPath = _.groupBy(
-    await findReferences(refFromFilename, [fsPath]),
+    await findReferences(fileName, [fsPath]),
     ({ location }) => location.uri.fsPath
   );
 
@@ -159,8 +159,8 @@ const refsToBacklinkTreeItems = (
     };
     if (ref.isCandidate) {
       backlink.command = {
-        command: "dendron.convertLink",
-        title: "Convert Link",
+        command: "dendron.convertCandidateLink",
+        title: "Convert Candidate Link",
         arguments: [{ location: ref.location, text: path.parse(fsPath).name }],
       };
     }

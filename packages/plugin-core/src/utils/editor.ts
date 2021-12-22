@@ -12,11 +12,11 @@ import {
   MDUtilsV5,
   ProcMode,
   AnchorUtils,
-  visit,
   WikiLinkNoteV4,
   UserTag,
   HashTag,
   linkedNoteType,
+  MDUtilsV4,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -199,7 +199,7 @@ export async function getSelectionAnchors(opts: {
 /**
  * Utility method to check if the selected text is a broken wikilink
  */
-export function isBrokenWikilink(): boolean {
+export async function isBrokenWikilink(): Promise<boolean> {
   const { editor, selection } = VSCodeUtils.getSelection();
   if (!editor || !selection) return false;
   const note = WSUtils.getNoteFromDocument(editor.document);
@@ -219,18 +219,18 @@ export function isBrokenWikilink(): boolean {
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
   let type: DECORATION_TYPES | undefined;
   let fname: string;
-  visit(
+  await MDUtilsV4.visitAsync(
     parsedLine,
     [
       DendronASTTypes.WIKI_LINK,
       DendronASTTypes.USERTAG,
       DendronASTTypes.HASHTAG,
     ],
-    (linkvalue: WikiLinkNoteV4 | UserTag | HashTag) => {
-      link = linkvalue;
+    async (linkvalue) => {
+      link = linkvalue as WikiLinkNoteV4 | UserTag | HashTag;
       if (!link) return false;
       fname = link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
-      type = linkedNoteType({ fname, engine }).type;
+      type = (await linkedNoteType({ fname, engine })).type;
       return false;
     }
   );

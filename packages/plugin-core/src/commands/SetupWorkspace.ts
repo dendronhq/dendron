@@ -184,9 +184,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       rootDirRaw: rootDir,
       skipOpenWs,
       workspaceType,
-    } = _.defaults(opts, {
-      skipOpenWs: opts?.workspaceType === WorkspaceType.NATIVE,
-    });
+    } = _.defaults(opts, {});
     Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 
     if (
@@ -218,11 +216,16 @@ export class SetupWorkspaceCommand extends BasicCommand<
       });
     }
 
-    if (!opts.skipOpenWs) {
+    if (!skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");
-      VSCodeUtils.openWS(
-        vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
-      );
+      if (workspaceType === WorkspaceType.CODE) {
+        VSCodeUtils.openWS(
+          vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
+        );
+      } else if (workspaceType === WorkspaceType.NATIVE) {
+        // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
+        VSCodeUtils.reloadWindow();
+      }
     }
     return vaults;
   }

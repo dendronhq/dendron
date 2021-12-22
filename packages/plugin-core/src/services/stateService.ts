@@ -38,7 +38,7 @@ export class StateService {
 
   /**
    * Previous global version
-   * @returns
+   * Get from {@link ExtensionGlobalState} (VSCode specific state)
    */
   getGlobalVersion(): string {
     return (
@@ -47,7 +47,7 @@ export class StateService {
   }
   /**
    * Previous workspace version
-   * @returns
+   * Get from {@link ExtensionWorkspaceState}  (VSCode specific store)
    */
   getWorkspaceVersion(): string {
     return this.workspaceState.get<string>(WORKSPACE_STATE.VERSION) || "0.0.0";

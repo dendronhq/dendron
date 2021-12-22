@@ -63,6 +63,9 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
   flush(): ReturnType<T> | undefined;
 }
 
+/**
+ * See [[Workspace Watcher|dendron://dendron.docs/pkg.plugin-core.ref.workspace-watcher]] for more docs
+ */
 export class WorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument>;

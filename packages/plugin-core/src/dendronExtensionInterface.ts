@@ -28,6 +28,23 @@ export type DendronWorkspaceSettings = Partial<{
   "dendron.serverPort": string;
 }>;
 
+/**
+ * This is THE interface of DendronExtension.
+ *
+ * Going forward we should NOT be using DendronExtension object directly
+ * (Eg. avoid using workspace.getExtension()).
+ *
+ * A very large amount of our application will require to take dependency on this
+ * interface hence it is paramount that it is kept away from any circular dependencies
+ * to accomplish that goal this interface should for the most part deal with interfaces
+ * (so think thrice prior to exposing a concrete class from this interface, since
+ * concrete classes tend to take on dependencies on other concrete classes).
+ *
+ * For most of the usage of this interface we should strive to get an instance of this
+ * interface through constructor dependency injection. However, during transition
+ * to constructor injection if we need to get this instance in a static fashion then
+ * use ExtensionProvider class.
+ * */
 export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;

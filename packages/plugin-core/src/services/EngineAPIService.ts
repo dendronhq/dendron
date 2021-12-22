@@ -89,66 +89,58 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
     this._trustedWorkspace = value;
   }
 
-  get notes(): NotePropsDict {
+  public get notes(): NotePropsDict {
     return this.internalEngine.notes;
   }
-
   public set notes(arg: NotePropsDict) {
     this.internalEngine.notes = arg;
   }
 
-  get wsRoot(): string {
+  public get wsRoot(): string {
     return this.internalEngine.wsRoot;
   }
-
   public set wsRoot(arg: string) {
     this.internalEngine.wsRoot = arg;
   }
 
-  get schemas(): SchemaModuleDict {
+  public get schemas(): SchemaModuleDict {
     return this.internalEngine.schemas;
   }
-
   public set schemas(arg: SchemaModuleDict) {
     this.internalEngine.schemas = arg;
   }
 
-  get links(): DLink[] {
+  public get links(): DLink[] {
     return this.internalEngine.links;
   }
-
   public set links(arg: DLink[]) {
     this.internalEngine.links = arg;
   }
 
-  get vaults(): DVault[] {
+  public get vaults(): DVault[] {
     return this.internalEngine.vaults;
   }
-
   public set vaults(arg: DVault[]) {
     this.internalEngine.vaults = arg;
   }
 
-  get configRoot(): string {
+  public get configRoot(): string {
     return this.internalEngine.configRoot;
   }
-
   public set configRoot(arg: string) {
     this.internalEngine.configRoot = arg;
   }
 
-  get config(): IntermediateDendronConfig {
+  public get config(): IntermediateDendronConfig {
     return this.internalEngine.config;
   }
-
   public set config(arg: IntermediateDendronConfig) {
     this.internalEngine.config = arg;
   }
 
-  get hooks(): DHookDict {
+  public get hooks(): DHookDict {
     return this.internalEngine.hooks;
   }
-
   public set hooks(arg: DHookDict) {
     this.internalEngine.hooks = arg;
   }
@@ -190,7 +182,6 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
   writeSchema(schema: SchemaModuleProps): Promise<void> {
     return this.internalEngine.writeSchema(schema);
   }
-
   init(): Promise<DEngineInitResp> {
     return this.internalEngine.init();
   }

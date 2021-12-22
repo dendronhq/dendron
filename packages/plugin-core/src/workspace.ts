@@ -99,15 +99,25 @@ export function getCodeConfig<T>(key: string): T | undefined {
   return DendronExtension.configuration().get<T>(key);
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getDWorkspace().
+ * Or preferably pass IDendronExtension to constructors of your classes. */
 export function getDWorkspace(): DWorkspaceV2 {
   const ws = getExtension();
   return ws.getWorkspaceImplOrThrow();
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getExtension().
+ * Or preferably pass IDendronExtension to constructors of your classes.
+ * */
 export function getExtension(): DendronExtension {
   return DendronExtension.instanceV2();
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getEngine().
+ * Or preferably pass IDendronExtension to constructors of your classes.*/
 export function getEngine() {
   return getExtension().getEngine();
 }
@@ -552,7 +562,7 @@ export class DendronExtension implements IDendronExtension {
     }
   }
 
-  setupBacklinkTreeView() {
+  private setupBacklinkTreeView() {
     const ctx = "setupBacklinkTreeView";
     Logger.info({ ctx, msg: "init:backlinks" });
 

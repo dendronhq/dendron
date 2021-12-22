@@ -879,6 +879,13 @@ const NODE_TYPES_TO_EXTRACT = [
 ];
 
 export class RemarkUtils {
+  /**
+   * Use this to [[Get the line offset of the frontmatter|dendron://dendron.docs/pkg.plugin-core.dev.cook#get-the-line-offset-of-the-frontmatter]]
+   * Given a string representation of a Dendron note,
+   * return the position of the line right after the frontmatter.
+   * @param fileText file content string to traverse
+   * @returns position in parsed file content right after the frontmatter
+   */
   static getNodePositionPastFrontmatter(fileText: string) {
     const proc = MDUtilsV5.procRemarkParseNoData(
       {},

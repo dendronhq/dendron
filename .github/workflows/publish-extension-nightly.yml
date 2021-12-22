@@ -45,8 +45,7 @@ jobs:
         run: yarn config set registry http://localhost:4873
 
       - name: Set Up NPM Local Registry
-        run: |
-          npm set registry http://localhost:4873/
+        run: npm set registry http://localhost:4873/
 
       - name: Set Environment Variables
         run: |
@@ -58,7 +57,7 @@ jobs:
 
       - name: Build the VSIX
         run: |
-          yarn build:patch:local:ci
+          yarn build:patch:local:ci:nightly
 
       - name: Check for VSIX
         run: |
@@ -91,4 +90,3 @@ jobs:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
-

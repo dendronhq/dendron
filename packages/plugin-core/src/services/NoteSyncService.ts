@@ -8,14 +8,12 @@ import {
 import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
   AnchorUtils,
-  DendronASTDest,
   LinkUtils,
-  MDUtilsV5,
+  RemarkUtils,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import visit from "unist-util-visit";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { Logger } from "../logger";
@@ -28,18 +26,17 @@ const getFrontmatterPosition = (
   document: vscode.TextDocument
 ): Promise<vscode.Position | false> => {
   return new Promise((resolve) => {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_DENDRON }
+    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+      document.getText()
     );
-    const parsed = proc.parse(document.getText());
-    visit(parsed, ["yaml"], (node) => {
-      if (_.isUndefined(node.position)) return resolve(false); // Should never happen
-      const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
+    if (!_.isUndefined(nodePosition)) {
+      const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
         line: 1,
       });
       resolve(position);
-    });
+    } else {
+      resolve(false);
+    }
   });
 };
 

@@ -784,6 +784,7 @@ export class NoteUtils {
     return latestUpdated;
   }
 
+  /** @deprecated see {@link NoteUtils.getNotesByFnameV2} */
   static getNotesByFname({
     fname,
     notes,
@@ -822,6 +823,7 @@ export class NoteUtils {
     return notes;
   }
 
+  /** @deprecated see {@link NoteUtils.getNoteByFnameV6} */
   static getNoteByFnameV5({
     fname,
     notes,

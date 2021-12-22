@@ -365,7 +365,7 @@ export type GetDecorationsOpts = {
 export type DCommonProps = {
   /** Dictionary where key is the note id. */
   notes: NotePropsDict;
-  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname. */
+  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
   noteFnames: NoteFNamesDict;
   schemas: SchemaModuleDict;
   wsRoot: string;

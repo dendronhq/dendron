@@ -22,6 +22,7 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
+  NoteFNamesDict,
   NoteProps,
   NotePropsDict,
   QueryNotesOpts,
@@ -92,6 +93,13 @@ export class EngineAPIService implements DEngineClient {
   }
   public set notes(arg: NotePropsDict) {
     this.internalEngine.notes = arg;
+  }
+
+  public get noteFnames(): NoteFNamesDict {
+    return this.internalEngine.noteFnames;
+  }
+  public set noteFnames(arg: NoteFNamesDict) {
+    this.internalEngine.noteFnames = arg;
   }
 
   public get wsRoot(): string {

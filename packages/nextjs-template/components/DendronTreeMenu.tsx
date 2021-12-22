@@ -35,6 +35,7 @@ export default function DendronTreeMenu(
       state: "useEffect:preCalculateTree",
     });
 
+    // all parents should be in expanded position
     const activeNoteIds = TreeViewUtils.getAllParents({
       notes: props.notes,
       noteId: noteActiveId,
@@ -44,6 +45,7 @@ export default function DendronTreeMenu(
   }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
 
   // --- Verify
+  // If no data, show spinner component
   if (!verifyNoteData(props)) {
     logger.info({
       state: "exit:notes not initialized",
@@ -51,19 +53,21 @@ export default function DendronTreeMenu(
     return <DendronSpinner />;
   }
 
-  const { notes, domains, noteIndex, collapsed, setCollapsed } = props;
+  const { notes, domains, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
   // --- Calc
-  const roots = domains.map((note) => {
-    return TreeViewUtils.note2TreeDatanote({
-      noteId: note.id,
-      noteDict: notes,
-      showVaultName: false,
-      applyNavExclude: true,
-    });
-  }) as DataNode[];
+  const roots: DataNode[] = domains
+    .map((note) => {
+      return TreeViewUtils.note2TreeDatanote({
+        noteId: note.id,
+        noteDict: notes,
+        showVaultName: false,
+        applyNavExclude: true,
+      });
+    })
+    .filter((ent): ent is DataNode => !_.isUndefined(ent));
 
   // --- Methods
   const onSelect = (noteId: string) => {

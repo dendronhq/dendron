@@ -3,7 +3,7 @@ import {
   isWebViewEntry,
   TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { CodeConfigKeys } from "./types";
+import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -15,6 +15,7 @@ export enum DendronContext {
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
+  BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -165,6 +166,21 @@ export const DENDRON_MENUS = {
     },
   ],
   "view/title": [
+    /**
+     * Sort orders are round-robined, if we add more orders and/or change ordering
+     * of sort order THEN make sure to update the labels of the command since the labels
+     * display the current backlink ordering that is being used.
+     * */
+    {
+      command: "dendron.backlinks.sortByLastUpdated",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.PathNames}`,
+      group: "navigation",
+    },
+    {
+      command: "dendron.backlinks.sortByPathNames",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.LastUpdated}`,
+      group: "navigation",
+    },
     {
       command: "dendron.backlinks.expandAll",
       when: "view == dendron.backlinks",
@@ -212,6 +228,20 @@ export const DENDRON_MENUS = {
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // ---
+  BACKLINK_SORT_BY_LAST_UPDATED: {
+    key: "dendron.backlinks.sortByLastUpdated",
+    title: "Sort by last updated (currently sorted by path names)",
+    icon: "$(list-ordered)",
+    desc: "Sort the backlinks by when the notes were last updated.",
+    group: "workspace",
+  },
+  BACKLINK_SORT_BY_PATH_NAMES: {
+    key: "dendron.backlinks.sortByPathNames",
+    title: "Sort by path names (currently sorted by last updated)",
+    icon: "$(list-ordered)",
+    desc: "Sort the backlinks by path names of notes.",
+    group: "workspace",
+  },
   BACKLINK_EXPAND_ALL: {
     key: "dendron.backlinks.expandAll",
     title: "Expand All",

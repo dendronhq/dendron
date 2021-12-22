@@ -44,7 +44,7 @@ const getFrontmatterPosition = (
 };
 
 /**
- * Keep notes on disk in sync with engine
+ * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for docs
  */
 export class NoteSyncService {
   static instance() {
@@ -166,6 +166,9 @@ export class NoteSyncService {
     return noteClean;
   }
 
+  /**
+   * Update note metadata (eg. links and anchors)
+   */
   static async updateNoteMeta({
     note,
     fmChangeOnly,

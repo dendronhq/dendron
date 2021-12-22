@@ -114,6 +114,7 @@ export const debouncedUpdateDecorations = debounceAsyncUntilComplete({
   trailing: true,
 });
 
+// see [[Decorations|dendron://dendron.docs/pkg.plugin-core.ref.decorations]] for further docs
 export async function updateDecorations(editor: TextEditor): Promise<{
   allDecorations?: Map<TextEditorDecorationType, DecorationOptions[]>;
   allWarnings?: Diagnostic[];

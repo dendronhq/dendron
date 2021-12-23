@@ -27,9 +27,7 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 };
 
 suite("WindowWatcher: GIVEN the dendron extension is running", function () {
-  const watcher: WindowWatcher = new WindowWatcher(
-    PreviewPanelFactory.getProxy()
-  );
+  const watcher: WindowWatcher = new WindowWatcher();
 
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},

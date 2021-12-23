@@ -335,6 +335,8 @@ export type RenameNoteOpts = {
 
 export type RenderNoteOpts = {
   id: string;
+  /** Optionally, an entire note can be provided to be rendered. If provided, the engine won't look up the note by id and will instead render this note. */
+  note?: NoteProps;
 };
 
 export type RefreshNotesOpts = {

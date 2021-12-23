@@ -12,6 +12,9 @@
         },
         {
             "path": "vault"
+        },
+        {
+            "path": "other-files"
         }
     ],
     "settings": {

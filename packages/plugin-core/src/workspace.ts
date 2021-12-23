@@ -13,7 +13,6 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
-  NodeJSUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
   writeJSONWithComments,
@@ -31,11 +30,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
-import {
-  DendronContext,
-  extensionQualifiedId,
-  GLOBAL_STATE,
-} from "./constants";
+import { DendronContext, GLOBAL_STATE } from "./constants";
 import BacklinksTreeDataProvider, {
   Backlink,
   secondLevelRefsToBacklinks,
@@ -59,27 +54,18 @@ import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
+import {
+  DendronWorkspaceSettings,
+  IDendronExtension,
+} from "./dendronExtensionInterface";
+import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { WSUtilsV2 } from "./WSUtilsV2";
+import { ICommandFactory } from "./commandFactoryInterface";
+import { CommandFactory } from "./commandFactory";
+import { ExtensionProvider } from "./ExtensionProvider";
+import { VersionProvider } from "./versionProvider";
 
 let _DendronWorkspace: DendronExtension | null;
-
-type DendronWorkspaceSettings = Partial<{
-  "dendron.dailyJournalDomain": string;
-  "dendron.defaultJournalName": string;
-  "dendron.defaultJournalDateFormat": string;
-  "dendron.defaultJournalAddBehavior": string;
-  "dendron.defaultScratchName": string;
-  "dendron.defaultScratchDateFormat": string;
-  "dendron.defaultScratchAddBehavior": string;
-  "dendron.copyNoteUrlRoot": string;
-  "dendron.linkSelectAutoTitleBehavior": string;
-  "dendron.defaultLookupCreateBehavior": string;
-  "dendron.defaultTimestampDecorationFormat": string;
-  "dendron.rootDir": string;
-  "dendron.dendronDir": string;
-  "dendron.logLevel": string;
-  "dendron.trace.server": string;
-  "dendron.serverPort": string;
-}>;
 
 export type ServerConfiguration = {
   serverPort: string;
@@ -113,15 +99,25 @@ export function getCodeConfig<T>(key: string): T | undefined {
   return DendronExtension.configuration().get<T>(key);
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getDWorkspace().
+ * Or preferably pass IDendronExtension to constructors of your classes. */
 export function getDWorkspace(): DWorkspaceV2 {
   const ws = getExtension();
   return ws.getWorkspaceImplOrThrow();
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getExtension().
+ * Or preferably pass IDendronExtension to constructors of your classes.
+ * */
 export function getExtension(): DendronExtension {
   return DendronExtension.instanceV2();
 }
 
+/**
+ * @deprecated: If need static access use ExtensionProvider.getEngine().
+ * Or preferably pass IDendronExtension to constructors of your classes.*/
 export function getEngine() {
   return getExtension().getEngine();
 }
@@ -144,7 +140,7 @@ export function getVaultFromUri(fileUri: Uri) {
 export const NO_WORKSPACE_IMPLEMENTATION = "no workspace implementation";
 
 // --- Main
-export class DendronExtension {
+export class DendronExtension implements IDendronExtension {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
@@ -167,6 +163,8 @@ export class DendronExtension {
   public serverWatcher?: vscode.FileSystemWatcher;
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
+  public wsUtils: IWSUtilsV2;
+  public commandFactory: ICommandFactory;
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -320,22 +318,7 @@ export class DendronExtension {
    * Otherwise, get from published extension `package.json`
    */
   static version(): string {
-    let version: string | undefined;
-    if (VSCodeUtils.isDevMode()) {
-      version = NodeJSUtils.getVersionFromPkg();
-    } else {
-      try {
-        const dendronExtension =
-          vscode.extensions.getExtension(extensionQualifiedId)!;
-        version = dendronExtension.packageJSON.version;
-      } catch (err) {
-        version = NodeJSUtils.getVersionFromPkg();
-      }
-    }
-    if (_.isUndefined(version)) {
-      version = "0.0.0";
-    }
-    return version;
+    return VersionProvider.version();
   }
 
   static async resetConfig(globalState: vscode.Memento) {
@@ -351,13 +334,15 @@ export class DendronExtension {
   static async getOrCreate(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
-  ) {
+  ): Promise<DendronExtension> {
     if (!_DendronWorkspace) {
       _DendronWorkspace = new DendronExtension(context, opts);
       _DendronWorkspace.type = await WorkspaceUtils.getWorkspaceType({
         workspaceFile: vscode.workspace.workspaceFile,
         workspaceFolders: vscode.workspace.workspaceFolders,
       });
+
+      ExtensionProvider.register(_DendronWorkspace);
     }
     return _DendronWorkspace;
   }
@@ -387,9 +372,15 @@ export class DendronExtension {
     this.treeViews = {};
     this.setupViews(context);
     this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
+    this.wsUtils = new WSUtilsV2(this);
+    this.commandFactory = new CommandFactory(this);
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
+  }
+
+  getDWorkspace(): DWorkspaceV2 {
+    return this.getWorkspaceImplOrThrow();
   }
 
   getWorkspaceImplOrThrow(): DWorkspaceV2 {
@@ -628,6 +619,7 @@ export class DendronExtension {
 
     return backlinkTreeView;
   }
+
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
     this._disposableStore.add(disposable);
@@ -647,7 +639,9 @@ export class DendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher(PreviewPanelFactory.getProxy());
+    const windowWatcher = new WindowWatcher(
+      PreviewPanelFactory.getProxy(getExtension())
+    );
 
     windowWatcher.activate(this.context);
     for (const editor of vscode.window.visibleTextEditors) {

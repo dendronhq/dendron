@@ -38,8 +38,9 @@ import {
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { getDWorkspace } from "../workspace";
+import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
-export class EngineAPIService implements DEngineClient {
+export class EngineAPIService implements DEngineClient, IEngineAPIService {
   private internalEngine: DEngineClient;
 
   private _trustedWorkspace: boolean = true;
@@ -83,6 +84,7 @@ export class EngineAPIService implements DEngineClient {
   get trustedWorkspace(): boolean {
     return this._trustedWorkspace;
   }
+
   set trustedWorkspace(value: boolean) {
     this._trustedWorkspace = value;
   }

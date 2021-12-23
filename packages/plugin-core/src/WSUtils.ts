@@ -1,11 +1,5 @@
 import { ServerUtils } from "@dendronhq/api-server";
-import {
-  DVault,
-  NoteProps,
-  NoteUtils,
-  SchemaModuleProps,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { DVault, NoteProps, SchemaModuleProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
@@ -15,7 +9,12 @@ import { DENDRON_COMMANDS } from "./constants";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
+import { WSUtilsV2 } from "./WSUtilsV2";
 
+/**
+ * Prefer to use WSUtilsV2 instead of this class to prevent circular dependencies.
+ * (move methods from this file to WSUtilsV2 as needed).
+ * */
 export class WSUtils {
   static handleServerProcess({
     subprocess,
@@ -102,57 +101,17 @@ export class WSUtils {
 
   //moved
   static getVaultFromDocument(document: vscode.TextDocument) {
-    const txtPath = document.uri.fsPath;
-    const { wsRoot, vaults } = getDWorkspace();
-    const vault = VaultUtils.getVaultByFilePath({
-      wsRoot,
-      vaults,
-      fsPath: txtPath,
-    });
-    return vault;
+    return new WSUtilsV2(getExtension()).getVaultFromDocument(document);
   }
 
   static getNoteFromDocument(document: vscode.TextDocument) {
-    const { engine, wsRoot } = getDWorkspace();
-    const txtPath = document.uri.fsPath;
-    const fname = path.basename(txtPath, ".md");
-    let vault: DVault;
-    try {
-      vault = this.getVaultFromDocument(document);
-    } catch (err) {
-      // No vault
-      return undefined;
-    }
-    return NoteUtils.getNoteByFnameV5({
-      fname,
-      vault,
-      wsRoot,
-      notes: engine.notes,
-    });
+    return new WSUtilsV2(getExtension()).getNoteFromDocument(document);
   }
 
   static tryGetNoteFromDocument = (
     document: vscode.TextDocument
   ): NoteProps | undefined => {
-    if (
-      !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
-    ) {
-      Logger.info({
-        uri: document.uri.fsPath,
-        msg: "not in workspace",
-      });
-      return;
-    }
-    try {
-      const note = WSUtils.getNoteFromDocument(document);
-      return note;
-    } catch (err) {
-      Logger.info({
-        uri: document.uri.fsPath,
-        msg: "not a valid note",
-      });
-    }
-    return;
+    return new WSUtilsV2(getExtension()).tryGetNoteFromDocument(document);
   };
 
   static getActiveNote() {

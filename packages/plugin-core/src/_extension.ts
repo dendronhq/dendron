@@ -740,7 +740,7 @@ export async function _activate(
       // If automaticallyShowPreview = true, display preview panel on start up
       const note = WSUtils.getActiveNote();
       if (note) {
-        PreviewPanelFactory.getProxy().showPreviewAndUpdate(note);
+        PreviewPanelFactory.getProxy(getExtension()).showPreviewAndUpdate(note);
       }
 
       return true;
@@ -979,7 +979,8 @@ async function _setupCommands(
   const existingCommands = await vscode.commands.getCommands();
 
   ALL_COMMANDS.map((Cmd) => {
-    const cmd = new Cmd();
+    const cmd = new Cmd(ws);
+
     if (!existingCommands.includes(cmd.key))
       context.subscriptions.push(
         vscode.commands.registerCommand(

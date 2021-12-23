@@ -72,7 +72,12 @@ export const syncNote = createAsyncThunk(
 export const renderNote = createAsyncThunk(
   "engine/render",
   async (
-    { port, ws, id }: { port: number; ws: string; id: string },
+    {
+      port,
+      ws,
+      id,
+      note,
+    }: { port: number; ws: string; id: string; note?: NoteProps },
     { dispatch }
   ) => {
     const endpoint = APIUtils.getLocalEndpoint(port);
@@ -82,7 +87,7 @@ export const renderNote = createAsyncThunk(
       apiPath: "api",
       logger,
     });
-    const resp = await api.noteRender({ id, ws });
+    const resp = await api.noteRender({ id, ws, note });
     if (resp.error) {
       dispatch(setError(stringifyError(resp.error)));
       return resp;

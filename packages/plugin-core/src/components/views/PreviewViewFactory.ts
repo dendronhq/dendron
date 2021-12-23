@@ -18,6 +18,7 @@ import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { IDendronExtension } from "../../dendronExtensionInterface";
+import { WSUtils } from "../../WSUtils";
 
 /**
  * Proxy for the Preview Panel
@@ -36,19 +37,25 @@ export interface PreviewProxy {
   getPanel(): vscode.WebviewPanel | undefined;
 }
 
+export type OpenNoteOpts = {
+  syncChangedNote: boolean;
+};
+
 export class PreviewPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
   private static _vsCodeCallback: vscode.Disposable | undefined = undefined;
 
   private static sendRefreshMessage(
     panel: vscode.WebviewPanel,
-    note: NoteProps
+    note: NoteProps,
+    opts?: OpenNoteOpts
   ) {
-    panel.webview.postMessage({
+    const { syncChangedNote } = _.defaults(opts, { syncChangedNote: true });
+    return panel.webview.postMessage({
       type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
       data: {
         note,
-        syncChangedNote: true,
+        syncChangedNote,
       },
       source: "vscode",
     } as OnDidChangeActiveTextEditorMsg);
@@ -80,17 +87,11 @@ export class PreviewPanelFactory {
     }
   }
 
-  private static updateForNote(note: NoteProps) {
+  private static async updateForNote(note: NoteProps, opts?: OpenNoteOpts) {
     if (PreviewPanelFactory._panel) {
-      PreviewPanelFactory._panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote: true,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
+      return this.sendRefreshMessage(PreviewPanelFactory._panel, note, opts);
     }
+    return;
   }
 
   static getProxy(extension: IDendronExtension): PreviewProxy {
@@ -127,6 +128,16 @@ export class PreviewPanelFactory {
         return PreviewPanelFactory._panel;
       },
     };
+  }
+
+  private static initWithNote: NoteProps | undefined;
+  private static initWithOpts: OpenNoteOpts | undefined;
+
+  /** If the preview is ready, the note will be shown immediately. If not, the note will be shown once */
+  public static showNoteWhenReady(note: NoteProps, opts?: OpenNoteOpts) {
+    this.initWithNote = note;
+    this.initWithOpts = opts;
+    return this.updateForNote(note, opts);
   }
 
   static create(ext: IDendronExtension): vscode.WebviewPanel {
@@ -167,14 +178,28 @@ export class PreviewPanelFactory {
         }
         case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
-          const note = ext.wsUtils.getActiveNote();
-          if (note) {
+          let note: NoteProps | undefined;
+          let opts: OpenNoteOpts | undefined;
+          if (PreviewPanelFactory.initWithNote !== undefined) {
+            note = PreviewPanelFactory.initWithNote;
+            opts = PreviewPanelFactory.initWithOpts;
             Logger.debug({
               ctx,
               msg: "got active note",
               note: NoteUtils.toLogObj(note),
             });
-            PreviewPanelFactory.sendRefreshMessage(this._panel!, note);
+          } else {
+            note = WSUtils.getActiveNote();
+            if (note) {
+              Logger.debug({
+                ctx,
+                msg: "got active note",
+                note: NoteUtils.toLogObj(note),
+              });
+            }
+          }
+          if (note) {
+            PreviewPanelFactory.sendRefreshMessage(this._panel!, note, opts);
           }
           break;
         }

@@ -64,7 +64,9 @@ export const useRenderedNoteBody = ({
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
-      dispatch(engineSlice.renderNote({ ...workspace, id: noteId }));
+      dispatch(
+        engineSlice.renderNote({ ...workspace, id: noteId, note: noteProps })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteId, contentHash]);

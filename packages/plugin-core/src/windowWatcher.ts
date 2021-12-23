@@ -145,7 +145,7 @@ export class WindowWatcher {
   /**
    * Show note preview panel if applicable
    */
-  async triggerNotePreviewUpdate({ document }: TextEditor) {
+  triggerNotePreviewUpdate({ document }: TextEditor) {
     const maybeNote = WSUtils.tryGetNoteFromDocument(document);
     if (maybeNote) {
       this._previewProxy.showPreviewAndUpdate(maybeNote);

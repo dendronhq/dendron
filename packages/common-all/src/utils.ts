@@ -26,6 +26,7 @@ import {
   genDefaultPreviewConfig,
   DendronPreviewConfig,
 } from "./types/intermediateConfigs";
+import path from "path";
 
 /**
  * Dendron utilities
@@ -663,4 +664,9 @@ export class ConfigUtils {
     const path = `preview.${key}`;
     _.set(config, path, value);
   }
+}
+
+/** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
+export function normalizeUnixPath(fsPath: string): string {
+  return path.posix.format(path.parse(fsPath));
 }

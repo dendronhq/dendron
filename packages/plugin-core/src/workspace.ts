@@ -15,6 +15,7 @@ import {
 import {
   readJSONWithComments,
   readJSONWithCommentsSync,
+  resolvePath,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
@@ -29,8 +30,15 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
+import { CommandFactory } from "./commandFactory";
+import { ICommandFactory } from "./commandFactoryInterface";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { DendronContext, GLOBAL_STATE } from "./constants";
+import {
+  DendronWorkspaceSettings,
+  IDendronExtension,
+} from "./dendronExtensionInterface";
+import { ExtensionProvider } from "./ExtensionProvider";
 import BacklinksTreeDataProvider, {
   Backlink,
   secondLevelRefsToBacklinks,
@@ -45,8 +53,9 @@ import {
 } from "./services/NoteTraitService";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { CodeConfigKeys } from "./types";
-import { DisposableStore, resolvePath } from "./utils";
+import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
+import { VersionProvider } from "./versionProvider";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -54,16 +63,8 @@ import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
-import {
-  DendronWorkspaceSettings,
-  IDendronExtension,
-} from "./dendronExtensionInterface";
-import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { WSUtilsV2 } from "./WSUtilsV2";
-import { ICommandFactory } from "./commandFactoryInterface";
-import { CommandFactory } from "./commandFactory";
-import { ExtensionProvider } from "./ExtensionProvider";
-import { VersionProvider } from "./versionProvider";
+import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 let _DendronWorkspace: DendronExtension | null;
 

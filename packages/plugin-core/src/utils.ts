@@ -1,7 +1,4 @@
-import { resolveTilde } from "@dendronhq/common-server";
 import ogs from "open-graph-scraper";
-import os from "os";
-import path from "path";
 import * as vscode from "vscode";
 
 export class DisposableStore {
@@ -18,44 +15,6 @@ export class DisposableStore {
     }
   }
 }
-
-// === File FUtils
-// @DEPRECATE, use src/files.ts#resolvePath
-/**
- * @deprecated use src/files.ts#resolvePath
- * @param filePath
- * @param wsRoot
- * @returns
- */
-export function resolvePath(filePath: string, wsRoot?: string): string {
-  const platform = os.platform();
-
-  const isWin = platform === "win32";
-  if (filePath[0] === "~") {
-    return resolveTilde(filePath);
-  } else if (
-    path.isAbsolute(filePath) ||
-    (isWin && filePath.startsWith("\\"))
-  ) {
-    return filePath;
-  } else {
-    if (!wsRoot) {
-      throw Error("can't use rel path without a workspace root set");
-    }
-    return path.join(wsRoot, filePath);
-  }
-}
-
-export function getPlatform() {
-  return process.platform;
-}
-
-export class FileUtils {
-  static escape(fpath: string) {
-    return fpath.replace(/(\s+)/g, "\\$1");
-  }
-}
-
 export const clipboard = vscode.env.clipboard;
 
 export const showMessage = {

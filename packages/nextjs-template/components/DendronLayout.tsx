@@ -124,12 +124,13 @@ export default function DendronLayout(
             margin: "0 auto",
           }}
         >
-          <Col>
+          <Col xs={4}>
             <DendronLogoOrTitle />
           </Col>
           <Col xs={0} sm={20} md={20} lg={19} className="gutter-row">
             <DendronSearch {...props} />
           </Col>
+          <Col xs={12} />
           <Col
             xs={4}
             sm={4}

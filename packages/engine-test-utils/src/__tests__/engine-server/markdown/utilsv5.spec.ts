@@ -4,6 +4,7 @@ import {
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
+import { DateTime } from "luxon";
 import os from "os";
 import path from "path";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
@@ -179,11 +180,40 @@ describe("MDUtils.proc", () => {
     },
   });
 
+  const WITH_DATE_VARIABLES = createProcCompileTests({
+    name: "WITH_DATE_VARIABLES",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = `{{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}`;
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.HTML]: {
+        [ProcFlavor.REGULAR]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkString(
+            resp.contents,
+            `${DateTime.local().year}.${DateTime.local().month}.${
+              DateTime.local().day
+            }`
+          );
+        },
+        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
+        [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+    },
+  });
+
   const ALL_TEST_CASES = [
     ...WITH_FOOTNOTES,
     ...IMAGE_NO_LEAD_FORWARD_SLASH,
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
     ...WILDCARD_NOTE_REF_MISSING,
+    ...WITH_DATE_VARIABLES,
   ];
 
   test.each(

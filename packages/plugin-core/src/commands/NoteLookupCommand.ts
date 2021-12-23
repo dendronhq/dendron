@@ -12,7 +12,13 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { HistoryService, MetadataService } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  HistoryService,
+  MDUtilsV5,
+  MetadataService,
+  ProcMode,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri } from "vscode";
 import {
@@ -479,6 +485,20 @@ export class NoteLookupCommand extends BaseCommand<
         note: nodeNew,
         engine,
       });
+
+      // Apply any variable substitution to the template before creating new note
+      // E.g. if template has {{ CURRENT_YEAR }}, new note will contain 2021
+      const proc = await MDUtilsV5.procRemarkFull(
+        {
+          fname: nodeNew.fname,
+          engine,
+          dest: DendronASTDest.MD_DENDRON,
+          vault: nodeNew.vault,
+        },
+        { mode: ProcMode.IMPORT }
+      );
+      const resolvedBody = await proc.process(nodeNew.body);
+      nodeNew.body = resolvedBody.toString();
     }
 
     const maybeJournalTitleOverride = this.journalTitleOverride();
@@ -496,6 +516,7 @@ export class NoteLookupCommand extends BaseCommand<
       Logger.error({ ctx, error: resp.error });
       return;
     }
+
     const uri = NoteUtils.getURI({
       note: nodeNew,
       wsRoot: getDWorkspace().wsRoot,

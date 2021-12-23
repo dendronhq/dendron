@@ -287,6 +287,16 @@ export class MDUtilsV5 {
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
+
+    // set global date variables
+    const currentDate = DateTime.local();
+    proc = proc.data("CURRENT_YEAR", currentDate.year);
+    proc = proc.data("CURRENT_MONTH", currentDate.month);
+    proc = proc.data("CURRENT_DAY", currentDate.day);
+    proc = proc.data("CURRENT_HOUR", currentDate.hour);
+    proc = proc.data("CURRENT_MINUTE", currentDate.minute);
+    proc = proc.data("CURRENT_SECOND", currentDate.second);
+
     switch (opts.mode) {
       case ProcMode.FULL:
         {

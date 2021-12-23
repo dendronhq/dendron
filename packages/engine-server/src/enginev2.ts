@@ -608,6 +608,10 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(noteChangeEntries: NoteChangeEntry[]) {
+    // no need to refresh if fast mode
+    if (this.fastMode) {
+      return;
+    }
     const notesMap = NoteUtils.createFnameNoteMap(_.values(this.notes), true);
     await Promise.all(
       noteChangeEntries.map(async (ent: NoteChangeEntry) => {

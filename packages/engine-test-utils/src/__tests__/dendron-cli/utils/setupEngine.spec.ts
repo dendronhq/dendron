@@ -63,14 +63,26 @@ describe("GIVEN setupEngine", () => {
       const sampleNote = NoteUtils.create({
         fname: "foo",
         vault,
-        body: "udpated foo",
-      });
-      const fooOrig = _.cloneDeep(engine.notes["foo"]);
-      await resp.engine.writeNote(sampleNote, { updateExisting: true });
-      expect(resp.engine.notes["foo"]).toMatchObject({
-        ..._.omit(fooOrig, ["contentHash"]),
         body: "updated foo",
       });
+      const prevNote = _.cloneDeep(engine.notes["foo"]);
+      await resp.engine.writeNote(sampleNote, { updateExisting: true });
+
+      const nextNote = resp.engine.notes["foo"];
+      // note body should be updated
+      expect(nextNote).toMatchObject({
+        ..._.omit(prevNote, [
+          "contentHash",
+          "created",
+          "updated",
+          "parent",
+          "children",
+          "schema",
+        ]),
+        body: "updated foo",
+      });
+      // content hash different
+      expect(nextNote.contentHash).not.toEqual(prevNote.contentHash);
     });
   });
 

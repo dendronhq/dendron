@@ -160,7 +160,7 @@ describe(`SchemaUtil tests:`, () => {
       });
     });
 
-    describe("GIVEN template type is not a note", async () => {
+    describe("GIVEN template type is not a note", () => {
       beforeEach(async () => {
         note = await noteFactory.createForFName("new note");
       });

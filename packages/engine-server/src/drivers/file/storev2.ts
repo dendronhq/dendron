@@ -168,6 +168,57 @@ export class FileStorage implements DStore {
   }
 
   /**
+   * Merge properties of existing note with new note
+   */
+  private mergePrevNoteWithNewNote({
+    prevNote,
+    nextNote,
+  }: {
+    prevNote: NoteProps;
+    nextNote: NoteProps;
+  }) {
+    nextNote = {
+      ...prevNote,
+      ..._.omit(nextNote, ["id", "links", "parent", "children", "anchors"]),
+    };
+    return nextNote;
+  }
+
+  /**
+   * Replace an existing note with new note
+   *
+   * In this case, we are deleting the old note and writing a new note in its place with the same hierarchy.
+   * the parent of this note needs to have the old note removed (because the id is now different)
+   * the new note needs to have the old note's children
+   */
+  private replacePrevNoteWithNewNote({
+    prevNote,
+    nextNote,
+  }: {
+    prevNote: NoteProps;
+    nextNote: NoteProps;
+  }) {
+    // if fast mode, no need to update metadata
+    if (this.engine.fastMode) {
+      return;
+    }
+    // need to update parent metadata since child id is changing
+    const parentNote = this.notes[prevNote.parent as string] as NoteProps;
+
+    // remove existing note from parent's children
+    parentNote.children = _.reject<string[]>(
+      parentNote.children,
+      (ent: string) => ent === prevNote.id
+    ) as string[];
+    // update parent's children
+    this.notes[prevNote.parent as string].children = parentNote.children;
+    // move prevNote's children to newly written note
+    nextNote.children = prevNote.children;
+    // delete prevNote
+    delete this.notes[prevNote.id];
+  }
+
+  /**
    * Used when writing
    */
   protected async runHooks({
@@ -178,7 +229,7 @@ export class FileStorage implements DStore {
     note: NoteProps;
   }): Promise<RespV3<NoteProps>> {
     const ctx = "runHooks";
-    if (runHooks === false) {
+    if (!runHooks || this.engine.fastMode) {
       this.logger.info({
         ctx,
         msg: "hooks disabled for write",
@@ -1098,24 +1149,11 @@ export class FileStorage implements DStore {
       note: NoteUtils.toLogObj(note),
     });
     let changed: NoteProps[] = [];
-    // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
-    // the parent of this note needs to have the old note removed (because the id is now different)
-    // the new note needs to have the old note's children
     if (existingNote) {
-      // need to update parent metadata since child id is changing
-      const parentNote = this.notes[existingNote.parent as string] as NoteProps;
-
-      // remove existing note from parent's children
-      parentNote.children = _.reject<string[]>(
-        parentNote.children,
-        (ent: string) => ent === existingNote.id
-      ) as string[];
-      // update parent's children
-      this.notes[existingNote.parent as string].children = parentNote.children;
-      // move existingNote's children to newly written note
-      note.children = existingNote.children;
-      // delete existingNote
-      delete this.notes[existingNote.id];
+      this.replacePrevNoteWithNewNote({
+        prevNote: existingNote,
+        nextNote: note,
+      });
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
@@ -1171,8 +1209,10 @@ export class FileStorage implements DStore {
           data: [],
         };
       }
-
-      note = { ...maybeNote, ..._.omit(note, "id") };
+      note = this.mergePrevNoteWithNewNote({
+        prevNote: maybeNote,
+        nextNote: note,
+      });
       noDelete = true;
     } else {
       changed = await this._writeNewNote({
@@ -1184,7 +1224,7 @@ export class FileStorage implements DStore {
 
     // run hooks if applicable
     const resp = await this.runHooks({
-      runHooks: (opts?.runHooks || false) && !this.engine.fastMode,
+      runHooks: opts?.runHooks || true,
       note,
     });
     if (resp.error) {

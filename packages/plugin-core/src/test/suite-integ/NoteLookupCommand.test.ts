@@ -1,6 +1,5 @@
 import {
   ConfigUtils,
-  DateTime,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
@@ -795,10 +794,14 @@ suite("NoteLookupCommand", function () {
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = WSUtils.getNoteFromDocument(document!);
-          expect(_.trim(newNote!.body)).toEqual(
-            `Today is ${DateTime.local().year}.${DateTime.local().month}.${
-              DateTime.local().day
-            }`
+          expect(newNote!.body.trim()).toEqual(
+            `Today is ${Time.now().year}.${Time.now().month}.${
+              Time.now().day
+            }` +
+              "\n" +
+              `This link goes to [[daily.journal.${Time.now().year}.${
+                Time.now().month
+              }.${Time.now().day}]]`
           );
         });
       }

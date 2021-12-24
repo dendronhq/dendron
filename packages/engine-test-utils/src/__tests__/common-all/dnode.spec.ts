@@ -5,6 +5,7 @@ import {
   SchemaOpts,
   NoteProps,
   SchemaTemplate,
+  Time,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
@@ -126,6 +127,37 @@ describe(`SchemaUtil tests:`, () => {
           {
             expect,
             preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
+
+      it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
+        const dateTemplate: SchemaTemplate = {
+          id: "date-variables",
+          type: "note",
+        };
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template: dateTemplate,
+              note,
+              engine,
+            });
+            expect(resp).toBeTruthy();
+            expect(note.body).not.toEqual(engine.notes["date-variables"].body);
+            expect(note.body.trim()).toEqual(
+              `Today is ${Time.now().year}.${Time.now().month}.${
+                Time.now().day
+              }` +
+                "\n" +
+                `This link goes to [[daily.journal.${Time.now().year}.${
+                  Time.now().month
+                }.${Time.now().day}]]`
+            );
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupRefs,
           }
         );
       });

@@ -129,7 +129,10 @@ export const NOTE_PRESETS_V4 = {
   }),
   NOTE_WITH_DATE_VARIABLES: CreateNoteFactory({
     fname: "date-variables",
-    body: "Today is {{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}",
+    body: [
+      "Today is {{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}",
+      "This link goes to [[daily.journal.{{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}]]",
+    ].join("\n"),
   }),
   NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-note-ref",

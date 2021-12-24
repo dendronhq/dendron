@@ -752,6 +752,11 @@ export enum NoteViewMessageEnum {
   "onGetActiveEditor" = "onGetActiveEditor",
 }
 
+export enum LookupViewMessageEnum {
+  "onUpdate" = "onUpdate",
+  "onValuesChange" = "onValuesChange",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -803,4 +808,9 @@ export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,
   { data: any }
+>;
+
+export type LookupViewMessage = DMessage<
+  LookupViewMessageEnum,
+  { changedValues: any; allValues: any }
 >;

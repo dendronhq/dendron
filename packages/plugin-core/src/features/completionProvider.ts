@@ -202,7 +202,7 @@ export const provideCompletionItems = sentryReportingCallback(
           // x will get sorted after numbers, so these will appear after notes without x
           item.sortText = "x" + item.sortText;
 
-          const sameNameNotes = NoteUtils.getNotesByFnameV2({
+          const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
             fname: note.fname,
             engine,
           }).length;

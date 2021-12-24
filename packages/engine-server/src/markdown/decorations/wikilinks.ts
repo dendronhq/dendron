@@ -144,7 +144,7 @@ export async function linkedNoteType({
     matchingNotes = note ? [note] : [];
   } else if (fname) {
     try {
-      matchingNotes = NoteUtils.getNotesByFnameV2({
+      matchingNotes = NoteUtils.getNotesByFnameFromEngine({
         fname,
         vault,
         engine,

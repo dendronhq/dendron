@@ -784,7 +784,7 @@ export class NoteUtils {
     return latestUpdated;
   }
 
-  /** @deprecated see {@link NoteUtils.getNotesByFnameV2} */
+  /** @deprecated see {@link NoteUtils.getNotesByFnameFromEngine} */
   static getNotesByFname({
     fname,
     notes,
@@ -808,7 +808,7 @@ export class NoteUtils {
     return out;
   }
 
-  static getNotesByFnameV2({
+  static getNotesByFnameFromEngine({
     fname,
     engine,
     vault,
@@ -823,7 +823,7 @@ export class NoteUtils {
     return notes;
   }
 
-  /** @deprecated see {@link NoteUtils.getNoteByFnameV6} */
+  /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
   static getNoteByFnameV5({
     fname,
     notes,
@@ -847,12 +847,12 @@ export class NoteUtils {
     return out;
   }
 
-  static getNoteByFnameV6(opts: {
+  static getNoteByFnameFromEngine(opts: {
     fname: string;
     vault: DVault;
     engine: DEngineClient;
   }): NoteProps | undefined {
-    return this.getNotesByFnameV2(opts)[0];
+    return this.getNotesByFnameFromEngine(opts)[0];
   }
 
   /** If `to vault` is defined, returns note from that vault
@@ -1299,7 +1299,7 @@ export class NoteUtils {
     const { fname, engine, includeSelf, nonStubOnly } = opts;
     let { vault } = opts;
     let parts = fname.split(".");
-    let note: NoteProps | undefined = NoteUtils.getNotesByFnameV2({
+    let note: NoteProps | undefined = NoteUtils.getNotesByFnameFromEngine({
       fname,
       vault,
       engine,
@@ -1312,7 +1312,7 @@ export class NoteUtils {
     // All ancestors within the same hierarchy
     while (parts.length > 1) {
       parts = parts.slice(undefined, parts.length - 1);
-      note = NoteUtils.getNotesByFnameV2({
+      note = NoteUtils.getNotesByFnameFromEngine({
         fname: parts.join("."),
         vault,
         engine,
@@ -1324,7 +1324,11 @@ export class NoteUtils {
     if (note) {
       // Yielded at least one note
       if (!vault) vault = note.vault;
-      note = NoteUtils.getNotesByFnameV2({ fname: "root", engine, vault })[0];
+      note = NoteUtils.getNotesByFnameFromEngine({
+        fname: "root",
+        engine,
+        vault,
+      })[0];
       if (note) yield note;
     }
   }

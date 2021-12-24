@@ -248,7 +248,7 @@ export class NoteFNamesDict {
   private _internalMap = new ListMap<string, string>();
 
   public constructor(initialNotes?: NoteProps[]) {
-    if (initialNotes) this.add(...initialNotes);
+    if (initialNotes) this.addAll(initialNotes);
   }
 
   public get(notes: Readonly<NotePropsDict>, fname: string) {
@@ -257,16 +257,16 @@ export class NoteFNamesDict {
     return keys.map((key) => notes[key]).filter(isNotUndefined);
   }
 
-  public add(...toAdd: NoteProps[]) {
-    toAdd.forEach((note) => {
-      this._internalMap.add(note.fname.toLowerCase(), note.id);
-    });
+  public add(note: NoteProps) {
+    this._internalMap.add(cleanName(note.fname), note.id);
   }
 
-  public delete(...toDelete: NoteProps[]) {
-    toDelete.forEach((note) => {
-      this._internalMap.delete(note.fname.toLowerCase(), note.id);
-    });
+  public addAll(notes: NoteProps[]) {
+    notes.forEach((note) => this.add(note));
+  }
+
+  public delete(note: NoteProps) {
+    this._internalMap.delete(cleanName(note.fname), note.id);
   }
 }
 export class FIFOQueue<T> {
@@ -722,4 +722,17 @@ export class ConfigUtils {
     const path = `preview.${key}`;
     _.set(config, path, value);
   }
+}
+
+/**
+ * Make name safe for dendron
+ * @param name
+ * @param opts
+ */
+export function cleanName(name: string): string {
+  name = name
+    .replace(new RegExp(_.escapeRegExp(path.sep), "g"), ".")
+    .toLocaleLowerCase();
+  name = name.replace(/ /g, "-");
+  return name;
 }

@@ -1,4 +1,4 @@
-import { DEngineClient, DLink } from "@dendronhq/common-all";
+import { DEngineClient, DLink, RespV3 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   SetupHookFunction,
@@ -7,11 +7,28 @@ import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import { NoteMetadataUtils } from "@dendronhq/engine-server";
 
-describe("NoteMetadataUtils", () => {
+// === Helper Functions
+const getNote = (engine: DEngineClient) => {
+  return engine.notes["foo"];
+};
+
+const preSetupHookForLinksAndTags: SetupHookFunction = async ({
+  wsRoot,
+  vaults,
+}) => {
+  const vault = vaults[0];
+  await NoteTestUtilsV4.createNote({
+    fname: "foo",
+    body: "#alpha\n#beta\n[[gamma]]\n[[delta]]\n",
+    vault,
+    wsRoot,
+  });
+  return;
+};
+// === Tests
+
+describe("extract simple scalars", () => {
   const preSetupHook = ENGINE_HOOKS.setupBasic;
-  const getNote = (engine: DEngineClient) => {
-    return engine.notes["foo"];
-  };
 
   describe("when extracting string", () => {
     test("THEN get string", async () => {
@@ -50,59 +67,166 @@ describe("NoteMetadataUtils", () => {
       );
     });
   });
+});
 
-  describe("WHEN extracting links", () => {
-    const preSetupHook: SetupHookFunction = async ({ wsRoot, vaults }) => {
-      const vault = vaults[0];
-      await NoteTestUtilsV4.createNote({
-        fname: "foo",
-        body: "#alpha\n#beta\n[[gamma]]\n[[delta]]\n",
-        vault,
-        wsRoot,
-      });
-      return;
-    };
+describe("when extracting links", () => {
+  const preSetupHook = preSetupHookForLinksAndTags;
 
-    const getNote = (engine: DEngineClient) => {
-      return engine.notes["foo"];
-    };
-    describe("AND WHEN extract single link", async () => {
-      let links: DLink[];
-      beforeAll(async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const note = getNote(engine);
-            links = NoteMetadataUtils.extractLinks({
-              note,
-              filters: ["gamma"],
-            });
-          },
-          { expect, preSetupHook }
-        );
+  describe("AND WHEN extract single link", () => {
+    let links: DLink[];
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const note = getNote(engine);
+          links = NoteMetadataUtils.extractLinks({
+            note,
+            filters: ["gamma"],
+          });
+        },
+        { expect, preSetupHook }
+      );
+    });
+    test("THEN extract one link", () => {
+      expect(links.length).toEqual(1);
+    });
+    test("THEN link is equal to filter", () => {
+      expect(links[0]).toMatchObject({
+        alias: "gamma",
+        from: { fname: "foo", id: "foo", vaultName: "vault1" },
+        position: {
+          end: { column: 10, line: 3, offset: 22 },
+          indent: [],
+          start: { column: 1, line: 3, offset: 13 },
+        },
+        sameFile: false,
+        to: {
+          anchorHeader: undefined,
+          fname: "gamma",
+          vaultName: undefined,
+        },
+        type: "wiki",
+        value: "gamma",
+        xvault: false,
       });
-      test("THEN extract one link", () => {
-        expect(links.length).toEqual(1);
-      });
-      test("THEN link is equal to filter", () => {
-        expect(links[0]).toMatchObject({
-          alias: "gamma",
-          from: { fname: "foo", id: "foo", vaultName: "vault1" },
-          position: {
-            end: { column: 10, line: 3, offset: 22 },
-            indent: [],
-            start: { column: 1, line: 3, offset: 13 },
-          },
-          sameFile: false,
-          to: {
-            anchorHeader: undefined,
-            fname: "gamma",
-            vaultName: undefined,
-          },
-          type: "wiki",
-          value: "gamma",
-          xvault: false,
+    });
+  });
+});
+
+describe("when extracting tags", () => {
+  const preSetupHook = preSetupHookForLinksAndTags;
+  const alphaTag = {
+    alias: "#alpha",
+    from: {
+      fname: "foo",
+      id: "foo",
+      vaultName: "vault1",
+    },
+    position: {
+      end: {
+        column: 7,
+        line: 1,
+        offset: 6,
+      },
+      indent: [],
+      start: {
+        column: 1,
+        line: 1,
+        offset: 0,
+      },
+    },
+    sameFile: undefined,
+    to: {
+      anchorHeader: undefined,
+      fname: "tags.alpha",
+      vaultName: undefined,
+    },
+    type: "wiki",
+    value: "tags.alpha",
+    xvault: false,
+  };
+
+  const setupEngineForMultiTag = async (filters: string[]) => {
+    let links: DLink[] = [];
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = getNote(engine);
+        links = NoteMetadataUtils.extractTags({
+          note,
+          filters,
         });
-      });
+      },
+      { expect, preSetupHook }
+    );
+    return links;
+  };
+
+  const setupEngineForSingleTag = async (filters: string[]) => {
+    let resp: RespV3<DLink | undefined>;
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const note = getNote(engine);
+        resp = NoteMetadataUtils.extractSingleTag({
+          note,
+          filters,
+        });
+      },
+      { expect, preSetupHook }
+    );
+    // @ts-ignore
+    return resp;
+  };
+
+  describe("AND WHEN extract single tag AND filter to one", () => {
+    let resp: RespV3<DLink | undefined>;
+    beforeAll(async () => {
+      resp = await setupEngineForSingleTag(["tags.alpha"]);
+    });
+
+    test("THEN extract one tag", () => {
+      expect(resp.data).toEqual(alphaTag);
+    });
+  });
+
+  describe("AND WHEN extract single tag AND filter to many", () => {
+    let resp: RespV3<DLink | undefined>;
+    beforeAll(async () => {
+      resp = await setupEngineForSingleTag(["tags.*"]);
+    });
+
+    test("THEN show error", () => {
+      expect(resp.error!.message).toEqual(
+        "singleTag field has multiple values. note: foo, tags: #alpha, #beta"
+      );
+    });
+  });
+
+  describe("AND WHEN extract multi tag AND filter to one", () => {
+    let links: DLink[];
+    beforeAll(async () => {
+      links = await setupEngineForMultiTag(["tags.alpha"]);
+    });
+
+    test("THEN extract one tag", () => {
+      expect(links.length).toEqual(1);
+    });
+    test("THEN link is equal to filter", () => {
+      expect(links[0]).toEqual(alphaTag);
+    });
+  });
+
+  describe("AND WHEN extract multi tag AND filter to all", () => {
+    let links: DLink[];
+
+    beforeAll(async () => {
+      links = await setupEngineForMultiTag(["tags.*"]);
+    });
+
+    test("THEN extract one tag", () => {
+      expect(links.length).toEqual(2);
+    });
+
+    test("THEN link is equal to filter", () => {
+      expect(links[0]).toEqual(alphaTag);
     });
   });
 });

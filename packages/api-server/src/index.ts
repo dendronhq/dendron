@@ -1,5 +1,6 @@
 import { LogLvl } from "@dendronhq/common-server";
 import express from "express";
+import { Server as HttpServer } from "http";
 import { Socket } from "net";
 import { configureLogger, getLogger } from "./core";
 
@@ -21,7 +22,7 @@ export type ServerClose = ReturnType<
 >["close"];
 export type Server = {
   close: ServerClose;
-};
+} & HttpServer;
 
 function launchv2(
   opts?: {} & LaunchOpts
@@ -45,7 +46,7 @@ function launchv2(
 
     const serverSockets = new Set<Socket>();
 
-    const server = app.listen(listenPort, () => {
+    const server: Server = app.listen(listenPort, () => {
       const port = (server.address() as any).port;
       getLogger().info({ ctx, msg: "exit", port, LOG_DST, root: __dirname });
 

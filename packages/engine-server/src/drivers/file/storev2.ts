@@ -282,7 +282,9 @@ export class FileStorage implements DStore {
 
   async init(): Promise<DEngineInitResp> {
     let errors: DendronError[] = [];
+    const ctx = "FileStorage.init";
     try {
+      this.logger.info({ ctx, fastMode: this.engine.fastMode });
       const resp = await this.initSchema();
       if (ResponseUtil.hasError(resp)) {
         errors.push(FileStorage.createMalformedSchemaError(resp));

@@ -36,6 +36,25 @@ export type SetupEngineOpts = {
   server: any;
 };
 
+class DummyServer {
+  private closeServer?: () => Promise<void>;
+
+  constructor(closeServer?: () => Promise<void>) {
+    this.closeServer = closeServer;
+  }
+
+  close(cb?: () => void) {
+    if (this.closeServer) {
+      this.closeServer().then(cb);
+      return;
+    } else if (cb) {
+      cb();
+      return;
+    }
+    return this;
+  }
+}
+
 /**
  * used by {@link setupEngine}.
  * Depending on options passed, we create a mock {@link Server}
@@ -43,17 +62,10 @@ export type SetupEngineOpts = {
  * @param closeServer
  * @returns
  */
-const createDummyServer = (closeServer?: () => Promise<void>) =>
-  ({
-    close: (cb: () => void) => {
-      if (closeServer) {
-        closeServer().then(cb);
-        return;
-      } else {
-        return cb();
-      }
-    },
-  } as Server);
+const createDummyServer = (closeServer?: () => Promise<void>): Server => {
+  // @ts-ignore
+  return new DummyServer(closeServer);
+};
 
 /**
  * Setup an engine based on CLI args
@@ -163,5 +175,9 @@ export function setupEngineArgs(args: yargs.Argv) {
   args.option("useLocalEngine", {
     type: "boolean",
     describe: "If set, use in memory engine instead of connecting to a server",
+  });
+  args.option("fast", {
+    type: "boolean",
+    describe: "launch engine in fast mode",
   });
 }

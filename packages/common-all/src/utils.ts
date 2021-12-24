@@ -1,6 +1,7 @@
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
+import path from "path";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";

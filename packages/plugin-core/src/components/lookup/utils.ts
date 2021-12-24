@@ -1,12 +1,14 @@
 /* eslint-disable no-dupe-class-members */
 import {
   DendronError,
+  DendronTreeViewKey,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DNoteLoc,
   DVault,
+  LookupModifierStatePayload,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
@@ -27,6 +29,7 @@ import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
+import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
@@ -708,6 +711,21 @@ export class PickerUtilsV2 {
         return bt.onEnable({ quickPick: opts.quickpick });
       })
     );
+
+    const payload: LookupModifierStatePayload = opts.quickpick.buttons.map(
+      (button: DendronBtn) => {
+        return {
+          type: button.type,
+          pressed: button.pressed,
+        };
+      }
+    );
+
+    const ext = getExtension();
+    const lookupView = ext.getTreeView(
+      DendronTreeViewKey.LOOKUP_VIEW
+    ) as LookupView;
+    lookupView.refresh(payload);
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

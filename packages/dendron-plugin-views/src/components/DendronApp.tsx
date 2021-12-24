@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  LookupViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
@@ -88,6 +89,11 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         logger.info({ ctx, msg: "setNoteActive:pre" });
         ideDispatch(ideSlice.actions.setNoteActive(note));
         logger.info({ ctx, msg: "setNoteActive:post" });
+        break;
+      case LookupViewMessageEnum.onUpdate:
+        logger.info({ ctx, msg: "refreshLookup:pre" });
+        ideDispatch(ideSlice.actions.refreshLookup(msg.data));
+        logger.info({ ctx, msg: "refreshLookup:post" });
         break;
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });

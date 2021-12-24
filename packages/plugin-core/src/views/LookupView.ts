@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   DendronTreeViewKey,
   DMessage,
   LookupModifierStatePayload,
@@ -9,6 +10,9 @@ import { Logger } from "../logger";
 import * as vscode from "vscode";
 import { WebViewUtils } from "./utils";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
+import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { DendronBtn, getButtonCategory } from "../components/lookup/buttons";
 
 export class LookupView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.LOOKUP_VIEW;
@@ -56,14 +60,55 @@ export class LookupView implements vscode.WebviewViewProvider {
           data: msg.data,
         });
 
-        const controllerState = this._controller?.state.buttons.map(
-          (button) => {
-            return { type: button.type, pressed: button.pressed };
+        const { category, type, checked } = msg.data;
+        const buttons = this._controller?.state.buttons as DendronBtn[];
+        switch (category) {
+          case "selection":
+          case "note": {
+            const buttonToUpdate = buttons.find((button) => {
+              if (type === undefined) {
+                return getButtonCategory(button) === category && button.pressed;
+              } else {
+                return button.type === type;
+              }
+            }) as DendronBtn;
+            await this._controller?.onTriggerButton(buttonToUpdate);
+            break;
           }
-        );
-        console.log({ controllerState });
-
-        console.log({ bond: msg.data.allValues });
+          case "effect": {
+            // get curent state of controller's effect modifiers
+            const effectButtons = this._controller?.state.buttons.filter(
+              (button) => {
+                return getButtonCategory(button) === "effect";
+              }
+            ) as DendronBtn[];
+            effectButtons.forEach(async (button) => {
+              // logical xor
+              const shouldUpdateButton =
+                type.includes(button.type) !== button.pressed;
+              if (shouldUpdateButton) {
+                await this._controller?.onTriggerButton(button);
+              }
+            });
+            break;
+          }
+          case "filter":
+          case "split": {
+            const buttonToUpdate = buttons.find((button) => {
+              return button.type === type && button.pressed !== checked;
+            }) as DendronBtn;
+            await this._controller?.onTriggerButton(buttonToUpdate);
+            break;
+          }
+          default: {
+            assertUnreachable();
+          }
+        }
+        break;
+      }
+      case LookupViewMessageEnum.onRequestControllerState: {
+        const quickpick = this._controller?.quickpick as DendronQuickPickerV2;
+        PickerUtilsV2.refreshLookupView({ buttons: quickpick.buttons });
         break;
       }
       case LookupViewMessageEnum.onUpdate:

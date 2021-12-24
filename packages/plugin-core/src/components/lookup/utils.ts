@@ -712,7 +712,12 @@ export class PickerUtilsV2 {
       })
     );
 
-    const payload: LookupModifierStatePayload = opts.quickpick.buttons.map(
+    PickerUtilsV2.refreshLookupView({ buttons: opts.quickpick.buttons });
+  }
+
+  static refreshLookupView(opts: { buttons: DendronBtn[] }) {
+    const { buttons } = opts;
+    const payload: LookupModifierStatePayload = buttons.map(
       (button: DendronBtn) => {
         return {
           type: button.type,

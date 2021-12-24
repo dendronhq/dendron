@@ -9,6 +9,7 @@ import {
   minimatch,
   NoteProps,
   NoteUtils,
+  RespV3,
   StatusCodes,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
@@ -50,16 +51,33 @@ type AirtableExportPodCustomOpts = AirtablePodCustomOptsCommon & {
 type AirtablePublishPodCustomOpts = AirtablePodCustomOptsCommon & {};
 
 export type SrcFieldMapping = SrcFieldMappingV2 | string;
-export type SrcFieldMappingV2 = SimpleSrcField | TagSrcField;
+export type SrcFieldMappingV2 =
+  | SimpleSrcField
+  | TagSrcField
+  | MultiSelectField
+  | SingleSelectField;
 
 type SimpleSrcField = {
   to: string;
   type: "string" | "date";
 };
+/**
+ * @deprecated
+ */
 type TagSrcField = {
   type: "singleTag";
   filter: string;
 };
+type SelectField = {
+  to: string;
+  filter?: string;
+};
+type SingleSelectField = {
+  type: "singleSelect";
+} & SelectField;
+type MultiSelectField = {
+  type: "multiSelect";
+} & SelectField;
 
 export type AirtableFieldsMap = { fields: { [key: string]: string | number } };
 
@@ -73,6 +91,84 @@ type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   filteredNotes: NoteProps[];
   checkpoint: string;
 };
+
+// get metadata from note
+class NoteMetadataUtils {
+  static extractString({
+    note,
+    fieldMapping,
+  }: {
+    fieldMapping: SimpleSrcField;
+    note: NoteProps;
+  }): string | undefined {
+    const val = _.get(note, fieldMapping.to, "");
+    if (_.isNull(val)) {
+      return "";
+    }
+    return val.toString();
+  }
+
+  static extractDate({
+    note,
+    fieldMapping,
+  }: {
+    fieldMapping: SimpleSrcField;
+    note: NoteProps;
+  }): string | undefined {
+    let val = _.get(note, fieldMapping.to);
+    if (_.isNumber(val)) {
+      val = DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL);
+    }
+    return val.toString();
+  }
+
+  /**
+   * Get all tags from a note
+   */
+  static extractTags({
+    hashtags,
+    fieldMapping,
+  }: {
+    hashtags: DLink[];
+    fieldMapping: SelectField;
+  }): string[] {
+    hashtags = hashtags.filter((t) => minimatch(t.value, fieldMapping.filter!));
+    return hashtags.map((ent) => ent.value.replace(/^tags./, ""));
+  }
+
+  /**
+   * Extract one tag from a note
+   */
+  static extractSingleTag({
+    note,
+    hashtags,
+    fieldMapping,
+    emptyHandler = "asUndefined",
+  }: {
+    note: NoteProps;
+    hashtags: DLink[];
+    fieldMapping: SelectField;
+    emptyHandler?: "emptyString" | "asUndefined";
+  }): RespV3<string | undefined> {
+    const tags = NoteMetadataUtils.extractTags({ fieldMapping, hashtags });
+    if (tags.length > 1) {
+      const error = new DendronError({
+        message: `singleTag field has multiple values. note: ${JSON.stringify(
+          NoteUtils.toLogObj(note)
+        )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
+      });
+      return { error };
+    }
+    if (tags.length === 0) {
+      if (emptyHandler === "asUndefined") {
+        return { data: undefined };
+      } else {
+        return { data: "" };
+      }
+    }
+    return { data: tags[0] };
+  }
+}
 
 export class AirtableUtils {
   static addRequiredFields(mapping: { [key: string]: SrcFieldMapping }) {
@@ -151,18 +247,24 @@ export class AirtableUtils {
   }) {
     switch (fieldMapping.type) {
       case "string": {
-        const val = _.get(note, fieldMapping.to, "");
-        if (_.isNull(val)) {
-          return val;
-        }
-        return val.toString();
+        return NoteMetadataUtils.extractString({ note, fieldMapping });
       }
       case "date": {
-        let val = _.get(note, fieldMapping.to);
-        if (_.isNumber(val)) {
-          val = DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL);
+        return NoteMetadataUtils.extractDate({ note, fieldMapping });
+      }
+      case "singleSelect": {
+        const { error, data } = NoteMetadataUtils.extractSingleTag({
+          fieldMapping,
+          hashtags,
+          note,
+        });
+        if (error) {
+          throw error;
         }
-        return val.toString();
+        return data;
+      }
+      case "multiSelect": {
+        return NoteMetadataUtils.extractTags({ fieldMapping, hashtags });
       }
       case "singleTag": {
         let val: string;

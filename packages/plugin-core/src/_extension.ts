@@ -91,6 +91,8 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import { WSUtils } from "./WSUtils";
+import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
+import { isAutoCompletable } from "./utils/AutoCompletable";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -980,6 +982,12 @@ async function _setupCommands(
 
   ALL_COMMANDS.map((Cmd) => {
     const cmd = new Cmd(ws);
+
+    // Register commands that implement on `onAutoComplete` with AutoCompletableRegister
+    // to be able to be invoked with auto completion action.
+    if (isAutoCompletable(cmd)) {
+      AutoCompletableRegistrar.register(cmd.key, cmd);
+    }
 
     if (!existingCommands.includes(cmd.key))
       context.subscriptions.push(

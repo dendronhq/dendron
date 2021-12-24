@@ -58,11 +58,8 @@ import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
-import {
-  AUTO_COMPLETABLE_COMMAND_ID,
-  AutoCompleter,
-  UIAutoCompletableCmds,
-} from "../utils/autoCompleter";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletable } from "../utils/AutoCompletable";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -118,12 +115,15 @@ export { CommandOpts as LookupCommandOptsV3 };
  * Note look up command instance that is used by the UI.
  * */
 
-export class NoteLookupCommand extends BaseCommand<
-  CommandOpts,
-  CommandOutput,
-  CommandGatherOutput,
-  CommandRunOpts
-> {
+export class NoteLookupCommand
+  extends BaseCommand<
+    CommandOpts,
+    CommandOutput,
+    CommandGatherOutput,
+    CommandRunOpts
+  >
+  implements AutoCompletable
+{
   key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
@@ -131,14 +131,6 @@ export class NoteLookupCommand extends BaseCommand<
 
   constructor() {
     super("LookupCommandV3");
-
-    // The first look up command that is created is expected to be created by the UI
-    // upon Dendron initialization hence we will register the instance as
-    // the UI command instance.
-    UIAutoCompletableCmds.registerIfNotRegistered(
-      AUTO_COMPLETABLE_COMMAND_ID.NOTE_LOOKUP,
-      this
-    );
   }
 
   protected get controller(): LookupControllerV3 {

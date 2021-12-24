@@ -35,7 +35,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
     beforeHook: () => {},
   });
 
-  let watcher: WindowWatcher | undefined = undefined;
+  let watcher: WindowWatcher | undefined;
 
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
     beforeEach(async () => {

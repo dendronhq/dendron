@@ -1,5 +1,6 @@
 import _ from "lodash";
 import path from "path";
+import { normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault, WorkspaceFolderRaw } from "./types";
@@ -197,5 +198,29 @@ export class VaultUtils {
       path: _path,
       name: name === _path || path.basename(_path) === name ? undefined : name,
     };
+  }
+
+  static FILE_VAULT_PREFIX = "dir-";
+
+  /** Creates a dummy vault for files that are not in Dendron workspace, for example a markdown file that's not in any vault. Do not use for notes. */
+  static createForFile({
+    filePath,
+    wsRoot,
+  }: {
+    filePath: string;
+    wsRoot: string;
+  }): DVault {
+    const normalizedPath = normalizeUnixPath(
+      path.dirname(path.relative(wsRoot, filePath))
+    );
+    return {
+      fsPath: normalizedPath,
+      name: `${this.FILE_VAULT_PREFIX}${normalizeUnixPath}`,
+    };
+  }
+
+  /** Returns true if the vault was created with {@link VaultUtils.createForFile} */
+  static isFileVault(vault: DVault): boolean {
+    return vault.name?.startsWith(this.FILE_VAULT_PREFIX) || false;
   }
 }

@@ -15,35 +15,35 @@ describe("WHEN getConfig from note", () => {
   };
   const config = ConfigUtils.genDefaultConfig();
 
-  describe("AND WHEN shouldShowChildLinks prop not set on note", () => {
-    test("THEN shouldShowChildLinks = false", () => {
+  describe("AND WHEN getEnableChildLinks prop not set on note", () => {
+    test("THEN getEnableChildLinks = false", () => {
       const note = NoteUtils.create({
         vault,
         fname,
       });
-      expect(ConfigUtils.shouldShowChildLinks(config, { note })).toBeTruthy();
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeTruthy();
     });
   });
 
-  describe("AND WHEN shouldShowChildLinks prop set to false on note", () => {
-    test("THEN shouldShowChildLinks = false", () => {
+  describe("AND WHEN getEnableChildLinks prop set to false on note", () => {
+    test("THEN getEnableChildLinks = false", () => {
       const note = NoteUtils.create({
         vault,
         fname,
-        config: { global: { showChildLinks: false } },
+        config: { global: { enableChildLinks: false } },
       });
-      expect(ConfigUtils.shouldShowChildLinks(config, { note })).toBeFalsy();
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeFalsy();
     });
   });
 
-  describe("AND WHEN shouldShowChildLinks prop set to true on note", () => {
-    test("THEN shouldShowChildLinks = true", () => {
+  describe("AND WHEN getEnableChildLinks prop set to true on note", () => {
+    test("THEN getEnableChildLinks = true", () => {
       const note = NoteUtils.create({
         vault,
         fname,
-        config: { global: { showChildLinks: true } },
+        config: { global: { enableChildLinks: true } },
       });
-      expect(ConfigUtils.shouldShowChildLinks(config, { note })).toBeTruthy();
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeTruthy();
     });
   });
 });

@@ -65,5 +65,5 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableMermaid: ENABLE_MERMAID("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
-  showChildLinks: SHOW_CHILD_LINKS("global"),
+  enableChildLinks: SHOW_CHILD_LINKS("global"),
 };

@@ -598,7 +598,7 @@ export class ConfigUtils {
    * NOTE: _config currently doesn't have a `global` object. We're keeping it here
    * to make using the API easier when we do add it
    */
-  static shouldShowChildLinks(
+  static getEnableChildLinks(
     _config: IntermediateDendronConfig,
     opts?: { note?: NoteProps }
   ): boolean {
@@ -607,9 +607,9 @@ export class ConfigUtils {
       opts.note &&
       opts.note.config &&
       opts.note.config.global &&
-      !_.isUndefined(opts.note.config.global.showChildLinks)
+      !_.isUndefined(opts.note.config.global.enableChildLinks)
     ) {
-      return opts.note.config.global.showChildLinks;
+      return opts.note.config.global.enableChildLinks;
     }
     return true;
   }

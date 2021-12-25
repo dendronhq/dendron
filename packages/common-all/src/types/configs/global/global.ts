@@ -7,7 +7,7 @@ export type DendronGlobalConfig = {
   enableMermaid: boolean; // TODO: split
   enablePrettyRefs: boolean; // TODO: split
   enableKatex: boolean; // TODO: split
-  showChildLinks: boolean;
+  enableChildLinks: boolean;
 };
 
 /**
@@ -21,6 +21,6 @@ export function genDefaultGlobalConfig(): DendronGlobalConfig {
     enableMermaid: true,
     enableKatex: true,
     enablePrettyRefs: true,
-    showChildLinks: true,
+    enableChildLinks: true,
   };
 }

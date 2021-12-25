@@ -50,10 +50,20 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
   };
 };
 
+export const SHOW_CHILD_LINKS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Show Child Links (${namespace})`,
+    desc: `Notes will render child links (${namespace})`,
+  };
+};
+
 export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableFMTitle: ENABLE_FM_TITLE("global"), // TODO: split implementation to respect non-global config
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
   enableMermaid: ENABLE_MERMAID("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
+  showChildLinks: SHOW_CHILD_LINKS("global"),
 };

@@ -1,33 +1,32 @@
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
+import path from "path";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import {
+  DendronSiteConfig,
+  DHookDict,
+  DVault,
   NoteProps,
   SEOProps,
-  DVault,
-  DHookDict,
-  DendronSiteConfig,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
+  DendronPreviewConfig,
   DendronWorkspaceConfig,
   genDefaultCommandConfig,
+  genDefaultPreviewConfig,
   genDefaultWorkspaceConfig,
   IntermediateDendronConfig,
   JournalConfig,
-  ScratchConfig,
   LookupConfig,
-  StrictConfigV4,
   NoteLookupConfig,
-  genDefaultPreviewConfig,
-  DendronPreviewConfig,
+  ScratchConfig,
+  StrictConfigV4,
 } from "./types/intermediateConfigs";
-import path from "path";
-import { NoteUtils } from "./dnode";
 
 /**
  * Dendron utilities
@@ -64,7 +63,7 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
-  return !isNaN(parseInt(n)) && isFinite(n);
+  return !Number.isNaN(parseInt(n, 10)) && Number.isFinite(n);
 };
 
 export function isBlockAnchor(anchor?: string): boolean {

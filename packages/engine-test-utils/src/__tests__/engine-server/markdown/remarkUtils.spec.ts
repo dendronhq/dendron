@@ -275,9 +275,8 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("note ref", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ engine }) => {
           const note = engine.notes["foo.one-id"];
-          console.log(wsRoot);
           const links = LinkUtils.findLinks({ note, engine });
           expect(links).toMatchSnapshot();
           checkLink({

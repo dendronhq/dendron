@@ -26,6 +26,7 @@ import {
   DNodePropsQuickInputV2,
   DNoteLoc,
   DVault,
+  NoteLocalConfig,
   NoteOpts,
   NoteProps,
   NotePropsDict,
@@ -633,11 +634,27 @@ export class NoteUtils {
    * Get config from a note
    * Currently only support global config
    */
-  static getConfig(note: NoteProps) {
+  static getNoteLocalConfig(note: NoteProps) {
     if (note.config) {
       return note.config;
     }
     return {};
+  }
+
+  static updateNoteLocalConfig<K extends keyof NoteLocalConfig>(
+    note: NoteProps,
+    key: K,
+    config: Partial<NoteLocalConfig[K]>
+  ) {
+    if (!note.config) {
+      note.config = {};
+    }
+    if (!note.config[key]) {
+      note.config[key] = config;
+    } else {
+      _.merge(note.config[key], config);
+    }
+    return note;
   }
 
   static genTitle(fname: string): string {
@@ -1043,7 +1060,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeMeta(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps) {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1066,18 +1083,8 @@ export class NoteUtils {
 
     // Separate custom and builtin props
     const builtinProps = _.pick(propsWithTrait, [
-      "id",
-      "title",
-      "desc",
-      "updated",
-      "created",
+      ...Object.values(DNodeExplicitProps),
       "stub",
-      "parent",
-      "children",
-      "color",
-      "tags",
-      "image",
-      "traitIds",
     ]);
 
     const { custom: customProps } = cleanProps;
@@ -1097,7 +1104,7 @@ export class NoteUtils {
     if (opts?.writeHierarchy) {
       blacklist = [];
     }
-    const meta = _.omit(NoteUtils.serializeMeta(props), blacklist);
+    const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
     return matter.stringify(body || "", meta);
   }
 
@@ -1669,8 +1676,7 @@ export class SchemaUtils {
       const note = _.find(noteCandidates, { fname: notePath }) as NoteProps;
       NoteUtils.addSchema({ note, schema, schemaModule });
 
-      const matchNextNamespace =
-        schema.data.namespace && matchNamespace ? false : true;
+      const matchNextNamespace = !(schema.data.namespace && matchNamespace);
       const nextSchemaCandidates = matchNextNamespace
         ? schema.children.map((id) => schemaModule.schemas[id])
         : [schema];
@@ -1762,8 +1768,7 @@ export class SchemaUtils {
       }
 
       // if current note is a namespace and we are currently matching namespaces, don't match on the next turn
-      const matchNextNamespace =
-        schema.data.namespace && matchNamespace ? false : true;
+      const matchNextNamespace = !(schema.data.namespace && matchNamespace);
 
       // if we are not matching the next namespace, then we go back to regular matching behavior
       const nextSchemaCandidates = matchNextNamespace

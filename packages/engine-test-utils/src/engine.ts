@@ -9,6 +9,7 @@ import {
   WorkspaceOpts,
   WorkspaceSettings,
   ConfigUtils,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -265,6 +266,7 @@ export class TestPresetEntryV5 {
 /**
  *
  * To create empty workspace, initilizae with `vaults = []`
+ * See [[Run Engine Test|dendron://dendron.docs/pkg.engine-test-utils.ref.run-engine-test]]
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty
@@ -407,5 +409,11 @@ export class TestEngineUtils {
 
   static vault3(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault3" })!;
+  }
+
+  static getNoteByFname(engine: DEngineClient, fname: string) {
+    const { wsRoot, vaults, notes } = engine;
+    const vault = vaults[0];
+    return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
 }

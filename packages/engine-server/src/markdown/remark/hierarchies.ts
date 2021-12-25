@@ -1,19 +1,21 @@
 import {
-  NoteUtils,
-  VaultUtils,
+  ConfigUtils,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
+  NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import visit from "unist-util-visit";
+import { MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
 import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
+import visit from "unist-util-visit";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
-import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
+import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
 
@@ -65,7 +67,7 @@ function footnoteDef2html(definition: FootnoteDefinition) {
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
   const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
-  const hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
+  let hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
     ? true
     : opts?.hierarchyDisplay;
 
@@ -134,6 +136,12 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       vault: vault!,
       wsRoot: engine.wsRoot,
     });
+
+    // check if v5 is active
+    if (MDUtilsV5.isV5Active(proc)) {
+      const resp = MDUtilsV5.getProcData(proc);
+      hierarchyDisplay = ConfigUtils.getEnableChildLinks(resp.config, { note });
+    }
 
     /** Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them. */
     function addTags() {
@@ -213,7 +221,9 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     }
 
     // Will appear on page in this order
-    addChildren();
+    if (hierarchyDisplay) {
+      addChildren();
+    }
     addTags();
     addFootnotes();
 

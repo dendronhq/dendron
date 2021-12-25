@@ -81,6 +81,12 @@ export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
   "vault",
 ];
 
+/**
+ * Notes have a config property that can override a subset of {@link dendronConfig}
+ */
+export type NoteLocalConfig = Partial<{
+  global: Partial<Pick<DendronGlobalConfig, "enableChildLinks">>;
+}>;
 export type DNodeAllProps = DNodeExplicitProps & DNodeImplicitProps;
 
 /**
@@ -95,6 +101,8 @@ export enum DNodeExplicitProps {
   config = "config",
   color = "color",
   tags = "tags",
+  traitIds = "traitIds",
+  image = "image",
 }
 
 /**
@@ -102,14 +110,13 @@ export enum DNodeExplicitProps {
  */
 export enum DNodeImplicitProps {
   fname = "fname",
-  custom = "custom",
   parent = "parent",
   children = "children",
   body = "body",
   data = "data",
   schemaStub = "schemaStub",
   type = "type",
-  image = "image",
+  custom = "custom",
 }
 
 /**
@@ -139,7 +146,7 @@ export type DNodeExplicitMetadata = {
   /**
    * Override of local dendron config
    */
-  config?: Partial<{ global: Partial<DendronGlobalConfig> }>;
+  config?: NoteLocalConfig;
 };
 
 /**

@@ -1,10 +1,11 @@
+/* eslint-disable no-throw-literal */
+// @ts-ignore
+import title from "@dendronhq/title";
 import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
-// @ts-ignore
-import title from "@dendronhq/title";
 import { URI } from "vscode-uri";
 import {
   CONSTANTS,
@@ -17,6 +18,8 @@ import { Time } from "./time";
 import {
   DEngineClient,
   DLink,
+  DNodeExplicitProps,
+  DNodeImplicitProps,
   DNodeOpts,
   DNodeProps,
   DNodePropsDict,
@@ -41,8 +44,8 @@ import {
   DefaultMap,
   getSlugger,
   isNotUndefined,
-  randomColor,
   normalizeUnixPath,
+  randomColor,
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
@@ -57,53 +60,24 @@ export class DNodeUtils {
   }
 
   static create(opts: DNodeOpts): DNodeProps {
-    const {
-      id,
-      type,
-      desc,
-      links,
-      anchors,
-      fname,
-      updated,
-      created,
-      parent,
-      children,
-      body,
-      data,
-      contentHash,
-      vault,
-    } = _.defaults(opts, {
-      updated: Time.now().toMillis(),
-      created: Time.now().toMillis(),
-      id: genUUID(),
-      desc: "",
-      links: [],
-      anchors: {},
-      children: [],
-      parent: null,
-      body: "",
-      data: {},
-      fname: null,
-    });
-    const title = opts.title || NoteUtils.genTitle(fname);
-    const cleanProps: DNodeProps = {
-      id,
-      title,
-      vault,
-      type,
-      desc,
-      links,
-      anchors,
-      fname,
-      updated,
-      created,
-      parent,
-      children,
-      body,
-      data,
-      contentHash,
-    };
+    const cleanProps: DNodeProps = _.defaults(
+      {
+        updated: Time.now().toMillis(),
+        created: Time.now().toMillis(),
+        id: genUUID(),
+        desc: "",
+        links: [],
+        anchors: {},
+        children: [],
+        parent: null,
+        body: "",
+        data: {},
+        title: opts.title || NoteUtils.genTitle(opts.fname),
+      },
+      opts
+    );
 
+    // TODO: remove
     // don't include optional props
     const optionalProps: (keyof DNodeOpts)[] = [
       "stub",
@@ -229,25 +203,15 @@ export class DNodeUtils {
     }
   }
 
+  /**
+   * Custom props are anything that is not a reserved key in Dendron
+   * @param props
+   * @returns
+   */
   static getCustomProps(props: any): any {
     const blacklist = [
-      "id",
-      "title",
-      "type",
-      "desc",
-      "fname",
-      "updated",
-      "custom",
-      "created",
-      "parent",
-      "children",
-      "color",
-      "body",
-      "data",
-      "schemaStub",
-      "type",
-      "tags",
-      "image",
+      ...Object.values(DNodeExplicitProps),
+      ...Object.values(DNodeImplicitProps),
     ];
     return _.omit(props, blacklist);
   }
@@ -543,7 +507,8 @@ export class NoteUtils {
     const aliasMode = alias?.mode;
     const aliasValue = alias?.value;
     const tabStopIndex = alias?.tabStopIndex;
-    let { title, fname, vault } = note;
+    const { fname, vault } = note;
+    let title = note.title;
 
     if (note.fname.startsWith(TAGS_HIERARCHY_BASE)) {
       const tag = note.fname.split(TAGS_HIERARCHY)[1];
@@ -667,10 +632,21 @@ export class NoteUtils {
     return normTitle;
   }
 
+  /**
+   * Get config from a note
+   * Currently only support global config
+   */
+  static getConfig(note: NoteProps) {
+    if (note.config) {
+      return note.config;
+    }
+    return {};
+  }
+
   static genTitle(fname: string): string {
     const titleFromBasename = DNodeUtils.basename(fname, true);
     // check if title is unchanged from default. if so, add default title
-    if (_.toLower(fname) == fname) {
+    if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
       // type definitions are wrong
       // @ts-ignore
@@ -768,7 +744,7 @@ export class NoteUtils {
         // specification, otherwise we will map by just the file name.
         if (pointTo.vaultName) {
           const filteredByVault = matchingList.filter(
-            (n) => VaultUtils.getName(n.vault) == pointTo.vaultName
+            (n) => VaultUtils.getName(n.vault) === pointTo.vaultName
           );
           return filteredByVault[0];
         } else {
@@ -1003,7 +979,7 @@ export class NoteUtils {
     while (note.parent !== null) {
       out.push(note);
       try {
-        let tmp = notes[note.parent];
+        const tmp = notes[note.parent];
         if (_.isUndefined(tmp)) {
           throw "note is undefined";
         }
@@ -1820,7 +1796,7 @@ export class SchemaUtils {
   }): SchemaMatchResult | undefined {
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
-    let match = _.find(schemas, (sc) => {
+    const match = _.find(schemas, (sc) => {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
         namespace = true;

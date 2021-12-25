@@ -1,7 +1,7 @@
 import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
-import { NoteTrait } from ".";
+import { DendronGlobalConfig, NoteTrait } from ".";
 
 export interface Point {
   /**
@@ -81,10 +81,41 @@ export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
   "vault",
 ];
 
+export type DNodeAllProps = DNodeExplicitProps & DNodeImplicitProps;
+
 /**
- * Props are the official interface for a node
+ * These are properties written in the note
  */
-export type DNodeProps<T = any, TCustom = any> = {
+export enum DNodeExplicitProps {
+  id = "id",
+  title = "title",
+  desc = "desc",
+  updated = "updated",
+  created = "created",
+  config = "config",
+  color = "color",
+  tags = "tags",
+}
+
+/**
+ * These are all props that are not written to the note
+ */
+export enum DNodeImplicitProps {
+  fname = "fname",
+  custom = "custom",
+  parent = "parent",
+  children = "children",
+  body = "body",
+  data = "data",
+  schemaStub = "schemaStub",
+  type = "type",
+  image = "image",
+}
+
+/**
+ * Metadata for all lnodes, written to the note
+ */
+export type DNodeExplicitMetadata = {
   /**
    * Unique id of a note
    */
@@ -98,6 +129,28 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   desc: string;
   /**
+   * Last updated
+   */
+  updated: number;
+  /**
+   * Created
+   */
+  created: number;
+  /**
+   * Override of local dendron config
+   */
+  config?: Partial<{ global: Partial<DendronGlobalConfig> }>;
+};
+
+/**
+ * Props are the official interface for a node
+ */
+export type DNodeProps<T = any, TCustom = any> = DNodeExplicitMetadata & {
+  /**
+   * Name of the node. This corresponds to the name of the file minus the extension
+   */
+  fname: string;
+  /**
    * Node links (eg. backlinks, wikilinks, etc)
    */
   links: DLink[];
@@ -106,21 +159,9 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   anchors: { [index: string]: DNoteAnchorPositioned | undefined };
   /**
-   * Name of the node. This corresponds to the name of the file minus the extension
-   */
-  fname: string;
-  /**
    * Whether this node is a note or a schema
    */
   type: DNodeType;
-  /**
-   * Last updated
-   */
-  updated: number;
-  /**
-   * Created
-   */
-  created: number;
   /**
    * Determines whether this node is a {@link stub https://wiki.dendron.so/notes/c6fd6bc4-7f75-4cbb-8f34-f7b99bfe2d50.html#stubs}
    */

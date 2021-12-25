@@ -27,6 +27,7 @@ import {
   DendronPreviewConfig,
 } from "./types/intermediateConfigs";
 import path from "path";
+import { NoteUtils } from "./dnode";
 
 /**
  * Dendron utilities
@@ -43,11 +44,11 @@ export class DUtils {
    * @returns
    */
   static isNumeric(str: string) {
-    if (typeof str != "string") return false; // we only process strings!
+    if (typeof str !== "string") return false; // we only process strings!
     return (
       // @ts-ignore
-      !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-      !isNaN(parseFloat(str))
+      !Number.isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+      !Number.isNaN(parseFloat(str))
     ); // ...and ensure strings of whitespace fail
   }
 }
@@ -592,6 +593,26 @@ export class ConfigUtils {
     return shouldApplyPublishRules
       ? ConfigUtils.getSite(config).usePrettyRefs
       : ConfigUtils.getPreview(config).enablePrettyRefs;
+  }
+
+  /**
+   * NOTE: _config currently doesn't have a `global` object. We're keeping it here
+   * to make using the API easier when we do add it
+   */
+  static shouldShowChildLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps }
+  ): boolean {
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      !_.isUndefined(opts.note.config.global.showChildLinks)
+    ) {
+      return opts.note.config.global.showChildLinks;
+    }
+    return true;
   }
 
   // set

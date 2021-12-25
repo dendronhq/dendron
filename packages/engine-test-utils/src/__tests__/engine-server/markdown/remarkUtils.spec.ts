@@ -878,7 +878,7 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["baz"];
           const notes = _.values(engine.notes);
           const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const linkCandidates = await LinkUtils.findLinkCandidates({
+          const linkCandidates = LinkUtils.findLinkCandidates({
             note,
             notesMap,
             engine,

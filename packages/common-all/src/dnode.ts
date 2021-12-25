@@ -60,22 +60,19 @@ export class DNodeUtils {
   }
 
   static create(opts: DNodeOpts): DNodeProps {
-    const cleanProps: DNodeProps = _.defaults(
-      {
-        updated: Time.now().toMillis(),
-        created: Time.now().toMillis(),
-        id: genUUID(),
-        desc: "",
-        links: [],
-        anchors: {},
-        children: [],
-        parent: null,
-        body: "",
-        data: {},
-        title: opts.title || NoteUtils.genTitle(opts.fname),
-      },
-      opts
-    );
+    const cleanProps: DNodeProps = _.defaults(opts, {
+      updated: Time.now().toMillis(),
+      created: Time.now().toMillis(),
+      id: genUUID(),
+      desc: "",
+      links: [],
+      anchors: {},
+      children: [],
+      parent: null,
+      body: "",
+      data: {},
+      title: opts.title || NoteUtils.genTitle(opts.fname),
+    });
 
     // TODO: remove
     // don't include optional props

@@ -72,6 +72,12 @@ export type NoteLocalConfig = Partial<{
 }>;
 export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 
+/**
+ * Notes have a config property that can override a subset of {@link dendronConfig}
+ */
+export type NoteLocalConfig = Partial<{
+  global: Partial<Pick<DendronGlobalConfig, "enableChildLinks">>;
+}>;
 export type DNodeAllProps = DNodeExplicitProps & DNodeImplicitProps;
 
 /**

@@ -5,7 +5,6 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { MDUtilsV5 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
 import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
@@ -17,6 +16,7 @@ import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
 import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
 
 type PluginOpts = {

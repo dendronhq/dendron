@@ -106,31 +106,6 @@ const SCHEMAS = {
 };
 
 const NOTES = {
-  SERIALIZE_CHILD_WITH_HIERARCHY: new TestPresetEntryV4(
-    async ({ vaults, wsRoot, engine }) => {
-      const noteNew = NoteUtils.create({
-        fname: "foo.ch1",
-        id: "foo.ch1",
-        created: 1,
-        updated: 1,
-        vault: vaults[0],
-      });
-      await engine.writeNote(noteNew, { writeHierarchy: true });
-      const vpath = vault2Path({ vault: vaults[0], wsRoot });
-      const rawNote = fs.readFileSync(path.join(vpath, "foo.ch1.md"), {
-        encoding: "utf8",
-      });
-
-      return [
-        {
-          actual: _.isNull(rawNote.match(/^parent: .*/gm)),
-          expected: false,
-          msg: "should have parent",
-        },
-      ];
-    }
-  ),
-
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
       wsRoot,

@@ -1,8 +1,13 @@
+import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { PodExportScope } from "@dendronhq/pods-core";
-import { describe, after } from "mocha";
+import { after, describe } from "mocha";
+import { IDendronExtension } from "packages/plugin-core/src/dendronExtensionInterface";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
+import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { getDWorkspace } from "../../../../workspace";
 import { expect } from "../../../testUtilsv2";
 import {
@@ -10,16 +15,14 @@ import {
   describeSingleWS,
   setupBeforeAfter,
 } from "../../../testUtilsV3";
-import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { TestExportPodCommand } from "./TestExportCommand";
-import { NoteProps } from "@dendronhq/common-all";
-import sinon from "sinon";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 
 suite("BaseExportPodCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
+  // not using this right now for tests
+  const extension = {} as IDendronExtension;
 
   describe("GIVEN a BaseExportPodCommand implementation", () => {
     describeSingleWS(
@@ -28,7 +31,7 @@ suite("BaseExportPodCommand", function () {
         ctx,
       },
       () => {
-        const cmd = new TestExportPodCommand();
+        const cmd = new TestExportPodCommand(extension);
 
         test("THEN clipboard contents should be in the export payload", async () => {
           vscode.env.clipboard.writeText("test");
@@ -47,7 +50,7 @@ suite("BaseExportPodCommand", function () {
         ctx,
       },
       () => {
-        const cmd = new TestExportPodCommand();
+        const cmd = new TestExportPodCommand(extension);
 
         test("THEN selection contents should be undefined if nothing is highlighted", async () => {
           const payload = await cmd.enrichInputs({
@@ -67,7 +70,7 @@ suite("BaseExportPodCommand", function () {
         ctx,
       },
       () => {
-        const cmd = new TestExportPodCommand();
+        const cmd = new TestExportPodCommand(extension);
 
         test("THEN selection contents should be in the export payload", async () => {
           const { wsRoot, vaults } = getDWorkspace();
@@ -95,7 +98,7 @@ suite("BaseExportPodCommand", function () {
         preSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        const cmd = new TestExportPodCommand();
+        const cmd = new TestExportPodCommand(extension);
 
         test("THEN hierarchy note props should be in the export payload", async () => {
           const payload = await cmd.enrichInputs({
@@ -119,7 +122,7 @@ suite("BaseExportPodCommand", function () {
         preSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        const cmd = new TestExportPodCommand();
+        const cmd = new TestExportPodCommand(extension);
 
         test("THEN workspace note props should be in the export payload", async () => {
           const payload = await cmd.enrichInputs({

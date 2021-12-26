@@ -18,8 +18,8 @@ import { Time } from "./time";
 import {
   DEngineClient,
   DLink,
-  DNodeExplicitProps,
-  DNodeImplicitProps,
+  DNodeExplicitPropsEnum,
+  DNodeImplicitPropsEnum,
   DNodeOpts,
   DNodeProps,
   DNodePropsDict,
@@ -30,7 +30,6 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
-  REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -208,8 +207,8 @@ export class DNodeUtils {
    */
   static getCustomProps(props: any): any {
     const blacklist = [
-      ...Object.values(DNodeExplicitProps),
-      ...Object.values(DNodeImplicitProps),
+      ...Object.values(DNodeExplicitPropsEnum),
+      ...Object.values(DNodeImplicitPropsEnum),
     ];
     return _.omit(props, blacklist);
   }
@@ -1052,6 +1051,22 @@ export class NoteUtils {
   }
 
   static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
+    const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
+      "id",
+      "title",
+      "desc",
+      "links",
+      "anchors",
+      "fname",
+      "type",
+      "updated",
+      "created",
+      "parent",
+      "children",
+      "data",
+      "body",
+      "vault",
+    ];
     return (
       _.isObject(props) &&
       REQUIRED_DNODEPROPS.every(
@@ -1083,7 +1098,7 @@ export class NoteUtils {
 
     // Separate custom and builtin props
     const builtinProps = _.pick(propsWithTrait, [
-      ...Object.values(DNodeExplicitProps),
+      ...Object.values(DNodeExplicitPropsEnum),
       "stub",
     ]);
 

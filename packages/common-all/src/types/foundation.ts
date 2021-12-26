@@ -64,35 +64,18 @@ export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
 export type DNodeImage = { url: string; alt: string };
 
-export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
-  "id",
-  "title",
-  "desc",
-  "links",
-  "anchors",
-  "fname",
-  "type",
-  "updated",
-  "created",
-  "parent",
-  "children",
-  "data",
-  "body",
-  "vault",
-];
-
 /**
  * Notes have a config property that can override a subset of {@link dendronConfig}
  */
 export type NoteLocalConfig = Partial<{
   global: Partial<Pick<DendronGlobalConfig, "enableChildLinks">>;
 }>;
-export type DNodeAllProps = DNodeExplicitProps & DNodeImplicitProps;
+export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 
 /**
  * These are properties written in the note
  */
-export enum DNodeExplicitProps {
+export enum DNodeExplicitPropsEnum {
   id = "id",
   title = "title",
   desc = "desc",
@@ -108,7 +91,7 @@ export enum DNodeExplicitProps {
 /**
  * These are all props that are not written to the note
  */
-export enum DNodeImplicitProps {
+export enum DNodeImplicitPropsEnum {
   fname = "fname",
   parent = "parent",
   children = "children",
@@ -122,7 +105,7 @@ export enum DNodeImplicitProps {
 /**
  * Metadata for all lnodes, written to the note
  */
-export type DNodeExplicitMetadata = {
+export type DNodeExplicitProps = {
   /**
    * Unique id of a note
    */
@@ -152,7 +135,7 @@ export type DNodeExplicitMetadata = {
 /**
  * Props are the official interface for a node
  */
-export type DNodeProps<T = any, TCustom = any> = DNodeExplicitMetadata & {
+export type DNodeProps<T = any, TCustom = any> = DNodeExplicitProps & {
   /**
    * Name of the node. This corresponds to the name of the file minus the extension
    */

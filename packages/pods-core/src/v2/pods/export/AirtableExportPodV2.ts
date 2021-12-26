@@ -2,6 +2,7 @@ import Airtable, { Base, FieldSet, Records } from "@dendronhq/airtable";
 import {
   DendronCompositeError,
   DendronError,
+  DEngineClient,
   NoteProps,
   ResponseUtil,
   RespV2,
@@ -42,10 +43,20 @@ export class AirtableExportPodV2
 {
   private _config: RunnableAirtableV2PodConfig;
   private _airtableBase: Base;
+  private _engine: DEngineClient;
 
-  constructor(airtable: Airtable, config: RunnableAirtableV2PodConfig) {
+  constructor({
+    airtable,
+    config,
+    engine,
+  }: {
+    airtable: Airtable;
+    config: RunnableAirtableV2PodConfig;
+    engine: DEngineClient;
+  }) {
     this._airtableBase = airtable.base(config.baseId);
     this._config = config;
+    this._engine = engine;
   }
 
   async exportNote(input: NoteProps): Promise<AirtableExportReturnType> {

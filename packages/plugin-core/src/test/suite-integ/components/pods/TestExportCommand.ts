@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/pods-core";
 import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
 import { BaseExportPodCommand } from "../../../../../src/commands/pods/BaseExportPodCommand";
+import { getExtension } from "packages/plugin-core/src/workspace";
 
 /**
  * Test implementation of BaseExportPodCommand. For testing purposes only.
@@ -31,7 +32,10 @@ export class TestExportPodCommand extends BaseExportPodCommand<
   };
 
   public constructor() {
-    super(TestExportPodCommand.mockedSelector);
+    super({
+      hierarchySelector: TestExportPodCommand.mockedSelector,
+      extension: getExtension(),
+    });
   }
 
   /**

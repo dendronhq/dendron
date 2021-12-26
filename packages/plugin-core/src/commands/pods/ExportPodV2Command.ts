@@ -2,6 +2,7 @@ import { getAllExportPods, PodClassEntryV4 } from "@dendronhq/pods-core";
 import { PodCommandFactory } from "../../components/pods/PodCommandFactory";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { BaseCommand, CodeCommandInstance } from "../base";
 
 type CommandOutput = void;
@@ -21,8 +22,8 @@ export class ExportPodV2Command extends BaseCommand<
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.EXPORT_POD_V2.key;
 
-  constructor(_name?: string) {
-    super(_name);
+  constructor(extension: IDendronExtension, _name?: string) {
+    super(extension, _name);
     this.pods = getAllExportPods();
   }
 
@@ -32,9 +33,13 @@ export class ExportPodV2Command extends BaseCommand<
    * undefined if the user didn't select anything.
    */
   async gatherInputs(podId: string): Promise<CommandInput | undefined> {
+    const extension = this.extension!;
     // If a podId is passed in, use this instead of prompting the user
     if (podId) {
-      return PodCommandFactory.createPodCommandForStoredConfig({ podId });
+      return PodCommandFactory.createPodCommandForStoredConfig(
+        { podId },
+        extension
+      );
     }
 
     const exportChoice = await PodUIControls.promptForExportConfigOrNewExport();
@@ -47,9 +52,12 @@ export class ExportPodV2Command extends BaseCommand<
       if (!podType) {
         return;
       }
-      return PodCommandFactory.createPodCommandForPodType(podType);
+      return PodCommandFactory.createPodCommandForPodType(podType, extension);
     } else {
-      return PodCommandFactory.createPodCommandForStoredConfig(exportChoice);
+      return PodCommandFactory.createPodCommandForStoredConfig(
+        exportChoice,
+        extension
+      );
     }
   }
 

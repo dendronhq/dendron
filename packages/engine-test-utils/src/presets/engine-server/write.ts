@@ -4,7 +4,6 @@ import {
   NoteUtils,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
   NoteTestUtilsV4,
@@ -12,7 +11,6 @@ import {
   SCHEMA_PRESETS_V4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { setupBasic } from "./utils";

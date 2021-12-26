@@ -43,6 +43,7 @@ export class AirtableExportPodV2
 {
   private _config: RunnableAirtableV2PodConfig;
   private _airtableBase: Base;
+  // @ts-ignore
   private _engine: DEngineClient;
 
   constructor({

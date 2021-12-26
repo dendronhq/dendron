@@ -35,21 +35,6 @@ export class DUtils {
   static minimatch = minimatch;
   static semver = semver;
   static querystring = querystring;
-
-  /**
-   * Check if string is numeric
-   * Credit to https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
-   * @param str
-   * @returns
-   */
-  static isNumeric(str: string) {
-    if (typeof str !== "string") return false; // we only process strings!
-    return (
-      // @ts-ignore
-      !Number.isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-      !Number.isNaN(parseFloat(str))
-    ); // ...and ensure strings of whitespace fail
-  }
 }
 
 export const getSlugger = () => {
@@ -63,7 +48,8 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
-  return !Number.isNaN(parseInt(n, 10)) && Number.isFinite(n);
+  // eslint-disable-next-line no-restricted-globals
+  return !isNaN(parseInt(n)) && isFinite(n);
 };
 
 export function isBlockAnchor(anchor?: string): boolean {

@@ -6,7 +6,7 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { commands, ViewColumn, window } from "vscode";
+import { ViewColumn, window } from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { Logger } from "../../logger";
 import { GraphStyleService } from "../../styles";
@@ -42,12 +42,10 @@ export class NoteGraphPanelFactory {
         switch (msg.type) {
           case GraphViewMessageType.onSelect: {
             const note = getEngine().notes[msg.data.id];
-            await commands.executeCommand(
-              "workbench.action.focusFirstEditorGroup"
-            );
             await new GotoNoteCommand(getExtension()).execute({
               qs: note.fname,
               vault: note.vault,
+              column: ViewColumn.One,
             });
             break;
           }

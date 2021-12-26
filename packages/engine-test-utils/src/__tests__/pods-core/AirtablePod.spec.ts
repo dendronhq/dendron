@@ -12,6 +12,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   AirtableExportPod,
+  AirtableExportResp,
   AirtableFieldsMap,
   AirtableUtils,
   SrcFieldMapping,
@@ -102,7 +103,7 @@ const runExport = (
       tableName: "fakeTable",
       ...opts.podConfig,
     },
-  }) as ReturnType<typeof pod.plant>;
+  }) as Promise<AirtableExportResp>;
 };
 
 const runExportPreset = (
@@ -138,7 +139,7 @@ const createAxiosError = ({
 }: {
   response?: Partial<AxiosError["response"]>;
 }) => {
-  let err: AxiosError = {
+  const err: AxiosError = {
     isAxiosError: true,
     config: {},
     // @ts-ignore
@@ -154,13 +155,52 @@ const createAxiosError = ({
 
 // --- Main
 
-describe("GIVEN airtable export", () => {
+describe("WHEN airtable export", () => {
   afterEach(() => {
     sinon.restore();
   });
 
   describe("WHEN create new notes", () => {
     const preSetupHook = createNotePresetsWithAllCreate;
+    describe.only("AND WHEN add linked record", () => {
+      describe("AND WHEN no records exists", () => {
+        let resp: AirtableExportResp;
+
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              stubAirtableCalls();
+              resp = (await runExport({
+                ...opts,
+                podConfig: {
+                  srcFieldMapping: {
+                    Project: {
+                      type: "linkedRecord",
+                      to: "links",
+                      filter: "task.*",
+                    },
+                  },
+                  srcHierarchy: "foo",
+                },
+              })) as AirtableExportResp;
+              // expect(data).toMatchSnapshot();
+              // // only two entries with level created
+              // expect(
+              //   _.filter(data.created, (ent) => ent.fields["Level"]).length
+              // ).toEqual(2);
+              // expect(data.updated.length).toEqual(0);
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+
+        test("THEN create on record", () => {});
+      });
+    });
+
     describe("AND WHEN export notes with one singleTag", () => {
       test("THEN success", async () => {
         await runEngineTestV5(
@@ -403,7 +443,7 @@ describe("checkpointing ", () => {
         });
 
         const resp = async () => {
-          return await pods.execute({
+          return pods.execute({
             engine,
             vaults,
             wsRoot,

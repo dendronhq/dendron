@@ -1,13 +1,7 @@
+import { DendronError, DLink, NoteProps, RespV3 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import minimatch from "minimatch";
-import {
-  DendronError,
-  DLink,
-  NoteProps,
-  NoteUtils,
-  RespV3,
-} from "@dendronhq/common-all";
 import { LinkUtils } from "../markdown";
 
 type ExtractPropsCommon = {

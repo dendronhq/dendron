@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GIVEN airtable export WHEN create new notes AND WHEN export notes with multiple singleTag THEN success 1`] = `
+exports[`WHEN airtable export WHEN create new notes AND WHEN export notes with multiple singleTag THEN success 1`] = `
 Object {
   "created": Array [
     Object {
@@ -31,7 +31,7 @@ Object {
 }
 `;
 
-exports[`GIVEN airtable export WHEN create new notes AND WHEN export notes with one singleTag THEN success 1`] = `
+exports[`WHEN airtable export WHEN create new notes AND WHEN export notes with one singleTag THEN success 1`] = `
 Object {
   "created": Array [
     Object {
@@ -59,7 +59,7 @@ Object {
 }
 `;
 
-exports[`GIVEN airtable export WHEN update notes AND WHEN export notes with multiple singleTag THEN success 1`] = `
+exports[`WHEN airtable export WHEN update notes AND WHEN export notes with multiple singleTag THEN success 1`] = `
 Object {
   "created": Array [],
   "updated": Array [
@@ -90,7 +90,7 @@ Object {
 }
 `;
 
-exports[`GIVEN airtable export WHEN update notes AND WHEN export notes with one singleTag THEN success 1`] = `
+exports[`WHEN airtable export WHEN update notes AND WHEN export notes with one singleTag THEN success 1`] = `
 Object {
   "created": Array [],
   "updated": Array [

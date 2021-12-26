@@ -50,7 +50,7 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
   };
 };
 
-export const SHOW_CHILD_LINKS = (
+export const ENABLE_CHILD_LINKS = (
   namespace: TopLevelDendronConfig
 ): DendronConfigEntry => {
   return {
@@ -65,5 +65,5 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableMermaid: ENABLE_MERMAID("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
-  enableChildLinks: SHOW_CHILD_LINKS("global"),
+  enableChildLinks: ENABLE_CHILD_LINKS("global"),
 };

@@ -18,6 +18,7 @@ import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { ExportPodCommand } from "../commands/ExportPod";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 
@@ -146,11 +147,11 @@ export const getSiteRootDirPath = () => {
 };
 
 export class NextJSPublishUtils {
-  static async prepareNextJSExportPod() {
-    const ws = getDWorkspace();
+  static async prepareNextJSExportPod(extension: IDendronExtension) {
+    const ws = extension.getWorkspaceImplOrThrow();
     const wsRoot = ws.wsRoot;
     const engine = ws.engine;
-    const cmd = new ExportPodCommand();
+    const cmd = new ExportPodCommand(extension);
 
     let nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
     const podConfig: NextjsExportConfig = {

@@ -62,7 +62,7 @@ export class GotoNoteCommand extends BasicCommand<
   GoToNoteCommandOutput
 > {
   key = DENDRON_COMMANDS.GOTO_NOTE.key;
-  private extension: IDendronExtension;
+  protected extension: IDendronExtension;
   private wsUtils: IWSUtilsV2;
 
   constructor(extension: IDendronExtension) {

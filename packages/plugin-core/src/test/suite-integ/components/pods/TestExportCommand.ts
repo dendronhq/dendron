@@ -7,9 +7,9 @@ import {
   PodExportScope,
   RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
-import { IDendronExtension } from "packages/plugin-core/src/dendronExtensionInterface";
 import { BaseExportPodCommand } from "../../../../../src/commands/pods/BaseExportPodCommand";
 import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
+import { IDendronExtension } from "../../../../../src/dendronExtensionInterface";
 
 /**
  * Test implementation of BaseExportPodCommand. For testing purposes only.

@@ -15,6 +15,7 @@ import {
 } from "../utils/pods";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOutput = void;
 
@@ -30,8 +31,8 @@ export class ExportPodCommand extends BaseCommand<
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.EXPORT_POD.key;
 
-  constructor(_name?: string) {
-    super(_name);
+  constructor(extension: IDendronExtension, _name?: string) {
+    super(extension, _name);
     this.pods = getAllExportPods();
   }
 

@@ -10,6 +10,7 @@ import {
 import _ from "lodash";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import {
   getGlobalState,
   launchGoogleOAuthFlow,
@@ -39,8 +40,8 @@ export class ImportPodCommand extends BaseCommand<
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.IMPORT_POD.key;
 
-  constructor(_name?: string) {
-    super(_name);
+  constructor(extension: IDendronExtension, _name?: string) {
+    super(extension, _name);
     this.pods = getAllImportPods();
   }
 

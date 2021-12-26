@@ -3,7 +3,6 @@ import { vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { PodExportScope } from "@dendronhq/pods-core";
 import { after, describe } from "mocha";
-import { IDendronExtension } from "packages/plugin-core/src/dendronExtensionInterface";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -13,6 +12,7 @@ import { expect } from "../../../testUtilsv2";
 import {
   describeMultiWS,
   describeSingleWS,
+  getFakeExtensionForTest,
   setupBeforeAfter,
 } from "../../../testUtilsV3";
 import { TestExportPodCommand } from "./TestExportCommand";
@@ -22,7 +22,7 @@ suite("BaseExportPodCommand", function () {
     beforeHook: () => {},
   });
   // not using this right now for tests
-  const extension = {} as IDendronExtension;
+  const extension = getFakeExtensionForTest();
 
   describe("GIVEN a BaseExportPodCommand implementation", () => {
     describeSingleWS(

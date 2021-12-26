@@ -300,6 +300,7 @@ export class AirtableUtils {
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
         const { vaults, notes } = engine;
+        // @ts-ignore
         const recordIds = links
           .flatMap((l) => {
             const { fname, vaultName } = l.from;
@@ -321,7 +322,6 @@ export class AirtableUtils {
             return recordIds;
           })
           .filter((n): n is string => !_.isUndefined(n));
-        debugger;
         throw Error("not implemented");
       }
       default:

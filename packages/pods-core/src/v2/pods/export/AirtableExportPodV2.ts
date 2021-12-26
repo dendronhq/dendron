@@ -139,6 +139,7 @@ export class AirtableExportPodV2
       notes,
       srcFieldMapping: this._config.sourceFieldMapping,
       logger,
+      engine: this._engine,
     });
 
     return { update, create };

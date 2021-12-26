@@ -197,7 +197,9 @@ describe("WHEN airtable export", () => {
           );
         });
 
-        test("THEN create on record", () => {});
+        test("THEN create on record", () => {
+          expect(resp).toMatchSnapshot();
+        });
       });
     });
 

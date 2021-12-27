@@ -3,6 +3,7 @@ import { createLogger, getAllFiles } from "@dendronhq/common-server";
 import fs, { Dirent } from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { BasicCommand } from "./base";
 
 const L = createLogger("dendron");
@@ -45,8 +46,12 @@ export abstract class RefactorBaseCommand<
 > extends BasicCommand<RefactorCommandOpts> {
   public props: Required<RefactorCommandOpts>;
 
-  constructor(name: string, opts: RefactorCommandOpts) {
-    super(name);
+  constructor(
+    extension: IDendronExtension,
+    name: string,
+    opts: RefactorCommandOpts
+  ) {
+    super(extension, name);
     this.props = this.cleanOpts(opts);
   }
 

@@ -17,6 +17,7 @@ import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
 import { PodCommandFactory } from "./PodCommandFactory";
 import { assertUnreachable } from "@dendronhq/common-all";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -154,16 +155,16 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
-  public static async promptForPodTypeForCommand(): Promise<
-    CodeCommandInstance | undefined
-  > {
+  public static async promptForPodTypeForCommand(
+    extension: IDendronExtension
+  ): Promise<CodeCommandInstance | undefined> {
     const picked = await PodUIControls.promptForPodType();
 
     if (!picked) {
       return;
     }
 
-    return PodCommandFactory.createPodCommandForPodType(picked);
+    return PodCommandFactory.createPodCommandForPodType(picked, extension);
   }
 
   /**

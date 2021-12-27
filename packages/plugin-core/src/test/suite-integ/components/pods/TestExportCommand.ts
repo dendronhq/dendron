@@ -7,8 +7,9 @@ import {
   PodExportScope,
   RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
-import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
 import { BaseExportPodCommand } from "../../../../../src/commands/pods/BaseExportPodCommand";
+import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
+import { IDendronExtension } from "../../../../../src/dendronExtensionInterface";
 
 /**
  * Test implementation of BaseExportPodCommand. For testing purposes only.
@@ -30,8 +31,11 @@ export class TestExportPodCommand extends BaseExportPodCommand<
     },
   };
 
-  public constructor() {
-    super(TestExportPodCommand.mockedSelector);
+  public constructor(extension: IDendronExtension) {
+    super({
+      hierarchySelector: TestExportPodCommand.mockedSelector,
+      extension,
+    });
   }
 
   /**

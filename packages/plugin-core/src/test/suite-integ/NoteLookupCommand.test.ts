@@ -65,6 +65,7 @@ import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
+  getFakeExtensionForTest,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,
@@ -204,7 +205,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async () => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const opts = await cmd.gatherInputs();
           const out = cmd.enrichInputs(opts);
           expect(
@@ -234,7 +235,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const opts = (await cmd.run({
             noConfirm: true,
@@ -262,7 +263,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const opts = (await cmd.run({
             noConfirm: true,
@@ -281,7 +282,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const opts = (await cmd.run({
             noConfirm: true,
@@ -304,7 +305,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await cmd.run({
             noConfirm: true,
@@ -330,7 +331,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await cmd.run({
             noConfirm: true,
@@ -366,7 +367,7 @@ suite("NoteLookupCommand", function () {
           });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const opts = (await cmd.run({
             noConfirm: true,
@@ -392,7 +393,7 @@ suite("NoteLookupCommand", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await WSUtils.openNote(engine.notes["foo"]);
           const opts = (await cmd.run({ noConfirm: true }))!;
@@ -412,7 +413,7 @@ suite("NoteLookupCommand", function () {
           fs.removeSync(path.join(vpath, "foo.ch1.md"));
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller, provider, quickpick } = await cmd.gatherInputs({
@@ -468,7 +469,7 @@ suite("NoteLookupCommand", function () {
         await ENGINE_HOOKS.setupHierarchyForLookupTests({ wsRoot, vaults });
       },
       onInit: async () => {
-        const cmd = new NoteLookupCommand();
+        const cmd = new NoteLookupCommand(getFakeExtensionForTest());
 
         const out: CommandOutput = (await cmd.run({
           noConfirm: true,
@@ -579,7 +580,7 @@ suite("NoteLookupCommand", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const opts = (await cmd.run({
             noConfirm: true,
@@ -612,7 +613,7 @@ suite("NoteLookupCommand", function () {
           });
         },
         onInit: async ({ vaults, engine, wsRoot }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const vault = TestEngineUtils.vault1(vaults);
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -636,7 +637,7 @@ suite("NoteLookupCommand", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await cmd.run({
             noConfirm: true,
@@ -660,7 +661,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ vaults, wsRoot }) => {
           const vault = _.find(vaults, { fsPath: "vault2" });
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           sinon.stub(PickerUtilsV2, "getVaultForOpenEditor").returns(vault!);
 
           const opts = (await cmd.run({
@@ -703,7 +704,7 @@ suite("NoteLookupCommand", function () {
 
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.fname;
           const vault = _.find(vaults, { fsPath: "vault2" });
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           sinon
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vault));
@@ -733,7 +734,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await cmd.run({
             initialValue: "bar.ch1",
@@ -757,7 +758,7 @@ suite("NoteLookupCommand", function () {
         },
 
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           await cmd.run({
             initialValue: "foo.",
@@ -782,7 +783,7 @@ suite("NoteLookupCommand", function () {
           });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({
             initialValue: "daily.journal.2021.08.10",
@@ -816,7 +817,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const spyFetchPickerResultsNoInput = sinon.spy(
             NotePickerUtils,
@@ -846,7 +847,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
@@ -861,7 +862,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
@@ -878,7 +879,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
@@ -895,7 +896,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "gamma" });
           expect(promptVaultSpy.calledOnce).toBeTruthy();
@@ -913,7 +914,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           // with journal note modifier enabled,
           await WSUtils.openNote(engine.notes["foo"]);
@@ -951,7 +952,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
@@ -983,7 +984,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
@@ -1016,7 +1017,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
@@ -1041,7 +1042,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           // with journal note modifier enabled,
           await WSUtils.openNote(engine.notes["foo"]);
@@ -1079,7 +1080,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           await WSUtils.openNote(engine.notes["foo"]);
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
@@ -1117,7 +1118,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           await WSUtils.openNote(engine.notes["foo"]);
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
@@ -1155,7 +1156,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           await WSUtils.openNote(engine.notes["foo"]);
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
@@ -1195,7 +1196,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           await WSUtils.openNote(engine.notes["foo"]);
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
@@ -1261,7 +1262,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({});
           const { selection2linkBtn, selectionExtractBtn } =
@@ -1280,7 +1281,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({
             selectionType: LookupSelectionTypeEnum.none,
@@ -1301,7 +1302,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const gatherOut = await cmd.gatherInputs({});
           const { selection2linkBtn, selectionExtractBtn } =
@@ -1320,7 +1321,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1360,7 +1361,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1401,7 +1402,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1443,7 +1444,7 @@ suite("NoteLookupCommand", function () {
             },
             { wsRoot }
           );
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1478,7 +1479,7 @@ suite("NoteLookupCommand", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           // open and create a file outside of vault.
@@ -1520,7 +1521,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1559,7 +1560,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
@@ -1610,7 +1611,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           // close all editors before running.
@@ -1645,7 +1646,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           const { controller } = await cmd.gatherInputs({
@@ -1678,7 +1679,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults }) => {
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
           const out = await cmd.run({
             initialValue: "foo",
@@ -1697,7 +1698,7 @@ suite("NoteLookupCommand", function () {
 
   describe("journal + selection2link interactions", () => {
     const prepareCommandFunc = async ({ vaults, engine }: any) => {
-      const cmd = new NoteLookupCommand();
+      const cmd = new NoteLookupCommand(getFakeExtensionForTest());
       stubVaultPick(vaults);
 
       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
@@ -1843,7 +1844,7 @@ suite("NoteLookupCommand", function () {
 
   describe("scratch + selection2link interactions", () => {
     const prepareCommandFunc = async ({ vaults, engine }: any) => {
-      const cmd = new NoteLookupCommand();
+      const cmd = new NoteLookupCommand(getFakeExtensionForTest());
       stubVaultPick(vaults);
 
       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
@@ -1987,7 +1988,7 @@ suite("NoteLookupCommand", function () {
 
   describe("task + selection2link interactions", () => {
     const prepareCommandFunc = async ({ vaults, engine }: any) => {
-      const cmd = new NoteLookupCommand();
+      const cmd = new NoteLookupCommand(getFakeExtensionForTest());
       stubVaultPick(vaults);
 
       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
@@ -2119,7 +2120,7 @@ suite("NoteLookupCommand", function () {
 
   describe("note modifiers + selectionExtract interactions", () => {
     const prepareCommandFunc = async ({ vaults, engine, noteType }: any) => {
-      const cmd = new NoteLookupCommand();
+      const cmd = new NoteLookupCommand(getFakeExtensionForTest());
       stubVaultPick(vaults);
 
       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
@@ -2201,7 +2202,7 @@ suite("NoteLookupCommand", function () {
       engine,
       opts,
     }: any) => {
-      const cmd = new NoteLookupCommand();
+      const cmd = new NoteLookupCommand(getFakeExtensionForTest());
       const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map(
         (fname) => engine.notes[fname]
       );
@@ -2343,6 +2344,7 @@ suite("stateService", function () {
   let homeDirStub: SinonStub;
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async (ctx) => {
+      // eslint-disable-next-line no-new
       new StateService(ctx);
       await resetCodeWorkspace();
       homeDirStub = TestEngineUtils.mockHomeDir();
@@ -2360,7 +2362,7 @@ suite("stateService", function () {
         onInit: async ({ vaults }) => {
           VSCodeUtils.closeAllEditors();
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           let metaData = MetadataService.instance().getMeta();
@@ -2387,7 +2389,7 @@ suite("stateService", function () {
         onInit: async ({ vaults }) => {
           VSCodeUtils.closeAllEditors();
 
-          const cmd = new NoteLookupCommand();
+          const cmd = new NoteLookupCommand(getFakeExtensionForTest());
           stubVaultPick(vaults);
 
           await cmd.run({

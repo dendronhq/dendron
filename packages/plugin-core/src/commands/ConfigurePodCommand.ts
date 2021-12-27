@@ -13,6 +13,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOutput = void;
 
@@ -27,8 +28,8 @@ export class ConfigurePodCommand extends BasicCommand<
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.CONFIGURE_POD.key;
 
-  constructor(_name?: string) {
-    super(_name);
+  constructor(extension: IDendronExtension, _name?: string) {
+    super(extension, _name);
     this.pods = getAllExportPods();
   }
 

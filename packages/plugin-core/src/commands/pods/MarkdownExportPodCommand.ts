@@ -15,6 +15,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
@@ -30,8 +31,8 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
 > {
   public key = "dendron.markdownexportv2";
 
-  public constructor() {
-    super(new QuickPickHierarchySelector());
+  public constructor(extension: IDendronExtension) {
+    super({ hierarchySelector: new QuickPickHierarchySelector(), extension });
   }
 
   public async gatherInputs(

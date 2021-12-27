@@ -6,6 +6,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { checkPreReq, NextJSPublishUtils } from "../utils/site";
 import { BasicCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOpts = void;
 
@@ -19,6 +20,13 @@ export class PublishExportCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.PUBLISH_EXPORT.key;
 
+  protected extension: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    super(extension);
+    this.extension = extension;
+  }
+
   async gatherInputs(): Promise<any> {
     return {};
   }
@@ -31,7 +39,9 @@ export class PublishExportCommand extends BasicCommand<
     const ctx = "PublishExportCommand";
     this.L.info({ ctx, msg: "enter" });
 
-    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
+    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod(
+      this.extension
+    );
     const { enrichedOpts, wsRoot, cmd, nextPath } = prepareOut;
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 

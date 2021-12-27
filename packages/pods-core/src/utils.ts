@@ -417,7 +417,7 @@ export class PodUtils {
           ? (text.split("\n").pop() || "").trim().endsWith("\n")
             ? ""
             : "\n"
-          : "\n\n";
+          : "\n";
       }
     });
 

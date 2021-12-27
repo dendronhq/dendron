@@ -309,6 +309,22 @@ describe("Fuse Engine tests with dummy data", () => {
         assertHasFName(queryResults, "some.note.name.with.big-o");
       });
     });
+
+    describe(`WHEN querying for full length word`, () => {
+      it("AND case matches THEN should get the note", () => {
+        const queryResults = fuseEngine.queryNote({
+          qs: "some.note.name.with.big-o",
+        });
+        assertHasFName(queryResults, "some.note.name.with.big-o");
+      });
+
+      it("AND case does NOT match THEN should get the note", () => {
+        const queryResults = fuseEngine.queryNote({
+          qs: "SOME.note.NAME.with.big-o",
+        });
+        assertHasFName(queryResults, "some.note.name.with.big-o");
+      });
+    });
   });
 });
 

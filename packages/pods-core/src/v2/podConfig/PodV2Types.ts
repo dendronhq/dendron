@@ -13,6 +13,7 @@ export enum PodV2Types {
 export enum PodExportScope {
   Clipboard = "Clipboard",
   Selection = "Selection",
+  LinksInSelection = "LinksInSelection",
   Note = "Note",
   Hierarchy = "Hierarchy",
   Vault = "Vault",

@@ -441,6 +441,9 @@ export class PodUIControls {
       case PodExportScope.Selection:
         return "Exports the current contents of the selected portion of text in the open note editor";
 
+      case PodExportScope.Lookup:
+        return "Exports all notes selected by lookup";
+
       case PodExportScope.LinksInSelection:
         return "Exports all notes in wikilinks of current selected portion of text in the open note editor";
 

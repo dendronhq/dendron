@@ -14,6 +14,7 @@ export enum PodExportScope {
   Clipboard = "Clipboard",
   Selection = "Selection",
   LinksInSelection = "LinksInSelection",
+  Lookup = "Lookup",
   Note = "Note",
   Hierarchy = "Hierarchy",
   Vault = "Vault",

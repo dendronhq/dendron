@@ -105,9 +105,10 @@ export abstract class BaseExportPodCommand<
         payload = selectedText;
         break;
       }
+      case PodExportScope.Lookup:
       case PodExportScope.LinksInSelection: {
         const scope = await PodUIControls.promptForScopeLookup({
-          fromSelection: true,
+          fromSelection: inputs.exportScope === PodExportScope.LinksInSelection,
           key: this.key,
           logger: this.L,
         });
@@ -221,6 +222,7 @@ export abstract class BaseExportPodCommand<
             }
             break;
           }
+          case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {

@@ -1138,7 +1138,7 @@ export class NoteUtils {
   }
 
   /**
-   * Human readable note location
+   * Human readable note location. eg: `dendron://foo (uisdfsdfsdf)`
    */
   static toNoteLocString(note: NoteProps): string {
     const noteLoc = this.toNoteLoc(note);

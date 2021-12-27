@@ -46,27 +46,6 @@ describe("extract simple scalars", () => {
       );
     });
   });
-
-  describe("when extracting date", () => {
-    const preSetupHook = ENGINE_HOOKS.setupBasic;
-    const getNote = (engine: DEngineClient) => {
-      return engine.notes["foo"];
-    };
-    test("THEN get date", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const note = getNote(engine);
-          expect(
-            NoteMetadataUtils.extractDate({
-              note,
-              key: "created",
-            })
-          ).toEqual("December 31, 1969, 4:00 PM PST");
-        },
-        { expect, preSetupHook }
-      );
-    });
-  });
 });
 
 describe("when extracting links", () => {

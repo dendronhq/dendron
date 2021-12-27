@@ -48,7 +48,7 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
-  // eslint-disable-next-line no-restricted-globals
+  // eslint-disable-next-line no-restricted-globals, radix
   return !isNaN(parseInt(n)) && isFinite(n);
 };
 
@@ -76,6 +76,13 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+/**
+ * Check if the value u is a falsy value.
+ */
+export function isFalsy(u: any): boolean {
+  return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 
 /** Calculates a basic integer hash for the given string.

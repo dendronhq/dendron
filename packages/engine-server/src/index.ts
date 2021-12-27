@@ -19,6 +19,7 @@ export * from "./migrations";
 export * from "./metadata";
 export { execa };
 export * from "./util/inMemoryNoteCache";
+export * from "./util/noteMetadataUtils";
 export * from "./drivers";
 export * from "./doctor";
 export * from "./backfillV2";

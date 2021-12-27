@@ -18,6 +18,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   GenTestResults,
+  NoteTestUtilsV4,
   PostSetupHookFunction,
   PreSetupHookFunction,
   RunEngineTestFunctionOpts,
@@ -411,6 +412,27 @@ export class TestEngineUtils {
     return _.find(vaults, { fsPath: "vault3" })!;
   }
 
+  /**
+   * Sugar for creating a note in the first vault
+   */
+  static createNoteByFname({
+    fname,
+    body = "",
+    custom,
+    vaults,
+    wsRoot,
+  }: {
+    fname: string;
+    body: string;
+    custom?: any;
+  } & WorkspaceOpts) {
+    const vault = vaults[0];
+    return NoteTestUtilsV4.createNote({ wsRoot, vault, fname, body, custom });
+  }
+
+  /**
+   * Sugar for retrieving a note in the first vault
+   */
   static getNoteByFname(engine: DEngineClient, fname: string) {
     const { wsRoot, vaults, notes } = engine;
     const vault = vaults[0];

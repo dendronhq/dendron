@@ -24,6 +24,7 @@ import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
 import { DoctorCommand } from "./Doctor";
 import { DumpStateCommand } from "./DumpStateCommand";
+import { DevTriggerCommand } from "./DevTriggerCommand";
 import { EnableTelemetryCommand } from "./EnableTelemetry";
 import { ExportPodCommand } from "./ExportPod";
 import { GoDownCommand } from "./GoDownCommand";
@@ -95,6 +96,7 @@ const ALL_COMMANDS = [
   DeleteNodeCommand,
   DiagnosticsReportCommand,
   DisableTelemetryCommand,
+  DevTriggerCommand,
   EnableTelemetryCommand,
   DoctorCommand,
   DumpStateCommand,

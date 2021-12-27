@@ -568,6 +568,11 @@
         "docs": "This is useful when diagnosing issues in Dendron"
       },
       {
+        "command": "dendron.dev.devTrigger",
+        "title": "Dendron:Dev: Dev Trigger",
+        "desc": "Command to use for development to trigger some arbitrary piece of code."
+      },
+      {
         "command": "dendron.dev.resetConfig",
         "title": "Dendron:Dev: Reset Config",
         "desc": "Reset the config"

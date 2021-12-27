@@ -72,6 +72,8 @@ export type NoteLocalConfig = Partial<{
 }>;
 export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 
+export type DNodeAllProps = DNodeExplicitProps & DNodeImplicitProps;
+
 /**
  * These are properties written in the note
  */

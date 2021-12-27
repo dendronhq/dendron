@@ -1137,6 +1137,22 @@ export class NoteUtils {
     };
   }
 
+  /**
+   * Human readable note location
+   */
+  static toNoteLocString(note: NoteProps): string {
+    const noteLoc = this.toNoteLoc(note);
+    const out: string[] = [];
+    if (noteLoc.vaultName) {
+      out.push(`dendron://${noteLoc.vaultName}/`);
+    }
+    out.push(noteLoc.fname);
+    if (noteLoc.id) {
+      out.push(` (${noteLoc.id})`);
+    }
+    return out.join("");
+  }
+
   static uri2Fname(uri: URI) {
     return path.basename(uri.fsPath, ".md");
   }

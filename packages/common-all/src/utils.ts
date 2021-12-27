@@ -78,6 +78,13 @@ export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
 }
 
+/**
+ * Check if the value u is a falsy value.
+ */
+export function isFalsy(u: any): boolean {
+  return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
+}
+
 /** Calculates a basic integer hash for the given string.
  *
  * This is very unsafe, do not rely on this for anything where collisions are bad.

@@ -1,5 +1,343 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`WHEN airtable export WHEN create new notes AND WHEN add linked record AND WHEN no records exists THEN create on record 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "foo.lvl-1",
+          "Project": Array [],
+        },
+        "id": "airtable-foo.lvl-1",
+      },
+      Object {
+        "fields": Object {
+          "DendronId": "foo.lvl-2",
+          "Project": Array [],
+        },
+        "id": "airtable-foo.lvl-2",
+      },
+      Object {
+        "fields": Object {
+          "DendronId": "foo.no-level",
+          "Project": Array [],
+        },
+        "id": "airtable-foo.no-level",
+      },
+    ],
+    "updated": Array [],
+  },
+  "notes": Array [
+    Object {
+      "anchors": Object {
+        "lookup": Object {
+          "column": 0,
+          "depth": 2,
+          "line": 11,
+          "text": "Lookup",
+          "type": "header",
+          "value": "lookup",
+        },
+        "welcome-to-dendron": Object {
+          "column": 0,
+          "depth": 1,
+          "line": 7,
+          "text": "Welcome to Dendron",
+          "type": "header",
+          "value": "welcome-to-dendron",
+        },
+      },
+      "body": "# Welcome to Dendron
+
+This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.
+
+## Lookup
+
+This section contains useful links to related resources.
+
+- [Getting Started Guide](https://link.dendron.so/6b25)
+- [Discord](https://link.dendron.so/6b23)
+- [Home Page](https://wiki.dendron.so/)
+- [Github](https://link.dendron.so/6b24)
+- [Developer Docs](https://docs.dendron.so/)
+",
+      "children": Array [
+        "fu92nUMasyaRUZw9umAPR",
+      ],
+      "contentHash": "40548e3f87b70067bb390077d27c3abf",
+      "created": 1640564043867,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "0k7Aqjj4XfyggPcdvKOhM",
+      "links": Array [],
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": 1640564043866,
+      "vault": Object {
+        "fsPath": "vault1",
+      },
+    },
+    Object {
+      "anchors": Object {},
+      "body": "
+",
+      "children": Array [],
+      "contentHash": "52925da8698073f863a0da7367575844",
+      "created": 1,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.lvl-1",
+      "id": "foo.lvl-1",
+      "links": Array [
+        Object {
+          "alias": "lvl1",
+          "from": Object {
+            "fname": "foo.lvl-1",
+            "id": "foo.lvl-1",
+            "vaultName": "vault1",
+          },
+          "position": undefined,
+          "to": Object {
+            "fname": "tags.lvl1",
+          },
+          "type": "frontmatterTag",
+          "value": "tags.lvl1",
+          "xvault": false,
+        },
+        Object {
+          "alias": "source.one",
+          "from": Object {
+            "fname": "foo.lvl-1",
+            "id": "foo.lvl-1",
+            "vaultName": "vault1",
+          },
+          "position": undefined,
+          "to": Object {
+            "fname": "tags.source.one",
+          },
+          "type": "frontmatterTag",
+          "value": "tags.source.one",
+          "xvault": false,
+        },
+      ],
+      "parent": "fu92nUMasyaRUZw9umAPR",
+      "tags": Array [
+        "lvl1",
+        "source.one",
+      ],
+      "title": "Lvl 1",
+      "type": "note",
+      "updated": 1,
+      "vault": Object {
+        "fsPath": "vault1",
+      },
+    },
+    Object {
+      "anchors": Object {},
+      "body": "
+",
+      "children": Array [],
+      "contentHash": "0a88d2171c193ce568479a8bd583cb1c",
+      "created": 1,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.lvl-2",
+      "id": "foo.lvl-2",
+      "links": Array [
+        Object {
+          "alias": "lvl2",
+          "from": Object {
+            "fname": "foo.lvl-2",
+            "id": "foo.lvl-2",
+            "vaultName": "vault1",
+          },
+          "position": undefined,
+          "to": Object {
+            "fname": "tags.lvl2",
+          },
+          "type": "frontmatterTag",
+          "value": "tags.lvl2",
+          "xvault": false,
+        },
+        Object {
+          "alias": "source.two",
+          "from": Object {
+            "fname": "foo.lvl-2",
+            "id": "foo.lvl-2",
+            "vaultName": "vault1",
+          },
+          "position": undefined,
+          "to": Object {
+            "fname": "tags.source.two",
+          },
+          "type": "frontmatterTag",
+          "value": "tags.source.two",
+          "xvault": false,
+        },
+      ],
+      "parent": "fu92nUMasyaRUZw9umAPR",
+      "tags": Array [
+        "lvl2",
+        "source.two",
+      ],
+      "title": "Lvl 2",
+      "type": "note",
+      "updated": 1,
+      "vault": Object {
+        "fsPath": "vault1",
+      },
+    },
+    Object {
+      "anchors": Object {},
+      "body": "
+",
+      "children": Array [],
+      "contentHash": "11a5e83d7e0ed0c6df96a3947fdfee5a",
+      "created": 1,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.no-level",
+      "id": "foo.no-level",
+      "links": Array [
+        Object {
+          "alias": "source.three",
+          "from": Object {
+            "fname": "foo.no-level",
+            "id": "foo.no-level",
+            "vaultName": "vault1",
+          },
+          "position": undefined,
+          "to": Object {
+            "fname": "tags.source.three",
+          },
+          "type": "frontmatterTag",
+          "value": "tags.source.three",
+          "xvault": false,
+        },
+      ],
+      "parent": "fu92nUMasyaRUZw9umAPR",
+      "tags": Array [
+        "source.three",
+      ],
+      "title": "No Level",
+      "type": "note",
+      "updated": 1,
+      "vault": Object {
+        "fsPath": "vault1",
+      },
+    },
+    Object {
+      "anchors": Object {
+        "lookup": Object {
+          "column": 0,
+          "depth": 2,
+          "line": 11,
+          "text": "Lookup",
+          "type": "header",
+          "value": "lookup",
+        },
+        "welcome-to-dendron": Object {
+          "column": 0,
+          "depth": 1,
+          "line": 7,
+          "text": "Welcome to Dendron",
+          "type": "header",
+          "value": "welcome-to-dendron",
+        },
+      },
+      "body": "# Welcome to Dendron
+
+This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.
+
+## Lookup
+
+This section contains useful links to related resources.
+
+- [Getting Started Guide](https://link.dendron.so/6b25)
+- [Discord](https://link.dendron.so/6b23)
+- [Home Page](https://wiki.dendron.so/)
+- [Github](https://link.dendron.so/6b24)
+- [Developer Docs](https://docs.dendron.so/)
+",
+      "children": Array [],
+      "contentHash": "808b2574620a722a58526c65d278f53f",
+      "created": 1640564043868,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "ZQmEmbTthvjjAt88NVCna",
+      "links": Array [],
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": 1640564043868,
+      "vault": Object {
+        "fsPath": "vault2",
+      },
+    },
+    Object {
+      "anchors": Object {
+        "lookup": Object {
+          "column": 0,
+          "depth": 2,
+          "line": 11,
+          "text": "Lookup",
+          "type": "header",
+          "value": "lookup",
+        },
+        "welcome-to-dendron": Object {
+          "column": 0,
+          "depth": 1,
+          "line": 7,
+          "text": "Welcome to Dendron",
+          "type": "header",
+          "value": "welcome-to-dendron",
+        },
+      },
+      "body": "# Welcome to Dendron
+
+This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.
+
+## Lookup
+
+This section contains useful links to related resources.
+
+- [Getting Started Guide](https://link.dendron.so/6b25)
+- [Discord](https://link.dendron.so/6b23)
+- [Home Page](https://wiki.dendron.so/)
+- [Github](https://link.dendron.so/6b24)
+- [Developer Docs](https://docs.dendron.so/)
+",
+      "children": Array [],
+      "contentHash": "0a31c59619ccc0550727a84ad554afb0",
+      "created": 1640564043868,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "XEa83Nt24BuxuEl0PYzCa",
+      "links": Array [],
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": 1640564043868,
+      "vault": Object {
+        "fsPath": "vault3",
+        "name": "vaultThree",
+      },
+    },
+  ],
+}
+`;
+
 exports[`WHEN airtable export WHEN create new notes AND WHEN export notes with multiple singleTag THEN success 1`] = `
 Object {
   "created": Array [

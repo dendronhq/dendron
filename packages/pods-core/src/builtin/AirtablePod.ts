@@ -1,14 +1,19 @@
 import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
 import {
   assertUnreachable,
+  DendronCompositeError,
   DendronError,
   DEngineClient,
   DLink,
+  ErrorFactory,
   ErrorUtils,
   ERROR_SEVERITY,
+  IDendronError,
+  isFalsy,
   minimatch,
   NoteProps,
   NoteUtils,
+  RespV3,
   StatusCodes,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -51,6 +56,13 @@ type AirtablePublishPodCustomOpts = AirtablePodCustomOptsCommon & {};
 export type AirtableExportResp = {
   notes: NoteProps[];
   data: { created: Records<FieldSet>; updated: Records<FieldSet> };
+};
+
+export type SrcFieldMappingResp = {
+  create: AirtableFieldsMap[];
+  update: (AirtableFieldsMap & { id: string })[];
+  lastCreated: number;
+  lastUpdated: number;
 };
 
 export type SrcFieldMapping = SrcFieldMappingV2 | string;
@@ -99,84 +111,6 @@ type AirtableExportPodProcessProps = AirtableExportPodCustomOpts & {
   checkpoint: string;
   engine: DEngineClient;
 };
-
-// get metadata from note
-// class NoteMetadataUtils {
-//   static extractString({
-//     note,
-//     fieldMapping,
-//   }: {
-//     fieldMapping: SimpleSrcField;
-//     note: NoteProps;
-//   }): string | undefined {
-//     const val = _.get(note, fieldMapping.to, "");
-//     if (_.isNull(val)) {
-//       return "";
-//     }
-//     return val.toString();
-//   }
-
-//   static extractDate({
-//     note,
-//     fieldMapping,
-//   }: {
-//     fieldMapping: SimpleSrcField;
-//     note: NoteProps;
-//   }): string | undefined {
-//     let val = _.get(note, fieldMapping.to);
-//     if (_.isNumber(val)) {
-//       val = DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL);
-//     }
-//     return val.toString();
-//   }
-
-//   /**
-//    * Get all tags from a note
-//    */
-//   static extractTags({
-//     hashtags,
-//     fieldMapping,
-//   }: {
-//     hashtags: DLink[];
-//     fieldMapping: SelectField;
-//   }): string[] {
-//     hashtags = hashtags.filter((t) => minimatch(t.value, fieldMapping.filter!));
-//     return hashtags.map((ent) => ent.value.replace(/^tags./, ""));
-//   }
-
-//   /**
-//    * Extract one tag from a note
-//    */
-//   static extractSingleTag({
-//     note,
-//     hashtags,
-//     fieldMapping,
-//     emptyHandler = "asUndefined",
-//   }: {
-//     note: NoteProps;
-//     hashtags: DLink[];
-//     fieldMapping: SelectField;
-//     emptyHandler?: "emptyString" | "asUndefined";
-//   }): RespV3<string | undefined> {
-//     const tags = NoteMetadataUtils.extractTags({ fieldMapping, hashtags });
-//     if (tags.length > 1) {
-//       const error = new DendronError({
-//         message: `singleTag field has multiple values. note: ${JSON.stringify(
-//           NoteUtils.toLogObj(note)
-//         )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
-//       });
-//       return { error };
-//     }
-//     if (tags.length === 0) {
-//       if (emptyHandler === "asUndefined") {
-//         return { data: undefined };
-//       } else {
-//         return { data: "" };
-//       }
-//     }
-//     return { data: tags[0] };
-//   }
-// }
 
 export class AirtableUtils {
   static addRequiredFields(mapping: { [key: string]: SrcFieldMapping }) {
@@ -254,13 +188,17 @@ export class AirtableUtils {
     note: NoteProps;
     hashtags: DLink[];
     engine: DEngineClient;
-  }) {
+  }): RespV3<any> {
     switch (fieldMapping.type) {
       case "string": {
-        return NoteMetadataUtils.extractString({ note, key: fieldMapping.to });
+        return {
+          data: NoteMetadataUtils.extractString({ note, key: fieldMapping.to }),
+        };
       }
       case "date": {
-        return NoteMetadataUtils.extractDate({ note, key: fieldMapping.to });
+        return {
+          data: NoteMetadataUtils.extractDate({ note, key: fieldMapping.to }),
+        };
       }
       case "singleSelect": {
         const { error, data } = NoteMetadataUtils.extractSingleTag({
@@ -268,9 +206,9 @@ export class AirtableUtils {
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
         if (error) {
-          throw error;
+          return { error };
         }
-        return data;
+        return { data };
       }
       case "multiSelect": {
         throw Error("not implemented");
@@ -292,7 +230,7 @@ export class AirtableUtils {
         } else {
           val = "";
         }
-        return val;
+        return { data: val };
       }
       case "linkedRecord": {
         const links = NoteMetadataUtils.extractLinks({
@@ -300,29 +238,52 @@ export class AirtableUtils {
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
         const { vaults, notes } = engine;
-        // @ts-ignore
-        const recordIds = links
-          .flatMap((l) => {
-            const { fname, vaultName } = l.from;
-            if (_.isUndefined(fname)) {
-              return;
-            }
-            const vault = vaultName
-              ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
-              : undefined;
-            const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
-            const recordIds = _notes
-              .map((n) => {
-                return NoteMetadataUtils.extractString({
+        const notesWithNoIds: NoteProps[] = [];
+        const recordIds = links.flatMap((l) => {
+          if (_.isUndefined(l.to)) {
+            return;
+          }
+          const { fname, vaultName } = l.to;
+          if (_.isUndefined(fname)) {
+            return;
+          }
+          const vault = vaultName
+            ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
+            : undefined;
+          const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
+          const _recordIds = _notes
+            .map((n) => {
+              return {
+                note: n,
+                id: NoteMetadataUtils.extractString({
                   key: "airtableId",
                   note: n,
-                });
-              })
-              .filter((n): n is string => !_.isUndefined(n));
-            return recordIds;
-          })
-          .filter((n): n is string => !_.isUndefined(n));
-        throw Error("not implemented");
+                }),
+              };
+            })
+            .filter((ent) => {
+              const { id, note } = ent;
+              const missingId = isFalsy(id);
+              if (missingId) {
+                notesWithNoIds.push(note);
+              }
+              return !missingId;
+            });
+
+          return _recordIds;
+        });
+        if (notesWithNoIds.length > 0) {
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: `The following notes are missing airtable ids: ${notesWithNoIds
+                .map((n) => NoteUtils.toNoteLocString(n))
+                .join(", ")}`,
+            }),
+          };
+        }
+
+        // if notesWithNoIds.length > 0 is false, then all records have ids
+        return { data: recordIds.map((ent) => ent!.id) };
       }
       default:
         assertUnreachable(fieldMapping);
@@ -341,20 +302,16 @@ export class AirtableUtils {
     srcFieldMapping: { [key: string]: SrcFieldMapping };
     logger: DLogger;
     engine: DEngineClient;
-  }) {
+  }): RespV3<SrcFieldMappingResp> {
     const { notes, srcFieldMapping, logger, engine } = opts;
     const ctx = "notesToSrc";
-    const recordSets: {
-      create: AirtableFieldsMap[];
-      update: (AirtableFieldsMap & { id: string })[];
-      lastCreated: number;
-      lastUpdated: number;
-    } = {
+    const recordSets: SrcFieldMappingResp = {
       create: [],
       update: [],
       lastCreated: -1,
       lastUpdated: -1,
     };
+    const errors: IDendronError[] = [];
     notes.map((note) => {
       // TODO: optimize, don't parse if no hashtags
       const hashtags = LinkUtils.findHashTags({ links: note.links });
@@ -375,12 +332,17 @@ export class AirtableUtils {
             };
           }
         } else {
-          const val = this.handleSrcField({
+          const resp = this.handleSrcField({
             fieldMapping,
             note,
             hashtags,
             engine,
           });
+          if (resp.error) {
+            return errors.push(resp.error);
+          }
+
+          const val = resp.data;
           if (val) {
             fields = {
               ...fields,
@@ -408,7 +370,11 @@ export class AirtableUtils {
       logger.debug({ ctx, noteId: note.id, msg: "exit" });
       return;
     });
-    return recordSets;
+
+    if (!_.isEmpty(errors)) {
+      return { error: new DendronCompositeError(errors) };
+    }
+    return { data: recordSets };
   }
 
   static async updateAirtableIdForNewlySyncedNotes({
@@ -477,12 +443,16 @@ export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
       config as AirtableExportConfig;
     const logger = createLogger("AirtablePublishPod");
 
-    const { update, create } = AirtableUtils.notesToSrcFieldMap({
+    const resp = AirtableUtils.notesToSrcFieldMap({
       notes: [note],
       srcFieldMapping,
       logger,
       engine,
     });
+    if (resp.error) {
+      throw resp.error;
+    }
+    const { update, create } = resp.data;
     const base = new Airtable({ apiKey }).base(baseId);
     if (!_.isEmpty(update)) {
       const out = await base(tableName).update(update);
@@ -553,12 +523,16 @@ export class AirtableExportPod extends ExportPod<
       engine,
     } = opts;
 
-    const { create, update, lastCreated } = AirtableUtils.notesToSrcFieldMap({
+    const resp = AirtableUtils.notesToSrcFieldMap({
       notes: filteredNotes,
       srcFieldMapping,
       logger: this.L,
       engine,
     });
+    if (resp.error) {
+      throw resp.error;
+    }
+    const { update, create, lastCreated } = resp.data;
 
     const base = new Airtable({ apiKey }).base(baseId);
     const createRequest = _.isEmpty(create)

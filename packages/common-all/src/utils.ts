@@ -48,7 +48,7 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
-  // eslint-disable-next-line no-restricted-globals
+  // eslint-disable-next-line no-restricted-globals, radix
   return !isNaN(parseInt(n)) && isFinite(n);
 };
 

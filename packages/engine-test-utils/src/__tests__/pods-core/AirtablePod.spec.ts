@@ -5,10 +5,8 @@ import {
   DEngineClient,
   ErrorUtils,
   StatusCodes,
-  Time,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   AirtableExportPod,
@@ -17,9 +15,7 @@ import {
   AirtableUtils,
   SrcFieldMapping,
 } from "@dendronhq/pods-core";
-import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -162,46 +158,6 @@ describe("WHEN airtable export", () => {
 
   describe("WHEN create new notes", () => {
     const preSetupHook = createNotePresetsWithAllCreate;
-    describe.only("AND WHEN add linked record", () => {
-      describe("AND WHEN no records exists", () => {
-        let resp: AirtableExportResp;
-
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              stubAirtableCalls();
-              resp = (await runExport({
-                ...opts,
-                podConfig: {
-                  srcFieldMapping: {
-                    Project: {
-                      type: "linkedRecord",
-                      to: "links",
-                      filter: "task.*",
-                    },
-                  },
-                  srcHierarchy: "foo",
-                },
-              })) as AirtableExportResp;
-              // expect(data).toMatchSnapshot();
-              // // only two entries with level created
-              // expect(
-              //   _.filter(data.created, (ent) => ent.fields["Level"]).length
-              // ).toEqual(2);
-              // expect(data.updated.length).toEqual(0);
-            },
-            {
-              expect,
-              preSetupHook,
-            }
-          );
-        });
-
-        test("THEN create on record", () => {
-          expect(resp).toMatchSnapshot();
-        });
-      });
-    });
 
     describe("AND WHEN export notes with one singleTag", () => {
       test("THEN success", async () => {
@@ -412,107 +368,5 @@ describe("WHEN airtable export", () => {
         }
       );
     });
-  });
-});
-
-describe("checkpointing ", () => {
-  let exportDest: string;
-  let checkpoint: string;
-  let timestamp: number;
-
-  beforeEach(() => {
-    exportDest = tmpDir().name;
-    const basePath = path.dirname(exportDest);
-    checkpoint = path.join(
-      basePath,
-      "pods",
-      "dendron.airtable",
-      "airtable-pod.lastupdate",
-      "checkpoint.txt"
-    );
-    fs.ensureDirSync(path.dirname(checkpoint));
-  });
-
-  test("checkpointing file with greater timestamp", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pods = new AirtableExportPod();
-        const srcHierarchy = "foo";
-        pods.processNote = jest.fn();
-        timestamp = Time.now().toMillis() + 50000000;
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-
-        const resp = async () => {
-          return pods.execute({
-            engine,
-            vaults,
-            wsRoot,
-            config: {
-              dest: exportDest,
-              apiKey: "apikey",
-              baseId: "baseId",
-              tableName: "Dendron",
-              srcFieldMapping: {
-                Title: "title",
-                "Updated On": "updated",
-                Notes: "body",
-              },
-              srcHierarchy,
-            },
-          });
-        };
-        expect.assertions(1);
-        return expect(resp()).rejects.toEqual(
-          Error(
-            "No new Records to sync in selected hierarchy. Create new file and then try"
-          )
-        );
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
-  });
-
-  test("checkpointing file with lower timestamp", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new AirtableExportPod();
-        const srcHierarchy = "foo";
-        timestamp = Time.now().toMillis() - 50000000;
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-        const stub = sinon
-          .stub(pod, "processNote")
-          .returns(Promise.resolve({ created: [], updated: [] }));
-        const resp = await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            dest: "TODO",
-            apiKey: "apikey",
-            baseId: "baseId",
-            tableName: "Dendron",
-            srcFieldMapping: {
-              Title: "title",
-              "Updated On": "updated",
-              Notes: "body",
-            },
-            srcHierarchy,
-          },
-        });
-        expect(resp.notes).not.toBeNull();
-        expect(stub.calledOnce).toBeTruthy();
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
   });
 });

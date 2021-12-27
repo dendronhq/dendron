@@ -197,6 +197,7 @@ export default function Graph({
       const defaultConfig = ConfigUtils.genDefaultConfig();
 
       const network = cytoscape({
+        boxSelectionEnabled: false,
         container: graphRef.current,
         elements: {
           nodes,

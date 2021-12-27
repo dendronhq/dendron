@@ -174,7 +174,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
 
   async onExportComplete(opts: {
     exportReturnValue: GoogleDocsExportReturnType;
-    payload: NoteProps;
+    payload: string | NoteProps;
     config: RunnableGoogleDocsV2PodConfig;
   }) {
     const { exportReturnValue, payload } = opts;
@@ -186,7 +186,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       return;
     }
     const { documentId, revisionId } = exportReturnValue.data!;
-    if (documentId && revisionId) {
+    if (typeof payload !== "string" && documentId && revisionId) {
       await this.updateNoteWithDocumentId({
         documentId,
         revisionId,
@@ -196,7 +196,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     const gdocLink = `https://docs.google.com/document/d/${exportReturnValue.data?.documentId}`;
     clipboard.writeText(gdocLink);
     vscode.window.showInformationMessage(
-      `The doc ${payload.fname} has been created. Its link has been copied to the clipboard.`
+      `The doc ${
+        typeof payload === "string" ? "Untitled document" : payload.fname
+      } has been created. Its link has been copied to the clipboard.`
     );
   }
 

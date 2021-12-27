@@ -6,8 +6,10 @@ import {
   NoteProps,
   ResponseUtil,
   RespV2,
+  stringifyError,
   Time,
 } from "@dendronhq/common-all";
+import { DendronASTDest, MDUtilsV4, MDUtilsV5 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import FormData from "form-data";
 import _ from "lodash";
@@ -86,6 +88,23 @@ export class GoogleDocsExportPodV2
     return response;
   }
 
+  async exportText(_input: string): Promise<GoogleDocsExportReturnType> {
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.HTML }
+    );
+    const out = await MDUtilsV4.procRehype({
+      proc,
+      mathjax: true,
+    }).process(_input);
+    const data = `<html>${out.contents}</html>`;
+    const response = await this.exportToGDoc({
+      data,
+      name: "Untitled document",
+    });
+    return response;
+  }
+
   /**
    * creates a new google document with the contents of a note
    */
@@ -97,15 +116,19 @@ export class GoogleDocsExportPodV2
     const { data, name, documentId } = opts;
     const { refreshToken, expirationTime } = this._config;
     let { accessToken } = this._config;
-
-    //checks the expiration time of the access token and refreshes if already expired.
-    if (Time.now().toSeconds() > expirationTime) {
-      accessToken = await PodUtils.refreshGoogleAccessToken(
-        this._wsRoot,
-        refreshToken,
-        this._config.connectionId
-      );
+    try {
+      //checks the expiration time of the access token and refreshes if already expired.
+      if (Time.now().toSeconds() > expirationTime) {
+        accessToken = await PodUtils.refreshGoogleAccessToken(
+          this._wsRoot,
+          refreshToken,
+          this._config.connectionId
+        );
+      }
+    } catch (err: any) {
+      throw new DendronError({ message: stringifyError(err) });
     }
+
     const content = Buffer.from(data);
 
     if (_.isUndefined(documentId)) {

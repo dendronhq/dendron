@@ -19,6 +19,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 
 /**
  * ConfigFileUtils
@@ -488,6 +489,42 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               vault: vaults[0],
             });
           },
+        }
+      );
+    });
+  });
+  describe("WHEN exporting text", () => {
+    test("THEN expect gdoc to be created", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableGoogleDocsV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            accessToken: "test",
+            refreshToken: "test",
+            expirationTime: Time.now().toSeconds() + 5000,
+            connectionId: "foo",
+          };
+
+          const pod = new GoogleDocsExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            vaults: opts.vaults,
+            wsRoot: opts.wsRoot,
+          });
+          const response = {
+            data: {
+              documentId: "testdoc",
+            },
+          };
+          pod.createGdoc = jest.fn().mockResolvedValue(response);
+          const props = "foo bar text";
+
+          const result = await pod.exportText(props);
+          expect(result.data?.documentId).toEqual("testdoc");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
     });

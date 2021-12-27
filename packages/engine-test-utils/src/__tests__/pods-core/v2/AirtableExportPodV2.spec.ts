@@ -116,8 +116,6 @@ describe("WHEN export note with linked record", () => {
     });
   });
 
-  describe.skip("AND linked note does not exist", () => {});
-
   describe("AND linked note has airtable id", () => {
     const preSetupHook = async (opts: WorkspaceOpts) => {
       await TestEngineUtils.createNoteByFname({

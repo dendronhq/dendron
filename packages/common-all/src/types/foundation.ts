@@ -1,7 +1,7 @@
 import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
-import { NoteTrait } from ".";
+import { DendronGlobalConfig, NoteTrait } from ".";
 
 export interface Point {
   /**
@@ -64,27 +64,48 @@ export type DNodeType = "note" | "schema";
 export type DNodePointer = string;
 export type DNodeImage = { url: string; alt: string };
 
-export const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
-  "id",
-  "title",
-  "desc",
-  "links",
-  "anchors",
-  "fname",
-  "type",
-  "updated",
-  "created",
-  "parent",
-  "children",
-  "data",
-  "body",
-  "vault",
-];
+/**
+ * Notes have a config property that can override a subset of {@link dendronConfig}
+ */
+export type NoteLocalConfig = Partial<{
+  global: Partial<Pick<DendronGlobalConfig, "enableChildLinks">>;
+}>;
+export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 
 /**
- * Props are the official interface for a node
+ * These are properties written in the note
  */
-export type DNodeProps<T = any, TCustom = any> = {
+export enum DNodeExplicitPropsEnum {
+  id = "id",
+  title = "title",
+  desc = "desc",
+  updated = "updated",
+  created = "created",
+  config = "config",
+  color = "color",
+  tags = "tags",
+  traitIds = "traitIds",
+  image = "image",
+}
+
+/**
+ * These are all props that are not written to the note
+ */
+export enum DNodeImplicitPropsEnum {
+  fname = "fname",
+  parent = "parent",
+  children = "children",
+  body = "body",
+  data = "data",
+  schemaStub = "schemaStub",
+  type = "type",
+  custom = "custom",
+}
+
+/**
+ * Metadata for all lnodes, written to the note
+ */
+export type DNodeExplicitProps = {
   /**
    * Unique id of a note
    */
@@ -98,6 +119,28 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   desc: string;
   /**
+   * Last updated
+   */
+  updated: number;
+  /**
+   * Created
+   */
+  created: number;
+  /**
+   * Override of local dendron config
+   */
+  config?: NoteLocalConfig;
+};
+
+/**
+ * Props are the official interface for a node
+ */
+export type DNodeProps<T = any, TCustom = any> = DNodeExplicitProps & {
+  /**
+   * Name of the node. This corresponds to the name of the file minus the extension
+   */
+  fname: string;
+  /**
    * Node links (eg. backlinks, wikilinks, etc)
    */
   links: DLink[];
@@ -106,21 +149,9 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   anchors: { [index: string]: DNoteAnchorPositioned | undefined };
   /**
-   * Name of the node. This corresponds to the name of the file minus the extension
-   */
-  fname: string;
-  /**
    * Whether this node is a note or a schema
    */
   type: DNodeType;
-  /**
-   * Last updated
-   */
-  updated: number;
-  /**
-   * Created
-   */
-  created: number;
   /**
    * Determines whether this node is a {@link stub https://wiki.dendron.so/notes/c6fd6bc4-7f75-4cbb-8f34-f7b99bfe2d50.html#stubs}
    */

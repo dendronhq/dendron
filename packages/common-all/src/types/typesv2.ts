@@ -299,10 +299,6 @@ export type EngineWriteOptsV2 = {
    */
   recursive?: boolean;
   /**
-   * Should persist hierarchy information to disk
-   */
-  writeHierarchy?: boolean;
-  /**
    * Don't bother adding parent nodes.
    * Used when importing existing notes in bulk
    */

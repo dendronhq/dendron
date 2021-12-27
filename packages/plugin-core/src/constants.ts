@@ -174,17 +174,17 @@ export const DENDRON_MENUS = {
     {
       command: "dendron.backlinks.sortByLastUpdated",
       when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.PathNames}`,
-      group: "navigation",
+      group: "navigation@1",
     },
     {
       command: "dendron.backlinks.sortByPathNames",
       when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.LastUpdated}`,
-      group: "navigation",
+      group: "navigation@1",
     },
     {
       command: "dendron.backlinks.expandAll",
       when: "view == dendron.backlinks",
-      group: "navigation",
+      group: "navigation@2",
     },
   ],
   "explorer/context": [

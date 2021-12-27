@@ -624,17 +624,17 @@
         {
           "command": "dendron.backlinks.sortByLastUpdated",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "dendron.backlinks.sortByPathNames",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [

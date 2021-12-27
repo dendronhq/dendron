@@ -554,6 +554,7 @@ export class SegmentUtils {
     SegmentClient.instance().track(event, {
       ...props,
       ...SegmentUtils.getCommonProps(),
+      userAgent: type,
       ...rest,
     });
   }
@@ -567,6 +568,7 @@ export class SegmentUtils {
     await SegmentClient.instance().track(event, {
       ...props,
       ...SegmentUtils.getCommonProps(),
+      userAgent: type,
       ...rest,
     });
   }

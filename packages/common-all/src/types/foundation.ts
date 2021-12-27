@@ -73,7 +73,7 @@ export type NoteLocalConfig = Partial<{
 export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 
 /**
- * These are properties written in the note
+ * Node property keys that are written to the frontmatter
  */
 export enum DNodeExplicitPropsEnum {
   id = "id",
@@ -89,7 +89,7 @@ export enum DNodeExplicitPropsEnum {
 }
 
 /**
- * These are all props that are not written to the note
+ * Node property keys that are not written to the frontmatter
  */
 export enum DNodeImplicitPropsEnum {
   fname = "fname",
@@ -103,7 +103,7 @@ export enum DNodeImplicitPropsEnum {
 }
 
 /**
- * Metadata for all lnodes, written to the note
+ * Node property keys that are written to the frontmatter
  */
 export type DNodeExplicitProps = {
   /**
@@ -217,6 +217,9 @@ export type SchemaTemplate = {
 };
 
 export type SchemaProps = DNodeProps<SchemaData>;
+/**
+ * Interface for a Dendron Note
+ */
 export type NoteProps = DNodeProps<any, any>;
 export type SEOProps = {
   title: string;

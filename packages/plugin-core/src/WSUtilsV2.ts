@@ -10,6 +10,9 @@ import {
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
+import { ExtensionProvider } from "./ExtensionProvider";
+
+let WS_UTILS: IWSUtilsV2 | undefined;
 
 /**
  *  Non static WSUtils to allow unwinding of our circular dependencies.
@@ -19,6 +22,23 @@ export class WSUtilsV2 implements IWSUtilsV2 {
 
   constructor(extension: IDendronExtension) {
     this.extension = extension;
+  }
+
+  static instance() {
+    if (WS_UTILS === undefined) {
+      WS_UTILS = new WSUtilsV2(ExtensionProvider.getExtension());
+    }
+    return WS_UTILS;
+  }
+
+  getVaultFromUri(fileUri: vscode.Uri): DVault {
+    const { vaults } = this.extension.getDWorkspace();
+    const vault = VaultUtils.getVaultByFilePath({
+      fsPath: fileUri.fsPath,
+      vaults,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
+    });
+    return vault;
   }
 
   getNoteFromDocument(document: vscode.TextDocument) {

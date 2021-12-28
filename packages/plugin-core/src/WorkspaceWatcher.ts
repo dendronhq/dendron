@@ -34,7 +34,7 @@ import * as Sentry from "@sentry/node";
 import { FileWatcher } from "./fileWatcher";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "./utils/analytics";
-import { SchemaSyncService } from "./services/SchemaSyncService";
+import { ExtensionProvider } from "./ExtensionProvider";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -152,7 +152,9 @@ export class WorkspaceWatcher {
 
   async onDidSaveTextDocument(document: TextDocument) {
     if (SchemaUtils.isSchemaUri(document.uri)) {
-      await SchemaSyncService.instance().onDidSave({ document });
+      await ExtensionProvider.getExtension().schemaSyncService.onDidSave({
+        document,
+      });
     }
   }
 
@@ -205,7 +207,11 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "enter" });
       this._quickDebouncedOnDidChangeTextDocument.cancel();
       const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      if (
+        !ExtensionProvider.getExtension().workspaceService?.isPathInWorkspace(
+          uri.fsPath
+        )
+      ) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }

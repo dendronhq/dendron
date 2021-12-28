@@ -8,7 +8,6 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseUtil,
-  VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -64,6 +63,8 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { SchemaSyncService } from "./services/SchemaSyncService";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -128,13 +129,7 @@ export function resolveRelToWSRoot(fpath: string): string {
 
 /** Given file uri that is within a vault within the current workspace returns the vault. */
 export function getVaultFromUri(fileUri: Uri) {
-  const { vaults } = getDWorkspace();
-  const vault = VaultUtils.getVaultByFilePath({
-    fsPath: fileUri.fsPath,
-    vaults,
-    wsRoot: getDWorkspace().wsRoot,
-  });
-  return vault;
+  return WSUtilsV2.instance().getVaultFromUri(fileUri);
 }
 
 export const NO_WORKSPACE_IMPLEMENTATION = "no workspace implementation";
@@ -156,7 +151,7 @@ export class DendronExtension implements IDendronExtension {
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
-
+  public schemaSyncService: ISchemaSyncService;
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
   public workspaceWatcher?: WorkspaceWatcher;
@@ -374,7 +369,7 @@ export class DendronExtension implements IDendronExtension {
     this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
     this.wsUtils = new WSUtilsV2(this);
     this.commandFactory = new CommandFactory(this);
-
+    this.schemaSyncService = new SchemaSyncService(this);
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
   }

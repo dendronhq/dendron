@@ -8,6 +8,7 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { IWorkspaceService } from "@dendronhq/engine-server";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { ICommandFactory } from "./commandFactoryInterface";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 
 export type DendronWorkspaceSettings = Partial<{
   "dendron.dailyJournalDomain": string;
@@ -52,7 +53,7 @@ export interface IDendronExtension {
   type: WorkspaceType;
   wsUtils: IWSUtilsV2;
   commandFactory: ICommandFactory;
-
+  schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
 
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;

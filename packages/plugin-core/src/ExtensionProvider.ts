@@ -11,7 +11,7 @@ import _ from "lodash";
  * a fitting option then use this class.
  * */
 export class ExtensionProvider {
-  static extension: IDendronExtension;
+  private static extension: IDendronExtension;
 
   static getExtension(): IDendronExtension {
     if (_.isUndefined(ExtensionProvider.extension)) {

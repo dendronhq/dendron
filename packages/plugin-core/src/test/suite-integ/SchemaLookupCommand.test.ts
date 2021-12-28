@@ -2,6 +2,7 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import {
   CommandOutput,
@@ -10,7 +11,11 @@ import {
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("SchemaLookupCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
@@ -35,6 +40,26 @@ suite("SchemaLookupCommand", function () {
         },
       });
     });
+
+    describeSingleWS(
+      "WHEN performing a multilevel schema lookup",
+      {
+        postSetupHook: ENGINE_HOOKS.setupBasic,
+        ctx,
+      },
+      () => {
+        test("THEN proper information message is shown", async () => {
+          const windowSpy = sinon.spy(vscode.window, "showInformationMessage");
+          const cmd = new SchemaLookupCommand();
+
+          await cmd.run({ noConfirm: true, initialValue: "foo.test" });
+          const infoMsg = windowSpy.getCall(0).args[0];
+          expect(infoMsg).toEqual(
+            "It looks like you are trying to create a multi-level [schema](https://wiki.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html). This is not supported. If you are trying to create a note instead, run the `> Note Lookup` command or click on `Note Lookup`"
+          );
+        });
+      }
+    );
 
     describe("updateItems", () => {
       test("star query", (done) => {

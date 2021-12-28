@@ -152,6 +152,11 @@ type TestFunc = TestPresetEntryV4["testFunc"];
 
 type FlavorDict = { [key in ProcFlavor]?: TestFunc | ProcFlavor };
 
+/**
+ * Create test cases for different processor destinations
+ * - NOTE: by default, assume the `fname` passed to processor is `foo`
+ * @param opts.setup: use this to run processor against custom text
+ */
 export const createProcCompileTests = (opts: {
   name: string;
   fname?: string;
@@ -173,7 +178,7 @@ export const createProcCompileTests = (opts: {
   if (verifyFuncDict) {
     allTests = Object.values(DendronASTDest)
       .flatMap((dest) => {
-        let verifyFuncsByFlavor = verifyFuncDict[dest] || {};
+        const verifyFuncsByFlavor = verifyFuncDict[dest] || {};
         return _.flatMap(verifyFuncsByFlavor, (funcOrFlavor, flavor) => {
           let verifyFunc: TestPresetEntryV4["testFunc"];
           if (_.isUndefined(funcOrFlavor)) {
@@ -227,7 +232,7 @@ export const createProcCompileTests = (opts: {
                   ...presetOpts,
                   extra: { dest, proc },
                 });
-                return await verifyFunc({ ...presetOpts, extra });
+                return verifyFunc({ ...presetOpts, extra });
               },
               { preSetupHook: opts.preSetupHook }
             ),

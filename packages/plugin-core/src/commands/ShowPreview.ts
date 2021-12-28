@@ -28,11 +28,12 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
-import { GotoNoteCommand } from "./GotoNote";
 import fs from "fs-extra";
 
-type CommandOpts = vscode.Uri;
-type CommandOutput = any;
+import {
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput,
+} from "./ShowPreviewInterface";
 
 export const extractHeaderAnchorIfExists = (
   link: string
@@ -262,7 +263,7 @@ export const handleLink = async ({
           return;
         }
 
-        return new GotoNoteCommand().execute({
+        return getExtension().commandFactory.goToNoteCmd().execute({
           qs: noteData.note.fname,
           vault: noteData.note.vault,
           column: vscode.ViewColumn.One,
@@ -300,8 +301,8 @@ export const handleLink = async ({
 };
 
 export class ShowPreviewCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
@@ -311,7 +312,7 @@ export class ShowPreviewCommand extends BasicCommand<
     this._panel = previewPanel;
   }
 
-  async sanityCheck(opts?: CommandOpts) {
+  async sanityCheck(opts?: ShowPreviewCommandOpts) {
     if (
       _.isUndefined(VSCodeUtils.getActiveTextEditor()) &&
       opts === undefined
@@ -321,7 +322,7 @@ export class ShowPreviewCommand extends BasicCommand<
     return;
   }
 
-  async addAnalyticsPayload(opts?: CommandOpts) {
+  async addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
     return { providedFile: opts !== undefined };
   }
 
@@ -358,7 +359,7 @@ export class ShowPreviewCommand extends BasicCommand<
     else return this.openFileInPreview(document.uri.fsPath);
   }
 
-  async execute(opts?: CommandOpts) {
+  async execute(opts?: ShowPreviewCommandOpts) {
     const ext = getExtension();
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;

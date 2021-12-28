@@ -96,7 +96,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
         let note: NoteProps | undefined;
         // eslint-disable-next-line no-cond-assign
         if (id && (note = getEngine().notes[id])) {
-          await new GotoNoteCommand().execute({
+          await new GotoNoteCommand(getExtension()).execute({
             qs: note.fname,
             vault: note.vault,
           });

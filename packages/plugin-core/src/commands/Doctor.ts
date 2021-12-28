@@ -1,15 +1,21 @@
 import {
   DEngineClient,
+  DVault,
   isNotUndefined,
   NoteProps,
+  NoteUtils,
+  Position,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import {
   DoctorService,
   DoctorActions,
   BackfillService,
+  RemarkUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
+import fs from "fs-extra";
 import { QuickPick, ViewColumn, window } from "vscode";
 import {
   ChangeScopeBtn,
@@ -152,18 +158,41 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         line: number;
         column: number;
       }[];
-    }[]
+    }[],
+    engine: DEngineClient
   ) {
     let content = [
       "# Broken Links Preview",
       "",
       `## The following files have broken links`,
     ];
+
+    const { notes, vaults, wsRoot } = engine;
     _.forEach(_.sortBy(brokenLinks, ["file"]), (ent) => {
       content = content.concat(`${ent.file}\n`);
+      const vault = VaultUtils.getVaultByName({
+        vaults,
+        vname: ent.vault,
+      }) as DVault;
+      const note = NoteUtils.getNoteByFnameV5({
+        fname: ent.file,
+        notes,
+        vault,
+        wsRoot,
+      }) as NoteProps;
+      const fsPath = NoteUtils.getFullPath({
+        note,
+        wsRoot,
+      });
+      const fileContent = fs.readFileSync(fsPath).toString();
+      const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+        fileContent
+      ) as Position;
       ent.links.forEach((link) => {
         content = content.concat(
-          `- ${link.value} at line ${link.line} column ${link.column}\n`
+          `- ${link.value} at line ${
+            link.line + nodePosition.end.line
+          } column ${link.column}\n`
         );
       });
     });
@@ -285,7 +314,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           window.showInformationMessage(`There are no broken links!`);
           break;
         }
-        await this.showBrokenLinkPreview(out.resp);
+        await this.showBrokenLinkPreview(out.resp, engine);
         break;
       }
       default: {

@@ -12,16 +12,12 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import {
-  handleLink,
-  LinkType,
-  ShowPreviewCommand,
-} from "../../commands/ShowPreview";
+import { handleLink, LinkType } from "../../commands/ShowPreview";
 import { Logger } from "../../logger";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { WSUtils } from "../../WSUtils";
 
 /**
@@ -100,14 +96,14 @@ export class PreviewPanelFactory {
     return undefined;
   }
 
-  static getProxy(): PreviewProxy {
+  static getProxy(extension: IDendronExtension): PreviewProxy {
     return {
       async showPreviewAndUpdate(note) {
         const ctx = {
           ctx: "ShowPreview:showPreviewAndRefresh",
           fname: note.fname,
         };
-        const config = getDWorkspace().config;
+        const config = extension.getDWorkspace().config;
 
         // If preview panel does not exist and automaticallyShowPreview = true, show preview before updating
         // Otherwise, update if panel exists
@@ -119,9 +115,10 @@ export class PreviewPanelFactory {
             ...ctx,
             state: "panel not found and automaticallyShowPreview = true",
           });
-          await new ShowPreviewCommand(
-            PreviewPanelFactory.create(getExtension())
-          ).execute();
+          const showPreview = extension.commandFactory.showPreviewCmd(
+            PreviewPanelFactory.create(extension)
+          );
+          await showPreview.execute();
           return PreviewPanelFactory.updateForNote(note);
         } else {
           return PreviewPanelFactory.updateForNote(note);
@@ -144,7 +141,7 @@ export class PreviewPanelFactory {
     return this.updateForNote(note, opts);
   }
 
-  static create(ext: DendronExtension): vscode.WebviewPanel {
+  static create(ext: IDendronExtension): vscode.WebviewPanel {
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
 
@@ -221,7 +218,7 @@ export class PreviewPanelFactory {
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const maybeNote = !_.isUndefined(activeTextEditor)
-            ? WSUtils.tryGetNoteFromDocument(activeTextEditor?.document)
+            ? ext.wsUtils.tryGetNoteFromDocument(activeTextEditor?.document)
             : undefined;
 
           if (!_.isUndefined(maybeNote)) {
@@ -249,7 +246,7 @@ export class PreviewPanelFactory {
           return;
         }
 
-        const maybeNote = WSUtils.tryGetNoteFromDocument(editor.document);
+        const maybeNote = ext.wsUtils.tryGetNoteFromDocument(editor.document);
 
         if (!maybeNote) {
           return;

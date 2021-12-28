@@ -1116,7 +1116,6 @@ export class FileStorage implements DStore {
       note,
       vault: note.vault,
       wsRoot: this.wsRoot,
-      opts: { writeHierarchy: opts?.writeHierarchy },
     });
 
     // schema metadata is only applicable at runtime

@@ -29,3 +29,10 @@ export type DateTimeFormat =
 export enum CodeConfigKeys {
   DEFAULT_TIMESTAMP_DECORATION_FORMAT = "dendron.defaultTimestampDecorationFormat",
 }
+
+export enum BacklinkSortOrder {
+  /** Using path sorted so order with shallow first = true */
+  PathNames = "PathNames",
+
+  LastUpdated = "LastUpdated",
+}

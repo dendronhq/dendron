@@ -352,6 +352,10 @@ export class VSCodeUtils {
     vscode.commands.executeCommand("setContext", key, status);
   }
 
+  static setContextStringValue(key: DendronContext, value: string) {
+    vscode.commands.executeCommand("setContext", key, value);
+  }
+
   static showInputBox = vscode.window.showInputBox;
   static showQuickPick = vscode.window.showQuickPick;
   static showWebView = (opts: {

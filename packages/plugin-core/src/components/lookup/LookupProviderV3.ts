@@ -22,6 +22,7 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { getDWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
   NotePickerUtils,
@@ -608,7 +609,25 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
       const isMultiLevel = picker.value.split(".").length > 1;
       if (isMultiLevel) {
-        window.showErrorMessage("schemas can only be one level deep");
+        window
+          .showInformationMessage(
+            "It looks like you are trying to create a multi-level [schema](https://wiki.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html). This is not supported. If you are trying to create a note instead, run the `> Note Lookup` command or click on `Note Lookup`",
+            ...["Note Lookup"]
+          )
+          .then(async (selection) => {
+            if (selection === "Note Lookup") {
+              await new NoteLookupCommand().run({
+                initialValue: picker.value,
+              });
+            }
+          });
+
+        HistoryService.instance().add({
+          source: "lookupProvider",
+          action: "done",
+          id: this.id,
+          data: { cancel: true },
+        });
         return;
       }
       // last chance to cancel

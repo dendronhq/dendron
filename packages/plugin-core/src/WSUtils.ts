@@ -12,10 +12,16 @@ import { ExecaChildProcess } from "execa";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "./constants";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
+import { WSUtilsV2 } from "./WSUtilsV2";
 
+/**
+ * Prefer to use WSUtilsV2 instead of this class to prevent circular dependencies.
+ * (move methods from this file to WSUtilsV2 as needed).
+ * */
 export class WSUtils {
   static handleServerProcess({
     subprocess,
@@ -101,7 +107,7 @@ export class WSUtils {
   }
 
   static getVaultFromPath(fsPath: string) {
-    const { wsRoot, vaults } = getDWorkspace();
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     return VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
@@ -110,7 +116,7 @@ export class WSUtils {
   }
 
   static getNoteFromPath(fsPath: string) {
-    const { engine, wsRoot } = getDWorkspace();
+    const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
@@ -139,25 +145,7 @@ export class WSUtils {
   static tryGetNoteFromDocument = (
     document: vscode.TextDocument
   ): NoteProps | undefined => {
-    if (
-      !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
-    ) {
-      Logger.info({
-        uri: document.uri.fsPath,
-        msg: "not in workspace",
-      });
-      return;
-    }
-    try {
-      const note = WSUtils.getNoteFromDocument(document);
-      return note;
-    } catch (err) {
-      Logger.info({
-        uri: document.uri.fsPath,
-        msg: "not a valid note",
-      });
-    }
-    return;
+    return new WSUtilsV2(getExtension()).tryGetNoteFromDocument(document);
   };
 
   static getActiveNote() {

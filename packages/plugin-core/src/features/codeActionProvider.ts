@@ -24,7 +24,7 @@ import { LookupSelectionTypeEnum } from "../components/lookup/types";
 import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension } from "../workspace";
+import { DendronExtension, getExtension } from "../workspace";
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
@@ -119,7 +119,7 @@ export const refactorProvider: CodeActionProvider = {
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
         command: {
-          command: new GotoNoteCommand().key,
+          command: new GotoNoteCommand(getExtension()).key,
           title: "Add missing note for wikilink declaration",
           arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },

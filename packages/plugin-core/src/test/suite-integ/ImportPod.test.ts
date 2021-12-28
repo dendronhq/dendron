@@ -8,16 +8,16 @@ import {
 } from "@dendronhq/pods-core";
 import { ensureDirSync } from "fs-extra";
 import path from "path";
+// // You can import and use all API from the 'vscode' module
+// // as well as import your extension to test it
+import * as vscode from "vscode";
 import { ImportPodCommand } from "../../commands/ImportPod";
 import { getDWorkspace } from "../../workspace";
-import {
-  getFakeExtensionForTest,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ImportPod", function () {
-  const ctx = setupBeforeAfter(this, {
+  let ctx: vscode.ExtensionContext;
+  ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
@@ -39,7 +39,7 @@ suite("ImportPod", function () {
               ensureDirSync(path.dirname(configPath));
               writeYAML(configPath, config);
 
-              const cmd = new ImportPodCommand(getFakeExtensionForTest());
+              const cmd = new ImportPodCommand();
               const podChoice = podClassEntryToPodItemV4(JSONImportPod);
               // @ts-ignore
               cmd.gatherInputs = async () => {

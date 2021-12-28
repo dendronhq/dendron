@@ -21,7 +21,6 @@ import {
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { OldNewLocation, PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { getDWorkspace } from "../workspace";
@@ -66,8 +65,8 @@ export class SchemaLookupCommand extends BaseCommand<
   protected _controller: LookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
 
-  constructor(extension: IDendronExtension) {
-    super(extension, "SchemaLookupCommand");
+  constructor() {
+    super("SchemaLookupCommand");
   }
 
   protected get controller(): LookupControllerV3 {

@@ -16,7 +16,6 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { HierarchySelector } from "../../components/lookup/HierarchySelector";
-import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { BaseCommand } from "../base";
@@ -50,16 +49,9 @@ export abstract class BaseExportPodCommand<
    * hierarchy to export. Should use {@link QuickPickHierarchySelector} by
    * default
    */
-  constructor({
-    hierarchySelector,
-    extension,
-  }: {
-    hierarchySelector: HierarchySelector;
-    extension: IDendronExtension;
-  }) {
+  constructor(hierarchySelector: HierarchySelector) {
     super();
     this.hierarchySelector = hierarchySelector;
-    this.extension = extension;
   }
 
   /**

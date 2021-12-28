@@ -49,7 +49,6 @@ import {
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
 import { VaultAddCommand } from "../commands/VaultAddCommand";
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
@@ -516,11 +515,4 @@ export function stubCancellationToken(): CancellationToken {
       };
     },
   };
-}
-
-/**
- * TODO: used as part of refactoring commands
- */
-export function getFakeExtensionForTest() {
-  return {} as IDendronExtension;
 }

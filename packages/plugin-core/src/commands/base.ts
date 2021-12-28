@@ -50,11 +50,8 @@ export abstract class BaseCommand<
   TRunOpts = TOpts
 > {
   public L: DLogger;
-  protected extension?: IDendronExtension;
 
-  // TODO: this should be a required variable
-  constructor(extension?: IDendronExtension, _name?: string) {
-    this.extension = extension;
+  constructor(_name?: string) {
     this.L = Logger;
   }
 

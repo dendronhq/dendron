@@ -60,7 +60,6 @@ import { BaseCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { AutoCompleter } from "../utils/autoCompleter";
 import { AutoCompletable } from "../utils/AutoCompletable";
-import { IDendronExtension } from "../dendronExtensionInterface";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -130,8 +129,8 @@ export class NoteLookupCommand
   protected _provider: ILookupProviderV3 | undefined;
   protected _quickPick: DendronQuickPickerV2 | undefined;
 
-  constructor(extension?: IDendronExtension, _name?: string) {
-    super(extension, "LookupCommandV3");
+  constructor() {
+    super("LookupCommandV3");
   }
 
   protected get controller(): LookupControllerV3 {

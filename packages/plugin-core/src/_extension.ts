@@ -1005,7 +1005,7 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         sentryReportingCallback(async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand(ws).run({ silent });
+          const out = await new ReloadIndexCommand().run({ silent });
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
@@ -1021,7 +1021,7 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
         sentryReportingCallback(async () => {
-          await new GoToSiblingCommand(ws).execute({ direction: "next" });
+          await new GoToSiblingCommand().execute({ direction: "next" });
         })
       )
     );
@@ -1031,7 +1031,7 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
         sentryReportingCallback(async () => {
-          await new GoToSiblingCommand(ws).execute({ direction: "prev" });
+          await new GoToSiblingCommand().execute({ direction: "prev" });
         })
       )
     );
@@ -1043,7 +1043,7 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
         sentryReportingCallback(async (args: any) => {
-          await new MoveNoteCommand(ws).run({
+          await new MoveNoteCommand().run({
             allowMultiselect: false,
             useSameVault: true,
             ...args,

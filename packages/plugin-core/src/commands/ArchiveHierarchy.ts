@@ -1,7 +1,6 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
@@ -23,8 +22,8 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
   private refactorCmd: RefactorHierarchyCommandV2;
 
-  constructor(extension: IDendronExtension, name?: string) {
-    super(extension, name);
+  constructor(name?: string) {
+    super(name);
     this.refactorCmd = new RefactorHierarchyCommandV2();
   }
 

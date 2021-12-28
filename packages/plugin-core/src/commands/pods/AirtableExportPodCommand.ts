@@ -21,7 +21,7 @@ import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { IDendronExtension } from "../../dendronExtensionInterface";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
@@ -37,8 +37,8 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
 > {
   public key = "dendron.airtableexport";
 
-  public constructor(extension: IDendronExtension) {
-    super({ hierarchySelector: new QuickPickHierarchySelector(), extension });
+  public constructor() {
+    super(new QuickPickHierarchySelector());
   }
 
   public createPod(
@@ -47,7 +47,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
     return new AirtableExportPodV2({
       airtable: new Airtable({ apiKey: config.apiKey }),
       config,
-      engine: this.extension!.getEngine(),
+      engine: ExtensionProvider.getEngine(),
     });
   }
 

@@ -9,7 +9,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { window } from "vscode";
 import { DENDRON_EMOJIS } from "@dendronhq/common-all";
-import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOutput = {
   pid: number;
@@ -17,12 +16,6 @@ type CommandOutput = {
 
 export class PublishDevCommand extends BasicCommand<CommandOutput> {
   key = DENDRON_COMMANDS.PUBLISH_DEV.key;
-  protected extension: IDendronExtension;
-
-  constructor(extension: IDendronExtension) {
-    super(extension);
-    this.extension = extension;
-  }
 
   async gatherInputs(): Promise<any> {
     return {};
@@ -40,9 +33,7 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
     const ctx = "PublishDevCommand";
     this.L.info({ ctx, msg: "enter" });
 
-    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod(
-      this.extension
-    );
+    const prepareOut = await NextJSPublishUtils.prepareNextJSExportPod();
     const { enrichedOpts, wsRoot, cmd, nextPath } = prepareOut;
     this.L.info({ ctx, msg: "prepare", enrichedOpts, nextPath });
 

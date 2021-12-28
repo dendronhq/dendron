@@ -13,7 +13,6 @@ import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,
-  getFakeExtensionForTest,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
@@ -29,7 +28,7 @@ suite("SchemaLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async () => {
-          const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+          const cmd = new SchemaLookupCommand();
 
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           const editor = VSCodeUtils.getActiveTextEditor();
@@ -51,7 +50,7 @@ suite("SchemaLookupCommand", function () {
       () => {
         test("THEN proper information message is shown", async () => {
           const windowSpy = sinon.spy(vscode.window, "showInformationMessage");
-          const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+          const cmd = new SchemaLookupCommand();
 
           await cmd.run({ noConfirm: true, initialValue: "foo.test" });
           const infoMsg = windowSpy.getCall(0).args[0];
@@ -70,7 +69,7 @@ suite("SchemaLookupCommand", function () {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
           onInit: async () => {
-            const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+            const cmd = new SchemaLookupCommand();
             const { quickpick } = (await cmd.run({
               noConfirm: true,
               initialValue: "*",
@@ -89,7 +88,7 @@ suite("SchemaLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async () => {
-          const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+          const cmd = new SchemaLookupCommand();
 
           await cmd.run({ noConfirm: true, initialValue: "baz" });
           const editor = VSCodeUtils.getActiveTextEditor();
@@ -109,7 +108,7 @@ suite("SchemaLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ engine }) => {
-          const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+          const cmd = new SchemaLookupCommand();
           const fooNote = engine.notes["foo"];
           await WSUtils.openNote(fooNote);
           await cmd.run({ noConfirm: true, initialValue: "baz" });
@@ -132,7 +131,7 @@ suite("SchemaLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ engine }) => {
-          const cmd = new SchemaLookupCommand(getFakeExtensionForTest());
+          const cmd = new SchemaLookupCommand();
           const gatherOut = await cmd.gatherInputs({
             noConfirm: true,
           });

@@ -9,7 +9,6 @@ import { CodeCommandInstance } from "../../commands/base";
 import { AirtableExportPodCommand } from "../../commands/pods/AirtableExportPodCommand";
 import { GoogleDocsExportPodCommand } from "../../commands/pods/GoogleDocsExportPodCommand";
 import { MarkdownExportPodCommand } from "../../commands/pods/MarkdownExportPodCommand";
-import { IDendronExtension } from "../../dendronExtensionInterface";
 import { getExtension } from "../../workspace";
 
 export class PodCommandFactory {
@@ -20,8 +19,7 @@ export class PodCommandFactory {
    * @returns A pod command configured with the found configuration
    */
   public static createPodCommandForStoredConfig(
-    configId: Pick<ExportPodConfigurationV2, "podId">,
-    extension: IDendronExtension
+    configId: Pick<ExportPodConfigurationV2, "podId">
   ): CodeCommandInstance {
     const storedConfig = PodV2ConfigManager.getPodConfigById({
       podsDir: path.join(getExtension().podsDir, "custom"),
@@ -38,7 +36,7 @@ export class PodCommandFactory {
 
     switch (storedConfig.podType) {
       case PodV2Types.AirtableExportV2: {
-        const airtableCmd = new AirtableExportPodCommand(extension);
+        const airtableCmd = new AirtableExportPodCommand();
         cmdWithArgs = {
           key: airtableCmd.key,
           run(): Promise<void> {
@@ -48,7 +46,7 @@ export class PodCommandFactory {
         break;
       }
       case PodV2Types.MarkdownExportV2: {
-        const cmd = new MarkdownExportPodCommand(extension);
+        const cmd = new MarkdownExportPodCommand();
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -58,7 +56,7 @@ export class PodCommandFactory {
         break;
       }
       case PodV2Types.GoogleDocsExportV2: {
-        const cmd = new GoogleDocsExportPodCommand(extension);
+        const cmd = new GoogleDocsExportPodCommand();
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -83,12 +81,11 @@ export class PodCommandFactory {
    * @returns
    */
   public static createPodCommandForPodType(
-    podType: PodV2Types,
-    extension: IDendronExtension
+    podType: PodV2Types
   ): CodeCommandInstance {
     switch (podType) {
       case PodV2Types.AirtableExportV2: {
-        const cmd = new AirtableExportPodCommand(extension);
+        const cmd = new AirtableExportPodCommand();
 
         return {
           key: cmd.key,
@@ -99,7 +96,7 @@ export class PodCommandFactory {
       }
 
       case PodV2Types.MarkdownExportV2: {
-        const cmd = new MarkdownExportPodCommand(extension);
+        const cmd = new MarkdownExportPodCommand();
 
         return {
           key: cmd.key,
@@ -109,7 +106,7 @@ export class PodCommandFactory {
         };
       }
       case PodV2Types.GoogleDocsExportV2: {
-        const cmd = new GoogleDocsExportPodCommand(extension);
+        const cmd = new GoogleDocsExportPodCommand();
         return {
           key: cmd.key,
           run(): Promise<void> {

@@ -181,7 +181,7 @@ export class VaultConvertCommand extends BasicCommand<
         {
           location: ProgressLocation.Notification,
           cancellable: false,
-          title: "Converting vault to local",
+          title: "Converting vault to remote",
         },
         async (progress) => {
           Logger.info({

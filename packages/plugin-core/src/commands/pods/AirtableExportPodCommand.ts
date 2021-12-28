@@ -21,6 +21,7 @@ import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
@@ -43,10 +44,11 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   public createPod(
     config: RunnableAirtableV2PodConfig
   ): ExportPodV2<AirtableExportReturnType> {
-    return new AirtableExportPodV2(
-      new Airtable({ apiKey: config.apiKey }),
-      config
-    );
+    return new AirtableExportPodV2({
+      airtable: new Airtable({ apiKey: config.apiKey }),
+      config,
+      engine: ExtensionProvider.getEngine(),
+    });
   }
 
   public getRunnableSchema(): JSONSchemaType<RunnableAirtableV2PodConfig> {

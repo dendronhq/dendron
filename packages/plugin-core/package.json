@@ -83,6 +83,18 @@
     ],
     "commands": [
       {
+        "command": "dendron.backlinks.sortByLastUpdated",
+        "title": "Sort by last updated (currently sorted by path names)",
+        "icon": "$(list-ordered)",
+        "desc": "Sort the backlinks by when the notes were last updated."
+      },
+      {
+        "command": "dendron.backlinks.sortByPathNames",
+        "title": "Sort by path names (currently sorted by last updated)",
+        "icon": "$(list-ordered)",
+        "desc": "Sort the backlinks by path names of notes."
+      },
+      {
         "command": "dendron.backlinks.expandAll",
         "title": "Expand All",
         "icon": "$(expand-all)",
@@ -610,9 +622,19 @@
       ],
       "view/title": [
         {
+          "command": "dendron.backlinks.sortByLastUpdated",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dendron.backlinks.sortByPathNames",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
+          "group": "navigation@1"
+        },
+        {
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [

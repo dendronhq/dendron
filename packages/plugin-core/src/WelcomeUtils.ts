@@ -1,4 +1,4 @@
-import { TutorialEvents } from "@dendronhq/common-all";
+import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
 import { readMD, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -71,6 +71,7 @@ export function showWelcome(assetUri: vscode.Uri) {
             await new SetupWorkspaceCommand().execute({
               rootDirRaw: wsPath,
               workspaceInitializer: new TutorialInitializer(),
+              workspaceType: WorkspaceType.CODE,
             });
 
             return;

@@ -163,6 +163,10 @@ export const DENDRON_MENUS = {
       command: "dendron.convertCandidateLink",
       when: "false",
     },
+    {
+      command: "dendron.dev.devTrigger",
+      when: DendronContext.DEV_MODE,
+    },
   ],
   "view/title": [
     {

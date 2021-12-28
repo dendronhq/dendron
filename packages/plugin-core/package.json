@@ -611,6 +611,10 @@
         {
           "command": "dendron.convertCandidateLink",
           "when": "false"
+        },
+        {
+          "command": "dendron.dev.devTrigger",
+          "when": "dendron:devMode"
         }
       ],
       "view/title": [

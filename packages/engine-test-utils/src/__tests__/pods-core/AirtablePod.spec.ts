@@ -5,20 +5,17 @@ import {
   DEngineClient,
   ErrorUtils,
   StatusCodes,
-  Time,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   AirtableExportPod,
+  AirtableExportResp,
   AirtableFieldsMap,
   AirtableUtils,
   SrcFieldMapping,
 } from "@dendronhq/pods-core";
-import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -102,7 +99,7 @@ const runExport = (
       tableName: "fakeTable",
       ...opts.podConfig,
     },
-  }) as ReturnType<typeof pod.plant>;
+  }) as Promise<AirtableExportResp>;
 };
 
 const runExportPreset = (
@@ -138,7 +135,7 @@ const createAxiosError = ({
 }: {
   response?: Partial<AxiosError["response"]>;
 }) => {
-  let err: AxiosError = {
+  const err: AxiosError = {
     isAxiosError: true,
     config: {},
     // @ts-ignore
@@ -154,13 +151,14 @@ const createAxiosError = ({
 
 // --- Main
 
-describe("GIVEN airtable export", () => {
+describe("WHEN airtable export", () => {
   afterEach(() => {
     sinon.restore();
   });
 
   describe("WHEN create new notes", () => {
     const preSetupHook = createNotePresetsWithAllCreate;
+
     describe("AND WHEN export notes with one singleTag", () => {
       test("THEN success", async () => {
         await runEngineTestV5(
@@ -370,107 +368,5 @@ describe("GIVEN airtable export", () => {
         }
       );
     });
-  });
-});
-
-describe("checkpointing ", () => {
-  let exportDest: string;
-  let checkpoint: string;
-  let timestamp: number;
-
-  beforeEach(() => {
-    exportDest = tmpDir().name;
-    const basePath = path.dirname(exportDest);
-    checkpoint = path.join(
-      basePath,
-      "pods",
-      "dendron.airtable",
-      "airtable-pod.lastupdate",
-      "checkpoint.txt"
-    );
-    fs.ensureDirSync(path.dirname(checkpoint));
-  });
-
-  test("checkpointing file with greater timestamp", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pods = new AirtableExportPod();
-        const srcHierarchy = "foo";
-        pods.processNote = jest.fn();
-        timestamp = Time.now().toMillis() + 50000000;
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-
-        const resp = async () => {
-          return await pods.execute({
-            engine,
-            vaults,
-            wsRoot,
-            config: {
-              dest: exportDest,
-              apiKey: "apikey",
-              baseId: "baseId",
-              tableName: "Dendron",
-              srcFieldMapping: {
-                Title: "title",
-                "Updated On": "updated",
-                Notes: "body",
-              },
-              srcHierarchy,
-            },
-          });
-        };
-        expect.assertions(1);
-        return expect(resp()).rejects.toEqual(
-          Error(
-            "No new Records to sync in selected hierarchy. Create new file and then try"
-          )
-        );
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
-  });
-
-  test("checkpointing file with lower timestamp", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const pod = new AirtableExportPod();
-        const srcHierarchy = "foo";
-        timestamp = Time.now().toMillis() - 50000000;
-        fs.writeFileSync(checkpoint, timestamp.toString(), {
-          encoding: "utf8",
-        });
-        const stub = sinon
-          .stub(pod, "processNote")
-          .returns(Promise.resolve({ created: [], updated: [] }));
-        const resp = await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            dest: "TODO",
-            apiKey: "apikey",
-            baseId: "baseId",
-            tableName: "Dendron",
-            srcFieldMapping: {
-              Title: "title",
-              "Updated On": "updated",
-              Notes: "body",
-            },
-            srcHierarchy,
-          },
-        });
-        expect(resp.notes).not.toBeNull();
-        expect(stub.calledOnce).toBeTruthy();
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
   });
 });

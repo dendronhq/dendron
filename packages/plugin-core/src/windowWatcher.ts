@@ -1,7 +1,7 @@
 import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import { RemarkUtils, WorkspaceUtils } from "@dendronhq/engine-server";
+
 import _ from "lodash";
-import visit from "unist-util-visit";
 import {
   ExtensionContext,
   Selection,
@@ -21,6 +21,10 @@ const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
   return ROOT_CTX + ":" + scope;
 };
+
+/**
+ * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
+ */
 export class WindowWatcher {
   private _previewProxy: PreviewProxy;
 
@@ -35,6 +39,7 @@ export class WindowWatcher {
   activate(context: ExtensionContext) {
     const extension = getExtension();
 
+    // provide logging whenever window changes
     extension.addDisposable(
       window.onDidChangeVisibleTextEditors(
         sentryReportingCallback((editors: TextEditor[]) => {
@@ -84,10 +89,13 @@ export class WindowWatcher {
         this.triggerUpdateDecorations(editor);
         this.triggerNotePreviewUpdate(editor);
 
+        // other components can register handlers for window watcher
+        // those handlers get called here
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
         );
 
+        // we have custom logic for newly opened documents
         if (
           getExtension().workspaceWatcher?.getNewlyOpenedDocument(
             editor.document
@@ -110,7 +118,10 @@ export class WindowWatcher {
         return;
       }
       const uri = editor.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      const { vaults, wsRoot } = getDWorkspace();
+      if (
+        !WorkspaceUtils.isPathInWorkspace({ fpath: uri.fsPath, vaults, wsRoot })
+      ) {
         return;
       }
       Logger.info({ ctx, editor: uri.fsPath });
@@ -134,7 +145,7 @@ export class WindowWatcher {
   /**
    * Show note preview panel if applicable
    */
-  async triggerNotePreviewUpdate({ document }: TextEditor) {
+  triggerNotePreviewUpdate({ document }: TextEditor) {
     const maybeNote = WSUtils.tryGetNoteFromDocument(document);
     if (maybeNote) {
       this._previewProxy.showPreviewAndUpdate(maybeNote);
@@ -162,23 +173,15 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_DENDRON }
+    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+      editor.document.getText()
     );
-    const parsed = proc.parse(editor.document.getText());
-    visit(parsed, ["yaml"], (node) => {
-      if (_.isUndefined(node.position)) return false; // Should never happen
-      const position = VSCodeUtils.point2VSCodePosition(
-        node.position.end,
-        // Move past frontmatter + one line after the end because otherwise this ends up inside frontmatter when folded.
-        // This also makes sense because the front
-        { line: 1 }
-      );
+    if (!_.isUndefined(nodePosition)) {
+      const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
+        line: 1,
+      });
       editor.selection = new Selection(position, position);
-      // Found the frontmatter already, stop traversing
-      return false;
-    });
+    }
   }
 
   private async foldFrontmatter() {

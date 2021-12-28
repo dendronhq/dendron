@@ -494,11 +494,21 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async renderNote({ id }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+  async renderNote({
+    id,
+    note,
+  }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
     const ctx = "DendronEngineV2:renderNote";
 
-    const note = this.notes[id];
+    // If provided, we render the given note entirely. Otherwise find the note in workspace.
+    if (!note) {
+      note = this.notes[id];
+    } else {
+      // `procRehype` needs the note to be in the engine, so we have to add it
+      this.notes[id] = note;
+    }
 
+    // If note was not provided and we couldn't find it, we can't render.
     if (!note) {
       return ResponseUtil.createUnhappyResponse({
         error: DendronError.createFromStatus({

@@ -376,16 +376,14 @@ export function note2File({
   note,
   vault,
   wsRoot,
-  opts,
 }: {
   note: NoteProps;
   vault: DVault;
   wsRoot: string;
-  opts?: { writeHierarchy?: boolean };
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtils.serialize(note, opts);
+  const payload = NoteUtils.serialize(note);
   const vpath = vault2Path({ vault, wsRoot });
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }

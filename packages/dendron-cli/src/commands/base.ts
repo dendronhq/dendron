@@ -146,6 +146,8 @@ export abstract class CLICommand<
       ...analyticsPayload,
     };
 
+    CLIAnalyticsUtils.identify();
+
     if (out.exit) {
       await CLIAnalyticsUtils.trackSync(event, props);
       process.exit();

@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import {
-  NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  NoteTestUtilsV4,
   toPlainObject,
 } from "@dendronhq/common-test-utils";
 import { TestConfigUtils } from "@dendronhq/engine-test-utils";
@@ -19,15 +19,21 @@ import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
+import { BacklinkSortOrder } from "../../types";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
 /** Asking for root children (asking for children without an input) from backlinks tree
  *  data provider will us the backlinks. */
-const getRootChildrenBacklinks = async () => {
+const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
     getDWorkspace().config.dev?.enableLinkCandidates
   );
+
+  if (sortOrder) {
+    backlinksTreeDataProvider.updateSortOrder(sortOrder);
+  }
+
   const parents = await backlinksTreeDataProvider.getChildren();
   const parentsWithChildren = [];
 
@@ -46,8 +52,10 @@ const getRootChildrenBacklinks = async () => {
   };
 };
 
-async function getRootChildrenBacklinksAsPlainObject() {
-  const value = await getRootChildrenBacklinks();
+async function getRootChildrenBacklinksAsPlainObject(
+  sortOrder?: BacklinkSortOrder
+) {
+  const value = await getRootChildrenBacklinks(sortOrder);
 
   const cleanedOutVal = {
     ...value,
@@ -278,6 +286,83 @@ suite("BacklinksTreeDataProvider", function () {
         const ref = out[0].refs[0];
         expect(ref.isCandidate).toBeTruthy();
         expect(ref.matchText as string).toEqual("alpha");
+        done();
+      },
+    });
+  });
+
+  test("Backlink sorting", (done) => {
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: `[[beta]]`,
+          vault: vaults[0],
+          wsRoot,
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: `[[alpha]]`,
+          vault: vaults[1],
+          wsRoot,
+          props: {
+            updated: 2,
+          },
+        });
+
+        await NoteTestUtilsV4.createNote({
+          fname: "omega",
+          body: `[[alpha]]`,
+          vault: vaults[1],
+          wsRoot,
+          props: {
+            updated: 3,
+          },
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        function buildVault1Path(fileName: string) {
+          return vscode.Uri.file(
+            path.join(wsRoot, vaults[1].fsPath, fileName)
+          ).path.toLowerCase();
+        }
+
+        const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
+        await VSCodeUtils.openFileInEditor(Uri.file(notePath));
+
+        // Test Default sort order
+        {
+          const { out } = await getRootChildrenBacklinksAsPlainObject();
+          expect(
+            out[0].command.arguments[0].path.toLowerCase() as string
+          ).toEqual(buildVault1Path("beta.md"));
+          expect(out.length).toEqual(2);
+        }
+
+        // Test Last Updated sort order
+        {
+          const { out } = await getRootChildrenBacklinksAsPlainObject(
+            BacklinkSortOrder.LastUpdated
+          );
+          expect(
+            out[0].command.arguments[0].path.toLowerCase() as string
+          ).toEqual(buildVault1Path("omega.md"));
+          expect(out.length).toEqual(2);
+        }
+
+        // Test PathNames sort order
+        {
+          const { out } = await getRootChildrenBacklinksAsPlainObject(
+            BacklinkSortOrder.PathNames
+          );
+          expect(
+            out[0].command.arguments[0].path.toLowerCase() as string
+          ).toEqual(buildVault1Path("beta.md"));
+          expect(out.length).toEqual(2);
+        }
+
         done();
       },
     });

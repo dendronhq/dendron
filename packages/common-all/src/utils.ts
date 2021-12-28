@@ -6,6 +6,9 @@ import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import {
+  DendronSiteConfig,
+  DHookDict,
+  DVault,
   NoteProps,
   SEOProps,
   DVault,
@@ -16,17 +19,17 @@ import {
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
+  DendronPreviewConfig,
   DendronWorkspaceConfig,
   genDefaultCommandConfig,
+  genDefaultPreviewConfig,
   genDefaultWorkspaceConfig,
   IntermediateDendronConfig,
   JournalConfig,
-  ScratchConfig,
   LookupConfig,
-  StrictConfigV4,
   NoteLookupConfig,
-  genDefaultPreviewConfig,
-  DendronPreviewConfig,
+  ScratchConfig,
+  StrictConfigV4,
 } from "./types/intermediateConfigs";
 
 /**
@@ -36,21 +39,6 @@ export class DUtils {
   static minimatch = minimatch;
   static semver = semver;
   static querystring = querystring;
-
-  /**
-   * Check if string is numeric
-   * Credit to https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
-   * @param str
-   * @returns
-   */
-  static isNumeric(str: string) {
-    if (typeof str != "string") return false; // we only process strings!
-    return (
-      // @ts-ignore
-      !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-      !isNaN(parseFloat(str))
-    ); // ...and ensure strings of whitespace fail
-  }
 }
 
 export const getSlugger = () => {
@@ -64,6 +52,7 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
+  // eslint-disable-next-line no-restricted-globals, radix
   return !isNaN(parseInt(n)) && isFinite(n);
 };
 
@@ -91,6 +80,13 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+/**
+ * Check if the value u is a falsy value.
+ */
+export function isFalsy(u: any): boolean {
+  return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 
 /** Calculates a basic integer hash for the given string.
@@ -653,6 +649,26 @@ export class ConfigUtils {
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }
 
+  /**
+   * NOTE: _config currently doesn't have a `global` object. We're keeping it here
+   * to make using the API easier when we do add it
+   */
+  static getEnableChildLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps }
+  ): boolean {
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      !_.isUndefined(opts.note.config.global.enableChildLinks)
+    ) {
+      return opts.note.config.global.enableChildLinks;
+    }
+    return true;
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
@@ -736,4 +752,9 @@ export function cleanName(name: string): string {
     .toLocaleLowerCase();
   name = name.replace(/ /g, "-");
   return name;
+}
+
+/** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
+export function normalizeUnixPath(fsPath: string): string {
+  return path.posix.format(path.parse(fsPath));
 }

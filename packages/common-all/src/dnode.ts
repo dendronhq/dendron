@@ -1,10 +1,11 @@
+/* eslint-disable no-throw-literal */
+// @ts-ignore
+import title from "@dendronhq/title";
 import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
-// @ts-ignore
-import title from "@dendronhq/title";
 import { URI } from "vscode-uri";
 import {
   CONSTANTS,
@@ -17,16 +18,18 @@ import { Time } from "./time";
 import {
   DEngineClient,
   DLink,
+  DNodeExplicitPropsEnum,
+  DNodeImplicitPropsEnum,
   DNodeOpts,
   DNodeProps,
   DNodePropsDict,
   DNodePropsQuickInputV2,
   DNoteLoc,
   DVault,
+  NoteLocalConfig,
   NoteOpts,
   NoteProps,
   NotePropsDict,
-  REQUIRED_DNODEPROPS,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -37,7 +40,13 @@ import {
   SchemaRaw,
   SchemaTemplate,
 } from "./types";
-import { DefaultMap, getSlugger, isNotUndefined, randomColor } from "./utils";
+import {
+  DefaultMap,
+  getSlugger,
+  isNotUndefined,
+  normalizeUnixPath,
+  randomColor,
+} from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
@@ -51,22 +60,7 @@ export class DNodeUtils {
   }
 
   static create(opts: DNodeOpts): DNodeProps {
-    const {
-      id,
-      type,
-      desc,
-      links,
-      anchors,
-      fname,
-      updated,
-      created,
-      parent,
-      children,
-      body,
-      data,
-      contentHash,
-      vault,
-    } = _.defaults(opts, {
+    const cleanProps: DNodeProps = _.defaults(opts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
       id: genUUID(),
@@ -77,27 +71,10 @@ export class DNodeUtils {
       parent: null,
       body: "",
       data: {},
-      fname: null,
+      title: opts.title || NoteUtils.genTitle(opts.fname),
     });
-    const title = opts.title || NoteUtils.genTitle(fname);
-    const cleanProps: DNodeProps = {
-      id,
-      title,
-      vault,
-      type,
-      desc,
-      links,
-      anchors,
-      fname,
-      updated,
-      created,
-      parent,
-      children,
-      body,
-      data,
-      contentHash,
-    };
 
+    // TODO: remove
     // don't include optional props
     const optionalProps: (keyof DNodeOpts)[] = [
       "stub",
@@ -223,25 +200,15 @@ export class DNodeUtils {
     }
   }
 
+  /**
+   * Custom props are anything that is not a reserved key in Dendron
+   * @param props
+   * @returns
+   */
   static getCustomProps(props: any): any {
     const blacklist = [
-      "id",
-      "title",
-      "type",
-      "desc",
-      "fname",
-      "updated",
-      "custom",
-      "created",
-      "parent",
-      "children",
-      "color",
-      "body",
-      "data",
-      "schemaStub",
-      "type",
-      "tags",
-      "image",
+      ...Object.values(DNodeExplicitPropsEnum),
+      ...Object.values(DNodeImplicitPropsEnum),
     ];
     return _.omit(props, blacklist);
   }
@@ -377,6 +344,7 @@ export class NoteUtils {
       type: "backlink",
       position: link.position,
       value: link.value,
+      alias: link.alias,
     });
   }
 
@@ -536,7 +504,8 @@ export class NoteUtils {
     const aliasMode = alias?.mode;
     const aliasValue = alias?.value;
     const tabStopIndex = alias?.tabStopIndex;
-    let { title, fname, vault } = note;
+    const { fname, vault } = note;
+    let title = note.title;
 
     if (note.fname.startsWith(TAGS_HIERARCHY_BASE)) {
       const tag = note.fname.split(TAGS_HIERARCHY)[1];
@@ -660,10 +629,37 @@ export class NoteUtils {
     return normTitle;
   }
 
+  /**
+   * Get config from a note
+   * Currently only support global config
+   */
+  static getNoteLocalConfig(note: NoteProps) {
+    if (note.config) {
+      return note.config;
+    }
+    return {};
+  }
+
+  static updateNoteLocalConfig<K extends keyof NoteLocalConfig>(
+    note: NoteProps,
+    key: K,
+    config: Partial<NoteLocalConfig[K]>
+  ) {
+    if (!note.config) {
+      note.config = {};
+    }
+    if (!note.config[key]) {
+      note.config[key] = config;
+    } else {
+      _.merge(note.config[key], config);
+    }
+    return note;
+  }
+
   static genTitle(fname: string): string {
     const titleFromBasename = DNodeUtils.basename(fname, true);
     // check if title is unchanged from default. if so, add default title
-    if (_.toLower(fname) == fname) {
+    if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
       // type definitions are wrong
       // @ts-ignore
@@ -761,7 +757,7 @@ export class NoteUtils {
         // specification, otherwise we will map by just the file name.
         if (pointTo.vaultName) {
           const filteredByVault = matchingList.filter(
-            (n) => VaultUtils.getName(n.vault) == pointTo.vaultName
+            (n) => VaultUtils.getName(n.vault) === pointTo.vaultName
           );
           return filteredByVault[0];
         } else {
@@ -1021,7 +1017,7 @@ export class NoteUtils {
     while (note.parent !== null) {
       out.push(note);
       try {
-        let tmp = notes[note.parent];
+        const tmp = notes[note.parent];
         if (_.isUndefined(tmp)) {
           throw "note is undefined";
         }
@@ -1080,6 +1076,22 @@ export class NoteUtils {
   }
 
   static isNoteProps(props: Partial<NoteProps>): props is NoteProps {
+    const REQUIRED_DNODEPROPS: (keyof DNodeProps)[] = [
+      "id",
+      "title",
+      "desc",
+      "links",
+      "anchors",
+      "fname",
+      "type",
+      "updated",
+      "created",
+      "parent",
+      "children",
+      "data",
+      "body",
+      "vault",
+    ];
     return (
       _.isObject(props) &&
       REQUIRED_DNODEPROPS.every(
@@ -1088,7 +1100,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeMeta(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps) {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1111,18 +1123,8 @@ export class NoteUtils {
 
     // Separate custom and builtin props
     const builtinProps = _.pick(propsWithTrait, [
-      "id",
-      "title",
-      "desc",
-      "updated",
-      "created",
+      ...Object.values(DNodeExplicitPropsEnum),
       "stub",
-      "parent",
-      "children",
-      "color",
-      "tags",
-      "image",
-      "traitIds",
     ]);
 
     const { custom: customProps } = cleanProps;
@@ -1130,19 +1132,13 @@ export class NoteUtils {
     return meta;
   }
 
-  static serialize(
-    props: NoteProps,
-    opts?: { writeHierarchy?: boolean; excludeStub?: boolean }
-  ): string {
+  static serialize(props: NoteProps, opts?: { excludeStub?: boolean }): string {
     const body = props.body;
-    let blacklist = ["parent", "children"];
+    const blacklist = ["parent", "children"];
     if (opts?.excludeStub) {
       blacklist.push("stub");
     }
-    if (opts?.writeHierarchy) {
-      blacklist = [];
-    }
-    const meta = _.omit(NoteUtils.serializeMeta(props), blacklist);
+    const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
     return matter.stringify(body || "", meta);
   }
 
@@ -1164,6 +1160,22 @@ export class NoteUtils {
       id,
       vaultName: VaultUtils.getName(vault),
     };
+  }
+
+  /**
+   * Human readable note location. eg: `dendron://foo (uisdfsdfsdf)`
+   */
+  static toNoteLocString(note: NoteProps): string {
+    const noteLoc = this.toNoteLoc(note);
+    const out: string[] = [];
+    if (noteLoc.vaultName) {
+      out.push(`dendron://${noteLoc.vaultName}/`);
+    }
+    out.push(noteLoc.fname);
+    if (noteLoc.id) {
+      out.push(` (${noteLoc.id})`);
+    }
+    return out.join("");
   }
 
   static uri2Fname(uri: URI) {
@@ -1335,6 +1347,41 @@ export class NoteUtils {
 
   static isNote(uri: URI) {
     return uri.fsPath.endsWith(".md");
+  }
+
+  static FILE_ID_PREFIX = "file-";
+
+  /** This should be only used for files not in Dendron workspace, for example a markdown file that's not in any vault. */
+  static genIdForFile({
+    filePath,
+    wsRoot,
+  }: {
+    filePath: string;
+    wsRoot: string;
+  }): string {
+    // Regardless of platform, use POSIX style
+    const normalizedPath = normalizeUnixPath(path.relative(wsRoot, filePath));
+    return `${this.FILE_ID_PREFIX}${normalizedPath}`;
+  }
+
+  /** Returns true if this is a note id generated by {@link NoteUtils.genIdForFile} */
+  static isFileId(id: string) {
+    return id.startsWith(this.FILE_ID_PREFIX);
+  }
+
+  /** This should be only used for files not in Dendron workspace, for example a markdown file that's not in any vault. */
+  static createForFile(opts: {
+    filePath: string;
+    contents: string;
+    wsRoot: string;
+  }) {
+    const id = this.genIdForFile(opts);
+    return this.create({
+      fname: path.basename(opts.filePath),
+      id,
+      vault: VaultUtils.createForFile(opts),
+      body: opts.contents,
+    });
   }
 }
 
@@ -1740,8 +1787,7 @@ export class SchemaUtils {
       const note = _.find(noteCandidates, { fname: notePath }) as NoteProps;
       NoteUtils.addSchema({ note, schema, schemaModule });
 
-      const matchNextNamespace =
-        schema.data.namespace && matchNamespace ? false : true;
+      const matchNextNamespace = !(schema.data.namespace && matchNamespace);
       const nextSchemaCandidates = matchNextNamespace
         ? schema.children.map((id) => schemaModule.schemas[id])
         : [schema];
@@ -1833,8 +1879,7 @@ export class SchemaUtils {
       }
 
       // if current note is a namespace and we are currently matching namespaces, don't match on the next turn
-      const matchNextNamespace =
-        schema.data.namespace && matchNamespace ? false : true;
+      const matchNextNamespace = !(schema.data.namespace && matchNamespace);
 
       // if we are not matching the next namespace, then we go back to regular matching behavior
       const nextSchemaCandidates = matchNextNamespace
@@ -1864,7 +1909,7 @@ export class SchemaUtils {
   }): SchemaMatchResult | undefined {
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
-    let match = _.find(schemas, (sc) => {
+    const match = _.find(schemas, (sc) => {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
         namespace = true;

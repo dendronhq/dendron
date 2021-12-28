@@ -10,10 +10,8 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("GoToSibling", function () {
-  let ctx: vscode.ExtensionContext;
   const direction = "next" as const;
-
-  ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this, {});
 
   const createNotes = (wsRoot: string, vault: DVault) => {
     return Promise.all([
@@ -314,7 +312,7 @@ suite("GoToSibling", function () {
           wsRoot,
         });
       },
-      onInit: async ({}) => {
+      onInit: async () => {
         await VSCodeUtils.closeAllEditors();
         const resp = await new GoToSiblingCommand().execute({ direction });
         await runJestHarnessV2(

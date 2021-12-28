@@ -183,7 +183,13 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
     // if no "render to markdown" has happended or the note body changed
     if (!noteContent || contentHash !== renderedNoteContentHash.current) {
       renderedNoteContentHash.current = contentHash;
-      dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
+      dispatch(
+        engineSlice.renderNote({
+          ...getWsAndPort(),
+          id: noteId,
+          note: noteActive,
+        })
+      );
     }
   }, [noteId, contentHash]);
 

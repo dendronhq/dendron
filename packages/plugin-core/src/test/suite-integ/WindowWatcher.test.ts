@@ -1,12 +1,12 @@
 import { ConfigUtils, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { describe } from "mocha";
+import { describe, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
-import { getDWorkspace, getExtension } from "../../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
@@ -26,16 +26,25 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
-suite("WindowWatcher: GIVEN the dendron extension is running", function () {
-  const watcher: WindowWatcher = new WindowWatcher(
-    PreviewPanelFactory.getProxy()
-  );
+const retrieveExtension = async (ctx: vscode.ExtensionContext) => {
+  return DendronExtension.getOrCreate(ctx);
+};
 
+suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
+  let watcher: WindowWatcher | undefined;
+
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
+    beforeEach(async () => {
+      if (watcher === undefined) {
+        watcher = new WindowWatcher(
+          PreviewPanelFactory.getProxy(await retrieveExtension(ctx))
+        );
+      }
+    });
     test("basic", (done) => {
       runSingleVaultTest({
         ctx,
@@ -45,7 +54,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher.triggerUpdateDecorations(editor!);
+          await watcher!.triggerUpdateDecorations(editor!);
           // TODO: check for decorations
           done();
         },
@@ -73,9 +82,11 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher.triggerNotePreviewUpdate(editor!);
+          await watcher!.triggerNotePreviewUpdate(editor!);
 
-          const maybePanel = PreviewPanelFactory.getProxy().getPanel();
+          const maybePanel = PreviewPanelFactory.getProxy(
+            getExtension()
+          ).getPanel();
           expect(maybePanel).toBeFalsy();
         });
       }
@@ -98,9 +109,11 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher.triggerNotePreviewUpdate(editor!);
+          await watcher!.triggerNotePreviewUpdate(editor!);
 
-          const maybePanel = PreviewPanelFactory.getProxy().getPanel();
+          const maybePanel = PreviewPanelFactory.getProxy(
+            getExtension()
+          ).getPanel();
           expect(maybePanel).toBeTruthy();
           expect(maybePanel?.active).toBeTruthy();
         });
@@ -126,7 +139,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
 
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher.activate(ctx);
+          watcher!.activate(ctx);
           // Open a note
           await WSUtils.openNote(
             NoteUtils.getNoteByFnameV5({
@@ -152,7 +165,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           getExtension().workspaceWatcher = new WorkspaceWatcher();
           getExtension().workspaceWatcher?.activate(ctx);
 
-          watcher.activate(ctx);
+          watcher!.activate(ctx);
           // Open a note
           const first = NoteUtils.getNoteByFnameV5({
             vault: vaults[0],

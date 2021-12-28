@@ -1,51 +1,10 @@
 /**
  * Responsible for picking out the auto completions.
  * */
-import { ErrorFactory, FuseEngine } from "@dendronhq/common-all";
-import { BaseCommand } from "../commands/base";
+import { FuseEngine } from "@dendronhq/common-all";
 import * as _ from "lodash";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
-
-type AutoCompletableCmd = BaseCommand<any> & {
-  onAutoComplete: () => Promise<void>;
-};
-
-export enum AUTO_COMPLETABLE_COMMAND_ID {
-  NOTE_LOOKUP = "NOTE_LOOKUP",
-}
-
-export class UIAutoCompletableCmds {
-  static _UI_AUTOCOMPLETE_COMMANDS = new Map<
-    AUTO_COMPLETABLE_COMMAND_ID,
-    AutoCompletableCmd
-  >();
-
-  /**
-   * The first instance that is called with the given id is registered within the map.
-   * */
-  static registerIfNotRegistered = (
-    id: AUTO_COMPLETABLE_COMMAND_ID,
-    cmd: AutoCompletableCmd
-  ) => {
-    if (_.isUndefined(this._UI_AUTOCOMPLETE_COMMANDS.get(id))) {
-      this._UI_AUTOCOMPLETE_COMMANDS.set(id, cmd);
-    }
-  };
-
-  /** Retrieve command instance that is used by UI. */
-  static getCmd = (id: AUTO_COMPLETABLE_COMMAND_ID): AutoCompletableCmd => {
-    const cmd = this._UI_AUTOCOMPLETE_COMMANDS.get(id);
-
-    if (cmd === undefined) {
-      throw ErrorFactory.createInvalidStateError({
-        message: `UI command instance does not exist for '${id}'`,
-      });
-    }
-
-    return cmd;
-  };
-}
 
 export class AutoCompleter {
   /**

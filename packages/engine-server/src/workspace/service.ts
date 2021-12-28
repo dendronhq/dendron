@@ -1,7 +1,9 @@
 import {
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
+  CURRENT_CONFIG_VERSION,
   DendronError,
+  Disposable,
   DuplicateNoteAction,
   DUser,
   DUtils,
@@ -10,15 +12,13 @@ import {
   DWorkspace,
   DWorkspaceEntry,
   InstallStatus,
+  IntermediateDendronConfig,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
   Time,
   VaultUtils,
   WorkspaceSettings,
-  ConfigUtils,
-  CURRENT_CONFIG_VERSION,
-  Disposable,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -39,9 +39,9 @@ import path from "path";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
-  MigrationServce,
-  MigrationChangeSetStatus,
   CONFIG_MIGRATIONS,
+  MigrationChangeSetStatus,
+  MigrationServce,
 } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
@@ -53,6 +53,7 @@ import {
 } from "../utils";
 import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
+import { IWorkspaceService } from "./workspaceServiceInterface";
 
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -116,7 +117,7 @@ type AddRemoveCommonOpts = {
 };
 
 /** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
-export class WorkspaceService implements Disposable {
+export class WorkspaceService implements Disposable, IWorkspaceService {
   public logger: DLogger;
   private loggerDispose: () => any;
   protected _seedService: SeedService;
@@ -984,6 +985,11 @@ export class WorkspaceService implements Disposable {
     return changes;
   }
 
+  /**
+   * Check major version of configuration.
+   * Because Dendron workspace relies on major version to be the same, we force a migration if that's not
+   * the case
+   */
   async runConfigMigrationIfNecessary({
     currentVersion,
     dendronConfig,
@@ -994,6 +1000,7 @@ export class WorkspaceService implements Disposable {
     let changes: MigrationChangeSetStatus[] = [];
     if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
       // we are on a legacy config.
+      // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationServce.applyMigrationRules({
         currentVersion,
         previousVersion: "0.70.0", // to force apply

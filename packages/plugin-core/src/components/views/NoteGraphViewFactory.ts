@@ -6,13 +6,13 @@ import {
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { commands, ViewColumn, window } from "vscode";
+import { ViewColumn, window } from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { Logger } from "../../logger";
 import { GraphStyleService } from "../../styles";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getEngine } from "../../workspace";
+import { DendronExtension, getEngine, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 export class NoteGraphPanelFactory {
@@ -42,12 +42,10 @@ export class NoteGraphPanelFactory {
         switch (msg.type) {
           case GraphViewMessageType.onSelect: {
             const note = getEngine().notes[msg.data.id];
-            await commands.executeCommand(
-              "workbench.action.focusFirstEditorGroup"
-            );
-            await new GotoNoteCommand().execute({
+            await new GotoNoteCommand(getExtension()).execute({
               qs: note.fname,
               vault: note.vault,
+              column: ViewColumn.One,
             });
             break;
           }

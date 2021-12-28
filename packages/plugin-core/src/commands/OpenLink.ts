@@ -1,17 +1,16 @@
 import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { resolvePath, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
 import path from "path";
+import { env, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { resolvePath } from "../utils";
-import { VSCodeUtils } from "../vsCodeUtils";
 import { getURLAt } from "../utils/md";
-import { getExtension, getDWorkspace } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
-import { env, Uri, window } from "vscode";
 
 type CommandOpts = {};
 

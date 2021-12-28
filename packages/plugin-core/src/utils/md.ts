@@ -51,6 +51,7 @@ export type FoundRefT = {
   location: Location;
   matchText: string;
   isCandidate?: boolean;
+  note?: NoteProps;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -549,6 +550,7 @@ export const findReferences = async (
       const foundRef: FoundRefT = {
         location,
         matchText: lines.slice(-1)[0],
+        note,
       };
       if (link.type === "linkCandidate") {
         foundRef.isCandidate = true;

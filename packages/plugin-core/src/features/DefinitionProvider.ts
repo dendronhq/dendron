@@ -4,18 +4,14 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
-import {
-  findAnchorPos,
-  GotoNoteCommand,
-  TargetKind,
-} from "../commands/GotoNote";
+import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 import * as Sentry from "@sentry/node";
 import { findNonNoteFile } from "@dendronhq/common-server";
+import { TargetKind } from "../commands/GoToNoteInterface";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   private async maybeNonNoteFileDefinition({
@@ -35,7 +31,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   }
 
   private async provideForNonNoteFile(nonNoteFile: string) {
-    const out = await new GotoNoteCommand().execute({
+    const out = await new GotoNoteCommand(getExtension()).execute({
       qs: nonNoteFile,
       kind: TargetKind.NON_NOTE,
     });
@@ -53,7 +49,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (noAutoCreateOnDefinition) {
       return;
     }
-    const out = await new GotoNoteCommand().execute({
+    const out = await new GotoNoteCommand(getExtension()).execute({
       qs: refAtPos.ref,
       anchor: refAtPos.anchorStart,
     });

@@ -8,7 +8,12 @@ import {
   Position,
   VSRange,
 } from "@dendronhq/common-all";
-import { goUpTo, resolvePath, tmpDir } from "@dendronhq/common-server";
+import {
+  goUpTo,
+  isInsidePath,
+  resolvePath,
+  tmpDir,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import os from "os";
@@ -17,6 +22,7 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode";
 import { DendronContext, GLOBAL_STATE } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+import { getDWorkspace } from "./workspace";
 
 type PointOffset = { line?: number; column?: number };
 
@@ -96,6 +102,24 @@ export class VSCodeUtils {
       throw new DendronError({ message: "no active editor" });
     }
     return editor;
+  }
+
+  /** If the text document at `filePath` is open in any editor, return that document. */
+  static getMatchingTextDocument(
+    filePath: string
+  ): vscode.TextDocument | undefined {
+    const { wsRoot } = getDWorkspace();
+    // Normalize file path for reliable comparison
+    if (isInsidePath(wsRoot, filePath)) {
+      filePath = path.relative(wsRoot, filePath);
+    }
+    return vscode.workspace.textDocuments.filter((document) => {
+      let documentPath = document.uri.fsPath;
+      if (isInsidePath(wsRoot, documentPath)) {
+        documentPath = path.relative(wsRoot, documentPath);
+      }
+      return path.relative(filePath, documentPath) === "";
+    })[0];
   }
 
   static getFsPathFromTextEditor(editor: vscode.TextEditor) {
@@ -326,6 +350,10 @@ export class VSCodeUtils {
 
   static setContext(key: DendronContext, status: boolean) {
     vscode.commands.executeCommand("setContext", key, status);
+  }
+
+  static setContextStringValue(key: DendronContext, value: string) {
+    vscode.commands.executeCommand("setContext", key, value);
   }
 
   static showInputBox = vscode.window.showInputBox;

@@ -8,8 +8,8 @@ import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
 import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
-import { ConvertLinkCommand } from "./ConvertLink";
 import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
+import { ConvertLinkCommand } from "./ConvertLink";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
@@ -42,6 +42,8 @@ import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteFileCommand } from "./PasteFile";
 import { PasteLinkCommand } from "./PasteLink";
+import { ConfigureExportPodV2 } from "./pods/ConfigureExportPodV2";
+import { ConfigureServiceConnection } from "./pods/ConfigureServiceConnection";
 import { ExportPodV2Command } from "./pods/ExportPodV2Command";
 import { PublishDevCommand } from "./PublishDevCommand";
 import { PublishExportCommand } from "./PublishExportCommand";
@@ -54,8 +56,6 @@ import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
 import { RunMigrationCommand } from "./RunMigrationCommand";
 import { SchemaLookupCommand } from "./SchemaLookupCommand";
-import { SeedAddCommand } from "./SeedAddCommand";
-import { SeedRemoveCommand } from "./SeedRemoveCommand";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowLegacyPreviewCommand } from "./ShowLegacyPreview";
@@ -67,8 +67,6 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
-import { ConfigureServiceConnection } from "./pods/ConfigureServiceConnection";
-import { ConfigureExportPodV2 } from "./pods/ConfigureExportPodV2";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -139,8 +137,6 @@ const ALL_COMMANDS = [
   LaunchTutorialCommand,
   ConvertLinkCommand,
   ConvertCandidateLinkCommand,
-  SeedAddCommand,
-  SeedRemoveCommand,
   RunMigrationCommand,
   CreateTaskCommand,
   RegisterNoteTraitCommand,

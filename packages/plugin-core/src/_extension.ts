@@ -93,6 +93,9 @@ import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import { WSUtils } from "./WSUtils";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { isAutoCompletable } from "./utils/AutoCompletable";
+import { IBaseCommand } from "./types";
+import { SeedAddCommand } from "./commands/SeedAddCommand";
+import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -980,6 +983,7 @@ async function _setupCommands(
 ) {
   const existingCommands = await vscode.commands.getCommands();
 
+  // add all commands
   ALL_COMMANDS.map((Cmd) => {
     const cmd = new Cmd(ws);
 
@@ -1053,42 +1057,69 @@ async function _setupCommands(
     );
   }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        sentryReportingCallback(async () => {
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run();
-        })
-      )
-    );
-  }
+  const addCommand = ({
+    context,
+    key,
+    cmd,
+    existingCommands,
+  }: {
+    context: vscode.ExtensionContext;
+    key: string;
+    cmd: IBaseCommand | (() => IBaseCommand);
+    existingCommands: string[];
+  }) => {
+    if (!existingCommands.includes(key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          key,
+          sentryReportingCallback(async (args) => {
+            if (_.isFunction(cmd)) {
+              await cmd().run(args);
+            } else {
+              await cmd.run(args);
+            }
+          })
+        )
+      );
+    }
+  };
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowSchemaGraphCommand(
-            SchemaGraphViewFactory.create(ws)
-          ).run();
-        })
-      )
-    );
-  }
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SHOW_PREVIEW.key,
+    cmd: () => new ShowPreviewCommand(PreviewPanelFactory.create(ws)),
+    existingCommands,
+  });
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowNoteGraphCommand(
-            NoteGraphPanelFactory.create(ws)
-          ).run();
-        })
-      )
-    );
-  }
+  // // NOTE: graph commands with create a panel when instantiated, hence passing them in via a closure
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
+    cmd: () => new ShowSchemaGraphCommand(SchemaGraphViewFactory.create(ws)),
+    existingCommands,
+  });
+
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
+    cmd: () => new ShowNoteGraphCommand(NoteGraphPanelFactory.create(ws)),
+    existingCommands,
+  });
+
+  // NOTE: seed commands currently DO NOT take extension as a first argument
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_ADD.key,
+    cmd: new SeedAddCommand(),
+    existingCommands,
+  });
+
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_REMOVE.key,
+    cmd: new SeedRemoveCommand(),
+    existingCommands,
+  });
 
   if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
     context.subscriptions.push(

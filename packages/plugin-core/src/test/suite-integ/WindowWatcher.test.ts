@@ -4,6 +4,7 @@ import { describe, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
 import { getDWorkspace, getExtension } from "../../workspace";
@@ -106,10 +107,10 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           await watcher!.triggerNotePreviewUpdate(editor!);
 
           const maybePanel = PreviewPanelFactory.getProxy(
-            getExtension()
+            ExtensionProvider.getExtension()
           ).getPanel();
           expect(maybePanel).toBeTruthy();
-          expect(maybePanel?.active).toBeTruthy();
+          expect(maybePanel?.visible).toBeTruthy();
         });
       }
     );

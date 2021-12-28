@@ -17,7 +17,7 @@ import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import {
-  OpenNoteOpts,
+  PreviewProxyOpts,
   PreviewPanelFactory,
 } from "../components/views/PreviewViewFactory";
 import { DENDRON_COMMANDS } from "../constants";
@@ -34,6 +34,7 @@ import {
   ShowPreviewCommandOpts,
   ShowPreviewCommandOutput,
 } from "./ShowPreviewInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export const extractHeaderAnchorIfExists = (
   link: string
@@ -326,8 +327,9 @@ export class ShowPreviewCommand extends BasicCommand<
     return { providedFile: opts !== undefined };
   }
 
-  public static openNoteInPreview(note: NoteProps, opts?: OpenNoteOpts) {
-    return PreviewPanelFactory.showNoteWhenReady(note, opts);
+  public static openNoteInPreview(note: NoteProps, opts?: PreviewProxyOpts) {
+    const extension = ExtensionProvider.getExtension();
+    return PreviewPanelFactory.showNoteWhenReady({ note, opts, extension });
   }
 
   /** Show a file in the preview. Only use this for files that are not notes, like a markdown file outside any vault. */

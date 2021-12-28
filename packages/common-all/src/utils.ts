@@ -27,7 +27,6 @@ import {
   ScratchConfig,
   StrictConfigV4,
 } from "./types/intermediateConfigs";
-import path from "path";
 
 /**
  * Dendron utilities

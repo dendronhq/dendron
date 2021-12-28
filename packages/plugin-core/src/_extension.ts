@@ -93,6 +93,9 @@ import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import { WSUtils } from "./WSUtils";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { isAutoCompletable } from "./utils/AutoCompletable";
+import { IBaseCommand } from "./types";
+import { SeedAddCommand } from "./commands/SeedAddCommand";
+import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -980,6 +983,7 @@ async function _setupCommands(
 ) {
   const existingCommands = await vscode.commands.getCommands();
 
+  // add all commands
   ALL_COMMANDS.map((Cmd) => {
     const cmd = new Cmd(ws);
 
@@ -1053,6 +1057,29 @@ async function _setupCommands(
     );
   }
 
+  const addCommand = ({
+    context,
+    key,
+    cmd,
+    existingCommands,
+  }: {
+    context: vscode.ExtensionContext;
+    key: string;
+    cmd: IBaseCommand;
+    existingCommands: string[];
+  }) => {
+    if (!existingCommands.includes(key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          key,
+          sentryReportingCallback(async (args) => {
+            cmd.run(args);
+          })
+        )
+      );
+    }
+  };
+
   if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
     context.subscriptions.push(
       vscode.commands.registerCommand(
@@ -1089,6 +1116,21 @@ async function _setupCommands(
       )
     );
   }
+
+  // NOTE: seed commands currently DO NOT take extension as a first argument
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_ADD.key,
+    cmd: new SeedAddCommand(),
+    existingCommands,
+  });
+
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_REMOVE.key,
+    cmd: new SeedRemoveCommand(),
+    existingCommands,
+  });
 
   if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
     context.subscriptions.push(

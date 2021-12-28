@@ -5,6 +5,7 @@ import { window } from "vscode";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { IBaseCommand } from "../types";
 
 export type CodeCommandConstructor = {
   new (extension: IDendronExtension): CodeCommandInstance;
@@ -17,20 +18,6 @@ export type CodeCommandInstance = {
 export type AnalyticProps = {
   props?: any;
 };
-
-export interface BaseCommand<
-  TOpts,
-  TOut = any,
-  TGatherOutput = TOpts,
-  TRunOpts = TOpts
-> {
-  /**
-   * Optional method to add properties to the analytics payload
-   * @param opts - Arguments passed to execute()
-   * @param out - return value from execute()
-   */
-  addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
-}
 
 /**
  * Base class for all Dendron Plugin Commands.
@@ -48,12 +35,15 @@ export abstract class BaseCommand<
   TOut = any,
   TGatherOutput = TOpts,
   TRunOpts = TOpts
-> {
+> implements IBaseCommand<TOpts, TOut, TGatherOutput, TRunOpts>
+{
   public L: DLogger;
 
   constructor(_name?: string) {
     this.L = Logger;
   }
+
+  addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
 
   static showInput = window.showInputBox;
 

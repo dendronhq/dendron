@@ -29,14 +29,6 @@ import {
 import _ from "lodash";
 import path from "path";
 import { Location } from "vscode";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
@@ -50,6 +42,12 @@ import { findReferences, FoundRefT } from "../utils/md";
 import { getEngine, getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
+import {
+  ILookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3Interface";
+import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 type CommandInput =
   | {
@@ -150,13 +148,17 @@ export class MoveHeaderCommand extends BasicCommand<
    * @returns
    */
   private promptForDestination(
-    lookupController: LookupControllerV3,
+    lookupController: ILookupControllerV3,
     opts: CommandInput
   ) {
-    const lookupProvider = new NoteLookupProvider(this.key, {
-      allowNewNote: true,
-      noHidePickerOnAccept: false,
-    });
+    const extension = ExtensionProvider.getExtension();
+    const lookupProvider = extension.noteLookupProviderFactory.create(
+      this.key,
+      {
+        allowNewNote: true,
+        noHidePickerOnAccept: false,
+      }
+    );
 
     lookupController.show({
       title: "Select note to move header to",
@@ -231,7 +233,8 @@ export class MoveHeaderCommand extends BasicCommand<
       disableVaultSelection: opts?.useSameVault,
       vaultSelectCanToggle: false,
     };
-    const lc = LookupControllerV3.create(lcOpts);
+    const lc =
+      ExtensionProvider.getExtension().lookupControllerFactory.create(lcOpts);
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id: this.key,

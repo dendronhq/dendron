@@ -24,7 +24,6 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
-import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
@@ -34,6 +33,7 @@ import {
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 const createEngine = createEngineFactory({
   renameNote: (opts: WorkspaceOpts) => {
@@ -824,9 +824,10 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await WSUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create({
-          nodeType: "note",
-        });
+        const lc =
+          ExtensionProvider.getExtension().lookupControllerFactory.create({
+            nodeType: "note",
+          });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
@@ -862,9 +863,10 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await WSUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create({
-          nodeType: "note",
-        });
+        const lc =
+          ExtensionProvider.getExtension().lookupControllerFactory.create({
+            nodeType: "note",
+          });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"

@@ -16,7 +16,7 @@ import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
 import { getEngine } from "../../workspace";
 import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
-import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3";
+import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 
 suite("RefactorHiearchy", function () {

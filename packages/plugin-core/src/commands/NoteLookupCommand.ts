@@ -27,13 +27,6 @@ import {
   SelectionExtractBtn,
   TaskBtn,
 } from "../components/lookup/buttons";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import {
-  ILookupProviderV3,
-  NoteLookupProvider,
-  NoteLookupProviderChangeStateResp,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -55,11 +48,17 @@ import {
 import { DENDRON_COMMANDS, DendronContext } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
-import { getDWorkspace, getEngine } from "../workspace";
 import { BaseCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { AutoCompleter } from "../utils/autoCompleter";
 import { AutoCompletable } from "../utils/AutoCompletable";
+import { ExtensionProvider } from "../ExtensionProvider";
+import {
+  ILookupProviderV3,
+  NoteLookupProviderChangeStateResp,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3Interface";
+import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -82,7 +81,7 @@ export type CommandRunOpts = {
  */
 type CommandGatherOutput = {
   quickpick: DendronQuickPickerV2;
-  controller: LookupControllerV3;
+  controller: ILookupControllerV3;
   provider: ILookupProviderV3;
   noConfirm?: boolean;
   fuzzThreshold?: number;
@@ -99,7 +98,7 @@ type CommandOpts = {
 
 export type CommandOutput = {
   quickpick: DendronQuickPickerV2;
-  controller: LookupControllerV3;
+  controller: ILookupControllerV3;
   provider: ILookupProviderV3;
 };
 
@@ -125,7 +124,7 @@ export class NoteLookupCommand
   implements AutoCompletable
 {
   key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
-  protected _controller: LookupControllerV3 | undefined;
+  protected _controller: ILookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
   protected _quickPick: DendronQuickPickerV2 | undefined;
 
@@ -133,7 +132,7 @@ export class NoteLookupCommand
     super("LookupCommandV3");
   }
 
-  protected get controller(): LookupControllerV3 {
+  protected get controller(): ILookupControllerV3 {
     if (_.isUndefined(this._controller)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
@@ -167,8 +166,9 @@ export class NoteLookupCommand
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {
+    const extension = ExtensionProvider.getExtension();
     const start = process.hrtime();
-    const ws = getDWorkspace();
+    const ws = extension.getDWorkspace();
     const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
     let selectionType;
@@ -200,7 +200,7 @@ export class NoteLookupCommand
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     const disableVaultSelection = !confirmVaultOnCreate;
-    this._controller = LookupControllerV3.create({
+    this._controller = extension.lookupControllerFactory.create({
       nodeType: "note",
       disableVaultSelection,
       vaultButtonPressed:
@@ -229,7 +229,7 @@ export class NoteLookupCommand
         ),
       ],
     });
-    this._provider = new NoteLookupProvider("lookup", {
+    this._provider = extension.noteLookupProviderFactory.create("lookup", {
       allowNewNote: true,
       noHidePickerOnAccept: false,
       forceAsIsPickerValueUsage: copts.noteType === LookupNoteTypeEnum.scratch,
@@ -429,7 +429,7 @@ export class NoteLookupCommand
     const picker = this.controller.quickpick;
     const fname = this.getFNameForNewItem(item);
 
-    const engine = getEngine();
+    const engine = ExtensionProvider.getEngine();
     let nodeNew: NoteProps;
     if (item.stub) {
       Logger.info({ ctx, msg: "create stub" });
@@ -491,7 +491,7 @@ export class NoteLookupCommand
 
     const uri = NoteUtils.getURI({
       note: nodeNew,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
   }
@@ -516,7 +516,7 @@ export class NoteLookupCommand
     fname: string;
     picker: DendronQuickPickerV2;
   }) {
-    const engine = getEngine();
+    const engine = ExtensionProvider.getEngine();
 
     const vaultsWithMatchingFile = new Set(
       NoteUtils.getNotesByFname({ fname, notes: engine.notes }).map(

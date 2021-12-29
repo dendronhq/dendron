@@ -31,6 +31,16 @@ import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { CommandFactory } from "./commandFactory";
 import { ICommandFactory } from "./commandFactoryInterface";
+import { LookupControllerV3Factory } from "./components/lookup/LookupControllerV3Factory";
+import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
+import {
+  NoteLookupProviderFactory,
+  SchemaLookupProviderFactory,
+} from "./components/lookup/LookupProviderV3Factory";
+import {
+  INoteLookupProviderFactory,
+  ISchemaLookupProviderFactory,
+} from "./components/lookup/LookupProviderV3Interface";
 import { DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
@@ -49,6 +59,8 @@ import {
   NoteTraitManager,
   NoteTraitService,
 } from "./services/NoteTraitService";
+import { SchemaSyncService } from "./services/SchemaSyncService";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 import { DisposableStore } from "./utils";
@@ -63,8 +75,6 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
-import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
-import { SchemaSyncService } from "./services/SchemaSyncService";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -152,6 +162,10 @@ export class DendronExtension implements IDendronExtension {
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
+  public lookupControllerFactory: ILookupControllerV3Factory;
+  public noteLookupProviderFactory: INoteLookupProviderFactory;
+  public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
+
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
   public workspaceWatcher?: WorkspaceWatcher;
@@ -370,6 +384,10 @@ export class DendronExtension implements IDendronExtension {
     this.wsUtils = new WSUtilsV2(this);
     this.commandFactory = new CommandFactory(this);
     this.schemaSyncService = new SchemaSyncService(this);
+    this.lookupControllerFactory = new LookupControllerV3Factory(this);
+    this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
+    this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
+
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
   }

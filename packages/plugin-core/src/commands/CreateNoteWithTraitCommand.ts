@@ -9,11 +9,7 @@ import {
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../components/lookup/LookupControllerV3";
-import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
+import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { VaultSelectionMode } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
@@ -23,6 +19,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export type CommandOpts = {
   fname: string;
@@ -158,12 +155,16 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
         nodeType: "note",
         disableVaultSelection: true,
       };
-      const lc = LookupControllerV3.create(lookupCreateOpts);
+      const extension = ExtensionProvider.getExtension();
+      const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
 
-      const provider = new NoteLookupProvider("createNoteWithTrait", {
-        allowNewNote: true,
-        forceAsIsPickerValueUsage: true,
-      });
+      const provider = extension.noteLookupProviderFactory.create(
+        "createNoteWithTrait",
+        {
+          allowNewNote: true,
+          forceAsIsPickerValueUsage: true,
+        }
+      );
 
       const defaultNoteName =
         initialValue ??

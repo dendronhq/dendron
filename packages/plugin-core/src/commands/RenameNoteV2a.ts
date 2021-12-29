@@ -4,8 +4,6 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import {
   NoteLookupProviderUtils,
   OldNewLocation,
@@ -17,6 +15,7 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = {
   move: OldNewLocation[];
@@ -44,10 +43,13 @@ export class RenameNoteV2aCommand extends BaseCommand<
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput> {
-    const lc = LookupControllerV3.create({
+    const extension = ExtensionProvider.getExtension();
+    const lc = extension.lookupControllerFactory.create({
       nodeType: "note",
     });
-    const provider = new NoteLookupProvider("rename", { allowNewNote: true });
+    const provider = extension.noteLookupProviderFactory.create("rename", {
+      allowNewNote: true,
+    });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
 
     const initialValue = path.basename(

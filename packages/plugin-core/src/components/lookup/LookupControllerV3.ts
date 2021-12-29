@@ -11,7 +11,6 @@ import { DENDRON_COMMANDS } from "../../constants";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../../workspace";
 import {
   ButtonCategory,
   DendronBtn,
@@ -19,7 +18,7 @@ import {
   IDendronQuickInputButton,
   VaultSelectButton,
 } from "./buttons";
-import { ILookupProviderV3 } from "./LookupProviderV3";
+import { ILookupProviderV3 } from "./LookupProviderV3Interface";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import {
   CreateQuickPickOpts,
@@ -27,44 +26,20 @@ import {
   PrepareQuickPickOpts,
   ShowQuickPickOpts,
 } from "./utils";
+import {
+  ILookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "./LookupControllerV3Interface";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { VersionProvider } from "../../versionProvider";
 
-export type LookupControllerV3CreateOpts = {
-  /**
-   * Node type
-   */
-  nodeType: string;
-  /**
-   * Replace default buttons
-   */
-  buttons?: DendronBtn[];
-  /**
-   * When true, don't enable vault selection
-   */
-  disableVaultSelection?: boolean;
-  /**
-   * if vault selection isn't disabled,
-   * press button on init if true
-   */
-  vaultButtonPressed?: boolean;
-  /** If vault selection isn't disabled, allow choosing the mode of selection.
-   *  Defaults to true. */
-  vaultSelectCanToggle?: boolean;
-  /**
-   * Additional buttons
-   */
-  extraButtons?: DendronBtn[];
-  /**
-   * 0.0 = exact match
-   * 1.0 = match anything
-   */
-  fuzzThreshold?: number;
-};
+export { LookupControllerV3CreateOpts };
 
 /**
  * For initialization lifecycle,
  * see [[dendron://dendron.docs/pkg.plugin-core.t.lookup.arch]]
  */
-export class LookupControllerV3 {
+export class LookupControllerV3 implements ILookupControllerV3 {
   public state: LookupControllerState;
   public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
@@ -73,7 +48,7 @@ export class LookupControllerV3 {
   public _provider?: ILookupProviderV3;
 
   static create(opts?: LookupControllerV3CreateOpts) {
-    const { vaults } = getDWorkspace();
+    const { vaults } = ExtensionProvider.getDWorkspace();
     const disableVaultSelection =
       (_.isBoolean(opts?.disableVaultSelection) &&
         opts?.disableVaultSelection) ||
@@ -156,14 +131,16 @@ export class LookupControllerV3 {
   /**
    * Wire up quickpick and initialize buttons
    */
-  async prepareQuickPick(opts: PrepareQuickPickOpts) {
+  async prepareQuickPick(
+    opts: PrepareQuickPickOpts
+  ): Promise<{ quickpick: DendronQuickPickerV2 }> {
     const ctx = "prepareQuickPick";
     Logger.info({ ctx, msg: "enter" });
     const { provider, title, selectAll } = _.defaults(opts, {
       nonInteractive: false,
       title: [
         `Lookup (${this.nodeType})`,
-        `- version: ${DendronExtension.version()}`,
+        `- version: ${VersionProvider.version()}`,
       ].join(" "),
       selectAll: false,
     });
@@ -235,7 +212,7 @@ export class LookupControllerV3 {
       initialValue?: string;
       provider: ILookupProviderV3;
     }
-  ) {
+  ): Promise<DendronQuickPickerV2> {
     const { quickpick } = await this.prepareQuickPick(opts);
     return this.showQuickPick({ ...opts, quickpick });
   }
@@ -248,7 +225,7 @@ export class LookupControllerV3 {
     Logger.info({ ctx, msg: "exit" });
   }
 
-  onTriggerButton = async (btn: QuickInputButton) => {
+  async onTriggerButton(btn: QuickInputButton) {
     const { _quickpick: quickpick } = this;
     const { buttons, buttonsPrev } = this.state;
     if (!quickpick) {
@@ -313,5 +290,5 @@ export class LookupControllerV3 {
       type: (btn as IDendronQuickInputButton).type,
       pressed: (btn as IDendronQuickInputButton).pressed,
     });
-  };
+  }
 }

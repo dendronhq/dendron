@@ -21,12 +21,7 @@ import {
   LookupControllerV3,
   LookupControllerV3CreateOpts,
 } from "../lookup/LookupControllerV3";
-import {
-  CopyNoteLinkBtn,
-  DirectChildFilterBtn,
-  MultiSelectBtn,
-  Selection2ItemsBtn,
-} from "../lookup/buttons";
+import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
 import _ from "lodash";
 import {
   NoteLookupProvider,
@@ -333,8 +328,6 @@ export class PodUIControls {
   }): Promise<NoteLookupProviderSuccessResp | undefined> {
     const { fromSelection, key, logger } = opts;
     const extraButtons = [
-      CopyNoteLinkBtn.create(false),
-      DirectChildFilterBtn.create(false),
       MultiSelectBtn.create({ pressed: true, canToggle: false }),
     ];
     if (fromSelection) {

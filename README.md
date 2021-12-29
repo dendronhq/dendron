@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-119-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-120-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -320,6 +320,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/rlh1994"><img src="https://avatars.githubusercontent.com/u/8260415?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryan Hill</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=rlh1994" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Arlh1994" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://WikiEducator.org/User:JimTittsler"><img src="https://avatars.githubusercontent.com/u/180326?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jim Tittsler</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jimt" title="Documentation">📖</a></td>
     <td align="center"><a href="http://aphorica.com"><img src="https://avatars.githubusercontent.com/u/161474?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rick Berger</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Arickbsgu" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/ThibaultNocchi"><img src="https://avatars.githubusercontent.com/u/1619359?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thibault</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AThibaultNocchi" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

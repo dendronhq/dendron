@@ -13,6 +13,7 @@ import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DendronBtn, getButtonCategory } from "../components/lookup/buttons";
+import { getExtension } from "../workspace";
 
 export class LookupView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.LOOKUP_VIEW;
@@ -37,13 +38,13 @@ export class LookupView implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken
   ) {
     this._view = webviewView;
-    webviewView.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [],
-    };
-    webviewView.webview.html = await this._getHtmlForWebview(
-      webviewView.webview
-    );
+
+    WebViewUtils.prepareTreeView({
+      ext: getExtension(),
+      key: DendronTreeViewKey.LOOKUP_VIEW,
+      webviewView,
+    });
+
     webviewView.webview.onDidReceiveMessage(
       this.onDidReceiveMessageHandler,
       this
@@ -125,12 +126,5 @@ export class LookupView implements vscode.WebviewViewProvider {
         source: "vscode",
       });
     }
-  }
-
-  private _getHtmlForWebview(_webview: vscode.Webview) {
-    return WebViewUtils.genHTMLForTreeView({
-      title: "LookupView",
-      view: DendronTreeViewKey.LOOKUP_VIEW,
-    });
   }
 }

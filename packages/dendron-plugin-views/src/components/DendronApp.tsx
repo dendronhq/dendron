@@ -92,7 +92,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       case LookupViewMessageEnum.onUpdate:
         logger.info({ ctx, msg: "refreshLookup:pre" });
-        ideDispatch(ideSlice.actions.refreshLookup(msg.data));
+        ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
       default:

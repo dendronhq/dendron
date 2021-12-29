@@ -22,7 +22,7 @@ type InitialState = {
     };
   };
   seedsInWorkspace: string[] | undefined; // Contains the seed ID's
-  lookupModifiers: LookupModifierStatePayload;
+  lookupModifiers: LookupModifierStatePayload | undefined;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -36,6 +36,7 @@ const INITIAL_STATE: InitialState = {
     },
   },
   seedsInWorkspace: undefined,
+  lookupModifiers: undefined,
 };
 
 export { InitialState as IDEState };

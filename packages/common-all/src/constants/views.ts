@@ -96,7 +96,7 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     desc: "Lookup View",
     label: "Lookup View",
     type: "webview",
-    bundleName: "Lookup",
+    bundleName: "LookupPanelView",
   },
 };
 

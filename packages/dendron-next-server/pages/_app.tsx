@@ -4,7 +4,6 @@ import {
   OnDidChangeActiveTextEditorMsg,
   SeedBrowserMessageType,
   ThemeMessageType,
-  LookupViewMessageEnum,
 } from "@dendronhq/common-all";
 import {
   combinedStore,
@@ -123,11 +122,6 @@ function AppVSCode({ Component, pageProps }: any) {
       const seeds = msg.data.msg;
       logger.info({ ctx, seeds, msg: "seeds" });
       ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
-    } else if (msg.type === LookupViewMessageEnum.onUpdate) {
-      const modifiers = msg.data.payload;
-      logger.info({ ctx, modifiers, msg: "refreshLookup" });
-      ideDispatch(ideSlice.actions.refreshLookup(modifiers));
-      logger.info({ ctx, msg: "refreshLookup:post" });
     } else {
       logger.error({ ctx, msg: "unknown message" });
     }

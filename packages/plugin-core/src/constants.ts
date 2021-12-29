@@ -164,6 +164,10 @@ export const DENDRON_MENUS = {
       command: "dendron.convertCandidateLink",
       when: "false",
     },
+    {
+      command: "dendron.dev.devTrigger",
+      when: DendronContext.DEV_MODE,
+    },
   ],
   "view/title": [
     /**
@@ -1024,6 +1028,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "dev",
     desc: "Dump internal state of Dendron inside logs",
     docs: "This is useful when diagnosing issues in Dendron",
+  },
+  DEV_TRIGGER: {
+    key: "dendron.dev.devTrigger",
+    title: `${CMD_PREFIX}Dev: Dev Trigger`,
+    desc: "Command to use for development to trigger some arbitrary piece of code.",
+    group: "dev",
+    skipDocs: true,
   },
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",

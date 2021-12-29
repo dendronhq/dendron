@@ -82,6 +82,7 @@ suite("windowDecorations", function () {
             props: {
               created: _.toInteger(CREATED),
               updated: _.toInteger(UPDATED),
+              tags: ["foo", "bar"],
             },
             vault: vaults[0],
             wsRoot,
@@ -132,7 +133,7 @@ suite("windowDecorations", function () {
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations!.length).toEqual(6);
+          expect(wikilinkDecorations!.length).toEqual(7);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -167,7 +168,7 @@ suite("windowDecorations", function () {
           const brokenWikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.brokenWikilink
           );
-          expect(brokenWikilinkDecorations!.length).toEqual(4);
+          expect(brokenWikilinkDecorations!.length).toEqual(5);
           expect(
             isTextDecorated(
               "[[does.not.exist]]",

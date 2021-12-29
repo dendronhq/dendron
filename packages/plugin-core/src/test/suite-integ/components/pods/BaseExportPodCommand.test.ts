@@ -140,7 +140,7 @@ suite("BaseExportPodCommand", function () {
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-          await await NoteTestUtilsV4.createNote({
+          await NoteTestUtilsV4.createNote({
             wsRoot,
             vault: vaults[0],
             fname: "test-note-for-pod1",

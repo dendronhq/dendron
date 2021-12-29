@@ -11,6 +11,7 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
+import { isInsidePath } from "@dendronhq/common-server";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 
@@ -24,6 +25,13 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     this.extension = extension;
   }
 
+  /**
+   * Prefer NOT to use this method and instead get WSUtilsV2 passed in as
+   * dependency or use IDendronExtension.wsUtils.
+   *
+   * This method exists to satisfy static method of WSUtils while refactoring
+   * is happening and we are moving method to this class.
+   * */
   static instance() {
     if (WS_UTILS === undefined) {
       WS_UTILS = new WSUtilsV2(ExtensionProvider.getExtension());
@@ -97,5 +105,21 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) return this.getNoteFromDocument(editor.document);
     return;
+  }
+
+  /** If the text document at `filePath` is open in any editor, return that document. */
+  getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined {
+    const { wsRoot } = this.extension.getDWorkspace();
+    // Normalize file path for reliable comparison
+    if (isInsidePath(wsRoot, filePath)) {
+      filePath = path.relative(wsRoot, filePath);
+    }
+    return vscode.workspace.textDocuments.filter((document) => {
+      let documentPath = document.uri.fsPath;
+      if (isInsidePath(wsRoot, documentPath)) {
+        documentPath = path.relative(wsRoot, documentPath);
+      }
+      return path.relative(filePath, documentPath) === "";
+    })[0];
   }
 }

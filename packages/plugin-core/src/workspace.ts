@@ -657,7 +657,9 @@ export class DendronExtension implements IDendronExtension {
       windowWatcher.triggerUpdateDecorations(editor);
     }
     this.windowWatcher = windowWatcher;
-    const workspaceWatcher = new WorkspaceWatcher();
+    const workspaceWatcher = new WorkspaceWatcher({
+      schemaSyncService: this.schemaSyncService,
+    });
     workspaceWatcher.activate(this.context);
     this.workspaceWatcher = workspaceWatcher;
 

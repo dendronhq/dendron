@@ -17,6 +17,8 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode";
 import { DendronContext, GLOBAL_STATE } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+// NOTE: This file should NOT have a dependency on getDWorkspace()/getExtension()
+// If you would like to introduce a utility for workspace add it to IWSUtilsV2/WSUtilsV2.
 
 type PointOffset = { line?: number; column?: number };
 

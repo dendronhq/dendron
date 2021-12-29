@@ -104,7 +104,10 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
-          watcher = new WorkspaceWatcher();
+          watcher = new WorkspaceWatcher({
+            schemaSyncService:
+              ExtensionProvider.getExtension().schemaSyncService,
+          });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
           const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
@@ -140,7 +143,10 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
-          watcher = new WorkspaceWatcher();
+          watcher = new WorkspaceWatcher({
+            schemaSyncService:
+              ExtensionProvider.getExtension().schemaSyncService,
+          });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
           const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");

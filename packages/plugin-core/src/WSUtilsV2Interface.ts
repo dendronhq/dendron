@@ -11,4 +11,7 @@ export interface IWSUtilsV2 {
   getActiveNote(): NoteProps | undefined;
 
   getVaultFromUri(fileUri: Uri): DVault;
+
+  /** If the text document at `filePath` is open in any editor, return that document. */
+  getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined;
 }

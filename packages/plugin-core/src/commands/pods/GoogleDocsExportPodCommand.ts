@@ -1,4 +1,4 @@
-import { NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
   createRunnableGoogleDocsV2PodConfigSchema,
@@ -8,6 +8,7 @@ import {
   GoogleDocsConnection,
   GoogleDocsExportPodV2,
   GoogleDocsExportReturnType,
+  GoogleDocsFields,
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
   JSONSchemaType,
@@ -20,7 +21,7 @@ import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { clipboard } from "../../utils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../../workspace";
@@ -174,46 +175,49 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
 
   async onExportComplete(opts: {
     exportReturnValue: GoogleDocsExportReturnType;
-    payload: string | NoteProps;
+    payload: string | NoteProps[];
     config: RunnableGoogleDocsV2PodConfig;
   }) {
     const { exportReturnValue, payload } = opts;
+    const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
+    const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
+    const createdCount = createdDocs?.length ?? 0;
+    const updatedCount = updatedDocs?.length ?? 0;
+    if (typeof payload !== "string" && createdDocs && createdCount > 0) {
+      await this.updateNoteWithCustomFrontmatter(createdDocs);
+    }
+    if (typeof payload !== "string" && updatedDocs && updatedCount > 0) {
+      await this.updateNoteWithCustomFrontmatter(updatedDocs);
+    }
+
     if (ResponseUtil.hasError(exportReturnValue)) {
-      this.L.error(exportReturnValue.error);
-      window.showErrorMessage(
-        "Error while running Google Docs Export Pod: " + exportReturnValue
+      const errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      window.showInformationMessage(
+        `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated.`
       );
-      return;
     }
-    const { documentId, revisionId } = exportReturnValue.data!;
-    if (typeof payload !== "string" && documentId && revisionId) {
-      await this.updateNoteWithDocumentId({
-        documentId,
-        revisionId,
-        note: payload,
-      });
-    }
-    const gdocLink = `https://docs.google.com/document/d/${exportReturnValue.data?.documentId}`;
-    clipboard.writeText(gdocLink);
-    vscode.window.showInformationMessage(
-      `The doc ${
-        typeof payload === "string" ? "Untitled document" : payload.fname
-      } has been created. Its link has been copied to the clipboard.`
-    );
   }
 
-  private async updateNoteWithDocumentId(opts: {
-    documentId: string;
-    revisionId: string;
-    note: NoteProps;
-  }) {
-    const { documentId, revisionId, note } = opts;
-    const engine = getEngine();
-    note.custom = {
-      ...note.custom,
-      documentId,
-      revisionId,
-    };
-    await engine.writeNote(note, { updateExisting: true });
+  private async updateNoteWithCustomFrontmatter(records: GoogleDocsFields[]) {
+    const engine = ExtensionProvider.getEngine();
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { documentId, revisionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          documentId,
+          revisionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
   }
 }

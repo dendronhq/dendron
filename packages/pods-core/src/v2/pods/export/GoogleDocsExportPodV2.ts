@@ -1,8 +1,10 @@
 import {
   axios,
+  DendronCompositeError,
   DendronError,
   DEngineClient,
   DVault,
+  IDendronError,
   NoteProps,
   ResponseUtil,
   RespV2,
@@ -12,6 +14,7 @@ import {
 import { DendronASTDest, MDUtilsV4, MDUtilsV5 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import FormData from "form-data";
+import { RateLimiter } from "limiter";
 import _ from "lodash";
 import {
   ConfigFileUtils,
@@ -23,16 +26,33 @@ import {
 } from "../../..";
 
 export type GoogleDocsExportReturnType = RespV2<{
-  /**
-   * Document Id of the exported Note
-   */
-  documentId?: string;
-  /**
-   * Revision Id of the exported Note
-   */
-  revisionId?: string;
+  created?: GoogleDocsFields[];
+  updated?: GoogleDocsFields[];
 }>;
 
+export type GoogleDocsFields =
+  | {
+      /**
+       * Document Id of the exported Note
+       */
+      documentId?: string;
+      /**
+       * Revision Id of the exported Note
+       */
+      revisionId?: string;
+      /**
+       * id of note
+       */
+      dendronId?: string;
+    }
+  | undefined;
+
+type GoogleDocsPayload = {
+  content: Buffer;
+  documentId?: string;
+  name?: string;
+  dendronId?: string;
+};
 /**
  * GDoc Export Pod (V2 - for compatibility with Pod V2 workflow). Supports only
  * exportNote() for now
@@ -63,28 +83,7 @@ export class GoogleDocsExportPodV2
   }
 
   async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
-    const pod = new HTMLPublishPod();
-    const config = {
-      fname: input.fname,
-      vaultName: input.vault,
-      dest: "stdout",
-      convertLinks: false,
-    };
-    // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
-    const data = await pod.plant({
-      config,
-      engine: this._engine,
-      note: input,
-      vaults: this._vaults,
-      wsRoot: this._wsRoot,
-    });
-    const documentId = input.custom.documentId;
-
-    const response = await this.exportToGDoc({
-      data,
-      name: input.fname,
-      documentId,
-    });
+    const response = await this.exportNotes([input]);
     return response;
   }
 
@@ -97,95 +96,203 @@ export class GoogleDocsExportPodV2
       proc,
       mathjax: true,
     }).process(_input);
-    const data = `<html>${out.contents}</html>`;
-    const response = await this.exportToGDoc({
-      data,
-      name: "Untitled document",
-    });
-    return response;
-  }
-
-  /**
-   * creates a new google document with the contents of a note
-   */
-  async exportToGDoc(opts: {
-    data: string;
-    name: string;
-    documentId?: string;
-  }): Promise<GoogleDocsExportReturnType> {
-    const { data, name, documentId } = opts;
-    const { refreshToken, expirationTime } = this._config;
-    let { accessToken } = this._config;
+    const htmlContent = `<html>${out.contents}</html>`;
+    const content = Buffer.from(htmlContent);
+    let { accessToken, expirationTime, refreshToken } = this._config;
     try {
-      //checks the expiration time of the access token and refreshes if already expired.
-      if (Time.now().toSeconds() > expirationTime) {
-        accessToken = await PodUtils.refreshGoogleAccessToken(
-          this._wsRoot,
-          refreshToken,
-          this._config.connectionId
-        );
-      }
+      accessToken = await this.checkTokenExpiry(
+        expirationTime,
+        accessToken,
+        refreshToken
+      );
     } catch (err: any) {
-      throw new DendronError({ message: stringifyError(err) });
+      return {
+        data: {},
+        error: err as DendronError,
+      };
     }
-
-    const content = Buffer.from(data);
-
-    if (_.isUndefined(documentId)) {
-      return this.createGdoc({ content, name, accessToken });
+    const response = await this.createGdoc({
+      docToCreate: [{ content, name: "UntitledDocument" }],
+      accessToken,
+    });
+    const data = {
+      created: response.data,
+    };
+    if (response.errors.length > 0) {
+      return {
+        data,
+        error: new DendronCompositeError(response.errors),
+      };
     } else {
-      return this.overwriteGdoc({ content, accessToken, documentId });
+      return ResponseUtil.createHappyResponse({
+        data,
+      });
+    }
+  }
+
+  async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
+    const resp = await this.getPayloadForNotes(notes);
+    let { accessToken, expirationTime, refreshToken } = this._config;
+    try {
+      accessToken = await this.checkTokenExpiry(
+        expirationTime,
+        accessToken,
+        refreshToken
+      );
+    } catch (err: any) {
+      return {
+        data: {},
+        error: err as DendronError,
+      };
+    }
+    /**
+     * The rate of Drive API write requests is limited—avoid exceeding 3 requests per second
+     * of sustained write or insert requests
+     */
+    const limiter = new RateLimiter({
+      tokensPerInterval: 3,
+      interval: "second",
+    });
+    const docToCreate = resp.filter((note) => _.isUndefined(note.documentId));
+    const docToUpdate = resp.filter((note) => !_.isUndefined(note.documentId));
+
+    const createRequest = await this.createGdoc({
+      docToCreate,
+      accessToken,
+      limiter,
+    });
+    const updateRequest = await this.overwriteGdoc({
+      docToUpdate,
+      accessToken,
+      limiter,
+    });
+    const errors = createRequest.errors.concat(updateRequest.errors);
+    const data = {
+      created: createRequest.data,
+      updated: updateRequest.data,
+    };
+
+    if (errors.length > 0) {
+      return {
+        data,
+        error: new DendronCompositeError(errors),
+      };
+    } else {
+      return ResponseUtil.createHappyResponse({
+        data,
+      });
     }
   }
 
   /**
-   * Create a new gdoc
+   * Method to check if the accessToken is valid, if not returns a refreshed accessToken
+   */
+  private async checkTokenExpiry(
+    expirationTime: number,
+    accessToken: string,
+    refreshToken: string
+  ) {
+    if (Time.now().toSeconds() > expirationTime) {
+      accessToken = await PodUtils.refreshGoogleAccessToken(
+        this._wsRoot,
+        refreshToken,
+        this._config.connectionId
+      );
+    }
+    return accessToken;
+  }
+
+  /**
+   * Method to return the payload for creating/overwriting a google document.
+   * @param notes
+   * @returns an array of payload for each note.
+   */
+  getPayloadForNotes(notes: NoteProps[]): Promise<GoogleDocsPayload[]> {
+    return Promise.all(
+      notes.map(async (input) => {
+        const pod = new HTMLPublishPod();
+        const config = {
+          fname: input.fname,
+          vaultName: input.vault,
+          dest: "stdout",
+          convertLinks: false,
+        };
+        // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
+        const data = await pod.plant({
+          config,
+          engine: this._engine,
+          note: input,
+          vaults: this._vaults,
+          wsRoot: this._wsRoot,
+        });
+        const content = Buffer.from(data);
+        const documentId = input.custom.documentId;
+        return {
+          content,
+          documentId,
+          name: input.fname,
+          dendronId: input.id,
+        };
+      })
+    );
+  }
+
+  /**
+   * Creates new google documents for given notes.
    */
   async createGdoc(opts: {
-    content: Buffer;
-    name: string;
+    docToCreate: GoogleDocsPayload[];
     accessToken: string;
-  }): Promise<GoogleDocsExportReturnType> {
-    try {
-      const { content, name, accessToken } = opts;
-      let revisionId = "";
-      //metadata is used by drive API to understand the required MIME type
-      const metadata = {
-        name,
-        mimeType: "application/vnd.google-apps.document",
-        parents: ["root"],
-      };
-      const formData = new FormData();
-      formData.append("metadata", JSON.stringify(metadata), {
-        contentType: "application/json",
-      });
-      formData.append("file", content);
-      const response = await axios({
-        method: "POST",
-        url: "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": `multipart/related; boundary=${formData.getBoundary()}`,
-        },
-        data: formData,
-      });
-      if (response) {
-        revisionId = await this.getRevisionId({
-          documentId: response.data.id,
-          accessToken,
-        });
-      }
-      return ResponseUtil.createHappyResponse({
-        data: {
-          documentId: response.data.id,
-          revisionId,
-        },
-      });
-    } catch (err: any) {
-      return ResponseUtil.createUnhappyResponse({
-        error: err as DendronError,
-      });
-    }
+    limiter?: RateLimiter;
+  }): Promise<{ data: GoogleDocsFields[]; errors: IDendronError[] }> {
+    const { docToCreate, accessToken, limiter } = opts;
+    const errors: IDendronError[] = [];
+    const out: GoogleDocsFields[] = await Promise.all(
+      docToCreate.map(async ({ name, content, dendronId }) => {
+        await limiter?.removeTokens(1);
+        try {
+          let revisionId = "";
+          //metadata is used by drive API to understand the required MIME type
+          const metadata = {
+            name,
+            mimeType: "application/vnd.google-apps.document",
+            parents: ["root"],
+          };
+          const formData = new FormData();
+          formData.append("metadata", JSON.stringify(metadata), {
+            contentType: "application/json",
+          });
+          formData.append("file", content);
+          const response = await axios({
+            method: "POST",
+            url: "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": `multipart/related; boundary=${formData.getBoundary()}`,
+            },
+            data: formData,
+          });
+          if (response) {
+            revisionId = await this.getRevisionId({
+              documentId: response.data.id,
+              accessToken,
+            });
+          }
+          return {
+            documentId: response.data.id,
+            revisionId,
+            dendronId,
+          };
+        } catch (err: any) {
+          errors.push(err as DendronError);
+          return;
+        }
+      })
+    );
+    return {
+      data: out,
+      errors,
+    };
   }
 
   /**
@@ -194,40 +301,52 @@ export class GoogleDocsExportPodV2
    * @returns
    */
   async overwriteGdoc(opts: {
-    content: Buffer;
+    docToUpdate: GoogleDocsPayload[];
     accessToken: string;
-    documentId: string;
-  }): Promise<GoogleDocsExportReturnType> {
-    const { content, accessToken, documentId } = opts;
-    const fileSize = content.length;
-    let revisionId = "";
-    try {
-      const response = await axios({
-        method: "PUT",
-        url: `https://www.googleapis.com/upload/drive/v2/files/${documentId}`,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          "Content-Range": `bytes 0-${fileSize - 1}/${fileSize}`,
-        },
-        data: content,
-      });
-      if (response) {
-        revisionId = await this.getRevisionId({ documentId, accessToken });
-      }
-      return ResponseUtil.createHappyResponse({
-        data: {
-          documentId: response.data.id,
-          revisionId,
-        },
-      });
-    } catch (err: any) {
-      return ResponseUtil.createUnhappyResponse({
-        error: err as DendronError,
-      });
-    }
+    limiter: RateLimiter;
+  }) {
+    const { docToUpdate, accessToken, limiter } = opts;
+    const errors: IDendronError[] = [];
+    const out: GoogleDocsFields[] = await Promise.all(
+      docToUpdate.map(async ({ content, documentId, dendronId }) => {
+        if (!documentId) return;
+        await limiter.removeTokens(1);
+        try {
+          const fileSize = content.length;
+          let revisionId = "";
+          const response = await axios({
+            method: "PUT",
+            url: `https://www.googleapis.com/upload/drive/v2/files/${documentId}`,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+              "Content-Range": `bytes 0-${fileSize - 1}/${fileSize}`,
+            },
+            data: content,
+          });
+          if (response) {
+            revisionId = await this.getRevisionId({ documentId, accessToken });
+          }
+          return {
+            documentId: response.data.id,
+            revisionId,
+            dendronId,
+          };
+        } catch (err: any) {
+          errors.push(err as DendronError);
+          return;
+        }
+      })
+    );
+    return {
+      data: out,
+      errors,
+    };
   }
 
+  /**
+   * Method to retrieve revisionId of a document. The drive api only returns document id in response.
+   */
   async getRevisionId(opts: { accessToken: string; documentId: string }) {
     const { accessToken, documentId } = opts;
     try {
@@ -242,9 +361,7 @@ export class GoogleDocsExportPodV2
       );
       return result.data.revisionId;
     } catch (err: any) {
-      return ResponseUtil.createUnhappyResponse({
-        error: err as DendronError,
-      });
+      throw new DendronError({ message: stringifyError(err) });
     }
   }
 

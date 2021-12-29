@@ -463,9 +463,14 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             wsRoot: opts.wsRoot,
           });
           const response = {
-            data: {
-              documentId: "testdoc",
-            },
+            data: [
+              {
+                documentId: "testdoc",
+                revisionId: "test",
+                dendronId: "foo",
+              },
+            ],
+            errors: [],
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
           const props = NoteUtils.getNoteByFnameFromEngine({
@@ -475,7 +480,11 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
-          expect(result.data?.documentId).toEqual("testdoc");
+          const entCreate = result.data?.created!;
+          const entUpdate = result.data?.updated!;
+          expect(entCreate.length).toEqual(1);
+          expect(entCreate[0]?.documentId).toEqual("testdoc");
+          expect(entUpdate.length).toEqual(0);
         },
         {
           expect,
@@ -512,15 +521,21 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             wsRoot: opts.wsRoot,
           });
           const response = {
-            data: {
-              documentId: "testdoc",
-            },
+            data: [
+              {
+                documentId: "testdoc",
+                revisionId: "test",
+              },
+            ],
+            errors: [],
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
           const props = "foo bar text";
 
           const result = await pod.exportText(props);
-          expect(result.data?.documentId).toEqual("testdoc");
+          const entCreate = result.data?.created!;
+          expect(entCreate.length).toEqual(1);
+          expect(entCreate[0]?.documentId).toEqual("testdoc");
         },
         {
           expect,

@@ -1130,6 +1130,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ThibaultNocchi",
+      "name": "Thibault",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1619359?v=4",
+      "profile": "https://github.com/ThibaultNocchi",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

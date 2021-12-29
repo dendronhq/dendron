@@ -29,7 +29,10 @@ export interface PreviewProxy {
    * If automaticallyShowPreview is set to true, show preview panel if it doesn't exist
    * @param note Note Props to update the preview contents with
    */
-  showPreviewAndUpdate(note: NoteProps): void;
+  showPreviewAndUpdate(
+    note: NoteProps,
+    opts?: PreviewProxyOpts
+  ): ReturnType<typeof PreviewPanelFactory["updateForNote"]>;
 
   /**
    * Return current panel. Can be undefined. Exposed for testing only
@@ -37,7 +40,7 @@ export interface PreviewProxy {
   getPanel(): vscode.WebviewPanel | undefined;
 }
 
-export type OpenNoteOpts = {
+export type PreviewProxyOpts = {
   syncChangedNote: boolean;
 };
 
@@ -48,7 +51,7 @@ export class PreviewPanelFactory {
   private static sendRefreshMessage(
     panel: vscode.WebviewPanel,
     note: NoteProps,
-    opts?: OpenNoteOpts
+    opts?: PreviewProxyOpts
   ) {
     const { syncChangedNote } = _.defaults(opts, { syncChangedNote: true });
     return panel.webview.postMessage({
@@ -87,16 +90,16 @@ export class PreviewPanelFactory {
     }
   }
 
-  private static async updateForNote(note: NoteProps, opts?: OpenNoteOpts) {
+  private static async updateForNote(note: NoteProps, opts?: PreviewProxyOpts) {
     if (PreviewPanelFactory._panel) {
       return this.sendRefreshMessage(PreviewPanelFactory._panel, note, opts);
     }
-    return;
+    return undefined;
   }
 
   static getProxy(extension: IDendronExtension): PreviewProxy {
     return {
-      showPreviewAndUpdate(note) {
+      async showPreviewAndUpdate(note, opts) {
         const ctx = {
           ctx: "ShowPreview:showPreviewAndRefresh",
           fname: note.fname,
@@ -113,14 +116,13 @@ export class PreviewPanelFactory {
             ...ctx,
             state: "panel not found and automaticallyShowPreview = true",
           });
-          extension.commandFactory
-            .showPreviewCmd(PreviewPanelFactory.create(extension))
-            .execute()
-            .then(() => {
-              PreviewPanelFactory.updateForNote(note);
-            });
+          const showPreview = extension.commandFactory.showPreviewCmd(
+            PreviewPanelFactory.create(extension)
+          );
+          await showPreview.execute();
+          return PreviewPanelFactory.updateForNote(note, opts);
         } else {
-          PreviewPanelFactory.updateForNote(note);
+          return PreviewPanelFactory.updateForNote(note, opts);
         }
       },
 
@@ -131,13 +133,21 @@ export class PreviewPanelFactory {
   }
 
   private static initWithNote: NoteProps | undefined;
-  private static initWithOpts: OpenNoteOpts | undefined;
+  private static initWithOpts: PreviewProxyOpts | undefined;
 
   /** If the preview is ready, the note will be shown immediately. If not, the note will be shown once */
-  public static showNoteWhenReady(note: NoteProps, opts?: OpenNoteOpts) {
+  public static showNoteWhenReady({
+    note,
+    opts,
+    extension,
+  }: {
+    note: NoteProps;
+    opts?: PreviewProxyOpts;
+    extension: IDendronExtension;
+  }) {
     this.initWithNote = note;
     this.initWithOpts = opts;
-    return this.updateForNote(note, opts);
+    return this.getProxy(extension).showPreviewAndUpdate(note, opts);
   }
 
   static create(ext: IDendronExtension): vscode.WebviewPanel {
@@ -179,13 +189,13 @@ export class PreviewPanelFactory {
         case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
           let note: NoteProps | undefined;
-          let opts: OpenNoteOpts | undefined;
+          let opts: PreviewProxyOpts | undefined;
           if (PreviewPanelFactory.initWithNote !== undefined) {
             note = PreviewPanelFactory.initWithNote;
             opts = PreviewPanelFactory.initWithOpts;
             Logger.debug({
               ctx,
-              msg: "got active note",
+              msg: "got pre-set note",
               note: NoteUtils.toLogObj(note),
             });
           } else {

@@ -1,11 +1,18 @@
 import { ServerUtils } from "@dendronhq/api-server";
-import { DVault, NoteProps, SchemaModuleProps } from "@dendronhq/common-all";
+import {
+  DVault,
+  NoteProps,
+  NoteUtils,
+  SchemaModuleProps,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "./constants";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
@@ -99,13 +106,40 @@ export class WSUtils {
     }
   }
 
+  static getVaultFromPath(fsPath: string) {
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    return VaultUtils.getVaultByFilePath({
+      wsRoot,
+      vaults,
+      fsPath,
+    });
+  }
+
+  static getNoteFromPath(fsPath: string) {
+    const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+    const fname = path.basename(fsPath, ".md");
+    let vault: DVault;
+    try {
+      vault = this.getVaultFromPath(fsPath);
+    } catch (err) {
+      // No vault
+      return undefined;
+    }
+    return NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      wsRoot,
+      notes: engine.notes,
+    });
+  }
+
   //moved
   static getVaultFromDocument(document: vscode.TextDocument) {
-    return new WSUtilsV2(getExtension()).getVaultFromDocument(document);
+    return this.getVaultFromPath(document.uri.fsPath);
   }
 
   static getNoteFromDocument(document: vscode.TextDocument) {
-    return new WSUtilsV2(getExtension()).getNoteFromDocument(document);
+    return this.getNoteFromPath(document.uri.fsPath);
   }
 
   static tryGetNoteFromDocument = (

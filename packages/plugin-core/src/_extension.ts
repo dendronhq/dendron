@@ -1084,8 +1084,10 @@ async function _setupCommands(
     context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        sentryReportingCallback(async () => {
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run();
+        sentryReportingCallback(async (args) => {
+          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
+            args
+          );
         })
       )
     );

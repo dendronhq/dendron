@@ -16,17 +16,25 @@ import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as vscode from "vscode";
+import {
+  PreviewProxyOpts,
+  PreviewPanelFactory,
+} from "../components/views/PreviewViewFactory";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { QuickPickUtil } from "../utils/quickPick";
 import { WebViewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine, getExtension } from "../workspace";
+import { getDWorkspace, getEngine, getExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
+import fs from "fs-extra";
+
 import {
   ShowPreviewCommandOpts,
   ShowPreviewCommandOutput,
 } from "./ShowPreviewInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export const extractHeaderAnchorIfExists = (
   link: string
@@ -305,19 +313,61 @@ export class ShowPreviewCommand extends BasicCommand<
     this._panel = previewPanel;
   }
 
-  async sanityCheck() {
-    if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
-      return "No document open";
+  async sanityCheck(opts?: ShowPreviewCommandOpts) {
+    if (
+      _.isUndefined(VSCodeUtils.getActiveTextEditor()) &&
+      opts === undefined
+    ) {
+      return "No document currently open, and no document selected to open";
     }
     return;
   }
 
-  async execute(_opts?: ShowPreviewCommandOpts) {
+  async addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
+    return { providedFile: opts !== undefined };
+  }
+
+  public static openNoteInPreview(note: NoteProps, opts?: PreviewProxyOpts) {
+    const extension = ExtensionProvider.getExtension();
+    return PreviewPanelFactory.showNoteWhenReady({ note, opts, extension });
+  }
+
+  /** Show a file in the preview. Only use this for files that are not notes, like a markdown file outside any vault. */
+  public static async openFileInPreview(filePath: string) {
+    // Only preview markdown files
+    if (path.extname(filePath) !== ".md") return;
+    const { wsRoot } = getDWorkspace();
+    // If the file is already open in an editor, get the text from there to make sure we have an up-to-date view in case changes are not persisted yet
+    const openFile = VSCodeUtils.getMatchingTextDocument(filePath);
+    const contents =
+      openFile && !openFile.isClosed
+        ? openFile.getText()
+        : await fs.readFile(filePath, { encoding: "utf-8" });
+    const dummyFileNote = NoteUtils.createForFile({
+      filePath,
+      wsRoot,
+      contents,
+    });
+    return this.openNoteInPreview(
+      dummyFileNote,
+      // Don't sync note because it doesn't actually exist
+      { syncChangedNote: false }
+    );
+  }
+
+  public static openDocumentInPreview(document: vscode.TextDocument) {
+    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
+    if (maybeNote) return this.openNoteInPreview(maybeNote);
+    else return this.openFileInPreview(document.uri.fsPath);
+  }
+
+  async execute(opts?: ShowPreviewCommandOpts) {
     const ext = getExtension();
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
     const port = ext.port!;
-    const wsRoot = ext.getEngine().wsRoot;
+    const engine = ext.getEngine();
+    const { wsRoot } = engine;
 
     const { bundleName: name } = getWebEditorViewEntry(
       DendronEditorViewKey.NOTE_PREVIEW
@@ -335,5 +385,32 @@ export class ShowPreviewCommand extends BasicCommand<
     this._panel.webview.html = html;
 
     this._panel.reveal(viewColumn, preserveFocus);
+    let note: NoteProps | undefined;
+
+    if (opts) {
+      // Used a context menu to open preview for a specific note
+      try {
+        note = WSUtils.getNoteFromPath(opts.path);
+      } catch {
+        // Sometimes VSCode gives us a weird `opts` when no note was selected, so fall back to active note
+        note = WSUtils.getActiveNote();
+      }
+    } else {
+      // Used the command bar or keyboard shortcut to open preview for active note
+      note = WSUtils.getActiveNote();
+    }
+
+    if (note) {
+      await ShowPreviewCommand.openNoteInPreview(note);
+    } else if (opts?.path) {
+      // We can't find the note, so this is not in the Dendron workspace.
+      // Preview the file anyway if it's a markdown file.
+      await ShowPreviewCommand.openFileInPreview(opts.path);
+    } else {
+      // Not file selected for preview, default ot open file
+      const editor = VSCodeUtils.getActiveTextEditor();
+      if (editor)
+        await ShowPreviewCommand.openFileInPreview(editor.document.uri.fsPath);
+    }
   }
 }

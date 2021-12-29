@@ -32,8 +32,7 @@ import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { CommandFactory } from "./commandFactory";
 import { ICommandFactory } from "./commandFactoryInterface";
-import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
-import { DENDRON_COMMANDS, DendronContext, GLOBAL_STATE } from "./constants";
+import { DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
   IDendronExtension,
@@ -656,9 +655,7 @@ export class DendronExtension implements IDendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher(
-      PreviewPanelFactory.getProxy(getExtension())
-    );
+    const windowWatcher = new WindowWatcher();
 
     windowWatcher.activate(this.context);
     for (const editor of vscode.window.visibleTextEditors) {

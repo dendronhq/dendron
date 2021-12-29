@@ -65,7 +65,7 @@ export abstract class BaseCommand<
    * Basic error checking
    * @returns
    */
-  async sanityCheck(): Promise<undefined | string | "cancel"> {
+  async sanityCheck(_opts?: TOpts): Promise<undefined | string | "cancel"> {
     return;
   }
 
@@ -78,7 +78,7 @@ export abstract class BaseCommand<
 
     try {
       // TODO: Add sanity check failure to analytics payload.
-      const out = await this.sanityCheck();
+      const out = await this.sanityCheck(opts);
       if (out === "cancel") {
         return;
       }

@@ -486,6 +486,11 @@ export class VSCodeUtils {
     });
   }
 
+  /** Use the built-in markdown preview to display preview for a file. */
+  static showDefaultPreview(uri?: vscode.Uri) {
+    return vscode.commands.executeCommand("markdown.showPreview", uri);
+  }
+
   static getCodeUserConfigDir() {
     const CODE_RELEASE_MAP = {
       VSCodium: "VSCodium",

@@ -4,9 +4,10 @@ import { describe, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
-import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
+import { getDWorkspace, getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
@@ -26,10 +27,6 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
-const retrieveExtension = async (ctx: vscode.ExtensionContext) => {
-  return DendronExtension.getOrCreate(ctx);
-};
-
 suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
@@ -40,9 +37,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
     beforeEach(async () => {
       if (watcher === undefined) {
-        watcher = new WindowWatcher(
-          PreviewPanelFactory.getProxy(await retrieveExtension(ctx))
-        );
+        watcher = new WindowWatcher();
       }
     });
     test("basic", (done) => {
@@ -112,10 +107,10 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           await watcher!.triggerNotePreviewUpdate(editor!);
 
           const maybePanel = PreviewPanelFactory.getProxy(
-            getExtension()
+            ExtensionProvider.getExtension()
           ).getPanel();
           expect(maybePanel).toBeTruthy();
-          expect(maybePanel?.active).toBeTruthy();
+          expect(maybePanel?.visible).toBeTruthy();
         });
       }
     );

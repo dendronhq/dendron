@@ -1,10 +1,8 @@
 import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
 import {
   isNotUndefined,
-  makeColorTranslucent,
   NoteProps,
   NotePropsDict,
-  NoteUtils,
   TAGS_HIERARCHY,
   TAGS_HIERARCHY_BASE,
   VaultUtils,
@@ -69,15 +67,9 @@ export class TreeViewUtils {
     if (showVaultName) title = `${title} (${vname})`;
 
     if (note.fname.startsWith(TAGS_HIERARCHY)) {
-      let { color } = NoteUtils.color({
-        fname: note.fname,
-        notes: noteDict,
-        vault: note.vault,
-      });
-      color = makeColorTranslucent(color, 0.6);
       title = (
         <span>
-          <NumberOutlined style={{ color }} />
+          <NumberOutlined />
           {title}
         </span>
       );

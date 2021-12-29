@@ -11,9 +11,6 @@ import {
   DVault,
   NoteProps,
   SEOProps,
-  DVault,
-  DHookDict,
-  DendronSiteConfig,
   NotePropsDict,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";

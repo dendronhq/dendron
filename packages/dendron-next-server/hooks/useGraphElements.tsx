@@ -266,8 +266,8 @@ function getNoteColor(opts: { fname: string; notes: NotePropsDict }) {
   // it requires multiple getNotesByFName calls. Once that function is cheaper
   // we can use this for all notes.
   if (!opts.fname.startsWith(TAGS_HIERARCHY)) return undefined;
-  const { color } = NoteUtils.color(opts);
-  return color;
+  // TODO: This needs to be revised to use the new color function
+  return undefined;
 }
 
 const getFullNoteGraphElements = ({

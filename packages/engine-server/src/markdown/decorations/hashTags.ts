@@ -42,7 +42,7 @@ export async function decorateTag({
   lineOffset?: number;
 }) {
   let color: string | undefined;
-  const { color: foundColor, type: colorType } = NoteUtils.colorV2({
+  const { color: foundColor, type: colorType } = NoteUtils.color({
     fname,
     engine,
   });

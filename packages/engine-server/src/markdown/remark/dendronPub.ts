@@ -223,7 +223,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         let color: string | undefined;
         if (mode !== ProcMode.IMPORT && value.startsWith(TAGS_HIERARCHY)) {
-          const { color: maybeColor, type: colorType } = NoteUtils.colorV2({
+          const { color: maybeColor, type: colorType } = NoteUtils.color({
             fname: value,
             vault,
             engine,

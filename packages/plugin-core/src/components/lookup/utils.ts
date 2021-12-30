@@ -28,10 +28,10 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
@@ -100,7 +100,7 @@ export function createMoreResults(): DNodePropsQuickInputV2 {
 export function node2Uri(node: DNodeProps): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
-  const { wsRoot } = getDWorkspace();
+  const { wsRoot } = ExtensionProvider.getDWorkspace();
   const vault = node.vault;
   const vpath = vault2Path({ wsRoot, vault });
   return Uri.file(path.join(vpath, nodePath));
@@ -199,7 +199,7 @@ export class ProviderAcceptHooks {
     // setup vars
     const oldVault = PickerUtilsV2.getVaultForOpenEditor();
     const newVault = quickpick.vault ? quickpick.vault : oldVault;
-    const { wsRoot, engine } = getDWorkspace();
+    const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
     const notes = engine.notes;
 
     // get old note
@@ -378,13 +378,13 @@ export class PickerUtilsV2 {
    */
   static getVaultForOpenEditor(): DVault {
     const ctx = "getVaultForOpenEditor";
-    const { vaults, wsRoot } = getDWorkspace();
+    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
 
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       activeDocument &&
-      getExtension().workspaceService?.isPathInWorkspace(
+      ExtensionProvider.getExtension().workspaceService?.isPathInWorkspace(
         activeDocument.uri.fsPath
       )
     ) {
@@ -481,7 +481,7 @@ export class PickerUtilsV2 {
     fname: string;
     vaultSelectionMode?: VaultSelectionMode;
   }): Promise<DVault | undefined> {
-    const { engine } = getDWorkspace();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
       vaults: engine.vaults,
@@ -517,7 +517,7 @@ export class PickerUtilsV2 {
   public static async promptVault(
     overrides?: VaultPickerItem[] | DVault[]
   ): Promise<DVault | undefined> {
-    const { vaults: wsVaults } = getDWorkspace();
+    const { vaults: wsVaults } = ExtensionProvider.getDWorkspace();
     const pickerOverrides = isDVaultArray(overrides)
       ? overrides.map((value) => {
           return { vault: value, label: VaultUtils.getName(value) };
@@ -560,7 +560,7 @@ export class PickerUtilsV2 {
   }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
-    // const { engine } = getDWorkspace();
+    // const { engine } =ExtensionProvider.getDWorkspace();
 
     // Only 1 vault, no other options to choose from:
     if (vaults.length <= 1) {
@@ -726,7 +726,8 @@ export class PickerUtilsV2 {
       }
     );
 
-    const ext = getExtension();
+    const ext = ExtensionProvider.getExtension();
+    // @ts-ignore
     const lookupView = ext.getTreeView(
       DendronTreeViewKey.LOOKUP_VIEW
     ) as LookupView;
@@ -787,7 +788,7 @@ export class NotePickerUtils {
   }: {
     engine: DEngineClient;
   }) => {
-    const { wsRoot, vaults } = getDWorkspace();
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const nodes = NoteLookupUtils.fetchRootResults(engine.notes);
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
@@ -807,7 +808,7 @@ export class NotePickerUtils {
   }: {
     picker: DendronQuickPickerV2;
   }) {
-    const engine = getDWorkspace().engine;
+    const engine = ExtensionProvider.getDWorkspace().engine;
     const resp = await NoteLookupUtils.lookup({
       qs: picker.value,
       engine,
@@ -828,7 +829,7 @@ export class NotePickerUtils {
     note: NoteProps;
     engine: DEngineClient;
   }) {
-    const { wsRoot, vaults } = getDWorkspace();
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     return DNodeUtils.enhancePropForQuickInputV3({
       wsRoot,
       props: input.note,
@@ -845,7 +846,7 @@ export class NotePickerUtils {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
     const { picker, transformedQuery, originalQS } = opts;
-    const { engine, wsRoot, vaults } = getDWorkspace();
+    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 
@@ -1019,7 +1020,7 @@ export class SchemaPickerUtils {
   }: {
     picker: DendronQuickPickerV2;
   }) {
-    const { engine, wsRoot, vaults } = getDWorkspace();
+    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(picker.value);
     const node = SchemaUtils.getModuleRoot(resp.data[0]);
     const perfectMatch = node.fname === picker.value;
@@ -1042,7 +1043,7 @@ export class SchemaPickerUtils {
     const ctx = "SchemaPickerUtils:fetchPickerResults";
     const start = process.hrtime();
     const { picker, qs } = opts;
-    const { engine, wsRoot, vaults } = getDWorkspace();
+    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(qs);
     let nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
 

@@ -8,9 +8,10 @@ import {
 import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
 
 export class WebViewUtils {
   /**
@@ -19,7 +20,9 @@ export class WebViewUtils {
    * @returns
    */
   static getViewRootUri() {
-    const assetUri = VSCodeUtils.getAssetUri(getExtension().context);
+    const assetUri = VSCodeUtils.getAssetUri(
+      ExtensionProvider.getExtension().context
+    );
     const pkgRoot = path.dirname(
       findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
     );
@@ -71,7 +74,9 @@ export class WebViewUtils {
     wsRoot: string;
     panel: vscode.WebviewPanel | vscode.WebviewView;
   }) {
-    const root = VSCodeUtils.getAssetUri(getExtension().context);
+    const root = VSCodeUtils.getAssetUri(
+      ExtensionProvider.getExtension().context
+    );
     const themes = ["light", "dark"];
     const themeMap: any = {};
     themes.map((th) => {
@@ -100,7 +105,7 @@ export class WebViewUtils {
     key,
     webviewView,
   }: {
-    ext: DendronExtension;
+    ext: IDendronExtension;
     key: DendronTreeViewKey;
     webviewView: vscode.WebviewView;
   }) {
@@ -134,9 +139,9 @@ export class WebViewUtils {
     title: string;
     view: DendronTreeViewKey | DendronEditorViewKey;
   }) => {
-    const { wsRoot, config } = getDWorkspace();
-    const ext = getExtension();
-    const port = getExtension().port;
+    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
+    const port = ext.port;
     const qs = DUtils.querystring.stringify({
       ws: wsRoot,
       port,

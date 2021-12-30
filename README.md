@@ -160,7 +160,7 @@ To stay up to date on Dendron developments and all things knowledge management:
 
 * Join [Dendron on Discord](https://link.dendron.so/discord)
 * [Subscribe to the newsletter](https://link.dendron.so/newsletter)
-* Read the [Dendron Blog](https://link.dendron.so/blog)
+* Read the [Dendron Blog](https://blog.dendron.so/)
 * Register for [Dendron Events on Luma](https://link.dendron.so/luma)
 * Follow [Dendron on Twitter](https://link.dendron.so/twitter)
 * Checkout [Dendron on GitHub](https://link.dendron.so/github)

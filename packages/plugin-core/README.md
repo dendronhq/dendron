@@ -29,7 +29,7 @@ We make managing general knowledge like managing code and your PKM like an IDE.
 
 Dendron aims to create a world class developer experience for managing knowledge.
 
-Our goal is to provide a tool with the efficiency of vim, the extensibility of emacs, and the approachability of VSCode.
+Our goal is to provide a tool with the efficiency of Vim, the extensibility of Emacs, and the approachability of VS Code.
 
 What this means:
 
@@ -61,7 +61,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 - manage using git
 - use git blame to see individual edits
-- edit in anything that works on text files (eg. vim)
+- edit in anything that works on text files (eg. Vim)
 
 <a href="https://www.loom.com/share/67b90027de974702a78753158822e96b">
     <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/67b90027de974702a78753158822e96b.gif">
@@ -147,15 +147,22 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 ## Getting Started
 
-Follow the instructions [here](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/) to get started with Dendron.
+Interested in trying out Dendron? Jump right in with the [Getting Started Guide](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)!
 
 ## Join Us
 
-To stay up to date on Dendron developments and all things knowledge management, you can follow us at [@dendronhq](https://twitter.com/dendronhq) or join us on [discord](https://discord.gg/6j85zNX)!
+To stay up to date on Dendron developments and all things knowledge management:
+
+* Join [Dendron on Discord](https://link.dendron.so/discord)
+* [Subscribe to the newsletter](https://link.dendron.so/newsletter)
+* Read the [Dendron Blog](https://link.dendron.so/blog)
+* Register for [Dendron Events on Luma](https://link.dendron.so/luma)
+* Follow [Dendron on Twitter](https://link.dendron.so/twitter)
+* Checkout [Dendron on GitHub](https://link.dendron.so/github)
 
 ## Developer Getting Started
 
-If you checked out this repo and would like to get started with the code, please see the [docs README](./../../docs/README.md) to get started.
+If you are interested in contributing to the Dendron source code, please see the [Dendron Development README](https://github.com/dendronhq/dendron/blob/master/docs/README.md) to get started.
 
 ## Contributors ✨
 
@@ -243,7 +250,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/kimds91"><img src="https://avatars.githubusercontent.com/u/11445901?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Do Soon Kim</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akimds91" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/gereleth"><img src="https://avatars.githubusercontent.com/u/6080076?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daria Vasyukova</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agereleth" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/djradon"><img src="https://avatars.githubusercontent.com/u/5224156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dave Richardson</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adjradon" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=djradon" title="Documentation">📖</a></td>
-    <td align="center"><a href="http://me-ding-fan.vercel.app"><img src="https://avatars.githubusercontent.com/u/26438549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ding</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Ding-Fan" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://me-ding-fan.vercel.app"><img src="https://avatars.githubusercontent.com/u/26438549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ding</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Ding-Fan" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3ADing-Fan" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/nz-john"><img src="https://avatars.githubusercontent.com/u/89765379?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Anz-john" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://hoppertech.net"><img src="https://avatars.githubusercontent.com/u/35973180?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeff Hopper</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AHopperTech" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.ryanpatrickrandall.com"><img src="https://avatars.githubusercontent.com/u/850915?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryan Randall</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aryan-p-randall" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=ryan-p-randall" title="Documentation">📖</a></td>
@@ -279,16 +286,16 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/ragamroll"><img src="https://avatars.githubusercontent.com/u/3618625?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ragamroll</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aragamroll" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/voothi"><img src="https://avatars.githubusercontent.com/u/9587340?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Denis Novikov</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Avoothi" title="Bug reports">🐛</a> <a href="#content-voothi" title="Content">🖋</a></td>
     <td align="center"><a href="https://github.com/mhijazi1"><img src="https://avatars.githubusercontent.com/u/5711555?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mo</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amhijazi1" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/cconrad"><img src="https://avatars.githubusercontent.com/u/584491?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Claus Conrad</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Acconrad" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/cconrad"><img src="https://avatars.githubusercontent.com/u/584491?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Claus Conrad</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Acconrad" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=cconrad" title="Documentation">📖</a> <a href="#financial-cconrad" title="Financial">💵</a></td>
     <td align="center"><a href="https://github.com/johndendron"><img src="https://avatars.githubusercontent.com/u/89761127?v=4?s=100" width="100px;" alt=""/><br /><sub><b>johndendron</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajohndendron" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://aaronmeese.com"><img src="https://avatars.githubusercontent.com/u/17814535?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aaron Meese</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=ajmeese7" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/JeffTeter"><img src="https://avatars.githubusercontent.com/u/13050714?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeff Teter</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AJeffTeter" title="Bug reports">🐛</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/mrajaram"><img src="https://avatars.githubusercontent.com/u/615159?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mari Rajaram</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=mrajaram" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/l2dy"><img src="https://avatars.githubusercontent.com/u/14329097?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zero King</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=l2dy" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/l2dy"><img src="https://avatars.githubusercontent.com/u/14329097?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zero King</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=l2dy" title="Code">💻</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Al2dy" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/benhsm"><img src="https://avatars.githubusercontent.com/u/93843523?v=4?s=100" width="100px;" alt=""/><br /><sub><b>benhsm</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=benhsm" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/icedwater"><img src="https://avatars.githubusercontent.com/u/144799?v=4?s=100" width="100px;" alt=""/><br /><sub><b>icedwater</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aicedwater" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/icedwater"><img src="https://avatars.githubusercontent.com/u/144799?v=4?s=100" width="100px;" alt=""/><br /><sub><b>icedwater</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aicedwater" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=icedwater" title="Code">💻</a></td>
     <td align="center"><a href="http://mstempl.netlify.app"><img src="https://avatars.githubusercontent.com/u/3171330?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bassmann</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABassmann" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://quanta.money"><img src="https://avatars.githubusercontent.com/u/81030?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Im</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aimmartian" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.okam.ca"><img src="https://avatars.githubusercontent.com/u/30426?v=4?s=100" width="100px;" alt=""/><br /><sub><b>David Paquet Pitts</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adavidpp" title="Bug reports">🐛</a></td>
@@ -307,6 +314,21 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/jsamr"><img src="https://avatars.githubusercontent.com/u/3646758?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jules Sam. Randolph</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajsamr" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/blu3r4y"><img src="https://avatars.githubusercontent.com/u/10400532?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mario Kahlhofer</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ablu3r4y" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/tolikkostin"><img src="https://avatars.githubusercontent.com/u/26538478?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Anatoliy Kostin</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Atolikkostin" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/r-good"><img src="https://avatars.githubusercontent.com/u/95871742?v=4?s=100" width="100px;" alt=""/><br /><sub><b>r-good</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ar-good" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://sagar.se"><img src="https://avatars.githubusercontent.com/u/1622959?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sagar Behere</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asagarbehere" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://nicklas.gummesson.net"><img src="https://avatars.githubusercontent.com/u/978461?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicklas Gummesson</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aviddo" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/jquesada2016"><img src="https://avatars.githubusercontent.com/u/54370171?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jquesada2016</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajquesada2016" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=jquesada2016" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/phanirithvij"><img src="https://avatars.githubusercontent.com/u/29627898?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Phani Rithvij</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aphanirithvij" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/kzilla-git"><img src="https://avatars.githubusercontent.com/u/12721315?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kumudan</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Akzilla-git" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/zersiax"><img src="https://avatars.githubusercontent.com/u/5076383?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Florian Beijers</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Azersiax" title="Bug reports">🐛</a> <a href="#a11y-zersiax" title="Accessibility">️️️️♿️</a></td>
+    <td align="center"><a href="https://github.com/rlh1994"><img src="https://avatars.githubusercontent.com/u/8260415?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryan Hill</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=rlh1994" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Arlh1994" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://WikiEducator.org/User:JimTittsler"><img src="https://avatars.githubusercontent.com/u/180326?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jim Tittsler</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jimt" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://aphorica.com"><img src="https://avatars.githubusercontent.com/u/161474?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rick Berger</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Arickbsgu" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/ThibaultNocchi"><img src="https://avatars.githubusercontent.com/u/1619359?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thibault</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AThibaultNocchi" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

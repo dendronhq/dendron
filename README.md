@@ -1,3 +1,7 @@
+[![dendronhq on Twitter](https://img.shields.io/twitter/follow/dendronhq?style=social)](https://link.dendron.so/twitter)
+[![Dendron on YouTube](https://img.shields.io/youtube/channel/subscribers/UC8GQLj4KZhN8WcJPiKXtcRQ?style=social)](https://link.dendron.so/youtube)
+[![Discord](https://img.shields.io/discord/717965437182410783?color=blueviolet&label=Discord&style=flat-square)](https://link.dendron.so/discord)
+[![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-120-orange.svg?style=flat-square)](#contributors-)
@@ -7,7 +11,7 @@
 
 ![Dendron Logo](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
-Dendron is an **open-source, local-first, markdown-based, note-taking tool**. It's a personal knowledge management solution (PKM) built specifically for developers and integrates natively with IDEs like [VSCode](https://code.visualstudio.com/).
+Dendron is an **open-source, local-first, markdown-based, note-taking tool**. It's a personal knowledge management solution (PKM) built specifically for developers and integrates natively with IDEs like [VS Code](https://code.visualstudio.com/) and [VSCodium](https://vscodium.com/).
 
 ## Why
 
@@ -30,7 +34,7 @@ We make managing general knowledge like managing code and your PKM like an IDE.
 
 Dendron aims to create a world class developer experience for managing knowledge.
 
-Our goal is to provide a tool with the efficiency of vim, the extensibility of emacs, and the approachability of VSCode.
+Our goal is to provide a tool with the efficiency of Vim, the extensibility of Emacs, and the approachability of VS Code.
 
 What this means:
 
@@ -62,7 +66,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 - manage using git
 - use git blame to see individual edits
-- edit in anything that works on text files (eg. vim)
+- edit in anything that works on text files (eg. Vim)
 
 <a href="https://www.loom.com/share/67b90027de974702a78753158822e96b">
     <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/67b90027de974702a78753158822e96b.gif">
@@ -148,15 +152,22 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 ## Getting Started
 
-Follow the instructions [here](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/) to get started with Dendron.
+Interested in trying out Dendron? Jump right in with the [Getting Started Guide](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)!
 
 ## Join Us
 
-To stay up to date on Dendron developments and all things knowledge management, you can follow us at [@dendronhq](https://twitter.com/dendronhq) or join us on [discord](https://discord.gg/6j85zNX)!
+To stay up to date on Dendron developments and all things knowledge management:
+
+* Join [Dendron on Discord](https://link.dendron.so/discord)
+* [Subscribe to the newsletter](https://link.dendron.so/newsletter)
+* Read the [Dendron Blog](https://link.dendron.so/blog)
+* Register for [Dendron Events on Luma](https://link.dendron.so/luma)
+* Follow [Dendron on Twitter](https://link.dendron.so/twitter)
+* Checkout [Dendron on GitHub](https://link.dendron.so/github)
 
 ## Developer Getting Started
 
-If you checked out this repo and would like to get started with the code, please see the [docs README](./docs/README.md) to get started.
+If you are interested in contributing to the Dendron source code, please see the [Dendron Development README](https://github.com/dendronhq/dendron/blob/master/docs/README.md) to get started.
 
 ## Contributors ✨
 

@@ -44,9 +44,8 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numNotes, noteActive?.id]);
 
-  // calculate root
+  // calculate the tree data
   React.useEffect(() => {
-    // calculate roots once on startup
     logger.info({ msg: "calcRoots:pre", numNotes });
     const _roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
       (ent) => {
@@ -63,7 +62,14 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     // TODO: remove notes
     logger.info({ msg: "calcRoots:post:setRoots", numNotes });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numNotes]);
+  }, [
+    // update if there are new notes
+    numNotes,
+    // update if something that may reorder the active note changes
+    noteActive?.title,
+    noteActive?.updated,
+    noteActive?.custom?.nav_order,
+  ]);
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {

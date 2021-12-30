@@ -38,3 +38,10 @@ export enum LookupFilterTypeEnum {
 }
 
 export type LookupFilterType = keyof typeof LookupFilterTypeEnum;
+
+export type AllModifierType =
+  | LookupSelectionType
+  | LookupNoteType
+  | LookupEffectType
+  | LookupSplitType
+  | LookupFilterType;

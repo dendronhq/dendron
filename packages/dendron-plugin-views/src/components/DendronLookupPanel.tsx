@@ -1,5 +1,5 @@
 import { DendronProps } from "../types";
-import { Form, Select, Switch, FormInstance } from "antd";
+import { Tooltip, Form, Select, Switch, FormInstance } from "antd";
 import {
   DMessageSource,
   LookupEffectTypeEnum,
@@ -9,6 +9,8 @@ import {
   LookupSplitTypeEnum,
   LookupViewMessage,
   LookupViewMessageEnum,
+  DENDRON_COLORS,
+  MODIFIER_DESCRIPTIONS,
 } from "@dendronhq/common-all";
 import React, { useEffect } from "react";
 import { postVSCodeMessage } from "../utils/vscode";
@@ -125,13 +127,15 @@ function SelectionTypeFormItem() {
   };
   const selectionModifierChoices = Object.keys(LookupSelectionTypeEnum)
     .filter((key) => key !== "none")
-    .map((key) => {
-      return <Option value={key}>{key}</Option>;
-    });
+    .map((key) => OptionWithTooltip(key));
 
   return (
     <>
-      <Form.Item name="selection" label="Selection">
+      <Form.Item
+        name="selection"
+        label="Selection"
+        tooltip="Determine the behavior of selected text in the active editor when creating a new note using lookup"
+      >
         <Select allowClear onChange={onSelectionChange} placeholder="None">
           {selectionModifierChoices}
         </Select>
@@ -164,9 +168,9 @@ function SelectionTypeFormItem() {
 // }
 
 function EffectTypeFormItem() {
-  const effectModifierChoices = Object.keys(LookupEffectTypeEnum).map((key) => {
-    return <Option value={key}>{key}</Option>;
-  });
+  const effectModifierChoices = Object.keys(LookupEffectTypeEnum).map((key) =>
+    OptionWithTooltip(key)
+  );
   const onEffectChange = (option: string) => {
     postVSCodeMessage({
       type: LookupViewMessageEnum.onValuesChange,
@@ -176,7 +180,11 @@ function EffectTypeFormItem() {
   };
   return (
     <>
-      <Form.Item name="effect" label="Effect Type">
+      <Form.Item
+        name="effect"
+        label="Effect Type"
+        tooltip="Various lookup effects"
+      >
         <Select
           allowClear
           mode="multiple"
@@ -204,6 +212,7 @@ function SplitTypeFormItem() {
         name="horizontalSplit"
         label="Split Horizontally"
         valuePropName="checked"
+        tooltip={MODIFIER_DESCRIPTIONS["horizontal"]}
       >
         <Switch onChange={onSplitChange} />
       </Form.Item>
@@ -225,9 +234,36 @@ function FilterTypeFormItem() {
         name="directChildOnly"
         label="Apply Direct Child Filter"
         valuePropName="checked"
+        tooltip={MODIFIER_DESCRIPTIONS["directChildOnly"]}
       >
         <Switch onChange={onFilterChange} />
       </Form.Item>
+    </>
+  );
+}
+
+function DendronGreenTooltip(props: React.PropsWithChildren<any>) {
+  return (
+    <>
+      <Tooltip
+        color={DENDRON_COLORS["dendron green"]}
+        placement="topLeft"
+        title={props.title}
+      >
+        {props.children}
+      </Tooltip>
+    </>
+  );
+}
+
+function OptionWithTooltip(key: string) {
+  return (
+    <>
+      <Option value={key}>
+        <DendronGreenTooltip title={MODIFIER_DESCRIPTIONS[key]}>
+          {key}
+        </DendronGreenTooltip>
+      </Option>
     </>
   );
 }

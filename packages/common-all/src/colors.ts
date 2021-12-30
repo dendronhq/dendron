@@ -1,8 +1,12 @@
+export const DENDRON_COLORS: { [index: string]: string } = {
+  "dendron green": "#00A824",
+};
+
 // https://xkcd.com/color/rgb.txt
 //
 // License: http://creativecommons.org/publicdomain/zero/1.0/
 //
-export const COLORS: { [index: string]: string } = {
+export const XKCD_COLORS: { [index: string]: string } = {
   "cloudy blue": "#acc2d9",
   "dark pastel green": "#56ae57",
   dust: "#b2996e",
@@ -953,4 +957,7 @@ export const COLORS: { [index: string]: string } = {
   green: "#15b01a",
   purple: "#7e1e9c",
 };
+
+const COLORS = { ...DENDRON_COLORS, ...XKCD_COLORS };
+
 export const COLORS_LIST = Object.values(COLORS);

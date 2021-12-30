@@ -10,6 +10,10 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  /**
+   * Should display dendron tree views
+   */
+  TREE_VIEWS_ACTIVE = "dendron:treeViewsActive",
   WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",

@@ -107,7 +107,6 @@ function LookupViewForm({
     <>
       <Form form={form}>
         <SelectionTypeFormItem />
-        <NoteTypeFormItem />
         <EffectTypeFormItem />
         <SplitTypeFormItem />
         <FilterTypeFormItem />
@@ -141,27 +140,28 @@ function SelectionTypeFormItem() {
   );
 }
 
-function NoteTypeFormItem() {
-  const onNoteChange = (option: string) => {
-    postVSCodeMessage({
-      type: LookupViewMessageEnum.onValuesChange,
-      data: { category: "note", type: option },
-      source: DMessageSource.webClient,
-    });
-  };
-  const noteModifierChoices = Object.keys(LookupNoteTypeEnum).map((key) => {
-    return <Option value={key}>{key}</Option>;
-  });
-  return (
-    <>
-      <Form.Item name="note" label="Note Type">
-        <Select allowClear onChange={onNoteChange} placeholder="None">
-          {noteModifierChoices}
-        </Select>
-      </Form.Item>
-    </>
-  );
-}
+// NOTE: keeping this around until we decide that we really don't want it.
+// function NoteTypeFormItem() {
+//   const onNoteChange = (option: string) => {
+//     postVSCodeMessage({
+//       type: LookupViewMessageEnum.onValuesChange,
+//       data: { category: "note", type: option },
+//       source: DMessageSource.webClient,
+//     });
+//   };
+//   const noteModifierChoices = Object.keys(LookupNoteTypeEnum).map((key) => {
+//     return <Option value={key}>{key}</Option>;
+//   });
+//   return (
+//     <>
+//       <Form.Item name="note" label="Note Type">
+//         <Select allowClear onChange={onNoteChange} placeholder="None">
+//           {noteModifierChoices}
+//         </Select>
+//       </Form.Item>
+//     </>
+//   );
+// }
 
 function EffectTypeFormItem() {
   const effectModifierChoices = Object.keys(LookupEffectTypeEnum).map((key) => {

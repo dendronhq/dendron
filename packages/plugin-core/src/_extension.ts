@@ -790,7 +790,6 @@ function togglePluginActiveContext(enabled: boolean) {
   const ctx = "togglePluginActiveContext";
   Logger.info({ ctx, state: `togglePluginActiveContext: ${enabled}` });
   VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
-  VSCodeUtils.setContext(DendronContext.TREE_VIEWS_ACTIVE, enabled);
   VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
 

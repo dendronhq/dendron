@@ -49,6 +49,7 @@ export const DENDRON_VIEWS = [
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
     where: "explorer",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),

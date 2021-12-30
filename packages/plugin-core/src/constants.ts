@@ -61,7 +61,7 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
-    when: `${DendronContext.WEB_UI_ENABLED} && ${DendronContext.NOTE_LOOK_UP_ACTIVE}`,
+    when: DendronContext.NOTE_LOOK_UP_ACTIVE,
     where: "explorer",
   },
   {

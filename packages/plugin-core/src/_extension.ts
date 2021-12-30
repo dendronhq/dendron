@@ -487,6 +487,7 @@ export async function _activate(
       // initialize client
       setupSegmentClient(wsImpl);
 
+      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,

@@ -277,6 +277,35 @@ describe("Fuse Engine tests with dummy data", () => {
       });
     });
 
+    describe('WHEN querying for "NOTE" (case mismatch)', () => {
+      let queryResult: NoteIndexProps[];
+      beforeAll(() => {
+        queryResult = fuseEngine.queryNote({ qs: "NOTE" });
+      });
+
+      it("THEN include note-1", () => {
+        assertHasFName(queryResult, "note-1");
+      });
+
+      it("THEN include note-2", () => {
+        assertHasFName(queryResult, "note-1");
+      });
+
+      it("THEN notes with same matching score should be ordered by update time", () => {
+        expect(queryResult[0].fname).toEqual("note-3");
+        expect(queryResult[1].fname).toEqual("note-2");
+        expect(queryResult[2].fname).toEqual("note-1");
+      });
+
+      it('THEN include "parent.new-note-1"', () => {
+        assertHasFName(queryResult, "parent.new-note-1");
+      });
+
+      it('THEN exclude "user.tim.test"', () => {
+        assertDoesNotHaveFName(queryResult, "user.tim.test");
+      });
+    });
+
     describe('WHEN querying for "note-1"', () => {
       let queryResults: NoteIndexProps[];
 
@@ -306,6 +335,22 @@ describe("Fuse Engine tests with dummy data", () => {
       });
 
       it(`THEN should match 'some.note.name.with.big-o'`, () => {
+        assertHasFName(queryResults, "some.note.name.with.big-o");
+      });
+    });
+
+    describe(`WHEN querying for full length word`, () => {
+      it("AND case matches THEN should get the note", () => {
+        const queryResults = fuseEngine.queryNote({
+          qs: "some.note.name.with.big-o",
+        });
+        assertHasFName(queryResults, "some.note.name.with.big-o");
+      });
+
+      it("AND case does NOT match THEN should get the note", () => {
+        const queryResults = fuseEngine.queryNote({
+          qs: "SOME.note.NAME.with.big-o",
+        });
         assertHasFName(queryResults, "some.note.name.with.big-o");
       });
     });

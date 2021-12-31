@@ -376,10 +376,18 @@ export type DCommonProps = {
   config: IntermediateDendronConfig;
 };
 
-export type NoteChangeEntry = {
+export type NoteChangeUpdateEntry = {
+  prevNote: NoteProps;
   note: NoteProps;
-  status: "create" | "update" | "delete";
+  status: "update";
 };
+
+export type NoteChangeEntry =
+  | {
+      note: NoteProps;
+      status: "create" | "delete";
+    }
+  | NoteChangeUpdateEntry;
 
 /** A block within a note that can be referenced using block anchors or headers. */
 export type NoteBlock = {

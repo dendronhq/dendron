@@ -301,16 +301,21 @@ export class DendronEngineClient implements DEngineClient {
       if (ent.status === "delete") {
         delete this.notes[id];
         this.noteFnames.delete(ent.note);
-        // eslint-disable-next-line no-unused-expressions
-        this.history &&
-          this.history.add({ source: "engine", action: "delete", uri });
+        this.history?.add({ source: "engine", action: "delete", uri });
       } else {
         if (ent.status === "create") {
-          // eslint-disable-next-line no-unused-expressions
-          this.history &&
-            this.history.add({ source: "engine", action: "create", uri });
+          this.noteFnames.add(ent.note);
+          this.history?.add({ source: "engine", action: "create", uri });
         }
         if (ent.status === "update") {
+          // If the note id or fname has been changed, need to update fname dict
+          if (
+            ent.prevNote?.fname !== ent.note.fname ||
+            ent.prevNote?.id !== ent.note.id
+          ) {
+            if (ent.prevNote) this.noteFnames.delete(ent.prevNote);
+            this.noteFnames.add(ent.note);
+          }
           ent.note.children = _.sortBy(
             ent.note.children,
             (id) =>
@@ -324,15 +329,8 @@ export class DendronEngineClient implements DEngineClient {
           );
         }
         this.notes[id] = ent.note;
-        this.noteFnames.add(ent.note);
       }
     });
-    // There's a limitation with updates: we know what the new note is, but we don't know what the old note was.
-    // If the note was renamed, then we can't remove the old name from `noteFnames` because we don't know the old fname.
-    // To get around this, we'll just refresh the entire dict.
-    if (notes.some((note) => note.status === "update")) {
-      this.noteFnames = new NoteFNamesDict(_.values(this.notes));
-    }
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
@@ -387,7 +385,9 @@ export class DendronEngineClient implements DEngineClient {
     if (_.isUndefined(noteClean)) {
       throw new DendronError({ message: "error updating note", payload: resp });
     }
-    await this.refreshNotesV2([{ note: noteClean, status: "update" }]);
+    await this.refreshNotesV2([
+      { note: noteClean, prevNote: note, status: "update" },
+    ]);
     return noteClean;
   }
 

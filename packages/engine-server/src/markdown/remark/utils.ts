@@ -1019,6 +1019,7 @@ export class RemarkUtils {
     wikilinkPrefix: string,
     siblingNotes: NoteProps[]
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1050,6 +1051,7 @@ export class RemarkUtils {
               : wikilinkValue;
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         });
@@ -1061,6 +1063,7 @@ export class RemarkUtils {
     assetHashMap: Map<string, string>,
     changes: NoteChangeEntry[]
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1088,6 +1091,7 @@ export class RemarkUtils {
           }
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         });
@@ -1099,6 +1103,7 @@ export class RemarkUtils {
     note: NoteProps,
     changes: NoteChangeEntry[]
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1134,6 +1139,7 @@ export class RemarkUtils {
         if (dirty) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1147,6 +1153,7 @@ export class RemarkUtils {
     engine: DEngineClient,
     dendronConfig: IntermediateDendronConfig
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1195,6 +1202,7 @@ export class RemarkUtils {
         if (dirty) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1203,6 +1211,7 @@ export class RemarkUtils {
   }
 
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1232,6 +1241,7 @@ export class RemarkUtils {
         if (!_.isEmpty(notesRefLegacy)) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1240,6 +1250,7 @@ export class RemarkUtils {
   }
 
   static h1ToTitle(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as Root;
@@ -1254,6 +1265,7 @@ export class RemarkUtils {
           }
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1262,6 +1274,7 @@ export class RemarkUtils {
   }
 
   static h1ToH2(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as Root;
@@ -1274,6 +1287,7 @@ export class RemarkUtils {
           head.depth = 2;
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }

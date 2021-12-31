@@ -1,3 +1,4 @@
+# Utility functions for installing lerna packages
 
 function run() {
     cmd=$@

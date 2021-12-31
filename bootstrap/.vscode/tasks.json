@@ -44,78 +44,6 @@
       "problemMatcher": []
     },
     {
-      "label": "changelog",
-      "type": "shell",
-      "command": "./bootstrap/scripts/changelog.sh",
-      "options": {
-        "cwd": "./.."
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "NPM: Publish",
-      "type": "shell",
-      "command": "./bootstrap/scripts/publish-patch.sh",
-      "options": {
-        "cwd": "./.."
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Sleep",
-      "type": "shell",
-      "command": "./bootstrap/scripts/sleep.sh",
-      "options": {
-        "cwd": "./.."
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "NPM: Publish:Pre-Patch",
-      "type": "shell",
-      "command": "./bootstrap/scripts/publish-pre-patch.sh",
-      "options": {
-        "cwd": "./.."
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Plugin: Package and Install",
-      "type": "shell",
-      "command": "scripts/pack_and_install.sh",
-      "options": {
-        "cwd": "./../build/dendron/packages/plugin-core/"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Plugin: Release",
-      "type": "shell",
-      "command": "scripts/publish.sh",
-      "options": {
-        "cwd": "./../build/dendron/packages/plugin-core/"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Plugin: Release Early Seed",
-      "type": "shell",
-      "command": "scripts/publish-insider.sh",
-      "options": {
-        "cwd": "./../build/dendron/packages/plugin-core/"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Plugin: Release Insider",
-      "type": "shell",
-      "command": "scripts/publish-insider.sh",
-      "options": {
-        "cwd": "./../build/dendron/packages/plugin-core/"
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "Plugin: Pack, Install, Release",
       "dependsOn": ["Plugin: Package and Install", "Plugin: Release"],
       "dependsOrder": "sequence",
@@ -127,22 +55,6 @@
         "NPM: Publish",
         "Plugin: Package and Install",
         "Plugin: Release"
-      ],
-      "dependsOrder": "sequence",
-      "problemMatcher": []
-    },
-    {
-      "label": "Pub:Local",
-      "dependsOn": ["NPM: Publish", "Sleep", "Plugin: Package and Install"],
-      "dependsOrder": "sequence",
-      "problemMatcher": []
-    },
-    {
-      "label": "Pub:Local:Pre:Patch",
-      "dependsOn": [
-        "NPM: Publish:Pre-Patch",
-        "Sleep",
-        "Plugin: Package and Install"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": []

@@ -1,3 +1,9 @@
+/* eslint-disable no-console */
+
+/**
+ * Compiles all code for Dendron Plugin
+ */
+
 const execa = require("execa");
 
 const $ = (cmd) => {

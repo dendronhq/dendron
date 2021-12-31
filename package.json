@@ -56,7 +56,7 @@
     "build:prerelease:local": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=local ./bootstrap/scripts/buildPatch.sh",
     "build:prerelease:remote": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",
     "build:prerelease:remote:ci": "cross-env UPGRADE_TYPE=prerelease PUBLISH_ENDPOINT=remote BUILD_ENV=ci ./bootstrap/scripts/buildPatch.sh",
-    "build:patch:local": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local USE_IN_MEMORY_REGISTRY=1 EXT_TARGET=nightly ./bootstrap/scripts/buildPatch.sh",
+    "build:patch:local": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local USE_IN_MEMORY_REGISTRY=1 ./bootstrap/scripts/buildPatch.sh",
     "build:patch:local:ci": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local BUILD_ENV=ci USE_IN_MEMORY_REGISTRY=1 ./bootstrap/scripts/buildPatch.sh",
     "build:patch:local:ci:nightly": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local BUILD_ENV=ci USE_IN_MEMORY_REGISTRY=1 EXT_TARGET=nightly ./bootstrap/scripts/buildPatch.sh",
     "build:patch:remote": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",

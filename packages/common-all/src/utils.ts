@@ -246,12 +246,22 @@ export class NoteFNamesDict {
   }
 
   public get(notes: Readonly<NotePropsDict>, fname: string) {
-    const keys = this._internalMap.get(fname.toLowerCase());
+    const keys = this._internalMap.get(cleanName(fname));
     if (keys === undefined) return [];
     return keys.map((key) => notes[key]).filter(isNotUndefined);
   }
 
+  /** Returns true if dict has `note` exactly with this fname and id. */
+  public has(note: NoteProps): boolean {
+    return !!this._internalMap
+      // there are notes with this fname
+      .get(cleanName(note.fname))
+      // and one of those has matching id
+      ?.some((maybeMatch) => maybeMatch === note.id);
+  }
+
   public add(note: NoteProps) {
+    if (this.has(note)) return; // avoid duplicates
     this._internalMap.add(cleanName(note.fname), note.id);
   }
 

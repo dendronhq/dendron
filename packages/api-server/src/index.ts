@@ -45,7 +45,7 @@ function launchv2(
 
     const serverSockets = new Set<Socket>();
 
-    const server = app.listen(listenPort, () => {
+    const server = app.listen(listenPort, "localhost", () => {
       const port = (server.address() as any).port;
       getLogger().info({ ctx, msg: "exit", port, LOG_DST, root: __dirname });
 

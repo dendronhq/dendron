@@ -18,11 +18,10 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
   const engine = props.engine;
   const { config, notes } = engine;
   const numNotes = _.size(notes);
-  const noteActive = props.ide.noteActive;
+  const { noteActive, notePrev } = props.ide;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const [roots, setRoots] = useState<DataNode[]>([]);
   // Used to avoid recomputing tree data unnecessarily
-  const [noteActiveId, setNoteActiveId] = useState<string>();
   const [numNotesLast, setNumNotesLast] = useState<number>(numNotes);
 
   logger.info({
@@ -49,18 +48,17 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
 
   // calculate the tree data
   React.useEffect(() => {
-    logger.info({ msg: "calcRoots:pre", numNotes, noteActiveId });
+    logger.info({ msg: "calcRoots:pre", numNotes, notePrevId: notePrev?.id });
     // Avoid recomputing if it's just that the active note changed
     if (
       roots.length !== 0 &&
-      noteActiveId !== noteActive?.id &&
+      notePrev?.id !== noteActive?.id &&
       numNotesLast === numNotes
     ) {
       logger.info({
         msg: "calcRoots:noteChange",
         noteActiveId: noteActive?.id,
       });
-      setNoteActiveId(noteActive?.id);
       return;
     }
     setNumNotesLast(numNotes);

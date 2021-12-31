@@ -488,6 +488,7 @@ export class NoteLookupCommand
       Logger.error({ ctx, error: resp.error });
       return;
     }
+
     const uri = NoteUtils.getURI({
       note: nodeNew,
       wsRoot: getDWorkspace().wsRoot,

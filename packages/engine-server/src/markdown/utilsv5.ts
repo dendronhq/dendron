@@ -287,6 +287,7 @@ export class MDUtilsV5 {
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
+
     switch (opts.mode) {
       case ProcMode.FULL:
         {

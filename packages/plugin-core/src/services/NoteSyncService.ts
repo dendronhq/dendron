@@ -161,6 +161,8 @@ export class NoteSyncService {
     PreviewPanelFactory.getProxy(getExtension()).showPreviewAndUpdate(
       noteClean
     );
+    // If note was renamed or had `nav_order` adjusted, it might move in the tree
+    getExtension().dendronTreeViewV2?.refresh(note);
 
     return noteClean;
   }

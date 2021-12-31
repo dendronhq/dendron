@@ -19,6 +19,7 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
+  NoteFNamesDict,
   NoteProps,
   NotePropsDict,
   QueryNotesOpts,
@@ -36,6 +37,7 @@ import {
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
   notes: NotePropsDict;
+  noteFnames: NoteFNamesDict;
   wsRoot: string;
   schemas: SchemaModuleDict;
   links: DLink[];

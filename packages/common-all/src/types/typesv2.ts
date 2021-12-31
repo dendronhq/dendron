@@ -14,6 +14,7 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
+import type { NoteFNamesDict } from "../utils";
 
 export enum ResponseCode {
   OK = 200,
@@ -362,6 +363,8 @@ export type GetDecorationsOpts = {
 export type DCommonProps = {
   /** Dictionary where key is the note id. */
   notes: NotePropsDict;
+  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
+  noteFnames: NoteFNamesDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
   /**
@@ -373,10 +376,18 @@ export type DCommonProps = {
   config: IntermediateDendronConfig;
 };
 
-export type NoteChangeEntry = {
+export type NoteChangeUpdateEntry = {
+  prevNote: NoteProps;
   note: NoteProps;
-  status: "create" | "update" | "delete";
+  status: "update";
 };
+
+export type NoteChangeEntry =
+  | {
+      note: NoteProps;
+      status: "create" | "delete";
+    }
+  | NoteChangeUpdateEntry;
 
 /** A block within a note that can be referenced using block anchors or headers. */
 export type NoteBlock = {

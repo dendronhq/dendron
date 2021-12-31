@@ -5,6 +5,7 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import os from "os";
 import path from "path";
+import { cleanName } from "@dendronhq/common-all";
 
 export type getAllFilesOpts = {
   root: string;
@@ -12,19 +13,6 @@ export type getAllFilesOpts = {
   exclude?: string[];
   withFileTypes?: boolean;
 };
-
-/**
- * Make name safe for dendron
- * @param name
- * @param opts
- */
-export function cleanName(name: string): string {
-  name = name
-    .replace(new RegExp(_.escapeRegExp(path.sep), "g"), ".")
-    .toLocaleLowerCase();
-  name = name.replace(/ /g, "-");
-  return name;
-}
 
 /**
  *

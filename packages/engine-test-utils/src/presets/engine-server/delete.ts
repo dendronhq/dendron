@@ -141,14 +141,15 @@ const NOTES = {
         notes: engine.notes,
         wsRoot: engine.wsRoot,
       });
+      const prevNote = { ...noteToDelete };
       const resp = await engine.deleteNote(noteToDelete?.id as string);
-      const changed = resp.data as NoteChangeEntry[];
+      const changed = resp.data;
       const notes = engine.notes;
       const vpath = vault2Path({ vault, wsRoot });
       return [
         {
           actual: changed,
-          expected: [{ note: notes["foo"], status: "update" }],
+          expected: [{ note: notes["foo"], prevNote, status: "update" }],
           msg: "note updated",
         },
         {

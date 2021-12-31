@@ -4,8 +4,8 @@ import {
   DVault,
   NoteTrait,
   OnCreateContext,
+  cleanName,
 } from "@dendronhq/common-all";
-import { cleanName } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";

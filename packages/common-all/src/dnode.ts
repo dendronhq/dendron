@@ -780,6 +780,7 @@ export class NoteUtils {
     return latestUpdated;
   }
 
+  /** @deprecated see {@link NoteUtils.getNotesByFnameFromEngine} */
   static getNotesByFname({
     fname,
     notes,
@@ -803,6 +804,22 @@ export class NoteUtils {
     return out;
   }
 
+  static getNotesByFnameFromEngine({
+    fname,
+    engine,
+    vault,
+  }: {
+    fname: string;
+    engine: DEngineClient;
+    vault?: DVault;
+  }): NoteProps[] {
+    let notes = engine.noteFnames.get(engine.notes, fname);
+    if (vault)
+      notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
+    return notes;
+  }
+
+  /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
   static getNoteByFnameV5({
     fname,
     notes,
@@ -824,6 +841,14 @@ export class NoteUtils {
       );
     });
     return out;
+  }
+
+  static getNoteByFnameFromEngine(opts: {
+    fname: string;
+    vault: DVault;
+    engine: DEngineClient;
+  }): NoteProps | undefined {
+    return this.getNotesByFnameFromEngine(opts)[0];
   }
 
   /** If `to vault` is defined, returns note from that vault
@@ -1188,7 +1213,11 @@ export class NoteUtils {
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color(opts: { fname: string; vault?: DVault; notes: NotePropsDict }): {
+  static color(opts: {
+    fname: string;
+    vault?: DVault;
+    engine: DEngineClient;
+  }): {
     color: string;
     type: "configured" | "generated";
   } {
@@ -1215,24 +1244,24 @@ export class NoteUtils {
    *
    * @param opts.fname The fname of the note you are trying to get the ancestors of.
    * @param opts.vault The vault to look for. If provided, only notes from this vault will be included.
-   * @param opts.notes All notes in `engine.notes`.
+   * @param opts.engine The engine.
    * @param opts.includeSelf: If true, note with `fname` itself will be included in the ancestors.
    * @param opts.nonStubOnly: If true, only notes that are not stubs will be included.
    */
   static *ancestors(opts: {
     fname: string;
     vault?: DVault;
-    notes: NotePropsDict;
+    engine: DEngineClient;
     includeSelf?: boolean;
     nonStubOnly?: boolean;
   }): Generator<NoteProps> {
-    const { fname, notes, includeSelf, nonStubOnly } = opts;
+    const { fname, engine, includeSelf, nonStubOnly } = opts;
     let { vault } = opts;
     let parts = fname.split(".");
-    let note: NoteProps | undefined = NoteUtils.getNotesByFname({
+    let note: NoteProps | undefined = NoteUtils.getNotesByFnameFromEngine({
       fname,
       vault,
-      notes,
+      engine,
     })[0];
 
     // Check if we need this note itself
@@ -1242,10 +1271,10 @@ export class NoteUtils {
     // All ancestors within the same hierarchy
     while (parts.length > 1) {
       parts = parts.slice(undefined, parts.length - 1);
-      note = NoteUtils.getNotesByFname({
+      note = NoteUtils.getNotesByFnameFromEngine({
         fname: parts.join("."),
         vault,
-        notes,
+        engine,
       })[0];
       if (note && !(nonStubOnly && note.stub)) yield note;
     }
@@ -1254,7 +1283,11 @@ export class NoteUtils {
     if (note) {
       // Yielded at least one note
       if (!vault) vault = note.vault;
-      note = NoteUtils.getNotesByFname({ fname: "root", notes, vault })[0];
+      note = NoteUtils.getNotesByFnameFromEngine({
+        fname: "root",
+        engine,
+        vault,
+      })[0];
       if (note) yield note;
     }
   }

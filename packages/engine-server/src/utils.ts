@@ -275,6 +275,11 @@ export const removeCache = (vpath: string) => {
   return;
 };
 
+/**
+ @deprecated - remove after version 0.76
+ * @param doc 
+ * @returns 
+ */
 export function stripLocalOnlyTags(doc: string) {
   const re = new RegExp(/(?<raw>.+<!--LOCAL_ONLY_LINE-->)/);
   let matches;

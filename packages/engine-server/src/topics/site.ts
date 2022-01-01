@@ -151,7 +151,7 @@ export class SiteUtils {
     const { siteHierarchies } = sconfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];
-    let hiearchiesToPublish: NotePropsDict[] = [];
+    const hiearchiesToPublish: NotePropsDict[] = [];
 
     // async pass to process all notes
     const domainsAndhiearchiesToPublish = await Promise.all(
@@ -239,6 +239,7 @@ export class SiteUtils {
     });
 
     let domainNote: NoteProps | undefined;
+    // duplicate notes found with same name, need to intelligently resolve
     if (notes.length > 1) {
       domainNote = SiteUtils.handleDup({
         allowStubs: false,
@@ -249,6 +250,7 @@ export class SiteUtils {
         noteCandidates: notes,
         noteDict: notesForHiearchy,
       });
+      // no note found
     } else if (notes.length < 1) {
       logger.error({
         ctx: "filterByHiearchy",
@@ -259,8 +261,11 @@ export class SiteUtils {
       // TODO: add warning
       return;
     } else {
+      // get the note
       domainNote = { ...notes[0] };
     }
+
+    // if no note found or can't publish, then stop here
     if (
       _.isUndefined(domainNote) ||
       !this.canPublish({ note: domainNote, config, engine })
@@ -268,104 +273,113 @@ export class SiteUtils {
       return;
     }
 
+    // correct metadata since `custom` is an optional prop
     if (!domainNote.custom) {
       domainNote.custom = {};
     }
     // set domain note settings
+    // navOrder is the same order that is in dendron.yml
     domainNote.custom.nav_order = navOrder;
     domainNote.parent = null;
+
+    // if note is hoempage, set permalink to indicate this
     if (domainNote.fname === sconfig.siteIndex) {
       domainNote.custom.permalink = "/";
     }
 
     logger.info({
       ctx: "filterByHiearchy",
-      fname: domainNote.fname,
-      domainNote: NoteUtils.toLogObj(domainNote),
+      domainNote: NoteUtils.toNoteLoc(domainNote),
     });
 
+    // gather all the children of this hierarchy
     const out: NotePropsDict = {};
     const processQ = [domainNote];
+
     while (!_.isEmpty(processQ)) {
-      const note = processQ.pop() as NoteProps;
+      // we cast because the `_.isEmpty` check guarantees that this is not undefined
+      let note = processQ.pop() as NoteProps;
 
       logger.debug({
         ctx: "filterByHiearchy",
-        fname: note.fname,
-        note: NoteUtils.toLogObj(note),
+        maybeNote: NoteUtils.toNoteLoc(note),
       });
 
-      // check if we can publish this note
-      const maybeNote = SiteUtils.filterByNote({ note, hConfig });
-      if (maybeNote) {
-        if (sconfig.writeStubs && maybeNote.stub) {
-          maybeNote.stub = false;
-          await engine.writeNote(note);
-        }
-        const siteFM = maybeNote.custom || ({} as DendronSiteFM);
+      // add custom metadata to note
+      note = SiteUtils.cleanNote({ note, hConfig });
+      const siteFM = note.custom || ({} as DendronSiteFM);
 
-        // if we skip, wire new children to current note
-        let children = HierarchyUtils.getChildren({
-          skipLevels: siteFM.skipLevels || 0,
-          note: maybeNote,
-          notes: notesForHiearchy,
-        });
-        if (siteFM.skipLevels && siteFM.skipLevels > 0) {
-          maybeNote.children = children.map((ent) => ent.id);
-          children.forEach((ent) => (ent.parent = maybeNote.id));
-        }
-
-        // remove any children that shouldn't be published
-        children = _.filter(children, (note: NoteProps) =>
-          SiteUtils.canPublish({
-            note,
-            config,
-            engine,
-          })
-        );
-        logger.debug({
-          ctx: "filterByHiearchy:post-filter-children",
-          note: note.fname,
-          children: children.map((ent) => ent.id),
-        });
-        // TODO: handle dups
-
-        // add children to Q
-        children.forEach((n: NoteProps) => {
-          // update parent to be current note
-          // dup merging at the top could cause children from multiple vaults
-          // to be present
-          n.parent = maybeNote.id;
-          processQ.push(n);
-        });
-
-        // updated children
-        out[maybeNote.id] = {
-          ...maybeNote,
-          children: children.map((ent) => ent.id),
-        };
+      // TODO: legacy behavior around stubs, will need to remove
+      if (sconfig.writeStubs && note.stub) {
+        delete note.stub;
+        // eslint-disable-next-line no-await-in-loop
+        await engine.writeNote(note);
       }
+
+      // if `skipLevels` is enabled, the children of the current note are descedants
+      // further dow
+      let children = HierarchyUtils.getChildren({
+        skipLevels: siteFM.skipLevels || 0,
+        note,
+        notes: notesForHiearchy,
+      });
+      if (siteFM.skipLevels && siteFM.skipLevels > 0) {
+        note.children = children.map((ent) => ent.id);
+        children.forEach((ent) => {
+          ent.parent = note.id;
+        });
+      }
+
+      // remove any children that shouldn't be published
+      children = _.filter(children, (note: NoteProps) =>
+        SiteUtils.canPublish({
+          note,
+          config,
+          engine,
+        })
+      );
+      logger.debug({
+        ctx: "filterByHiearchy:post-filter-children",
+        note: NoteUtils.toNoteLoc(note),
+        children: children.map((ent) => ent.id),
+      });
+      // TODO: handle dups
+
+      // add children to Q to be processed
+      children.forEach((child: NoteProps) => {
+        // update parent to be current note
+        // dup merging at the top could cause children from multiple vaults
+        // to be present
+        child.parent = note.id;
+        processQ.push(child);
+      });
+
+      // updated children
+      out[note.id] = {
+        ...note,
+        children: children.map((ent) => ent.id),
+      };
     }
     return { notes: out, domain: domainNote };
   }
 
-  static filterByNote(opts: {
+  /**
+   * Apply custom frontmatter and formatting to note
+   */
+  static cleanNote({
+    note,
+    hConfig,
+  }: {
     note: NoteProps;
     hConfig: HierarchyConfig;
-  }): NoteProps | undefined {
-    const { note, hConfig } = opts;
-
-    // apply custom frontmatter if exist
+  }) {
     hConfig.customFrontmatter?.forEach((fm) => {
       const { key, value } = fm;
-      // @ts-ignore
-      meta[key] = value;
+      _.set(note, `custom.${key}`, value);
     });
     if (hConfig.noindexByDefault && !_.has(note, "custom.noindex")) {
       _.set(note, "custom.noindex", true);
     }
-
-    // remove site-only stuff
     return {
       ...note,
       body: stripLocalOnlyTags(note.body),

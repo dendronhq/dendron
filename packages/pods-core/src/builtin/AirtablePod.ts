@@ -219,11 +219,13 @@ export class AirtableUtils {
           minimatch(t.value, fieldMapping.filter!)
         );
         if (hashtags.length > 1) {
-          throw new DendronError({
-            message: `singleTag field has multiple values. note: ${JSON.stringify(
-              NoteUtils.toLogObj(note)
-            )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
-          });
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: `singleTag field has multiple values. filter: ${
+                fieldMapping.filter
+              }, note: ${NoteUtils.toNoteLocString(note)}`,
+            }),
+          };
         }
         if (hashtags.length !== 0) {
           val = hashtags[0].value.replace(/^tags./, "");

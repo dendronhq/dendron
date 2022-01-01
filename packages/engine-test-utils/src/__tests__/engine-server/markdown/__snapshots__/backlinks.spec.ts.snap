@@ -4,7 +4,7 @@ exports[`backlinks backlink to home page 1`] = `
 VFile {
   "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"https://foo.com\\">Alpha (vault1)</a></li>
 <li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">Omega (vault1) (Private)</a></li>
@@ -20,7 +20,7 @@ exports[`backlinks basic 1`] = `
 VFile {
   "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"alpha.html\\">Alpha (vault1)</a></li>
 <li><a href=\\"omega.html\\">Omega (vault1)</a></li>
@@ -36,7 +36,7 @@ exports[`backlinks frontmatter tags multiple 1`] = `
 VFile {
   "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"one.html\\">One (vault1)</a></li>
 <li><a href=\\"two.html\\">Two (vault1)</a></li>
@@ -52,7 +52,7 @@ exports[`backlinks frontmatter tags single 1`] = `
 VFile {
   "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"one.html\\">One (vault1)</a></li>
 </ul>",
@@ -67,7 +67,7 @@ exports[`backlinks hashtag 1`] = `
 VFile {
   "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"one.html\\">One (vault1)</a></li>
 </ul>",
@@ -82,7 +82,7 @@ exports[`backlinks multiple links 1`] = `
 VFile {
   "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#one\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>One</h1>
 <hr>
-<h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
+<strong>Backlinks</strong>
 <ul>
 <li><a href=\\"three.html\\">Three (vault1)</a></li>
 <li><a href=\\"two.html\\">Two (vault1)</a></li>

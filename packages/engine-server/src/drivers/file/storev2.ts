@@ -50,6 +50,7 @@ import {
 import {
   DLogger,
   file2Note,
+  genHash,
   getAllFiles,
   getDurationMilliseconds,
   note2File,
@@ -958,12 +959,14 @@ export class FileStorage implements DStore {
         },
         _n
       );
-      n.body = noteMod.body;
-      n.tags = noteMod.tags;
       const shouldChange = !(
         n.body === noteMod.body && n.tags === noteMod.tags
       );
-      if (shouldChange) notesToChange.push(n);
+      if (shouldChange) {
+        n.body = noteMod.body;
+        n.tags = noteMod.tags;
+        notesToChange.push(n);
+      }
     });
 
     /**

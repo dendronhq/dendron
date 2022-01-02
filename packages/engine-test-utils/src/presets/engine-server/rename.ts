@@ -669,7 +669,6 @@ const NOTES = {
             { status: "update", fname: "root" },
             { status: "delete", fname: fnameTarget },
             { status: "create", fname: fnameNew },
-            { status: "update", fname: fnameLink },
           ],
         },
         {
@@ -915,7 +914,6 @@ const NOTES = {
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
             { status: "create", fname: "gamma" },
-            { status: "update", fname: "beta" },
           ],
         },
         {

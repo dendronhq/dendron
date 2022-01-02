@@ -1,9 +1,5 @@
 import { ConfigUtils, DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
-import {
-  EtcUtils,
-  SegmentClient,
-  TelemetryStatus,
-} from "@dendronhq/common-server";
+import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "./ExtensionProvider";
@@ -71,9 +67,6 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
   }
 
   try {
-    if (EtcUtils.isRunningInTestOrCI()) {
-      return;
-    }
     // instantiate segment client right now
     instantiateSegmentClient();
     // watch the config changes to update status if it changes

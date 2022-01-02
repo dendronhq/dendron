@@ -12,6 +12,7 @@ import os from "os";
 import path from "path";
 import { getOS } from "./system";
 import { createLogger, DLogger } from "./logger";
+import { EtcUtils } from ".";
 
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",
@@ -268,6 +269,9 @@ export class SegmentClient {
     props?: { [key: string]: any },
     opts?: SegmentExtraArg
   ) {
+    if (EtcUtils.isRunningInTestOrCI()) {
+      return;
+    }
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
@@ -550,6 +554,9 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
+    if (EtcUtils.isRunningInTestOrCI()) {
+      return;
+    }
     const { type, ...rest } = platformProps;
     SegmentClient.instance().track(event, {
       ...props,
@@ -564,6 +571,9 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
+    if (EtcUtils.isRunningInTestOrCI()) {
+      return;
+    }
     const { type, ...rest } = platformProps;
     await SegmentClient.instance().track(event, {
       ...props,
@@ -574,6 +584,9 @@ export class SegmentUtils {
   }
 
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
+    if (EtcUtils.isRunningInTestOrCI()) {
+      return;
+    }
     if (identifyProps.type === "vscode") {
       const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
       SegmentClient.instance().identifyAnonymous(

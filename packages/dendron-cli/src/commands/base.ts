@@ -7,6 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  EtcUtils,
   getDurationMilliseconds,
   SegmentClient,
   TelemetryStatus,
@@ -82,6 +83,9 @@ export abstract class CLICommand<
   }
 
   setUpSegmentClient() {
+    if (EtcUtils.isRunningInTestOrCI()) {
+      return;
+    }
     // if running CLI without ever having used dendron plugin,
     // show a notice about telemety and instructions on how to disable.
     if (_.isUndefined(SegmentClient.readConfig())) {
@@ -110,11 +114,14 @@ export abstract class CLICommand<
 
   eval = async (args: any) => {
     const start = process.hrtime();
-    this.L.info({ args });
+    this.L.info({ args, state: "enter" });
     if (args.devMode) {
       this.opts.dev = args.devMode;
     }
+    this.L.info({ args, state: "setUpSegmentClient:pre" });
     this.setUpSegmentClient();
+
+    this.L.info({ args, state: "findWSRoot:pre" });
     if (!args.wsRoot) {
       const configPath = WorkspaceUtils.findWSRoot();
       if (_.isUndefined(configPath) && !this.wsRootOptional) {
@@ -128,13 +135,16 @@ export abstract class CLICommand<
     if (args.quiet) {
       this.opts.quiet = true;
     }
+    this.L.info({ args, state: "enrichArgs:pre" });
     const opts = await this.enrichArgs(args);
     if (opts.error) {
       this.L.error(opts.error);
       return { error: opts.error };
     }
 
+    this.L.info({ args, state: "execute:pre" });
     const out = await this.execute(opts.data);
+    this.L.info({ args, state: "execute:post" });
     if (isDendronResp(out) && out.error) {
       this.L.error(out.error);
     }
@@ -149,12 +159,14 @@ export abstract class CLICommand<
     CLIAnalyticsUtils.identify();
 
     if (out.exit) {
+      this.L.info({ args, state: "processExit:pre" });
       await CLIAnalyticsUtils.trackSync(event, props);
       process.exit();
     }
 
     CLIAnalyticsUtils.track(event, props);
 
+    this.L.info({ args, state: "exit" });
     return out;
   };
 

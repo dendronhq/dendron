@@ -161,6 +161,7 @@ export type GetDecorationsRequest = {
     range: VSRange;
     text: string;
   }[];
+  text: string;
 } & Partial<WorkspaceRequest>;
 
 export type SchemaDeleteRequest = {

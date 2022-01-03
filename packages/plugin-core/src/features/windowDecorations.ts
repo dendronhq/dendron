@@ -162,6 +162,7 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     const out = await engine.getDecorations({
       id: note.id,
       ranges,
+      text: editor.document.getText(),
     });
 
     if (

@@ -356,6 +356,8 @@ export type GetDecorationsOpts = {
     /** The document text that corresponds to this range. This is required because otherwise there's a data race between the notes in engine updating and decorations being generated. */
     text: string;
   }[];
+  /** The text of the entire document. Required because we show warnings for the whole note even if they are not a visible range. */
+  text: string;
 };
 
 // === Engine and Store Main

@@ -25,9 +25,7 @@ import { PodUtils } from "../utils";
 
 const ID = "dendron.nextjs";
 
-const $$ = (cmd: string, opts?: any) => {
-  return execa.command(cmd, { ...opts });
-};
+const $$ = execa.command;
 
 type NextjsExportPodCustomOpts = {
   overrides?: Partial<DendronSiteConfig>;
@@ -150,7 +148,7 @@ export class NextjsExportPodUtils {
   static async startNextDev(opts: { nextPath: string; quiet?: boolean }) {
     const { nextPath, quiet } = opts;
     const cmdDev = quiet ? "npm run --silent dev" : "npm run dev";
-    const out = $$(cmdDev, { cwd: nextPath });
+    const out = $$(cmdDev, { cwd: nextPath, windowsHide: false });
     out.stdout?.pipe(process.stdout);
     return out.pid;
   }

@@ -4,7 +4,6 @@ import { describe, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
-import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
 import { getDWorkspace, getExtension } from "../../workspace";
@@ -16,6 +15,7 @@ import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -132,7 +132,10 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
 
-          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher = new WorkspaceWatcher({
+            schemaSyncService:
+              ExtensionProvider.getExtension().schemaSyncService,
+          });
           getExtension().workspaceWatcher?.activate(ctx);
           watcher!.activate(ctx);
           // Open a note
@@ -157,7 +160,10 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
-          getExtension().workspaceWatcher = new WorkspaceWatcher();
+          getExtension().workspaceWatcher = new WorkspaceWatcher({
+            schemaSyncService:
+              ExtensionProvider.getExtension().schemaSyncService,
+          });
           getExtension().workspaceWatcher?.activate(ctx);
 
           watcher!.activate(ctx);

@@ -338,7 +338,8 @@ export class ShowPreviewCommand extends BasicCommand<
     if (path.extname(filePath) !== ".md") return;
     const { wsRoot } = getDWorkspace();
     // If the file is already open in an editor, get the text from there to make sure we have an up-to-date view in case changes are not persisted yet
-    const openFile = VSCodeUtils.getMatchingTextDocument(filePath);
+    const openFile =
+      ExtensionProvider.getWSUtils().getMatchingTextDocument(filePath);
     const contents =
       openFile && !openFile.isClosed
         ? openFile.getText()

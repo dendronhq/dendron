@@ -1,6 +1,7 @@
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { DendronError } from "@dendronhq/common-all";
 import _ from "lodash";
+import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 /**
  * Use this to statically get implementation of IDendronExtension without having to
@@ -11,7 +12,7 @@ import _ from "lodash";
  * a fitting option then use this class.
  * */
 export class ExtensionProvider {
-  static extension: IDendronExtension;
+  private static extension: IDendronExtension;
 
   static getExtension(): IDendronExtension {
     if (_.isUndefined(ExtensionProvider.extension)) {
@@ -29,6 +30,10 @@ export class ExtensionProvider {
 
   static getEngine() {
     return ExtensionProvider.getExtension().getEngine();
+  }
+
+  static getWSUtils(): IWSUtilsV2 {
+    return ExtensionProvider.getExtension().wsUtils;
   }
 
   static register(extension: IDendronExtension) {

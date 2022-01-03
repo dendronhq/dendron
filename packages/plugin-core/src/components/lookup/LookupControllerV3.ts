@@ -9,12 +9,11 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DENDRON_COMMANDS } from "../../constants";
-import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension } from "../../workspace";
+import { getExtension } from "../../workspace";
 import {
   ButtonCategory,
   DendronBtn,
@@ -99,8 +98,9 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
 
     // wire up lookup controller to lookup view
-    // @ts-ignore
-    this._view = ExtensionProvider.getExtension().getTreeView(
+    // TODO: swap out `getExtension` to use a static provider
+    // once treeview related interface has been migrated to IDendronExtension
+    this._view = getExtension().getTreeView(
       DendronTreeViewKey.LOOKUP_VIEW
     ) as LookupView;
     this._view.registerController(this);

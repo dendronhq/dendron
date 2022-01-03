@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Watch all packages required for building dendron repo
+
 echo "watching..."
 npx lerna run watch --parallel 
     \ --scope @dendronhq/common-all 
@@ -8,7 +10,6 @@ npx lerna run watch --parallel
     \ --scope @dendronhq/plugin-core 
     \ --scope @dendronhq/dendron-cli 
     \ --scope @dendronhq/pods-core 
-    \ --scope @dendronhq/lsp-server 
     \ --scope @dendronhq/api-server
     \ --scope @dendronhq/dendron-next-server
     \ --scope @dendronhq/common-test-utils

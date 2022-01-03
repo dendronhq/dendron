@@ -79,32 +79,39 @@ suite("MoveNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
 
-  _.map(ENGINE_RENAME_PRESETS["NOTES"], (TestCase: TestPresetEntryV4, name) => {
-    test(name, (done) => {
-      const { testFunc, preSetupHook } = TestCase;
+  _.map(
+    _.omit(ENGINE_RENAME_PRESETS["NOTES"], [
+      "NO_UPDATE",
+      "NO_UPDATE_NUMBER_IN_FM",
+      "NO_UPDATE_DOUBLE_QUOTE_IN_FM",
+    ]),
+    (TestCase: TestPresetEntryV4, name) => {
+      test(name, (done) => {
+        const { testFunc, preSetupHook } = TestCase;
 
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: async ({ wsRoot, vaults }) => {
-          await preSetupHook({
-            wsRoot,
-            vaults,
-          });
-        },
-        onInit: async ({ vaults, wsRoot }) => {
-          const engineMock = createEngine({ wsRoot, vaults });
-          const results = await testFunc({
-            engine: engineMock,
-            vaults,
-            wsRoot,
-            initResp: {} as any,
-          });
-          await runJestHarnessV2(results, expect);
-          done();
-        },
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          postSetupHook: async ({ wsRoot, vaults }) => {
+            await preSetupHook({
+              wsRoot,
+              vaults,
+            });
+          },
+          onInit: async ({ vaults, wsRoot }) => {
+            const engineMock = createEngine({ wsRoot, vaults });
+            const results = await testFunc({
+              engine: engineMock,
+              vaults,
+              wsRoot,
+              initResp: {} as any,
+            });
+            await runJestHarnessV2(results, expect);
+            done();
+          },
+        });
       });
-    });
-  });
+    }
+  );
 
   test("update body", (done) => {
     runLegacySingleWorkspaceTest({

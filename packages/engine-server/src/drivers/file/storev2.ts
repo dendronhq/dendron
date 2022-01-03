@@ -835,6 +835,8 @@ export class FileStorage implements DStore {
       }
     });
 
+    await Promise.all(notesChangedEntries).catch();
+
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.

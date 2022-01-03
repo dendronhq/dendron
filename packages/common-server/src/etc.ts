@@ -1,6 +1,4 @@
-import { getStage } from "@dendronhq/common-all";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import { goUpTo } from "./filesv2";
 
@@ -13,31 +11,6 @@ export class NodeJSUtils {
       )
     );
     return `${pkgJSON.version}`;
-  }
-}
-
-/**
- * Various utilities that are not categorized
- */
-export class EtcUtils {
-  static isRunningInTestOrCI() {
-    return this.isRunningInsideCI() || this.isRunningInsideTest();
-  }
-  /**
-   * Check if running inside test context
-   */
-  static isRunningInsideTest(): boolean {
-    return getStage() === "test";
-  }
-
-  /**
-   * Check if process is running inside a CI
-   */
-  static isRunningInsideCI(): boolean {
-    if (_.get(process.env, "GITHUB_ACTIONS")) {
-      return true;
-    }
-    return false;
   }
 }
 

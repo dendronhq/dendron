@@ -4,6 +4,7 @@ import {
   env,
   genUUID,
   RespV2,
+  RuntimeUtils,
 } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
@@ -12,7 +13,6 @@ import os from "os";
 import path from "path";
 import { getOS } from "./system";
 import { createLogger, DLogger } from "./logger";
-import { EtcUtils } from ".";
 
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",
@@ -269,7 +269,7 @@ export class SegmentClient {
     props?: { [key: string]: any },
     opts?: SegmentExtraArg
   ) {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     if (this._hasOptedOut || this._segmentInstance == null) {
@@ -554,7 +554,7 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     const { type, ...rest } = platformProps;
@@ -571,7 +571,7 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     const { type, ...rest } = platformProps;
@@ -584,7 +584,7 @@ export class SegmentUtils {
   }
 
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     if (identifyProps.type === "vscode") {

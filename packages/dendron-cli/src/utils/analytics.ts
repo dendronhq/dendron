@@ -1,4 +1,5 @@
-import { EtcUtils, SegmentUtils } from "@dendronhq/common-server";
+import { RuntimeUtils } from "@dendronhq/common-all";
+import { SegmentUtils } from "@dendronhq/common-server";
 
 export class CLIAnalyticsUtils {
   static track(event: string, props?: any) {
@@ -20,7 +21,7 @@ export class CLIAnalyticsUtils {
    * Show notice about telemetry
    */
   static showTelemetryMessage() {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     const message = [

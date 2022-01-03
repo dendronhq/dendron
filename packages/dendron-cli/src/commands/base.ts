@@ -4,10 +4,10 @@ import {
   isDendronResp,
   RespV3,
   config,
+  RuntimeUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  EtcUtils,
   getDurationMilliseconds,
   SegmentClient,
   TelemetryStatus,
@@ -83,7 +83,7 @@ export abstract class CLICommand<
   }
 
   setUpSegmentClient() {
-    if (EtcUtils.isRunningInTestOrCI()) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     // if running CLI without ever having used dendron plugin,

@@ -13,10 +13,9 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("telemetry", function () {
-  let ctx: vscode.ExtensionContext;
   let homeDirStub: SinonStub;
 
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       homeDirStub = TestEngineUtils.mockHomeDir();
     },

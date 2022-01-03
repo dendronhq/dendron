@@ -8,7 +8,6 @@ import {
   RenameHeaderCommand,
   CommandOutput,
 } from "../../commands/RenameHeader";
-import { ExtensionProvider } from "../../ExtensionProvider";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import {

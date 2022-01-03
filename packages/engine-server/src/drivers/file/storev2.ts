@@ -50,7 +50,6 @@ import {
 import {
   DLogger,
   file2Note,
-  genHash,
   getAllFiles,
   getDurationMilliseconds,
   note2File,

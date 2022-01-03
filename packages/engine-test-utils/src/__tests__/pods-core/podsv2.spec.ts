@@ -1,4 +1,9 @@
-import { NoteProps, NoteUtils, Time } from "@dendronhq/common-all";
+import {
+  NoteProps,
+  NoteUtils,
+  ResponseUtil,
+  Time,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
@@ -536,6 +541,49 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(1);
           expect(entCreate[0]?.documentId).toEqual("testdoc");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("WHEN there is an error in response", () => {
+    test("THEN expect gdoc to return error message", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableGoogleDocsV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            accessToken: "test",
+            refreshToken: "test",
+            expirationTime: Time.now().toSeconds() + 5000,
+            connectionId: "foo",
+          };
+
+          const pod = new GoogleDocsExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            vaults: opts.vaults,
+            wsRoot: opts.wsRoot,
+          });
+          const response = {
+            data: [],
+            errors: [
+              {
+                data: {},
+                error: "error with status code 501",
+              },
+            ],
+          };
+          pod.createGdoc = jest.fn().mockResolvedValue(response);
+          const props = "foo bar text";
+
+          const result = await pod.exportText(props);
+          const entCreate = result.data?.created!;
+          expect(entCreate.length).toEqual(0);
+          expect(ResponseUtil.hasError(result)).toBeTruthy();
         },
         {
           expect,

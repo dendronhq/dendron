@@ -11,7 +11,7 @@ import {
   stringifyError,
   Time,
 } from "@dendronhq/common-all";
-import { DendronASTDest, MDUtilsV4, MDUtilsV5 } from "@dendronhq/engine-server";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import FormData from "form-data";
 import { RateLimiter } from "limiter";
@@ -92,10 +92,8 @@ export class GoogleDocsExportPodV2
       {},
       { dest: DendronASTDest.HTML }
     );
-    const out = await MDUtilsV4.procRehype({
-      proc,
-      mathjax: true,
-    }).process(_input);
+    const out = await proc.process(_input);
+
     const htmlContent = `<html>${out.contents}</html>`;
     const content = Buffer.from(htmlContent);
     let { accessToken, expirationTime, refreshToken } = this._config;

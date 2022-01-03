@@ -179,19 +179,20 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     config: RunnableGoogleDocsV2PodConfig;
   }) {
     const { exportReturnValue, payload } = opts;
+    let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
     const createdCount = createdDocs?.length ?? 0;
     const updatedCount = updatedDocs?.length ?? 0;
-    if (typeof payload !== "string" && createdDocs && createdCount > 0) {
+    if (!_.isString(payload) && createdDocs && createdCount > 0) {
       await this.updateNoteWithCustomFrontmatter(createdDocs);
     }
-    if (typeof payload !== "string" && updatedDocs && updatedCount > 0) {
+    if (!_.isString(payload) && updatedDocs && updatedCount > 0) {
       await this.updateNoteWithCustomFrontmatter(updatedDocs);
     }
 
     if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
+      errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
         exportReturnValue.error
       )}`;
 
@@ -201,6 +202,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
         `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated.`
       );
     }
+    return errorMsg;
   }
 
   private async updateNoteWithCustomFrontmatter(records: GoogleDocsFields[]) {

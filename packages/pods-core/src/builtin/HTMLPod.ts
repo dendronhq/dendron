@@ -54,9 +54,9 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     const { data: econfig } = await engine.getConfig();
     const overrideConfig = { ...econfig! };
 
-    const wsConfig = ConfigUtils.getWorkspace(overrideConfig);
-    wsConfig.enableUserTags = convertUserNotesToLinks;
-    wsConfig.enableHashTags = convertTagNotesToLinks;
+    const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
+    workspaceConfig.enableUserTags = convertUserNotesToLinks;
+    workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,

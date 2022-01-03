@@ -1,4 +1,10 @@
-import { DendronError, getSlugger, VaultUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  getSlugger,
+  RenameNotePayload,
+  RespV2,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -32,7 +38,7 @@ type CommandOpts =
       source?: string;
     }
   | undefined;
-type CommandOutput = {} | undefined;
+export type CommandOutput = RespV2<RenameNotePayload> | undefined;
 
 export class RenameHeaderCommand extends BasicCommand<
   CommandOpts,
@@ -127,7 +133,7 @@ export class RenameHeaderCommand extends BasicCommand<
     // This doesn't update the decorations for some reason, we need to update them to get any same-file decorations updated
     delayedUpdateDecorations();
 
-    await engine.renameNote({
+    const out = await engine.renameNote({
       oldLoc: {
         ...noteLoc,
         anchorHeader: slugger.slug(oldHeader.text),
@@ -139,7 +145,7 @@ export class RenameHeaderCommand extends BasicCommand<
         alias: newAnchorHeader,
       },
     });
-    return;
+    return out;
   }
 
   addAnalyticsPayload(opts?: CommandOpts) {

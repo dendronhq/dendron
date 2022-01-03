@@ -43,6 +43,7 @@ const runRename = async ({
   wsRoot,
   numChanges,
   cb,
+  noNameChange,
 }: {
   engine: DEngineClient;
   vaults: DVault[];
@@ -52,17 +53,25 @@ const runRename = async ({
     barChange: NoteChangeEntry;
     allChanged: NoteChangeEntry[];
   }) => TestResult[];
+  noNameChange?: boolean; // newLoc is oldLoc
 }) => {
   const vault = vaults[0];
+  const vaultName = VaultUtils.getName(vault);
+  const oldLoc = { fname: "foo", vaultName };
+  const newLoc = noNameChange ? oldLoc : { fname: "baz", vaultName };
   const changed = await engine.renameNote({
-    oldLoc: { fname: "foo", vaultName: VaultUtils.getName(vault) },
-    newLoc: { fname: "baz", vaultName: VaultUtils.getName(vault) },
+    oldLoc,
+    newLoc,
   });
+
+  const checkVaultMatch = noNameChange ? ["foo.md"] : ["baz.md"];
+  const checkVaultNoMatch = noNameChange ? ["baz.md"] : ["foo.md"];
+
   const checkVault = await FileTestUtils.assertInVault({
     wsRoot,
     vault,
-    match: ["baz.md"],
-    nomatch: ["foo.md"],
+    match: checkVaultMatch,
+    nomatch: checkVaultNoMatch,
   });
   const barChange = _.find(changed.data, (ent) => ent.note.fname === "bar")!;
   const out = cb({ barChange, allChanged: changed.data! });
@@ -96,6 +105,110 @@ const preSetupHook = async (
 };
 
 const NOTES = {
+  NO_UPDATE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        numChanges: 1, // there should be no unnecessary updates added in resp
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: barChange,
+              expected: undefined,
+            },
+          ];
+        },
+        noNameChange: true,
+      });
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "bar",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[foo]]",
+        });
+      },
+    }
+  ),
+  NO_UPDATE_NUMBER_IN_FM: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        numChanges: 1, // no unecessary updates in resp
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: barChange,
+              expected: undefined,
+            },
+          ];
+        },
+        noNameChange: true,
+      });
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "bar",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[foo]]",
+          props: { title: "09" }, // testing for cases where frontmatter is read as number instead of string, which malforms the title
+        });
+      },
+    }
+  ),
+  NO_UPDATE_DOUBLE_QUOTE_IN_FM: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      return runRename({
+        wsRoot,
+        vaults,
+        engine,
+        numChanges: 1,
+        cb: ({ barChange }) => {
+          return [
+            {
+              actual: barChange,
+              expected: undefined,
+            },
+          ];
+        },
+        noNameChange: true,
+      });
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "bar",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[foo]]",
+          props: { title: '"wow"' }, // testing for cases where double quotes are unnecessarily changed to single quotes
+        });
+      },
+    }
+  ),
   WITH_INLINE_CODE: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       return runRename({
@@ -669,7 +782,6 @@ const NOTES = {
             { status: "update", fname: "root" },
             { status: "delete", fname: fnameTarget },
             { status: "create", fname: fnameNew },
-            { status: "update", fname: fnameLink },
           ],
         },
         {
@@ -915,7 +1027,6 @@ const NOTES = {
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
             { status: "create", fname: "gamma" },
-            { status: "update", fname: "beta" },
           ],
         },
         {

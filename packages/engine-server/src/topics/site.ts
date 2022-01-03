@@ -316,8 +316,8 @@ export class SiteUtils {
         await engine.writeNote(note);
       }
 
-      // if `skipLevels` is enabled, the children of the current note are descedants
-      // further dow
+      // if `skipLevels` is enabled, the children of the current note are descendants
+      // further down
       let children = HierarchyUtils.getChildren({
         skipLevels: siteFM.skipLevels || 0,
         note,

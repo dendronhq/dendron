@@ -34,17 +34,6 @@ export const DendronTOC = ({
             <></>
           )
         )}
-        {note?.links?.length > 0 &&
-        note?.links.some((link) => link.type === "backlink") ? (
-          <Link href="#backlinks" title="Backlinks" />
-        ) : (
-          <></>
-        )}
-        {note?.children?.length > 0 ? (
-          <Link href="#children" title="Children" />
-        ) : (
-          <></>
-        )}
       </Anchor>
     </>
   );

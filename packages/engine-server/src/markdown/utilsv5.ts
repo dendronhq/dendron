@@ -332,7 +332,7 @@ export class MDUtilsV5 {
 
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
-            proc = proc.use(backlinks).use(hierarchies);
+            proc = proc.use(hierarchies).use(backlinks);
           }
           // Add flavor specific plugins. These need to come before `dendronPub`
           // to fix extended image URLs before they get converted to HTML

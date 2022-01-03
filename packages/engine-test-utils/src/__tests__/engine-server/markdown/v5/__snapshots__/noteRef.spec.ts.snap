@@ -15,7 +15,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/some-prefix/notes/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -41,7 +41,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\">Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
@@ -67,7 +67,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\">Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
@@ -93,7 +93,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"/notes/bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
 </ol>",
@@ -119,7 +119,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\">Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
@@ -145,7 +145,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\">Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",

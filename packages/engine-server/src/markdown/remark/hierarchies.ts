@@ -197,9 +197,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       if (!_.isEmpty(children)) {
         addBreak();
         root.children.push(
-          u(DendronASTTypes.HEADING, { depth: 2 }, [
-            u("text", hierarchyDisplayTitle),
-          ])
+          u("strong", [{ type: "text", value: hierarchyDisplayTitle }])
         );
         root.children.push(
           list(

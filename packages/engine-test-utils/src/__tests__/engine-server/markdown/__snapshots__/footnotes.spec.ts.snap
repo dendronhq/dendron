@@ -7,7 +7,7 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam mollitia <a id=\\"fnref-magni\\" class=\\"fnref\\" href=\\"#fn-magni\\">magni</a> quas porro tenetur.</p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"bar.html\\">Bar</a></li>
 <li><a href=\\"foo.html\\">Foo</a></li>
@@ -31,7 +31,7 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam <a id=\\"fnref-magni\\" class=\\"fnref\\" href=\\"#fn-magni\\">magni</a> mollitia quas porro tenetur.</p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"bar.html\\">Bar</a></li>
 <li><a href=\\"foo.html\\">Foo</a></li>
@@ -73,7 +73,7 @@ Ipsum iusto impedit provident. <a id=\\"fnref-vel\\" class=\\"fnref\\" href=\\"#
 </div></div><p></p><p></p>
 <p>Et maiores magnam <a id=\\"fnref-magni\\" class=\\"fnref\\" href=\\"#fn-magni\\">magni</a> mollitia quas porro tenetur.</p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"bar.html\\">Bar</a></li>
 <li><a href=\\"foo.html\\">Foo</a></li>
@@ -98,7 +98,7 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam mollitia quas porro tenetur.</p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"bar.html\\">Bar</a></li>
 <li><a href=\\"foo.html\\">Foo</a></li>

@@ -35,18 +35,18 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { LookupControllerV3 } from "./LookupControllerV3";
 import {
   ILookupProviderV3,
   NoteLookupProviderChangeStateResp,
   OnAcceptHook,
-} from "./LookupProviderV3";
+} from "./LookupProviderV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
   TransformedQueryString,
   VaultSelectionMode,
 } from "./types";
+import { ILookupControllerV3 } from "./LookupControllerV3Interface";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -256,7 +256,9 @@ export class ProviderAcceptHooks {
 }
 
 export class PickerUtilsV2 {
-  static createDendronQuickPick(opts: CreateQuickPickOpts) {
+  static createDendronQuickPick(
+    opts: CreateQuickPickOpts
+  ): DendronQuickPickerV2 {
     const { title, placeholder, ignoreFocusOut, initialValue } = _.defaults(
       opts,
       {
@@ -1047,7 +1049,7 @@ export class SchemaPickerUtils {
 }
 
 export class NoteLookupProviderUtils {
-  static cleanup(opts: { id: string; controller: LookupControllerV3 }) {
+  static cleanup(opts: { id: string; controller: ILookupControllerV3 }) {
     const { id, controller } = opts;
     controller.onHide();
     HistoryService.instance().remove(id, "lookupProvider");
@@ -1055,7 +1057,7 @@ export class NoteLookupProviderUtils {
 
   static subscribe(opts: {
     id: string;
-    controller: LookupControllerV3;
+    controller: ILookupControllerV3;
     logger: DLogger;
     onDone?: Function;
     onError?: Function;

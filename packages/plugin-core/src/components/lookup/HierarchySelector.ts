@@ -2,14 +2,11 @@ import { DendronError } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../../components/lookup/LookupControllerV3";
-import { NoteLookupProvider } from "../../components/lookup/LookupProviderV3";
-import { NoteLookupProviderUtils } from "../../components/lookup/utils";
+import { LookupControllerV3CreateOpts } from "./LookupControllerV3Interface";
+import { NoteLookupProviderUtils } from "./utils";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 /**
  * Interface for a user (or test mock) control for selecting a hierarchy. Mostly
@@ -34,11 +31,12 @@ export class QuickPickHierarchySelector implements HierarchySelector {
         nodeType: "note",
         disableVaultSelection: true,
       };
-      const lc = LookupControllerV3.create(lookupCreateOpts);
+      const extension = ExtensionProvider.getExtension();
+      const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
 
       const PROVIDER_ID: string = "HierarchySelector";
 
-      const provider = new NoteLookupProvider(PROVIDER_ID, {
+      const provider = extension.noteLookupProviderFactory.create(PROVIDER_ID, {
         allowNewNote: false,
         forceAsIsPickerValueUsage: true,
       });

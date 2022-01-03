@@ -1,14 +1,19 @@
-import vscode from "vscode";
 import {
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { IWorkspaceService } from "@dendronhq/engine-server";
-import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
+import vscode from "vscode";
 import { ICommandFactory } from "./commandFactoryInterface";
+import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
+import {
+  INoteLookupProviderFactory,
+  ISchemaLookupProviderFactory,
+} from "./components/lookup/LookupProviderV3Interface";
+import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 export type DendronWorkspaceSettings = Partial<{
   "dendron.dailyJournalDomain": string;
@@ -55,6 +60,10 @@ export interface IDendronExtension {
   commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
+
+  lookupControllerFactory: ILookupControllerV3Factory;
+  noteLookupProviderFactory: INoteLookupProviderFactory;
+  schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 

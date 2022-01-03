@@ -7,7 +7,6 @@ import {
   IDendronError,
   NonOptional,
   NoteProps,
-  NoteUtils,
   offsetRange,
 } from "@dendronhq/common-all";
 import { decorateUserTag } from "./userTags";

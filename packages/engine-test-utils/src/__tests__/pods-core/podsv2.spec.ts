@@ -298,11 +298,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             dendronConfig: opts.dendronConfig!,
           });
 
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "simple-wikilink",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
@@ -339,11 +338,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             dendronConfig: opts.dendronConfig!,
           });
 
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "usertag",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
@@ -364,14 +362,14 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
     });
   });
 
-  describe("WHEN addFMTitle is set to false", () => {
+  describe("WHEN addFrontmatterTitle is set to false", () => {
     test("THEN expect title to not be present as h1 header", async () => {
       await runEngineTestV5(
         async (opts) => {
           const podConfig: RunnableMarkdownV2PodConfig = {
             exportScope: PodExportScope.Note,
             destination: "clipboard",
-            addFMTitle: false,
+            addFrontmatterTitle: false,
           };
 
           const pod = new MarkdownExportPodV2({
@@ -380,11 +378,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             dendronConfig: opts.dendronConfig!,
           });
 
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "usertag",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
@@ -418,11 +415,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             dendronConfig: opts.dendronConfig!,
           });
 
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "footag",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
@@ -471,11 +467,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             },
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "simple-wikilink",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);

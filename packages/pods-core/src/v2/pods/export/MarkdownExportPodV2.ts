@@ -71,18 +71,18 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
     const {
       convertTagNotesToLinks = false,
       convertUserNotesToLinks = false,
-      addFMTitle,
+      addFrontmatterTitle,
     } = this._config;
     const engine = this._engine;
     const overrideConfig = { ...this._engine.config };
 
-    const wsConfig = ConfigUtils.getWorkspace(overrideConfig);
-    wsConfig.enableUserTags = convertUserNotesToLinks;
-    wsConfig.enableHashTags = convertTagNotesToLinks;
+    const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
+    workspaceConfig.enableUserTags = convertUserNotesToLinks;
+    workspaceConfig.enableHashTags = convertTagNotesToLinks;
 
-    if (!_.isUndefined(addFMTitle)) {
+    if (!_.isUndefined(addFrontmatterTitle)) {
       const previewConfig = ConfigUtils.getPreview(overrideConfig);
-      previewConfig.enableFMTitle = addFMTitle;
+      previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
     let remark = MDUtilsV4.procFull({
@@ -138,7 +138,7 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
           default: false,
           nullable: true,
         },
-        addFMTitle: {
+        addFrontmatterTitle: {
           type: "boolean",
           nullable: true,
         },

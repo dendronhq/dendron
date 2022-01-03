@@ -57,14 +57,14 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     }
 
     //use FM Title as h1 header
-    const addFMTitle = await this.promptUserForaddFMTitleSetting();
-    if (addFMTitle === undefined) return;
+    const addFrontmatterTitle = await this.promptUserForaddFMTitleSetting();
+    if (addFrontmatterTitle === undefined) return;
 
     const config = {
       exportScope,
       wikiLinkToURL: opts?.wikiLinkToURL || false,
       destination,
-      addFMTitle,
+      addFrontmatterTitle,
       convertTagNotesToLinks: opts?.convertTagNotesToLinks || false,
       convertUserNotesToLinks: opts?.convertUserNotesToLinks || false,
     };
@@ -200,19 +200,22 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
   private async promptUserForaddFMTitleSetting(): Promise<boolean | undefined> {
     const items: vscode.QuickPickItem[] = [
       {
-        label: "Post h1 header from FM",
-        detail: "Post frontmatter title property as h1 header of the note.",
+        label: "Add note title from FM as h1 header",
+        detail:
+          "Add note title from the frontmatter to the start of exported note",
       },
       {
-        label: "Don't Post h1 header from FM",
+        label: "Skip adding note FM title as h1 header",
         detail:
-          "The Frontmatter title will not be posted as header of the note",
+          "Skip adding note title from the frontmatter to the start of exported note",
       },
     ];
     const picked = await vscode.window.showQuickPick(items, {
-      title: "Do you want to add Frontmatter title as h1 header?",
+      title: "Do you want to add note frontmatter title as h1 header?",
     });
 
-    return picked ? picked.label === "Post h1 header from FM" : undefined;
+    return picked
+      ? picked.label === "Add note title from FM as h1 header"
+      : undefined;
   }
 }

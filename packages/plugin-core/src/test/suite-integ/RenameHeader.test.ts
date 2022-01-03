@@ -87,7 +87,6 @@ suite("RenameNote", function () {
         sandbox
           .stub(vscode.window, "showInputBox")
           .returns(Promise.resolve("Foo Bar"));
-        const ws = ExtensionProvider.getDWorkspace();
         const out = (await new RenameHeaderCommand().run({})) as CommandOutput;
 
         const updateResps = out!.data?.filter((resp) => {

@@ -267,16 +267,19 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest
    * @param nodesToMove
    */
-  private async appendHeaderToDestination(
-    engine: EngineAPIService,
-    dest: NoteProps,
-    nodesToMove: Node[]
-  ): Promise<void> {
-    const destProc = this.getProc(engine, dest);
+  private async appendHeaderToDestination(opts: {
+    engine: EngineAPIService;
+    dest: NoteProps;
+    origin: NoteProps;
+    nodesToMove: Node[];
+  }): Promise<void> {
+    const { engine, dest, origin, nodesToMove } = opts;
+    // find where the extracted block starts and ends
+    const startOffset = nodesToMove[0].position?.start.offset;
+    const endOffset = _.last(nodesToMove)!.position?.end.offset;
 
-    // make a fake tree to feed through proc.stringify
-    const fakeTree = { type: "root", children: nodesToMove } as Node;
-    const destContentToAppend = destProc.stringify(fakeTree);
+    const originBody = origin.body;
+    const destContentToAppend = originBody.slice(startOffset, endOffset);
 
     // add the stringified blocks to destination note body
     dest.body = `${dest.body}\n\n${destContentToAppend}`;
@@ -567,7 +570,12 @@ export class MoveHeaderCommand extends BasicCommand<
     );
 
     // append header to destination
-    await this.appendHeaderToDestination(engine, dest, nodesToMove);
+    await this.appendHeaderToDestination({
+      engine,
+      dest,
+      origin: originDeepCopy,
+      nodesToMove,
+    });
 
     delayedUpdateDecorations();
 

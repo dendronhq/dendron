@@ -3,9 +3,10 @@ import {
   setupBeforeAfter,
   setupLegacyWorkspaceMulti,
 } from "../testUtilsV3";
-import { describe, before, after } from "mocha";
+import { describe, before, beforeEach, after, afterEach } from "mocha";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import sinon from "sinon";
+import { window } from "vscode";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WorkspaceType } from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
@@ -14,6 +15,30 @@ import { getDWorkspace } from "../../workspace";
 // eslint-disable-next-line prefer-arrow-callback
 suite("GIVEN ChangeWorkspace command", function () {
   const ctx = setupBeforeAfter(this, {});
+
+  describeMultiWS(
+    "WHEN command is gathering inputs",
+    {
+      ctx,
+    },
+    () => {
+      let showOpenDialog: sinon.SinonStub;
+
+      beforeEach(async () => {
+        const cmd = new ChangeWorkspaceCommand();
+        showOpenDialog = sinon.stub(window, "showOpenDialog");
+        await cmd.gatherInputs();
+      });
+      afterEach(() => {
+        showOpenDialog.restore();
+      });
+
+      test("THEN file picker is opened", (done) => {
+        expect(showOpenDialog.calledOnce).toBeTruthy();
+        done();
+      });
+    }
+  );
 
   describeMultiWS(
     "WHEN command is run",

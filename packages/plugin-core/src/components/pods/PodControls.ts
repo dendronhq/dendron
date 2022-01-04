@@ -17,19 +17,14 @@ import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
 import { PodCommandFactory } from "./PodCommandFactory";
 import { assertUnreachable } from "@dendronhq/common-all";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../lookup/LookupControllerV3";
+import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
 import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
 import _ from "lodash";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../lookup/LookupProviderV3";
 import { NoteLookupProviderUtils } from "../lookup/utils";
 import { DLogger } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -341,11 +336,14 @@ export class PodUIControls {
       vaultSelectCanToggle: false,
       extraButtons,
     };
-    const controller = LookupControllerV3.create(lcOpts);
-    const provider = new NoteLookupProvider(key, {
+
+    const extension = ExtensionProvider.getExtension();
+    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const provider = extension.noteLookupProviderFactory.create(key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
+
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id: key,

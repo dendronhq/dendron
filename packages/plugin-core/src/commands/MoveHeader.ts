@@ -436,6 +436,7 @@ export class MoveHeaderCommand extends BasicCommand<
           fname: dest.fname,
           notes,
         });
+        const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
         const newLink = {
           ...oldLink,
           from: {
@@ -444,7 +445,7 @@ export class MoveHeaderCommand extends BasicCommand<
             vaultName: VaultUtils.getName(dest.vault),
           },
           data: {
-            xvault: notesWithSameName.length > 1,
+            xvault: isXVault,
           },
         } as DNoteLink;
         const newBody = LinkUtils.updateLink({

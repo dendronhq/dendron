@@ -6,7 +6,6 @@ import {
   ERROR_SEVERITY,
   getSlugger,
   NoteProps,
-  NotePropsDict,
   NoteQuickInput,
   NoteUtils,
   VaultUtils,
@@ -36,10 +35,9 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { EngineAPIService } from "../services/EngineAPIService";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { findReferences, FoundRefT } from "../utils/md";
-import { getEngine, getVaultFromUri } from "../workspace";
+import { getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -48,6 +46,7 @@ import {
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 
 type CommandInput =
   | {
@@ -60,7 +59,7 @@ type CommandOpts = {
   dest?: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
-  engine: EngineAPIService;
+  engine: IEngineAPIService;
 } & CommandInput;
 type CommandOutput = {
   updated: NoteProps[];
@@ -93,7 +92,7 @@ export class MoveHeaderCommand extends BasicCommand<
     severity: ERROR_SEVERITY.MINOR,
   });
 
-  private getProc = (engine: EngineAPIService, note: NoteProps) => {
+  private getProc = (engine: IEngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
       engine,
       fname: note.fname,
@@ -108,7 +107,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param engine
    * @returns {}
    */
-  private validateAndProcessInput(engine: EngineAPIService): {
+  private validateAndProcessInput(engine: IEngineAPIService): {
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
@@ -176,7 +175,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @returns
    */
   prepareDestination(opts: {
-    engine: EngineAPIService;
+    engine: IEngineAPIService;
     quickpick: DendronQuickPickerV2;
     selectedItems: readonly NoteQuickInput[];
   }) {
@@ -194,11 +193,10 @@ export class MoveHeaderCommand extends BasicCommand<
         // if a user selects a vault in the picker that
         // already has the note, we should not create a new one.
         const fname = selected.fname;
-        const maybeNote = NoteUtils.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes: engine.notes,
+          engine,
           vault, // this is the vault selected from the vault picker
-          wsRoot: engine.wsRoot,
         });
         if (_.isUndefined(maybeNote)) {
           dest = NoteUtils.create({ fname, vault });
@@ -214,7 +212,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
-    const engine = getEngine();
+    const engine = ExtensionProvider.getEngine();
     const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
@@ -268,7 +266,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param nodesToMove
    */
   private async appendHeaderToDestination(opts: {
-    engine: EngineAPIService;
+    engine: IEngineAPIService;
     dest: NoteProps;
     origin: NoteProps;
     nodesToMove: Node[];
@@ -324,18 +322,16 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private getNoteByLocation(
     location: Location,
-    engine: EngineAPIService
+    engine: IEngineAPIService
   ): NoteProps | undefined {
-    const { wsRoot, notes } = engine;
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
 
     const vault = getVaultFromUri(location.uri);
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes,
+      engine,
       vault,
-      wsRoot,
     });
     return note;
   }
@@ -385,7 +381,7 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private findLinksToUpdate(
     note: NoteProps,
-    engine: EngineAPIService,
+    engine: IEngineAPIService,
     origin: NoteProps,
     anchorNamesToUpdate: string[]
   ) {
@@ -422,20 +418,20 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest Note that was the destination of move header commnad
    * @returns
    */
-  private updateLinksInNote(opts: {
-    notes: NotePropsDict;
+  updateLinksInNote(opts: {
     note: NoteProps;
+    engine: IEngineAPIService;
     linksToUpdate: DLink[];
     dest: NoteProps;
   }) {
-    const { notes, note, linksToUpdate, dest } = opts;
+    const { note, engine, linksToUpdate, dest } = opts;
     return _.reduce(
       linksToUpdate,
       (note: NoteProps, linkToUpdate: DLink) => {
         const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
-        const notesWithSameName = NoteUtils.getNotesByFname({
+        const notesWithSameName = NoteUtils.getNotesByFnameFromEngine({
           fname: dest.fname,
-          notes,
+          engine,
         });
 
         // original link had vault prefix?
@@ -481,7 +477,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async updateReferences(
     foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
-    engine: EngineAPIService,
+    engine: IEngineAPIService,
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteProps[]> {
@@ -507,8 +503,8 @@ export class MoveHeaderCommand extends BasicCommand<
           anchorNamesToUpdate
         );
         const modifiedNote = this.updateLinksInNote({
-          notes: engine.notes,
           note: _note,
+          engine,
           linksToUpdate,
           dest,
         });
@@ -534,7 +530,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async removeBlocksFromOrigin(
     origin: NoteProps,
     nodesToMove: Node[],
-    engine: EngineAPIService
+    engine: IEngineAPIService
   ) {
     // find where the extracted block starts and ends
     const startOffset = nodesToMove[0].position?.start.offset;

@@ -225,7 +225,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     Logger.info({ ctx, msg: "exit" });
   }
 
-  async onTriggerButton(btn: QuickInputButton) {
+  onTriggerButton = async (btn: QuickInputButton) => {
     const { _quickpick: quickpick } = this;
     const { buttons, buttonsPrev } = this.state;
     if (!quickpick) {
@@ -290,5 +290,5 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       type: (btn as IDendronQuickInputButton).type,
       pressed: (btn as IDendronQuickInputButton).pressed,
     });
-  }
+  };
 }

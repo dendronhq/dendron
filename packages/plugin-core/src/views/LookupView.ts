@@ -39,6 +39,8 @@ export class LookupView implements vscode.WebviewViewProvider {
   ) {
     this._view = webviewView;
 
+    // TODO: swap `getExtension()` out for `ExtensionProvider.getExtension()`
+    // once IDendronExtension gets properties for tree views.
     WebViewUtils.prepareTreeView({
       ext: getExtension(),
       key: DendronTreeViewKey.LOOKUP_VIEW,

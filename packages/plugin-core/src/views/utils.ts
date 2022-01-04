@@ -136,7 +136,7 @@ export class WebViewUtils {
   }) => {
     const { wsRoot, config } = getDWorkspace();
     const ext = getExtension();
-    const port = ext.port;
+    const port = getExtension().port;
     const qs = DUtils.querystring.stringify({
       ws: wsRoot,
       port,

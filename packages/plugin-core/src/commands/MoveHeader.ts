@@ -422,12 +422,13 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest Note that was the destination of move header commnad
    * @returns
    */
-  private updateLinksInNote(
-    notes: NotePropsDict,
-    note: NoteProps,
-    linksToUpdate: DLink[],
-    dest: NoteProps
-  ) {
+  private updateLinksInNote(opts: {
+    notes: NotePropsDict;
+    note: NoteProps;
+    linksToUpdate: DLink[];
+    dest: NoteProps;
+  }) {
+    const { notes, note, linksToUpdate, dest } = opts;
     return _.reduce(
       linksToUpdate,
       (note: NoteProps, linkToUpdate: DLink) => {
@@ -436,6 +437,12 @@ export class MoveHeaderCommand extends BasicCommand<
           fname: dest.fname,
           notes,
         });
+
+        // original link had vault prefix?
+        //   keep it
+        // original link didn't have vault prefix?
+        //   add vault prefix if there are notes with same name in other vaults.
+        //   don't add otherwise.
         const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
         const newLink = {
           ...oldLink,
@@ -499,12 +506,12 @@ export class MoveHeaderCommand extends BasicCommand<
           origin,
           anchorNamesToUpdate
         );
-        const modifiedNote = this.updateLinksInNote(
-          engine.notes,
-          _note,
+        const modifiedNote = this.updateLinksInNote({
+          notes: engine.notes,
+          note: _note,
           linksToUpdate,
-          dest
-        );
+          dest,
+        });
         note!.body = modifiedNote.body;
         const writeResp = await engine.writeNote(note!, {
           updateExisting: true,

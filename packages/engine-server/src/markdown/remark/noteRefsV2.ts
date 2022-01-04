@@ -813,46 +813,26 @@ function convertNoteRefHelperAST(
 
   // slice of interested range
   try {
-    let out = root(
+    const refTree = root(
       bodyAST.children.slice(
         (start ? start.index : 0) + anchorStartOffset,
         end ? end.index + 1 : undefined
       )
     );
     // Copy the current proc to preserve all options
-    let tmpProc = MDUtilsV4.procFull(procOpts);
+    let tmpProc = proc();
     // but change the fname and vault to the referenced note, since we're inside that note now
     tmpProc = MDUtilsV4.setDendronData(tmpProc, {
       insideNoteRef: true,
       fname: note.fname,
       vault: note.vault,
     });
-    if (isV5Active) {
-      if (procOpts.dest === DendronASTDest.HTML) {
-        tmpProc = MDUtilsV5.procRemarkFull(
-          {
-            ...MDUtilsV5.getProcData(proc),
-            insideNoteRef: true,
-            fname: note.fname,
-            vault: note.vault,
-          },
-          MDUtilsV5.getProcOpts(proc)
-        );
-      }
-    }
     // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
     // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
-    out.children.push(...footnotes);
+    refTree.children.push(...footnotes);
 
-    const { dest } = MDUtilsV4.getDendronData(tmpProc);
-    if (dest === DendronASTDest.HTML) {
-      const out3 = tmpProc.runSync(out) as Parent;
-      return { error: null, data: out3 };
-    } else {
-      const out2 = tmpProc.stringify(out);
-      out = tmpProc.parse(out2) as Parent;
-      return { error: null, data: out };
-    }
+    const finalizedRefTree = tmpProc.runSync(refTree) as Parent;
+    return { error: null, data: finalizedRefTree };
   } catch (err) {
     console.log(
       JSON.stringify({

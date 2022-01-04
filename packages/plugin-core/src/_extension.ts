@@ -74,6 +74,10 @@ import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
+import {
+  INoteSyncService,
+  NoteSyncServiceV2,
+} from "./services/NoteSyncServiceV2";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
@@ -409,8 +413,10 @@ export async function _activate(
       skipSetup: stage === "test",
     });
 
+    const noteSyncService = _setupNoteSyncService(ws, context);
+
     // Setup the commands
-    _setupCommands(ws, context);
+    _setupCommands(ws, context, noteSyncService);
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -775,7 +781,10 @@ export async function _activate(
       // If automaticallyShowPreview = true, display preview panel on start up
       const note = WSUtils.getActiveNote();
       if (note) {
-        PreviewPanelFactory.getProxy(getExtension()).showPreviewAndUpdate(note);
+        PreviewPanelFactory.getProxy(
+          getExtension(),
+          noteSyncService
+        ).showPreviewAndUpdate(note);
       }
 
       return true;
@@ -1009,7 +1018,8 @@ export function shouldDisplayLapsedUserMsg(): boolean {
 
 async function _setupCommands(
   ws: DendronExtension,
-  context: vscode.ExtensionContext
+  context: vscode.ExtensionContext,
+  noteSyncService: INoteSyncService
 ) {
   const existingCommands = await vscode.commands.getCommands();
 
@@ -1115,9 +1125,9 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_PREVIEW.key,
         sentryReportingCallback(async (args) => {
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
-            args
-          );
+          await new ShowPreviewCommand(
+            PreviewPanelFactory.create(ws, noteSyncService)
+          ).run(args);
         })
       )
     );
@@ -1233,4 +1243,13 @@ function updateEngineAPI(port: number | string): void {
   ext.port = _.toInteger(port);
   // const engine = ext.getEngine();
   // return engine;
+}
+
+function _setupNoteSyncService(
+  ws: DendronExtension,
+  context: vscode.ExtensionContext
+) {
+  const svc: INoteSyncService = new NoteSyncServiceV2(ws);
+  context.subscriptions.push(svc);
+  return svc;
 }

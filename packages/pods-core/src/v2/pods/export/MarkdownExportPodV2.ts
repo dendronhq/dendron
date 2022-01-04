@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DEngineClient,
   IntermediateDendronConfig,
   NoteProps,
@@ -67,12 +68,27 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
   }
 
   async exportNote(input: NoteProps): Promise<string> {
+    const {
+      convertTagNotesToLinks = false,
+      convertUserNotesToLinks = false,
+      addFrontmatterTitle,
+    } = this._config;
     const engine = this._engine;
+    const overrideConfig = { ...this._engine.config };
+
+    const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
+    workspaceConfig.enableUserTags = convertUserNotesToLinks;
+    workspaceConfig.enableHashTags = convertTagNotesToLinks;
+
+    if (!_.isUndefined(addFrontmatterTitle)) {
+      const previewConfig = ConfigUtils.getPreview(overrideConfig);
+      previewConfig.enableFMTitle = addFrontmatterTitle;
+    }
 
     let remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
-        ...this._engine.config,
+        ...overrideConfig,
         usePrettyRefs: false,
       },
       engine,
@@ -104,12 +120,27 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
         wikiLinkToURL: {
           description: "How to convert the wikilinks",
           type: "boolean",
+          default: false,
           nullable: true,
         },
         destination: {
           description:
             "export destination. Specify either a file path or 'clipboard' to export to your clipboard",
           type: "string",
+        },
+        convertTagNotesToLinks: {
+          type: "boolean",
+          default: false,
+          nullable: true,
+        },
+        convertUserNotesToLinks: {
+          type: "boolean",
+          default: false,
+          nullable: true,
+        },
+        addFrontmatterTitle: {
+          type: "boolean",
+          nullable: true,
         },
       },
     }) as JSONSchemaType<MarkdownV2PodConfig>;

@@ -958,6 +958,4 @@ export const XKCD_COLORS: { [index: string]: string } = {
   purple: "#7e1e9c",
 };
 
-const COLORS = { ...DENDRON_COLORS, ...XKCD_COLORS };
-
-export const COLORS_LIST = Object.values(COLORS);
+export const COLORS_LIST = Object.values(XKCD_COLORS);

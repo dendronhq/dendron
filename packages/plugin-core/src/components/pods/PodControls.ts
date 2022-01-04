@@ -315,7 +315,7 @@ export class PodUIControls {
   }
 
   /**
-   * Prompts a lookup that will determine the scope of export.
+   * Prompts a lookup control that allows user to select notes for export.
    * @param fromSelection set this flag to true if we are using {@link PodExportScope.LinksInSelection}
    * @param key key of the command. this will be used for lookup provider subscription.
    * @param logger logger object used by the command.
@@ -363,7 +363,7 @@ export class PodUIControls {
         },
       });
       controller.show({
-        title: "Select all notes to export.",
+        title: "Select notes to export.",
         placeholder: "Lookup notes.",
         provider,
         selectAll: true,
@@ -435,7 +435,7 @@ export class PodUIControls {
         return "Exports the current contents of the selected portion of text in the open note editor";
 
       case PodExportScope.Lookup:
-        return "Exports all notes selected by lookup";
+        return "Prompts user to select note(s) for export";
 
       case PodExportScope.LinksInSelection:
         return "Exports all notes in wikilinks of current selected portion of text in the open note editor";

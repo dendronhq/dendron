@@ -1380,12 +1380,12 @@ export class SchemaUtils {
       const currentDate = Time.now();
       const compiledSchemaTemplate = _.template(note.body);
       note.body = compiledSchemaTemplate({
-        CURRENT_YEAR: currentDate.year,
-        CURRENT_MONTH: currentDate.month,
-        CURRENT_DAY: currentDate.day,
-        CURRENT_HOUR: currentDate.hour,
-        CURRENT_MINUTE: currentDate.minute,
-        CURRENT_SECOND: currentDate.second,
+        CURRENT_YEAR: currentDate.toFormat("yyyy"),
+        CURRENT_MONTH: currentDate.toFormat("LL"),
+        CURRENT_DAY: currentDate.toFormat("dd"),
+        CURRENT_HOUR: currentDate.toFormat("HH"),
+        CURRENT_MINUTE: currentDate.toFormat("mm"),
+        CURRENT_SECOND: currentDate.toFormat("ss"),
       });
 
       return true;

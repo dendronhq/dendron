@@ -5,7 +5,6 @@ import {
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
-  VaultUtils,
   MODIFIER_DESCRIPTIONS,
 } from "@dendronhq/common-all";
 import _ from "lodash";

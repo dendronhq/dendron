@@ -12,6 +12,7 @@ import {
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
+import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
@@ -60,6 +61,7 @@ export interface IDendronExtension {
   commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
+  noteSyncService: INoteSyncService;
 
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;

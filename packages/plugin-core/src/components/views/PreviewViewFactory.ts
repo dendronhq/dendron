@@ -15,7 +15,7 @@ import * as vscode from "vscode";
 import { handleLink, LinkType } from "../../commands/ShowPreview";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
-import { INoteSyncService } from "../../services/NoteSyncServiceV2";
+import { INoteSyncService } from "../../services/NoteSyncService";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -101,10 +101,7 @@ export class PreviewPanelFactory {
     return undefined;
   }
 
-  static getProxy(
-    extension: IDendronExtension,
-    svc: INoteSyncService
-  ): PreviewProxy {
+  static getProxy(extension: IDendronExtension): PreviewProxy {
     return {
       async showPreviewAndUpdate(note, opts) {
         const ctx = {
@@ -124,7 +121,7 @@ export class PreviewPanelFactory {
             state: "panel not found and automaticallyShowPreview = true",
           });
           const showPreview = extension.commandFactory.showPreviewCmd(
-            PreviewPanelFactory.create(extension, svc)
+            PreviewPanelFactory.create(extension)
           );
           await showPreview.execute();
           return PreviewPanelFactory.updateForNote(note, opts);
@@ -154,14 +151,10 @@ export class PreviewPanelFactory {
   }) {
     this.initWithNote = note;
     this.initWithOpts = opts;
-    //TODO: Figure out how to add this back.....
-    // return this.getProxy(extension).showPreviewAndUpdate(note, opts);
+    return this.getProxy(extension).showPreviewAndUpdate(note, opts);
   }
 
-  static create(
-    ext: IDendronExtension,
-    noteSyncService: INoteSyncService
-  ): vscode.WebviewPanel {
+  static create(ext: IDendronExtension): vscode.WebviewPanel {
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
 
@@ -173,7 +166,7 @@ export class PreviewPanelFactory {
       DendronEditorViewKey.NOTE_PREVIEW
     );
 
-    this._noteSyncService = noteSyncService;
+    this._noteSyncService = ext.noteSyncService;
 
     this._panel = vscode.window.createWebviewPanel(
       name,

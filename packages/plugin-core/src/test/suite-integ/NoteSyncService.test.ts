@@ -1,12 +1,14 @@
-import { milliseconds, Time } from "@dendronhq/common-all";
+import { assert, DateTime, milliseconds, Time } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
-import _ from "lodash";
-import { DateTime } from "luxon";
-import { describe } from "mocha";
+import { afterEach, describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { NoteSyncService } from "../../services/NoteSyncService";
+import { EventEmitter, TextDocumentChangeEvent } from "vscode";
+import {
+  INoteSyncService,
+  NoteSyncService,
+} from "../../services/NoteSyncService";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -32,6 +34,14 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe(`GIVEN NoteSyncService`, () => {
+    let noteSyncSvc: INoteSyncService | undefined;
+
+    afterEach(() => {
+      if (noteSyncSvc) {
+        noteSyncSvc.dispose();
+      }
+    });
+
     test("WHEN only fontmatter title changes THEN updated stamp should be changed.", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -52,36 +62,58 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
           });
 
           const beforeStamp = await millisNowAndWait1Milli();
-          const resp = await NoteSyncService.instance().onDidChange(
-            editor.document,
-            {
-              contentChanges: [
-                {
-                  range: new vscode.Range(
-                    changeSelection!.start.line,
-                    changeSelection!.start.character,
-                    changeSelection!.end.line,
-                    changeSelection!.end.character
-                  ),
-                  text: "bar",
-                  rangeLength: 3,
-                  rangeOffset: offset,
-                },
-              ],
-            }
+
+          const mockExtension: any = {
+            getEngine: () => {
+              return engine;
+            },
+            workspaceService: {
+              isPathInWorkspace: (_fsPath: string) => true,
+            },
+          };
+
+          const emitter = new EventEmitter<TextDocumentChangeEvent>();
+
+          noteSyncSvc = new NoteSyncService(
+            mockExtension,
+            vscode.workspace.onDidSaveTextDocument,
+            emitter.event
           );
 
-          expect(resp!.updated > beforeStamp).toBeTruthy();
+          noteSyncSvc.onNoteChange(
+            async (noteProps) => {
+              expect(noteProps.updated > beforeStamp).toBeTruthy();
 
-          expect(
-            await AssertUtils.assertInString({
-              body: engine.notes["foo"].title,
-              match: ["bar"],
-              nomatch: ["foo"],
-            })
-          ).toBeTruthy();
+              expect(
+                await AssertUtils.assertInString({
+                  body: engine.notes["foo"].title,
+                  match: ["bar"],
+                  nomatch: ["foo"],
+                })
+              ).toBeTruthy();
 
-          done();
+              done();
+            },
+            this
+            // ctx.subscriptions
+          );
+
+          emitter.fire({
+            document: editor.document,
+            contentChanges: [
+              {
+                range: new vscode.Range(
+                  changeSelection!.start.line,
+                  changeSelection!.start.character,
+                  changeSelection!.end.line,
+                  changeSelection!.end.character
+                ),
+                text: "bar",
+                rangeLength: 3,
+                rangeOffset: offset,
+              },
+            ],
+          });
         },
       });
     });
@@ -91,6 +123,14 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
 suite("NoteSyncService", function testSuite() {
   let newUpdatedTime: number;
   let timeStub: sinon.SinonStub;
+
+  let noteSyncSvc: INoteSyncService | undefined;
+
+  afterEach(() => {
+    if (noteSyncSvc) {
+      noteSyncSvc.dispose();
+    }
+  });
 
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
@@ -119,18 +159,43 @@ suite("NoteSyncService", function testSuite() {
             const selection = new vscode.Selection(pos, pos);
             builder.replace(selection, `Hello`);
           });
-          const resp = await NoteSyncService.instance().onDidChange(
-            editor.document
+
+          const mockExtension: any = {
+            getEngine: () => {
+              return engine;
+            },
+            workspaceService: {
+              isPathInWorkspace: (_fsPath: string) => true,
+            },
+          };
+
+          const emitter = new EventEmitter<TextDocumentChangeEvent>();
+
+          noteSyncSvc = new NoteSyncService(
+            mockExtension,
+            vscode.workspace.onDidSaveTextDocument,
+            emitter.event
           );
-          expect(resp?.contentHash).toEqual("465a4f4ebf83fbea836eb7b8e8e040ec");
-          expect(resp?.updated).toEqual(newUpdatedTime);
-          expect(
-            await AssertUtils.assertInString({
-              body: engine.notes["foo"].body,
-              match: ["Hello"],
-            })
-          ).toBeTruthy();
-          done();
+
+          noteSyncSvc.onNoteChange(async (noteProps) => {
+            expect(noteProps.contentHash).toEqual(
+              "465a4f4ebf83fbea836eb7b8e8e040ec"
+            );
+            expect(noteProps.updated).toEqual(newUpdatedTime);
+            expect(
+              await AssertUtils.assertInString({
+                body: engine.notes["foo"].body,
+                match: ["Hello"],
+              })
+            ).toBeTruthy();
+
+            done();
+          }, this);
+
+          emitter.fire({
+            document: editor.document,
+            contentChanges: [],
+          });
         },
       });
     });
@@ -153,14 +218,37 @@ suite("NoteSyncService", function testSuite() {
             const pos = new vscode.Position(6, 0);
             builder.insert(pos, `tags: test\n`);
           });
-          await NoteSyncService.instance().onDidChange(editor.document);
 
-          // "foo" should have the frontmatter link to "tags.test"
-          const updatedFoo = engine.notes["foo"];
-          expect(updatedFoo.links.length).toEqual(1);
-          expect(updatedFoo.links[0].type).toEqual("frontmatterTag");
-          expect(updatedFoo.links[0].to?.fname).toEqual("tags.test");
-          done();
+          const mockExtension: any = {
+            getEngine: () => {
+              return engine;
+            },
+            workspaceService: {
+              isPathInWorkspace: (_fsPath: string) => true,
+            },
+          };
+
+          const emitter = new EventEmitter<TextDocumentChangeEvent>();
+
+          noteSyncSvc = new NoteSyncService(
+            mockExtension,
+            vscode.workspace.onDidSaveTextDocument,
+            emitter.event
+          );
+
+          noteSyncSvc.onNoteChange(async (_noteProps) => {
+            const updatedFoo = engine.notes["foo"];
+            expect(updatedFoo.links.length).toEqual(1);
+            expect(updatedFoo.links[0].type).toEqual("frontmatterTag");
+            expect(updatedFoo.links[0].to?.fname).toEqual("tags.test");
+
+            done();
+          }, this);
+
+          emitter.fire({
+            document: editor.document,
+            contentChanges: [],
+          });
         },
       });
     });
@@ -172,10 +260,35 @@ suite("NoteSyncService", function testSuite() {
         onInit: async ({ engine }) => {
           const foo = engine.notes["foo"];
           const editor = await WSUtils.openNote(foo);
-          const resp = await NoteSyncService.instance().onDidChange(
-            editor.document
+
+          const mockExtension: any = {
+            getEngine: () => {
+              return engine;
+            },
+            workspaceService: {
+              isPathInWorkspace: (_fsPath: string) => true,
+            },
+          };
+
+          const emitter = new EventEmitter<TextDocumentChangeEvent>();
+
+          noteSyncSvc = new NoteSyncService(
+            mockExtension,
+            vscode.workspace.onDidSaveTextDocument,
+            emitter.event
           );
-          expect(_.isUndefined(resp)).toBeTruthy();
+
+          noteSyncSvc.onNoteChange(async (_noteProps) => {
+            assert(false, "Callback not expected");
+          }, this);
+
+          emitter.fire({
+            document: editor.document,
+            contentChanges: [],
+          });
+
+          // Small sleep to ensure callback doesn't fire.
+          await millisNowAndWait1Milli();
           done();
         },
       });

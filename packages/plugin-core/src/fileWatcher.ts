@@ -9,19 +9,21 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import {
-  HistoryService,
-  FileWatcherAdapter,
   EngineFileWatcher,
+  FileWatcherAdapter,
+  HistoryService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { NoteSyncService } from "./services/NoteSyncService";
+import { INoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { getDWorkspace, getExtension } from "./workspace";
 
 export class FileWatcher {
+  private _noteSyncService: INoteSyncService;
+
   public watchers: { vault: DVault; watcher: FileWatcherAdapter }[];
   /**
    * Should watching be paused
@@ -29,8 +31,15 @@ export class FileWatcher {
   public pause: boolean;
   public L = Logger;
 
-  constructor(opts: WorkspaceOpts) {
-    const { vaults, wsRoot } = opts;
+  constructor(opts: {
+    workspaceOpts: WorkspaceOpts;
+    noteSyncSvc: INoteSyncService;
+  }) {
+    const { workspaceOpts, noteSyncSvc } = opts;
+
+    this._noteSyncService = noteSyncSvc;
+
+    const { vaults, wsRoot } = workspaceOpts;
     this.watchers = vaults.map((vault) => {
       const vpath = path.join(
         wsRoot,
@@ -41,7 +50,7 @@ export class FileWatcher {
 
       let watcher: FileWatcherAdapter;
       // For VSCode workspaces, or if forced in the config, use the VSCode watcher
-      if (FileWatcher.watcherType(opts) === "plugin") {
+      if (FileWatcher.watcherType(workspaceOpts) === "plugin") {
         watcher = new PluginFileWatcher(pattern);
       } else {
         watcher = new EngineFileWatcher(pattern.base, pattern.pattern);
@@ -135,7 +144,9 @@ export class FileWatcher {
         }
 
         // add note
-        note = await NoteSyncService.updateNoteMeta({
+        //TODO: After refactoring fileWatcher to an eventing pattern,
+        //make noteSyncService depend on fileWatcher, not the other way around
+        note = await this._noteSyncService.syncNoteMetadata({
           note,
           fmChangeOnly: false,
         });

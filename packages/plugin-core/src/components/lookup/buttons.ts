@@ -9,6 +9,7 @@ import {
   NoteUtils,
   TaskNoteUtils,
   VaultUtils,
+  MODIFIER_DESCRIPTIONS,
 } from "@dendronhq/common-all";
 import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -254,8 +255,7 @@ export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new Selection2LinkBtn({
       title: "Selection to Link",
-      description:
-        "Highlighted text will be turned into a wikilink to the newly created note",
+      description: MODIFIER_DESCRIPTIONS["selection2link"],
       iconOff: "link",
       iconOn: "menu-selection",
       type: "selection2link",
@@ -298,8 +298,7 @@ export class SelectionExtractBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new SelectionExtractBtn({
       title: "Selection Extract",
-      description:
-        "Highlighted text will be copied over to the new note and a note reference will be left in the original note",
+      description: MODIFIER_DESCRIPTIONS["selectionExtract"],
       iconOff: "find-selection",
       iconOn: "menu-selection",
       type: "selectionExtract",
@@ -331,8 +330,7 @@ export class Selection2ItemsBtn extends DendronBtn {
     });
     return new Selection2ItemsBtn({
       title: "Selection to Items",
-      description:
-        "Wikilinks in highlighted text will be used to create selectable items in lookup",
+      description: MODIFIER_DESCRIPTIONS["selection2Items"],
       iconOff: "checklist",
       iconOn: "menu-selection",
       type: "selection2Items",
@@ -424,7 +422,7 @@ export class JournalBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new JournalBtn({
       title: "Create Journal Note",
-      description: "",
+      description: MODIFIER_DESCRIPTIONS["journal"],
       iconOff: "calendar",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.journal,
@@ -460,7 +458,7 @@ export class ScratchBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new ScratchBtn({
       title: "Create Scratch Note",
-      description: "",
+      description: MODIFIER_DESCRIPTIONS["scratch"],
       iconOff: "new-file",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.scratch,
@@ -496,7 +494,7 @@ export class TaskBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new TaskBtn({
       title: "Create Task Note",
-      description: "",
+      description: MODIFIER_DESCRIPTIONS["task"],
       iconOff: "diff-added",
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.task,
@@ -548,7 +546,7 @@ export class HorizontalSplitBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new HorizontalSplitBtn({
       title: "Split Horizontal",
-      description: "Open lookup result to the side",
+      description: MODIFIER_DESCRIPTIONS["horizontal"],
       iconOff: "split-horizontal",
       iconOn: "menu-selection",
       type: "horizontal",
@@ -574,8 +572,7 @@ export class DirectChildFilterBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new DirectChildFilterBtn({
       title: "Direct Child Filter",
-      description:
-        "Limits lookup depth to one level and filters out stub notes",
+      description: MODIFIER_DESCRIPTIONS["directChildOnly"],
       iconOff: "git-branch",
       iconOn: "menu-selection",
       type: "directChildOnly" as LookupFilterType,
@@ -604,7 +601,7 @@ export class MultiSelectBtn extends DendronBtn {
     });
     return new MultiSelectBtn({
       title: "Multi-Select",
-      description: "Select multiple notes at once",
+      description: MODIFIER_DESCRIPTIONS["multiSelect"],
       iconOff: "chrome-maximize",
       iconOn: "menu-selection",
       type: "multiSelect" as LookupEffectType,
@@ -627,7 +624,7 @@ export class CopyNoteLinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new CopyNoteLinkBtn({
       title: "Copy Note Link",
-      description: "Add selected notes to the clipboard as wikilinks",
+      description: MODIFIER_DESCRIPTIONS["copyNoteLink"],
       iconOff: "clippy",
       iconOn: "menu-selection",
       type: "copyNoteLink" as LookupEffectType,

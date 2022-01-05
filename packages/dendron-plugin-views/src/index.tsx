@@ -3,6 +3,7 @@ const VALID_NAMES = [
   "DendronNotePageView",
   "SampleView",
   "DendronTreeExplorerPanelView",
+  "DendronLookupPanelView",
 ];
 
 if (VALID_NAMES.includes(VIEW_NAME)) {

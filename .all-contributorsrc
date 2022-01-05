@@ -1140,6 +1140,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "redsolver",
+      "name": "redsolver",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30355444?v=4",
+      "profile": "https://github.com/redsolver",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

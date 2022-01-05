@@ -12,7 +12,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">Beta (Private)</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Beta (Private)</div></div>
 </div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -563,7 +563,7 @@ VFile {
 exports[`dendronPub usePrettyRefs config.site.usePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
+<p></p><p></p><div>bar body</div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
@@ -588,7 +588,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+<div class=\\"portal-parent-fader-bottom\\"></div><div>bar body</div>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -605,7 +605,7 @@ VFile {
 exports[`dendronPub usePrettyRefs config.usePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
+<p></p><p></p><div>bar body</div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
@@ -630,7 +630,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+<div class=\\"portal-parent-fader-bottom\\"></div><div>bar body</div>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -656,7 +656,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+<div class=\\"portal-parent-fader-bottom\\"></div><div>bar body</div>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -682,7 +682,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+<div class=\\"portal-parent-fader-bottom\\"></div><div>bar body</div>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>

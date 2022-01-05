@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-123-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-124-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -337,6 +337,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/redsolver"><img src="https://avatars.githubusercontent.com/u/30355444?v=4?s=100" width="100px;" alt=""/><br /><sub><b>redsolver</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aredsolver" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/NahomBefekadu"><img src="https://avatars.githubusercontent.com/u/58083518?v=4?s=100" width="100px;" alt=""/><br /><sub><b>NahomBefekadu</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ANahomBefekadu" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/jaroslavknotek"><img src="https://avatars.githubusercontent.com/u/46137238?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jaroslavknotek</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajaroslavknotek" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/foldsters"><img src="https://avatars.githubusercontent.com/u/37962412?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matthew Giallourakis</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afoldsters" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

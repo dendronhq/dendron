@@ -609,7 +609,7 @@ export class DendronExtension implements IDendronExtension {
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       getDWorkspace().config.dev?.enableLinkCandidates
     );
-    // JY Note: Here is where it gets refreshed:
+
     vscode.window.onDidChangeActiveTextEditor(() =>
       backlinksTreeDataProvider.refresh()
     );

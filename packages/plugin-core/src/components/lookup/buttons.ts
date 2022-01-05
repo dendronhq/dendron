@@ -145,20 +145,6 @@ const selectionToNoteProps = async (opts: {
               builder.replace(selection, `[[${text}|${link}]]`);
             }
           });
-          // // Because the window switches too quickly, note sync service
-          // // sometimes can't update the current note with the link fast enough.
-          // // So we manually force the update here instead.
-
-          // const currentNote = WSUtils.getNoteFromDocument(editor.document);
-          // if (currentNote) {
-          //   await NoteSyncService.instance().updateNoteContents({
-          //     oldNote: currentNote,
-          //     content: editor.document.getText(),
-          //     fmChangeOnly: false,
-          //     fname: currentNote.fname,
-          //     vault: currentNote.vault,
-          //   });
-          // }
         }
       }
       return note;

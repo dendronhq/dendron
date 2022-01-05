@@ -1010,7 +1010,6 @@ export function shouldDisplayLapsedUserMsg(): boolean {
 async function _setupCommands(
   ws: DendronExtension,
   context: vscode.ExtensionContext
-  // noteSyncService: INoteSyncService
 ) {
   const existingCommands = await vscode.commands.getCommands();
 

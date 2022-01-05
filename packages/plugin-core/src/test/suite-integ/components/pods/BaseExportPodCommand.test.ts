@@ -1,6 +1,6 @@
 import { vault2Path } from "@dendronhq/common-server";
 import { PodExportScope } from "@dendronhq/pods-core";
-import { describe, after } from "mocha";
+import { describe, after, beforeEach, afterEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { getDWorkspace } from "../../../../workspace";
@@ -12,9 +12,12 @@ import {
 } from "../../../testUtilsV3";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { TestExportPodCommand } from "./TestExportCommand";
-import { NoteProps } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { PodUIControls } from "../../../../components/pods/PodControls";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 
 suite("BaseExportPodCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -127,6 +130,77 @@ suite("BaseExportPodCommand", function () {
           });
 
           expect(payload?.payload.length).toEqual(6);
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN exporting a lookup based scope",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test-note-for-pod1",
+          });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "test-note-for-pod2",
+          });
+        },
+      },
+      () => {
+        const cmd = new TestExportPodCommand();
+        let sandbox: sinon.SinonSandbox;
+
+        beforeEach(() => {
+          sandbox = sinon.createSandbox();
+        });
+
+        afterEach(() => {
+          sandbox.restore();
+        });
+
+        test("THEN lookup is prompted and lookup result should be the export payload", async () => {
+          const engine = ExtensionProvider.getEngine();
+          const { wsRoot, vaults } = engine;
+          const testNote1 = NoteUtils.getNoteByFnameV5({
+            fname: "test-note-for-pod1",
+            notes: engine.notes,
+            wsRoot,
+            vault: vaults[0],
+          }) as NoteProps;
+          const testNote2 = NoteUtils.getNoteByFnameV5({
+            fname: "test-note-for-pod2",
+            notes: engine.notes,
+            wsRoot,
+            vault: vaults[0],
+          }) as NoteProps;
+          const selectedItems = [
+            { ...testNote1, label: "" },
+            { ...testNote2, label: "" },
+          ];
+          const lookupStub = sandbox
+            .stub(PodUIControls, "promptForScopeLookup")
+            .resolves({
+              selectedItems,
+              onAcceptHookResp: [],
+            });
+
+          await cmd.enrichInputs({
+            exportScope: PodExportScope.Lookup,
+          });
+
+          expect(lookupStub.calledOnce).toBeTruthy();
+
+          await cmd.enrichInputs({
+            exportScope: PodExportScope.LinksInSelection,
+          });
+
+          expect(lookupStub.calledTwice).toBeTruthy();
         });
       }
     );

@@ -69,6 +69,7 @@ import { VersionProvider } from "./versionProvider";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { LookupView } from "./views/LookupView";
 import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -497,6 +498,10 @@ export class DendronExtension implements IDendronExtension {
     this.getWorkspaceImplOrThrow().engine = engine;
   }
 
+  getTreeView(key: DendronTreeViewKey) {
+    return this.treeViews[key];
+  }
+
   async setupViews(context: vscode.ExtensionContext) {
     const ctx = "setupViews";
     HistoryService.instance().subscribe("extension", async (event) => {
@@ -519,6 +524,15 @@ export class DendronExtension implements IDendronExtension {
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,
             calendarView
+          )
+        );
+
+        const lookupView = new LookupView();
+        this.treeViews[DendronTreeViewKey.LOOKUP_VIEW] = lookupView;
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            LookupView.viewType,
+            lookupView
           )
         );
 

@@ -266,7 +266,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         ? _.toArray(notes)
         : scope.selectedItems.map(
             (item) =>
-              _.omit(item, ["label", "detail", "alwasyShow"]) as DNodeProps
+              _.omit(item, ["label", "detail", "alwaysShow"]) as DNodeProps
           );
 
     const capturedNotes: DNodeProps[] = scopedItems.filter((item) => {

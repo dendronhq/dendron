@@ -31,6 +31,7 @@ import {
   USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
   DNoteAnchorBasic,
+  DNodeProps,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type {
@@ -479,6 +480,46 @@ export class LinkUtils {
     } else {
       return null;
     }
+  }
+
+  static getNotesFromWikiLinks(opts: {
+    activeNote: DNodeProps;
+    wikiLinks: ParseLinkV2Resp[];
+    engine: DEngineClient;
+  }) {
+    const { activeNote, wikiLinks, engine } = opts;
+    const { vaults, notes, wsRoot } = engine;
+
+    let out: DNodeProps[] = [];
+    wikiLinks.forEach((wikiLink) => {
+      const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
+
+      const vault = wikiLink.vaultName
+        ? (VaultUtils.getVaultByName({
+            vname: wikiLink.vaultName,
+            vaults,
+          }) as DVault)
+        : undefined;
+
+      if (vault) {
+        const note = NoteUtils.getNoteByFnameV5({
+          fname,
+          notes,
+          vault,
+          wsRoot,
+        });
+        if (note) {
+          out.push(note);
+        }
+      } else {
+        const notesWithSameFname = NoteUtils.getNotesByFname({
+          fname,
+          notes,
+        });
+        out = out.concat(notesWithSameFname);
+      }
+    });
+    return out;
   }
 
   static parseLink(linkMatch: string) {

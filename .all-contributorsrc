@@ -1177,6 +1177,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "themurtazanazir",
+      "name": "Murtaza Nazir",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34167018?v=4",
+      "profile": "https://github.com/themurtazanazir",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

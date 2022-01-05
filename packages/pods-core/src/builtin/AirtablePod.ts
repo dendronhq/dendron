@@ -74,6 +74,11 @@ export type SrcFieldMappingV2 =
   | SingleSelectField
   | LinkedRecordField;
 
+export enum SpecialSrcFieldToKey {
+  TAGS = "tags",
+  LINKS = "links",
+}
+
 type SimpleSrcField = {
   to: string;
   type: "string" | "date";
@@ -86,7 +91,7 @@ type TagSrcField = {
   filter: string;
 };
 type SelectField = {
-  to: "links" | "tags" | string;
+  to: SpecialSrcFieldToKey | string;
   filter?: string;
 };
 type SingleSelectField = {
@@ -217,7 +222,19 @@ export class AirtableUtils {
         return { data };
       }
       case "multiSelect": {
-        throw Error("not implemented");
+        if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
+          const tags = NoteMetadataUtils.extractTags({
+            note,
+            filters: fieldMapping.filter ? [fieldMapping.filter] : [],
+          });
+          const data = NoteMetadataUtils.cleanTags(tags);
+          return { data };
+        }
+        const data = NoteMetadataUtils.extractArray({
+          note,
+          key: fieldMapping.to,
+        });
+        return { data };
       }
       case "singleTag": {
         let val: string;

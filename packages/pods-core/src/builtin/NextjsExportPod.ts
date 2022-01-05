@@ -145,10 +145,14 @@ export class NextjsExportPodUtils {
     return out;
   }
 
-  static async startNextDev(opts: { nextPath: string; quiet?: boolean }) {
-    const { nextPath, quiet } = opts;
+  static async startNextDev(opts: {
+    nextPath: string;
+    quiet?: boolean;
+    windowsHide?: boolean;
+  }) {
+    const { nextPath, quiet, windowsHide } = opts;
     const cmdDev = quiet ? "npm run --silent dev" : "npm run dev";
-    const out = $$(cmdDev, { cwd: nextPath, windowsHide: false });
+    const out = $$(cmdDev, { cwd: nextPath, windowsHide });
     out.stdout?.pipe(process.stdout);
     return out.pid;
   }

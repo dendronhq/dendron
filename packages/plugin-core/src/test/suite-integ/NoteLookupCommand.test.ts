@@ -26,7 +26,7 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, Done } from "mocha";
+import { afterEach, beforeEach, describe, Done } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
@@ -786,6 +786,16 @@ suite("NoteLookupCommand", function () {
         ctx,
       },
       () => {
+        const currentDate = new Date(2021, 11, 2);
+        let clock: sinon.SinonFakeTimers;
+        beforeEach(async () => {
+          clock = sinon.useFakeTimers(currentDate);
+        });
+        afterEach(() => {
+          sinon.restore();
+          clock.restore();
+        });
+
         test("WHEN a new note matches the schema template, THEN new note's body contains proper date substitution", async () => {
           const cmd = new NoteLookupCommand();
           await cmd.run({
@@ -794,15 +804,11 @@ suite("NoteLookupCommand", function () {
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = WSUtils.getNoteFromDocument(document!);
-          const currentDate = Time.now();
-          const year = currentDate.toFormat("yyyy");
-          const month = currentDate.toFormat("LL");
-          const day = currentDate.toFormat("dd");
 
           expect(newNote!.body.trim()).toEqual(
-            `Today is ${year}.${month}.${day}` +
+            `Today is 2021.12.02` +
               "\n" +
-              `This link goes to [[daily.journal.${year}.${month}.${day}]]`
+              `This link goes to [[daily.journal.2021.12.02]]`
           );
         });
       }

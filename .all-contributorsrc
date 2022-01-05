@@ -1168,6 +1168,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "foldsters",
+      "name": "Matthew Giallourakis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37962412?v=4",
+      "profile": "https://github.com/foldsters",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

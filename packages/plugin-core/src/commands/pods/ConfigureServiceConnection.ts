@@ -32,8 +32,8 @@ export class ConfigureServiceConnection extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ConfigureServiceConnection" };
-    this.L.info({ ctx, opts });
     const { serviceType } = opts;
+    this.L.info({ ctx, serviceType, msg: "enter" });
     let configFilePath: string;
     const mngr = new ExternalConnectionManager(getExtension().podsDir);
     const existingConnections = await mngr.getAllConfigsByType(serviceType);

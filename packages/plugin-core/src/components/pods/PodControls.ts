@@ -426,12 +426,6 @@ export class PodUIControls {
    */
   private static getDescriptionForScope(scope: PodExportScope): string {
     switch (scope) {
-      case PodExportScope.Clipboard:
-        return "Exports the current contents of your clipboard";
-
-      case PodExportScope.Selection:
-        return "Exports the current contents of the selected portion of text in the open note editor";
-
       case PodExportScope.Lookup:
         return "Prompts user to select note(s) for export";
 

@@ -60,6 +60,11 @@ export const DENDRON_VIEWS = [
     icon: "media/icons/dendron-vscode.svg",
   },
   {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
+    when: DendronContext.NOTE_LOOK_UP_ACTIVE,
+    where: "explorer",
+  },
+  {
     id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
     when: DendronContext.PLUGIN_ACTIVE,

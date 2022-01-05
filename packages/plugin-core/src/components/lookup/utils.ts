@@ -1,12 +1,14 @@
 /* eslint-disable no-dupe-class-members */
 import {
   DendronError,
+  DendronTreeViewKey,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DNoteLoc,
   DVault,
+  LookupModifierStatePayload,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
@@ -28,6 +30,7 @@ import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
+import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
@@ -559,8 +562,6 @@ export class PickerUtilsV2 {
   }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
-    // const { engine } = getDWorkspace();
-
     // Only 1 vault, no other options to choose from:
     if (vaults.length <= 1) {
       return Array.of({ vault, label: VaultUtils.getName(vault) });
@@ -710,6 +711,27 @@ export class PickerUtilsV2 {
         return bt.onEnable({ quickPick: opts.quickpick });
       })
     );
+
+    PickerUtilsV2.refreshLookupView({ buttons: opts.quickpick.buttons });
+  }
+
+  static refreshLookupView(opts: { buttons: DendronBtn[] }) {
+    const { buttons } = opts;
+    const payload: LookupModifierStatePayload = buttons.map(
+      (button: DendronBtn) => {
+        return {
+          type: button.type,
+          pressed: button.pressed,
+        };
+      }
+    );
+
+    // TODO: swpa this out for `ExtensionProvider.getExtension()`
+    // once IDendronExtension interface has the tree view properties.
+    const lookupView = getExtension().getTreeView(
+      DendronTreeViewKey.LOOKUP_VIEW
+    ) as LookupView;
+    lookupView.refresh(payload);
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

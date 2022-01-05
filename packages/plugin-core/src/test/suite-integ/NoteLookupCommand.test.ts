@@ -794,14 +794,14 @@ suite("NoteLookupCommand", function () {
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = WSUtils.getNoteFromDocument(document!);
+          const year = Time.now().year;
+          const month = ("0" + Time.now().month).slice(-2);
+          const day = ("0" + Time.now().day).slice(-2);
+
           expect(newNote!.body.trim()).toEqual(
-            `Today is ${Time.now().year}.${Time.now().month}.${
-              Time.now().day
-            }` +
+            `Today is ${year}.${month}.${day}` +
               "\n" +
-              `This link goes to [[daily.journal.${Time.now().year}.${
-                Time.now().month
-              }.${Time.now().day}]]`
+              `This link goes to [[daily.journal.${year}.${month}.${day}]]`
           );
         });
       }

@@ -794,9 +794,10 @@ suite("NoteLookupCommand", function () {
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           const newNote = WSUtils.getNoteFromDocument(document!);
-          const year = Time.now().year;
-          const month = ("0" + Time.now().month).slice(-2);
-          const day = ("0" + Time.now().day).slice(-2);
+          const currentDate = Time.now();
+          const year = currentDate.toFormat("yyyy");
+          const month = currentDate.toFormat("LL");
+          const day = currentDate.toFormat("dd");
 
           expect(newNote!.body.trim()).toEqual(
             `Today is ${year}.${month}.${day}` +

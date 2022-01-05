@@ -143,9 +143,11 @@ describe(`SchemaUtil tests:`, () => {
               note,
               engine,
             });
-            const year = Time.now().year;
-            const month = ("0" + Time.now().month).slice(-2);
-            const day = ("0" + Time.now().day).slice(-2);
+
+            const currentDate = Time.now();
+            const year = currentDate.toFormat("yyyy");
+            const month = currentDate.toFormat("LL");
+            const day = currentDate.toFormat("dd");
 
             expect(resp).toBeTruthy();
             expect(note.body).not.toEqual(engine.notes["date-variables"].body);

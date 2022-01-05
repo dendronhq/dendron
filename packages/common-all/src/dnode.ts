@@ -1380,12 +1380,12 @@ export class SchemaUtils {
       const currentDate = Time.now();
       const compiledSchemaTemplate = _.template(note.body);
       note.body = compiledSchemaTemplate({
-        CURRENT_YEAR: currentDate.year,
-        CURRENT_MONTH: this.addPadding(currentDate.month),
-        CURRENT_DAY: this.addPadding(currentDate.day),
-        CURRENT_HOUR: this.addPadding(currentDate.hour),
-        CURRENT_MINUTE: this.addPadding(currentDate.minute),
-        CURRENT_SECOND: this.addPadding(currentDate.second),
+        CURRENT_YEAR: currentDate.toFormat("yyyy"),
+        CURRENT_MONTH: currentDate.toFormat("LL"),
+        CURRENT_DAY: currentDate.toFormat("dd"),
+        CURRENT_HOUR: currentDate.toFormat("HH"),
+        CURRENT_MINUTE: currentDate.toFormat("mm"),
+        CURRENT_SECOND: currentDate.toFormat("ss"),
       });
 
       return true;
@@ -1943,16 +1943,6 @@ export class SchemaUtils {
 
   static isSchemaUri(uri: URI) {
     return uri.fsPath.endsWith(".schema.yml");
-  }
-
-  /**
-   * Adds leading zero if number is a single digit.
-   *
-   * Example: addPadding(3) -> "03"
-   *          addPadding(23) -> "23"
-   */
-  static addPadding(number: number) {
-    return number >= 0 && number < 10 ? "0" + number : "" + number;
   }
 
   // /**

@@ -206,12 +206,17 @@ export abstract class BaseExportPodCommand<
               if (typeof noteProp === "string") {
                 throw new Error("Invalid Payload Type in Pod Note Export");
               } else if (pod.exportNote) {
-                const result = await pod.exportNote(noteProp);
-                await this.onExportComplete({
-                  exportReturnValue: result,
-                  payload: noteProp,
-                  config: opts.config,
-                });
+                try {
+                  const result = await pod.exportNote(noteProp);
+                  await this.onExportComplete({
+                    exportReturnValue: result,
+                    payload: noteProp,
+                    config: opts.config,
+                  });
+                } catch (err) {
+                  this.L.error(err);
+                  throw err;
+                }
               } else {
                 throw new Error("Invalid Payload Type in Text Export");
               }

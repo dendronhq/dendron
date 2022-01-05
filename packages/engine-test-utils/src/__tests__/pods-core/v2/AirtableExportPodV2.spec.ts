@@ -95,6 +95,101 @@ const setupTestFactory = ({
   };
 };
 
+describe("WHEN export note with singleSelect ", () => {
+  describe("AND GIVEN singleSelect is regular fm field", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "",
+        custom: {
+          single: "one",
+        },
+        ...opts,
+      });
+    };
+    const setupTest = setupTestFactory({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "singleSelect",
+          to: "single",
+        },
+      },
+    });
+    test("THEN field is exported ", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Tasks: "one",
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+
+  describe("AND GIVEN singleSelect is a tag ", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "#role.foo #role.bar #action.baz",
+        ...opts,
+      });
+    };
+
+    describe("AND multiple matching tags for singleSelect", () => {
+      const setupTest = setupTestFactory({
+        fname: "alpha",
+        srcFieldMapping: {
+          Tasks: {
+            type: "singleSelect",
+            to: SpecialSrcFieldToKey.TAGS,
+            filter: "tags.role.*",
+          },
+        },
+      });
+
+      test("THEN error is throw ", async () => {
+        const resp = await setupTest(preSetupHook);
+        await checkString(
+          resp.error!.message,
+          "singleTag field has multiple values. note: alpha, tags: #role.foo, #role.bar"
+        );
+      });
+    });
+
+    describe("AND single matching tags for singleSelect", () => {
+      const setupTest = setupTestFactory({
+        fname: "alpha",
+        srcFieldMapping: {
+          Tasks: {
+            type: "singleSelect",
+            to: SpecialSrcFieldToKey.TAGS,
+            filter: "tags.action.*",
+          },
+        },
+      });
+
+      test("THEN field is exported ", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([
+          {
+            fields: {
+              DendronId: "alpha",
+              Tasks: "action.baz",
+            },
+            id: "airtable-alpha",
+          },
+        ]);
+      });
+    });
+  });
+});
+
 describe("WHEN export note with multi select", () => {
   describe("AND GIVEN multiSelect is regular fm field", () => {
     const preSetupHook = async (opts: WorkspaceOpts) => {

@@ -386,9 +386,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
   async plant(opts: GDocImportPodPlantOpts) {
     const ctx = "GDocPod";
-
-    this.L.info({ ctx, opts, msg: "enter" });
     const { wsRoot, engine, vault, config, onPrompt, utilityMethods } = opts;
+    this.L.info({ ctx, msg: "enter" });
+
     const {
       showDocumentQuickPick,
       openFileInEditor,

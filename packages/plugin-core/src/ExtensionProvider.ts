@@ -17,7 +17,7 @@ export class ExtensionProvider {
   static getExtension(): IDendronExtension {
     if (_.isUndefined(ExtensionProvider.extension)) {
       throw new DendronError({
-        message: `Extension is not yet registered. Maker sure initialization registers extension prior to usage.`,
+        message: `Extension is not yet registered. Make sure initialization registers extension prior to usage.`,
       });
     }
 

@@ -13,9 +13,11 @@ import {
   PodUtils,
   RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { HierarchySelector } from "../../components/lookup/HierarchySelector";
+import { PodUIControls } from "../../components/pods/PodControls";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { BaseCommand } from "../base";
@@ -101,6 +103,26 @@ export abstract class BaseExportPodCommand<
         }
 
         payload = selectedText;
+        break;
+      }
+      case PodExportScope.Lookup:
+      case PodExportScope.LinksInSelection: {
+        const scope = await PodUIControls.promptForScopeLookup({
+          fromSelection: inputs.exportScope === PodExportScope.LinksInSelection,
+          key: this.key,
+          logger: this.L,
+        });
+        if (scope === undefined) {
+          vscode.window.showErrorMessage("Unable to get notes payload.");
+          return;
+        }
+        payload = scope.selectedItems.map((item) => {
+          return _.omit(item, ["label", "detail", "alwaysShow"]) as NoteProps;
+        });
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get notes payload.");
+          return;
+        }
         break;
       }
       case PodExportScope.Note: {
@@ -200,6 +222,8 @@ export abstract class BaseExportPodCommand<
             }
             break;
           }
+          case PodExportScope.Lookup:
+          case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
             if (typeof opts.payload === "string") {

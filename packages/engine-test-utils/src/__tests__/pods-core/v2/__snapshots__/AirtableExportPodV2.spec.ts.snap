@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WHEN export note with multi select AND GIVEN multiSelect is a tag  THEN tags are exported  1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+          "Tasks": Array [
+            "role.foo",
+            "role.bar",
+          ],
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export note with multi select AND GIVEN multiSelect is regular fm field THEN fields are exported  1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+          "Tasks": Array [
+            "one",
+            "two",
+          ],
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;

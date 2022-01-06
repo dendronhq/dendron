@@ -12,6 +12,7 @@ import {
   isFalsy,
   minimatch,
   NoteProps,
+  NotePropsWithOptionalCustom,
   NoteUtils,
   RespV3,
   StatusCodes,
@@ -178,6 +179,11 @@ export class AirtableUtils {
     return _.flatten(out);
   }
 
+  /**
+   * Maps a {@linkk SrcFieldMappingV2["type"]} to a field on {@link NoteProps}
+   * @param param0
+   * @returns
+   */
   static handleSrcField({
     fieldMapping,
     note,
@@ -219,11 +225,13 @@ export class AirtableUtils {
           minimatch(t.value, fieldMapping.filter!)
         );
         if (hashtags.length > 1) {
-          throw new DendronError({
-            message: `singleTag field has multiple values. note: ${JSON.stringify(
-              NoteUtils.toLogObj(note)
-            )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
-          });
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: `singleTag field has multiple values. filter: ${
+                fieldMapping.filter
+              }, note: ${NoteUtils.toNoteLocString(note)}`,
+            }),
+          };
         }
         if (hashtags.length !== 0) {
           val = hashtags[0].value.replace(/^tags./, "");
@@ -390,7 +398,7 @@ export class AirtableUtils {
       records.map(async (ent) => {
         const airtableId = ent.id;
         const dendronId = ent.fields["DendronId"] as string;
-        const note = engine.notes[dendronId];
+        const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
         const noteAirtableId = _.get(note.custom, "airtableId");
         if (!noteAirtableId) {
           const updatedNote = {

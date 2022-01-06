@@ -1,9 +1,10 @@
-import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
+import Airtable from "@dendronhq/airtable";
 import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableExportPodV2,
   AirtableExportReturnType,
+  AirtableUtils,
   AirtableV2PodConfig,
   ConfigFileUtils,
   createRunnableAirtableV2PodConfigSchema,
@@ -23,7 +24,7 @@ import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySel
 import { PodUIControls } from "../../components/pods/PodControls";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getEngine, getExtension } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -167,19 +168,22 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
    * @param exportReturnValue
    * @returns
    */
-  public onExportComplete(opts: {
+  public async onExportComplete({
+    exportReturnValue,
+  }: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
     payload: string | NoteProps[];
-  }): void {
-    const { exportReturnValue } = opts;
-
-    if (exportReturnValue.data?.created) {
-      this.updateNotesWithAirtableId(exportReturnValue.data?.created);
-    }
-
-    if (exportReturnValue.data?.updated) {
-      this.updateNotesWithAirtableId(exportReturnValue.data?.updated);
+  }) {
+    const records = exportReturnValue.data;
+    const engine = ExtensionProvider.getEngine();
+    const logger = this.L;
+    if (records?.created) {
+      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
+        records: records.created,
+        engine,
+        logger,
+      });
     }
 
     const createdCount = exportReturnValue.data?.created?.length ?? 0;
@@ -196,32 +200,6 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
         `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
       );
     }
-  }
-
-  private async updateNotesWithAirtableId(
-    records: Records<FieldSet>
-  ): Promise<void> {
-    const engine = getEngine();
-    // const out = await Promise.all(
-    await Promise.all(
-      records.map(async (ent) => {
-        const airtableId = ent.id;
-        const dendronId = ent.fields["DendronId"] as string;
-        const note = engine.notes[dendronId];
-        const noteAirtableId = _.get(note.custom, "airtableId");
-        if (!noteAirtableId) {
-          const updatedNote = {
-            ...note,
-            custom: { ...note.custom, airtableId },
-          };
-          const out = await engine.writeNote(updatedNote, {
-            updateExisting: true,
-          });
-          return out;
-        }
-        return undefined;
-      })
-    );
   }
 
   /**

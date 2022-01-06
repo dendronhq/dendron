@@ -104,7 +104,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     return config;
   }
 
-  public onExportComplete({
+  public async onExportComplete({
     exportReturnValue,
     payload,
     config,
@@ -112,7 +112,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     exportReturnValue: string;
     payload: string | NoteProps;
     config: RunnableMarkdownV2PodConfig;
-  }): void {
+  }) {
     if (config.destination === "clipboard") {
       if (typeof payload === "string") {
         vscode.env.clipboard.writeText(exportReturnValue);

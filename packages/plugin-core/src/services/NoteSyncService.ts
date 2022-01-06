@@ -53,7 +53,11 @@ export interface INoteSyncService extends Disposable {
 }
 
 /**
- * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for docs
+ * This service keeps client state note state synchronized with the engine
+ * state. It also exposes an event that allows callback functionality whenever
+ * the engine has finished updating a note state. See {@link INoteSyncService}
+ * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
+ * additional docs
  */
 export class NoteSyncService implements INoteSyncService {
   private L: DLogger;

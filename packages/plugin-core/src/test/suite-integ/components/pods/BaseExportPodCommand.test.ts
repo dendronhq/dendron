@@ -26,45 +26,6 @@ suite("BaseExportPodCommand", function () {
 
   describe("GIVEN a BaseExportPodCommand implementation", () => {
     describeSingleWS(
-      "WHEN exporting a clipboard scope",
-      {
-        ctx,
-      },
-      () => {
-        const cmd = new TestExportPodCommand();
-
-        test("THEN clipboard contents should be in the export payload", async () => {
-          vscode.env.clipboard.writeText("test");
-          const payload = await cmd.enrichInputs({
-            exportScope: PodExportScope.Clipboard,
-          });
-
-          expect(payload?.payload).toEqual("test");
-        });
-      }
-    );
-
-    describeSingleWS(
-      "WHEN exporting a selection scope",
-      {
-        ctx,
-      },
-      () => {
-        const cmd = new TestExportPodCommand();
-
-        test("THEN selection contents should be undefined if nothing is highlighted", async () => {
-          const payload = await cmd.enrichInputs({
-            exportScope: PodExportScope.Selection,
-          });
-
-          expect(payload?.payload).toBeFalsy();
-        });
-
-        // TODO: Add positive test case with text selection
-      }
-    );
-
-    describeSingleWS(
       "WHEN exporting a note scope",
       {
         ctx,
@@ -72,7 +33,7 @@ suite("BaseExportPodCommand", function () {
       () => {
         const cmd = new TestExportPodCommand();
 
-        test("THEN selection contents should be in the export payload", async () => {
+        test("THEN note prop should be in the export payload", async () => {
           const { wsRoot, vaults } = getDWorkspace();
 
           const notePath = path.join(
@@ -84,7 +45,6 @@ suite("BaseExportPodCommand", function () {
           const payload = await cmd.enrichInputs({
             exportScope: PodExportScope.Note,
           });
-          expect(typeof payload?.payload === "string").toBeFalsy();
           expect((payload?.payload as NoteProps[])[0].fname).toEqual("root");
           expect((payload?.payload as NoteProps[]).length).toEqual(1);
         });

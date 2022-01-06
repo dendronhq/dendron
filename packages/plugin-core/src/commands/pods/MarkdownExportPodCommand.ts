@@ -1,4 +1,3 @@
-import { NoteProps } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
   createRunnableMarkdownV2PodConfigSchema,
@@ -106,24 +105,18 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
 
   public async onExportComplete({
     exportReturnValue,
-    payload,
     config,
   }: {
     exportReturnValue: string;
-    payload: string | NoteProps;
     config: RunnableMarkdownV2PodConfig;
   }) {
     if (config.destination === "clipboard") {
-      if (typeof payload === "string") {
-        vscode.env.clipboard.writeText(exportReturnValue);
-      } else {
-        //TODO: This error needs to be thrown earlier.
-        // throw new Error(
-        //   "Cannot have clipboard be the destination on a multi-note export"
-        // );
+      //TODO: This error needs to be thrown earlier.
+      // throw new Error(
+      //   "Cannot have clipboard be the destination on a multi-note export"
+      // );
 
-        vscode.env.clipboard.writeText(exportReturnValue);
-      }
+      vscode.env.clipboard.writeText(exportReturnValue);
     } else {
       throw new Error("Not yet implemented");
     }

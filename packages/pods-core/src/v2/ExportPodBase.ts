@@ -15,9 +15,7 @@ export interface ExportPodFactory<T extends RunnablePodConfigV2, R> {
  * for callback operations once the export is complete
  */
 export interface ExportPodV2<R> {
-  exportText?(input: string): Promise<R>;
-
-  exportNote?(input: NoteProps): Promise<R>;
+  exportNote(input: NoteProps): Promise<R>;
 
   /**
    * Bulk export of notes. Allows for external API optimizations such as call

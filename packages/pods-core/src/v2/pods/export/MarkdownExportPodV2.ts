@@ -7,7 +7,6 @@ import {
 import {
   DendronASTDest,
   MDUtilsV4,
-  MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
@@ -20,8 +19,7 @@ import {
 } from "../../..";
 
 /**
- * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow). Supports
- * both exportText() and exportNote()
+ * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).
  */
 export class MarkdownExportPodV2 implements ExportPodV2<string> {
   private _config: RunnableMarkdownV2PodConfig;
@@ -40,31 +38,6 @@ export class MarkdownExportPodV2 implements ExportPodV2<string> {
     this._config = podConfig;
     this._engine = engine;
     this._dendronConfig = dendronConfig;
-  }
-
-  async exportText(_input: string): Promise<string> {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_REGULAR }
-    );
-
-    // TODO: markdown process utils don't currently take raw text; requires NoteProps for all the util methods.
-    // if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
-    //   proc = proc.use(
-    //     RemarkUtils.convertWikiLinkToNoteUrl(
-    //       _input,
-    //       [],
-    //       this._engine,
-    //       this._dendronConfig
-    //     )
-    //   );
-    // } else {
-    //   proc = proc.use(RemarkUtils.convertLinksFromDotNotation(_input, []));
-    // }
-
-    const out = proc.processSync(_input).toString();
-
-    return _.trim(out);
   }
 
   async exportNote(input: NoteProps): Promise<string> {

@@ -80,32 +80,6 @@ export abstract class BaseExportPodCommand<
     let payload: string | NoteProps[] | undefined;
 
     switch (inputs.exportScope) {
-      case PodExportScope.Clipboard: {
-        payload = await vscode.env.clipboard.readText();
-
-        if (!payload || payload === "") {
-          vscode.window.showWarningMessage(
-            "Clipboard is either empty or not text - nothing to export."
-          );
-          return;
-        }
-        break;
-      }
-      case PodExportScope.Selection: {
-        const activeRange = await VSCodeUtils.extractRangeFromActiveEditor();
-        const { document, range } = activeRange || {};
-        const selectedText = document ? document.getText(range).trim() : "";
-
-        if (!selectedText || selectedText === "") {
-          vscode.window.showWarningMessage(
-            "No text has been selected - nothing to export."
-          );
-          return;
-        }
-
-        payload = selectedText;
-        break;
-      }
       case PodExportScope.Lookup:
       case PodExportScope.LinksInSelection: {
         const scope = await PodUIControls.promptForScopeLookup({
@@ -167,7 +141,7 @@ export abstract class BaseExportPodCommand<
    * Construct the pod and perform export for the appropriate payload scope.
    * @param opts
    */
-  async execute(opts: { config: Config; payload: string | NoteProps[] }) {
+  async execute(opts: { config: Config; payload: NoteProps[] }) {
     PodUtils.validate(opts.config, this.getRunnableSchema());
     vscode.window.withProgress(
       {
@@ -183,29 +157,9 @@ export abstract class BaseExportPodCommand<
         const pod = this.createPod(opts.config);
 
         switch (opts.config.exportScope) {
-          case PodExportScope.Clipboard:
-          case PodExportScope.Selection: {
-            if (!pod.exportText) {
-              throw new Error("Text export not supported by this pod!");
-            } else if (typeof opts.payload === "string") {
-              const strPayload = opts.payload;
-              pod.exportText(strPayload).then((result) => {
-                this.onExportComplete({
-                  exportReturnValue: result,
-                  payload: strPayload,
-                  config: opts.config,
-                });
-              });
-            } else {
-              throw new Error("Invalid Payload Type in Text Export");
-            }
-            break;
-          }
           case PodExportScope.Note: {
             for (const noteProp of opts.payload) {
-              if (typeof noteProp === "string") {
-                throw new Error("Invalid Payload Type in Pod Note Export");
-              } else if (pod.exportNote) {
+            if (pod.exportNote) {
                 try {
                   const result = await pod.exportNote(noteProp);
                   await this.onExportComplete({
@@ -227,9 +181,7 @@ export abstract class BaseExportPodCommand<
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-            if (typeof opts.payload === "string") {
-              throw new Error("Invalid Payload Type in Pod Note Export");
-            } else if (pod.exportNotes) {
+           if (pod.exportNotes) {
               const result = await pod.exportNotes(opts.payload);
               await this.onExportComplete({
                 exportReturnValue: result,
@@ -260,7 +212,7 @@ export abstract class BaseExportPodCommand<
     config,
   }: {
     exportReturnValue: R;
-    payload: string | NoteProps | NoteProps[];
+    payload: NoteProps | NoteProps[];
     config: Config;
   }): Promise<void>;
 

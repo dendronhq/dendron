@@ -113,7 +113,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
   const podConfig1: ExportPodConfigurationV2 = {
     podId: "foo",
     podType: PodV2Types.AirtableExportV2,
-    exportScope: PodExportScope.Clipboard,
+    exportScope: PodExportScope.Note,
   };
 
   const podConfig2: ExportPodConfigurationV2 = {
@@ -157,7 +157,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
       expect(podConfig).toBeDefined();
       expect(podConfig?.podId).toEqual("foo");
       expect(podConfig?.podType).toEqual(PodV2Types.AirtableExportV2);
-      expect(podConfig?.exportScope).toEqual(PodExportScope.Clipboard);
+      expect(podConfig?.exportScope).toEqual(PodExportScope.Note);
     });
   });
 

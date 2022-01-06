@@ -77,5 +77,5 @@ export class TestExportPodCommand extends BaseExportPodCommand<
     exportReturnValue: string;
     config: RunnablePodConfigV2;
     payload: NoteProps | NoteProps[];
-  }): void {}
+  }): Promise<void> {}
 }

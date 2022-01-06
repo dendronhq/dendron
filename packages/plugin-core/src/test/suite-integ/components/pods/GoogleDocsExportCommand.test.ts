@@ -55,7 +55,7 @@ suite("GoogleDocsExportPodCommand", function () {
           });
           expect(resp).toEqual(
             `Finished GoogleDocs Export. 0 docs created; 0 docs updated. Error encountered: ${ErrorFactory.safeStringify(
-              result.error
+              result.error?.message
             )}`
           );
         });

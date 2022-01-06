@@ -41,3 +41,39 @@ Object {
   "error": null,
 }
 `;
+
+exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is a tag  AND single matching tags for singleSelect THEN field is exported  1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+          "Tasks": "action.baz",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is regular fm field THEN field is exported  1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+          "Tasks": "one",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;

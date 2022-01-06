@@ -4,13 +4,11 @@ import {
   DendronCompositeError,
   DendronError,
   DEngineClient,
-  DLink,
   ErrorFactory,
   ErrorUtils,
   ERROR_SEVERITY,
   IDendronError,
   isFalsy,
-  minimatch,
   NoteProps,
   NotePropsWithOptionalCustom,
   NoteUtils,
@@ -19,7 +17,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
-import { LinkUtils, NoteMetadataUtils } from "@dendronhq/engine-server";
+import { NoteMetadataUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";
@@ -69,7 +67,6 @@ export type SrcFieldMappingResp = {
 export type SrcFieldMapping = SrcFieldMappingV2 | string;
 export type SrcFieldMappingV2 =
   | SimpleSrcField
-  | TagSrcField
   | MultiSelectField
   | SingleSelectField
   | LinkedRecordField;
@@ -83,23 +80,20 @@ type SimpleSrcField = {
   to: string;
   type: "string" | "date";
 };
-/**
- * @deprecated
- */
-type TagSrcField = {
-  type: "singleTag";
-  filter: string;
-};
+
 type SelectField = {
   to: SpecialSrcFieldToKey | string;
   filter?: string;
 };
+
 type SingleSelectField = {
   type: "singleSelect";
 } & SelectField;
+
 type MultiSelectField = {
   type: "multiSelect";
 } & SelectField;
+
 type LinkedRecordField = {
   type: "linkedRecord";
 } & SelectField;
@@ -192,12 +186,10 @@ export class AirtableUtils {
   static handleSrcField({
     fieldMapping,
     note,
-    hashtags,
     engine,
   }: {
     fieldMapping: SrcFieldMappingV2;
     note: NoteProps;
-    hashtags: DLink[];
     engine: DEngineClient;
   }): RespV3<any> {
     switch (fieldMapping.type) {
@@ -212,14 +204,22 @@ export class AirtableUtils {
         };
       }
       case "singleSelect": {
-        const { error, data } = NoteMetadataUtils.extractSingleTag({
-          note,
-          filters: fieldMapping.filter ? [fieldMapping.filter] : [],
-        });
-        if (error) {
-          return { error };
+        if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
+          const { error, data } = NoteMetadataUtils.extractSingleTag({
+            note,
+            filters: fieldMapping.filter ? [fieldMapping.filter] : [],
+          });
+          if (error) {
+            return { error };
+          }
+          return { data: NoteMetadataUtils.cleanTags(data ? [data] : [])[0] };
+        } else {
+          const data = NoteMetadataUtils.extractString({
+            note,
+            key: fieldMapping.to,
+          });
+          return { data };
         }
-        return { data };
       }
       case "multiSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
@@ -235,27 +235,6 @@ export class AirtableUtils {
           key: fieldMapping.to,
         });
         return { data };
-      }
-      case "singleTag": {
-        let val: string;
-        hashtags = hashtags.filter((t) =>
-          minimatch(t.value, fieldMapping.filter!)
-        );
-        if (hashtags.length > 1) {
-          return {
-            error: ErrorFactory.createInvalidStateError({
-              message: `singleTag field has multiple values. filter: ${
-                fieldMapping.filter
-              }, note: ${NoteUtils.toNoteLocString(note)}`,
-            }),
-          };
-        }
-        if (hashtags.length !== 0) {
-          val = hashtags[0].value.replace(/^tags./, "");
-        } else {
-          val = "";
-        }
-        return { data: val };
       }
       case "linkedRecord": {
         const links = NoteMetadataUtils.extractLinks({
@@ -339,7 +318,6 @@ export class AirtableUtils {
     const errors: IDendronError[] = [];
     notes.map((note) => {
       // TODO: optimize, don't parse if no hashtags
-      const hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
       logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
@@ -360,7 +338,6 @@ export class AirtableUtils {
           const resp = this.handleSrcField({
             fieldMapping,
             note,
-            hashtags,
             engine,
           });
           if (resp.error) {

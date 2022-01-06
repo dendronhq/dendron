@@ -257,12 +257,10 @@ export class AirtableUtils {
           const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
           const _recordIds = _notes
             .map((n) => {
+              const id = AirtableUtils.getAirtableIdFromNote(n);
               return {
                 note: n,
-                id: NoteMetadataUtils.extractString({
-                  key: "airtableId",
-                  note: n,
-                }),
+                id,
               };
             })
             .filter((ent) => {

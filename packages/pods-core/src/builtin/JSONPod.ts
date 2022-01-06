@@ -33,8 +33,9 @@ export class JSONImportPod extends ImportPod {
 
   async plant(opts: JSONImportPodPlantOpts) {
     const ctx = "JSONPod";
-    this.L.info({ ctx, opts, msg: "enter" });
     const { engine, vault, src } = opts;
+    this.L.info({ ctx, msg: "enter", src: src.fsPath });
+
     const { destName, concatenate } = opts.config;
     const entries = fs.readJSONSync(src.fsPath);
     const notes = await this._entries2Notes(entries, {

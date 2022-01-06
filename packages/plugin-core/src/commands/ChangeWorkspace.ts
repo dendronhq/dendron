@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { window } from "vscode";
+import { OpenDialogOptions, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -25,11 +25,20 @@ export class ChangeWorkspaceCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CHANGE_WS.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const rootDirRaw = await VSCodeUtils.gatherFolderPath();
-    if (_.isUndefined(rootDirRaw)) {
-      return;
+    // Show a file picker dialog to select existing workspace directory
+    const options: OpenDialogOptions = {
+      canSelectMany: false,
+      openLabel: "Change Workspace",
+      canSelectFiles: false,
+      canSelectFolders: true,
+    };
+
+    const fileUri = await window.showOpenDialog(options);
+
+    if (fileUri && fileUri[0]) {
+      return { rootDirRaw: fileUri[0].fsPath };
     }
-    return { rootDirRaw };
+    return;
   }
 
   async execute(opts: ChangeWorkspaceCommandOpts) {

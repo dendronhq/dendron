@@ -6,7 +6,6 @@ import {
   ERROR_SEVERITY,
   getSlugger,
   NoteProps,
-  NotePropsDict,
   NoteQuickInput,
   NoteUtils,
   VaultUtils,
@@ -36,10 +35,9 @@ import {
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { EngineAPIService } from "../services/EngineAPIService";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { findReferences, FoundRefT } from "../utils/md";
-import { getEngine, getVaultFromUri } from "../workspace";
+import { getVaultFromUri } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -48,6 +46,7 @@ import {
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 
 type CommandInput =
   | {
@@ -60,7 +59,7 @@ type CommandOpts = {
   dest?: NoteProps;
   origin: NoteProps;
   nodesToMove: Node[];
-  engine: EngineAPIService;
+  engine: IEngineAPIService;
 } & CommandInput;
 type CommandOutput = {
   updated: NoteProps[];
@@ -93,7 +92,7 @@ export class MoveHeaderCommand extends BasicCommand<
     severity: ERROR_SEVERITY.MINOR,
   });
 
-  private getProc = (engine: EngineAPIService, note: NoteProps) => {
+  private getProc = (engine: IEngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
       engine,
       fname: note.fname,
@@ -108,7 +107,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param engine
    * @returns {}
    */
-  private validateAndProcessInput(engine: EngineAPIService): {
+  private validateAndProcessInput(engine: IEngineAPIService): {
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
@@ -176,7 +175,7 @@ export class MoveHeaderCommand extends BasicCommand<
    * @returns
    */
   prepareDestination(opts: {
-    engine: EngineAPIService;
+    engine: IEngineAPIService;
     quickpick: DendronQuickPickerV2;
     selectedItems: readonly NoteQuickInput[];
   }) {
@@ -194,11 +193,10 @@ export class MoveHeaderCommand extends BasicCommand<
         // if a user selects a vault in the picker that
         // already has the note, we should not create a new one.
         const fname = selected.fname;
-        const maybeNote = NoteUtils.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes: engine.notes,
+          engine,
           vault, // this is the vault selected from the vault picker
-          wsRoot: engine.wsRoot,
         });
         if (_.isUndefined(maybeNote)) {
           dest = NoteUtils.create({ fname, vault });
@@ -214,7 +212,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
-    const engine = getEngine();
+    const engine = ExtensionProvider.getEngine();
     const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
@@ -267,16 +265,19 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest
    * @param nodesToMove
    */
-  private async appendHeaderToDestination(
-    engine: EngineAPIService,
-    dest: NoteProps,
-    nodesToMove: Node[]
-  ): Promise<void> {
-    const destProc = this.getProc(engine, dest);
+  private async appendHeaderToDestination(opts: {
+    engine: IEngineAPIService;
+    dest: NoteProps;
+    origin: NoteProps;
+    nodesToMove: Node[];
+  }): Promise<void> {
+    const { engine, dest, origin, nodesToMove } = opts;
+    // find where the extracted block starts and ends
+    const startOffset = nodesToMove[0].position?.start.offset;
+    const endOffset = _.last(nodesToMove)!.position?.end.offset;
 
-    // make a fake tree to feed through proc.stringify
-    const fakeTree = { type: "root", children: nodesToMove } as Node;
-    const destContentToAppend = destProc.stringify(fakeTree);
+    const originBody = origin.body;
+    const destContentToAppend = originBody.slice(startOffset, endOffset);
 
     // add the stringified blocks to destination note body
     dest.body = `${dest.body}\n\n${destContentToAppend}`;
@@ -321,18 +322,16 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private getNoteByLocation(
     location: Location,
-    engine: EngineAPIService
+    engine: IEngineAPIService
   ): NoteProps | undefined {
-    const { wsRoot, notes } = engine;
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
 
     const vault = getVaultFromUri(location.uri);
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes,
+      engine,
       vault,
-      wsRoot,
     });
     return note;
   }
@@ -382,7 +381,7 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private findLinksToUpdate(
     note: NoteProps,
-    engine: EngineAPIService,
+    engine: IEngineAPIService,
     origin: NoteProps,
     anchorNamesToUpdate: string[]
   ) {
@@ -419,20 +418,28 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest Note that was the destination of move header commnad
    * @returns
    */
-  private updateLinksInNote(
-    notes: NotePropsDict,
-    note: NoteProps,
-    linksToUpdate: DLink[],
-    dest: NoteProps
-  ) {
+  updateLinksInNote(opts: {
+    note: NoteProps;
+    engine: IEngineAPIService;
+    linksToUpdate: DLink[];
+    dest: NoteProps;
+  }) {
+    const { note, engine, linksToUpdate, dest } = opts;
     return _.reduce(
       linksToUpdate,
       (note: NoteProps, linkToUpdate: DLink) => {
         const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
-        const notesWithSameName = NoteUtils.getNotesByFname({
+        const notesWithSameName = NoteUtils.getNotesByFnameFromEngine({
           fname: dest.fname,
-          notes,
+          engine,
         });
+
+        // original link had vault prefix?
+        //   keep it
+        // original link didn't have vault prefix?
+        //   add vault prefix if there are notes with same name in other vaults.
+        //   don't add otherwise.
+        const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
         const newLink = {
           ...oldLink,
           from: {
@@ -441,7 +448,7 @@ export class MoveHeaderCommand extends BasicCommand<
             vaultName: VaultUtils.getName(dest.vault),
           },
           data: {
-            xvault: notesWithSameName.length > 1,
+            xvault: isXVault,
           },
         } as DNoteLink;
         const newBody = LinkUtils.updateLink({
@@ -470,7 +477,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async updateReferences(
     foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
-    engine: EngineAPIService,
+    engine: IEngineAPIService,
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteProps[]> {
@@ -495,12 +502,12 @@ export class MoveHeaderCommand extends BasicCommand<
           origin,
           anchorNamesToUpdate
         );
-        const modifiedNote = this.updateLinksInNote(
-          engine.notes,
-          _note,
+        const modifiedNote = this.updateLinksInNote({
+          note: _note,
+          engine,
           linksToUpdate,
-          dest
-        );
+          dest,
+        });
         note!.body = modifiedNote.body;
         const writeResp = await engine.writeNote(note!, {
           updateExisting: true,
@@ -523,7 +530,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async removeBlocksFromOrigin(
     origin: NoteProps,
     nodesToMove: Node[],
-    engine: EngineAPIService
+    engine: IEngineAPIService
   ) {
     // find where the extracted block starts and ends
     const startOffset = nodesToMove[0].position?.start.offset;
@@ -567,7 +574,12 @@ export class MoveHeaderCommand extends BasicCommand<
     );
 
     // append header to destination
-    await this.appendHeaderToDestination(engine, dest, nodesToMove);
+    await this.appendHeaderToDestination({
+      engine,
+      dest,
+      origin: originDeepCopy,
+      nodesToMove,
+    });
 
     delayedUpdateDecorations();
 

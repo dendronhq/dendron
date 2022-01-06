@@ -6,6 +6,8 @@ import {
   AirtableFieldsMap,
   PodExportScope,
   RunnableAirtableV2PodConfig,
+  SpecialSrcFieldToKey,
+  SrcFieldMapping,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import { TestEngineUtils } from "../../..";
@@ -56,10 +58,14 @@ function createPod({
   });
 }
 
-describe("WHEN export note with linked record", () => {
-  let resp: AirtableExportReturnType;
-
-  const setupTest = async (preSetupHook: SetupHookFunction) => {
+const setupTestFactory = ({
+  srcFieldMapping,
+  fname,
+}: {
+  srcFieldMapping: { [key: string]: SrcFieldMapping };
+  fname: string;
+}) => {
+  return async (preSetupHook: SetupHookFunction) => {
     let resp: AirtableExportReturnType;
     await runEngineTestV5(
       async (opts) => {
@@ -71,16 +77,12 @@ describe("WHEN export note with linked record", () => {
                 type: "string",
                 to: "id",
               },
-              Tasks: {
-                type: "linkedRecord",
-                to: "links",
-                filter: "task.*",
-              },
+              ...srcFieldMapping,
             },
           },
           engine: opts.engine,
         });
-        const note = TestEngineUtils.getNoteByFname(engine, "proj.beta");
+        const note = TestEngineUtils.getNoteByFname(engine, fname);
         resp = await pod.exportNote(note!);
       },
       {
@@ -91,6 +93,187 @@ describe("WHEN export note with linked record", () => {
     // @ts-ignore;
     return resp;
   };
+};
+
+describe("WHEN export note with singleSelect ", () => {
+  describe("AND GIVEN singleSelect is regular fm field", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "",
+        custom: {
+          single: "one",
+        },
+        ...opts,
+      });
+    };
+    const setupTest = setupTestFactory({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "singleSelect",
+          to: "single",
+        },
+      },
+    });
+    test("THEN field is exported ", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Tasks: "one",
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+
+  describe("AND GIVEN singleSelect is a tag ", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "#role.foo #role.bar #action.baz",
+        ...opts,
+      });
+    };
+
+    describe("AND multiple matching tags for singleSelect", () => {
+      const setupTest = setupTestFactory({
+        fname: "alpha",
+        srcFieldMapping: {
+          Tasks: {
+            type: "singleSelect",
+            to: SpecialSrcFieldToKey.TAGS,
+            filter: "tags.role.*",
+          },
+        },
+      });
+
+      test("THEN error is throw ", async () => {
+        const resp = await setupTest(preSetupHook);
+        await checkString(
+          resp.error!.message,
+          "singleTag field has multiple values. note: alpha, tags: #role.foo, #role.bar"
+        );
+      });
+    });
+
+    describe("AND single matching tags for singleSelect", () => {
+      const setupTest = setupTestFactory({
+        fname: "alpha",
+        srcFieldMapping: {
+          Tasks: {
+            type: "singleSelect",
+            to: SpecialSrcFieldToKey.TAGS,
+            filter: "tags.action.*",
+          },
+        },
+      });
+
+      test("THEN field is exported ", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([
+          {
+            fields: {
+              DendronId: "alpha",
+              Tasks: "action.baz",
+            },
+            id: "airtable-alpha",
+          },
+        ]);
+      });
+    });
+  });
+});
+
+describe("WHEN export note with multi select", () => {
+  describe("AND GIVEN multiSelect is regular fm field", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "",
+        custom: {
+          multi: ["one", "two"],
+        },
+        ...opts,
+      });
+    };
+    const setupTest = setupTestFactory({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "multiSelect",
+          to: "multi",
+        },
+      },
+    });
+    test("THEN fields are exported ", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Tasks: ["one", "two"],
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+
+  describe("AND GIVEN multiSelect is a tag ", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "#role.foo #role.bar #action.baz",
+        ...opts,
+      });
+    };
+    const setupTest = setupTestFactory({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "multiSelect",
+          to: SpecialSrcFieldToKey.TAGS,
+          filter: "tags.role.*",
+        },
+      },
+    });
+
+    test("THEN tags are exported ", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Tasks: ["role.foo", "role.bar"],
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+});
+
+describe("WHEN export note with linked record", () => {
+  let resp: AirtableExportReturnType;
+
+  const setupTest = setupTestFactory({
+    fname: "proj.beta",
+    srcFieldMapping: {
+      Tasks: {
+        type: "linkedRecord",
+        to: "links",
+        filter: "task.*",
+      },
+    },
+  });
 
   describe("AND linked note does not have airtable id", () => {
     test("THEN show error message", async () => {

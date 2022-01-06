@@ -137,6 +137,11 @@ export class AirtableExportPodV2
     }
   }
 
+  /**
+   * Get mapping of fields that will be updated in airtable
+   * @param notes
+   * @returns
+   */
   private getPayloadForNotes(notes: NoteProps[]): RespV3<{
     create: AirtableFieldsMap[];
     update: any[];

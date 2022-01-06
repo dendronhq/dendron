@@ -14,6 +14,16 @@ type ExtractPropWithFilter = {
 
 export class NoteMetadataUtils {
   /**
+   * Return list of strings from links
+   * @param links
+   */
+  static cleanTags(links: DLink[]): string[] {
+    return links.map((l) => {
+      return l.value.replace(/^tags./, "");
+    });
+  }
+
+  /**
    * Extract string metadata from note
    * @returns
    */
@@ -45,6 +55,18 @@ export class NoteMetadataUtils {
   }
 
   /**
+   * If field is not found, return empty array
+   */
+  static extractArray<T>({
+    note,
+    key,
+  }: {
+    key: string;
+  } & ExtractPropsCommon): T[] | undefined {
+    return _.get(note, key, []);
+  }
+
+  /**
    * Get all links from a note
    */
   static extractLinks({ note, filters }: ExtractPropWithFilter): DLink[] {
@@ -58,7 +80,7 @@ export class NoteMetadataUtils {
   /**
    * Get hashtags from note
    */
-  static extractTags({ note, filters }: ExtractPropWithFilter) {
+  static extractTags({ note, filters }: ExtractPropWithFilter): DLink[] {
     let links = LinkUtils.findHashTags({ links: note.links });
     filters.map((pattern) => {
       links = links.filter((t) => minimatch(t.value, pattern));

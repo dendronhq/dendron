@@ -77,9 +77,11 @@ export class TestExportPodCommand extends BaseExportPodCommand<
    * @param exportReturnValue
    * @returns
    */
-  public onExportComplete(_opts: {
+  public async onExportComplete(_opts: {
     exportReturnValue: string;
     config: RunnablePodConfigV2;
     payload: string | NoteProps | NoteProps[];
-  }): void {}
+  }) {
+    return;
+  }
 }

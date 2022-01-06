@@ -5,8 +5,8 @@ import {
   SchemaOpts,
   NoteProps,
   SchemaTemplate,
-  Time,
 } from "@dendronhq/common-all";
+import sinon from "sinon";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -107,10 +107,17 @@ describe(`SchemaUtil tests:`, () => {
       TestNoteFactory.defaultUnitTestFactory();
     let note: NoteProps;
     const template: SchemaTemplate = { id: "foo", type: "note" };
+    const currentDate = new Date(2022, 0, 10);
+    let clock: sinon.SinonFakeTimers;
 
     describe(`GIVEN current note's body is empty`, () => {
       beforeEach(async () => {
         note = await noteFactory.createForFName("new note");
+        clock = sinon.useFakeTimers(currentDate);
+      });
+      afterEach(() => {
+        sinon.restore();
+        clock.restore();
       });
 
       it("WHEN applying a template, THEN replace note's body with template's body", async () => {
@@ -143,16 +150,13 @@ describe(`SchemaUtil tests:`, () => {
               note,
               engine,
             });
+
             expect(resp).toBeTruthy();
             expect(note.body).not.toEqual(engine.notes["date-variables"].body);
             expect(note.body.trim()).toEqual(
-              `Today is ${Time.now().year}.${Time.now().month}.${
-                Time.now().day
-              }` +
+              `Today is 2022.01.10` +
                 "\n" +
-                `This link goes to [[daily.journal.${Time.now().year}.${
-                  Time.now().month
-                }.${Time.now().day}]]`
+                `This link goes to [[daily.journal.2022.01.10]]`
             );
           },
           {

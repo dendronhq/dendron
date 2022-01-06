@@ -32,11 +32,10 @@ export class ChangeWorkspaceCommand extends BasicCommand<
       canSelectFiles: false,
       canSelectFolders: true,
     };
+    const filePath = await VSCodeUtils.openFilePicker(options);
 
-    const fileUri = await window.showOpenDialog(options);
-
-    if (fileUri && fileUri[0]) {
-      return { rootDirRaw: fileUri[0].fsPath };
+    if (filePath) {
+      return { rootDirRaw: filePath };
     }
     return;
   }

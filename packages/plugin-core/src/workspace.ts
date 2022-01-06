@@ -8,7 +8,6 @@ import {
   ERROR_STATUS,
   getStage,
   ResponseUtil,
-  VaultUtils,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
@@ -32,6 +31,16 @@ import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { CommandFactory } from "./commandFactory";
 import { ICommandFactory } from "./commandFactoryInterface";
+import { LookupControllerV3Factory } from "./components/lookup/LookupControllerV3Factory";
+import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
+import {
+  NoteLookupProviderFactory,
+  SchemaLookupProviderFactory,
+} from "./components/lookup/LookupProviderV3Factory";
+import {
+  INoteLookupProviderFactory,
+  ISchemaLookupProviderFactory,
+} from "./components/lookup/LookupProviderV3Interface";
 import { DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
@@ -50,6 +59,8 @@ import {
   NoteTraitManager,
   NoteTraitService,
 } from "./services/NoteTraitService";
+import { SchemaSyncService } from "./services/SchemaSyncService";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 import { DisposableStore } from "./utils";
@@ -58,6 +69,7 @@ import { VersionProvider } from "./versionProvider";
 import { CalendarView } from "./views/CalendarView";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { LookupView } from "./views/LookupView";
 import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -128,13 +140,7 @@ export function resolveRelToWSRoot(fpath: string): string {
 
 /** Given file uri that is within a vault within the current workspace returns the vault. */
 export function getVaultFromUri(fileUri: Uri) {
-  const { vaults } = getDWorkspace();
-  const vault = VaultUtils.getVaultByFilePath({
-    fsPath: fileUri.fsPath,
-    vaults,
-    wsRoot: getDWorkspace().wsRoot,
-  });
-  return vault;
+  return WSUtilsV2.instance().getVaultFromUri(fileUri);
 }
 
 export const NO_WORKSPACE_IMPLEMENTATION = "no workspace implementation";
@@ -156,6 +162,10 @@ export class DendronExtension implements IDendronExtension {
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
+  public schemaSyncService: ISchemaSyncService;
+  public lookupControllerFactory: ILookupControllerV3Factory;
+  public noteLookupProviderFactory: INoteLookupProviderFactory;
+  public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
@@ -374,6 +384,10 @@ export class DendronExtension implements IDendronExtension {
     this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
     this.wsUtils = new WSUtilsV2(this);
     this.commandFactory = new CommandFactory(this);
+    this.schemaSyncService = new SchemaSyncService(this);
+    this.lookupControllerFactory = new LookupControllerV3Factory(this);
+    this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
+    this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -484,6 +498,10 @@ export class DendronExtension implements IDendronExtension {
     this.getWorkspaceImplOrThrow().engine = engine;
   }
 
+  getTreeView(key: DendronTreeViewKey) {
+    return this.treeViews[key];
+  }
+
   async setupViews(context: vscode.ExtensionContext) {
     const ctx = "setupViews";
     HistoryService.instance().subscribe("extension", async (event) => {
@@ -506,6 +524,15 @@ export class DendronExtension implements IDendronExtension {
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,
             calendarView
+          )
+        );
+
+        const lookupView = new LookupView();
+        this.treeViews[DendronTreeViewKey.LOOKUP_VIEW] = lookupView;
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            LookupView.viewType,
+            lookupView
           )
         );
 
@@ -662,7 +689,9 @@ export class DendronExtension implements IDendronExtension {
       windowWatcher.triggerUpdateDecorations(editor);
     }
     this.windowWatcher = windowWatcher;
-    const workspaceWatcher = new WorkspaceWatcher();
+    const workspaceWatcher = new WorkspaceWatcher({
+      schemaSyncService: this.schemaSyncService,
+    });
     workspaceWatcher.activate(this.context);
     this.workspaceWatcher = workspaceWatcher;
 

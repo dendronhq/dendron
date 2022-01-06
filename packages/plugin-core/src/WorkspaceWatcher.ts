@@ -34,7 +34,7 @@ import * as Sentry from "@sentry/node";
 import { FileWatcher } from "./fileWatcher";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "./utils/analytics";
-import { SchemaSyncService } from "./services/SchemaSyncService";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -75,8 +75,14 @@ export class WorkspaceWatcher {
   private _quickDebouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
+  private _schemaSyncService: ISchemaSyncService;
 
-  constructor() {
+  constructor({
+    schemaSyncService,
+  }: {
+    schemaSyncService: ISchemaSyncService;
+  }) {
+    this._schemaSyncService = schemaSyncService;
     this._openedDocuments = new Map();
     this._debouncedOnDidChangeTextDocument = _.debounce(
       this.onDidChangeTextDocument,
@@ -152,7 +158,9 @@ export class WorkspaceWatcher {
 
   async onDidSaveTextDocument(document: TextDocument) {
     if (SchemaUtils.isSchemaUri(document.uri)) {
-      await SchemaSyncService.instance().onDidSave({ document });
+      await this._schemaSyncService.onDidSave({
+        document,
+      });
     }
   }
 

@@ -45,6 +45,7 @@ export const DENDRON_VIEWS = [
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
     where: "explorer",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
@@ -57,6 +58,11 @@ export const DENDRON_VIEWS = [
     when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     icon: "media/icons/dendron-vscode.svg",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
+    when: DendronContext.NOTE_LOOK_UP_ACTIVE,
+    where: "explorer",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,

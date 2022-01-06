@@ -2,14 +2,12 @@ import { ConfigUtils, NoteQuickInput } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = any;
 
@@ -33,14 +31,20 @@ export class InsertNoteCommand extends BasicCommand<
   }
 
   createLookup() {
-    const lc = new LookupControllerV3({ nodeType: "note", buttons: [] });
+    const lc = ExtensionProvider.getExtension().lookupControllerFactory.create({
+      nodeType: "note",
+      buttons: [],
+    });
     return lc;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     const lc = this.createLookup();
-    const provider = new NoteLookupProvider("insert", { allowNewNote: false });
-    const config = getDWorkspace().config;
+    const extension = ExtensionProvider.getExtension();
+    const provider = extension.noteLookupProviderFactory.create("insert", {
+      allowNewNote: false,
+    });
+    const config = extension.getDWorkspace().config;
     const tempPrefix = ConfigUtils.getCommands(config).insertNote.initialValue;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
 

@@ -1,12 +1,14 @@
 /* eslint-disable no-dupe-class-members */
 import {
   DendronError,
+  DendronTreeViewKey,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DNoteLoc,
   DVault,
+  LookupModifierStatePayload,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
@@ -22,31 +24,34 @@ import {
   getDurationMilliseconds,
   vault2Path,
 } from "@dendronhq/common-server";
-import { HistoryService } from "@dendronhq/engine-server";
+import { HistoryService, LinkUtils } from "@dendronhq/engine-server";
 import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
+import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
+import { WSUtils } from "../../WSUtils";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { LookupControllerV3 } from "./LookupControllerV3";
 import {
   ILookupProviderV3,
   NoteLookupProviderChangeStateResp,
   OnAcceptHook,
-} from "./LookupProviderV3";
+} from "./LookupProviderV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
   TransformedQueryString,
   VaultSelectionMode,
 } from "./types";
+import { ILookupControllerV3 } from "./LookupControllerV3Interface";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
@@ -256,7 +261,9 @@ export class ProviderAcceptHooks {
 }
 
 export class PickerUtilsV2 {
-  static createDendronQuickPick(opts: CreateQuickPickOpts) {
+  static createDendronQuickPick(
+    opts: CreateQuickPickOpts
+  ): DendronQuickPickerV2 {
     const { title, placeholder, ignoreFocusOut, initialValue } = _.defaults(
       opts,
       {
@@ -555,8 +562,6 @@ export class PickerUtilsV2 {
   }): Promise<VaultPickerItem[]> {
     let vaultSuggestions: VaultPickerItem[] = [];
 
-    // const { engine } = getDWorkspace();
-
     // Only 1 vault, no other options to choose from:
     if (vaults.length <= 1) {
       return Array.of({ vault, label: VaultUtils.getName(vault) });
@@ -706,6 +711,27 @@ export class PickerUtilsV2 {
         return bt.onEnable({ quickPick: opts.quickpick });
       })
     );
+
+    PickerUtilsV2.refreshLookupView({ buttons: opts.quickpick.buttons });
+  }
+
+  static refreshLookupView(opts: { buttons: DendronBtn[] }) {
+    const { buttons } = opts;
+    const payload: LookupModifierStatePayload = buttons.map(
+      (button: DendronBtn) => {
+        return {
+          type: button.type,
+          pressed: button.pressed,
+        };
+      }
+    );
+
+    // TODO: swpa this out for `ExtensionProvider.getExtension()`
+    // once IDendronExtension interface has the tree view properties.
+    const lookupView = getExtension().getTreeView(
+      DendronTreeViewKey.LOOKUP_VIEW
+    ) as LookupView;
+    lookupView.refresh(payload);
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {
@@ -725,6 +751,42 @@ export class PickerUtilsV2 {
 }
 
 export class NotePickerUtils {
+  static createItemsFromSelectedWikilinks():
+    | DNodePropsQuickInputV2[]
+    | undefined {
+    const engine = ExtensionProvider.getEngine();
+    const { vaults, schemas, wsRoot } = engine;
+
+    // get selection
+    const { text } = VSCodeUtils.getSelection();
+    if (text === undefined) {
+      return;
+    }
+    const wikiLinks = LinkUtils.extractWikiLinks(text as string);
+
+    // dedupe wikilinks by value
+    const uniqueWikiLinks = _.uniqBy(wikiLinks, "value");
+
+    const activeNote = WSUtils.getActiveNote() as DNodeProps;
+
+    // make a list of picker items from wikilinks
+    const notesFromWikiLinks = LinkUtils.getNotesFromWikiLinks({
+      activeNote,
+      wikiLinks: uniqueWikiLinks,
+      engine,
+    });
+    const pickerItemsFromSelection = notesFromWikiLinks.map(
+      (note: DNodeProps) =>
+        DNodeUtils.enhancePropForQuickInputV3({
+          props: note,
+          schemas,
+          vaults,
+          wsRoot,
+        })
+    );
+    return pickerItemsFromSelection;
+  }
+
   static createNoActiveItem({
     fname,
   }: {
@@ -1047,7 +1109,7 @@ export class SchemaPickerUtils {
 }
 
 export class NoteLookupProviderUtils {
-  static cleanup(opts: { id: string; controller: LookupControllerV3 }) {
+  static cleanup(opts: { id: string; controller: ILookupControllerV3 }) {
     const { id, controller } = opts;
     controller.onHide();
     HistoryService.instance().remove(id, "lookupProvider");
@@ -1055,7 +1117,7 @@ export class NoteLookupProviderUtils {
 
   static subscribe(opts: {
     id: string;
-    controller: LookupControllerV3;
+    controller: ILookupControllerV3;
     logger: DLogger;
     onDone?: Function;
     onError?: Function;

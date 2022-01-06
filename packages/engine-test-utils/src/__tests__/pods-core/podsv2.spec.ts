@@ -298,11 +298,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             dendronConfig: opts.dendronConfig!,
           });
 
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "simple-wikilink",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
@@ -316,6 +315,120 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               vault: vaults[0],
             });
             await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+  describe("WHEN convertUserNotesToLinks is not configured explicitly", () => {
+    test("THEN expect user tags to remain unchanged", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "usertag",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+
+          expect(result.includes("@johndoe")).toBeTruthy();
+          expect(result.includes("[@johndoe](/user/johndoe)")).toBeFalsy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_USERTAG.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN addFrontmatterTitle is set to false", () => {
+    test("THEN expect title to not be present as h1 header", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+            addFrontmatterTitle: false,
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "usertag",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+
+          expect(result.indexOf("Usertag")).toEqual(-1);
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_USERTAG.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+  describe("WHEN convertTagNotesToLinks is set to false", () => {
+    test("THEN expect tags to remain unparsed", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableMarkdownV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+          };
+
+          const pod = new MarkdownExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            dendronConfig: opts.dendronConfig!,
+          });
+
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "footag",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+          expect(result.includes("#foobar")).toBeTruthy();
+          expect(result.includes("[#foobar](/tags/foobar")).toBeFalsy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_TAG.create({
               wsRoot,
               vault: vaults[0],
             });
@@ -354,11 +467,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             },
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "simple-wikilink",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);

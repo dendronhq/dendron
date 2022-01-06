@@ -13,14 +13,7 @@ import _md from "markdown-it";
 import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
+import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
@@ -33,6 +26,8 @@ import {
   MultiSelectBtn,
   Selection2ItemsBtn,
 } from "../components/lookup/buttons";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 const md = _md();
 
@@ -86,9 +81,10 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         MultiSelectBtn.create({ pressed: true, canToggle: false }),
       ],
     };
-    const controller = LookupControllerV3.create(lcOpts);
+    const extension = ExtensionProvider.getExtension();
+    const controller = extension.lookupControllerFactory.create(lcOpts);
 
-    const provider = new NoteLookupProvider(this.key, {
+    const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
@@ -270,7 +266,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         ? _.toArray(notes)
         : scope.selectedItems.map(
             (item) =>
-              _.omit(item, ["label", "detail", "alwasyShow"]) as DNodeProps
+              _.omit(item, ["label", "detail", "alwaysShow"]) as DNodeProps
           );
 
     const capturedNotes: DNodeProps[] = scopedItems.filter((item) => {

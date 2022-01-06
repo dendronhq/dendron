@@ -17,6 +17,14 @@ import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { getExtension } from "../../workspace";
 import { PodCommandFactory } from "./PodCommandFactory";
 import { assertUnreachable } from "@dendronhq/common-all";
+import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
+import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
+import _ from "lodash";
+import { NoteLookupProviderUtils } from "../lookup/utils";
+import { DLogger } from "@dendronhq/common-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -301,6 +309,66 @@ export class PodUIControls {
     return id;
   }
 
+  /**
+   * Prompts a lookup control that allows user to select notes for export.
+   * @param fromSelection set this flag to true if we are using {@link PodExportScope.LinksInSelection}
+   * @param key key of the command. this will be used for lookup provider subscription.
+   * @param logger logger object used by the command.
+   * @returns
+   */
+  public static async promptForScopeLookup(opts: {
+    fromSelection?: boolean;
+    key: string;
+    logger: DLogger;
+  }): Promise<NoteLookupProviderSuccessResp | undefined> {
+    const { fromSelection, key, logger } = opts;
+    const extraButtons = [
+      MultiSelectBtn.create({ pressed: true, canToggle: false }),
+    ];
+    if (fromSelection) {
+      extraButtons.push(
+        Selection2ItemsBtn.create({ pressed: true, canToggle: false })
+      );
+    }
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+      vaultSelectCanToggle: false,
+      extraButtons,
+    };
+
+    const extension = ExtensionProvider.getExtension();
+    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const provider = extension.noteLookupProviderFactory.create(key, {
+      allowNewNote: false,
+      noHidePickerOnAccept: false,
+    });
+
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: key,
+        controller,
+        logger,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          resolve(data);
+        },
+        onHide: () => {
+          resolve(undefined);
+        },
+      });
+      controller.show({
+        title: "Select notes to export.",
+        placeholder: "Lookup notes.",
+        provider,
+        selectAll: true,
+      });
+    });
+  }
+
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {
     const qp = vscode.window.createQuickPick();
     qp.title = "Pick a Pod Configuration or Create a New One";
@@ -363,6 +431,12 @@ export class PodUIControls {
 
       case PodExportScope.Selection:
         return "Exports the current contents of the selected portion of text in the open note editor";
+
+      case PodExportScope.Lookup:
+        return "Prompts user to select note(s) for export";
+
+      case PodExportScope.LinksInSelection:
+        return "Exports all notes in wikilinks of current selected portion of text in the open note editor";
 
       case PodExportScope.Note:
         return "Exports the currently opened note";

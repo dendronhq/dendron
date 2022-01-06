@@ -1,13 +1,20 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { note2String } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { describe } from "mocha";
+import { beforeEach, afterEach, describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { RenameHeaderCommand } from "../../commands/RenameHeader";
+import {
+  RenameHeaderCommand,
+  CommandOutput,
+} from "../../commands/RenameHeader";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 // TODO:
 // In a reference range (start & end)
@@ -35,6 +42,59 @@ async function checkFile({
 
 suite("RenameNote", function () {
   const ctx = setupBeforeAfter(this, {});
+
+  let target: NoteProps;
+  describeMultiWS(
+    "GIVEN a note, and another note that references it",
+    {
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        target = await NoteTestUtilsV4.createNote({
+          fname: "target",
+          wsRoot,
+          vault: vaults[0],
+          body: "## header\n\n## dummy",
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "note-with-link-to-target",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[target]]",
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "another-note-with-link-to-target",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[target#dummy]]",
+        });
+      },
+    },
+    () => {
+      let sandbox: sinon.SinonSandbox;
+      beforeEach(() => {
+        sandbox = sinon.createSandbox();
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      test("THEN, if the reference isn't pointing to the header being renamed, the note that is referencing isn't updated.", async () => {
+        const editor = await WSUtils.openNote(target);
+        editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+
+        sandbox
+          .stub(vscode.window, "showInputBox")
+          .returns(Promise.resolve("Foo Bar"));
+        const out = (await new RenameHeaderCommand().run({})) as CommandOutput;
+
+        const updateResps = out!.data?.filter((resp) => {
+          return resp.status === "update";
+        });
+        expect(updateResps?.length).toEqual(0);
+      });
+    }
+  );
 
   describe("using selection", () => {
     test("wikilink to other file", (done) => {

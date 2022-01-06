@@ -41,7 +41,7 @@ VFile {
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -69,7 +69,7 @@ VFile {
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -97,7 +97,7 @@ VFile {
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -128,7 +128,7 @@ VFile {
 
 * * *
 
-## Children
+**Children**
 
 1. [Bar](bar.html)
 2. [Foo](foo.html)
@@ -161,7 +161,7 @@ VFile {
 
 * * *
 
-## Children
+**Children**
 
 1. [One](one.html)
 
@@ -222,7 +222,7 @@ Regular wikilink: [Two](foo.two.html)
 
 * * *
 
-## Children
+**Children**
 
 1. [Foo](foo.html)
 
@@ -254,7 +254,7 @@ VFile {
 
 * * *
 
-## Children
+**Children**
 
 1. [Ch1](foo.ch1.html)
 
@@ -286,7 +286,7 @@ VFile {
 
 * * *
 
-## Children
+**Children**
 
 1. [Ch1](foo.ch1.html)
 
@@ -313,7 +313,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -339,7 +339,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -365,7 +365,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Sint minus fuga omnis non.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -392,7 +392,7 @@ VFile {
 <p>Sapiente sed accusamus eum.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -419,7 +419,7 @@ VFile {
 <p>Sapiente sed accusamus eum.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -474,7 +474,7 @@ VFile {
 
 * * *
 
-## Children
+**Children**
 
 1. [Journal](journal.html)
 
@@ -1182,7 +1182,7 @@ VFile {
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1222,7 +1222,7 @@ VFile {
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1262,7 +1262,7 @@ VFile {
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1302,7 +1302,7 @@ VFile {
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end2\\" href=\\"#^end2\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1331,7 +1331,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1360,7 +1360,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1388,7 +1388,7 @@ VFile {
 Sint minus fuga omnis non.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1416,7 +1416,7 @@ VFile {
 Sint minus fuga omnis non.</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1446,7 +1446,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1476,7 +1476,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1520,7 +1520,7 @@ VFile {
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1564,7 +1564,7 @@ VFile {
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1608,7 +1608,7 @@ VFile {
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1652,7 +1652,7 @@ VFile {
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1681,7 +1681,7 @@ Sint minus fuga omnis non.
 </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1710,7 +1710,7 @@ Sint minus fuga omnis non.
 </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1740,7 +1740,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1770,7 +1770,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1798,7 +1798,7 @@ VFile {
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1826,7 +1826,7 @@ VFile {
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1870,7 +1870,7 @@ VFile {
 <table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1914,7 +1914,7 @@ VFile {
 <table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^block-anchor\\" href=\\"#^block-anchor\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1943,7 +1943,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -1972,7 +1972,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2001,7 +2001,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2030,7 +2030,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2059,7 +2059,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2088,7 +2088,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2122,7 +2122,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2156,7 +2156,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2184,7 +2184,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2212,7 +2212,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2241,7 +2241,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2270,7 +2270,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2302,7 +2302,7 @@ VFile {
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2334,7 +2334,7 @@ VFile {
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2366,7 +2366,7 @@ Sapiente sed accusamus eum. </p>
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2398,7 +2398,7 @@ Sapiente sed accusamus eum. </p>
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2425,7 +2425,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>End anchor ^invalid-end not found</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2452,7 +2452,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>End anchor ^invalid-end not found</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2479,7 +2479,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Start anchor ^invalid-start not found</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2506,7 +2506,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Start anchor ^invalid-start not found</p>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2537,7 +2537,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2568,7 +2568,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2606,7 +2606,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2644,7 +2644,7 @@ VFile {
 </ul>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>",
@@ -2679,7 +2679,7 @@ VFile {
 </ol>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>
@@ -2718,7 +2718,7 @@ VFile {
 </ol>
 </div></div><p></p><p></p>
 <hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<strong>Children</strong>
 <ol>
 <li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
 </ol>

@@ -190,4 +190,12 @@ export const NOTE_PRESETS_V4 = {
     fname: "wikilink-top-hierarchy-target",
     body: ["# Header ", "body text"].join("\n"),
   }),
+  NOTE_WITH_USERTAG: CreateNoteFactory({
+    fname: "usertag",
+    body: "@johndoe",
+  }),
+  NOTE_WITH_TAG: CreateNoteFactory({
+    fname: "footag",
+    body: "#foobar",
+  }),
 };

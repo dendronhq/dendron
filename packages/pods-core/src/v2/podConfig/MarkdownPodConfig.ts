@@ -6,6 +6,9 @@ import { ExportPodConfigurationV2 } from "./PodV2Types";
  */
 export type MarkdownV2PodConfig = ExportPodConfigurationV2 & {
   wikiLinkToURL?: boolean;
+  convertTagNotesToLinks?: boolean;
+  convertUserNotesToLinks?: boolean;
+  addFrontmatterTitle?: boolean;
   // TODO: `"clipboard" | string` is kind of meaningless; use a better way to
   // distinguish clipboard functionality.
   destination: string | "clipboard";
@@ -55,6 +58,21 @@ export function createRunnableMarkdownV2PodConfigSchema(): JSONSchemaType<Runnab
         nullable: true,
       },
       wikiLinkToURL: {
+        type: "boolean",
+        default: false,
+        nullable: true,
+      },
+      convertTagNotesToLinks: {
+        type: "boolean",
+        default: false,
+        nullable: true,
+      },
+      convertUserNotesToLinks: {
+        type: "boolean",
+        default: false,
+        nullable: true,
+      },
+      addFrontmatterTitle: {
         type: "boolean",
         nullable: true,
       },

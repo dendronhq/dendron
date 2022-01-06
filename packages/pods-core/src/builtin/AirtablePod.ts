@@ -4,21 +4,20 @@ import {
   DendronCompositeError,
   DendronError,
   DEngineClient,
-  DLink,
   ErrorFactory,
   ErrorUtils,
   ERROR_SEVERITY,
   IDendronError,
   isFalsy,
-  minimatch,
   NoteProps,
+  NotePropsWithOptionalCustom,
   NoteUtils,
   RespV3,
   StatusCodes,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
-import { LinkUtils, NoteMetadataUtils } from "@dendronhq/engine-server";
+import { NoteMetadataUtils } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";
@@ -68,32 +67,33 @@ export type SrcFieldMappingResp = {
 export type SrcFieldMapping = SrcFieldMappingV2 | string;
 export type SrcFieldMappingV2 =
   | SimpleSrcField
-  | TagSrcField
   | MultiSelectField
   | SingleSelectField
   | LinkedRecordField;
+
+export enum SpecialSrcFieldToKey {
+  TAGS = "tags",
+  LINKS = "links",
+}
 
 type SimpleSrcField = {
   to: string;
   type: "string" | "date";
 };
-/**
- * @deprecated
- */
-type TagSrcField = {
-  type: "singleTag";
-  filter: string;
-};
+
 type SelectField = {
-  to: "links" | "tags" | string;
+  to: SpecialSrcFieldToKey | string;
   filter?: string;
 };
+
 type SingleSelectField = {
   type: "singleSelect";
 } & SelectField;
+
 type MultiSelectField = {
   type: "multiSelect";
 } & SelectField;
+
 type LinkedRecordField = {
   type: "linkedRecord";
 } & SelectField;
@@ -178,15 +178,18 @@ export class AirtableUtils {
     return _.flatten(out);
   }
 
+  /**
+   * Maps a {@linkk SrcFieldMappingV2["type"]} to a field on {@link NoteProps}
+   * @param param0
+   * @returns
+   */
   static handleSrcField({
     fieldMapping,
     note,
-    hashtags,
     engine,
   }: {
     fieldMapping: SrcFieldMappingV2;
     note: NoteProps;
-    hashtags: DLink[];
     engine: DEngineClient;
   }): RespV3<any> {
     switch (fieldMapping.type) {
@@ -201,36 +204,37 @@ export class AirtableUtils {
         };
       }
       case "singleSelect": {
-        const { error, data } = NoteMetadataUtils.extractSingleTag({
-          note,
-          filters: fieldMapping.filter ? [fieldMapping.filter] : [],
-        });
-        if (error) {
-          return { error };
+        if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
+          const { error, data } = NoteMetadataUtils.extractSingleTag({
+            note,
+            filters: fieldMapping.filter ? [fieldMapping.filter] : [],
+          });
+          if (error) {
+            return { error };
+          }
+          return { data: NoteMetadataUtils.cleanTags(data ? [data] : [])[0] };
+        } else {
+          const data = NoteMetadataUtils.extractString({
+            note,
+            key: fieldMapping.to,
+          });
+          return { data };
         }
-        return { data };
       }
       case "multiSelect": {
-        throw Error("not implemented");
-      }
-      case "singleTag": {
-        let val: string;
-        hashtags = hashtags.filter((t) =>
-          minimatch(t.value, fieldMapping.filter!)
-        );
-        if (hashtags.length > 1) {
-          throw new DendronError({
-            message: `singleTag field has multiple values. note: ${JSON.stringify(
-              NoteUtils.toLogObj(note)
-            )}, tags: ${JSON.stringify(_.pick(hashtags, "value"))}`,
+        if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
+          const tags = NoteMetadataUtils.extractTags({
+            note,
+            filters: fieldMapping.filter ? [fieldMapping.filter] : [],
           });
+          const data = NoteMetadataUtils.cleanTags(tags);
+          return { data };
         }
-        if (hashtags.length !== 0) {
-          val = hashtags[0].value.replace(/^tags./, "");
-        } else {
-          val = "";
-        }
-        return { data: val };
+        const data = NoteMetadataUtils.extractArray({
+          note,
+          key: fieldMapping.to,
+        });
+        return { data };
       }
       case "linkedRecord": {
         const links = NoteMetadataUtils.extractLinks({
@@ -253,12 +257,10 @@ export class AirtableUtils {
           const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
           const _recordIds = _notes
             .map((n) => {
+              const id = AirtableUtils.getAirtableIdFromNote(n);
               return {
                 note: n,
-                id: NoteMetadataUtils.extractString({
-                  key: "airtableId",
-                  note: n,
-                }),
+                id,
               };
             })
             .filter((ent) => {
@@ -314,7 +316,6 @@ export class AirtableUtils {
     const errors: IDendronError[] = [];
     notes.map((note) => {
       // TODO: optimize, don't parse if no hashtags
-      const hashtags = LinkUtils.findHashTags({ links: note.links });
       let fields = {};
       logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
       for (const [key, fieldMapping] of Object.entries<SrcFieldMapping>(
@@ -335,7 +336,6 @@ export class AirtableUtils {
           const resp = this.handleSrcField({
             fieldMapping,
             note,
-            hashtags,
             engine,
           });
           if (resp.error) {
@@ -390,7 +390,7 @@ export class AirtableUtils {
       records.map(async (ent) => {
         const airtableId = ent.id;
         const dendronId = ent.fields["DendronId"] as string;
-        const note = engine.notes[dendronId];
+        const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
         const noteAirtableId = _.get(note.custom, "airtableId");
         if (!noteAirtableId) {
           const updatedNote = {

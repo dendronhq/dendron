@@ -15,10 +15,9 @@ import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { PluginSchemaUtils } from "../pluginSchemaUtils";
 import { PluginVaultUtils } from "../pluginVaultUtils";
-import { SchemaSyncService } from "../services/SchemaSyncService";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandOpts = {
   candidates?: readonly SchemaCandidate[];
@@ -132,7 +131,7 @@ function createCandidatesMapByFname(items: readonly SchemaCandidate[]) {
 function getUriFromSchema(schema: SchemaModuleProps) {
   const vaultPath = vault2Path({
     vault: schema.vault,
-    wsRoot: getDWorkspace().wsRoot,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
   });
   const uri = Uri.file(
     SchemaUtils.getPath({ root: vaultPath, fname: schema.fname })
@@ -141,7 +140,10 @@ function getUriFromSchema(schema: SchemaModuleProps) {
 }
 
 function getSchemaUri(vault: DVault, schemaName: string) {
-  const vaultPath = vault2Path({ vault, wsRoot: getDWorkspace().wsRoot });
+  const vaultPath = vault2Path({
+    vault,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+  });
   const uri = Uri.file(
     SchemaUtils.getPath({ root: vaultPath, fname: schemaName })
   );
@@ -527,7 +529,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
   private getHierarchyCandidates(
     hierarchyLevel: HierarchyLevel
   ): SchemaCandidate[] {
-    const { engine } = getDWorkspace();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const notes = engine.notes;
     const noteCandidates = _.filter(notes, (n) =>
       hierarchyLevel.isCandidateNote(n.fname)
@@ -595,7 +597,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
 
     fs.writeFileSync(uri!.fsPath, schemaBody);
 
-    await SchemaSyncService.instance().saveSchema({
+    await ExtensionProvider.getExtension().schemaSyncService.saveSchema({
       uri: uri!,
       isBrandNewFile: true,
     });

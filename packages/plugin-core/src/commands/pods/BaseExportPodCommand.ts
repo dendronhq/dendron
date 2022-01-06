@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
   assertUnreachable,
   DNodeProps,
@@ -13,11 +14,13 @@ import {
   PodUtils,
   RunnablePodConfigV2,
 } from "@dendronhq/pods-core";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { HierarchySelector } from "../../components/lookup/HierarchySelector";
+import { PodUIControls } from "../../components/pods/PodControls";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../../workspace";
 import { BaseCommand } from "../base";
 
 /**
@@ -103,6 +106,26 @@ export abstract class BaseExportPodCommand<
         payload = selectedText;
         break;
       }
+      case PodExportScope.Lookup:
+      case PodExportScope.LinksInSelection: {
+        const scope = await PodUIControls.promptForScopeLookup({
+          fromSelection: inputs.exportScope === PodExportScope.LinksInSelection,
+          key: this.key,
+          logger: this.L,
+        });
+        if (scope === undefined) {
+          vscode.window.showErrorMessage("Unable to get notes payload.");
+          return;
+        }
+        payload = scope.selectedItems.map((item) => {
+          return _.omit(item, ["label", "detail", "alwaysShow"]) as NoteProps;
+        });
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get notes payload.");
+          return;
+        }
+        break;
+      }
       case PodExportScope.Note: {
         payload = this.getNoteProps();
 
@@ -145,6 +168,7 @@ export abstract class BaseExportPodCommand<
    * @param opts
    */
   async execute(opts: { config: Config; payload: string | NoteProps[] }) {
+    PodUtils.validate(opts.config, this.getRunnableSchema());
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -157,7 +181,6 @@ export abstract class BaseExportPodCommand<
         });
 
         const pod = this.createPod(opts.config);
-        PodUtils.validate(opts.config, this.getRunnableSchema());
 
         switch (opts.config.exportScope) {
           case PodExportScope.Clipboard:
@@ -179,38 +202,39 @@ export abstract class BaseExportPodCommand<
             break;
           }
           case PodExportScope.Note: {
-            const promises = [];
-
             for (const noteProp of opts.payload) {
               if (typeof noteProp === "string") {
                 throw new Error("Invalid Payload Type in Pod Note Export");
               } else if (pod.exportNote) {
-                promises.push(
-                  pod.exportNote(noteProp).then((result) => {
-                    this.onExportComplete({
-                      exportReturnValue: result,
-                      payload: noteProp,
-                      config: opts.config,
-                    });
-                  })
-                );
+                try {
+                  const result = await pod.exportNote(noteProp);
+                  await this.onExportComplete({
+                    exportReturnValue: result,
+                    payload: noteProp,
+                    config: opts.config,
+                  });
+                } catch (err) {
+                  this.L.error(err);
+                  throw err;
+                }
               } else {
                 throw new Error("Invalid Payload Type in Text Export");
               }
             }
             break;
           }
+          case PodExportScope.Lookup:
+          case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
             if (typeof opts.payload === "string") {
               throw new Error("Invalid Payload Type in Pod Note Export");
             } else if (pod.exportNotes) {
-              pod.exportNotes(opts.payload).then((result) => {
-                this.onExportComplete({
-                  exportReturnValue: result,
-                  payload: opts.payload,
-                  config: opts.config,
-                });
+              const result = await pod.exportNotes(opts.payload);
+              await this.onExportComplete({
+                exportReturnValue: result,
+                payload: opts.payload,
+                config: opts.config,
               });
             } else {
               throw new Error("Multi Note Export not supported by this pod!");
@@ -238,7 +262,7 @@ export abstract class BaseExportPodCommand<
     exportReturnValue: R;
     payload: string | NoteProps | NoteProps[];
     config: Config;
-  }): void;
+  }): Promise<void>;
 
   /**
    * Gets notes matching the selected hierarchy
@@ -253,7 +277,7 @@ export abstract class BaseExportPodCommand<
           return resolve(undefined);
         }
 
-        const notes = getExtension().getEngine().notes;
+        const notes = ExtensionProvider.getEngine().notes;
 
         resolve(
           Object.values(notes).filter(
@@ -274,7 +298,7 @@ export abstract class BaseExportPodCommand<
       return;
     }
 
-    const { vaults, engine, wsRoot } = getDWorkspace();
+    const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
 
     const vault = VaultUtils.getVaultByFilePath({
       vaults,
@@ -302,7 +326,7 @@ export abstract class BaseExportPodCommand<
    * @returns all notes in the workspace
    */
   private getWorkspaceProps(): DNodeProps[] | undefined {
-    const { engine } = getDWorkspace();
+    const engine = ExtensionProvider.getEngine();
     return Object.values(engine.notes);
   }
 }

@@ -4,6 +4,7 @@ import {
   env,
   genUUID,
   RespV2,
+  RuntimeUtils,
 } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
@@ -268,6 +269,9 @@ export class SegmentClient {
     props?: { [key: string]: any },
     opts?: SegmentExtraArg
   ) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
+      return;
+    }
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
@@ -550,6 +554,9 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
+      return;
+    }
     const { type, ...rest } = platformProps;
     SegmentClient.instance().track(event, {
       ...props,
@@ -564,6 +571,9 @@ export class SegmentUtils {
     platformProps: VSCodeProps | CLIProps,
     props?: any
   ) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
+      return;
+    }
     const { type, ...rest } = platformProps;
     await SegmentClient.instance().track(event, {
       ...props,
@@ -574,6 +584,9 @@ export class SegmentUtils {
   }
 
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
+      return;
+    }
     if (identifyProps.type === "vscode") {
       const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
       SegmentClient.instance().identifyAnonymous(

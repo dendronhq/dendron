@@ -56,15 +56,17 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    const wikiLinkToURL = await this.promptUserForWikilinkToURLSetting();
-    if (wikiLinkToURL === undefined) {
-      return;
-    }
+    //use FM Title as h1 header
+    const addFrontmatterTitle = await this.promptUserForaddFMTitleSetting();
+    if (addFrontmatterTitle === undefined) return;
 
     const config = {
       exportScope,
-      wikiLinkToURL,
+      wikiLinkToURL: opts?.wikiLinkToURL || false,
       destination,
+      addFrontmatterTitle,
+      convertTagNotesToLinks: opts?.convertTagNotesToLinks || false,
+      convertUserNotesToLinks: opts?.convertUserNotesToLinks || false,
     };
 
     // If this is not an already saved pod config, then prompt user whether they
@@ -102,7 +104,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     return config;
   }
 
-  public onExportComplete({
+  public async onExportComplete({
     exportReturnValue,
     payload,
     config,
@@ -110,7 +112,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     exportReturnValue: string;
     payload: string | NoteProps;
     config: RunnableMarkdownV2PodConfig;
-  }): void {
+  }) {
     if (config.destination === "clipboard") {
       if (typeof payload === "string") {
         vscode.env.clipboard.writeText(exportReturnValue);
@@ -146,32 +148,6 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
   /*
    * Region: UI Controls
    */
-
-  /**
-   * Prompt user with simple quick pick on which wikilink conversion setting to
-   * use
-   * @returns
-   */
-  private async promptUserForWikilinkToURLSetting(): Promise<
-    boolean | undefined
-  > {
-    const items: vscode.QuickPickItem[] = [
-      {
-        label: "Convert wikilinks to URLs",
-        detail:
-          "Converts wikilinks to their corresponding URLs on a Dendron published site",
-      },
-      {
-        label: "Don't modify wikilinks",
-        detail: "Wikilinks will be preserved in their [[existing-format]]",
-      },
-    ];
-    const picked = await vscode.window.showQuickPick(items, {
-      title: "How would you like wikilinks to be formatted?",
-    });
-
-    return picked ? picked.label === "Convert wikilinks to URLs" : undefined;
-  }
 
   /**
    * Prompt the user via Quick Pick(s) to select the destination of the export
@@ -215,5 +191,31 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     }
 
     return;
+  }
+
+  /**
+   * Prompt user with simple quick pick to select whether to use FM title as h1 header or not
+   * @returns
+   */
+  private async promptUserForaddFMTitleSetting(): Promise<boolean | undefined> {
+    const items: vscode.QuickPickItem[] = [
+      {
+        label: "Add note title from FM as h1 header",
+        detail:
+          "Add note title from the frontmatter to the start of exported note",
+      },
+      {
+        label: "Skip adding note FM title as h1 header",
+        detail:
+          "Skip adding note title from the frontmatter to the start of exported note",
+      },
+    ];
+    const picked = await vscode.window.showQuickPick(items, {
+      title: "Do you want to add note frontmatter title as h1 header?",
+    });
+
+    return picked
+      ? picked.label === "Add note title from FM as h1 header"
+      : undefined;
   }
 }

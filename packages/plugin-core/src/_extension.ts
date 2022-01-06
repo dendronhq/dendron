@@ -7,6 +7,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
+  DWorkspaceV2,
   ExtensionEvents,
   getStage,
   InstallStatus,
@@ -45,10 +46,12 @@ import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { SeedAddCommand } from "./commands/SeedAddCommand";
 import {
   SeedBrowseCommand,
   WebViewPanelFactory,
 } from "./commands/SeedBrowseCommand";
+import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
@@ -75,9 +78,12 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
 import { setupSegmentClient } from "./telemetry";
+import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
+import { isAutoCompletable } from "./utils/AutoCompletable";
 import { MarkdownUtils } from "./utils/md";
+import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
@@ -91,14 +97,84 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
 import { WSUtils } from "./WSUtils";
-import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
-import { isAutoCompletable } from "./utils/AutoCompletable";
-import { IBaseCommand } from "./types";
-import { SeedAddCommand } from "./commands/SeedAddCommand";
-import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
+
+class ExtensionUtils {
+  /**
+   * Setup segment client
+   * Also setup cache flushing in case of missed uploads
+   */
+  static setupSegmentWithCacheFlush({
+    context,
+    ws,
+  }: {
+    context: vscode.ExtensionContext;
+    ws: DWorkspaceV2;
+  }) {
+    if (getStage() === "prod") {
+      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+      fs.ensureDir(segmentResidualCacheDir);
+      setupSegmentClient(
+        ws,
+        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+      );
+
+      // Try to flush the Segment residual cache every hour:
+      (function tryFlushSegmentCache() {
+        SegmentClient.instance()
+          .tryFlushResidualCache()
+          .then((result) => {
+            Logger.info(
+              `Segment Residual Cache flush attempted. ${JSON.stringify(
+                result
+              )}`
+            );
+          });
+
+        // Repeat once an hour:
+        setTimeout(tryFlushSegmentCache, 3600000);
+      })();
+    }
+  }
+
+  static async startServerProcess({
+    context,
+    start,
+    wsService,
+  }: {
+    context: vscode.ExtensionContext;
+    wsService: WorkspaceService;
+    start: [number, number];
+  }) {
+    const ctx = "startServerProcess";
+    const { port, subprocess } = await startServerProcess();
+    if (subprocess) {
+      WSUtils.handleServerProcess({
+        subprocess,
+        context,
+        onExit: (type: SubProcessExitType) => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                  code: type,
+                });
+                _activate(context);
+              }
+            });
+        },
+      });
+    }
+    const durationStartServer = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
+    updateEngineAPI(port);
+    wsService.writePort(port);
+  }
+}
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -411,6 +487,7 @@ export async function _activate(
       // initialize client
       setupSegmentClient(wsImpl);
 
+      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
@@ -453,32 +530,8 @@ export async function _activate(
           );
         }
       }
-      // initialize client
-      if (getStage() === "prod") {
-        const segmentResidualCacheDir = context.globalStorageUri.fsPath;
-        fs.ensureDir(segmentResidualCacheDir);
-        setupSegmentClient(
-          wsImpl,
-          path.join(segmentResidualCacheDir, "segmentresidualcache.log")
-        );
 
-        // Try to flush the Segment residual cache every hour:
-        (function tryFlushSegmentCache() {
-          SegmentClient.instance()
-            .tryFlushResidualCache()
-            .then((result) => {
-              Logger.info(
-                `Segment Residual Cache flush attempted. ${JSON.stringify(
-                  result
-                )}`
-              );
-            });
-
-          // Repeat once an hour:
-          setTimeout(tryFlushSegmentCache, 3600000);
-        })();
-      }
-
+      ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
@@ -551,33 +604,10 @@ export async function _activate(
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
 
-      const { port, subprocess } = await startServerProcess();
-      if (subprocess) {
-        WSUtils.handleServerProcess({
-          subprocess,
-          context,
-          onExit: (type: SubProcessExitType) => {
-            const txt = "Restart Dendron";
-            vscode.window
-              .showErrorMessage("Dendron engine encountered an error", txt)
-              .then(async (resp) => {
-                if (resp === txt) {
-                  AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
-                    code: type,
-                  });
-                  _activate(context);
-                }
-              });
-          },
-        });
-      }
-      const durationStartServer = getDurationMilliseconds(start);
-      Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-      updateEngineAPI(port);
-      wsService.writePort(port);
+      await ExtensionUtils.startServerProcess({ context, start, wsService });
+
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
-
       if (!reloadSuccess) {
         HistoryService.instance().add({
           source: "extension",
@@ -622,7 +652,7 @@ export async function _activate(
       });
       if (stage !== "test") {
         await ws.activateWatchers();
-        toggleViews(true);
+        togglePluginActiveContext(true);
       }
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
@@ -638,7 +668,7 @@ export async function _activate(
           msg: "watching for a native workspace to be created",
         });
 
-        toggleViews(false);
+        togglePluginActiveContext(false);
         const autoInit = new FileAddWatcher(
           vscode.workspace.workspaceFolders?.map(
             (vscodeFolder) => vscodeFolder.uri.fsPath
@@ -757,9 +787,9 @@ export async function _activate(
   }
 }
 
-function toggleViews(enabled: boolean) {
-  const ctx = "toggleViews";
-  Logger.info({ ctx, msg: `views enabled: ${enabled}` });
+function togglePluginActiveContext(enabled: boolean) {
+  const ctx = "togglePluginActiveContext";
+  Logger.info({ ctx, state: `togglePluginActiveContext: ${enabled}` });
   VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
   VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
@@ -770,7 +800,7 @@ export function deactivate() {
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
     getExtension().deactivate();
   }
-  toggleViews(false);
+  togglePluginActiveContext(false);
 }
 
 async function showWelcomeOrWhatsNew({

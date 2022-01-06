@@ -1,18 +1,15 @@
+import { RuntimeUtils } from "@dendronhq/common-all";
 import { SegmentUtils } from "@dendronhq/common-server";
 
 export class CLIAnalyticsUtils {
   static track(event: string, props?: any) {
     const cliVersion = process.env.npm_package_version!;
-    if (!process.env.GITHUB_ACTIONS) {
-      SegmentUtils.track(event, { type: "cli", cliVersion }, props);
-    }
+    SegmentUtils.track(event, { type: "cli", cliVersion }, props);
   }
 
   static async trackSync(event: string, props?: any) {
     const cliVersion = process.env.npm_package_version!;
-    if (!process.env.GITHUB_ACTIONS) {
-      await SegmentUtils.trackSync(event, { type: "cli", cliVersion }, props);
-    }
+    await SegmentUtils.trackSync(event, { type: "cli", cliVersion }, props);
   }
 
   static identify() {
@@ -24,6 +21,9 @@ export class CLIAnalyticsUtils {
    * Show notice about telemetry
    */
   static showTelemetryMessage() {
+    if (RuntimeUtils.isRunningInTestOrCI()) {
+      return;
+    }
     const message = [
       "Dendron collects limited usage data to help improve the quality of our software.",
       "",

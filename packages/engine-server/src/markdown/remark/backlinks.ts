@@ -66,9 +66,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       root.children.push({
         type: "thematicBreak",
       });
-      root.children.push(
-        u(DendronASTTypes.HEADING, { depth: 2 }, [u("text", "Backlinks")])
-      );
+      root.children.push(u("strong", [{ type: "text", value: "Backlinks" }]));
       root.children.push(
         list(
           "unordered",

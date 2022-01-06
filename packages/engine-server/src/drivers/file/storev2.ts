@@ -640,11 +640,10 @@ export class FileStorage implements DStore {
     note: NoteProps;
     oldLoc: DNoteLoc;
     newLoc: DNoteLoc;
-  }): Promise<NoteChangeUpdateEntry> {
+  }): Promise<NoteChangeUpdateEntry | undefined> {
     const prevNote = { ...note };
     const vault = note.vault;
-    const wsRoot = this.wsRoot;
-    const vaultPath = vault2Path({ vault, wsRoot });
+    const vaultPath = vault2Path({ vault, wsRoot: this.wsRoot });
     // read note in case its changed
     const _n = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
     const foundLinks = LinkUtils.findLinks({
@@ -768,17 +767,19 @@ export class FileStorage implements DStore {
       },
       _n
     );
-    // const resp = await MDUtilsV4.procTransform(
-    //   { engine: this.engine, fname: n.fname, vault: n.vault },
-    //   { from: oldLoc, to: newLoc }
-    // ).process(_n.body);
-    note.body = noteMod.body;
-    note.tags = noteMod.tags;
-    return {
-      note,
-      prevNote,
-      status: "update",
-    };
+    const shouldChange = !(
+      note.body === noteMod.body && note.tags === noteMod.tags
+    );
+    if (shouldChange) {
+      note.body = noteMod.body;
+      note.tags = noteMod.tags;
+      return {
+        note,
+        prevNote,
+        status: "update",
+      };
+    }
+    return;
   }
 
   async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
@@ -811,31 +812,37 @@ export class FileStorage implements DStore {
       newLoc.alias = newNoteTitle;
     }
 
-    const notesToChange = NoteUtils.getNotesWithLinkTo({
+    // const notesToChange = NoteUtils.getNotesWithLinkTo({
+    let notesChangedEntries: NoteChangeEntry[] = [];
+    const notesWithLinkTo = NoteUtils.getNotesWithLinkTo({
       note: oldNote,
       notes: this.notes,
     });
     this.logger.info({
       ctx,
-      msg: "notesToChange:gather",
-      notes: notesToChange.map((n) => NoteUtils.toLogObj(n)),
+      msg: "notesWithLinkTo:gather",
+      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
     });
     // update note body of all notes that have changed
-    const notesChanged = await Promise.all(
-      notesToChange.map(async (n) =>
-        this.processNoteChangedByRename({ note: n, oldLoc, newLoc })
-      )
-    ).catch((err) => {
-      this.logger.error({ err });
-      throw new DendronError({ message: " error rename note", payload: err });
+    notesWithLinkTo.forEach(async (n) => {
+      const out = await this.processNoteChangedByRename({
+        note: n,
+        oldLoc,
+        newLoc,
+      });
+      if (out !== undefined) {
+        notesChangedEntries.push(out);
+      }
     });
+
+    await Promise.all(notesChangedEntries);
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
     if (!_.isUndefined(opts.isEventSourceEngine)) {
-      return this.writeManyNotes(notesChanged.map((entry) => entry.note));
+      return this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
     }
     const newNote: NoteProps = {
       ...oldNote,
@@ -893,14 +900,13 @@ export class FileStorage implements DStore {
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
-    await this.writeManyNotes(notesChanged.map((entry) => entry.note));
-    // remove old note only when rename is success
+    await this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
-    let notesChangedEntries = changedFromDelete
+    notesChangedEntries = changedFromDelete
       .concat(changeFromWrite)
-      .concat(notesChanged);
+      .concat(notesChangedEntries);
     // remove duplicate updates
     notesChangedEntries = _.uniqBy(notesChangedEntries, (ent) => {
       return [ent.status, ent.note.id, ent.note.fname].join("");

@@ -5,13 +5,17 @@ import { expect } from "../../../testUtilsv2";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
 import { DendronError, ErrorFactory } from "@dendronhq/common-all";
 import { GoogleDocsExportPodCommand } from "../../../../commands/pods/GoogleDocsExportPodCommand";
+import { vault2Path } from "@dendronhq/common-server";
+import path from "path";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
+import { VSCodeUtils } from "../../../../vsCodeUtils";
 
 suite("GoogleDocsExportPodCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
-  describe("GIVEN a GoogleDocsExportPodCommand is ran with Selection scope", () => {
+  describe("GIVEN a GoogleDocsExportPodCommand is ran with Note scope", () => {
     describeSingleWS(
       "WHEN there is an error in response",
       {
@@ -19,10 +23,16 @@ suite("GoogleDocsExportPodCommand", function () {
       },
       () => {
         const cmd = new GoogleDocsExportPodCommand();
+        test("THEN error message must be displayed", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
-        test("THEN error message must contain the error", async () => {
+          const notePath = path.join(
+            vault2Path({ vault: vaults[0], wsRoot }),
+            "root.md"
+          );
+          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
           const payload = await cmd.enrichInputs({
-            exportScope: PodExportScope.Selection,
+            exportScope: PodExportScope.Note,
             accessToken: "test",
             refreshToken: "test",
             expirationTime: 1234,

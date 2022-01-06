@@ -11,7 +11,6 @@ import {
   stringifyError,
   Time,
 } from "@dendronhq/common-all";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import FormData from "form-data";
 import { RateLimiter } from "limiter";
@@ -50,8 +49,8 @@ export type GoogleDocsFields =
 type GoogleDocsPayload = {
   content: Buffer;
   documentId?: string;
-  name?: string;
-  dendronId?: string;
+  name: string;
+  dendronId: string;
 };
 /**
  * GDoc Export Pod (V2 - for compatibility with Pod V2 workflow). Supports only
@@ -85,47 +84,6 @@ export class GoogleDocsExportPodV2
   async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
     const response = await this.exportNotes([input]);
     return response;
-  }
-
-  async exportText(_input: string): Promise<GoogleDocsExportReturnType> {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.HTML }
-    );
-    const out = await proc.process(_input);
-
-    const htmlContent = `<html>${out.contents}</html>`;
-    const content = Buffer.from(htmlContent);
-    let { accessToken, expirationTime, refreshToken } = this._config;
-    try {
-      accessToken = await this.checkTokenExpiry(
-        expirationTime,
-        accessToken,
-        refreshToken
-      );
-    } catch (err: any) {
-      return {
-        data: {},
-        error: err as DendronError,
-      };
-    }
-    const response = await this.createGdoc({
-      docToCreate: [{ content, name: "UntitledDocument" }],
-      accessToken,
-    });
-    const data = {
-      created: response.data,
-    };
-    if (response.errors.length > 0) {
-      return {
-        data,
-        error: new DendronCompositeError(response.errors),
-      };
-    } else {
-      return ResponseUtil.createHappyResponse({
-        data,
-      });
-    }
   }
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {

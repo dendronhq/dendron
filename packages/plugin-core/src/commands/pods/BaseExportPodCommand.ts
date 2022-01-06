@@ -76,8 +76,8 @@ export abstract class BaseExportPodCommand<
    */
   async enrichInputs(
     inputs: Config
-  ): Promise<{ config: Config; payload: string | NoteProps[] } | undefined> {
-    let payload: string | NoteProps[] | undefined;
+  ): Promise<{ config: Config; payload: NoteProps[] } | undefined> {
+    let payload: NoteProps[] | undefined;
 
     switch (inputs.exportScope) {
       case PodExportScope.Lookup:
@@ -159,7 +159,7 @@ export abstract class BaseExportPodCommand<
         switch (opts.config.exportScope) {
           case PodExportScope.Note: {
             for (const noteProp of opts.payload) {
-            if (pod.exportNote) {
+              if (pod.exportNote) {
                 try {
                   const result = await pod.exportNote(noteProp);
                   await this.onExportComplete({
@@ -181,7 +181,7 @@ export abstract class BaseExportPodCommand<
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-           if (pod.exportNotes) {
+            if (pod.exportNotes) {
               const result = await pod.exportNotes(opts.payload);
               await this.onExportComplete({
                 exportReturnValue: result,
@@ -214,7 +214,7 @@ export abstract class BaseExportPodCommand<
     exportReturnValue: R;
     payload: NoteProps | NoteProps[];
     config: Config;
-  }): Promise<void>;
+  }): Promise<void | string>;
 
   /**
    * Gets notes matching the selected hierarchy
@@ -279,6 +279,6 @@ export abstract class BaseExportPodCommand<
    */
   private getWorkspaceProps(): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
-    return Object.values(engine.notes);
+    return Object.values(engine.notes).filter((value) => value.stub !== true);
   }
 }

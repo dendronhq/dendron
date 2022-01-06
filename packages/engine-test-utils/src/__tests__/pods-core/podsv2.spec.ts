@@ -24,7 +24,6 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
 
 /**
  * ConfigFileUtils
@@ -507,48 +506,6 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
       );
     });
   });
-  describe("WHEN exporting text", () => {
-    test("THEN expect gdoc to be created", async () => {
-      await runEngineTestV5(
-        async (opts) => {
-          const podConfig: RunnableGoogleDocsV2PodConfig = {
-            exportScope: PodExportScope.Note,
-            accessToken: "test",
-            refreshToken: "test",
-            expirationTime: Time.now().toSeconds() + 5000,
-            connectionId: "foo",
-          };
-
-          const pod = new GoogleDocsExportPodV2({
-            podConfig,
-            engine: opts.engine,
-            vaults: opts.vaults,
-            wsRoot: opts.wsRoot,
-          });
-          const response = {
-            data: [
-              {
-                documentId: "testdoc",
-                revisionId: "test",
-              },
-            ],
-            errors: [],
-          };
-          pod.createGdoc = jest.fn().mockResolvedValue(response);
-          const props = "foo bar text";
-
-          const result = await pod.exportText(props);
-          const entCreate = result.data?.created!;
-          expect(entCreate.length).toEqual(1);
-          expect(entCreate[0]?.documentId).toEqual("testdoc");
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
 
   describe("WHEN there is an error in response", () => {
     test("THEN expect gdoc to return error message", async () => {
@@ -578,16 +535,25 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             ],
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
-          const props = "foo bar text";
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "simple-wikilink",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
 
-          const result = await pod.exportText(props);
+          const result = await pod.exportNote(props);
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(0);
           expect(ResponseUtil.hasError(result)).toBeTruthy();
         },
         {
           expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
         }
       );
     });

@@ -175,25 +175,24 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
 
   async onExportComplete(opts: {
     exportReturnValue: GoogleDocsExportReturnType;
-    payload: string | NoteProps[];
+    payload: NoteProps[];
     config: RunnableGoogleDocsV2PodConfig;
   }) {
-    const { exportReturnValue, payload } = opts;
+    const { exportReturnValue } = opts;
     let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
     const createdCount = createdDocs?.length ?? 0;
     const updatedCount = updatedDocs?.length ?? 0;
-    if (!_.isString(payload) && createdDocs && createdCount > 0) {
+    if (createdDocs && createdCount > 0) {
       await this.updateNoteWithCustomFrontmatter(createdDocs);
     }
-    if (!_.isString(payload) && updatedDocs && updatedCount > 0) {
+    if (updatedDocs && updatedCount > 0) {
       await this.updateNoteWithCustomFrontmatter(updatedDocs);
     }
-
     if (ResponseUtil.hasError(exportReturnValue)) {
       errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
-        exportReturnValue.error
+        exportReturnValue.error?.message
       )}`;
 
       this.L.error(errorMsg);

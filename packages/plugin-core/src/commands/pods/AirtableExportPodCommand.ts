@@ -173,7 +173,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   }: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
-    payload: string | NoteProps[];
+    payload: NoteProps[];
   }) {
     const records = exportReturnValue.data;
     const engine = ExtensionProvider.getEngine();

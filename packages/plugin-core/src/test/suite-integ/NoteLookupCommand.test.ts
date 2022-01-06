@@ -7,7 +7,6 @@ import {
   LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
-  SchemaUtils,
   Time,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -26,7 +25,7 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe, Done } from "mocha";
+import { describe, Done } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
@@ -66,7 +65,6 @@ import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
-  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,

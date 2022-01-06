@@ -323,7 +323,7 @@ export class ShowPreviewCommand extends BasicCommand<
     return;
   }
 
-  async addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
+  addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
     return { providedFile: opts !== undefined };
   }
 

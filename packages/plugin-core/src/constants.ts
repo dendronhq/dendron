@@ -182,7 +182,10 @@ export const DENDRON_MENUS = {
       group: "2_workspace",
     },
     {
-      when: "(resourceExtname == .md || resourceExtname == .yml) && dendron:pluginActive",
+      // parentheses are not supported. boolean logic should be simplified
+      // https://github.com/microsoft/vscode/issues/91473
+      // e.g. (A || B) && C => A && C || B && C
+      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
       command: "dendron.deleteNode",
       group: "2_workspace",
     },

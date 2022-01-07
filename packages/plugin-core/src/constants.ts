@@ -182,7 +182,7 @@ export const DENDRON_MENUS = {
       group: "2_workspace",
     },
     {
-      when: "resourceExtname == .md || resourceExtname == .yml && dendron:pluginActive",
+      when: "(resourceExtname == .md || resourceExtname == .yml) && dendron:pluginActive",
       command: "dendron.deleteNode",
       group: "2_workspace",
     },

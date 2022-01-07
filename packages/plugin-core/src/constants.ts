@@ -182,9 +182,7 @@ export const DENDRON_MENUS = {
       group: "2_workspace",
     },
     {
-      // parentheses are not supported. boolean logic should be simplified
-      // https://github.com/microsoft/vscode/issues/91473
-      // e.g. (A || B) && C => A && C || B && C
+      // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
       when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
       command: "dendron.deleteNode",
       group: "2_workspace",

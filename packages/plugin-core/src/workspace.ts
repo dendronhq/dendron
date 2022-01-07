@@ -159,7 +159,6 @@ export class DendronExtension implements IDendronExtension {
 
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
   public dendronTreeView: DendronTreeView | undefined;
-  public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
@@ -516,7 +515,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2();
+        const provider = new DendronTreeViewV2(this);
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;

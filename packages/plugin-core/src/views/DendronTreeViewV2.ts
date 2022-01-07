@@ -13,10 +13,10 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine, getExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { WebViewUtils } from "./utils";
 
@@ -24,12 +24,20 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
 
   private _view?: vscode.WebviewView;
+  private _ext: IDendronExtension;
 
-  constructor() {
-    getExtension().dendronTreeViewV2 = this;
-    getExtension().addDisposable(
+  constructor(ext: IDendronExtension) {
+    this._ext = ext;
+
+    this._ext.context.subscriptions.push(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
+
+    this._ext.noteSyncService.onNoteChange((noteProps) => {
+      if (this._view && this._view.visible) {
+        this.refresh(noteProps);
+      }
+    });
   }
 
   async onOpenTextDocument(editor: vscode.TextEditor | undefined) {
@@ -41,8 +49,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const ext = getExtension();
-    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    if (!this._ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
       return;
     }
     if (basename.endsWith(".md")) {
@@ -64,7 +71,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     Logger.info({ ctx, msg: "enter", start });
 
     WebViewUtils.prepareTreeView({
-      ext: getExtension(),
+      ext: this._ext,
       key: DendronTreeViewKey.TREE_VIEW_V2,
       webviewView,
     });
@@ -75,8 +82,8 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {
         case TreeViewMessageEnum.onSelect: {
-          const note = getEngine().notes[msg.data.id];
-          await new GotoNoteCommand(getExtension()).execute({
+          const note = this._ext.getEngine().notes[msg.data.id];
+          await new GotoNoteCommand(this._ext).execute({
             qs: note.fname,
             vault: note.vault,
           });
@@ -86,7 +93,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           if (document) {
             if (
-              !getExtension().workspaceService?.isPathInWorkspace(
+              !this._ext.workspaceService?.isPathInWorkspace(
                 document.uri.fsPath
               )
             ) {

@@ -156,22 +156,39 @@ Interested in trying out Dendron? Jump right in with the [Getting Started Guide]
 
 ## Join Us
 
-To stay up to date on Dendron developments and all things knowledge management:
+Dendron wouldn't be what it is today without our wonderful set of members and supporters.
 
-* Join [Dendron on Discord](https://link.dendron.so/discord)
-* [Subscribe to the newsletter](https://link.dendron.so/newsletter)
-* Read the [Dendron Blog](https://blog.dendron.so/)
-* Register for [Dendron Events on Luma](https://link.dendron.so/luma)
-* Follow [Dendron on Twitter](https://link.dendron.so/twitter)
-* Checkout [Dendron on GitHub](https://link.dendron.so/github)
+### Community Calendar
 
-## Developer Getting Started
+We have a bunch of community events that we host throughout the week. You can stay up to date on whats happening by taking a look at our community calendar!
 
-If you are interested in contributing to the Dendron source code, please see the [Dendron Development README](https://github.com/dendronhq/dendron/blob/master/docs/README.md) to get started.
+- View and register for upcoming [Dendron Community Events on Luma](https://link.dendron.so/luma)
+
+### Dendron Newsletter
+
+- [Subscribe to the Dendron Newsletter](https://link.dendron.so/newsletter)
+
+Dendron sends out a weekly newsletter highlighting:
+
+- Latest release features
+- Latest [Dendron blog](https://blog.dendron.so) posts
+- Insights from the [Dendron Discord](https://link.dendron.so/discord) community
+- RFC updates and [GitHub discussions](https://link.dendron.so/6WvK)
+- and more!
+
+### Join other Dendrologists
+
+There are a variety of ways to connect with Dendron devs, contributors, and other members of the Dendron community:
+
+- Join the [Dendron on Discord](https://link.dendron.so/discord) 
+- Follow [Dendron on Twitter (`@dendronhq`)](https://link.dendron.so/twitter)
+- Checkout [Dendron on GitHub](https://link.dendron.so/github)
+- Read the [Dendron Blog](https://blog.dendron.so/)
+- Subscribe to the [Dendron Newsletter](https://link.dendron.so/newsletter)
 
 ## Contributors ✨
 
-Dendron wouldn't be what it is today without help from these wonderful gardeners 👨‍🌾👩‍🌾
+Dendron wouldn't be what it is today without help from the wonderful gardeners 👨‍🌾👩‍🌾
 
 If you would like to contribute (docs, code, finance, or advocacy), you can find instructions to do so [here](https://wiki.dendron.so/notes/125c990b-6fe7-4ada-a65f-44cbde8b33f0.html).
 
@@ -350,7 +367,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
 
 ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. We welcome community contributions and pull requests. See [CONTRIBUTING](https://github.com/dendronhq/dendron/blob/master/docs/CONTRIBUTING.md) for information on how to set up a development environment and submit code.
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. We welcome community contributions and pull requests. See the [Dendron development guide](https://docs.dendron.so/notes/3489b652-cd0e-4ac8-a734-08094dc043eb/) for information on how to set up a development environment and submit code.
 
 ## License
 

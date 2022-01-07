@@ -1,4 +1,4 @@
-import { DendronBtn } from "./buttons";
+import { DendronBtn } from "./ButtonTypes";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
 import { CancellationTokenSource, QuickInputButton } from "vscode";

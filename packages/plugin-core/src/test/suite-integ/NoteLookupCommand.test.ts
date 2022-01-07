@@ -36,7 +36,6 @@ import {
 } from "../../commands/NoteLookupCommand";
 import {
   ButtonType,
-  DendronBtn,
   HorizontalSplitBtn,
   JournalBtn,
   ScratchBtn,
@@ -44,6 +43,7 @@ import {
   SelectionExtractBtn,
   TaskBtn,
 } from "../../components/lookup/buttons";
+import { DendronBtn } from "../../components/lookup/ButtonTypes";
 import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
 import {
   DendronQuickPickerV2,

@@ -7,7 +7,6 @@ import {
   LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
-  SchemaUtils,
   Time,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -26,7 +25,7 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe, Done } from "mocha";
+import { describe, Done } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
@@ -66,7 +65,6 @@ import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
-  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,
@@ -750,70 +748,6 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
-
-    describeSingleWS(
-      "GIVEN a schema that applies a date variable template",
-      {
-        postSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupRefs({ wsRoot, vaults });
-          const vault = vaults[0];
-          await NoteTestUtilsV4.createSchema({
-            fname: "bar",
-            wsRoot,
-            vault,
-            modifier: (schema) => {
-              const schemas = [
-                SchemaUtils.createFromSchemaOpts({
-                  id: "bar",
-                  parent: "root",
-                  fname: "bar",
-                  children: ["ch1"],
-                  vault,
-                }),
-                SchemaUtils.createFromSchemaRaw({
-                  id: "ch1",
-                  template: { id: "date-variables", type: "note" },
-                  vault,
-                }),
-              ];
-              schemas.map((s) => {
-                schema.schemas[s.id] = s;
-              });
-              return schema;
-            },
-          });
-        },
-        ctx,
-      },
-      () => {
-        const currentDate = new Date(2021, 11, 2);
-        let clock: sinon.SinonFakeTimers;
-        beforeEach(async () => {
-          clock = sinon.useFakeTimers(currentDate);
-        });
-        afterEach(() => {
-          sinon.restore();
-          clock.restore();
-        });
-
-        //TODO: Re-enable when fixed. Looks like sinon.useFakeTimers() is causing cmd.run() to hang for some reason.
-        test.skip("WHEN a new note matches the schema template, THEN new note's body contains proper date substitution", async () => {
-          const cmd = new NoteLookupCommand();
-          await cmd.run({
-            initialValue: "bar.ch1",
-            noConfirm: true,
-          });
-          const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = WSUtils.getNoteFromDocument(document!);
-
-          expect(newNote!.body.trim()).toEqual(
-            `Today is 2021.12.02` +
-              "\n" +
-              `This link goes to [[daily.journal.2021.12.02]]`
-          );
-        });
-      }
-    );
 
     test("new node matching schema prefix defaults to first matching schema child name", (done) => {
       runLegacyMultiWorkspaceTest({

@@ -2,6 +2,7 @@
 import {
   assertUnreachable,
   DNodeProps,
+  DVault,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -118,6 +119,20 @@ export abstract class BaseExportPodCommand<
         }
         break;
       }
+      case PodExportScope.Vault: {
+        const vault = await PodUIControls.promptForVaultSelection();
+        if (!vault) {
+          vscode.window.showErrorMessage("Unable to get vault payload.");
+          return;
+        }
+        payload = this.getVaultProps(vault);
+
+        if (!payload) {
+          vscode.window.showErrorMessage("Unable to get vault payload.");
+          return;
+        }
+        break;
+      }
       case PodExportScope.Workspace: {
         payload = this.getWorkspaceProps();
 
@@ -159,7 +174,7 @@ export abstract class BaseExportPodCommand<
         switch (opts.config.exportScope) {
           case PodExportScope.Note: {
             for (const noteProp of opts.payload) {
-            if (pod.exportNote) {
+              if (pod.exportNote) {
                 try {
                   const result = await pod.exportNote(noteProp);
                   await this.onExportComplete({
@@ -177,11 +192,12 @@ export abstract class BaseExportPodCommand<
             }
             break;
           }
+          case PodExportScope.Vault:
           case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-           if (pod.exportNotes) {
+            if (pod.exportNotes) {
               const result = await pod.exportNotes(opts.payload);
               await this.onExportComplete({
                 exportReturnValue: result,
@@ -279,6 +295,17 @@ export abstract class BaseExportPodCommand<
    */
   private getWorkspaceProps(): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
-    return Object.values(engine.notes);
+    return Object.values(engine.notes).filter((notes) => notes.stub !== true);
+  }
+
+  /**
+   *
+   * @returns all notes in the vault
+   */
+  private getVaultProps(vault: DVault): DNodeProps[] | undefined {
+    const engine = ExtensionProvider.getEngine();
+    return Object.values(engine.notes).filter(
+      (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)
+    );
   }
 }

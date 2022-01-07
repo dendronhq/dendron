@@ -12,12 +12,19 @@ import {
 } from "../../../testUtilsV3";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { TestExportPodCommand } from "./TestExportCommand";
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { PodUIControls } from "../../../../components/pods/PodControls";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ExtensionProvider } from "../../../../ExtensionProvider";
+
+const stubQuickPick = (vault: DVault) => {
+  // @ts-ignore
+  VSCodeUtils.showQuickPick = () => {
+    return { data: vault };
+  };
+};
 
 suite("BaseExportPodCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -161,6 +168,26 @@ suite("BaseExportPodCommand", function () {
           });
 
           expect(lookupStub.calledTwice).toBeTruthy();
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN exporting a vault scope",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      },
+      () => {
+        const cmd = new TestExportPodCommand();
+        test("THEN quickpick is prompted and selected vault's notes shoul be export payload", async () => {
+          const engine = ExtensionProvider.getEngine();
+          const { vaults } = engine;
+          stubQuickPick(vaults[0]);
+          const payload = await cmd.enrichInputs({
+            exportScope: PodExportScope.Vault,
+          });
+          expect(payload?.payload.length).toEqual(4);
         });
       }
     );

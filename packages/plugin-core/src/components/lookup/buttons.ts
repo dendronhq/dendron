@@ -1,19 +1,20 @@
 import {
   ConfigUtils,
   getSlugger,
+  MODIFIER_DESCRIPTIONS,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
-  MODIFIER_DESCRIPTIONS,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
-import { NoteSyncService } from "../../services/NoteSyncService";
-import { clipboard } from "../../utils";
 import { DendronClientUtilsV2 } from "../../clientUtils";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtils } from "../../WSUtils";
 import {
   DendronQuickPickerV2,
   LookupEffectType,
@@ -25,8 +26,6 @@ import {
   VaultSelectionMode,
 } from "./types";
 import { NotePickerUtils, PickerUtilsV2 } from "./utils";
-import { WSUtils } from "../../WSUtils";
-import { ExtensionProvider } from "../../ExtensionProvider";
 
 export type ButtonType =
   | LookupEffectType
@@ -146,20 +145,6 @@ const selectionToNoteProps = async (opts: {
               builder.replace(selection, `[[${text}|${link}]]`);
             }
           });
-          // Because the window switches too quickly, note sync service
-          // sometimes can't update the current note with the link fast enough.
-          // So we manually force the update here instead.
-
-          const currentNote = WSUtils.getNoteFromDocument(editor.document);
-          if (currentNote) {
-            await NoteSyncService.instance().updateNoteContents({
-              oldNote: currentNote,
-              content: editor.document.getText(),
-              fmChangeOnly: false,
-              fname: currentNote.fname,
-              vault: currentNote.vault,
-            });
-          }
         }
       }
       return note;

@@ -550,8 +550,8 @@ describe("markdown import pod", () => {
         const B2fileBody = fs.readFileSync(path.join(vpath, "a1.b2.md"), {
           encoding: "utf8",
         });
-        expect(B1fileBody).toContain(`[[B2|a1.b2]]`);
-        expect(B2fileBody).toContain(`[[B1 B2|a1.b1-b2]]`);
+        expect(B1fileBody).toContain(`[[a1.b2]]`);
+        expect(B2fileBody).toContain(`[[a1.b1-b2]]`);
       },
       {
         expect,
@@ -559,6 +559,55 @@ describe("markdown import pod", () => {
           await setupImport(importSrc);
           fs.writeFileSync(path.join(importSrc, "A1", "B1.md"), "[[B2]]");
           fs.writeFileSync(path.join(importSrc, "A1", "B2.md"), "[[B1 B2]]");
+          fs.writeFileSync(
+            path.join(importSrc, "A1", "B1 B2.md"),
+            "Hello World"
+          );
+        },
+      }
+    );
+  });
+
+  test("only necessary parts of files are modified", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const vault = vaults[0];
+        vpath = vault2Path({ wsRoot, vault });
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            noAddUUID: true,
+          },
+        });
+        const B1fileBody = fs.readFileSync(path.join(vpath, "a1.b1.md"), {
+          encoding: "utf8",
+        });
+        const B2fileBody = fs.readFileSync(path.join(vpath, "a1.b2.md"), {
+          encoding: "utf8",
+        });
+        // Making sure the whitespace around them is maintained. If not, that would indicate we are reformatting the files.
+        expect(B1fileBody).toContain(`hello  [[a1.b2]] world`);
+        expect(B2fileBody).toContain(`\n\n[[a1.b1-b2]]\n\n`);
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await setupImport(importSrc);
+          fs.writeFileSync(
+            path.join(importSrc, "A1", "B1.md"),
+            "hello  [[B2]] world"
+          );
+          fs.writeFileSync(
+            path.join(importSrc, "A1", "B2.md"),
+            "\n\n[[B1 B2]]\n\n"
+          );
           fs.writeFileSync(
             path.join(importSrc, "A1", "B1 B2.md"),
             "Hello World"

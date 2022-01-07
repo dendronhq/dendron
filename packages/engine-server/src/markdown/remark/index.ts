@@ -42,3 +42,4 @@ export {
   extendedImage2html,
   extendedImage2htmlRaw,
 } from "./extendedImage";
+export type { Image, Link } from "mdast";

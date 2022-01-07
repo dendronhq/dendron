@@ -16,9 +16,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { getExtension } from "../../workspace";
 import {
   ButtonCategory,
-  DendronBtn,
   getButtonCategory,
-  IDendronQuickInputButton,
   VaultSelectButton,
 } from "./buttons";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
@@ -35,6 +33,7 @@ import {
 } from "./LookupControllerV3Interface";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VersionProvider } from "../../versionProvider";
+import { DendronBtn, IDendronQuickInputButton } from "./ButtonTypes";
 
 export { LookupControllerV3CreateOpts };
 

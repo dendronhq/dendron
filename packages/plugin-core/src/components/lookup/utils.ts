@@ -34,7 +34,7 @@ import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
-import { DendronBtn, getButtonCategory } from "./buttons";
+import { getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
   CREATE_NEW_LABEL,
@@ -52,6 +52,7 @@ import {
   VaultSelectionMode,
 } from "./types";
 import { ILookupControllerV3 } from "./LookupControllerV3Interface";
+import { DendronBtn } from "./ButtonTypes";
 
 const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {

@@ -1,4 +1,4 @@
-import { DendronBtn } from "../../components/lookup/buttons";
+import { DendronBtn } from "../../components/lookup/ButtonTypes";
 import { describe, beforeEach, it } from "mocha";
 import { expect } from "../testUtilsv2";
 

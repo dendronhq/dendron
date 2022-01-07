@@ -9,12 +9,12 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { QuickInputButton, ThemeIcon } from "vscode";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
+import { DendronBtn } from "./ButtonTypes";
 import {
   DendronQuickPickerV2,
   LookupEffectType,
@@ -154,81 +154,6 @@ const selectionToNoteProps = async (opts: {
     }
   }
 };
-
-export type IDendronQuickInputButton = QuickInputButton & {
-  type: ButtonType;
-  description: string;
-  pressed: boolean;
-  onLookup: (payload: any) => Promise<void>;
-};
-
-type DendronBtnCons = {
-  title: string;
-  description: string;
-  iconOff: string;
-  iconOn: string;
-  type: ButtonType;
-  pressed?: boolean;
-  canToggle?: boolean;
-};
-export class DendronBtn implements IDendronQuickInputButton {
-  public iconPathNormal: ThemeIcon;
-  public iconPathPressed: ThemeIcon;
-  public type: ButtonType;
-  public description: string;
-  public pressed: boolean;
-  public canToggle: boolean;
-  public title: string;
-  public opts: DendronBtnCons;
-
-  onLookup = async (_payload: any) => {
-    return;
-  };
-
-  constructor(opts: DendronBtnCons) {
-    const { iconOff, iconOn, type, title, description, pressed } = opts;
-    this.iconPathNormal = new vscode.ThemeIcon(iconOff);
-    this.iconPathPressed = new vscode.ThemeIcon(iconOn);
-    this.type = type;
-    this.description = description;
-    this.pressed = pressed || false;
-    this.title = title;
-    this.canToggle = _.isUndefined(opts.canToggle) ? true : opts.canToggle;
-    this.opts = opts;
-  }
-
-  clone(): DendronBtn {
-    return new DendronBtn({
-      ...this.opts,
-    });
-  }
-
-  async onEnable(_opts: ButtonHandleOpts): Promise<void> {
-    return undefined;
-  }
-
-  async onDisable(_opts: ButtonHandleOpts): Promise<void> {
-    return undefined;
-  }
-
-  get iconPath() {
-    return !this.pressed ? this.iconPathNormal : this.iconPathPressed;
-  }
-
-  get tooltip(): string {
-    return this.description
-      ? `${this.title}, ${this.description}, status: ${
-          this.pressed ? "on" : "off"
-        }`
-      : `${this.title}, status: ${this.pressed ? "on" : "off"}`;
-  }
-
-  toggle() {
-    if (this.canToggle) {
-      this.pressed = !this.pressed;
-    }
-  }
-}
 
 export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {

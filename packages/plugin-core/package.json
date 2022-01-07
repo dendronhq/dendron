@@ -355,14 +355,12 @@
       },
       {
         "command": "dendron.showLegacyPreview",
-        "title": "Dendron: Show Preview (legacy)",
-        "enablement": "dendron:pluginActive && dendron:hasLegacyPreview"
+        "title": "Dendron: Show Preview (legacy)"
       },
       {
         "command": "dendron.showPreview",
         "title": "Dendron: Show Preview",
-        "icon": "$(open-preview)",
-        "enablement": "dendron:pluginActive"
+        "icon": "$(open-preview)"
       },
       {
         "command": "dendron.pasteFile",
@@ -673,6 +671,14 @@
         },
         {
           "command": "dendron.showSchemaGraph",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.showLegacyPreview",
+          "when": "dendron:pluginActive && dendron:hasLegacyPreview"
+        },
+        {
+          "command": "dendron.showPreview",
           "when": "dendron:pluginActive"
         },
         {

@@ -56,16 +56,7 @@ function updateCommands() {
   const commands = _.map(
     _.filter(DENDRON_COMMANDS, (ent) => _.isUndefined(ent.shortcut)),
     (ent) => {
-      const configProps = _.omit(ent, [
-        "key",
-        "keybindings",
-        "group",
-        "docs",
-        "desc",
-        "docLink",
-        "docPreview",
-        "when",
-      ]);
+      const configProps = _.omit(ent, ["key", "keybindings", "when"]);
       const key = ent["key"];
       return {
         command: key,

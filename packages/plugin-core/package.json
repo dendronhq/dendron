@@ -430,10 +430,6 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.contributeToCause",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.gotoNote",
           "when": "dendron:pluginActive"
         },
@@ -562,14 +558,6 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.initWS",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.changeWS",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.upgradeSettings",
           "when": "dendron:pluginActive"
         },
@@ -638,31 +626,11 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.signUp",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.signIn",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.enableTelemetry",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.disableTelemetry",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.openLink",
           "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.pasteLink",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.showHelp",
           "when": "dendron:pluginActive"
         },
         {
@@ -730,15 +698,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.dev.openLogs",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.diagnosticsReport",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.launchTutorial",
           "when": "dendron:pluginActive"
         }
       ],

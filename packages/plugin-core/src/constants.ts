@@ -250,7 +250,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.contributeToCause",
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Contribute`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
@@ -522,12 +521,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   CHANGE_WS: {
     key: "dendron.changeWS",
     title: `${CMD_PREFIX} Change Workspace`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
@@ -626,23 +623,19 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   SIGNUP: {
     key: "dendron.signUp",
     title: `${CMD_PREFIX} Sign Up`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   SIGNIN: {
     key: "dendron.signIn",
     title: `${CMD_PREFIX} Sign In`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Misc
   ENABLE_TELEMETRY: {
     key: "dendron.enableTelemetry",
     title: `${CMD_PREFIX} Enable Telemetry`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   DISABLE_TELEMETRY: {
     key: "dendron.disableTelemetry",
     title: `${CMD_PREFIX} Disable Telemetry`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   OPEN_LINK: {
     key: "dendron.openLink",
@@ -657,7 +650,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   SHOW_HELP: {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_NOTE_GRAPH: {
     key: "dendron.showNoteGraph",
@@ -757,7 +749,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
     title: `${CMD_PREFIX}Dev: Open Logs`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   DEV_DIAGNOSTICS_REPORT: {
     key: "dendron.diagnosticsReport",
@@ -767,7 +758,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   LAUNCH_TUTORIAL: {
     key: "dendron.launchTutorial",
     title: `${CMD_PREFIX} Launch Tutorial`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
 };
 

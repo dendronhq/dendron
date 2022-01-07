@@ -1,4 +1,4 @@
-import { assertUnreachable } from "@dendronhq/common-all";
+import { assertUnreachable, DVault, VaultUtils } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import {
@@ -348,6 +348,28 @@ export class PodUIControls {
         selectAll: true,
       });
     });
+  }
+
+  /**
+   * Prompt to select vault
+   * @returns vault
+   *
+   */
+  public static async promptForVaultSelection(): Promise<DVault | undefined> {
+    const { vaults } = ExtensionProvider.getDWorkspace();
+    if (vaults.length === 1) return vaults[0];
+
+    const vaultQuickPick = await VSCodeUtils.showQuickPick(
+      vaults.map((ent) => ({
+        label: VaultUtils.getName(ent),
+        detail: ent.fsPath,
+        data: ent,
+      })),
+      {
+        placeHolder: "Select the vault to export",
+      }
+    );
+    return vaultQuickPick?.data;
   }
 
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {

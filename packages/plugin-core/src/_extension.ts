@@ -484,8 +484,8 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
 
-      // initialize client
-      setupSegmentClient(wsImpl);
+      // // initialize Segment client
+      ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({
@@ -531,7 +531,6 @@ export async function _activate(
         }
       }
 
-      ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 

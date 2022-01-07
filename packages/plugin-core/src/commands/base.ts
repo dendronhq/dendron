@@ -126,7 +126,7 @@ export abstract class BaseCommand<
       return;
     } finally {
       const payload = this.addAnalyticsPayload
-        ? this.addAnalyticsPayload(opts, resp)
+        ? await this.addAnalyticsPayload(opts, resp)
         : {};
 
       AnalyticsUtils.track(this.key, {

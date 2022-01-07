@@ -29,7 +29,26 @@ function updateConfig() {
 
 function updateMenus() {
   console.log("update menus...");
+  DENDRON_MENUS["commandPalette"] = updateCommandPalettes();
   return DENDRON_MENUS;
+}
+
+function updateCommandPalettes() {
+  console.log("updating command palettes...");
+  const commandPalette = _.map(
+    _.filter(DENDRON_COMMANDS, (ent) => {
+      return !_.isUndefined(ent.when);
+    }),
+    (ent) => {
+      const key = ent["key"];
+      const when = ent["when"];
+      return {
+        command: key,
+        when,
+      };
+    }
+  );
+  return commandPalette;
 }
 
 function updateCommands() {
@@ -41,7 +60,11 @@ function updateCommands() {
         "key",
         "keybindings",
         "group",
-        "skipDocs",
+        "docs",
+        "desc",
+        "docLink",
+        "docPreview",
+        "when",
       ]);
       const key = ent["key"];
       return {

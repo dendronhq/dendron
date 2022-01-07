@@ -55,13 +55,13 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW_V2),
-    when: DendronContext.WEB_UI_ENABLED,
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
     icon: "media/icons/dendron-vscode.svg",
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
-    when: DendronContext.NOTE_LOOK_UP_ACTIVE,
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE}`,
     where: "explorer",
   },
   {
@@ -100,30 +100,11 @@ type CommandEntry = {
   title: string;
   keybindings?: KeyBinding;
   icon?: string;
+  // shortcut-only copy of a command entry
   shortcut?: boolean;
-  group:
-    | "notes"
-    | "hooks"
-    | "lookup"
-    | "workspace"
-    | "pods"
-    | "dev"
-    | "hierarchies"
-    | "navigation"
-    | "misc"
-    | "publishing"
-    | "seeds"
-    | "schemas";
-  /**
-   * Skip doc generation
-   */
-  skipDocs?: boolean;
-  desc: string;
-  docs?: string;
-  docLink?: string;
-  docAnchor?: string;
-  docPreview?: string;
+  // this will be used in `commandPalette` contribution point.
   when?: string;
+  // this will be used in `commands` contribution point.
   enablement?: string;
 };
 
@@ -159,22 +140,14 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
   },
 ];
 
+type CommandPaletteEntry = {
+  command: string;
+  when?: string;
+};
+
 // TODO: fomarlize
 export const DENDRON_MENUS = {
-  commandPalette: [
-    {
-      command: "dendron.lookupNoteAutoComplete",
-      when: "false",
-    },
-    {
-      command: "dendron.convertCandidateLink",
-      when: "false",
-    },
-    {
-      command: "dendron.dev.devTrigger",
-      when: DendronContext.DEV_MODE,
-    },
-  ],
+  commandPalette: [] as CommandPaletteEntry[],
   "view/title": [
     /**
      * Sort orders are round-robined, if we add more orders and/or change ordering
@@ -255,51 +228,35 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.backlinks.sortByLastUpdated",
     title: "Sort by last updated (currently sorted by path names)",
     icon: "$(list-ordered)",
-    desc: "Sort the backlinks by when the notes were last updated.",
-    group: "workspace",
   },
   BACKLINK_SORT_BY_PATH_NAMES: {
     key: "dendron.backlinks.sortByPathNames",
     title: "Sort by path names (currently sorted by last updated)",
     icon: "$(list-ordered)",
-    desc: "Sort the backlinks by path names of notes.",
-    group: "workspace",
   },
   BACKLINK_EXPAND_ALL: {
     key: "dendron.backlinks.expandAll",
     title: "Expand All",
     icon: "$(expand-all)",
-    desc: "Expand all backlinks",
-    group: "workspace",
   },
   // --- Notes
   BROWSE_NOTE: {
     key: "dendron.browseNote",
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Browse Note`,
-    group: "notes",
-    desc: "Browse note on github",
-    skipDocs: false,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Contribute`,
-    group: "lookup",
-    desc: "Become an environmentalist and keep Dendron sustainable",
-    docs: [
-      "This command takes you to Dendron's [Environmentalist](https://accounts.dendron.so/account/subscribe) plans.",
-      "Environmentalists are users that can support Dendron financially through a monthly contribution. Environmentalist get access to insider builds, priority support, and access to exclusive dev channels.",
-    ].join("\n"),
-    skipDocs: false,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Goto Note`,
-    group: "notes",
-    desc: "Go to a note",
-    skipDocs: true,
+    when: DendronContext.PLUGIN_ACTIVE,
     keybindings: {
       key: "ctrl+enter",
       when: "editorFocus",
@@ -308,150 +265,109 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CREATE_SCHEMA_FROM_HIERARCHY: {
     key: "dendron.createSchemaFromHierarchy",
     title: `${CMD_PREFIX} Create Schema From Note Hierarchy`,
-    group: "schemas",
     keybindings: {
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    desc: "Create Schema from existing note hierarchy",
-    docLink: "dendron.topic.schema.create-from-hierarchy.md",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
     title: `${CMD_PREFIX} Create Daily Journal Note`,
-    group: "notes",
     keybindings: {
       key: "ctrl+shift+i",
       mac: "cmd+shift+i",
       when: DendronContext.PLUGIN_ACTIVE,
     },
-    desc: "Create a global journal note",
-    docLink: "dendron.topic.special-notes.md",
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   COPY_NOTE_LINK: {
     key: "dendron.copyNoteLink",
     title: `${CMD_PREFIX} Copy Note Link`,
-    group: "notes",
-    desc: "Copy wiki link to note",
-    docLink: "dendron.topic.commands.md",
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)",
     keybindings: {
       key: "ctrl+shift+c",
       mac: "cmd+shift+c",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   COPY_NOTE_REF: {
     key: "dendron.copyNoteRef",
     title: `${CMD_PREFIX} Copy Note Ref`,
-    group: "notes",
-    desc: "Copies a reference to the current open document",
-    docLink: "dendron.topic.commands.md",
-    docs: [
-      "Lets you quickly create a [[note reference| dendron.topic.refs]] to the current note.",
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)",
-      "",
-      "If you have a header selected while running this command, it will copy the note ref with the selected header to the next note ref",
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.copy-selection.gif)",
-    ].join("\n"),
-    docPreview: "",
     keybindings: {
       key: "ctrl+shift+r",
       mac: "cmd+shift+r",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   DELETE_NODE: {
     key: "dendron.deleteNode",
     title: `${CMD_PREFIX} Delete Node`,
-    group: "notes",
     keybindings: {
       key: "ctrl+shift+d",
       mac: "cmd+shift+d",
       when: DendronContext.PLUGIN_ACTIVE,
     },
-    desc: "Delete a note or schema",
-    docLink: "dendron.topic.lookup.md",
-    docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   INSERT_NOTE: {
     key: "dendron.insertNote",
     title: `${CMD_PREFIX} Insert Note`,
-    group: "notes",
-    desc: "Insert note contents",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   INSERT_NOTE_LINK: {
     key: "dendron.insertNoteLink",
     title: `${CMD_PREFIX} Insert Note Link`,
-    group: "notes",
-    desc: "Insert note link",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   INSERT_NOTE_INDEX: {
     key: "dendron.insertNoteIndex",
     title: `${CMD_PREFIX} Insert Note Index`,
-    group: "notes",
-    desc: "Insert note index",
     when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
   },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
-    group: "notes",
-    desc: "Move a note",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RANDOM_NOTE: {
     key: "dendron.randomNote",
     title: `${CMD_PREFIX} Random Note`,
-    group: "notes",
-    desc: "Open a random note within a configured hierarchy set",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,
-    group: "notes",
-    desc: "Rename a note and all backlinks",
-    docLink: "dendron.topic.commands.md",
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RENAME_HEADER: {
     key: "dendron.renameHeader",
     title: `${CMD_PREFIX} Rename Header`,
-    group: "notes",
-    desc: "Rename a header, and update all links to it.",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   MOVE_HEADER: {
     key: "dendron.moveHeader",
     title: `${CMD_PREFIX} Move Header`,
-    group: "notes",
-    desc: "Move a header, and update all links to it.",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CONVERT_CANDIDATE_LINK: {
     key: "dendron.convertCandidateLink",
     title: `${CMD_PREFIX} Convert Candidate Link`,
-    group: "notes",
-    desc: "Convert link candidate into backlink",
+    when: "false",
   },
   CONVERT_LINK: {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,
-    group: "notes",
-    desc: "Convert links",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",
     title: `${CMD_PREFIX} Lookup Note`,
-    group: "navigation",
     keybindings: {
       mac: "cmd+L",
       key: "ctrl+l",
       when: DendronContext.PLUGIN_ACTIVE,
     },
-    desc: "Initiate note lookup",
-    docLink: "dendron.topic.lookup.md",
-    docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
   },
 
@@ -475,12 +391,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     /** This command will NOT show up within the command palette
      *  since its disabled within package.json in contributes.menus.commandPalette */
     title: `${CMD_PREFIX} hidden`,
-    group: "navigation",
     keybindings: {
       key: "Tab",
       when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
     },
-    desc: "Auto complete note lookup",
     when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
   },
   LOOKUP_JOURNAL: {
@@ -531,6 +445,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-lookup.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RELOAD_INDEX: {
     key: "dendron.reloadIndex",
@@ -539,6 +454,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Reload the index. Necessary for Dendron to pick up on schema changes.",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   TASK_CREATE: {
     key: "dendron.createTask",
@@ -547,6 +463,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Create a task note.",
     docLink: "dendron.topic.tasks.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Hierarchies
   ARCHIVE_HIERARCHY: {
@@ -561,6 +478,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/9698d5a4451b49d8b107f3ff67d97877">  <img style="" src="https://cdn.loom.com/sessions/thumbnails/9698d5a4451b49d8b107f3ff67d97877-with-play.gif"> </a>`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   REFACTOR_HIERARCHY: {
     key: "dendron.refactorHierarchy",
@@ -581,6 +499,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif"> </a>`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   GO_UP_HIERARCHY: {
     key: "dendron.goUpHierarchy",
@@ -595,6 +514,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   GO_NEXT_HIERARCHY: {
     key: "dendron.goNextHierarchy",
@@ -608,6 +528,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   GO_PREV_HIERARCHY: {
     key: "dendron.goPrevHierarchy",
@@ -621,6 +542,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   GO_DOWN_HIERARCHY: {
     key: "dendron.goDownHierarchy",
@@ -635,6 +557,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Workspace
   ADD_AND_COMMIT: {
@@ -642,6 +565,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Workspace: Add and Commit`,
     group: "workspace",
     desc: "add and commit all files",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SYNC: {
     key: "dendron.sync",
@@ -652,6 +576,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       `Sync all files in your workspace, across all vaults.`,
       `This will add and commit all changes, then pull and push to sync all changes.`,
     ].join("\n"),
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
@@ -663,6 +588,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       "When you add a vault, you can choose between adding a local vault or a remote vault.",
     ].join("\n"),
     docLink: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   VAULT_REMOVE: {
     key: "dendron.vaultRemove",
@@ -674,12 +600,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       `Remove a vault from your workspace. Note that the underlying files wil **not** be deleted - the vault will lose its association with your workspace.`,
       `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     ].join("\n"),
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   VAULT_CONVERT: {
     key: "dendron.vaultConvert",
     title: `${CMD_PREFIX} Vault Convert`,
     group: "workspace",
     desc: "Convert vaults between local and remote vaults.",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   INIT_WS: {
     key: "dendron.initWS",
@@ -689,6 +617,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // INIT_WS_V2: {
   //   key: "dendron.initWSV2",
@@ -706,6 +635,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Change into existing workspace",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
@@ -714,7 +644,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Upgrade to the latest Dendron settings. You shouldn't need to run this manually. Its run everytime you get a Dendron update.",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
-    skipDocs: true,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Pods
   CONFIGURE_POD: {
@@ -725,6 +655,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CONFIGURE_SERVICE_CONNECTION: {
     key: "dendron.configureServiceConnection",
@@ -734,6 +665,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CONFIGURE_EXPORT_POD_V2: {
     key: "dendron.configureExportPodV2",
@@ -743,6 +675,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   IMPORT_POD: {
     key: "dendron.importPod",
@@ -751,6 +684,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Import notes from an external data source. Currently, only the local file system is supported",
     docLink: "dendron.topic.pod.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   EXPORT_POD: {
     key: "dendron.exportPod",
@@ -759,6 +693,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Export notes to an external data source. Currently only JSON is supported. ",
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   EXPORT_POD_V2: {
     key: "dendron.exportPodv2",
@@ -767,6 +702,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Experimental Feature",
     docLink: "dendron.topic.pod.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   PUBLISH_POD: {
     key: "dendron.publishPod",
@@ -775,6 +711,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Publish your note to a different format/location",
     docLink: "dendron.topic.pod.md",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SNAPSHOT_VAULT: {
     key: "dendron.snapshotVault",
@@ -787,6 +724,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RESTORE_VAULT: {
     key: "dendron.restoreVault",
@@ -798,6 +736,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   COPY_NOTE_URL: {
     key: "dendron.copyNoteURL",
@@ -812,6 +751,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       windows: "ctrl+shift+u",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Hooks
   CREATE_HOOK: {
@@ -833,12 +773,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Register Note Trait`,
     group: "hooks",
     desc: "Register a new Note Trait in Dendron's Trait System",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CREATE_USER_DEFINED_NOTE: {
     key: "dendron.createNoteWithTraits",
     title: `${CMD_PREFIX} Create Note with Custom Traits`,
     group: "hooks",
     desc: "Create a New Note with a User-Defined Trait Applied",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Publishing
   PUBLISH_EXPORT: {
@@ -849,6 +791,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   PUBLISH_DEV: {
     key: "dendron.publishDev",
@@ -858,6 +801,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Accounts
   SIGNUP: {
@@ -865,12 +809,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Sign Up`,
     group: "workspace",
     desc: "sign up for a Dendron account",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SIGNIN: {
     key: "dendron.signIn",
     title: `${CMD_PREFIX} Sign In`,
     group: "workspace",
     desc: "sign in to a Dendron account",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Misc
   ENABLE_TELEMETRY: {
@@ -878,12 +824,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Enable Telemetry`,
     group: "workspace",
     desc: "Enable telemetry",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   DISABLE_TELEMETRY: {
     key: "dendron.disableTelemetry",
     title: `${CMD_PREFIX} Disable Telemetry`,
     group: "workspace",
     desc: "Disable telemetry",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   OPEN_LINK: {
     key: "dendron.openLink",
@@ -892,12 +840,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Open link to external file (eg. pdf, .mov, etc) use system default",
     docLink: "dendron.topic.links.md",
     docPreview: `<a href="https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68"><img src="https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif"> </a>`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   PASTE_LINK: {
     key: "dendron.pasteLink",
     title: `${CMD_PREFIX} Paste Link`,
     group: "workspace",
     desc: "Fetch metadata for a web link and format as markdown",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_HELP: {
     key: "dendron.showHelp",
@@ -906,18 +856,21 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_NOTE_GRAPH: {
     key: "dendron.showNoteGraph",
     title: `${CMD_PREFIX} Show Note Graph`,
     group: "workspace",
     desc: "Display the notes in this workspace as a graph",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_SCHEMA_GRAPH: {
     key: "dendron.showSchemaGraph",
     title: `${CMD_PREFIX} Show Schema Graph`,
     group: "workspace",
     desc: "Display the schemas in this workspace as a graph",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_LEGACY_PREVIEW: {
     key: "dendron.showLegacyPreview",
@@ -954,6 +907,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "misc",
     keybindings: {},
     desc: "Paste file",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // -- Workbench
   CONFIGURE_RAW: {
@@ -964,6 +918,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
 
   CONFIGURE_UI: {
@@ -976,6 +931,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   CONFIGURE_GRAPH_STYLES: {
     key: "dendron.configureGraphStyle",
@@ -985,6 +941,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   //-- Seeds
   SEED_ADD: {
@@ -995,6 +952,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SEED_REMOVE: {
     key: "dendron.seedRemove",
@@ -1004,6 +962,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   SEED_BROWSE: {
     key: "dendron.seedBrowse",
@@ -1013,6 +972,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Dev
   DOCTOR: {
@@ -1027,6 +987,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif"> </a>`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   DUMP_STATE: {
     key: "dendron.dev.dumpState",
@@ -1034,27 +995,28 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "dev",
     desc: "Dump internal state of Dendron inside logs",
     docs: "This is useful when diagnosing issues in Dendron",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   DEV_TRIGGER: {
     key: "dendron.dev.devTrigger",
     title: `${CMD_PREFIX}Dev: Dev Trigger`,
     desc: "Command to use for development to trigger some arbitrary piece of code.",
     group: "dev",
-    skipDocs: true,
+    when: DendronContext.DEV_MODE,
   },
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,
     desc: "Reset the config",
     group: "dev",
-    skipDocs: true,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   RUN_MIGRATION: {
     key: "dendron.dev.runMigration",
     title: `${CMD_PREFIX}Dev: Run Migration`,
     desc: "Select and run a migration",
     group: "dev",
-    skipDocs: true,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
@@ -1063,6 +1025,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Open Dendron logs for current session",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   DEV_DIAGNOSTICS_REPORT: {
     key: "dendron.diagnosticsReport",
@@ -1071,12 +1034,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Generate diagnostics report",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   LAUNCH_TUTORIAL: {
     key: "dendron.launchTutorial",
     title: `${CMD_PREFIX} Launch Tutorial`,
     group: "dev",
     desc: "Launch the Tutorial",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
 };
 

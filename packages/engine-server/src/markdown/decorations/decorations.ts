@@ -34,6 +34,7 @@ import {
   warnMissingFrontmatter,
 } from "./diagnostics";
 import _ from "lodash";
+import visit from "unist-util-visit";
 
 /** Dispatches the correct decorator based on the type of AST node. */
 function runDecorator(
@@ -69,6 +70,19 @@ export async function runAllDecorators(
   const allDiagnostics: Diagnostic[] = [];
   const allErrors: IDendronError[] = [];
 
+  const proc = MDUtilsV5.procRemarkParse(
+    {
+      mode: ProcMode.FULL,
+      parseOnly: true,
+    },
+    {
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+      vault: note.vault,
+      fname: note.fname,
+    }
+  );
+
   for (const { range, text } of ranges) {
     if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
       return {
@@ -84,20 +98,7 @@ export async function runAllDecorators(
         ],
       };
     }
-    const proc = MDUtilsV5.procRemarkParse(
-      {
-        mode: ProcMode.FULL,
-        parseOnly: true,
-      },
-      {
-        dest: DendronASTDest.MD_DENDRON,
-        engine,
-        vault: note.vault,
-        fname: note.fname,
-      }
-    );
     const tree = proc.parse(text);
-    let frontmatter: FrontmatterContent | undefined;
 
     // eslint-disable-next-line no-await-in-loop
     await MDUtilsV4.visitAsync(tree, [], async (nodeIn) => {
@@ -124,24 +125,25 @@ export async function runAllDecorators(
         );
         if (errors) allErrors.push(...errors);
       }
-      // Capture frontmatter if we come across it so we can check it for warnings
-      if (node.type === DendronASTTypes.FRONTMATTER)
-        frontmatter = nodeIn as FrontmatterContent;
     });
+  }
 
-    if (range.start.line === 0) {
-      // Can't check frontmatter if frontmatter is not visible
-      if (_.isUndefined(frontmatter)) {
-        allDiagnostics.push(warnMissingFrontmatter());
-      } else {
-        const { diagnostics, errors } = checkAndWarnBadFrontmatter(
-          note,
-          frontmatter
-        );
-        allDiagnostics.push(...diagnostics);
-        if (errors) allErrors.push(...errors);
-      }
-    }
+  // Check for frontmatter diagnostics. Diagnostics always run on the whole note because they need to be active even when they are not visible.
+  let frontmatter: FrontmatterContent | undefined;
+  const fullTree = proc.parse(opts.text);
+  visit(fullTree, ["yaml"], (node: FrontmatterContent) => {
+    frontmatter = node;
+    return false; // stop iterating
+  });
+  if (_.isUndefined(frontmatter)) {
+    allDiagnostics.push(warnMissingFrontmatter());
+  } else {
+    const { diagnostics, errors } = checkAndWarnBadFrontmatter(
+      note,
+      frontmatter
+    );
+    allDiagnostics.push(...diagnostics);
+    if (errors) allErrors.push(...errors);
   }
 
   return {

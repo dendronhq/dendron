@@ -19,6 +19,9 @@ export type AnalyticProps = {
   props?: any;
 };
 
+/** Anything other than `undefined` is an error and will stop the command. "cancel" will stop the command without displaying an error. */
+export type SanityCheckResults = undefined | string | "cancel";
+
 /**
  * Base class for all Dendron Plugin Commands.
  *
@@ -61,11 +64,8 @@ export abstract class BaseCommand<
     return;
   }
 
-  /**
-   * Basic error checking
-   * @returns
-   */
-  async sanityCheck(_opts?: TOpts): Promise<undefined | string | "cancel"> {
+  /** Check for errors and stop execution if needed, runs before `gatherInputs`. */
+  async sanityCheck(_opts?: Partial<TRunOpts>): Promise<SanityCheckResults> {
     return;
   }
 
@@ -80,14 +80,16 @@ export abstract class BaseCommand<
     let opts: TOpts | undefined;
     let resp: TOut | undefined;
 
+    let sanityCheck: SanityCheckResults;
+
     try {
-      // TODO: Add sanity check failure to analytics payload.
-      const out = await this.sanityCheck(opts);
-      if (out === "cancel") {
+      sanityCheck = await this.sanityCheck(args);
+      if (sanityCheck === "cancel") {
+        this.L.info({ ctx, msg: "sanity check cancelled" });
         return;
       }
-      if (!_.isUndefined(out) && out !== "cancel") {
-        window.showErrorMessage(out);
+      if (!_.isUndefined(sanityCheck) && sanityCheck !== "cancel") {
+        window.showErrorMessage(sanityCheck);
         return;
       }
 
@@ -132,11 +134,12 @@ export abstract class BaseCommand<
       const payload = this.addAnalyticsPayload
         ? await this.addAnalyticsPayload(opts, resp)
         : {};
-
+      const sanityCheckResults = sanityCheck ? { sanityCheck } : {};
       AnalyticsUtils.track(this.key, {
         duration: getDurationMilliseconds(start),
         error: isError,
         ...payload,
+        ...sanityCheckResults,
       });
     }
   }

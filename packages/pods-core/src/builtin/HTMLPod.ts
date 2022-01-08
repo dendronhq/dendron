@@ -11,6 +11,8 @@ export type HTMLPublishPodConfig = PublishPodConfig & {
    * check for parsing links(wikilinks and backlinks). Used by gdoc export pod to avoid parsing wikilinks as href.
    */
   convertLinks?: boolean;
+  convertTagNotesToLinks?: boolean;
+  convertUserNotesToLinks?: boolean;
 };
 
 export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
@@ -27,14 +29,34 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
           default: true,
           nullable: true,
         },
+        convertTagNotesToLinks: {
+          type: "boolean",
+          default: false,
+          nullable: true,
+        },
+        convertUserNotesToLinks: {
+          type: "boolean",
+          default: false,
+          nullable: true,
+        },
       },
     }) as JSONSchemaType<HTMLPublishPodConfig>;
   }
 
   async plant(opts: PublishPodPlantOpts): Promise<any> {
     const { config, engine, note } = opts;
-    const { fname, convertLinks = true } = config;
+    const {
+      fname,
+      convertLinks = true,
+      convertTagNotesToLinks = false,
+      convertUserNotesToLinks = false,
+    } = config;
     const { data: econfig } = await engine.getConfig();
+    const overrideConfig = { ...econfig! };
+
+    const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
+    workspaceConfig.enableUserTags = convertUserNotesToLinks;
+    workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,
@@ -42,10 +64,10 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       fname,
       shouldApplyPublishRules: false,
       publishOpts: {
-        insertTitle: ConfigUtils.getProp(econfig!, "useFMTitle"),
+        insertTitle: ConfigUtils.getProp(overrideConfig, "useFMTitle"),
       },
-      config: econfig!,
-      mermaid: ConfigUtils.getProp(econfig!, "mermaid"),
+      config: overrideConfig,
+      mermaid: ConfigUtils.getProp(overrideConfig, "mermaid"),
       wikiLinksOpts: { convertLinks },
     });
     const { contents } = await MDUtilsV4.procRehype({

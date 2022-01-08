@@ -28,7 +28,7 @@ import {
 } from "./utils";
 import { transformQueryString } from "./queryStringTransformer";
 import stringSimilarity from "string-similarity";
-import { IDendronQuickInputButton } from "./buttons";
+import { IDendronQuickInputButton } from "./ButtonTypes";
 import {
   ILookupProviderOptsV3,
   ILookupProviderV3,

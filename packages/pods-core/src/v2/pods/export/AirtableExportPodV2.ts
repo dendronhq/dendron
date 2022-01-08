@@ -75,8 +75,7 @@ class AirtableUtilsV2 {
 
 /**
  * Airtable Export Pod (V2 - for compatibility with Pod V2 workflow). This pod
- * will export data to a table row in Airtable. Currently, only exportNote() is
- * supported; exportText() is not currently supported.
+ * will export data to a table row in Airtable.
  */
 export class AirtableExportPodV2
   implements ExportPodV2<AirtableExportReturnType>
@@ -137,6 +136,11 @@ export class AirtableExportPodV2
     }
   }
 
+  /**
+   * Get mapping of fields that will be updated in airtable
+   * @param notes
+   * @returns
+   */
   private getPayloadForNotes(notes: NoteProps[]): RespV3<{
     create: AirtableFieldsMap[];
     update: any[];

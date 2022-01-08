@@ -9,7 +9,7 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { DendronBtn } from "../components/lookup/buttons";
+import { DendronBtn } from "../components/lookup/ButtonTypes";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { VSCodeUtils } from "../vsCodeUtils";
 

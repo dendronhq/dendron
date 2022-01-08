@@ -44,10 +44,6 @@ export class TestExportPodCommand extends BaseExportPodCommand<
       exportNote() {
         return new Promise<string>((resolve) => resolve("note"));
       },
-
-      exportText() {
-        return new Promise<string>((resolve) => resolve("text"));
-      },
     };
   }
 
@@ -77,9 +73,9 @@ export class TestExportPodCommand extends BaseExportPodCommand<
    * @param exportReturnValue
    * @returns
    */
-  public onExportComplete(_opts: {
+  public async onExportComplete(_opts: {
     exportReturnValue: string;
     config: RunnablePodConfigV2;
-    payload: string | NoteProps | NoteProps[];
-  }): void {}
+    payload: NoteProps | NoteProps[];
+  }): Promise<void> {}
 }

@@ -221,6 +221,13 @@ export type SchemaProps = DNodeProps<SchemaData>;
  * Interface for a Dendron Note
  */
 export type NoteProps = DNodeProps<any, any>;
+
+/**
+ * Dendron note with optional custom props
+ */
+export type NotePropsWithOptionalCustom = Omit<NoteProps, "custom"> &
+  Partial<{ custom: any }>;
+
 export type SEOProps = {
   title: string;
   updated: number;

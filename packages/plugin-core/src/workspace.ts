@@ -55,6 +55,7 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
+import { INoteSyncService, NoteSyncService } from "./services/NoteSyncService";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -158,11 +159,11 @@ export class DendronExtension implements IDendronExtension {
 
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
   public dendronTreeView: DendronTreeView | undefined;
-  public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
+  public noteSyncService: INoteSyncService;
   public lookupControllerFactory: ILookupControllerV3Factory;
   public noteLookupProviderFactory: INoteLookupProviderFactory;
   public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
@@ -388,6 +389,13 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
+    this.noteSyncService = new NoteSyncService(
+      this,
+      vscode.workspace.onDidSaveTextDocument,
+      vscode.workspace.onDidChangeTextDocument
+    );
+
+    context.subscriptions.push(this.noteSyncService);
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -507,7 +515,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2();
+        const provider = new DendronTreeViewV2(this);
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -600,10 +608,15 @@ export class DendronExtension implements IDendronExtension {
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       getDWorkspace().config.dev?.enableLinkCandidates
     );
-    vscode.window.onDidChangeActiveTextEditor(
-      // eslint-disable-next-line  no-return-await
-      async () => await backlinksTreeDataProvider.refresh()
+
+    vscode.window.onDidChangeActiveTextEditor(() =>
+      backlinksTreeDataProvider.refresh()
     );
+
+    this.noteSyncService.onNoteChange(() =>
+      backlinksTreeDataProvider.refresh()
+    );
+
     const backlinkTreeView = vscode.window.createTreeView(
       DendronTreeViewKey.BACKLINKS,
       {
@@ -705,8 +718,11 @@ export class DendronExtension implements IDendronExtension {
     }
     const realVaults = getDWorkspace().vaults;
     const fileWatcher = new FileWatcher({
-      wsRoot,
-      vaults: realVaults,
+      workspaceOpts: {
+        wsRoot,
+        vaults: realVaults,
+      },
+      noteSyncSvc: this.noteSyncService,
     });
 
     fileWatcher.activate(getExtension().context);

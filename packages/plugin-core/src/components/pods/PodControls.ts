@@ -1,3 +1,6 @@
+import { assertUnreachable } from "@dendronhq/common-all";
+import { DLogger } from "@dendronhq/common-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
@@ -10,21 +13,15 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
-import { KeybindingUtils } from "../../KeybindingUtils";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { CodeCommandInstance } from "../../commands/base";
-import { launchGoogleOAuthFlow } from "../../utils/pods";
-import { getExtension } from "../../workspace";
-import { PodCommandFactory } from "./PodCommandFactory";
-import { assertUnreachable } from "@dendronhq/common-all";
-import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
-import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
-import _ from "lodash";
-import { NoteLookupProviderUtils } from "../lookup/utils";
-import { DLogger } from "@dendronhq/common-server";
-import { HistoryEvent } from "@dendronhq/engine-server";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { KeybindingUtils } from "../../KeybindingUtils";
+import { launchGoogleOAuthFlow } from "../../utils/pods";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { getExtension } from "../../workspace";
+import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
+import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../lookup/utils";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -156,22 +153,6 @@ export class PodUIControls {
 
       inputBox.show();
     });
-  }
-
-  /**
-   * Prompt user to pick a pod (v2) type
-   * @returns a runnable code command for the selected pod
-   */
-  public static async promptForPodTypeForCommand(): Promise<
-    CodeCommandInstance | undefined
-  > {
-    const picked = await PodUIControls.promptForPodType();
-
-    if (!picked) {
-      return;
-    }
-
-    return PodCommandFactory.createPodCommandForPodType(picked);
   }
 
   /**
@@ -426,12 +407,6 @@ export class PodUIControls {
    */
   private static getDescriptionForScope(scope: PodExportScope): string {
     switch (scope) {
-      case PodExportScope.Clipboard:
-        return "Exports the current contents of your clipboard";
-
-      case PodExportScope.Selection:
-        return "Exports the current contents of the selected portion of text in the open note editor";
-
       case PodExportScope.Lookup:
         return "Prompts user to select note(s) for export";
 

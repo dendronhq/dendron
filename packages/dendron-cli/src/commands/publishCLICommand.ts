@@ -435,7 +435,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async dev(opts: DevCmdOpts) {
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
-    await NextjsExportPodUtils.startNextDev({ nextPath });
+    await NextjsExportPodUtils.startNextDev({ nextPath, windowsHide: false });
     return { error: null };
   }
 

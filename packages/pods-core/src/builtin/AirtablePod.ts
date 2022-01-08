@@ -232,6 +232,10 @@ export class AirtableUtils {
             note,
             key: fieldMapping.to,
           });
+          // no result on empty string
+          if (_.isEmpty(data)) {
+            return { data: undefined };
+          }
           return { data };
         }
       }

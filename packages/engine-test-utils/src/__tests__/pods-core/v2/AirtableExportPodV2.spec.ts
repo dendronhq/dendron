@@ -66,6 +66,25 @@ function createPod({
   });
 }
 
+const createTestNote = (opts: WorkspaceOpts, custom: any = {}) => {
+  return TestEngineUtils.createNoteByFname({
+    fname: "alpha",
+    body: "",
+    custom,
+    ...opts,
+  });
+};
+
+const genField = (opts: any = {}) => {
+  return {
+    fields: {
+      DendronId: "alpha",
+      ...opts,
+    },
+    id: "airtable-alpha",
+  };
+};
+
 const _setupTestFactoryCommon = ({
   srcFieldMapping,
   filters,
@@ -255,16 +274,6 @@ describe("WHEN export checkbox", () => {
 
 describe("WHEN export note with singleSelect ", () => {
   describe("AND GIVEN singleSelect is regular fm field", () => {
-    const preSetupHook = async (opts: WorkspaceOpts) => {
-      await TestEngineUtils.createNoteByFname({
-        fname: "alpha",
-        body: "",
-        custom: {
-          single: "one",
-        },
-        ...opts,
-      });
-    };
     const setupTest = setupTestFactoryForNote({
       fname: "alpha",
       srcFieldMapping: {
@@ -274,18 +283,27 @@ describe("WHEN export note with singleSelect ", () => {
         },
       },
     });
-    test("THEN field is exported ", async () => {
-      const resp = await setupTest(preSetupHook);
-      expect(resp).toMatchSnapshot();
-      expect(resp.data?.created).toEqual([
-        {
-          fields: {
-            DendronId: "alpha",
-            Tasks: "one",
-          },
-          id: "airtable-alpha",
-        },
-      ]);
+
+    describe("AND WHEN value is filled", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { single: "one" });
+      };
+      test("THEN field is exported ", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([genField({ Tasks: "one" })]);
+      });
+    });
+
+    describe("AND WHEN value is empty", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts);
+      };
+      test("THEN field is not exported", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([genField()]);
+      });
     });
   });
 
@@ -334,15 +352,26 @@ describe("WHEN export note with singleSelect ", () => {
       test("THEN field is exported ", async () => {
         const resp = await setupTest(preSetupHook);
         expect(resp).toMatchSnapshot();
-        expect(resp.data?.created).toEqual([
-          {
-            fields: {
-              DendronId: "alpha",
-              Tasks: "action.baz",
-            },
-            id: "airtable-alpha",
+        expect(resp.data?.created).toEqual([genField({ Tasks: "action.baz" })]);
+      });
+    });
+
+    describe("AND no matching tags for singleSelect", () => {
+      const setupTest = setupTestFactoryForNote({
+        fname: "alpha",
+        srcFieldMapping: {
+          Tasks: {
+            type: "singleSelect",
+            to: SpecialSrcFieldToKey.TAGS,
+            filter: "tags.gamma.*",
           },
-        ]);
+        },
+      });
+
+      test("THEN field is exported ", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([genField({})]);
       });
     });
   });

@@ -53,7 +53,6 @@ export class NoteMetadataUtils {
     key: string;
   } & ExtractPropsCommon): boolean {
     const val = _.get(note, key);
-    debugger;
     return !isFalsy(val);
   }
 

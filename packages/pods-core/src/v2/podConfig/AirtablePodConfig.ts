@@ -80,6 +80,19 @@ export function createRunnableAirtableV2PodConfigSchema(): JSONSchemaType<Runnab
         type: "string",
         nullable: true,
       },
+      filters: {
+        type: "object",
+        required: [],
+        nullable: true,
+        properties: {
+          fname: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+        },
+      },
     },
   };
 }

@@ -1,11 +1,20 @@
-import { DEngineClient, DLink, RespV3 } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DLink,
+  NoteProps,
+  NoteUtils,
+  RespV3,
+} from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
+import {
+  NotemetadataExtractScalarProps,
+  NoteMetadataUtils,
+} from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
-import { NoteMetadataUtils } from "@dendronhq/engine-server";
+import { checkString } from "../../utils";
 
 // === Helper Functions
 const getNote = (engine: DEngineClient) => {
@@ -25,30 +34,82 @@ const preSetupHookForLinksAndTags: SetupHookFunction = async ({
   });
   return;
 };
+
 // === Tests
 
-describe("extract simple scalars", () => {
-  const preSetupHook = ENGINE_HOOKS.setupBasic;
+const simpleScalars = [
+  ["string", NoteMetadataUtils.extractString],
+  ["boolean", NoteMetadataUtils.extractBoolean],
+  ["number", NoteMetadataUtils.extractNumber],
+] as [string, (opts: NotemetadataExtractScalarProps) => RespV3<any>][];
 
-  describe("when extracting string", () => {
-    test("THEN get string", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const note = getNote(engine);
+describe("extract scalar", () => {
+  const vault = { fsPath: "DUMMY" };
+  const note = NoteUtils.create({
+    vault,
+    custom: {
+      astring: null,
+      abool: null,
+      anumber: null,
+    },
+    fname: "alpha",
+  });
+
+  describe("AND WHEN scalar is null", () => {
+    describe("AND WHEN strictNullCheck = false", () => {
+      const strictNullChecks = false;
+      test.concurrent.each(simpleScalars)(
+        `THEN %s returns undefined`,
+        async (_type, extract) => {
+          expect(extract({ note, key: `a${_type}`, strictNullChecks })).toEqual(
+            {
+              data: undefined,
+            }
+          );
+        }
+      );
+    });
+
+    describe("AND WHEN strictNullCheck = true", () => {
+      const strictNullChecks = true;
+      test.concurrent.each(simpleScalars)(
+        `THEN %s returns error`,
+        async (_type, extract) => {
           expect(
-            NoteMetadataUtils.extractString({
-              note,
-              key: "title",
-            })
-          ).toEqual("Foo");
-        },
-        { expect, preSetupHook }
+            checkString(
+              extract({ note, key: `a${_type}`, strictNullChecks }).error
+                ?.message || "",
+              "is wrong type"
+            )
+          ).toBeTruthy();
+        }
       );
     });
   });
+
+  describe("AND WHEN scalar is filled", () => {
+    const note = NoteUtils.create({
+      vault,
+      custom: {
+        astring: "astring",
+        abool: true,
+        anumber: 1,
+      },
+      fname: "alpha",
+    });
+
+    test.concurrent.each(simpleScalars)(
+      `THEN %s returns %s value`,
+      async (_type, extract) => {
+        expect(extract({ note, key: `a${_type}` })).toEqual({
+          data: note[`a${_type}` as keyof NoteProps],
+        });
+      }
+    );
+  });
 });
 
-describe("when extracting links", () => {
+describe("WHEN extracting links", () => {
   const preSetupHook = preSetupHookForLinksAndTags;
 
   describe("AND WHEN extract single link", () => {

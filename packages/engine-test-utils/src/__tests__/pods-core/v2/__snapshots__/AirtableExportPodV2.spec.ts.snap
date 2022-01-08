@@ -186,6 +186,6 @@ Object {
 exports[`WHEN export number AND WHEN number is required AND WHEN field is absent THEN return error 1`] = `
 Object {
   "data": Object {},
-  "error": [Error: undefined is not numeric],
+  "error": [Error: undefined is wrong type],
 }
 `;

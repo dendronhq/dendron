@@ -1,6 +1,7 @@
 import {
   DendronError,
   DLink,
+  ErrorFactory,
   isFalsy,
   NoteProps,
   RespV3,
@@ -12,6 +13,7 @@ import { LinkUtils } from "../markdown";
 
 type ExtractPropsCommon = {
   note: NoteProps;
+  required?: boolean;
 };
 
 type ExtractPropWithFilter = {
@@ -44,6 +46,27 @@ export class NoteMetadataUtils {
       return "";
     }
     return val.toString();
+  }
+
+  static extractNumber({
+    note,
+    key,
+    required,
+  }: {
+    key: string;
+  } & ExtractPropsCommon): RespV3<number | undefined> {
+    const val = _.get(note, key);
+    if (_.isNumber(val)) {
+      return { data: val };
+    }
+    if (_.isUndefined(val) && !required) {
+      return { data: undefined };
+    }
+    return {
+      error: ErrorFactory.createInvalidStateError({
+        message: `${val} is not numeric`,
+      }),
+    };
   }
 
   static extractBoolean({

@@ -147,3 +147,45 @@ Object {
   "error": null,
 }
 `;
+
+exports[`WHEN export number AND WHEN number is not required AND WHEN field is absent THEN do not export number 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export number AND WHEN number is not required AND WHEN number is present THEN export number 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "Alpha": 1,
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export number AND WHEN number is required AND WHEN field is absent THEN return error 1`] = `
+Object {
+  "data": Object {},
+  "error": [Error: undefined is not numeric],
+}
+`;

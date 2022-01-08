@@ -69,23 +69,20 @@ export type SrcFieldMappingV2 =
   | SimpleSrcField
   | MultiSelectField
   | SingleSelectField
-  | BooleanSrcField
   | LinkedRecordField;
+
+type SrcFieldCommon = {
+  required?: boolean;
+};
 
 export enum SpecialSrcFieldToKey {
   TAGS = "tags",
   LINKS = "links",
 }
-
-type BooleanSrcField = {
-  type: "boolean";
-  to: string;
-};
-
 type SimpleSrcField = {
   to: string;
-  type: "string" | "date";
-};
+  type: "string" | "date" | "number" | "boolean";
+} & SrcFieldCommon;
 
 type SelectField = {
   to: SpecialSrcFieldToKey | string;
@@ -216,6 +213,13 @@ export class AirtableUtils {
             key: fieldMapping.to,
           }),
         };
+      }
+      case "number": {
+        return NoteMetadataUtils.extractNumber({
+          note,
+          key: fieldMapping.to,
+          required: fieldMapping.required,
+        });
       }
       case "singleSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {

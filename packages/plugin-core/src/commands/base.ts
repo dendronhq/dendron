@@ -69,6 +69,10 @@ export abstract class BaseCommand<
     return;
   }
 
+  protected mergeInputs(opts: TOpts, args?: Partial<TRunOpts>): TOpts {
+    return { ...opts, ...args };
+  }
+
   async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
     const ctx = `${this.key}:run`;
     const start = process.hrtime();
@@ -95,7 +99,7 @@ export abstract class BaseCommand<
           return;
         }
         this.L.info({ ctx, msg: "pre-execute" });
-        resp = await this.execute({ ...opts, ...args });
+        resp = await this.execute(this.mergeInputs(opts, args));
         this.L.info({ ctx, msg: "post-execute" });
         this.showResponse(resp);
         return resp;
@@ -148,5 +152,26 @@ export abstract class BasicCommand<
 > extends BaseCommand<TOpts, TOut, TOpts, TRunOpts> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;
+  }
+}
+
+/** This command passes the output of `gatherOpts`/`enrichOpts` directly to `execute`.
+ *
+ * The regular command class tries to merge the inputs from `gatherOpts` and `enrichOpts` together, which
+ * will break your code if you use any `TOpts` that is not a basic js object.
+ *
+ * This is especially useful for commands that accept input directly from VSCode, like {@link ShowPreviewCommand}
+ */
+export abstract class InputArgCommand<TOpts, TOut = any> extends BasicCommand<
+  TOpts,
+  TOut,
+  TOpts
+> {
+  async gatherInputs(opts?: TOpts): Promise<TOpts | undefined> {
+    return opts;
+  }
+
+  protected mergeInputs(opts: TOpts, _args?: Partial<TOpts>): TOpts {
+    return opts;
   }
 }

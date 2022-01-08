@@ -27,7 +27,7 @@ import { WebViewUtils } from "../views/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
-import { BasicCommand } from "./base";
+import { InputArgCommand } from "./base";
 import fs from "fs-extra";
 
 import {
@@ -301,7 +301,7 @@ export const handleLink = async ({
   }
 };
 
-export class ShowPreviewCommand extends BasicCommand<
+export class ShowPreviewCommand extends InputArgCommand<
   ShowPreviewCommandOpts,
   ShowPreviewCommandOutput
 > {
@@ -314,11 +314,8 @@ export class ShowPreviewCommand extends BasicCommand<
   }
 
   async sanityCheck(opts?: ShowPreviewCommandOpts) {
-    if (
-      _.isUndefined(VSCodeUtils.getActiveTextEditor()) &&
-      opts === undefined
-    ) {
-      return "No document currently open, and no document selected to open";
+    if (_.isUndefined(VSCodeUtils.getActiveTextEditor()) && _.isEmpty(opts)) {
+      return "No note currently open, and no note selected to open.";
     }
     return;
   }
@@ -391,7 +388,7 @@ export class ShowPreviewCommand extends BasicCommand<
     if (opts) {
       // Used a context menu to open preview for a specific note
       try {
-        note = WSUtils.getNoteFromPath(opts.path);
+        note = WSUtils.getNoteFromPath(opts.fsPath);
       } catch {
         // Sometimes VSCode gives us a weird `opts` when no note was selected, so fall back to active note
         note = WSUtils.getActiveNote();
@@ -406,7 +403,7 @@ export class ShowPreviewCommand extends BasicCommand<
     } else if (opts?.path) {
       // We can't find the note, so this is not in the Dendron workspace.
       // Preview the file anyway if it's a markdown file.
-      await ShowPreviewCommand.openFileInPreview(opts.path);
+      await ShowPreviewCommand.openFileInPreview(opts.fsPath);
     } else {
       // Not file selected for preview, default ot open file
       const editor = VSCodeUtils.getActiveTextEditor();

@@ -1,5 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`WHEN export checkbox AND WHEN checkbox is false THEN chekbox set tot rue 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "Alpha": false,
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export checkbox AND WHEN checkbox is true THEN chekbox set tot rue 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "Alpha": true,
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
 exports[`WHEN export note with multi select AND GIVEN multiSelect is a tag  THEN tags are exported  1`] = `
 Object {
   "data": Object {

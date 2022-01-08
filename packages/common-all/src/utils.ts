@@ -83,6 +83,9 @@ export function isNotUndefined<T>(t: T | undefined): t is T {
  * Check if the value u is a falsy value.
  */
 export function isFalsy(u: any): boolean {
+  if (_.isBoolean(u)) {
+    return u === false;
+  }
   return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 

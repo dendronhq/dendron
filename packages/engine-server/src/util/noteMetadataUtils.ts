@@ -1,4 +1,10 @@
-import { DendronError, DLink, NoteProps, RespV3 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DLink,
+  isFalsy,
+  NoteProps,
+  RespV3,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import minimatch from "minimatch";
@@ -38,6 +44,17 @@ export class NoteMetadataUtils {
       return "";
     }
     return val.toString();
+  }
+
+  static extractBoolean({
+    note,
+    key,
+  }: {
+    key: string;
+  } & ExtractPropsCommon): boolean {
+    const val = _.get(note, key);
+    debugger;
+    return !isFalsy(val);
   }
 
   static extractDate({

@@ -69,6 +69,7 @@ export type SrcFieldMappingV2 =
   | SimpleSrcField
   | MultiSelectField
   | SingleSelectField
+  | BooleanSrcField
   | LinkedRecordField;
 
 type SrcFieldCommon = {
@@ -79,6 +80,15 @@ export enum SpecialSrcFieldToKey {
   TAGS = "tags",
   LINKS = "links",
 }
+<<<<<<< HEAD
+=======
+
+type BooleanSrcField = {
+  type: "boolean";
+  to: string;
+};
+
+>>>>>>> 7295ee6dd (enhance(pod): support checkbox field)
 type SimpleSrcField = {
   to: string;
   type: "string" | "date" | "number" | "boolean";
@@ -214,6 +224,7 @@ export class AirtableUtils {
           }),
         };
       }
+<<<<<<< HEAD
       case "number": {
         return NoteMetadataUtils.extractNumber({
           note,
@@ -221,6 +232,8 @@ export class AirtableUtils {
           required: fieldMapping.required,
         });
       }
+=======
+>>>>>>> 7295ee6dd (enhance(pod): support checkbox field)
       case "singleSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
           const { error, data } = NoteMetadataUtils.extractSingleTag({

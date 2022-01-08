@@ -274,6 +274,60 @@ describe("WHEN export checkbox", () => {
 
 describe("WHEN export note with singleSelect ", () => {
   describe("AND GIVEN singleSelect is regular fm field", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "",
+        custom: {
+          alpha: true,
+        },
+        ...opts,
+      });
+    };
+    test("THEN chekbox set tot rue", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Alpha: true,
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+
+  describe("AND WHEN checkbox is false", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "",
+        custom: {
+          alpha: false,
+        },
+        ...opts,
+      });
+    };
+    test("THEN chekbox set tot rue", async () => {
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toMatchSnapshot();
+      expect(resp.data?.created).toEqual([
+        {
+          fields: {
+            DendronId: "alpha",
+            Alpha: false,
+          },
+          id: "airtable-alpha",
+        },
+      ]);
+    });
+  });
+});
+
+describe("WHEN export note with singleSelect ", () => {
+  describe("AND GIVEN singleSelect is regular fm field", () => {
     const setupTest = setupTestFactoryForNote({
       fname: "alpha",
       srcFieldMapping: {

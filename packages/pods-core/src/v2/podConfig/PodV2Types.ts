@@ -43,18 +43,6 @@ export type ExportPodConfigurationV2 = {
    * Specifies the scope of this export operation
    */
   exportScope: PodExportScope;
-
-  filters?: ExportPodConfigurationFilterV2;
-};
-
-/**
- * Defines filters for export pod
- */
-export type ExportPodConfigurationFilterV2 = {
-  /**
-   * Glob patterns to filter from
-   */
-  fname: string[];
 };
 
 /**

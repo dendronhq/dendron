@@ -5,12 +5,23 @@ import { ExternalTarget } from "../external-services/ExternalConnectionManager";
 import { ExportPodConfigurationV2 } from "./PodV2Types";
 
 /**
+ * Defines filters for export pod
+ */
+export type ExportPodConfigurationFilterV2 = {
+  /**
+   * Glob patterns to filter from
+   */
+  fname: string[];
+};
+
+/**
  * Complete Pod Config for Airtable V2
  */
 export type AirtableV2PodConfig = ExportPodConfigurationV2 & {
   baseId: string;
   tableName: string;
   sourceFieldMapping: { [key: string]: SrcFieldMapping };
+  filters?: ExportPodConfigurationFilterV2;
 };
 
 /**

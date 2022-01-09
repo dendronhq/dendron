@@ -228,11 +228,20 @@ function DendronSearchComponent(
         : lookupResults.map((noteIndex: NoteIndexProps) => {
             return (
               <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
-                <Link
-                  onClick={(e) => e.stopPropagation()}
-                  href={`/notes/${noteIndex.id}`}
-                >
-                  {noteIndex.fname}
+                <Link href={`/notes/${noteIndex.id}`}>
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid */}
+                  <a
+                    onClick={(e) => {
+                      if (e.button === 1 || e.ctrlKey || e.metaKey) {
+                        e.stopPropagation();
+                      } else {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="option-link"
+                  >
+                    {noteIndex.fname}
+                  </a>
                 </Link>
               </AutoComplete.Option>
             );

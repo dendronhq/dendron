@@ -19,6 +19,7 @@ import DendronSpinner from "./DendronSpinner";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 import _ from "lodash";
+import Link from "next/link";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -227,7 +228,12 @@ function DendronSearchComponent(
         : lookupResults.map((noteIndex: NoteIndexProps) => {
             return (
               <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
-                <div>{noteIndex.fname}</div>
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/notes/${noteIndex.id}`}
+                >
+                  {noteIndex.fname}
+                </Link>
               </AutoComplete.Option>
             );
           })}

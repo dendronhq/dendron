@@ -19,6 +19,8 @@ import DendronSpinner from "./DendronSpinner";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 import _ from "lodash";
+import { isMouseEvent } from "../utils/isMouseEvent";
+import { isKeyboardEvent } from "../utils/isKeyboardEvent";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -160,6 +162,15 @@ function DendronSearchComponent(
       // @ts-ignore
       onSelect={(_selection, option) => {
         const id = option.key?.toString()!;
+        const shouldOpenInNewTab =
+          // eslint-disable-next-line no-restricted-globals
+          (isMouseEvent(event) && event.button === 1) ||
+          // eslint-disable-next-line no-restricted-globals
+          (isKeyboardEvent(event) && (event.ctrlKey || event.metaKey));
+        if (shouldOpenInNewTab) {
+          window.open(`${window.location.origin}/notes/${id}`, "_blank");
+          return;
+        }
         dendronRouter.changeActiveNote(id, { noteIndex });
         dispatch(
           browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)

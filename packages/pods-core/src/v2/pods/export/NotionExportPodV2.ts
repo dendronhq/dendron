@@ -42,17 +42,9 @@ const limiter = new RateLimiter({ tokensPerInterval: 3, interval: "second" });
  */
 export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
   private _config: RunnableNotionV2PodConfig;
-  private _client: Client;
 
-  constructor({
-    podConfig,
-    notion,
-  }: {
-    podConfig: RunnableNotionV2PodConfig;
-    notion: Client;
-  }) {
+  constructor({ podConfig }: { podConfig: RunnableNotionV2PodConfig }) {
     this._config = podConfig;
-    this._client = notion;
   }
 
   async exportNote(input: NoteProps): Promise<NotionExportReturnType> {
@@ -63,10 +55,7 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
   async exportNotes(notes: NoteProps[]): Promise<NotionExportReturnType> {
     const { parentPageId } = this._config;
     const blockPagesArray = this.convertMdToNotionBlock(notes, parentPageId);
-    const { data, errors } = await this.createPagesInNotion(
-      blockPagesArray,
-      this._client
-    );
+    const { data, errors } = await this.createPagesInNotion(blockPagesArray);
     const createdNotes = data.filter(
       (ent): ent is NotionFields => !_.isUndefined(ent)
     );
@@ -113,12 +102,14 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
    * Method to create pages in Notion
    */
   createPagesInNotion = async (
-    blockPagesArray: any,
-    notion: Client
+    blockPagesArray: any
   ): Promise<{
     data: NotionFields[];
     errors: IDendronError[];
   }> => {
+    const notion = new Client({
+      auth: this._config.apiKey,
+    });
     const errors: IDendronError[] = [];
     const out: NotionFields[] = await Promise.all(
       blockPagesArray.map(async (ent: any) => {

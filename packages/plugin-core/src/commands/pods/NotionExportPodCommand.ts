@@ -47,13 +47,8 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
   public createPod(
     config: RunnableNotionV2PodConfig
   ): ExportPodV2<NotionExportReturnType> {
-    const { apiKey } = config;
-    const notion = new Client({
-      auth: apiKey,
-    });
     return new NotionExportPodV2({
       podConfig: config,
-      notion,
     });
   }
 
@@ -162,7 +157,6 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     config: RunnableNotionV2PodConfig;
     payload: NoteProps[];
   }) {
-    console.log("exportReturnValue", exportReturnValue);
     const { data } = exportReturnValue;
     if (data?.created) {
       await this.updateNotionIdForNewlyCreatedNotes(data.created);
@@ -220,7 +214,15 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     return title[0] ? title[0].plain_text : "Untitled";
   };
 
-  promptForParentPage = async (pagesMap: string[]) => {
+  /**
+   * Prompt to choose the Parent Page in Notion. All the exported notes are created inside this page.
+   * It is mandatory to have a parent page while create pages via API.
+   * @param pagesMap
+   * @returns pageId of selected page.
+   */
+  promptForParentPage = async (
+    pagesMap: string[]
+  ): Promise<string | undefined> => {
     const pickItems = pagesMap.map((page) => {
       return {
         label: page,

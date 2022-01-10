@@ -814,6 +814,10 @@ export class SurveyUtils {
             "Survey submitted! Thanks for helping us make Dendron better 🌱"
           );
         } else {
+          await StateService.instance().updateGlobalState(
+            GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED,
+            "cancelled"
+          );
           vscode.window.showInformationMessage("Survey cancelled.");
           AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyRejected);
         }

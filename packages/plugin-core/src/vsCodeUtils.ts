@@ -287,21 +287,6 @@ export class VSCodeUtils {
     }
   }
 
-  /**
-   * Opens file picker which allows user to select a file or folder
-   *
-   * @param options Options to configure the behaviour of a file open dialog
-   * @returns Filesystem path
-   */
-  static async openFilePicker(options?: vscode.OpenDialogOptions) {
-    const fileUri = await vscode.window.showOpenDialog(options);
-
-    if (fileUri && fileUri[0]) {
-      return fileUri[0].fsPath;
-    }
-    return;
-  }
-
   /** Prompt the user for an absolute path to a folder. Supports `~`.
    *
    * @param opts.default The default path to suggest.

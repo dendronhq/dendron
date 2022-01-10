@@ -2,10 +2,9 @@ import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
 import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import PathLike = fs.PathLike;
 import _ from "lodash";
 import path from "path";
-import vscode, { Uri } from "vscode";
+import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -36,9 +35,9 @@ const CODE_WS_LABEL = "Code Workspace";
 const CODE_WS_DETAIL = undefined;
 
 enum EXISTING_ROOT_ACTIONS {
-  CONTINUE = "Continue",
-  DELETE = "Delete",
-  ABORT = "Abort",
+  CONTINUE = "continue",
+  DELETE = "delete",
+  ABORT = "abort",
 }
 
 export class SetupWorkspaceCommand extends BasicCommand<
@@ -49,7 +48,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     let workspaceType = WorkspaceType.CODE;
-    const defaultUri = Uri.file(resolveTilde("~"));
     let rootDirRaw: string | undefined;
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (
@@ -102,15 +100,13 @@ export class SetupWorkspaceCommand extends BasicCommand<
     }
 
     if (!rootDirRaw) {
-      // Prompt user where to create workspace
-      const options: vscode.OpenDialogOptions = {
-        canSelectMany: false,
-        openLabel: "Create Workspace",
-        canSelectFiles: false,
-        canSelectFolders: true,
-        defaultUri,
-      };
-      rootDirRaw = await VSCodeUtils.openFilePicker(options);
+      // Otherwise, ask to create a Code Workspace anywhere
+      rootDirRaw = await VSCodeUtils.gatherFolderPath({
+        default: path.join(resolveTilde("~"), "Dendron"),
+        override: {
+          title: "Path for new Dendron Code Workspace",
+        },
+      });
       if (_.isUndefined(rootDirRaw)) {
         return;
       }
@@ -130,7 +126,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     rootDir: string;
     skipConfirmation?: boolean;
   }): Promise<boolean> => {
-    if (!this.isEmptyDirectory(rootDir) && !skipConfirmation) {
+    if (fs.existsSync(rootDir) && !skipConfirmation) {
       const resp = await VSCodeUtils.showQuickPick(
         [
           {
@@ -232,15 +228,5 @@ export class SetupWorkspaceCommand extends BasicCommand<
       }
     }
     return vaults;
-  }
-
-  /**
-   * Tests whether or not the given directory is empty.
-   */
-  private isEmptyDirectory(path: PathLike) {
-    if (!fs.existsSync(path)) return true;
-
-    const files = fs.readdirSync(path);
-    return !files || !files.length;
   }
 }

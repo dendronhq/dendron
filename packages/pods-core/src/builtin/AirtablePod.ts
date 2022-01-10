@@ -17,7 +17,10 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
-import { NoteMetadataUtils } from "@dendronhq/engine-server";
+import {
+  NoteMetadataUtils,
+  NoteMetadataValidationProps,
+} from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import { RateLimiter } from "limiter";
@@ -69,11 +72,8 @@ export type SrcFieldMappingV2 =
   | SimpleSrcField
   | MultiSelectField
   | SingleSelectField
+  | BooleanSrcField
   | LinkedRecordField;
-
-type SrcFieldCommon = {
-  required?: boolean;
-};
 
 export enum SpecialSrcFieldToKey {
   TAGS = "tags",
@@ -82,7 +82,7 @@ export enum SpecialSrcFieldToKey {
 type SimpleSrcField = {
   to: string;
   type: "string" | "date" | "number" | "boolean";
-} & SrcFieldCommon;
+} & NoteMetadataValidationProps;
 
 type SelectField = {
   to: SpecialSrcFieldToKey | string;
@@ -195,31 +195,29 @@ export class AirtableUtils {
     note: NoteProps;
     engine: DEngineClient;
   }): RespV3<any> {
-    switch (fieldMapping.type) {
+    const { type, to: key, ...props } = fieldMapping;
+    switch (type) {
       case "string": {
-        return {
-          data: NoteMetadataUtils.extractString({ note, key: fieldMapping.to }),
-        };
-      }
-      case "date": {
-        return {
-          data: NoteMetadataUtils.extractDate({ note, key: fieldMapping.to }),
-        };
+        return NoteMetadataUtils.extractString({ note, key, ...props });
       }
       case "boolean": {
-        return {
-          data: NoteMetadataUtils.extractBoolean({
-            note,
-            key: fieldMapping.to,
-          }),
-        };
+        return NoteMetadataUtils.extractBoolean({
+          note,
+          key,
+          ...props,
+        });
       }
       case "number": {
         return NoteMetadataUtils.extractNumber({
           note,
-          key: fieldMapping.to,
-          required: fieldMapping.required,
+          key,
+          ...props,
         });
+      }
+      case "date": {
+        return {
+          data: NoteMetadataUtils.extractDate({ note, key }),
+        };
       }
       case "singleSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
@@ -232,15 +230,11 @@ export class AirtableUtils {
           }
           return { data: NoteMetadataUtils.cleanTags(data ? [data] : [])[0] };
         } else {
-          const data = NoteMetadataUtils.extractString({
+          return NoteMetadataUtils.extractString({
             note,
-            key: fieldMapping.to,
+            key,
+            ...props,
           });
-          // no result on empty string
-          if (_.isEmpty(data)) {
-            return { data: undefined };
-          }
-          return { data };
         }
       }
       case "multiSelect": {

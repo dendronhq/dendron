@@ -2,7 +2,7 @@ import {
   DendronError,
   DLink,
   ErrorFactory,
-  isFalsy,
+  isNumeric,
   NoteProps,
   RespV3,
 } from "@dendronhq/common-all";
@@ -11,14 +11,34 @@ import { DateTime } from "luxon";
 import minimatch from "minimatch";
 import { LinkUtils } from "../markdown";
 
+export type NoteMetadataValidationProps = {
+  /**
+   * If required, will throw error if field is missing
+   */
+  required?: boolean;
+  /**
+   * If enabled, will throw error if field is null
+   */
+  strictNullChecks?: boolean;
+};
+
+export type NotemetadataExtractScalarProps = {
+  key: string;
+} & ExtractPropsCommon;
+
 type ExtractPropsCommon = {
   note: NoteProps;
-  required?: boolean;
-};
+} & NoteMetadataValidationProps;
 
 type ExtractPropWithFilter = {
   filters: string[];
 } & ExtractPropsCommon;
+
+enum NullOrUndefined {
+  "UNDEFINED",
+  "NULL",
+  "NO_UNDEFINED_OR_NULL",
+}
 
 export class NoteMetadataUtils {
   /**
@@ -31,6 +51,36 @@ export class NoteMetadataUtils {
     });
   }
 
+  static checkIfAllowNullOrUndefined(
+    val: any,
+    { required, strictNullChecks }: NoteMetadataValidationProps
+  ) {
+    if (_.isUndefined(val) && !required) {
+      return NullOrUndefined.UNDEFINED;
+    }
+    if (_.isNull(val) && !strictNullChecks) {
+      return NullOrUndefined.NULL;
+    }
+    return NullOrUndefined.NO_UNDEFINED_OR_NULL;
+  }
+
+  static checkAndReturnUndefinedOrError(
+    val: any,
+    props: NoteMetadataValidationProps
+  ) {
+    if (
+      NoteMetadataUtils.checkIfAllowNullOrUndefined(val, props) !==
+      NullOrUndefined.NO_UNDEFINED_OR_NULL
+    ) {
+      return { data: undefined };
+    }
+    return {
+      error: ErrorFactory.createInvalidStateError({
+        message: `${val} is wrong type`,
+      }),
+    };
+  }
+
   /**
    * Extract string metadata from note
    * @returns
@@ -38,53 +88,46 @@ export class NoteMetadataUtils {
   static extractString({
     note,
     key,
-  }: {
-    key: string;
-  } & ExtractPropsCommon): string | undefined {
-    const val = _.get(note, key, "");
-    if (_.isNull(val)) {
-      return "";
+    ...props
+  }: NotemetadataExtractScalarProps): RespV3<string | undefined> {
+    const val = _.get(note, key);
+    if (_.isString(val)) {
+      return { data: val };
     }
-    return val.toString();
+    return NoteMetadataUtils.checkAndReturnUndefinedOrError(val, props);
   }
 
   static extractNumber({
     note,
     key,
-    required,
-  }: {
-    key: string;
-  } & ExtractPropsCommon): RespV3<number | undefined> {
+    ...props
+  }: NotemetadataExtractScalarProps): RespV3<number | undefined> {
     const val = _.get(note, key);
     if (_.isNumber(val)) {
       return { data: val };
     }
-    if (_.isUndefined(val) && !required) {
-      return { data: undefined };
+    if (isNumeric(val)) {
+      return { data: parseFloat(val) };
     }
-    return {
-      error: ErrorFactory.createInvalidStateError({
-        message: `${val} is not numeric`,
-      }),
-    };
+    return NoteMetadataUtils.checkAndReturnUndefinedOrError(val, props);
   }
 
   static extractBoolean({
     note,
     key,
-  }: {
-    key: string;
-  } & ExtractPropsCommon): boolean {
+    ...props
+  }: NotemetadataExtractScalarProps): RespV3<boolean | undefined> {
     const val = _.get(note, key);
-    return !isFalsy(val);
+    if (_.isBoolean(val)) {
+      return { data: val };
+    }
+    return NoteMetadataUtils.checkAndReturnUndefinedOrError(val, props);
   }
 
   static extractDate({
     note,
     key,
-  }: {
-    key: string;
-  } & ExtractPropsCommon): DateTime | undefined {
+  }: NotemetadataExtractScalarProps): RespV3<DateTime | undefined> {
     // TODO: we should validate
     let val = _.get(note, key);
     if (_.isNumber(val)) {

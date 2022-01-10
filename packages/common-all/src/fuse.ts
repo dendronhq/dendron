@@ -310,9 +310,6 @@ export class FuseEngine {
   }): Fuse.FuseResult<NoteIndexProps>[] {
     if (results.length === 0) return [];
 
-    console.log(`Results length: '${results.length}'`);
-    console.log(`Results: '${JSON.stringify(results)}'`);
-
     const sortOrder: SortOrderObj[] = [
       // We want match scores to be ascending since the lowest score
       // represents the best match. We first group sort by FuseJS score

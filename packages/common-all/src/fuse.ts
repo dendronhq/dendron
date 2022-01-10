@@ -215,6 +215,10 @@ export class FuseEngine {
         onlyDirectChildren,
       });
 
+      if (originalQS === undefined) {
+        // TODO: add log WARN (does not appear to be easily accessible logger in common-all)
+        originalQS = qs;
+      }
       results = FuseEngine.sortResults({ results, originalQS });
 
       items = _.map(results, (resp) => resp.item);

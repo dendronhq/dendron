@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import _ from "lodash";
+import _, { ListIterator, NotVoid } from "lodash";
 import {
   DEngineMode,
   SchemaProps,
@@ -14,6 +14,7 @@ import {
   ConfigUtils,
 } from ".";
 import { DVault } from "./types";
+import { levenshteinDistance } from "./util/stringUtil";
 
 export type NoteIndexProps = {
   id: string;
@@ -100,6 +101,14 @@ type FuseEngineOpts = {
   fuzzThreshold: number;
 };
 
+type SortOrderObj = {
+  orderBy: ListIterator<
+    Fuse.FuseResult<NoteIndexProps> & { levenshteinDist: number },
+    NotVoid
+  >;
+  order: "asc" | "desc";
+};
+
 export const getCleanThresholdValue = (configThreshold: number) => {
   if (configThreshold < 0 || configThreshold > 1) {
     // Setting threshold to fallback threshold value in case configuration is incorrect.
@@ -172,6 +181,7 @@ export class FuseEngine {
    * If qs = "", return root note
    * @param qs query string.
    * @param onlyDirectChildren query for direct children only.
+   * @param originalQS original query string that was typed by the user.
    * @returns
    */
   queryNote({
@@ -181,7 +191,7 @@ export class FuseEngine {
   }: {
     qs: string;
     onlyDirectChildren?: boolean;
-    originalQS?: string;
+    originalQS: string;
   }): NoteIndexProps[] {
     let items: NoteIndexProps[];
 
@@ -296,37 +306,47 @@ export class FuseEngine {
     originalQS,
   }: {
     results: Fuse.FuseResult<NoteIndexProps>[];
-    originalQS?: string;
+    originalQS: string;
   }): Fuse.FuseResult<NoteIndexProps>[] {
-    const groupedByScore = _.groupBy(results, (r) => r.score);
+    if (results.length === 0) return [];
 
-    // lodash group by makes strings out of number hence to sort scores
-    // we will parse them back into a number keeping the key string.
-    const scores = _.keys(groupedByScore).map((stringKey) => ({
-      key: stringKey,
-      score: Number.parseFloat(stringKey),
-    }));
+    console.log(`Results length: '${results.length}'`);
+    console.log(`Results: '${JSON.stringify(results)}'`);
 
-    // We want ascending scores since the lowest score represents the best match.
-    scores.sort((a, b) => a.score - b.score);
+    const sortOrder: SortOrderObj[] = [
+      // We want match scores to be ascending since the lowest score
+      // represents the best match. We first group sort by FuseJS score
+      // Subsequently applying other sorts if the FuseJS score matches.
+      {
+        orderBy: (item) => item.score,
+        order: "asc",
+      },
+      // if the item is a stub it should go towards the end of the same score match group.
+      {
+        orderBy: (item) => item.item.stub,
+        order: "desc",
+      },
+      // Lowest distance is the closer match hence sort in ascending order.
+      {
+        orderBy: (item) => item.levenshteinDist,
+        order: "asc",
+      },
+      // We want the items with the same match scores to be sorted by
+      // descending order of their update date.
+      {
+        orderBy: (item) => item.item.updated,
+        order: "desc",
+      },
+    ];
 
-    // We want the items with the same match scores to be sorted by
-    // descending order of their update date. And if the item is a
-    // stub it should go towards the end of the same match group.
-    for (const score of scores) {
-      const sameScoreMatches = groupedByScore[score.key];
-
-      const [stubs, notes] = _.partition(sameScoreMatches, (m) => m.item.stub);
-
-      notes.sort((a, b) => {
-        return b.item.updated - a.item.updated;
-      });
-
-      // @ts-ignore
-      groupedByScore[score.key] = [...notes, ...stubs];
-    }
-
-    let sorted = scores.map((score) => groupedByScore[score.key]).flat();
+    let sorted = _.orderBy(
+      results.map((res) => ({
+        ...res,
+        levenshteinDist: levenshteinDistance(res.item.fname, originalQS),
+      })),
+      sortOrder.map((v) => v.orderBy),
+      sortOrder.map((v) => v.order)
+    );
 
     // Pull up exact match if it exists.
     if (originalQS) {
@@ -420,10 +440,12 @@ export class NoteLookupUtils {
 
   static async lookup({
     qs,
+    originalQS,
     engine,
     showDirectChildrenOnly,
   }: {
     qs: string;
+    originalQS: string;
     engine: DEngineClient;
     showDirectChildrenOnly?: boolean;
   }): Promise<NoteProps[]> {
@@ -434,6 +456,7 @@ export class NoteLookupUtils {
     }
     const resp = await engine.queryNotes({
       qs,
+      originalQS,
       onlyDirectChildren: showDirectChildrenOnly,
     });
     let nodes = resp.data;

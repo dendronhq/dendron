@@ -77,7 +77,11 @@ const NOTES = {
     async ({ vaults, engine }) => {
       const vault = vaults[0];
       const notes = engine.notes;
-      const { data } = await engine.queryNotes({ qs: "", vault });
+      const { data } = await engine.queryNotes({
+        qs: "",
+        originalQS: "",
+        vault,
+      });
       const expectedNote = NoteUtils.getNoteByFnameV5({
         wsRoot: engine.wsRoot,
         fname: "root",
@@ -99,7 +103,11 @@ const NOTES = {
   STAR_QUERY: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const { data } = await engine.queryNotes({ qs: "*", vault });
+      const { data } = await engine.queryNotes({
+        qs: "*",
+        originalQS: "*",
+        vault,
+      });
       return [
         {
           actual: data.length,
@@ -116,7 +124,11 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-      const { data } = await engine.queryNotes({ qs: fname, vault });
+      const { data } = await engine.queryNotes({
+        qs: fname,
+        originalQS: fname,
+        vault,
+      });
       const expectedNote = NoteUtils.getNoteByFnameV5({
         fname,
         notes,
@@ -146,7 +158,11 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.fname;
-      const { data } = await engine.queryNotes({ qs: fname, vault });
+      const { data } = await engine.queryNotes({
+        qs: fname,
+        originalQS: fname,
+        vault,
+      });
       const expectedNote = NoteUtils.getNoteByFnameV5({
         fname,
         notes,

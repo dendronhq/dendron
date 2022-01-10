@@ -572,6 +572,7 @@ export class PickerUtilsV2 {
     const newQs = domain.join(".");
     const queryResponse = await engine.queryNotes({
       qs: newQs,
+      originalQS: newQs,
       createIfNew: false,
     });
 
@@ -848,6 +849,7 @@ export class NotePickerUtils {
     const engine = getDWorkspace().engine;
     const resp = await NoteLookupUtils.lookup({
       qs: picker.value,
+      originalQS: picker.value,
       engine,
       showDirectChildrenOnly: picker.showDirectChildrenOnly,
     });

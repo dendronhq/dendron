@@ -4,6 +4,7 @@ import {
   DendronError,
   DEngineClient,
   IDendronError,
+  minimatch,
   NoteProps,
   ResponseUtil,
   RespV2,
@@ -90,11 +91,18 @@ export class AirtableExportPodV2
     this._engine = engine;
   }
 
+  private cleanNotes(notes: NoteProps[], fnameFilters: string[]): NoteProps[] {
+    return _.reject(notes, (ent) => {
+      return _.some(fnameFilters, (pat) => minimatch(ent.fname, pat));
+    });
+  }
+
   async exportNote(input: NoteProps): Promise<AirtableExportReturnType> {
     return this.exportNotes([input]);
   }
 
   async exportNotes(input: NoteProps[]): Promise<AirtableExportReturnType> {
+    input = this.cleanNotes(input, _.get(this._config, "filters.fname"));
     const resp = this.getPayloadForNotes(input);
     if (resp.error) {
       return {
@@ -174,6 +182,19 @@ export class AirtableExportPodV2
           required: [],
           description:
             "mapping of airtable fields with the note eg: {Created On: created, Notes: body}",
+        },
+        filters: {
+          type: "object",
+          required: [],
+          nullable: true,
+          properties: {
+            fname: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
         },
       },
     }) as JSONSchemaType<PersistedAirtablePodConfig>;

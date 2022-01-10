@@ -208,6 +208,67 @@ describe("WHEN export hierarchy", () => {
   });
 });
 
+describe("WHEN export number", () => {
+  describe("AND WHEN number is required", () => {
+    const setupTest = setupTestFactoryForNote({
+      fname: "alpha",
+      srcFieldMapping: {
+        Alpha: {
+          type: "number",
+          to: "custom.alpha",
+          required: true,
+        },
+      },
+    });
+
+    describe("AND WHEN field is absent", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, {});
+      };
+
+      test("THEN return error", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data).toEqual({});
+      });
+    });
+  });
+
+  describe("AND WHEN number is not required", () => {
+    const setupTest = setupTestFactoryForNote({
+      fname: "alpha",
+      srcFieldMapping: {
+        Alpha: {
+          type: "number",
+          to: "custom.alpha",
+        },
+      },
+    });
+
+    describe("AND WHEN number is present", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { alpha: 1 });
+      };
+      test("THEN export number", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([genField({ Alpha: 1 })]);
+      });
+    });
+
+    describe("AND WHEN field is absent", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, {});
+      };
+      test("THEN do not export number", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.created).toEqual([genField()]);
+      });
+    });
+  });
+});
+
 describe("WHEN export checkbox", () => {
   const setupTest = setupTestFactoryForNote({
     fname: "alpha",
@@ -221,27 +282,13 @@ describe("WHEN export checkbox", () => {
 
   describe("AND WHEN checkbox is true", () => {
     const preSetupHook = async (opts: WorkspaceOpts) => {
-      await TestEngineUtils.createNoteByFname({
-        fname: "alpha",
-        body: "",
-        custom: {
-          alpha: true,
-        },
-        ...opts,
-      });
+      return createTestNote(opts, { alpha: true });
     };
+
     test("THEN chekbox set tot rue", async () => {
       const resp = await setupTest(preSetupHook);
       expect(resp).toMatchSnapshot();
-      expect(resp.data?.created).toEqual([
-        {
-          fields: {
-            DendronId: "alpha",
-            Alpha: true,
-          },
-          id: "airtable-alpha",
-        },
-      ]);
+      expect(resp.data?.created).toEqual([genField({ Alpha: true })]);
     });
   });
 

@@ -357,9 +357,16 @@ export class MDUtilsV5 {
             );
           }
 
+          const wikiLinkOpts =
+            opts.flavor === ProcFlavor.PUBLISHING
+              ? {
+                  prefix: (data.config?.site.assetsPrefix || "") + "/notes/",
+                }
+              : {};
           proc = proc.use(dendronPub, {
             insertTitle,
             transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
+            wikiLinkOpts,
           });
 
           const config = data.config as IntermediateDendronConfig;
@@ -372,17 +379,6 @@ export class MDUtilsV5 {
 
           if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
-          }
-          // Add remaining flavor specific plugins
-          if (opts.flavor === ProcFlavor.PUBLISHING) {
-            const prefix = data.config?.site.assetsPrefix
-              ? data.config?.site.assetsPrefix + "/notes/"
-              : "/notes/";
-            proc = proc.use(dendronPub, {
-              wikiLinkOpts: {
-                prefix,
-              },
-            });
           }
         }
         break;

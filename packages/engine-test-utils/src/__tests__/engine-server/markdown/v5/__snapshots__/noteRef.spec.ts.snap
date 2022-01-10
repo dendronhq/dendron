@@ -12,7 +12,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div>bar body</div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -38,7 +38,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Bar</div></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -64,7 +64,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Bar</div></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -90,7 +90,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Bar</div></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"/notes/bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -116,7 +116,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Bar</div></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -142,7 +142,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><div><div>Bar</div></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>

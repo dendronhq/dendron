@@ -5,7 +5,6 @@ import {
   ConfigFileUtils,
   ExportPodConfigurationV2,
   ExternalConnectionManager,
-  isExportPodConfigurationV2,
   PodV2Types,
 } from "..";
 
@@ -62,9 +61,10 @@ export class PodV2ConfigManager {
         fPath,
       });
 
-      if (isExportPodConfigurationV2(config)) {
-        configs.push(config);
-      }
+      // if (isExportPodConfigurationV2(config)) {
+      //   configs.push(config);
+      // }
+      configs.push(config);
     }
 
     return configs;

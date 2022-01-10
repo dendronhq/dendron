@@ -164,6 +164,17 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     fPath: path.join(podsDir, "notion.yml"),
     configSchema: NotionExportPodV2.config(),
     setProperties: podConfig4,
+    });
+    
+  const podConfigWithoutExportScope = {
+    podId: "test-config",
+    podType: PodV2Types.MarkdownExportV2,
+  };
+
+  ConfigFileUtils.genConfigFileV2({
+    fPath: path.join(podsDir, "test-config.yml"),
+    configSchema: MarkdownExportPodV2.config(),
+    setProperties: podConfigWithoutExportScope,
   });
 
   describe("WHEN getting a pod config by an existing ID", () => {

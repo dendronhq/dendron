@@ -110,7 +110,7 @@ export class GotoNoteCommand extends BasicCommand<
         opts.qs = note.fname;
         opts.vault = note.vault;
       } else {
-        const { wsRoot, vaults } = this.extension.getDWorkspace().engine;
+        const { wsRoot, vaults } = this.extension.getEngine();
         // Same file link within non-note file
         opts.qs = path.relative(
           wsRoot,
@@ -127,7 +127,7 @@ export class GotoNoteCommand extends BasicCommand<
   }
 
   private async maybeSetOptsFromExistingNote(opts: GoToNoteCommandOpts) {
-    const { engine } = this.extension.getDWorkspace();
+    const engine = this.extension.getEngine();
     const notes = NoteUtils.getNotesByFname({
       fname: opts.qs!,
       notes: engine.notes,
@@ -149,7 +149,7 @@ export class GotoNoteCommand extends BasicCommand<
   }
 
   private async maybeSetOptsFromNonNote(opts: GoToNoteCommandOpts) {
-    const { vaults, wsRoot } = this.extension.getDWorkspace().engine;
+    const { vaults, wsRoot } = this.extension.getEngine();
     const nonNote = await findNonNoteFile({
       fpath: opts.qs!,
       wsRoot,

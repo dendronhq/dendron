@@ -11,15 +11,13 @@ import path from "path";
 import * as vscode from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { VaultSelectionMode } from "../components/lookup/types";
-import {
-  NoteLookupProviderUtils,
-  PickerUtilsV2,
-} from "../components/lookup/utils";
+import { PickerUtilsV2 } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 export type CommandOpts = {
   fname: string;
@@ -37,11 +35,13 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
 > {
   key: string;
   trait: NoteTrait;
+  protected _extension: IDendronExtension;
 
-  constructor(commandId: string, trait: NoteTrait) {
+  constructor(ext: IDendronExtension, commandId: string, trait: NoteTrait) {
     super();
     this.key = commandId;
     this.trait = trait;
+    this._extension = ext;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
@@ -111,7 +111,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       title = this.trait.OnCreate.setTitle(context);
     }
 
-    const config = getDWorkspace().config;
+    const config = this._extension.getDWorkspace().config;
     const confirmVaultOnCreate =
       ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
 
@@ -138,7 +138,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       }
     }
 
-    await new GotoNoteCommand(getExtension()).execute({
+    await new GotoNoteCommand(this._extension).execute({
       qs: fname,
       vault,
       overrides: { title, traits: [this.trait] },
@@ -236,7 +236,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   }
 
   private checkWorkspaceTrustAndWarn(): boolean {
-    const engine = getExtension().getEngine();
+    const engine = this._extension.getEngine();
 
     if (!engine.trustedWorkspace) {
       vscode.window.showWarningMessage(

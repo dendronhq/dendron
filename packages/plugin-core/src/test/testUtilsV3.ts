@@ -55,9 +55,10 @@ import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
-import { WorkspaceInitFactory } from "../workspace/workspaceInitializer";
+import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
 import {
+  cleanupVSCodeContextSubscriptions,
   setupCodeConfiguration,
   SetupCodeConfigurationV2,
   stubWorkspace,
@@ -492,17 +493,6 @@ export function describeSingleWS(
     after(() => {
       cleanupVSCodeContextSubscriptions(opts.ctx);
     });
-  });
-}
-
-/**
- *  Releases all registered VS Code Extension resouces such as commands and
- *  providers
- * @param ctx
- */
-export function cleanupVSCodeContextSubscriptions(ctx: ExtensionContext) {
-  ctx.subscriptions.forEach((disposable) => {
-    disposable.dispose();
   });
 }
 

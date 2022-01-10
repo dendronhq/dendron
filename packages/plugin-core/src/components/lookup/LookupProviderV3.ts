@@ -20,12 +20,8 @@ import { AnalyticsUtils } from "../../utils/analytics";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
-import {
-  NotePickerUtils,
-  OldNewLocation,
-  PickerUtilsV2,
-  SchemaPickerUtils,
-} from "./utils";
+import { OldNewLocation, PickerUtilsV2 } from "./utils";
+import { NotePickerUtils, SchemaPickerUtils } from "../lookup/NotePickerUtils";
 import { transformQueryString } from "./queryStringTransformer";
 import stringSimilarity from "string-similarity";
 import { IDendronQuickInputButton } from "./ButtonTypes";

@@ -41,10 +41,10 @@ import {
 } from "../components/lookup/types";
 import {
   node2Uri,
-  NotePickerUtils,
   OldNewLocation,
   PickerUtilsV2,
 } from "../components/lookup/utils";
+import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
 import { DENDRON_COMMANDS, DendronContext } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";

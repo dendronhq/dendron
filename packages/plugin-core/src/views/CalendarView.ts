@@ -101,7 +101,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
             vault: note.vault,
           });
         } else if (fname) {
-          await new CreateDailyJournalCommand().execute({
+          await new CreateDailyJournalCommand(getExtension()).execute({
             fname,
           });
         }

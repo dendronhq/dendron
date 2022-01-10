@@ -431,6 +431,9 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      MetadataService.instance().setInitialInstall();
+    }
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -820,7 +823,6 @@ async function showWelcomeOrWhatsNew({
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
-      MetadataService.instance().setInitialInstall();
 
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),

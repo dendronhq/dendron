@@ -251,6 +251,13 @@ export class PodUIControls {
           );
           break;
         }
+        case ExternalService.Notion: {
+          await this.promptToCreateNewServiceConfig(ExternalService.Notion);
+          vscode.window.showInformationMessage(
+            `First setup a new ${connectionType} connection and then re-run the pod command.`
+          );
+          break;
+        }
         default:
       }
       return;
@@ -467,6 +474,9 @@ export class PodUIControls {
 
       case PodV2Types.GoogleDocsExportV2:
         return "Formats Dendron note to google doc";
+
+      case PodV2Types.NotionExportV2:
+        return "Exports notes to Notion";
 
       default:
         assertUnreachable();

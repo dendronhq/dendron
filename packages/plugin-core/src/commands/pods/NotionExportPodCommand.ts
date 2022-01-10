@@ -1,0 +1,257 @@
+import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import {
+  Client,
+  ConfigFileUtils,
+  createRunnableNotionV2PodConfigSchema,
+  ExportPodV2,
+  ExternalConnectionManager,
+  ExternalService,
+  isRunnableNotionV2PodConfig,
+  JSONSchemaType,
+  NotionConnection,
+  NotionExportPodV2,
+  NotionExportReturnType,
+  NotionFields,
+  NotionV2PodConfig,
+  Page,
+  PodV2Types,
+  RunnableNotionV2PodConfig,
+  TitlePropertyValue,
+} from "@dendronhq/pods-core";
+import _ from "lodash";
+import path from "path";
+import * as vscode from "vscode";
+import { ProgressLocation, window } from "vscode";
+import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
+import { PodUIControls } from "../../components/pods/PodControls";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { getExtension } from "../../workspace";
+import { BaseExportPodCommand } from "./BaseExportPodCommand";
+
+/**
+ * VSCode command for running the Notion Export Pod. It is not meant to be
+ * directly invoked throught the command palette, but is invoked by
+ * {@link ExportPodV2Command}
+ */
+export class NotionExportPodCommand extends BaseExportPodCommand<
+  RunnableNotionV2PodConfig,
+  NotionExportReturnType
+> {
+  public key = "dendron.notionexport";
+
+  public constructor() {
+    super(new QuickPickHierarchySelector());
+  }
+
+  public createPod(
+    config: RunnableNotionV2PodConfig
+  ): ExportPodV2<NotionExportReturnType> {
+    const { apiKey } = config;
+    const notion = new Client({
+      auth: apiKey,
+    });
+    return new NotionExportPodV2({
+      podConfig: config,
+      notion,
+    });
+  }
+
+  public getRunnableSchema(): JSONSchemaType<RunnableNotionV2PodConfig> {
+    return createRunnableNotionV2PodConfigSchema();
+  }
+
+  async gatherInputs(
+    opts?: Partial<NotionV2PodConfig & NotionConnection>
+  ): Promise<RunnableNotionV2PodConfig | undefined> {
+    let apiKey: string | undefined = opts?.apiKey;
+    let connectionId: string | undefined = opts?.connectionId;
+
+    // Get an Notion API Key
+    if (!apiKey) {
+      const mngr = new ExternalConnectionManager(getExtension().podsDir);
+      // If the apiKey doesn't exist, see if we can first extract it from the connectedServiceId:
+      if (opts?.connectionId) {
+        const config = mngr.getConfigById<NotionConnection>({
+          id: opts.connectionId,
+        });
+
+        if (!config) {
+          window.showErrorMessage(
+            `Couldn't find service config with the passed in connection ID ${opts.connectionId}.`
+          );
+          return;
+        }
+        apiKey = config.apiKey;
+      } else {
+        // Prompt User to pick an notion connection, or create a new one
+        // (which will stop execution of current pod command)
+        const connection =
+          await PodUIControls.promptForExternalServiceConnectionOrNew<NotionConnection>(
+            ExternalService.Notion
+          );
+
+        if (!connection) {
+          return;
+        }
+
+        connectionId = connection.connectionId;
+        apiKey = connection.apiKey;
+      }
+    }
+
+    // Get the export scope
+    const exportScope =
+      opts && opts.exportScope
+        ? opts.exportScope
+        : await PodUIControls.promptForExportScope();
+
+    if (!exportScope) {
+      return;
+    }
+
+    const pagesMap = await this.getAllNotionPages(apiKey);
+    const parentPage = await this.promptForParentPage(Object.keys(pagesMap));
+    if (_.isUndefined(parentPage)) return;
+    const parentPageId = pagesMap[parentPage];
+
+    const inputs = {
+      exportScope,
+      parentPageId,
+      ...opts,
+      podType: PodV2Types.NotionExportV2,
+      apiKey,
+      connectionId,
+    };
+
+    if (!isRunnableNotionV2PodConfig(inputs)) {
+      let id = inputs.podId;
+      if (!id) {
+        const picked = await PodUIControls.promptForGenericId();
+
+        if (!picked) {
+          return;
+        }
+        id = picked;
+      }
+
+      const configPath = ConfigFileUtils.genConfigFileV2({
+        fPath: path.join(getExtension().podsDir, "custom", `config.${id}.yml`),
+        configSchema: NotionExportPodV2.config(),
+        setProperties: _.merge(inputs, {
+          podId: id,
+          connectionId: inputs.connectionId,
+        }),
+      });
+
+      await VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
+      //TODO: Modify message:
+      window.showInformationMessage(
+        "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
+      );
+      return;
+    } else {
+      return inputs;
+    }
+  }
+
+  public async onExportComplete({
+    exportReturnValue,
+  }: {
+    exportReturnValue: NotionExportReturnType;
+    config: RunnableNotionV2PodConfig;
+    payload: NoteProps[];
+  }) {
+    console.log("exportReturnValue", exportReturnValue);
+    const { data } = exportReturnValue;
+    if (data?.created) {
+      await this.updateNotionIdForNewlyCreatedNotes(data.created);
+    }
+    const createdCount = data?.created?.length ?? 0;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Notion Export. ${createdCount} notes created in Notion; Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      window.showInformationMessage(
+        `Finished Notion Export. ${createdCount} notes created in Notion`
+      );
+    }
+  }
+
+  getAllNotionPages = async (apiKey: string) => {
+    const pagesMap = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Fetching Parent Pages...",
+        cancellable: false,
+      },
+      async () => {
+        const notion = new Client({
+          auth: apiKey,
+        });
+        const allDocs = await notion.search({
+          sort: { direction: "descending", timestamp: "last_edited_time" },
+          filter: { value: "page", property: "object" },
+        });
+        const pagesMap: { [key: string]: string } = {};
+        const pages = allDocs.results as Page[];
+        pages.map((page: Page) => {
+          const key = this.getPageName(page);
+          const value = page.id;
+          pagesMap[key] = value;
+        });
+        return pagesMap;
+      }
+    );
+    return pagesMap;
+  };
+
+  /**
+   * Method to get page name of a Notion Page
+   */
+  getPageName = (page: Page) => {
+    const { title } =
+      page.parent.type !== "database_id"
+        ? (page.properties.title as TitlePropertyValue)
+        : (page.properties.Name as TitlePropertyValue);
+    return title[0] ? title[0].plain_text : "Untitled";
+  };
+
+  promptForParentPage = async (pagesMap: string[]) => {
+    const pickItems = pagesMap.map((page) => {
+      return {
+        label: page,
+      };
+    });
+    const selected = await window.showQuickPick(pickItems, {
+      placeHolder: "Choose the Parent Page",
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      canPickMany: false,
+    });
+    if (!selected) {
+      return;
+    }
+    return selected.label;
+  };
+
+  updateNotionIdForNewlyCreatedNotes = async (records: NotionFields[]) => {
+    const engine = ExtensionProvider.getEngine();
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { notionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          notionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
+  };
+}

@@ -5,6 +5,7 @@ import {
   AirtableConnection,
   ConfigFileUtils,
   GoogleDocsConnection,
+  NotionConnection,
 } from "../..";
 
 /**
@@ -38,7 +39,8 @@ export function isExternalTarget(object: any): object is ExternalTarget {
  */
 export enum ExternalService {
   Airtable = "Airtable",
-  GoogleDocs = "GoogleDocs", // TODO: Not actually implemented yet
+  GoogleDocs = "GoogleDocs",
+  Notion = "Notion",
 }
 
 /**
@@ -85,6 +87,14 @@ export class ExternalConnectionManager {
         const file = ConfigFileUtils.genConfigFileV2<GoogleDocsConnection>({
           fPath: path.join(this.configRootPath, `svcconfig.${id}.yml`),
           configSchema: GoogleDocsConnection.getSchema(),
+          setProperties: { connectionId: id },
+        });
+        return file;
+      }
+      case ExternalService.Notion: {
+        const file = ConfigFileUtils.genConfigFileV2<NotionConnection>({
+          fPath: path.join(this.configRootPath, `svcconfig.${id}.yml`),
+          configSchema: NotionConnection.getSchema(),
           setProperties: { connectionId: id },
         });
         return file;

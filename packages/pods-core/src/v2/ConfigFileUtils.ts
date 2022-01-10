@@ -8,6 +8,7 @@ import {
   GoogleDocsExportPodV2,
   MarkdownExportPodV2,
   PodV2Types,
+  NotionExportPodV2,
 } from "..";
 
 export class ConfigFileUtils {
@@ -109,6 +110,8 @@ export class ConfigFileUtils {
         return GoogleDocsExportPodV2.config();
       case PodV2Types.MarkdownExportV2:
         return MarkdownExportPodV2.config();
+      case PodV2Types.NotionExportV2:
+        return NotionExportPodV2.config();
       default:
         assertUnreachable();
     }

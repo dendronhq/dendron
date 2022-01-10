@@ -123,10 +123,7 @@ export function resolveTilde(filePath: string) {
     return "";
   }
   // '~/folder/path' or '~'
-  if (
-    filePath[0] === "~" &&
-    (filePath[1] === path.sep || filePath.length === 1)
-  ) {
+  if (filePath[0] === "~" && (filePath[1] === "/" || filePath.length === 1)) {
     return filePath.replace("~", os.homedir());
   }
   return filePath;

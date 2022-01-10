@@ -60,7 +60,12 @@ class AirtableUtilsV2 {
           const _records = await func(record);
           return _records;
         } catch (error) {
-          errors.push(error as DendronError);
+          const _error = new DendronError({
+            innerError: error as Error,
+            payload: record,
+            message: "error with airtable",
+          });
+          errors.push(_error);
           return;
         }
       })

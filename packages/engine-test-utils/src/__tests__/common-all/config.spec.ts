@@ -49,7 +49,7 @@ describe("WHEN getConfig from note", () => {
 });
 
 describe("ConfigUtils", () => {
-  describe.only("configIsValid", () => {
+  describe("configIsValid", () => {
     describe("GIVEN config v2 and client version 0.62", () => {
       test("THEN config is invalid because client is incompatible", (done) => {
         const resp = ConfigUtils.configIsValid({

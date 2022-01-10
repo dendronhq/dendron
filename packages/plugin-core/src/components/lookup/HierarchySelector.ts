@@ -3,10 +3,10 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
 import { LookupControllerV3CreateOpts } from "./LookupControllerV3Interface";
-import { NoteLookupProviderUtils } from "./utils";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { NoteLookupProviderUtils } from "./NotePickerUtils";
 
 /**
  * Interface for a user (or test mock) control for selecting a hierarchy. Mostly

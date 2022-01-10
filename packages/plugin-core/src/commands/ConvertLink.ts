@@ -22,7 +22,7 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
-import { NoteLookupProviderUtils } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 

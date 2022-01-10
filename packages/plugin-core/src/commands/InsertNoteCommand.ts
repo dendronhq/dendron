@@ -2,7 +2,7 @@ import { ConfigUtils, NoteQuickInput } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Selection, SnippetString } from "vscode";
-import { NoteLookupProviderUtils } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";

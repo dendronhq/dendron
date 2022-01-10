@@ -5,6 +5,7 @@ import vscode from "vscode";
 import { CreateNoteWithTraitCommand } from "../../../../commands/CreateNoteWithTraitCommand";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { getDWorkspace } from "../../../../workspace";
+import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
 import { TestTrait } from "./TestTrait";
@@ -27,7 +28,11 @@ suite("CreateNoteWithTraitCommand tests", () => {
       test(`THEN expect the title to have been modified`, async () => {
         const { engine, wsRoot, vaults } = getDWorkspace();
         const testTrait = new TestTrait();
+
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
         const cmd = new CreateNoteWithTraitCommand(
+          mockExtension,
           "test-create-note-with-trait",
           testTrait
         );

@@ -1,25 +1,10 @@
-import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
-import { RemarkUtils, WorkspaceUtils } from "@dendronhq/engine-server";
-
-import _ from "lodash";
-import {
-  ExtensionContext,
-  Selection,
-  TextEditor,
-  TextEditorVisibleRangesChangeEvent,
-  window,
-} from "vscode";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { IDendronExtension } from "./dendronExtensionInterface";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
-import { VSCodeUtils } from "./vsCodeUtils";
-import { getDWorkspace, getExtension } from "./workspace";
-
-const context = (scope: string) => {
-  const ROOT_CTX = "WindowWatcher";
-  return ROOT_CTX + ":" + scope;
-};
 
 /**
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
@@ -29,11 +14,17 @@ export class WindowWatcher {
     e: TextEditor | undefined
   ) => void)[] = [];
 
-  activate(context: ExtensionContext) {
-    const extension = getExtension();
+  private _extension: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    this._extension = extension;
+  }
+
+  activate() {
+    const context = this._extension.context;
 
     // provide logging whenever window changes
-    extension.addDisposable(
+    this._extension.addDisposable(
       window.onDidChangeVisibleTextEditors(
         sentryReportingCallback((editors: TextEditor[]) => {
           const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
@@ -44,14 +35,14 @@ export class WindowWatcher {
         })
       )
     );
-    extension.addDisposable(
+    this._extension.addDisposable(
       window.onDidChangeActiveTextEditor(
         this.onDidChangeActiveTextEditor,
         this,
         context.subscriptions
       )
     );
-    extension.addDisposable(
+    this._extension.addDisposable(
       window.onDidChangeTextEditorVisibleRanges(
         this.onDidChangeTextEditorVisibleRanges,
         this,
@@ -76,7 +67,7 @@ export class WindowWatcher {
       ) {
         const uri = editor.document.uri;
         this.triggerNotePreviewUpdate(editor);
-        if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        if (this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });
@@ -87,15 +78,6 @@ export class WindowWatcher {
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
         );
-
-        // we have custom logic for newly opened documents
-        if (
-          getExtension().workspaceWatcher?.getNewlyOpenedDocument(
-            editor.document
-          )
-        ) {
-          this.onFirstOpen(editor);
-        }
       } else {
         Logger.info({ ctx, editor: "undefined" });
       }
@@ -111,7 +93,7 @@ export class WindowWatcher {
         return;
       }
       const uri = editor.document.uri;
-      const { vaults, wsRoot } = getDWorkspace();
+      const { vaults, wsRoot } = this._extension.getDWorkspace();
       if (
         !WorkspaceUtils.isPathInWorkspace({ fpath: uri.fsPath, vaults, wsRoot })
       ) {
@@ -140,39 +122,5 @@ export class WindowWatcher {
    */
   triggerNotePreviewUpdate({ document }: TextEditor) {
     return ShowPreviewCommand.openDocumentInPreview(document);
-  }
-
-  private async onFirstOpen(editor: TextEditor) {
-    Logger.info({
-      ctx: context("onFirstOpen"),
-      msg: "enter",
-      fname: NoteUtils.uri2Fname(editor.document.uri),
-    });
-    this.moveCursorPastFrontmatter(editor);
-    const config = getDWorkspace().config;
-    if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
-      await this.foldFrontmatter();
-    }
-    Logger.info({
-      ctx: context("onFirstOpen"),
-      msg: "exit",
-      fname: NoteUtils.uri2Fname(editor.document.uri),
-    });
-  }
-
-  private moveCursorPastFrontmatter(editor: TextEditor) {
-    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
-      editor.document.getText()
-    );
-    if (!_.isUndefined(nodePosition)) {
-      const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
-        line: 1,
-      });
-      editor.selection = new Selection(position, position);
-    }
-  }
-
-  private async foldFrontmatter() {
-    await VSCodeUtils.foldActiveEditorAtPosition({ line: 0 });
   }
 }

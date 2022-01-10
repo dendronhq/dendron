@@ -51,13 +51,13 @@ import {
   _activate,
 } from "../../_extension";
 import {
+  cleanupVSCodeContextSubscriptions,
   expect,
   genDefaultSettings,
   genEmptyWSFiles,
   resetCodeWorkspace,
 } from "../testUtilsv2";
 import {
-  cleanupVSCodeContextSubscriptions,
   describeMultiWS,
   runLegacySingleWorkspaceTest,
   runTestButSkipForWindows,

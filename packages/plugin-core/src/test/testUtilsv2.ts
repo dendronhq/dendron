@@ -47,7 +47,6 @@ import { BlankInitializer } from "../workspace/blankInitializer";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 import { WSUtils } from "../WSUtils";
-import { cleanupVSCodeContextSubscriptions } from "./testUtilsV3";
 
 export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -471,5 +470,16 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
   stubWorkspaceFile(wsRoot);
   stubWorkspaceFolders(wsRoot, vaults);
 };
+
+/**
+ *  Releases all registered VS Code Extension resouces such as commands and
+ *  providers
+ * @param ctx
+ */
+export function cleanupVSCodeContextSubscriptions(ctx: ExtensionContext) {
+  ctx.subscriptions.forEach((disposable) => {
+    disposable.dispose();
+  });
+}
 
 export * from "./expect";

@@ -5,11 +5,11 @@ import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
 import {
-  NoteLookupProviderUtils,
   OldNewLocation,
   PickerUtilsV2,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../vsCodeUtils";

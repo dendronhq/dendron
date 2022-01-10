@@ -128,7 +128,7 @@ export class DoctorService {
     let notes: NoteProps[];
     if (_.isUndefined(candidates)) {
       notes = query
-        ? engine.queryNotesSync({ qs: query }).data
+        ? engine.queryNotesSync({ qs: query, originalQS: query }).data
         : _.values(engine.notes);
     } else {
       notes = candidates;

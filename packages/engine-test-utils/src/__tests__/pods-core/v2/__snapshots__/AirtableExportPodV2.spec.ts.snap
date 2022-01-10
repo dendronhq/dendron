@@ -78,6 +78,23 @@ Object {
 }
 `;
 
+exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is a tag  AND no matching tags for singleSelect THEN field is exported  1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
 exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is a tag  AND single matching tags for singleSelect THEN field is exported  1`] = `
 Object {
   "data": Object {
@@ -96,7 +113,24 @@ Object {
 }
 `;
 
-exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is regular fm field THEN field is exported  1`] = `
+exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is regular fm field AND WHEN value is empty THEN field is not exported 1`] = `
+Object {
+  "data": Object {
+    "created": Array [
+      Object {
+        "fields": Object {
+          "DendronId": "alpha",
+        },
+        "id": "airtable-alpha",
+      },
+    ],
+    "updated": Array [],
+  },
+  "error": null,
+}
+`;
+
+exports[`WHEN export note with singleSelect  AND GIVEN singleSelect is regular fm field AND WHEN value is filled THEN field is exported  1`] = `
 Object {
   "data": Object {
     "created": Array [

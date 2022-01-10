@@ -2,7 +2,7 @@ import {
   ALL_MIGRATIONS,
   MigrationChangeSetStatus,
   Migrations,
-  MigrationServce,
+  MigrationService,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -41,7 +41,7 @@ export class RunMigrationCommand extends BasicCommand<
         };
       }
     );
-    
+
     if (_.isUndefined(opts)) {
       const selected = await vscode.window
         .showQuickPick(migrationItems)
@@ -73,7 +73,7 @@ export class RunMigrationCommand extends BasicCommand<
           cancellable: false,
         },
         async () => {
-          const out = await MigrationServce.applyMigrationRules({
+          const out = await MigrationService.applyMigrationRules({
             currentVersion: version,
             previousVersion: "0.0.0",
             migrations: migrationsToRun,

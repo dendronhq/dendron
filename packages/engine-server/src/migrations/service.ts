@@ -23,7 +23,7 @@ type ApplyMigrationRuleOpts = {
   logger: DLogger;
 };
 
-export class MigrationServce {
+export class MigrationService {
   static async applyMigrationRules({
     currentVersion,
     previousVersion,

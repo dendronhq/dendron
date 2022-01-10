@@ -618,6 +618,46 @@ export class InactiveUserPlugDiscordSurvey extends DendronQuickPickSurvey {
   }
 }
 
+export class InactiveUserFeedbackCallSurvey extends DendronQuickPickSurvey {
+  CALENDLY_URL = "https://calendly.com/d/mqtk-rf7q/onboard";
+  openFeedbackCallLink = false;
+  async onAnswer(result: vscode.QuickPickItem) {
+    if (result.label === "Yes") {
+      this.openFeedbackCallLink = true;
+      vscode.window.showInformationMessage(
+        "Thank you for considering a feedback session.",
+        {
+          modal: true,
+          detail: "We will take you to the link after the survey.",
+        },
+        { title: "Proceed with Survey" }
+      );
+    }
+
+    AnalyticsUtils.track(SurveyEvents.InactiveUserFeedbackCallAnswered, {
+      result: result.label,
+    });
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.InactiveUserFeedbackCallRejected);
+  }
+
+  static create() {
+    const title =
+      "Would you like to book a call to share more about your experience and how we could improve Dendron? There will be a small monetary compensation if you choose to particiapate.";
+    const placeHolder =
+      "Would you like to schedule a 30 minute feedback session?";
+    const choices = [{ label: "Yes" }, { label: "No" }];
+    return new InactiveUserFeedbackCallSurvey({
+      title,
+      choices,
+      canPickMany: false,
+      placeHolder,
+    });
+  }
+}
+
 export class SurveyUtils {
   /**
    * Asks three questions about background, use case, and prior tools used.
@@ -772,20 +812,29 @@ export class SurveyUtils {
           const onboardingSurvey = InactiveUserOnboardingSurvey.create();
           const additionalCommentSurvey =
             InactiveUserAdditionalCommentSurvey.create();
+          const feedbackCallSurvey = InactiveUserFeedbackCallSurvey.create();
           const discordPlugSurvey = InactiveUserPlugDiscordSurvey.create();
 
-          const reasonResults = await reasonSurvey.show(1, 4);
-          const onboardingResults = await onboardingSurvey.show(2, 4);
+          const reasonResults = await reasonSurvey.show(1, 5);
+          const onboardingResults = await onboardingSurvey.show(2, 5);
           const additionCommentResult = await additionalCommentSurvey.show(
             3,
-            4
+            5
           );
-          const discordPlugResult = await discordPlugSurvey.show(4, 4);
+          const feedbackCallResults = await feedbackCallSurvey.show(4, 5);
+          const discordPlugResult = await discordPlugSurvey.show(5, 5);
 
           if (onboardingSurvey.openOnboardingLink) {
             await vscode.commands.executeCommand(
               "vscode.open",
               vscode.Uri.parse(onboardingSurvey.CALENDLY_URL)
+            );
+          }
+
+          if (feedbackCallSurvey.openFeedbackCallLink) {
+            await vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(feedbackCallSurvey.CALENDLY_URL)
             );
           }
 
@@ -800,6 +849,7 @@ export class SurveyUtils {
             reasonResults,
             onboardingResults,
             additionCommentResult,
+            feedbackCallResults,
             discordPlugResult,
           ].filter((value) => !_.isUndefined(value)).length;
           AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyAccepted, {

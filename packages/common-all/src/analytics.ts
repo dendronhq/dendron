@@ -78,6 +78,8 @@ export enum SurveyEvents {
   InactiveUserGettingStartedHelpRejected = "Inactive_User_Getting_Started_Help_Rejected",
   InactiveUserAdditionalCommentAnswered = "Inactive_User_Additional_Comment_Answered",
   InactiveUserAdditionalCommentRejected = "Inactive_User_Additional_Comment_Rejected",
+  InactiveUserFeedbackCallAnswered = "Inactive_User_Feedback_Call_Answered",
+  InactiveUserFeedbackCallRejected = "Inactive_User_Feedback_Call_Rejected",
   InactiveUserDiscordPlugAnswered = "Inactive_User_Discord_Plug_Answered",
   InactiveUserDiscordPlugRejected = "Inactive_User_Discord_Plug_Rejected",
   InactiveUserSurveyPrompted = "Inactive_User_Survey_Prompted",

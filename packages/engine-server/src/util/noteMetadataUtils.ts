@@ -51,7 +51,7 @@ export class NoteMetadataUtils {
     });
   }
 
-  static checkIfAllowNullOrUndefind(
+  static checkIfAllowNullOrUndefined(
     val: any,
     { required, strictNullChecks }: NoteMetadataValidationProps
   ) {
@@ -69,7 +69,7 @@ export class NoteMetadataUtils {
     props: NoteMetadataValidationProps
   ) {
     if (
-      NoteMetadataUtils.checkIfAllowNullOrUndefind(val, props) !==
+      NoteMetadataUtils.checkIfAllowNullOrUndefined(val, props) !==
       NullOrUndefined.NO_UNDEFINED_OR_NULL
     ) {
       return { data: undefined };

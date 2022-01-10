@@ -66,6 +66,7 @@ import {
 } from "../testUtilsV3";
 import semver from "semver";
 import * as vscode from "vscode";
+import { AnalyticsUtils } from "../../utils/analytics";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -487,6 +488,32 @@ suite("Extension", function () {
             firstInstall: 1,
             firstWsInitialize: 1,
             shouldDisplayMessage: false,
+          });
+        });
+      });
+
+      describe("firstWeekSinceInstall", () => {
+        describe("GIVEN first week", () => {
+          test("THEN isFirstWeek is true", (done) => {
+            const svc = MetadataService.instance();
+            svc.setInitialInstall();
+
+            const actual = AnalyticsUtils.isFirstWeek();
+            expect(actual).toBeTruthy();
+            done();
+          });
+        });
+        describe("GIVEN not first week", () => {
+          test("THEN isFirstWeek is false", (done) => {
+            const svc = MetadataService.instance();
+            const ONE_WEEK = 604800;
+            const NOW = Time.now().toSeconds();
+            const TWO_WEEKS_BEFORE = NOW - 2 * ONE_WEEK;
+            svc.setMeta("firstInstall", TWO_WEEKS_BEFORE);
+
+            const actual = AnalyticsUtils.isFirstWeek();
+            expect(actual).toBeFalsy();
+            done();
           });
         });
       });

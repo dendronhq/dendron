@@ -27,6 +27,11 @@ const DEFAULT_OPENGRAPH_RESPONSE_SUCCESS = {
 } as ogs.SuccessResult;
 const DEFAULT_OPENGRAPH_RESPONSE_FAIL = { error: true } as ogs.ErrorResult;
 
+const OPENGRAPH_RESPONSE_SUCCESS_NOTTRIMMED = {
+  error: false,
+  result: { ogTitle: "\n \t Dendron Home \n \t " },
+} as ogs.SuccessResult;
+
 // TODO: issues with stubbing proprty using sinon
 suite("pasteLink", function () {
   const ctx = setupBeforeAfter(this);
@@ -47,6 +52,29 @@ suite("pasteLink", function () {
         sinon
           .stub(utils, "getOpenGraphMetadata")
           .returns(Promise.resolve(DEFAULT_OPENGRAPH_RESPONSE_SUCCESS));
+
+        const formattedLink = await new PasteLinkCommand().run();
+        expect(formattedLink).toEqual(`[Dendron Home](https://dendron.so)`);
+      });
+    }
+  );
+
+  describeMultiWS(
+    "WHEN pasting link without trimmed title",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      ctx,
+    },
+    () => {
+      test("THEN trims link title", async () => {
+        // You can access the workspace inside the test like this:
+        const { engine } = getDWorkspace();
+        const note = engine.notes["foo"];
+        await WSUtils.openNote(note);
+        utils.clipboard.writeText("https://dendron.so");
+        sinon
+          .stub(utils, "getOpenGraphMetadata")
+          .returns(Promise.resolve(OPENGRAPH_RESPONSE_SUCCESS_NOTTRIMMED));
 
         const formattedLink = await new PasteLinkCommand().run();
         expect(formattedLink).toEqual(`[Dendron Home](https://dendron.so)`);

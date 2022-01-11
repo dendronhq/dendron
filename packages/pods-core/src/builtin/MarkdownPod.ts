@@ -9,10 +9,15 @@ import {
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
+  DendronASTNode,
+  DendronASTTypes,
+  Image,
+  Link,
   MDUtilsV4,
   MDUtilsV5,
-  ProcMode,
   RemarkUtils,
+  selectAll,
+  WikiLinkNoteV4,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import klaw, { Item } from "klaw";
@@ -161,7 +166,11 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     return { engineFileDict, assetFileDict };
   }
 
-  _files2HierarichalDict(opts: {
+  /** Collects all notes and copies assets in the given files/folders, and creates asset summary notes.
+   *
+   * @returns The created notes and a map of asset paths to imported paths.
+   */
+  private async collectNotesCopyAssets(opts: {
     files: DItem[];
     src: string;
     vault: DVault;
@@ -170,66 +179,71 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   }) {
     const { files, src, vault, wsRoot, config } = opts;
     const out: HierarichalDict = {};
-    const assetHashMap = new Map<string, string>();
-    _.forEach(files, (item) => {
-      const fname = cleanFileName(item.path, {
-        isDir: item.stats.isDirectory(),
-      });
-      const lvl = fname.split(".").length;
-      if (!_.has(out, lvl)) {
-        out[lvl] = [];
-      }
-      const isDir = item.stats.isDirectory();
-      const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
-      const noteProps = NoteUtils.create({
-        fname,
-        stub,
-        vault,
-        custom: { isDir },
-      });
-      if (item?.body) {
-        noteProps.body = item.body;
-      }
-      if (item?.data) {
-        noteProps.data = item.data;
-      }
-
-      // deal with non-md files
-      if (!_.isEmpty(item.entries)) {
-        // move entries over
-        // TODO: don't hardcode assets
-        const assetDirName = "assets";
-        const vpath = vault2Path({ vault, wsRoot });
-        const assetDir = path.join(vpath, assetDirName);
-        fs.ensureDirSync(assetDir);
-        const mdLinks: string[] = [];
-        item.entries.map((_item) => {
-          const { ext, name } = path.parse(_item.path);
-          let assetBaseNew: string;
-          if (config.noAddUUID) {
-            assetBaseNew = `${cleanFileName(name)}${ext}`;
-          } else {
-            const uuid = genUUIDInsecure();
-            assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
-          }
-          const assetPathFull = path.join(assetDir, assetBaseNew);
-          const assetPathRel = path
-            .join(assetDirName, assetBaseNew)
-            .replace(/[\\]/g, "/");
-          const key = _.replace(_item.path as string, /[\\|/|.]/g, "");
-          assetHashMap.set(key, `/${assetPathRel}`);
-
-          fs.copyFileSync(path.join(src, _item.path), assetPathFull);
-          mdLinks.push(
-            toMarkdownLink(`/${assetPathRel}`, { name: `${name}${ext}` })
-          );
+    const assetMap = new Map<string, string>();
+    // collect the assets in concurrently
+    await Promise.all(
+      files.map(async (item) => {
+        const fname = cleanFileName(item.path, {
+          isDir: item.stats.isDirectory(),
         });
-        noteProps.body = `## Imported Assets\n${mdLinks.join("\n")}`;
-      }
+        const lvl = fname.split(".").length;
+        if (!_.has(out, lvl)) {
+          out[lvl] = [];
+        }
+        const isDir = item.stats.isDirectory();
+        const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
+        const noteProps = NoteUtils.create({
+          fname,
+          stub,
+          vault,
+          custom: { isDir },
+        });
+        if (item?.body) {
+          noteProps.body = item.body;
+        }
+        if (item?.data) {
+          noteProps.data = item.data;
+        }
 
-      out[lvl].push(noteProps);
-    });
-    return { hDict: out, assetHashMap };
+        // deal with non-md files
+        if (!_.isEmpty(item.entries)) {
+          // move entries over
+          // TODO: don't hardcode assets
+          const assetDirName = "assets";
+          const vpath = vault2Path({ vault, wsRoot });
+          const assetDir = path.join(vpath, assetDirName);
+          await fs.ensureDir(assetDir);
+          const mdLinks: string[] = [];
+          await Promise.all(
+            item.entries.map(async (subItem) => {
+              const { ext, name } = path.parse(subItem.path);
+              let assetBaseNew: string;
+              if (config.noAddUUID) {
+                assetBaseNew = `${cleanFileName(name)}${ext}`;
+              } else {
+                const uuid = genUUIDInsecure();
+                assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
+              }
+              const assetPathFull = path.join(assetDir, assetBaseNew);
+              const assetPathRel = path
+                .join(assetDirName, assetBaseNew)
+                .replace(/[\\]/g, "/");
+              const key = MarkdownImportPod.cleanAssetPath(subItem.path);
+              assetMap.set(key, `/${assetPathRel}`);
+
+              await fs.copyFile(path.join(src, subItem.path), assetPathFull);
+              mdLinks.push(
+                toMarkdownLink(`/${assetPathRel}`, { name: `${name}${ext}` })
+              );
+            })
+          );
+          noteProps.body = `## Imported Assets\n${mdLinks.join("\n")}`;
+        }
+
+        out[lvl].push(noteProps);
+      })
+    );
+    return { hDict: out, assetMap };
   }
 
   hDict2Notes(
@@ -272,6 +286,117 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     return _.values(noteDict);
   }
 
+  /** Cleans up a link following Dendron best practices, converting slashes to dots and spaces to dashes. */
+  private static cleanLinkValue(link: WikiLinkNoteV4): string {
+    return link.value.toLowerCase().replace(/[\\/]/g, ".").replace(/\s/g, "-");
+  }
+
+  static async updateLinks({
+    note,
+    siblingNotes,
+    tree,
+    proc,
+  }: {
+    note: NoteProps;
+    siblingNotes: NoteProps[];
+    tree: DendronASTNode;
+    proc: ReturnType<typeof MDUtilsV5["procRemarkFull"]>;
+  }) {
+    const linkPrefix = note.fname.substring(0, note.fname.lastIndexOf(".") + 1);
+    const lines = note.body.split("\n");
+
+    const links: WikiLinkNoteV4[] = selectAll(
+      DendronASTTypes.WIKI_LINK,
+      tree
+    ) as WikiLinkNoteV4[];
+
+    links.forEach((link) => {
+      const prevValue = link.value;
+      const linkValue = this.cleanLinkValue(link);
+      const newValue = linkPrefix.concat(linkValue);
+      link.value =
+        siblingNotes.filter(
+          (note) => note.fname.toLowerCase() === newValue.toLowerCase()
+        ).length > 0
+          ? newValue
+          : linkValue;
+      // If link has the default alias, update that too to avoid writing a stale alias
+      if (prevValue === link.data.alias) {
+        link.data.alias = link.value;
+      }
+
+      const { start, end } = link.position!;
+      const line = lines[start.line - 1];
+
+      lines[start.line - 1] = [
+        line.slice(undefined, start.column - 1),
+        proc.stringify(link),
+        line.slice(end.column - 1, undefined),
+      ].join("");
+    });
+    note.body = lines.join("\n");
+  }
+
+  static cleanAssetPath(path: string): string {
+    return path.replace(/[\\|/.]/g, "");
+  }
+
+  /** Gets all links to assets. */
+  static async updateAssetLinks({
+    note,
+    tree,
+    assetMap,
+    proc,
+  }: {
+    note: NoteProps;
+    tree: DendronASTNode;
+    assetMap: Map<string, string>;
+    proc: ReturnType<typeof MDUtilsV5["procRemarkFull"]>;
+  }) {
+    const assetReferences = [
+      ...selectAll(DendronASTTypes.IMAGE, tree),
+      ...selectAll(DendronASTTypes.LINK, tree),
+    ] as unknown as (Image | Link)[];
+    const lines = note.body.split("\n");
+
+    await Promise.all(
+      assetReferences.map(async (asset) => {
+        const key = this.cleanAssetPath(asset.url);
+        let url: string | undefined;
+
+        // Try finding what the new URL should be
+        const assetUrl = assetMap.get(key);
+        if (assetUrl) {
+          url = assetUrl;
+        } else {
+          // for relative links
+          const prefix = _.replace(
+            note.fname.substring(0, note.fname.lastIndexOf(".")),
+            /[\\|/.]/g,
+            ""
+          );
+          const value = assetMap.get(prefix.concat(key));
+          // @ts-ignore
+          if (value) url = value;
+        }
+
+        // If we did manage to find it, then update this link
+        if (url !== undefined && url !== "") {
+          asset.url = url;
+          const { start, end } = asset.position!;
+          const line = lines[start.line - 1];
+          lines[start.line - 1] = [
+            line.slice(undefined, start.column - 1),
+            proc.stringify(asset),
+            line.slice(end.column - 1, undefined),
+          ].join("");
+        }
+      })
+    );
+
+    note.body = lines.join("\n");
+  }
+
   async plant(
     opts: MarkdownImportPodPlantOpts
   ): Promise<MarkdownImportPodResp> {
@@ -282,7 +407,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     const { items, errors } = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
-    const { hDict, assetHashMap } = this._files2HierarichalDict({
+    const { hDict, assetMap } = await this.collectNotesCopyAssets({
       files: _.values(engineFileDict),
       src: src.fsPath,
       vault,
@@ -292,42 +417,38 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     const notes = this.hDict2Notes(hDict, config);
     const notesClean = await Promise.all(
       notes
-        .filter((n) => !n.stub)
-        .map(async (n) => {
-          const noteDirlevel = n.fname.split(".").length;
-          //notes in same level with n
+        .filter((note) => !note.stub)
+        .map(async (note) => {
+          //notes in same level with note
+          const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
-          const wikilinkPrefix = n.fname.substring(
-            0,
-            n.fname.lastIndexOf(".") + 1
-          );
-          const cBody = await MDUtilsV5.procRemarkFull(
-            {
-              fname: n.fname,
-              engine,
-              dest: DendronASTDest.MD_DENDRON,
-              vault: n.vault,
-            },
-            { mode: ProcMode.IMPORT }
-          )
-            .use(
-              RemarkUtils.convertLinksToDotNotation(
-                n,
-                [],
-                wikilinkPrefix,
-                siblingNotes
-              )
-            )
-            .use(RemarkUtils.convertAssetReferences(n, assetHashMap, []))
-            .process(n.body);
-          n.body = cBody.toString();
+          const proc = MDUtilsV5.procRemarkFull({
+            engine,
+            fname: note.fname,
+            vault: note.vault,
+            dest: DendronASTDest.MD_DENDRON,
+          });
+
+          const tree = proc.parse(note.body) as DendronASTNode;
+          await MarkdownImportPod.updateLinks({
+            note,
+            tree,
+            siblingNotes,
+            proc,
+          });
+          await MarkdownImportPod.updateAssetLinks({
+            note,
+            tree,
+            assetMap,
+            proc,
+          });
           if (config.frontmatter) {
-            n.custom = _.merge(n.custom, config.frontmatter);
+            note.custom = _.merge(note.custom, config.frontmatter);
           }
           if (config.fnameAsId) {
-            n.id = n.fname;
+            note.id = note.fname;
           }
-          return n;
+          return note;
         })
     );
     await engine.bulkAddNotes({ notes: notesClean });

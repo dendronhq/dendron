@@ -8,7 +8,7 @@ import {
   createSerializedFuseNoteIndex,
   ConfigUtils,
 } from "@dendronhq/common-all";
-import { simpleGit } from "@dendronhq/common-server";
+import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
   MDUtilsV5,
   ProcFlavor,
@@ -24,6 +24,10 @@ import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
 
 const ID = "dendron.nextjs";
+
+const TEMPLATE_REMOTE = "origin";
+const TEMPLATE_REMOTE_URL = "https://github.com/dendronhq/nextjs-template.git";
+const TEMPLATE_BRANCH = "main";
 
 const $$ = execa.command;
 
@@ -104,12 +108,41 @@ export class NextjsExportPodUtils {
   static async cloneTemplate(opts: { nextPath: string }) {
     const { nextPath } = opts;
 
-    const url = "https://github.com/dendronhq/nextjs-template.git";
     await fs.ensureDir(nextPath);
     const git = simpleGit({ baseDir: nextPath });
-    await git.clone(url, nextPath);
+    await git.clone(TEMPLATE_REMOTE_URL, nextPath);
 
     return { error: null };
+  }
+
+  static async updateTemplate(opts: { nextPath: string }) {
+    const { nextPath } = opts;
+    const git = simpleGit({ baseDir: nextPath });
+
+    const remotes = await git.getRemotes(true);
+    if (
+      remotes.length !== 1 ||
+      remotes[0].name !== TEMPLATE_REMOTE ||
+      remotes[0].refs.fetch !== TEMPLATE_REMOTE_URL ||
+      remotes[0].refs.push !== TEMPLATE_REMOTE_URL
+    ) {
+      throw new Error("remotes not set up correctly");
+    }
+
+    const status = await git.status();
+    if (status.current !== TEMPLATE_BRANCH) {
+      throw new Error(`${status.current} is not expected branch`);
+    }
+    const remoteBranch = `${TEMPLATE_REMOTE}/${TEMPLATE_BRANCH}`;
+    if (status.tracking !== remoteBranch) {
+      throw new Error(`${status.tracking} is not expected remote branch`);
+    }
+    if (status.ahead !== 0 || !status.isClean()) {
+      throw new Error("working copy is not clean");
+    }
+
+    await git.fetch();
+    await git.reset(SimpleGitResetMode.HARD, [remoteBranch]);
   }
 
   static async isInitialized(opts: { wsRoot: string }) {

@@ -313,19 +313,33 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { wsRoot, spinner } = opts;
     const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
 
-    const nextPathExists = await this._nextPathExists({
+    let nextPathExists = await this._nextPathExists({
       nextPath,
       spinner,
     });
 
     if (nextPathExists) {
-      await this._removeNextPath({
-        nextPath,
-        spinner,
-      });
+      try {
+        await this._updateNextTemplate({
+          nextPath,
+          spinner,
+        });
+      } catch (err) {
+        SpinnerUtils.renderAndContinue({
+          spinner,
+          text: `failed to update next NextJS template working copy (${err}); cloning fresh`,
+        });
+        await this._removeNextPath({
+          nextPath,
+          spinner,
+        });
+        nextPathExists = false;
+      }
     }
 
-    await this._initialize({ nextPath, spinner });
+    if (!nextPathExists) {
+      await this._initialize({ nextPath, spinner });
+    }
 
     return { error: null };
   }
@@ -354,7 +368,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const nextPathBase = path.basename(nextPath);
     SpinnerUtils.renderAndContinue({
       spinner,
-      text: `checking if ${nextPathBase}  directory exists.`,
+      text: `checking if ${nextPathBase} directory exists.`,
     });
     const nextPathExists = await NextjsExportPodUtils.nextPathExists({
       nextPath,
@@ -366,6 +380,22 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }`,
     });
     return nextPathExists;
+  }
+
+  async _updateNextTemplate(opts: { nextPath: string; spinner: ora.Ora }) {
+    const { spinner, nextPath } = opts;
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `updating NextJS template.`,
+    });
+    await NextjsExportPodUtils.updateTemplate({
+      nextPath,
+    });
+    await this._installDependencies(opts);
+    SpinnerUtils.renderAndContinue({
+      spinner,
+      text: `updated NextJS template.`,
+    });
   }
 
   async _removeNextPath(opts: { nextPath: string; spinner: ora.Ora }) {

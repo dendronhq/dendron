@@ -91,6 +91,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       desc: "commands related to development of Dendron",
     });
     this.wsRootOptional = true;
+    this.skipValidation = true;
   }
 
   private setEndpoint(publishEndpoint: PublishEndpoint) {

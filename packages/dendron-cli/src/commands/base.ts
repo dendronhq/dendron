@@ -5,6 +5,8 @@ import {
   RespV3,
   config,
   RuntimeUtils,
+  ConfigUtils,
+  DENDRON_EMOJIS,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -12,10 +14,11 @@ import {
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
+import { CLIUtils } from "../utils/cli";
 
 type BaseCommandOpts = { quiet?: boolean; dev?: boolean };
 
@@ -52,6 +55,7 @@ export abstract class CLICommand<
   public desc: string;
   // TODO: hackish
   protected wsRootOptional?: boolean;
+  protected skipValidation?: boolean;
   protected _analyticsPayload: any = {};
 
   constructor(opts: { name: string; desc: string } & BaseCommandOpts) {
@@ -102,6 +106,44 @@ export abstract class CLICommand<
     this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
+  validateConfig(opts: { wsRoot: string }) {
+    const { wsRoot } = opts;
+    const ws = new WorkspaceService({ wsRoot });
+    const dendronConfig = ws.config;
+    const configVersion = ConfigUtils.getProp(dendronConfig, "version");
+    const clientVersion = CLIUtils.getClientVersion();
+    const validationResp = ConfigUtils.configIsValid({
+      clientVersion,
+      configVersion,
+    });
+    if (!validationResp.isValid) {
+      const { reason, minCompatConfigVersion, minCompatClientVersion } =
+        validationResp;
+      const instruction =
+        reason === "client"
+          ? "Please make sure dendron-cli is up to date by running the following: \n npm install @dendronhq/dendron-cli@latest"
+          : "Please make sure dendron.yml is up to date by running the following: \n dendron dev show_migration; dendron dev run_migration --migrationVersion={version}";
+      const clientVersionOkay =
+        reason === "client" ? DENDRON_EMOJIS.NOT_OKAY : DENDRON_EMOJIS.OKAY;
+      const configVersionOkay =
+        reason === "config" ? DENDRON_EMOJIS.NOT_OKAY : DENDRON_EMOJIS.OKAY;
+
+      const message = [
+        "================================================",
+        `${reason} is out of date.`,
+        "------------------------------------------------",
+        `current client version:            ${clientVersionOkay} ${clientVersion}`,
+        `minimum compatible client version:    ${minCompatClientVersion}`,
+        `current config version:            ${configVersionOkay} ${configVersion}`,
+        `minimum compatible config version:    ${minCompatConfigVersion}`,
+        "------------------------------------------------",
+        instruction,
+      ].join("\n");
+      console.log(message);
+      process.exit();
+    }
+  }
+
   addArgsToPayload(data: any) {
     _.set(this._analyticsPayload, "args", data);
   }
@@ -114,7 +156,10 @@ export abstract class CLICommand<
 
   eval = async (args: any) => {
     const start = process.hrtime();
+
+    CLIAnalyticsUtils.identify();
     this.L.info({ args, state: "enter" });
+
     if (args.devMode) {
       this.opts.dev = args.devMode;
     }
@@ -135,6 +180,11 @@ export abstract class CLICommand<
     if (args.quiet) {
       this.opts.quiet = true;
     }
+
+    if (!this.skipValidation) {
+      this.validateConfig({ wsRoot: args.wsRoot });
+    }
+
     this.L.info({ args, state: "enrichArgs:pre" });
     const opts = await this.enrichArgs(args);
     if (opts.error) {
@@ -155,8 +205,6 @@ export abstract class CLICommand<
       duration: getDurationMilliseconds(start),
       ...analyticsPayload,
     };
-
-    CLIAnalyticsUtils.identify();
 
     if (out.exit) {
       this.L.info({ args, state: "processExit:pre" });

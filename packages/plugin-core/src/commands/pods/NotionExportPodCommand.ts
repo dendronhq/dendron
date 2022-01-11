@@ -73,7 +73,7 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
 
         if (!config) {
           window.showErrorMessage(
-            `Couldn't find service config with the passed in connection ID ${opts.connectionId}.`
+            `Couldn't find service config with the specified connection ID ${opts.connectionId}. Ensure that the connection ID is correct. You can check existing connections with the Dendron: Configure Service Connection command.`
           );
           return;
         }

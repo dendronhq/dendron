@@ -20,6 +20,7 @@ import {
   PodV2ConfigManager,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
+  RunnableNotionV2PodConfig,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";

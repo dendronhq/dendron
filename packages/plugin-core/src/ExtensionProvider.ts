@@ -14,6 +14,13 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 export class ExtensionProvider {
   private static extension: IDendronExtension;
 
+  /**
+   * @deprecated for all NEW code, do NOT use this static method.  Inject
+   * IDendronExtension into your class's constructor. This method is only meant
+   * as a temporary solution to refactor existing code to no longer depend on
+   * workspace.ts
+   * @returns
+   */
   static getExtension(): IDendronExtension {
     if (_.isUndefined(ExtensionProvider.extension)) {
       throw new DendronError({
@@ -24,18 +31,34 @@ export class ExtensionProvider {
     return ExtensionProvider.extension;
   }
 
+  /**
+   * @deprecated see {@link ExtensionProvider.getExtension}
+   * @returns
+   */
   static getDWorkspace() {
     return ExtensionProvider.getExtension().getDWorkspace();
   }
 
+  /**
+   * @deprecated see {@link ExtensionProvider.getExtension}
+   * @returns
+   */
   static getEngine() {
     return ExtensionProvider.getExtension().getEngine();
   }
 
+  /**
+   * @deprecated see {@link ExtensionProvider.getExtension}
+   * @returns
+   */
   static getWSUtils(): IWSUtilsV2 {
     return ExtensionProvider.getExtension().wsUtils;
   }
 
+  /**
+   * @deprecated see {@link ExtensionProvider.getExtension}
+   * @returns
+   */
   static register(extension: IDendronExtension) {
     ExtensionProvider.extension = extension;
   }

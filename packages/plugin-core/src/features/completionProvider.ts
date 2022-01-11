@@ -1,6 +1,5 @@
 import {
   ALIAS_NAME,
-  DefaultMap,
   DNoteAnchor,
   ERROR_SEVERITY,
   genUUIDInsecure,
@@ -155,21 +154,15 @@ export const provideCompletionItems = sentryReportingCallback(
     const range = new Range(position.line, start, position.line, end);
 
     const { engine } = getDWorkspace();
-    const notes = engine.notes;
+    const { notes, wsRoot } = engine;
     const completionItems: CompletionItem[] = [];
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
-    const wsRoot = engine.wsRoot;
     Logger.debug({
       ctx,
       range,
       notesLength: notes.length,
       currentVault,
       wsRoot,
-    });
-
-    const notesByFname = new DefaultMap<string, number>(() => 0);
-    _.values(notes).forEach((note) => {
-      notesByFname.set(note.fname, notesByFname.get(note.fname) + 1);
     });
 
     _.values(notes).map((note, index) => {
@@ -209,7 +202,10 @@ export const provideCompletionItems = sentryReportingCallback(
           // x will get sorted after numbers, so these will appear after notes without x
           item.sortText = "x" + item.sortText;
 
-          const sameNameNotes = notesByFname.get(note.fname);
+          const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
+            fname: note.fname,
+            engine,
+          }).length;
           if (sameNameNotes > 1) {
             // There are multiple notes with the same name in multiple vaults,
             // and this note is in a different vault than the current note.
@@ -220,7 +216,6 @@ export const provideCompletionItems = sentryReportingCallback(
           }
         }
       }
-
       completionItems.push(item);
     });
     Logger.info({ ctx, completionItemsLength: completionItems.length });

@@ -3,6 +3,174 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.77.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.77.0) (2022-01-11)
+
+
+### Features Dendron
+
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+* **navigation:** non-note file enhancements ([#1895](https://github.com/dendronhq/dendron/issues/1895)) ([90e083b](https://github.com/dendronhq/dendron/commit/90e083b5e10073acbc8967ad9649c0008aae381c))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+* **schemas:** yaml expansions in schemas ([#1726](https://github.com/dendronhq/dendron/issues/1726)) ([0bd94bb](https://github.com/dendronhq/dendron/commit/0bd94bb86489aa23ce970b1b0c9bfe224d77d1ff))
+* ajv warning messages printed to console ([#1722](https://github.com/dendronhq/dendron/issues/1722)) ([1aae27b](https://github.com/dendronhq/dendron/commit/1aae27bb0924f649af131ca7664da3f914044c31))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* decorator improvements ([#1770](https://github.com/dendronhq/dendron/issues/1770)) ([a7227fd](https://github.com/dendronhq/dendron/commit/a7227fd4d8991e44729989c821a22560dcb8348b))
+* Native workspace enhancements ([#1670](https://github.com/dendronhq/dendron/issues/1670)) ([7a392bb](https://github.com/dendronhq/dendron/commit/7a392bb47c69b562d54fa15479a184f1441e129e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
+# 0.76.0 (2022-01-04)
+
+**Note:** Version bump only for package @dendronhq/common-server
+
+
+
+
+
+# [0.75.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.75.0) (2021-12-28)
+
+
+### Features Dendron
+
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+* **navigation:** non-note file enhancements ([#1895](https://github.com/dendronhq/dendron/issues/1895)) ([90e083b](https://github.com/dendronhq/dendron/commit/90e083b5e10073acbc8967ad9649c0008aae381c))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+* **schemas:** yaml expansions in schemas ([#1726](https://github.com/dendronhq/dendron/issues/1726)) ([0bd94bb](https://github.com/dendronhq/dendron/commit/0bd94bb86489aa23ce970b1b0c9bfe224d77d1ff))
+* ajv warning messages printed to console ([#1722](https://github.com/dendronhq/dendron/issues/1722)) ([1aae27b](https://github.com/dendronhq/dendron/commit/1aae27bb0924f649af131ca7664da3f914044c31))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* decorator improvements ([#1770](https://github.com/dendronhq/dendron/issues/1770)) ([a7227fd](https://github.com/dendronhq/dendron/commit/a7227fd4d8991e44729989c821a22560dcb8348b))
+* Native workspace enhancements ([#1670](https://github.com/dendronhq/dendron/issues/1670)) ([7a392bb](https://github.com/dendronhq/dendron/commit/7a392bb47c69b562d54fa15479a184f1441e129e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
 # [0.74.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.74.0) (2021-12-21)
 
 

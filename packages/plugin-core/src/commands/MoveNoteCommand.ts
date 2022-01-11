@@ -12,14 +12,7 @@ import _md from "markdown-it";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
+import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import {
   NoteLookupProviderUtils,
   OldNewLocation,
@@ -32,6 +25,8 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 type CommandInput = any;
 
@@ -85,7 +80,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
-    const engine = getDWorkspace().engine;
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
     const vault = opts?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,
@@ -104,9 +100,9 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (vault) {
       lookupCreateOpts.buttons = [];
     }
-    const lc = LookupControllerV3.create(lookupCreateOpts);
+    const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
 
-    const provider = new NoteLookupProvider("move", {
+    const provider = extension.noteLookupProviderFactory.create("move", {
       allowNewNote: true,
       forceAsIsPickerValueUsage: true,
     });

@@ -200,9 +200,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               text: "skipping build...",
             });
           } else {
-            spinner.stop();
             await this.build(opts);
           }
+          spinner.stop();
           await this.export(opts);
           if (opts.target) {
             await this._handlePublishTarget(opts.target, opts);
@@ -435,7 +435,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async dev(opts: DevCmdOpts) {
     const nextPath = NextjsExportPodUtils.getNextRoot(opts.wsRoot);
-    await NextjsExportPodUtils.startNextDev({ nextPath });
+    await NextjsExportPodUtils.startNextDev({ nextPath, windowsHide: false });
     return { error: null };
   }
 

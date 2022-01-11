@@ -12,8 +12,6 @@ export abstract class SeedCommandBase<
 > extends BasicCommand<CommandOpts, CommandOutput> {
   protected seedSvc: SeedService | undefined = undefined;
 
-  public constructor();
-  public constructor(seedSvc: SeedService);
   public constructor(seedSvc?: SeedService) {
     super();
 

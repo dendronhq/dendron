@@ -1,5 +1,10 @@
-import { DNodeUtils as _du, SchemaUtils as _su } from "@dendronhq/common-all";
 import {
+  DNodeUtils as _du,
+  DVault,
+  SchemaUtils as _su,
+} from "@dendronhq/common-all";
+import {
+  file2Note,
   file2Schema,
   goUpTo,
   schemaModuleProps2File,
@@ -25,7 +30,7 @@ describe("goUpTo", () => {
 
   // used in dendron-cli/src/commands/build-site-v2.ts
   test("double", () => {
-    let cwd2 = path.join(cwd, "foo", "bar");
+    const cwd2 = path.join(cwd, "foo", "bar");
     fs.ensureDirSync(cwd2);
     const match1 = goUpTo({ base: cwd2, fname: "foo" });
     expect(match1).toEqual(cwd);
@@ -66,6 +71,47 @@ describe("schemaModuleProps2File", () => {
       encoding: "utf8",
     });
     expect(payload).toMatchSnapshot();
+  });
+});
+
+describe("GIVEN config set", () => {
+  describe("WHEN file2Note", () => {
+    let root: string;
+    let vault: DVault;
+    beforeEach(() => {
+      root = tmpDir().name;
+      vault = { fsPath: root };
+    });
+
+    test("THEN config is read", () => {
+      const notePath = path.join(root, "foo.md");
+      fs.writeFileSync(
+        notePath,
+        `---
+id: foo
+title: foo
+desc: foo
+updated: 1
+created: 1
+config:
+  global:
+    enableChildLinks: false
+---
+Foo body`
+      );
+
+      expect(file2Note(notePath, vault)).toMatchObject({
+        id: "foo",
+        title: "foo",
+        updated: 1,
+        created: 1,
+        config: {
+          global: {
+            enableChildLinks: false,
+          },
+        },
+      });
+    });
   });
 });
 

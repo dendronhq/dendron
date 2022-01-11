@@ -50,7 +50,9 @@ export class WorkspaceUtils {
     return WorkspaceType.NONE;
   }
 
-  /** Finds the workspace type by analyzing the given directory. Use if plugin is not available. */
+  /** Finds the workspace type by analyzing the given directory. Use if plugin is not available.
+   * @returns WorkspaceType
+   */
   static async getWorkspaceTypeFromDir(dir: string) {
     if (fs.pathExistsSync(path.join(dir, CONSTANTS.DENDRON_WS_NAME))) {
       return WorkspaceType.CODE;
@@ -60,7 +62,7 @@ export class WorkspaceUtils {
       fname: CONSTANTS.DENDRON_CONFIG_FILE,
       returnDirPath: true,
     });
-    if (!wsRoot) return;
+    if (!wsRoot) return WorkspaceType.NONE;
     if (fs.pathExistsSync(path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE))) {
       return WorkspaceType.NATIVE;
     }

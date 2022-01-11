@@ -21,15 +21,10 @@ import {
   ParseLinkV2Resp,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
+import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 type CommandOpts = {
   range: Range;
@@ -138,8 +133,9 @@ export class ConvertLinkCommand extends BasicCommand<
       disableVaultSelection: true,
       vaultSelectCanToggle: false,
     };
-    const controller = LookupControllerV3.create(lcOpts);
-    const provider = new NoteLookupProvider(this.key, {
+    const extension = ExtensionProvider.getExtension();
+    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });

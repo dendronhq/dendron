@@ -12,16 +12,13 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import {
-  handleLink,
-  LinkType,
-  ShowPreviewCommand,
-} from "../../commands/ShowPreview";
+import { handleLink, LinkType } from "../../commands/ShowPreview";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
+import { INoteSyncService } from "../../services/NoteSyncService";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 
 /**
@@ -33,7 +30,10 @@ export interface PreviewProxy {
    * If automaticallyShowPreview is set to true, show preview panel if it doesn't exist
    * @param note Note Props to update the preview contents with
    */
-  showPreviewAndUpdate(note: NoteProps): void;
+  showPreviewAndUpdate(
+    note: NoteProps,
+    opts?: PreviewProxyOpts
+  ): ReturnType<typeof PreviewPanelFactory["updateForNote"]>;
 
   /**
    * Return current panel. Can be undefined. Exposed for testing only
@@ -41,19 +41,28 @@ export interface PreviewProxy {
   getPanel(): vscode.WebviewPanel | undefined;
 }
 
+export type PreviewProxyOpts = {
+  syncChangedNote: boolean;
+};
+
 export class PreviewPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
-  private static _vsCodeCallback: vscode.Disposable | undefined = undefined;
+  private static _noteSyncService: INoteSyncService;
+  private static _onDidChangeActiveTextEditor: vscode.Disposable | undefined =
+    undefined;
+  private static _onNoteChanged: vscode.Disposable | undefined = undefined;
 
   private static sendRefreshMessage(
     panel: vscode.WebviewPanel,
-    note: NoteProps
+    note: NoteProps,
+    opts?: PreviewProxyOpts
   ) {
-    panel.webview.postMessage({
+    const { syncChangedNote } = _.defaults(opts, { syncChangedNote: true });
+    return panel.webview.postMessage({
       type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
       data: {
         note,
-        syncChangedNote: true,
+        syncChangedNote,
       },
       source: "vscode",
     } as OnDidChangeActiveTextEditorMsg);
@@ -85,27 +94,21 @@ export class PreviewPanelFactory {
     }
   }
 
-  private static updateForNote(note: NoteProps) {
+  private static async updateForNote(note: NoteProps, opts?: PreviewProxyOpts) {
     if (PreviewPanelFactory._panel) {
-      PreviewPanelFactory._panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote: true,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
+      return this.sendRefreshMessage(PreviewPanelFactory._panel, note, opts);
     }
+    return undefined;
   }
 
-  static getProxy(): PreviewProxy {
+  static getProxy(extension: IDendronExtension): PreviewProxy {
     return {
-      showPreviewAndUpdate(note) {
+      async showPreviewAndUpdate(note, opts) {
         const ctx = {
           ctx: "ShowPreview:showPreviewAndRefresh",
           fname: note.fname,
         };
-        const config = getDWorkspace().config;
+        const config = extension.getDWorkspace().config;
 
         // If preview panel does not exist and automaticallyShowPreview = true, show preview before updating
         // Otherwise, update if panel exists
@@ -117,13 +120,13 @@ export class PreviewPanelFactory {
             ...ctx,
             state: "panel not found and automaticallyShowPreview = true",
           });
-          new ShowPreviewCommand(PreviewPanelFactory.create(getExtension()))
-            .execute()
-            .then(() => {
-              PreviewPanelFactory.updateForNote(note);
-            });
+          const showPreview = extension.commandFactory.showPreviewCmd(
+            PreviewPanelFactory.create(extension)
+          );
+          await showPreview.execute();
+          return PreviewPanelFactory.updateForNote(note, opts);
         } else {
-          PreviewPanelFactory.updateForNote(note);
+          return PreviewPanelFactory.updateForNote(note, opts);
         }
       },
 
@@ -133,7 +136,25 @@ export class PreviewPanelFactory {
     };
   }
 
-  static create(ext: DendronExtension): vscode.WebviewPanel {
+  private static initWithNote: NoteProps | undefined;
+  private static initWithOpts: PreviewProxyOpts | undefined;
+
+  /** If the preview is ready, the note will be shown immediately. If not, the note will be shown once */
+  public static showNoteWhenReady({
+    note,
+    opts,
+    extension,
+  }: {
+    note: NoteProps;
+    opts?: PreviewProxyOpts;
+    extension: IDendronExtension;
+  }) {
+    this.initWithNote = note;
+    this.initWithOpts = opts;
+    return this.getProxy(extension).showPreviewAndUpdate(note, opts);
+  }
+
+  static create(ext: IDendronExtension): vscode.WebviewPanel {
     const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
     const preserveFocus = true;
 
@@ -144,6 +165,8 @@ export class PreviewPanelFactory {
     const { bundleName: name, label } = getWebEditorViewEntry(
       DendronEditorViewKey.NOTE_PREVIEW
     );
+
+    this._noteSyncService = ext.noteSyncService;
 
     this._panel = vscode.window.createWebviewPanel(
       name,
@@ -171,14 +194,28 @@ export class PreviewPanelFactory {
         }
         case DMessageEnum.MESSAGE_DISPATCHER_READY: {
           // if ready, get current note
-          const note = WSUtils.getActiveNote();
-          if (note) {
+          let note: NoteProps | undefined;
+          let opts: PreviewProxyOpts | undefined;
+          if (PreviewPanelFactory.initWithNote !== undefined) {
+            note = PreviewPanelFactory.initWithNote;
+            opts = PreviewPanelFactory.initWithOpts;
             Logger.debug({
               ctx,
-              msg: "got active note",
+              msg: "got pre-set note",
               note: NoteUtils.toLogObj(note),
             });
-            PreviewPanelFactory.sendRefreshMessage(this._panel!, note);
+          } else {
+            note = WSUtils.getActiveNote();
+            if (note) {
+              Logger.debug({
+                ctx,
+                msg: "got active note",
+                note: NoteUtils.toLogObj(note),
+              });
+            }
+          }
+          if (note) {
+            PreviewPanelFactory.sendRefreshMessage(this._panel!, note, opts);
           }
           break;
         }
@@ -196,7 +233,7 @@ export class PreviewPanelFactory {
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const maybeNote = !_.isUndefined(activeTextEditor)
-            ? WSUtils.tryGetNoteFromDocument(activeTextEditor?.document)
+            ? ext.wsUtils.tryGetNoteFromDocument(activeTextEditor?.document)
             : undefined;
 
           if (!_.isUndefined(maybeNote)) {
@@ -209,46 +246,59 @@ export class PreviewPanelFactory {
       }
     });
 
-    this._vsCodeCallback = vscode.window.onDidChangeActiveTextEditor(
-      sentryReportingCallback((editor: vscode.TextEditor | undefined) => {
-        if (
-          !editor ||
-          editor.document.uri.fsPath !==
-            vscode.window.activeTextEditor?.document.uri.fsPath
-        ) {
-          return;
-        }
+    this._onDidChangeActiveTextEditor =
+      vscode.window.onDidChangeActiveTextEditor(
+        sentryReportingCallback((editor: vscode.TextEditor | undefined) => {
+          if (
+            !editor ||
+            editor.document.uri.fsPath !==
+              vscode.window.activeTextEditor?.document.uri.fsPath
+          ) {
+            return;
+          }
 
-        const uri = editor.document.uri;
-        if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
-          return;
-        }
+          const uri = editor.document.uri;
+          if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+            return;
+          }
 
-        const maybeNote = WSUtils.tryGetNoteFromDocument(editor.document);
+          const maybeNote = ext.wsUtils.tryGetNoteFromDocument(editor.document);
 
-        if (!maybeNote) {
-          return;
-        }
+          if (!maybeNote) {
+            return;
+          }
 
-        this._panel!.webview.postMessage({
-          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-          data: {
-            note: maybeNote,
-            syncChangedNote: true,
-          },
-          source: "vscode",
-        } as OnDidChangeActiveTextEditorMsg);
-      })
+          this._panel!.webview.postMessage({
+            type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+            data: {
+              note: maybeNote,
+              syncChangedNote: true,
+            },
+            source: "vscode",
+          } as OnDidChangeActiveTextEditorMsg);
+        })
+      );
+
+    this._onNoteChanged = PreviewPanelFactory._noteSyncService.onNoteChange(
+      (note: NoteProps) => {
+        PreviewPanelFactory.updateForNote(note);
+      }
     );
 
-    ext.addDisposable(this._vsCodeCallback);
+    ext.addDisposable(this._onDidChangeActiveTextEditor);
+    ext.addDisposable(this._onNoteChanged);
 
     this._panel.onDidDispose(() => {
       this._panel = undefined;
 
-      if (this._vsCodeCallback) {
-        this._vsCodeCallback.dispose();
-        this._vsCodeCallback = undefined;
+      if (this._onDidChangeActiveTextEditor) {
+        this._onDidChangeActiveTextEditor.dispose();
+        this._onDidChangeActiveTextEditor = undefined;
+      }
+
+      if (this._onNoteChanged) {
+        this._onNoteChanged.dispose();
+        this._onNoteChanged = undefined;
       }
     });
 

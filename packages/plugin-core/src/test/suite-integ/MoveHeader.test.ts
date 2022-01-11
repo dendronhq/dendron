@@ -15,8 +15,8 @@ import vscode from "vscode";
 import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -37,7 +37,7 @@ suite("MoveHeader", function () {
           fname: "origin",
           wsRoot,
           vault: vaults[0],
-          body: "## Foo header\n\n",
+          body: "## Foo header\n\n some text with anchor ^123",
         });
         await NoteTestUtilsV4.createNote({
           fname: "dest",
@@ -49,7 +49,13 @@ suite("MoveHeader", function () {
           fname: "ref-note",
           wsRoot,
           vault: vaults[0],
-          body: "[[Origin|origin]]\n\n[[Foo|origin#foo-header]]",
+          body: "[[Origin|origin]]\n\n[[Foo|origin#foo-header]]\n\n",
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "ref-note2",
+          wsRoot,
+          vault: vaults[0],
+          body: "[[Foo|dendron://vault1/origin#foo-header]]\n\n",
         });
       };
     });
@@ -77,6 +83,7 @@ suite("MoveHeader", function () {
                 initialValue: "dest",
                 nonInteractive: true,
               });
+
               expect(gatherOut?.dest?.fname).toEqual("dest");
               done();
             }),
@@ -96,17 +103,17 @@ suite("MoveHeader", function () {
                 initialValue: "new-note",
                 nonInteractive: true,
               });
-              const { engine, vaults, wsRoot } = getDWorkspace();
-              const newNote = NoteUtils.getNoteByFnameV5({
+              const { engine, vaults } = ExtensionProvider.getDWorkspace();
+              const newNote = NoteUtils.getNoteByFnameFromEngine({
                 fname: "new-note",
-                notes: engine.notes,
+                engine,
                 vault: vaults[0],
-                wsRoot,
               });
 
               expect(!_.isUndefined(newNote)).toBeTruthy();
               expect(out!.origin.body.includes("## Foo header")).toBeFalsy();
               expect(out!.dest!.body.includes("## Foo header")).toBeTruthy();
+              expect(out!.dest!.body.includes("^123")).toBeTruthy();
 
               done();
             }),
@@ -188,18 +195,64 @@ suite("MoveHeader", function () {
               useSameVault: true,
               nonInteractive: true,
             });
-            // await new Promise((res) => setTimeout(res, 100));
             await new Promise<void>((resolve) => {
               setTimeout(() => {
                 resolve();
               }, 100);
             });
+            const refNote = out!.updated.find(
+              (n) => n.id === "ref-note"
+            ) as NoteProps;
+            const refNote2 = out!.updated.find(
+              (n) => n.id === "ref-note2"
+            ) as NoteProps;
+
             expect(
-              out!.updated[0].body.includes("[[Foo|dest#foo-header]]")
+              refNote.body.includes("[[Foo|dest#foo-header]]")
             ).toBeTruthy();
             expect(
-              out!.updated[0].body.includes("[[Origin|dest]]")
+              refNote2.body.includes("[[Foo|dendron://vault1/dest#foo-header]]")
+            );
+            expect(refNote.body.includes("[[Origin|dest]]")).toBeFalsy();
+            done();
+          }),
+        });
+      });
+
+      test("THEN vault prefix is added to bare links if there are notes with same name as destination in different vaults", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await preSetupHook({ wsRoot, vaults });
+            await NoteTestUtilsV4.createNote({
+              fname: "dest",
+              wsRoot,
+              vault: vaults[2],
+              genRandomId: true,
+            });
+          },
+          onInit: onInitFunc(async () => {
+            const cmd = new MoveHeaderCommand();
+            const out = await cmd.run({
+              initialValue: "dest",
+              useSameVault: true,
+              nonInteractive: true,
+            });
+            await new Promise<void>((resolve) => {
+              setTimeout(() => {
+                resolve();
+              }, 100);
+            });
+            const refNote = out!.updated.find(
+              (n) => n.id === "ref-note"
+            ) as NoteProps;
+            expect(
+              refNote.body.includes("[[Foo|dest#foo-header]]")
             ).toBeFalsy();
+            expect(
+              refNote.body.includes("[[Foo|dendron://vault1/dest#foo-header]]")
+            );
+            expect(refNote.body.includes("[[Origin|dest]]")).toBeFalsy();
             done();
           }),
         });

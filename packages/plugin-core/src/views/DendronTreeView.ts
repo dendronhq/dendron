@@ -19,10 +19,10 @@ import vscode, {
   Uri,
   window,
 } from "vscode";
-import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { getExtension, getDWorkspace } from "../workspace";
+import { GotoNoteCommandOpts } from "../commands/GoToNoteInterface";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)

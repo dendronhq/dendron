@@ -17,122 +17,93 @@ import _ from "lodash";
 import path from "path";
 import visit from "unist-util-visit";
 import * as vscode from "vscode";
-import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
+import {
+  Disposable,
+  Event,
+  EventEmitter,
+  TextDocument,
+  TextDocumentChangeEvent,
+} from "vscode";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
-
-let NOTE_SERVICE: NoteSyncService | undefined;
-
-const getFrontmatterPosition = (
-  document: vscode.TextDocument
-): Promise<vscode.Position | false> => {
-  return new Promise((resolve) => {
-    const proc = MDUtilsV5.procRemarkParseNoData(
-      {},
-      { dest: DendronASTDest.MD_DENDRON }
-    );
-    const parsed = proc.parse(document.getText());
-    visit(parsed, ["yaml"], (node) => {
-      if (_.isUndefined(node.position)) return resolve(false); // Should never happen
-      const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
-        line: 1,
-      });
-      resolve(position);
-    });
-  });
-};
 
 /**
- * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for docs
+ * Interface for a service that synchronizes notes from the client to the engine
  */
-export class NoteSyncService {
-  static instance() {
-    if (_.isUndefined(NOTE_SERVICE)) {
-      NOTE_SERVICE = new NoteSyncService();
-    }
-    return NOTE_SERVICE;
-  }
+export interface INoteSyncService extends Disposable {
+  /**
+   * Event that fires after a set of NoteProps has been changed AND those
+   * changes have been reflected on the engine side
+   */
+  get onNoteChange(): Event<NoteProps>;
 
+  /**
+   * @deprecated - Remove from interface once FileWatcher has been refactored to
+   * no longer take a dependency on sync service
+   * @param param0
+   */
+  syncNoteMetadata({
+    note,
+    fmChangeOnly,
+  }: {
+    note: NoteProps;
+    fmChangeOnly: boolean;
+  }): Promise<NoteProps>;
+}
+
+/**
+ * This service keeps client state note state synchronized with the engine
+ * state. It also exposes an event that allows callback functionality whenever
+ * the engine has finished updating a note state. See {@link INoteSyncService}
+ * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
+ * additional docs
+ */
+export class NoteSyncService implements INoteSyncService {
   private L: DLogger;
 
-  constructor() {
-    this.L = Logger;
+  _textDocumentEventHandle: Disposable;
+  _textDocumentChangeEventHandle: Disposable;
+
+  _extension: IDendronExtension;
+
+  private _emitter = new EventEmitter<NoteProps>();
+
+  public get onNoteChange(): Event<NoteProps> {
+    return this._emitter.event;
   }
 
   /**
-   * Performs tasks that should be run when the note is changed
-   * - update note links
-   * - update note anchors
-   * - trigger engine update
-   * - trigger preview sync
-   * @param uri
-   * @returns
+   *
+   * @param ext Instance of IDendronExtension
+   * @param textDocumentEvent - Event returning TextDocument, such as
+   * vscode.workspace.OnDidSaveTextDocument. This call is not debounced
+   * @param textDocumentChangeEvent - Event returning a TextDocumentChangeEvent,
+   * such as vscode.workspace.OnDidChangeTextDocument. This call is debounced
+   * every 200 ms
    */
-  async onDidChange(
-    document: vscode.TextDocument,
-    hints?: { contentChanges: readonly vscode.TextDocumentContentChangeEvent[] }
+  constructor(
+    ext: IDendronExtension,
+    textDocumentEvent: Event<TextDocument>,
+    textDocumentChangeEvent: Event<TextDocumentChangeEvent>
   ) {
-    const ctx = "NoteSyncService:onDidChange";
-    const uri = document.uri;
-    const { engine } = getDWorkspace();
-    const fname = path.basename(uri.fsPath, ".md");
+    this.L = Logger;
+    this._extension = ext;
+    this._emitter = new EventEmitter<NoteProps>();
 
-    if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
-      return;
-    }
-
-    const maybePos = await getFrontmatterPosition(document);
-    let fmChangeOnly = false;
-    if (!maybePos) {
-      this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
-      return;
-    }
-    if (hints?.contentChanges) {
-      const allChangesInFM = _.every(hints.contentChanges, (contentChange) => {
-        const endPosition = contentChange.range.end;
-        return endPosition.isBefore(maybePos);
-      });
-      if (allChangesInFM) {
-        this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });
-        fmChangeOnly = true;
-      }
-    }
-
-    this.L.debug({ ctx, uri: uri.fsPath });
-    const vault = VaultUtils.getVaultByFilePath({
-      vaults: engine.vaults,
-      wsRoot: getDWorkspace().wsRoot,
-      fsPath: uri.fsPath,
-    });
-    const noteHydrated = NoteUtils.getNoteByFnameV5({
-      fname,
-      vault,
-      notes: engine.notes,
-      wsRoot: getDWorkspace().wsRoot,
-    }) as NoteProps;
-
-    const content = document.getText();
-    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
-      this.L.debug({
-        ctx,
-        uri: uri.fsPath,
-        msg: "note content unchanged, ignoring",
-      });
-      return;
-    }
-
-    return this.updateNoteContents({
-      oldNote: noteHydrated,
-      content,
-      fmChangeOnly,
-      fname,
-      vault,
-    });
+    this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
+    this._textDocumentChangeEventHandle = textDocumentChangeEvent(
+      _.debounce(this.onDidChange, 200),
+      this
+    );
   }
 
-  async updateNoteContents(opts: {
+  dispose() {
+    this._textDocumentEventHandle.dispose();
+    this._textDocumentChangeEventHandle.dispose();
+  }
+
+  private async syncNoteContents(opts: {
     oldNote: NoteProps;
     content: string;
     fmChangeOnly: boolean;
@@ -141,7 +112,7 @@ export class NoteSyncService {
   }) {
     const ctx = "NoteSyncService:updateNoteContents";
     const { content, fmChangeOnly, fname, vault, oldNote } = opts;
-    const { engine } = getDWorkspace();
+    const engine = this._extension.getEngine();
     // note is considered dirty, apply any necessary changes here
     // call `doc.getText` to get latest note
     let note = string2Note({
@@ -151,32 +122,27 @@ export class NoteSyncService {
       calculateHash: true,
     });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
-
-    note = await NoteSyncService.updateNoteMeta({ note, fmChangeOnly });
+    note = await this.syncNoteMetadata({ note, fmChangeOnly });
 
     const now = NoteUtils.genUpdateTime();
     note.updated = now;
 
-    this.L.debug({ ctx, fname: note.fname, msg: "exit" });
     const noteClean = await engine.updateNote(note);
-
-    // Temporary workaround until NoteSyncService is no longer a singleton
-    PreviewPanelFactory.getProxy().showPreviewAndUpdate(noteClean);
-
+    this.L.debug({ ctx, fname: note.fname, msg: "exit" });
     return noteClean;
   }
 
   /**
    * Update note metadata (eg. links and anchors)
    */
-  static async updateNoteMeta({
+  public async syncNoteMetadata({
     note,
     fmChangeOnly,
   }: {
     note: NoteProps;
     fmChangeOnly: boolean;
   }) {
-    const { engine } = getDWorkspace();
+    const engine = this._extension.getEngine();
     // Avoid calculating links/anchors if the note is too long
     if (
       note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
@@ -200,7 +166,7 @@ export class NoteSyncService {
       });
       note.anchors = anchors;
 
-      if (getDWorkspace().config.dev?.enableLinkCandidates) {
+      if (this._extension.workspaceService?.config.dev?.enableLinkCandidates) {
         const linkCandidates = LinkUtils.findLinkCandidates({
           note,
           notesMap,
@@ -212,4 +178,135 @@ export class NoteSyncService {
 
     return note;
   }
+
+  private async onDidSave(document: TextDocument) {
+    const ctx = "NoteSyncService:onDidChange";
+    const uri = document.uri;
+    const fname = path.basename(uri.fsPath, ".md");
+
+    if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return;
+    }
+
+    this.L.debug({ ctx, uri: uri.fsPath });
+    const engine = this._extension.getEngine();
+    const vault = VaultUtils.getVaultByFilePath({
+      vaults: engine.vaults,
+      wsRoot: this._extension.getEngine().wsRoot,
+      fsPath: uri.fsPath,
+    });
+    const noteHydrated = NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      notes: engine.notes,
+      wsRoot: this._extension.getEngine().wsRoot,
+    }) as NoteProps;
+
+    const content = document.getText();
+    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+      this.L.debug({
+        ctx,
+        uri: uri.fsPath,
+        msg: "note content unchanged, ignoring",
+      });
+      return;
+    }
+
+    const props = await this.syncNoteContents({
+      oldNote: noteHydrated,
+      content,
+      fmChangeOnly: false,
+      fname,
+      vault,
+    });
+
+    this._emitter.fire(props);
+  }
+
+  private async onDidChange(event: TextDocumentChangeEvent) {
+    if (event.document.isDirty === false) {
+      return;
+    }
+
+    const document = event.document;
+    const contentChanges = event.contentChanges;
+
+    const ctx = "NoteSyncService:onDidChange";
+    const uri = document.uri;
+    const fname = path.basename(uri.fsPath, ".md");
+
+    if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return;
+    }
+
+    const maybePos = await this.getFrontmatterPosition(document);
+    let fmChangeOnly = false;
+    if (!maybePos) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
+      return;
+    }
+    if (contentChanges) {
+      const allChangesInFM = _.every(contentChanges, (contentChange) => {
+        const endPosition = contentChange.range.end;
+        return endPosition.isBefore(maybePos);
+      });
+      if (allChangesInFM) {
+        this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });
+        fmChangeOnly = true;
+      }
+    }
+
+    this.L.debug({ ctx, uri: uri.fsPath });
+    const engine = this._extension.getEngine();
+    const vault = VaultUtils.getVaultByFilePath({
+      vaults: engine.vaults,
+      wsRoot: this._extension.getEngine().wsRoot,
+      fsPath: uri.fsPath,
+    });
+    const noteHydrated = NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      notes: engine.notes,
+      wsRoot: this._extension.getEngine().wsRoot,
+    }) as NoteProps;
+
+    const content = document.getText();
+    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+      this.L.debug({
+        ctx,
+        uri: uri.fsPath,
+        msg: "note content unchanged, ignoring",
+      });
+      return;
+    }
+    const props = await this.syncNoteContents({
+      oldNote: noteHydrated,
+      content,
+      fmChangeOnly,
+      fname,
+      vault,
+    });
+    this._emitter.fire(props);
+  }
+
+  private getFrontmatterPosition = (
+    document: vscode.TextDocument
+  ): Promise<vscode.Position | false> => {
+    return new Promise((resolve) => {
+      const proc = MDUtilsV5.procRemarkParseNoData(
+        {},
+        { dest: DendronASTDest.MD_DENDRON }
+      );
+      const parsed = proc.parse(document.getText());
+      visit(parsed, ["yaml"], (node) => {
+        if (_.isUndefined(node.position)) return resolve(false); // Should never happen
+        const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
+          line: 1,
+        });
+        resolve(position);
+      });
+    });
+  };
 }

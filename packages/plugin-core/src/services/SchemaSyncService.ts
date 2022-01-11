@@ -2,20 +2,18 @@ import _ from "lodash";
 import { Logger } from "../logger";
 import vscode, { Uri } from "vscode";
 import { SchemaParser } from "@dendronhq/engine-server";
-import { getDWorkspace, getVaultFromUri } from "../workspace";
 import path from "path";
 import { VSCodeUtils } from "../vsCodeUtils";
-
-let SCHEMA_SYNC_SERVICE: SchemaSyncService | undefined;
+import { ISchemaSyncService } from "./SchemaSyncServiceInterface";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 /** Currently responsible for keeping the engine in sync with schema
  *  changes on disk. */
-export class SchemaSyncService {
-  static instance() {
-    if (_.isUndefined(SCHEMA_SYNC_SERVICE)) {
-      SCHEMA_SYNC_SERVICE = new SchemaSyncService();
-    }
-    return SCHEMA_SYNC_SERVICE;
+export class SchemaSyncService implements ISchemaSyncService {
+  private extension: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    this.extension = extension;
   }
 
   async onDidSave({ document }: { document: vscode.TextDocument }) {
@@ -37,14 +35,14 @@ export class SchemaSyncService {
     isBrandNewFile?: boolean;
   }) {
     const schemaParser = new SchemaParser({
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
       logger: Logger,
     });
-    const engineClient = getDWorkspace().engine;
+    const engineClient = this.extension.getDWorkspace().engine;
 
     const parsedSchema = await schemaParser.parse(
       [path.basename(uri.fsPath)],
-      getVaultFromUri(uri)
+      this.extension.wsUtils.getVaultFromUri(uri)
     );
 
     if (_.isEmpty(parsedSchema.errors)) {

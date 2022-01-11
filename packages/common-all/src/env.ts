@@ -61,3 +61,28 @@ export function env(name: ConfigKey, opts?: { shouldThrow?: boolean }): any {
   // @ts-ignore: multiple configs
   return getOrThrow((config || {})[stage] || {}, name, opts);
 }
+
+/**
+ * Various utilities that are not categorized
+ */
+export class RuntimeUtils {
+  static isRunningInTestOrCI() {
+    return this.isRunningInsideCI() || this.isRunningInsideTest();
+  }
+  /**
+   * Check if running inside test context
+   */
+  static isRunningInsideTest(): boolean {
+    return getStage() === "test";
+  }
+
+  /**
+   * Check if process is running inside a CI
+   */
+  static isRunningInsideCI(): boolean {
+    if (_.get(process.env, "GITHUB_ACTIONS")) {
+      return true;
+    }
+    return false;
+  }
+}

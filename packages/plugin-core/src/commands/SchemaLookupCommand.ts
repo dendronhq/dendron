@@ -12,19 +12,18 @@ import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri } from "vscode";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import {
-  ILookupProviderV3,
-  SchemaLookupProvider,
-  SchemaLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { OldNewLocation, PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
+import {
+  ILookupProviderV3,
+  SchemaLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3Interface";
 
 type CommandRunOpts = {
   initialValue?: string;
@@ -33,7 +32,7 @@ type CommandRunOpts = {
 
 type CommandGatherOutput = {
   quickpick: DendronQuickPickerV2;
-  controller: LookupControllerV3;
+  controller: ILookupControllerV3;
   provider: ILookupProviderV3;
   noConfirm?: boolean;
   fuzzThreshold?: number;
@@ -45,7 +44,7 @@ type CommandOpts = {
 
 export type CommandOutput = {
   quickpick: DendronQuickPickerV2;
-  controller: LookupControllerV3;
+  controller: ILookupControllerV3;
   provider: ILookupProviderV3;
 };
 
@@ -62,14 +61,14 @@ export class SchemaLookupCommand extends BaseCommand<
   CommandRunOpts
 > {
   key = DENDRON_COMMANDS.LOOKUP_SCHEMA.key;
-  protected _controller: LookupControllerV3 | undefined;
+  protected _controller: ILookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
 
   constructor() {
     super("SchemaLookupCommand");
   }
 
-  protected get controller(): LookupControllerV3 {
+  protected get controller(): ILookupControllerV3 {
     if (_.isUndefined(this._controller)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
@@ -94,13 +93,17 @@ export class SchemaLookupCommand extends BaseCommand<
     const ctx = "SchemaLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     const copts: CommandRunOpts = opts || {};
-    this._controller = LookupControllerV3.create({
+    const extension = ExtensionProvider.getExtension();
+    this._controller = extension.lookupControllerFactory.create({
       nodeType: "schema",
     });
-    this._provider = new SchemaLookupProvider("schemaLookup", {
-      allowNewNote: true,
-      noHidePickerOnAccept: false,
-    });
+    this._provider = extension.schemaLookupProviderFactory.create(
+      "schemaLookup",
+      {
+        allowNewNote: true,
+        noHidePickerOnAccept: false,
+      }
+    );
     const lc = this.controller;
 
     const { quickpick } = await lc.prepareQuickPick({
@@ -201,7 +204,7 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptExistingSchemaItem(
     item: SchemaQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
-    const { wsRoot, engine } = getDWorkspace();
+    const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
     const schemas = engine.schemas;
     const vpath = vault2Path({
       vault: item.vault,
@@ -220,7 +223,8 @@ export class SchemaLookupCommand extends BaseCommand<
   async acceptNewSchemaItem(): Promise<OnDidAcceptReturn | undefined> {
     const picker = this.controller.quickpick;
     const fname = picker.value;
-    const { engine } = getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine } = ws;
     const vault: DVault = picker.vault
       ? picker.vault
       : PickerUtilsV2.getVaultForOpenEditor();
@@ -229,7 +233,7 @@ export class SchemaLookupCommand extends BaseCommand<
         fname,
         vault,
       });
-    const vpath = vault2Path({ vault, wsRoot: getDWorkspace().wsRoot });
+    const vpath = vault2Path({ vault, wsRoot: ws.wsRoot });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(nodeSchemaModuleNew);
 

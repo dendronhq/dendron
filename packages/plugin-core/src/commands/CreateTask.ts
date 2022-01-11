@@ -4,10 +4,8 @@ import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import {
-  NoteLookupCommand,
-  CommandOutput as NoteLookupOutput,
-} from "./NoteLookupCommand";
+import { CommandOutput as NoteLookupOutput } from "./NoteLookupCommand";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 type CommandOpts = {};
 
@@ -33,8 +31,7 @@ export class CreateTaskCommand extends BasicCommand<
     const { config } = getDWorkspace();
     const { createTaskSelectionType } = ConfigUtils.getTask(config);
 
-    const cmd = new NoteLookupCommand();
-    return cmd.run({
+    return AutoCompletableRegistrar.getNoteLookupCmd().run({
       noteType: LookupNoteTypeEnum.task,
       selectionType: createTaskSelectionType,
     });

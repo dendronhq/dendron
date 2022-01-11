@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.74.0",
+  "version": "0.77.0",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -37,8 +37,8 @@
     "test:unit:debug": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.74.0",
-    "@dendronhq/common-server": "^0.74.0",
+    "@dendronhq/common-all": "^0.77.0",
+    "@dendronhq/common-server": "^0.77.0",
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@jcoreio/async-throttle": "^1.4.3",
     "@mapbox/rehype-prism": "^0.5.0",
@@ -69,7 +69,7 @@
     "mdast-util-inject": "^1.1.0",
     "qs": "^6.10.1",
     "rehype-autolink-headings": "^5.0.1",
-    "rehype-katex": "3",
+    "rehype-katex": "5",
     "rehype-raw": "^5.0.0",
     "rehype-slug": "^4.0.1",
     "rehype-stringify": "^8.0.0",

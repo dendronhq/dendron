@@ -9,6 +9,7 @@ import {
   WorkspaceOpts,
   WorkspaceSettings,
   ConfigUtils,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -17,6 +18,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   GenTestResults,
+  NoteTestUtilsV4,
   PostSetupHookFunction,
   PreSetupHookFunction,
   RunEngineTestFunctionOpts,
@@ -265,6 +267,7 @@ export class TestPresetEntryV5 {
 /**
  *
  * To create empty workspace, initilizae with `vaults = []`
+ * See [[Run Engine Test|dendron://dendron.docs/pkg.engine-test-utils.ref.run-engine-test]]
  * @param func
  * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
  * @param opts.preSetupHook: By default, initiate empty
@@ -407,5 +410,32 @@ export class TestEngineUtils {
 
   static vault3(vaults: DVault[]) {
     return _.find(vaults, { fsPath: "vault3" })!;
+  }
+
+  /**
+   * Sugar for creating a note in the first vault
+   */
+  static createNoteByFname({
+    fname,
+    body = "",
+    custom,
+    vaults,
+    wsRoot,
+  }: {
+    fname: string;
+    body: string;
+    custom?: any;
+  } & WorkspaceOpts) {
+    const vault = vaults[0];
+    return NoteTestUtilsV4.createNote({ wsRoot, vault, fname, body, custom });
+  }
+
+  /**
+   * Sugar for retrieving a note in the first vault
+   */
+  static getNoteByFname(engine: DEngineClient, fname: string) {
+    const { wsRoot, vaults, notes } = engine;
+    const vault = vaults[0];
+    return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
 }

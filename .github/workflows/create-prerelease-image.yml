@@ -36,35 +36,48 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version:  14.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
 
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873
-      
+
       - name: Set Up NPM Local Registry
         run: npm set registry http://localhost:4873/
-      
-      - name: Clear Verdaccio Cache
+
+      - name: Set Environment Variables
         run: |
-          if [ -d ~/.config/verdaccio/storage/@dendronhq ]; then echo "Clearing Existing Verdaccio Cache" && rm -Rf ~/.config/verdaccio/storage/@dendronhq; fi
+          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
 
       - name: Build the VSIX
-        env: 
-          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
-          echo "DENDRON_RELEASE_VERSION=`cat meta.json | jq -r '.["@dendronhq/plugin-core"]' | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
           yarn build:patch:local:ci
+
+      - name: Check for VSIX
+        run: |
+          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
+          if [ $vsixCount = 1 ]; then
+            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
+            echo "found a single .vsix file named $vsix"
+            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
+            else
+            echo "error: expected 1 .vsix file, found $vsixCount"
+            exit 1
+          fi
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2
         with:
           name: vsix
-          path: ./packages/plugin-core/*.vsix
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -75,10 +88,6 @@ jobs:
 
       - name: Publish VSIX to S3
         run: |
-          version=`cat ./packages/plugin-core/package.json | jq ".version" -r`
-          name=`cat ./packages/plugin-core/package.json | jq ".displayName" -r`
-          package="$name-$version.vsix"
-          echo $package
           BUCKET=org-dendron-public-assets
-          aws s3 cp --acl public-read ./packages/plugin-core/$package s3://$BUCKET/publish/$package
-          echo https://$BUCKET.s3.amazonaws.com/publish/$package
+          aws s3 cp --acl public-read ${{ env.VSIX_RELATIVE_PATH }} s3://$BUCKET/publish/${{ env.VSIX_FILE_NAME }}
+          echo https://$BUCKET.s3.amazonaws.com/publish/${{ env.VSIX_FILE_NAME }}

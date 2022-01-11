@@ -1,9 +1,6 @@
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
-import {
-  AUTO_COMPLETABLE_COMMAND_ID,
-  UIAutoCompletableCmds,
-} from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 type CommandOpts = {};
 
@@ -22,8 +19,8 @@ export class NoteLookupAutoCompleteCommand extends BasicCommand<
   }
 
   async execute() {
-    await UIAutoCompletableCmds.getCmd(
-      AUTO_COMPLETABLE_COMMAND_ID.NOTE_LOOKUP
+    await AutoCompletableRegistrar.getCmd(
+      DENDRON_COMMANDS.LOOKUP_NOTE.key
     ).onAutoComplete();
   }
 }

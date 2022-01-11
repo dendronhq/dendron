@@ -24,7 +24,6 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
-import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
@@ -34,6 +33,7 @@ import {
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 const createEngine = createEngineFactory({
   renameNote: (opts: WorkspaceOpts) => {
@@ -79,32 +79,39 @@ suite("MoveNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
 
-  _.map(ENGINE_RENAME_PRESETS["NOTES"], (TestCase: TestPresetEntryV4, name) => {
-    test(name, (done) => {
-      const { testFunc, preSetupHook } = TestCase;
+  _.map(
+    _.omit(ENGINE_RENAME_PRESETS["NOTES"], [
+      "NO_UPDATE",
+      "NO_UPDATE_NUMBER_IN_FM",
+      "NO_UPDATE_DOUBLE_QUOTE_IN_FM",
+    ]),
+    (TestCase: TestPresetEntryV4, name) => {
+      test(name, (done) => {
+        const { testFunc, preSetupHook } = TestCase;
 
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: async ({ wsRoot, vaults }) => {
-          await preSetupHook({
-            wsRoot,
-            vaults,
-          });
-        },
-        onInit: async ({ vaults, wsRoot }) => {
-          const engineMock = createEngine({ wsRoot, vaults });
-          const results = await testFunc({
-            engine: engineMock,
-            vaults,
-            wsRoot,
-            initResp: {} as any,
-          });
-          await runJestHarnessV2(results, expect);
-          done();
-        },
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          postSetupHook: async ({ wsRoot, vaults }) => {
+            await preSetupHook({
+              wsRoot,
+              vaults,
+            });
+          },
+          onInit: async ({ vaults, wsRoot }) => {
+            const engineMock = createEngine({ wsRoot, vaults });
+            const results = await testFunc({
+              engine: engineMock,
+              vaults,
+              wsRoot,
+              initResp: {} as any,
+            });
+            await runJestHarnessV2(results, expect);
+            done();
+          },
+        });
       });
-    });
-  });
+    }
+  );
 
   test("update body", (done) => {
     runLegacySingleWorkspaceTest({
@@ -824,9 +831,10 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await WSUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create({
-          nodeType: "note",
-        });
+        const lc =
+          ExtensionProvider.getExtension().lookupControllerFactory.create({
+            nodeType: "note",
+          });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
@@ -862,9 +870,10 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await WSUtils.openNote(fooNote);
-        const lc = LookupControllerV3.create({
-          nodeType: "note",
-        });
+        const lc =
+          ExtensionProvider.getExtension().lookupControllerFactory.create({
+            nodeType: "note",
+          });
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"

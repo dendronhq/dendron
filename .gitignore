@@ -30,3 +30,4 @@ test-workspace-*-profile
 dendron-main.code-workspace
 pkgjson.code-search
 packages/nextjs-template/public
+.npmrc

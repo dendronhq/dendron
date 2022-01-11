@@ -194,6 +194,9 @@ export class DendronEngineV2 implements DEngine {
   get notes(): NotePropsDict {
     return this.store.notes;
   }
+  get noteFnames() {
+    return this.store.noteFnames;
+  }
   get schemas(): SchemaModuleDict {
     return this.store.schemas;
   }
@@ -491,11 +494,21 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async renderNote({ id }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+  async renderNote({
+    id,
+    note,
+  }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
     const ctx = "DendronEngineV2:renderNote";
 
-    const note = this.notes[id];
+    // If provided, we render the given note entirely. Otherwise find the note in workspace.
+    if (!note) {
+      note = this.notes[id];
+    } else {
+      // `procRehype` needs the note to be in the engine, so we have to add it in case it's a dummy note
+      this.notes[id] = note;
+    }
 
+    // If note was not provided and we couldn't find it, we can't render.
     if (!note) {
       return ResponseUtil.createUnhappyResponse({
         error: DendronError.createFromStatus({
@@ -537,6 +550,12 @@ export class DendronEngineV2 implements DEngine {
 
     const duration = milliseconds() - beforeRenderMillis;
     this.logger.info({ ctx, id, duration, msg: `Render preview finished.` });
+
+    if (NoteUtils.isFileId(note.id)) {
+      // Dummy note, we should remove it once we're done rendering
+      delete this.notes[note.id];
+    }
+
     return ResponseUtil.createHappyResponse({ data });
   }
 

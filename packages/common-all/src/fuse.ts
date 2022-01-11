@@ -368,10 +368,12 @@ export class FuseEngine {
       // with a super low score of '0.03' but we don't want to display all the journal
       // dates with the same length. Hence whenever the length of our query is equal
       // or longer than the query results, we want to create a new note, not show those results.
+
+      const lowerCaseQueryString = queryString.toLowerCase();
       results = results.filter(
         (r) =>
           r.item.fname.length > queryString.length ||
-          r.item.fname === queryString
+          r.item.fname.toLowerCase() === lowerCaseQueryString
       );
     }
 

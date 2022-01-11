@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
   createRunnableMarkdownV2PodConfigSchema,
@@ -6,7 +6,9 @@ import {
   isRunnableMarkdownV2PodConfig,
   JSONSchemaType,
   MarkdownExportPodV2,
+  MarkdownExportReturnType,
   MarkdownV2PodConfig,
+  PodExportScope,
   PodV2Types,
   RunnableMarkdownV2PodConfig,
 } from "@dendronhq/pods-core";
@@ -26,7 +28,7 @@ import { BaseExportPodCommand } from "./BaseExportPodCommand";
  */
 export class MarkdownExportPodCommand extends BaseExportPodCommand<
   RunnableMarkdownV2PodConfig,
-  string
+  MarkdownExportReturnType
 > {
   public key = "dendron.markdownexportv2";
 
@@ -51,20 +53,22 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    const destination = await this.promptUserForDestination();
+    const destination = await this.promptUserForDestination(exportScope);
     if (!destination) {
       return;
     }
 
-    const wikiLinkToURL = await this.promptUserForWikilinkToURLSetting();
-    if (wikiLinkToURL === undefined) {
-      return;
-    }
+    //use FM Title as h1 header
+    const addFrontmatterTitle = await this.promptUserForaddFMTitleSetting();
+    if (addFrontmatterTitle === undefined) return;
 
     const config = {
       exportScope,
-      wikiLinkToURL,
+      wikiLinkToURL: opts?.wikiLinkToURL || false,
       destination,
+      addFrontmatterTitle,
+      convertTagNotesToLinks: opts?.convertTagNotesToLinks || false,
+      convertUserNotesToLinks: opts?.convertUserNotesToLinks || false,
     };
 
     // If this is not an already saved pod config, then prompt user whether they
@@ -102,36 +106,33 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     return config;
   }
 
-  public onExportComplete({
+  public async onExportComplete({
     exportReturnValue,
-    payload,
     config,
   }: {
-    exportReturnValue: string;
-    payload: string | NoteProps;
+    exportReturnValue: MarkdownExportReturnType;
     config: RunnableMarkdownV2PodConfig;
-  }): void {
-    if (config.destination === "clipboard") {
-      if (typeof payload === "string") {
-        vscode.env.clipboard.writeText(exportReturnValue);
-      } else {
-        //TODO: This error needs to be thrown earlier.
-        // throw new Error(
-        //   "Cannot have clipboard be the destination on a multi-note export"
-        // );
-
-        vscode.env.clipboard.writeText(exportReturnValue);
-      }
-    } else {
-      throw new Error("Not yet implemented");
+  }) {
+    const data = exportReturnValue.data?.exportedNotes;
+    if (_.isString(data) && config.destination === "clipboard") {
+      vscode.env.clipboard.writeText(data);
     }
-
-    vscode.window.showInformationMessage(
-      "Finished running Markdown export pod."
-    );
+    const count = data?.length ?? 0;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Markdown Export. ${count} notes exported; Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+      this.L.error(errorMsg);
+    } else {
+      vscode.window.showInformationMessage(
+        "Finished running Markdown export pod."
+      );
+    }
   }
 
-  public createPod(config: RunnableMarkdownV2PodConfig): ExportPodV2<string> {
+  public createPod(
+    config: RunnableMarkdownV2PodConfig
+  ): ExportPodV2<MarkdownExportReturnType> {
     return new MarkdownExportPodV2({
       podConfig: config,
       engine: getEngine(),
@@ -148,38 +149,12 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
    */
 
   /**
-   * Prompt user with simple quick pick on which wikilink conversion setting to
-   * use
-   * @returns
-   */
-  private async promptUserForWikilinkToURLSetting(): Promise<
-    boolean | undefined
-  > {
-    const items: vscode.QuickPickItem[] = [
-      {
-        label: "Convert wikilinks to URLs",
-        detail:
-          "Converts wikilinks to their corresponding URLs on a Dendron published site",
-      },
-      {
-        label: "Don't modify wikilinks",
-        detail: "Wikilinks will be preserved in their [[existing-format]]",
-      },
-    ];
-    const picked = await vscode.window.showQuickPick(items, {
-      title: "How would you like wikilinks to be formatted?",
-    });
-
-    return picked ? picked.label === "Convert wikilinks to URLs" : undefined;
-  }
-
-  /**
    * Prompt the user via Quick Pick(s) to select the destination of the export
    * @returns
    */
-  private async promptUserForDestination(): Promise<
-    "clipboard" | string | undefined
-  > {
+  private async promptUserForDestination(
+    exportScope: PodExportScope
+  ): Promise<"clipboard" | string | undefined> {
     const items: vscode.QuickPickItem[] = [
       {
         label: "clipboard",
@@ -190,14 +165,17 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
         detail: "Exports the contents to a local directory",
       },
     ];
-    const picked = await vscode.window.showQuickPick(items);
+    // Cannot have clipboard be the destination on a multi-note export
+    if (exportScope === PodExportScope.Note) {
+      const picked = await vscode.window.showQuickPick(items);
 
-    if (!picked) {
-      return;
-    }
+      if (!picked) {
+        return;
+      }
 
-    if (picked.label === "clipboard") {
-      return "clipboard";
+      if (picked.label === "clipboard") {
+        return "clipboard";
+      }
     }
 
     // Else, local filesystem, show a file picker dialog:
@@ -215,5 +193,31 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     }
 
     return;
+  }
+
+  /**
+   * Prompt user with simple quick pick to select whether to use FM title as h1 header or not
+   * @returns
+   */
+  private async promptUserForaddFMTitleSetting(): Promise<boolean | undefined> {
+    const items: vscode.QuickPickItem[] = [
+      {
+        label: "Add note title from FM as h1 header",
+        detail:
+          "Add note title from the frontmatter to the start of exported note",
+      },
+      {
+        label: "Skip adding note FM title as h1 header",
+        detail:
+          "Skip adding note title from the frontmatter to the start of exported note",
+      },
+    ];
+    const picked = await vscode.window.showQuickPick(items, {
+      title: "Do you want to add note frontmatter title as h1 header?",
+    });
+
+    return picked
+      ? picked.label === "Add note title from FM as h1 header"
+      : undefined;
   }
 }

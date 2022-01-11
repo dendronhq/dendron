@@ -33,8 +33,8 @@ export class ConfigureExportPodV2 extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ConfigureExportPodV2" };
-    this.L.info({ ctx, opts });
     const { podType } = opts;
+    this.L.info({ ctx, podType, msg: "enter" });
     const podsDir = path.join(getExtension().podsDir, "custom");
     let configFilePath: string;
     const existingConfigs = await PodV2ConfigManager.getAllConfigsByType({

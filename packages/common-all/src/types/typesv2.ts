@@ -14,6 +14,7 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
+import type { NoteFNamesDict } from "../utils";
 
 export enum ResponseCode {
   OK = 200,
@@ -299,10 +300,6 @@ export type EngineWriteOptsV2 = {
    */
   recursive?: boolean;
   /**
-   * Should persist hierarchy information to disk
-   */
-  writeHierarchy?: boolean;
-  /**
    * Don't bother adding parent nodes.
    * Used when importing existing notes in bulk
    */
@@ -335,6 +332,8 @@ export type RenameNoteOpts = {
 
 export type RenderNoteOpts = {
   id: string;
+  /** Optionally, an entire note can be provided to be rendered. If provided, the engine won't look up the note by id and will instead render this note. */
+  note?: NoteProps;
 };
 
 export type RefreshNotesOpts = {
@@ -357,6 +356,8 @@ export type GetDecorationsOpts = {
     /** The document text that corresponds to this range. This is required because otherwise there's a data race between the notes in engine updating and decorations being generated. */
     text: string;
   }[];
+  /** The text of the entire document. Required because we show warnings for the whole note even if they are not a visible range. */
+  text: string;
 };
 
 // === Engine and Store Main
@@ -364,6 +365,8 @@ export type GetDecorationsOpts = {
 export type DCommonProps = {
   /** Dictionary where key is the note id. */
   notes: NotePropsDict;
+  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
+  noteFnames: NoteFNamesDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
   /**
@@ -375,10 +378,18 @@ export type DCommonProps = {
   config: IntermediateDendronConfig;
 };
 
-export type NoteChangeEntry = {
+export type NoteChangeUpdateEntry = {
+  prevNote: NoteProps;
   note: NoteProps;
-  status: "create" | "update" | "delete";
+  status: "update";
 };
+
+export type NoteChangeEntry =
+  | {
+      note: NoteProps;
+      status: "create" | "delete";
+    }
+  | NoteChangeUpdateEntry;
 
 /** A block within a note that can be referenced using block anchors or headers. */
 export type NoteBlock = {
@@ -743,6 +754,12 @@ export enum NoteViewMessageEnum {
   "onGetActiveEditor" = "onGetActiveEditor",
 }
 
+export enum LookupViewMessageEnum {
+  "onUpdate" = "onUpdate",
+  "onValuesChange" = "onValuesChange",
+  "onRequestControllerState" = "onRequestControllerState",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -795,3 +812,5 @@ export type SeedBrowserMessage = DMessage<
   SeedBrowserMessageType | DMessageEnum,
   { data: any }
 >;
+
+export type LookupViewMessage = DMessage<LookupViewMessageEnum, any>;

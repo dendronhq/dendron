@@ -1,6 +1,5 @@
 import {
   ConfigUtils,
-  DNodePropsQuickInputV2,
   DNodeUtils,
   FuseEngine,
   LookupEvents,
@@ -8,20 +7,18 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  RespV2,
   SchemaModuleProps,
-  SchemaQuickInput,
   SchemaUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { CancellationToken, CancellationTokenSource, window } from "vscode";
+import { CancellationTokenSource, window } from "vscode";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { getDWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
   NotePickerUtils,
@@ -31,61 +28,16 @@ import {
 } from "./utils";
 import { transformQueryString } from "./queryStringTransformer";
 import stringSimilarity from "string-similarity";
-import { IDendronQuickInputButton } from "./buttons";
-
-export type OnUpdatePickerItemsOpts = {
-  picker: DendronQuickPickerV2;
-  token: CancellationToken;
-  fuzzThreshold?: number;
-  /**
-   * force update even if picker vaule didn't change
-   */
-  forceUpdate?: boolean;
-};
-
-export type OnAcceptHook = (opts: {
-  quickpick: DendronQuickPickerV2;
-  selectedItems: NoteQuickInput[];
-}) => Promise<RespV2<any>>;
-
-export type ILookupProviderV3 = {
-  id: string;
-  provide: (lc: LookupControllerV3) => Promise<void>;
-  onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
-  registerOnAcceptHook: (hook: OnAcceptHook) => void;
-  onDidAccept(opts: {
-    quickpick: DendronQuickPickerV2;
-    lc: LookupControllerV3;
-  }): any;
-};
-
-export type ILookupProviderOptsV3 = {
-  allowNewNote: boolean;
-  noHidePickerOnAccept?: boolean;
-  /** Forces to use picker value as is when constructing the query string. */
-  forceAsIsPickerValueUsage?: boolean;
-  /**
-   * Extra items to show in picker.
-   * This will always be shown at the top
-   * when (and only when) nothing is queried.
-   */
-  extraItems?: DNodePropsQuickInputV2[];
-};
-
-export type NoteLookupProviderSuccessResp<T = never> = {
-  selectedItems: readonly NoteQuickInput[];
-  onAcceptHookResp: T[];
-  cancel?: boolean;
-};
-export type NoteLookupProviderChangeStateResp = {
-  action: "hide";
-};
-
-export type SchemaLookupProviderSuccessResp<T = never> = {
-  selectedItems: readonly SchemaQuickInput[];
-  onAcceptHookResp: T[];
-  cancel?: boolean;
-};
+import { IDendronQuickInputButton } from "./ButtonTypes";
+import {
+  ILookupProviderOptsV3,
+  ILookupProviderV3,
+  NoteLookupProviderSuccessResp,
+  OnAcceptHook,
+  OnUpdatePickerItemsOpts,
+  SchemaLookupProviderSuccessResp,
+} from "./LookupProviderV3Interface";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 
 /** This function presumes that 'CreateNew' should be shown and determines whether
  *  CreateNew should be at the top of the look up results or not. */
@@ -136,8 +88,14 @@ export function sortBySimilarity(candidates: NoteProps[], query: string) {
 export class NoteLookupProvider implements ILookupProviderV3 {
   private _onAcceptHooks: OnAcceptHook[];
   public opts: ILookupProviderOptsV3;
+  private extension: IDendronExtension;
 
-  constructor(public id: string, opts: ILookupProviderOptsV3) {
+  constructor(
+    public id: string,
+    opts: ILookupProviderOptsV3,
+    extension: IDendronExtension
+  ) {
+    this.extension = extension;
     this._onAcceptHooks = [];
     this.opts = opts;
   }
@@ -298,7 +256,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     });
 
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = getDWorkspace();
+    const ws = this.extension.getDWorkspace();
     let profile: number;
     const queryUpToLastDot =
       queryOrig.lastIndexOf(".") >= 0
@@ -411,7 +369,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             updatedItems,
             (ent) => ent.fname
           );
-          const { wsRoot, vaults } = getDWorkspace();
+          const { wsRoot, vaults } = this.extension.getDWorkspace();
 
           candidatesToAdd = sortBySimilarity(
             candidatesToAdd,
@@ -448,7 +406,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         (item) => item.fname.toLowerCase() === queryOrigLowerCase
       ).length;
       const vaultsHaveSpaceForExactMatch =
-        getDWorkspace().engine.vaults.length > numberOfExactMatches;
+        this.extension.getDWorkspace().engine.vaults.length >
+        numberOfExactMatches;
 
       const shouldAddCreateNew =
         this.opts.allowNewNote &&
@@ -518,10 +477,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 }
 
 export class SchemaLookupProvider implements ILookupProviderV3 {
+  private _extension: IDendronExtension;
   private _onAcceptHooks: OnAcceptHook[];
   public opts: ILookupProviderOptsV3;
 
-  constructor(public id: string, opts: ILookupProviderOptsV3) {
+  constructor(
+    public id: string,
+    opts: ILookupProviderOptsV3,
+    extension: IDendronExtension
+  ) {
+    this._extension = extension;
     this._onAcceptHooks = [];
     this.opts = opts;
   }
@@ -608,7 +573,25 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
       const isMultiLevel = picker.value.split(".").length > 1;
       if (isMultiLevel) {
-        window.showErrorMessage("schemas can only be one level deep");
+        window
+          .showInformationMessage(
+            "It looks like you are trying to create a multi-level [schema](https://wiki.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html). This is not supported. If you are trying to create a note instead, run the `> Note Lookup` command or click on `Note Lookup`",
+            ...["Note Lookup"]
+          )
+          .then(async (selection) => {
+            if (selection === "Note Lookup") {
+              await new NoteLookupCommand().run({
+                initialValue: picker.value,
+              });
+            }
+          });
+
+        HistoryService.instance().add({
+          source: "lookupProvider",
+          action: "done",
+          id: this.id,
+          data: { cancel: true },
+        });
         return;
       }
       // last chance to cancel
@@ -653,7 +636,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     // get prior
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
-    const ws = getDWorkspace();
+    const ws = this._extension.getDWorkspace();
     let profile: number;
 
     const engine = ws.engine;
@@ -670,7 +653,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         );
         picker.items = nodes.map((ent) => {
           return DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot: getDWorkspace().wsRoot,
+            wsRoot: this._extension.getDWorkspace().wsRoot,
             props: ent,
             schemas: engine.schemas,
             vaults: ws.vaults,

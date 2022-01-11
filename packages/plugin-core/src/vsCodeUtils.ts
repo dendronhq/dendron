@@ -17,6 +17,8 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode";
 import { DendronContext, GLOBAL_STATE } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+// NOTE: This file should NOT have a dependency on getDWorkspace()/getExtension()
+// If you would like to introduce a utility for workspace add it to IWSUtilsV2/WSUtilsV2.
 
 type PointOffset = { line?: number; column?: number };
 
@@ -328,6 +330,10 @@ export class VSCodeUtils {
     vscode.commands.executeCommand("setContext", key, status);
   }
 
+  static setContextStringValue(key: DendronContext, value: string) {
+    vscode.commands.executeCommand("setContext", key, value);
+  }
+
   static showInputBox = vscode.window.showInputBox;
   static showQuickPick = vscode.window.showQuickPick;
   static showWebView = (opts: {
@@ -456,6 +462,11 @@ export class VSCodeUtils {
       selectionLines: [opts.line],
       levels: opts.levels,
     });
+  }
+
+  /** Use the built-in markdown preview to display preview for a file. */
+  static showDefaultPreview(uri?: vscode.Uri) {
+    return vscode.commands.executeCommand("markdown.showPreview", uri);
   }
 
   static getCodeUserConfigDir() {

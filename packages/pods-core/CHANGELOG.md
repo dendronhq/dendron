@@ -3,6 +3,232 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.77.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.77.0) (2022-01-11)
+
+
+### Bug Fixes
+
+* compact bullet list on import ([a43cdd9](https://github.com/dendronhq/dendron/commit/a43cdd9c1305c31d0b6e6bb96acc5fb5aa28cd70))
+* Publishing dev server keeps running after exiting on Windows ([#2035](https://github.com/dendronhq/dendron/issues/2035)) ([134bcb3](https://github.com/dendronhq/dendron/commit/134bcb3b38c5a2136507d68660d85dd77f5f9791))
+* resolve PR comment ([114a8b7](https://github.com/dendronhq/dendron/commit/114a8b71a375d22abf392c968fa35ddbafdb1565))
+* resolved PR comments ([85d91f4](https://github.com/dendronhq/dendron/commit/85d91f4881a7c9b7f21cbff458c885b13b7eeff9))
+* **pod:** issue with linkedRecord not getting correct airtable id ([cb0b0e1](https://github.com/dendronhq/dendron/commit/cb0b0e153ff1a2745cdd51b3155230941b9eb505))
+* resolved PR comments ([126034e](https://github.com/dendronhq/dendron/commit/126034ee21767c91b62e0e82c6efcec7d5826753))
+* update interface for batch api calls ([81d8e9c](https://github.com/dendronhq/dendron/commit/81d8e9cbb1e33453b0d615b75bca9a0bce6eed25))
+
+
+### Features Dendron
+
+* **pod:** orbit import pod ([#1637](https://github.com/dendronhq/dendron/issues/1637)) ([66a5b14](https://github.com/dendronhq/dendron/commit/66a5b14019e542ade95f4cd2cb7b5cd3763d3b59))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **pods:** github import pod handle deleted authors ([#1660](https://github.com/dendronhq/dendron/issues/1660)) ([eb11440](https://github.com/dendronhq/dendron/commit/eb11440e255b889e546cd7f67fcb970692c52989))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **pods:** minor error in airtable v2 export pod ([#1846](https://github.com/dendronhq/dendron/issues/1846)) ([4550d93](https://github.com/dendronhq/dendron/commit/4550d9371c55ddb6a48be4a6b21c03585bc89592))
+* **pods:** resolve same level dir wikilinks in markdown import([#1615](https://github.com/dendronhq/dendron/issues/1615)) ([3c82e14](https://github.com/dendronhq/dendron/commit/3c82e147a33ed5d6cff3c2508aec1f66eca2d20c))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+* **viwes:** `nav_order` property not respected in tree view ([fd328a1](https://github.com/dendronhq/dendron/commit/fd328a17478a063c2ea3d51e00fbc26c7e7e1b26))
+* markdown publish to hide block reference anchors ([#1577](https://github.com/dendronhq/dendron/issues/1577)) ([43fe1a7](https://github.com/dendronhq/dendron/commit/43fe1a7d4437136ebe6ba3cb91ca835b93c7a831))
+
+
+### Features Dendron
+
+* **pods:** Export Pod V2 ([#1772](https://github.com/dendronhq/dendron/issues/1772)) ([2dac9df](https://github.com/dendronhq/dendron/commit/2dac9dfb13525af984c3fd2f938283cba33cef7b))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Bug Fixes
+
+* resolve relative links on import ([#1371](https://github.com/dendronhq/dendron/issues/1371)) ([d4cee4c](https://github.com/dendronhq/dendron/commit/d4cee4c978ddcc56ad13a17ec0988be1420f789c))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* reload index to be silent by default ([#1269](https://github.com/dendronhq/dendron/issues/1269)) ([2c0bf03](https://github.com/dendronhq/dendron/commit/2c0bf03d997ee3abc1f802f80e4b177feb44ae8b))
+* slugify github issue title ([#1218](https://github.com/dendronhq/dendron/issues/1218)) ([e6c2638](https://github.com/dendronhq/dendron/commit/e6c26380abd68f076dbe1d8ed542327c3ff558f3))
+
+
+### Features Dendron
+
+* github publish to create new issue ([#1206](https://github.com/dendronhq/dendron/issues/1206)) ([67abef0](https://github.com/dendronhq/dendron/commit/67abef02c5615385a8a7f82fe290c8a443605a7f))
+* nextjs publishing fulltext search ([#1334](https://github.com/dendronhq/dendron/issues/1334)) ([68f8473](https://github.com/dendronhq/dendron/commit/68f8473badf22494c8d0758f8195e377235321f6))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+### Features Dendron
+
+* **pubv3:** add more features to new publishing ([28a8a4f](https://github.com/dendronhq/dendron/commit/28a8a4f0ec8a02e6d6946833dec11c0117a3f783))
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* frontmatter tags ([#1104](https://github.com/dendronhq/dendron/issues/1104)) ([e4c022f](https://github.com/dendronhq/dendron/commit/e4c022f422b1ce020215d59d2658218f10c75250))
+
+
+
+
+
+# 0.76.0 (2022-01-04)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
+# [0.75.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.75.0) (2021-12-28)
+
+
+### Bug Fixes
+
+* update interface for batch api calls ([81d8e9c](https://github.com/dendronhq/dendron/commit/81d8e9cbb1e33453b0d615b75bca9a0bce6eed25))
+
+
+### Features Dendron
+
+* **pod:** orbit import pod ([#1637](https://github.com/dendronhq/dendron/issues/1637)) ([66a5b14](https://github.com/dendronhq/dendron/commit/66a5b14019e542ade95f4cd2cb7b5cd3763d3b59))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **pods:** github import pod handle deleted authors ([#1660](https://github.com/dendronhq/dendron/issues/1660)) ([eb11440](https://github.com/dendronhq/dendron/commit/eb11440e255b889e546cd7f67fcb970692c52989))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **pods:** minor error in airtable v2 export pod ([#1846](https://github.com/dendronhq/dendron/issues/1846)) ([4550d93](https://github.com/dendronhq/dendron/commit/4550d9371c55ddb6a48be4a6b21c03585bc89592))
+* **pods:** resolve same level dir wikilinks in markdown import([#1615](https://github.com/dendronhq/dendron/issues/1615)) ([3c82e14](https://github.com/dendronhq/dendron/commit/3c82e147a33ed5d6cff3c2508aec1f66eca2d20c))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+* **viwes:** `nav_order` property not respected in tree view ([fd328a1](https://github.com/dendronhq/dendron/commit/fd328a17478a063c2ea3d51e00fbc26c7e7e1b26))
+* markdown publish to hide block reference anchors ([#1577](https://github.com/dendronhq/dendron/issues/1577)) ([43fe1a7](https://github.com/dendronhq/dendron/commit/43fe1a7d4437136ebe6ba3cb91ca835b93c7a831))
+
+
+### Features Dendron
+
+* **pods:** Export Pod V2 ([#1772](https://github.com/dendronhq/dendron/issues/1772)) ([2dac9df](https://github.com/dendronhq/dendron/commit/2dac9dfb13525af984c3fd2f938283cba33cef7b))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Bug Fixes
+
+* resolve relative links on import ([#1371](https://github.com/dendronhq/dendron/issues/1371)) ([d4cee4c](https://github.com/dendronhq/dendron/commit/d4cee4c978ddcc56ad13a17ec0988be1420f789c))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* reload index to be silent by default ([#1269](https://github.com/dendronhq/dendron/issues/1269)) ([2c0bf03](https://github.com/dendronhq/dendron/commit/2c0bf03d997ee3abc1f802f80e4b177feb44ae8b))
+* slugify github issue title ([#1218](https://github.com/dendronhq/dendron/issues/1218)) ([e6c2638](https://github.com/dendronhq/dendron/commit/e6c26380abd68f076dbe1d8ed542327c3ff558f3))
+
+
+### Features Dendron
+
+* github publish to create new issue ([#1206](https://github.com/dendronhq/dendron/issues/1206)) ([67abef0](https://github.com/dendronhq/dendron/commit/67abef02c5615385a8a7f82fe290c8a443605a7f))
+* nextjs publishing fulltext search ([#1334](https://github.com/dendronhq/dendron/issues/1334)) ([68f8473](https://github.com/dendronhq/dendron/commit/68f8473badf22494c8d0758f8195e377235321f6))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+### Features Dendron
+
+* **pubv3:** add more features to new publishing ([28a8a4f](https://github.com/dendronhq/dendron/commit/28a8a4f0ec8a02e6d6946833dec11c0117a3f783))
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* frontmatter tags ([#1104](https://github.com/dendronhq/dendron/issues/1104)) ([e4c022f](https://github.com/dendronhq/dendron/commit/e4c022f422b1ce020215d59d2658218f10c75250))
+
+
+
+
+
 # [0.74.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.74.0) (2021-12-21)
 
 

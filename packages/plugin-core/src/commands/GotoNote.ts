@@ -1,7 +1,6 @@
 import {
   assertUnreachable,
   DNoteAnchorBasic,
-  DVault,
   getSlugger,
   NoteProps,
   NoteUtils,
@@ -10,43 +9,21 @@ import {
 import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { Position, Selection, Uri, ViewColumn, window } from "vscode";
+import { Position, Selection, Uri, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
-
-type CommandOpts = {
-  qs?: string;
-  vault?: DVault;
-  anchor?: DNoteAnchorBasic;
-  overrides?: Partial<NoteProps>;
-  kind?: TargetKind;
-  /**
-   * What {@link vscode.ViewColumn} to open note in
-   */
-  column?: ViewColumn;
-  /** added for contextual UI analytics. */
-  source?: string;
-};
-export { CommandOpts as GotoNoteCommandOpts };
-
-export enum TargetKind {
-  NOTE = "note",
-  NON_NOTE = "nonNote",
-}
-
-type CommandOutput =
-  // When opening a note
-  | { kind: TargetKind.NOTE; note: NoteProps; pos?: Position; source?: string }
-  // When opening a non-note file
-  | { kind: TargetKind.NON_NOTE; fullPath: string }
-  | undefined;
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { IWSUtilsV2 } from "../WSUtilsV2Interface";
+import {
+  GoToNoteCommandOpts,
+  GoToNoteCommandOutput,
+  TargetKind,
+} from "./GoToNoteInterface";
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;
@@ -80,8 +57,19 @@ type FoundLinkSelection = NonNullable<
 /**
  * Open or create a note. See {@link GotoNoteCommand.execute} for details
  */
-export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class GotoNoteCommand extends BasicCommand<
+  GoToNoteCommandOpts,
+  GoToNoteCommandOutput
+> {
   key = DENDRON_COMMANDS.GOTO_NOTE.key;
+  private extension: IDendronExtension;
+  private wsUtils: IWSUtilsV2;
+
+  constructor(extension: IDendronExtension) {
+    super();
+    this.extension = extension;
+    this.wsUtils = extension.wsUtils;
+  }
 
   getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
@@ -107,19 +95,22 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     };
   }
 
-  private getQs(opts: CommandOpts, link: FoundLinkSelection): CommandOpts {
+  private getQs(
+    opts: GoToNoteCommandOpts,
+    link: FoundLinkSelection
+  ): GoToNoteCommandOpts {
     if (link.value) {
       // Reference to another file
       opts.qs = link.value;
     } else {
       // Same file block reference, implicitly current file
-      const note = WSUtils.getActiveNote();
+      const note = this.wsUtils.getActiveNote();
       if (note) {
         // Same file link within note
         opts.qs = note.fname;
         opts.vault = note.vault;
       } else {
-        const { wsRoot, vaults } = getDWorkspace().engine;
+        const { wsRoot, vaults } = this.extension.getDWorkspace().engine;
         // Same file link within non-note file
         opts.qs = path.relative(
           wsRoot,
@@ -135,8 +126,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async maybeSetOptsFromExistingNote(opts: CommandOpts) {
-    const { engine } = getDWorkspace();
+  private async maybeSetOptsFromExistingNote(opts: GoToNoteCommandOpts) {
+    const { engine } = this.extension.getDWorkspace();
     const notes = NoteUtils.getNotesByFname({
       fname: opts.qs!,
       notes: engine.notes,
@@ -157,8 +148,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async maybeSetOptsFromNonNote(opts: CommandOpts) {
-    const { vaults, wsRoot } = getDWorkspace().engine;
+  private async maybeSetOptsFromNonNote(opts: GoToNoteCommandOpts) {
+    const { vaults, wsRoot } = this.extension.getDWorkspace().engine;
     const nonNote = await findNonNoteFile({
       fpath: opts.qs!,
       wsRoot,
@@ -171,11 +162,11 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async setOptsFromNewNote(opts: CommandOpts) {
+  private async setOptsFromNewNote(opts: GoToNoteCommandOpts) {
     // Depending on the config, we can either
     // automatically pick the vault or we'll prompt for it.
     const confirmVaultSetting =
-      getDWorkspace().config["lookupConfirmVaultOnCreate"];
+      this.extension.getDWorkspace().config["lookupConfirmVaultOnCreate"];
     const selectionMode =
       confirmVaultSetting !== true
         ? VaultSelectionMode.smart
@@ -196,7 +187,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return opts;
   }
 
-  private async processInputs(opts: CommandOpts) {
+  private async processInputs(opts: GoToNoteCommandOpts) {
     if (opts.qs && opts.vault) return opts;
 
     if (opts.qs && !opts.vault) {
@@ -215,7 +206,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (!opts.qs) opts = this.getQs(opts, link);
     if (!opts.vault && link.vaultName)
       opts.vault = VaultUtils.getVaultByNameOrThrow({
-        vaults: getDWorkspace().vaults,
+        vaults: this.extension.getDWorkspace().vaults,
         vname: link.vaultName,
       });
     if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;
@@ -253,12 +244,12 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
    * @param opts.anchor - a {@link DNoteAnchor} to navigate to
    * @returns
    */
-  async execute(opts: CommandOpts): Promise<CommandOutput> {
+  async execute(opts: GoToNoteCommandOpts): Promise<GoToNoteCommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
     const { overrides } = opts;
-    const client = getExtension().getEngine();
-    const { wsRoot } = getDWorkspace();
+    const client = this.extension.getEngine();
+    const { wsRoot } = this.extension.getDWorkspace();
 
     const processedOpts = await this.processInputs(opts);
     if (processedOpts === null) return; // User cancelled a prompt, or did not have a valid link selected
@@ -294,34 +285,39 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // Otherwise, it's a regular note
     let pos: undefined | Position;
-    const out = await getExtension().pauseWatchers<CommandOutput>(async () => {
-      const { data } = await client.getNoteByPath({
-        npath: qs,
-        createIfNew: true,
-        vault,
-        overrides,
-      });
-      const note = data?.note as NoteProps;
-      const npath = NoteUtils.getFullPath({
-        note,
-        wsRoot,
-      });
-      const uri = Uri.file(npath);
-      const editor = await VSCodeUtils.openFileInEditor(uri, {
-        column: opts.column,
-      });
-      this.L.info({ ctx, opts, msg: "exit" });
-      if (opts.anchor && editor) {
-        pos = findAnchorPos({ anchor: opts.anchor, note });
-        editor.selection = new Selection(pos, pos);
-        editor.revealRange(editor.selection);
+    const out = await this.extension.pauseWatchers<GoToNoteCommandOutput>(
+      async () => {
+        const { data } = await client.getNoteByPath({
+          npath: qs,
+          createIfNew: true,
+          vault,
+          overrides,
+        });
+        const note = data?.note as NoteProps;
+        const npath = NoteUtils.getFullPath({
+          note,
+          wsRoot,
+        });
+        const uri = Uri.file(npath);
+        const editor = await VSCodeUtils.openFileInEditor(uri, {
+          column: opts.column,
+        });
+        this.L.info({ ctx, opts, msg: "exit" });
+        if (opts.anchor && editor) {
+          pos = findAnchorPos({ anchor: opts.anchor, note });
+          editor.selection = new Selection(pos, pos);
+          editor.revealRange(editor.selection);
+        }
+        return { kind: TargetKind.NOTE, note, pos, source: opts.source };
       }
-      return { kind: TargetKind.NOTE, note, pos, source: opts.source };
-    });
+    );
     return out;
   }
 
-  addAnalyticsPayload(opts?: CommandOpts, resp?: CommandOutput) {
+  addAnalyticsPayload(
+    opts?: GoToNoteCommandOpts,
+    resp?: GoToNoteCommandOutput
+  ) {
     const { source } = { ...opts, ...resp };
     return getAnalyticsPayload(source);
   }

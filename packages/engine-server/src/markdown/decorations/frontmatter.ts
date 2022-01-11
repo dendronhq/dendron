@@ -63,7 +63,7 @@ export const decorateFrontmatter: Decorator<
   const tags = getFrontmatterTags(parseFrontmatter(contents));
   const tagDecorations: DecorationHashTag[] = [];
   const errors: IDendronError[] = [];
-  Promise.all(
+  await Promise.all(
     tags.map(async (tag) => {
       const { errors, decorations } = await decorateTag({
         fname: `${TAGS_HIERARCHY}${tag.value}`,

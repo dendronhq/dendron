@@ -3,9 +3,50 @@ import {
   DVault,
   genDefaultJournalConfig,
   IntermediateDendronConfig,
+  NoteUtils,
   StrictConfigV4,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+
+describe("WHEN getConfig from note", () => {
+  const fname = "foo";
+  const vault: DVault = {
+    name: "fooVault",
+    fsPath: "fooVault",
+  };
+  const config = ConfigUtils.genDefaultConfig();
+
+  describe("AND WHEN getEnableChildLinks prop not set on note", () => {
+    test("THEN getEnableChildLinks = false", () => {
+      const note = NoteUtils.create({
+        vault,
+        fname,
+      });
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeTruthy();
+    });
+  });
+
+  describe("AND WHEN getEnableChildLinks prop set to false on note", () => {
+    test("THEN getEnableChildLinks = false", () => {
+      const note = NoteUtils.create({
+        vault,
+        fname,
+        config: { global: { enableChildLinks: false } },
+      });
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeFalsy();
+    });
+  });
+
+  describe("AND WHEN getEnableChildLinks prop set to true on note", () => {
+    test("THEN getEnableChildLinks = true", () => {
+      const note = NoteUtils.create({
+        vault,
+        fname,
+        config: { global: { enableChildLinks: true } },
+      });
+      expect(ConfigUtils.getEnableChildLinks(config, { note })).toBeTruthy();
+    });
+  });
+});
 
 describe("ConfigUtils", () => {
   describe("getProps", () => {

@@ -15,12 +15,14 @@ type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
 const DendronTreeExplorerPanel: DendronComponent = (props) => {
   const logger = createLogger("DendronTreeExplorerPanel");
-  const noteActive = props.ide.noteActive;
   const engine = props.engine;
   const { config, notes } = engine;
+  const numNotes = _.size(notes);
+  const { noteActive, notePrev } = props.ide;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const [roots, setRoots] = useState<DataNode[]>([]);
-  const numNotes = _.size(notes);
+  // Used to avoid recomputing tree data unnecessarily
+  const [numNotesLast, setNumNotesLast] = useState<number>(numNotes);
 
   logger.info({
     msg: "enter",
@@ -44,10 +46,23 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numNotes, noteActive?.id]);
 
-  // calculate root
+  // calculate the tree data
   React.useEffect(() => {
-    // calculate roots once on startup
-    logger.info({ msg: "calcRoots:pre", numNotes });
+    logger.info({ msg: "calcRoots:pre", numNotes, notePrevId: notePrev?.id });
+    // Avoid recomputing if it's just that the active note changed
+    if (
+      roots.length !== 0 &&
+      notePrev?.id !== noteActive?.id &&
+      numNotesLast === numNotes
+    ) {
+      logger.info({
+        msg: "calcRoots:noteChange",
+        noteActiveId: noteActive?.id,
+      });
+      return;
+    }
+    setNumNotesLast(numNotes);
+
     const _roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
       (ent) => {
         return TreeViewUtils.note2TreeDatanote({
@@ -63,7 +78,14 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     // TODO: remove notes
     logger.info({ msg: "calcRoots:post:setRoots", numNotes });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numNotes]);
+  }, [
+    // update if there are new notes
+    numNotes,
+    // update if something that may reorder the active note changes
+    noteActive?.title,
+    noteActive?.updated,
+    noteActive?.custom?.nav_order,
+  ]);
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {

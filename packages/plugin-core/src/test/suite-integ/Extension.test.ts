@@ -66,6 +66,7 @@ import {
 } from "../testUtilsV3";
 import semver from "semver";
 import * as vscode from "vscode";
+import { AnalyticsUtils } from "../../utils/analytics";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -117,7 +118,7 @@ async function inactiveMessageTest(opts: {
   workspaceActivated?: boolean;
   firstLookupTime?: number;
   lastLookupTime?: number;
-  hasBeenPrompted: boolean;
+  state: string | undefined;
   shouldDisplayMessage: boolean;
 }) {
   const {
@@ -128,13 +129,13 @@ async function inactiveMessageTest(opts: {
     shouldDisplayMessage,
     firstLookupTime,
     lastLookupTime,
-    hasBeenPrompted,
+    state,
     workspaceActivated,
   } = opts;
   const svc = MetadataService.instance();
   sinon
     .stub(StateService.instance(), "getGlobalState")
-    .resolves(hasBeenPrompted ? "submitted" : undefined);
+    .resolves(_.isUndefined(state) ? undefined : state);
 
   svc.setMeta("firstInstall", firstInstall);
   svc.setMeta("firstWsInitialize", firstWsInitialize);
@@ -491,16 +492,42 @@ suite("Extension", function () {
         });
       });
 
+      describe("firstWeekSinceInstall", () => {
+        describe("GIVEN first week", () => {
+          test("THEN isFirstWeek is true", (done) => {
+            const svc = MetadataService.instance();
+            svc.setInitialInstall();
+
+            const actual = AnalyticsUtils.isFirstWeek();
+            expect(actual).toBeTruthy();
+            done();
+          });
+        });
+        describe("GIVEN not first week", () => {
+          test("THEN isFirstWeek is false", (done) => {
+            const svc = MetadataService.instance();
+            const ONE_WEEK = 604800;
+            const NOW = Time.now().toSeconds();
+            const TWO_WEEKS_BEFORE = NOW - 2 * ONE_WEEK;
+            svc.setMeta("firstInstall", TWO_WEEKS_BEFORE);
+
+            const actual = AnalyticsUtils.isFirstWeek();
+            expect(actual).toBeFalsy();
+            done();
+          });
+        });
+      });
+
       describe("shouldDisplayInactiveUserSurvey", () => {
         const ONE_WEEK = 604800;
         const NOW = Time.now().toSeconds();
         const ONE_WEEK_BEFORE = NOW - ONE_WEEK;
+        const TWO_WEEKS_BEFORE = NOW - 2 * ONE_WEEK;
+        const THREE_WEEKS_BEFORE = NOW - 3 * ONE_WEEK;
         const FOUR_WEEKS_BEFORE = NOW - 4 * ONE_WEEK;
         const FIVE_WEEKS_BEFORE = NOW - 5 * ONE_WEEK;
-        const EIGHT_WEEKS_BEFORE = NOW - 8 * ONE_WEEK;
-        const NINE_WEEKS_BEFORE = NOW - 9 * ONE_WEEK;
         describe("GIVEN not prompted yet", () => {
-          describe("WHEN is first week active user AND inactive for less than a month", () => {
+          describe("WHEN is first week active user AND inactive for less than two weeks", () => {
             test("THEN should not display inactive user survey", (done) => {
               inactiveMessageTest({
                 done,
@@ -509,12 +536,43 @@ suite("Extension", function () {
                 firstLookupTime: ONE_WEEK_BEFORE,
                 lastLookupTime: ONE_WEEK_BEFORE,
                 workspaceActivated: true,
-                hasBeenPrompted: false,
+                state: undefined,
                 shouldDisplayMessage: false,
               });
             });
           });
-          describe("WHEN is first week active user AND inactive for at least a month", () => {
+          describe("WHEN is first week active user AND inactive for at two weeks", () => {
+            test("THEN should display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: THREE_WEEKS_BEFORE,
+                firstWsInitialize: THREE_WEEKS_BEFORE,
+                firstLookupTime: THREE_WEEKS_BEFORE,
+                lastLookupTime: TWO_WEEKS_BEFORE,
+                workspaceActivated: true,
+                state: undefined,
+                shouldDisplayMessage: true,
+              });
+            });
+          });
+        });
+        describe("GIVEN already prompted", () => {
+          describe("WHEN user has submitted", () => {
+            test("THEN should never display inactive user survey", (done) => {
+              inactiveMessageTest({
+                done,
+                firstInstall: FIVE_WEEKS_BEFORE,
+                firstWsInitialize: FIVE_WEEKS_BEFORE,
+                firstLookupTime: FIVE_WEEKS_BEFORE,
+                lastLookupTime: FOUR_WEEKS_BEFORE,
+                inactiveUserMsgSendTime: TWO_WEEKS_BEFORE,
+                workspaceActivated: true,
+                state: "submitted",
+                shouldDisplayMessage: false,
+              });
+            });
+          });
+          describe("WHEN it has been another two weeks since user rejected survey", () => {
             test("THEN should display inactive user survey", (done) => {
               inactiveMessageTest({
                 done,
@@ -522,40 +580,24 @@ suite("Extension", function () {
                 firstWsInitialize: FIVE_WEEKS_BEFORE,
                 firstLookupTime: FIVE_WEEKS_BEFORE,
                 lastLookupTime: FOUR_WEEKS_BEFORE,
+                inactiveUserMsgSendTime: TWO_WEEKS_BEFORE,
                 workspaceActivated: true,
-                hasBeenPrompted: false,
+                state: "cancelled",
                 shouldDisplayMessage: true,
               });
             });
           });
-        });
-        describe("GIVEN already prompted", () => {
-          describe("WHEN it has been another month since first prompt", () => {
-            test("THEN should display inactive user survey", (done) => {
-              inactiveMessageTest({
-                done,
-                firstInstall: NINE_WEEKS_BEFORE,
-                firstWsInitialize: NINE_WEEKS_BEFORE,
-                firstLookupTime: NINE_WEEKS_BEFORE,
-                lastLookupTime: EIGHT_WEEKS_BEFORE,
-                inactiveUserMsgSendTime: FOUR_WEEKS_BEFORE,
-                workspaceActivated: true,
-                hasBeenPrompted: true,
-                shouldDisplayMessage: true,
-              });
-            });
-          });
-          describe("WHEN it hasn't been another month since first prompt", () => {
+          describe("WHEN it hasn't been another two weeks since rejected prompt", () => {
             test("THEN should not display inactive user survey", (done) => {
               inactiveMessageTest({
                 done,
-                firstInstall: NINE_WEEKS_BEFORE,
-                firstWsInitialize: NINE_WEEKS_BEFORE,
-                firstLookupTime: NINE_WEEKS_BEFORE,
-                lastLookupTime: EIGHT_WEEKS_BEFORE,
+                firstInstall: FIVE_WEEKS_BEFORE,
+                firstWsInitialize: FIVE_WEEKS_BEFORE,
+                firstLookupTime: FIVE_WEEKS_BEFORE,
+                lastLookupTime: FOUR_WEEKS_BEFORE,
                 inactiveUserMsgSendTime: ONE_WEEK_BEFORE,
                 workspaceActivated: true,
-                hasBeenPrompted: true,
+                state: "cancelled",
                 shouldDisplayMessage: false,
               });
             });

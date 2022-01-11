@@ -1,4 +1,9 @@
-import { NoteProps, NoteUtils, Time } from "@dendronhq/common-all";
+import {
+  NoteProps,
+  NoteUtils,
+  ResponseUtil,
+  Time,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import {
@@ -14,9 +19,9 @@ import {
   PodV2ConfigManager,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
-  RunnableMarkdownV2PodConfig,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
 
@@ -113,7 +118,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
   const podConfig1: ExportPodConfigurationV2 = {
     podId: "foo",
     podType: PodV2Types.AirtableExportV2,
-    exportScope: PodExportScope.Clipboard,
+    exportScope: PodExportScope.Note,
   };
 
   const podConfig2: ExportPodConfigurationV2 = {
@@ -157,7 +162,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
       expect(podConfig).toBeDefined();
       expect(podConfig?.podId).toEqual("foo");
       expect(podConfig?.podType).toEqual(PodV2Types.AirtableExportV2);
-      expect(podConfig?.exportScope).toEqual(PodExportScope.Clipboard);
+      expect(podConfig?.exportScope).toEqual(PodExportScope.Note);
     });
   });
 
@@ -280,53 +285,6 @@ describe("GIVEN an ExternalConnectionManager class", () => {
 });
 
 /**
- * MarkdownExportPod
- */
-describe("GIVEN a Markdown Export Pod with a particular config", () => {
-  describe("WHEN exporting a note", () => {
-    test("THEN expect wikilinks to be converted", async () => {
-      await runEngineTestV5(
-        async (opts) => {
-          const podConfig: RunnableMarkdownV2PodConfig = {
-            exportScope: PodExportScope.Note,
-            destination: "clipboard",
-          };
-
-          const pod = new MarkdownExportPodV2({
-            podConfig,
-            engine: opts.engine,
-            dendronConfig: opts.dendronConfig!,
-          });
-
-          const props = NoteUtils.getNoteByFnameV5({
-            fname: "simple-wikilink",
-            vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
-          }) as NoteProps;
-
-          const result = await pod.exportNote(props);
-          expect(result.includes("[One](/simple-wikilink/one)")).toBeTruthy();
-        },
-        {
-          expect,
-          preSetupHook: async ({ wsRoot, vaults }) => {
-            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE.create({
-              wsRoot,
-              vault: vaults[0],
-            });
-            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
-              wsRoot,
-              vault: vaults[0],
-            });
-          },
-        }
-      );
-    });
-  });
-});
-
-/**
  * GoogleDocsExportPod
  */
 describe("GIVEN a Google Docs Export Pod with a particular config", () => {
@@ -349,20 +307,28 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             wsRoot: opts.wsRoot,
           });
           const response = {
-            data: {
-              documentId: "testdoc",
-            },
+            data: [
+              {
+                documentId: "testdoc",
+                revisionId: "test",
+                dendronId: "foo",
+              },
+            ],
+            errors: [],
           };
           pod.createGdoc = jest.fn().mockResolvedValue(response);
-          const props = NoteUtils.getNoteByFnameV5({
+          const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "simple-wikilink",
             vault: opts.vaults[0],
-            notes: opts.engine.notes,
-            wsRoot: opts.wsRoot,
+            engine: opts.engine,
           }) as NoteProps;
 
           const result = await pod.exportNote(props);
-          expect(result.data?.documentId).toEqual("testdoc");
+          const entCreate = result.data?.created!;
+          const entUpdate = result.data?.updated!;
+          expect(entCreate.length).toEqual(1);
+          expect(entCreate[0]?.documentId).toEqual("testdoc");
+          expect(entUpdate.length).toEqual(0);
         },
         {
           expect,
@@ -372,6 +338,58 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               vault: vaults[0],
             });
             await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE_TARGET.create({
+              wsRoot,
+              vault: vaults[0],
+            });
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN there is an error in response", () => {
+    test("THEN expect gdoc to return error message", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableGoogleDocsV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            accessToken: "test",
+            refreshToken: "test",
+            expirationTime: Time.now().toSeconds() + 5000,
+            connectionId: "foo",
+          };
+
+          const pod = new GoogleDocsExportPodV2({
+            podConfig,
+            engine: opts.engine,
+            vaults: opts.vaults,
+            wsRoot: opts.wsRoot,
+          });
+          const response = {
+            data: [],
+            errors: [
+              {
+                data: {},
+                error: "error with status code 501",
+              },
+            ],
+          };
+          pod.createGdoc = jest.fn().mockResolvedValue(response);
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "simple-wikilink",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+
+          const result = await pod.exportNote(props);
+          const entCreate = result.data?.created!;
+          expect(entCreate.length).toEqual(0);
+          expect(ResponseUtil.hasError(result)).toBeTruthy();
+        },
+        {
+          expect,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await NOTE_PRESETS_V4.NOTE_WITH_WIKILINK_SIMPLE.create({
               wsRoot,
               vault: vaults[0],
             });

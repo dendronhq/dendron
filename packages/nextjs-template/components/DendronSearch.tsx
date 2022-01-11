@@ -152,10 +152,12 @@ function DendronSearchComponent(
       allowClear
       style={{ width: "100%" }}
       value={searchQueryValue}
+      // @ts-ignore
       onClick={results === SearchMode.SEARCH_MODE ? () => null : onClickLookup}
       onChange={
         results === SearchMode.SEARCH_MODE ? onChangeSearch : onChangeLookup
       }
+      // @ts-ignore
       onSelect={(_selection, option) => {
         const id = option.key?.toString()!;
         dendronRouter.changeActiveNote(id, { noteIndex });

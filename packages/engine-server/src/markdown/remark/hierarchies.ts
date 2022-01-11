@@ -1,20 +1,22 @@
 import {
-  NoteUtils,
-  VaultUtils,
+  ConfigUtils,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
+  NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import visit from "unist-util-visit";
 import _ from "lodash";
 import { Content, FootnoteDefinition, FootnoteReference, Root } from "mdast";
 import { heading, html, list, listItem, paragraph, text } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
+import visit from "unist-util-visit";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
-import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
+import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
 import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
 
 type PluginOpts = {
@@ -62,10 +64,11 @@ function footnoteDef2html(definition: FootnoteDefinition) {
 }
 
 /** Adds the "Children", "Tags", and "Footnotes" items to the end of the note. Also renders footnotes. */
+// eslint-disable-next-line func-names
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
   const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
-  const hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
+  let hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
     ? true
     : opts?.hierarchyDisplay;
 
@@ -73,8 +76,16 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     const root = tree as Root;
     const { fname, vault, dest, config, insideNoteRef } =
       MDUtilsV4.getDendronData(proc);
-
     let addedBreak = false;
+
+    if (dest !== DendronASTDest.HTML) {
+      return;
+    }
+    // TODO: remove
+    if (!hierarchyDisplay) {
+      return;
+    }
+
     function addBreak() {
       if (addedBreak) return;
       root.children.push({
@@ -115,12 +126,6 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       }
     }
 
-    if (dest !== DendronASTDest.HTML) {
-      return;
-    }
-    if (!hierarchyDisplay) {
-      return;
-    }
     if (!fname || insideNoteRef) {
       // Even inside a note ref, render footnotes because we want them in there too
       addFootnotes();
@@ -128,12 +133,17 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     }
 
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes: engine.notes,
+      engine,
       vault: vault!,
-      wsRoot: engine.wsRoot,
     });
+
+    // check if v5 is active
+    if (MDUtilsV5.isV5Active(proc)) {
+      const resp = MDUtilsV5.getProcData(proc);
+      hierarchyDisplay = ConfigUtils.getEnableChildLinks(resp.config, { note });
+    }
 
     /** Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them. */
     function addTags() {
@@ -187,9 +197,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       if (!_.isEmpty(children)) {
         addBreak();
         root.children.push(
-          u(DendronASTTypes.HEADING, { depth: 2 }, [
-            u("text", hierarchyDisplayTitle),
-          ])
+          u("strong", [{ type: "text", value: hierarchyDisplayTitle }])
         );
         root.children.push(
           list(
@@ -213,7 +221,9 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     }
 
     // Will appear on page in this order
-    addChildren();
+    if (hierarchyDisplay) {
+      addChildren();
+    }
     addTags();
     addFootnotes();
 

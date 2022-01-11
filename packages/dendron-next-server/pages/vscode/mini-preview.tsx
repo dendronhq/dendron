@@ -27,7 +27,13 @@ export default function MiniPreview({ engine, ide }: DendronProps) {
     }
     const maybeContent = engine.notesRendered[noteId];
     if (!maybeContent) {
-      dispatch(engineSlice.renderNote({ ...getWsAndPort(), id: noteId }));
+      dispatch(
+        engineSlice.renderNote({
+          ...getWsAndPort(),
+          id: noteId,
+          note: ide.noteActive,
+        })
+      );
     }
   }, [ide.noteActive, engine.notesRendered]);
 

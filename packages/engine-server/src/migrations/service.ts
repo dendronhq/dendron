@@ -53,7 +53,7 @@ export class MigrationServce {
       migrationsToRun,
       async (prev, migration) => {
         await prev;
-        const out = await this.applyMigrationChanges({
+        const out = await this.collectMigrationChanges({
           currentVersion,
           previousVersion,
           migration,
@@ -68,11 +68,14 @@ export class MigrationServce {
     const changes = _.flatten(results);
     if (!_.isEmpty(changes)) {
       const { data } = _.last(changes)!;
+
+      // TODO: this should only be set if the migration is backwards incompatible with previous dendron versions
       ConfigUtils.setWorkspaceProp(
         data.dendronConfig,
         "dendronVersion",
         currentVersion
       );
+
       wsService.setConfig(data.dendronConfig);
       // wsConfig is undefined for native workspaces
       if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);
@@ -80,7 +83,10 @@ export class MigrationServce {
     return changes;
   }
 
-  static async applyMigrationChanges({
+  /**
+   * Creates a list of changes that will need to be applied
+   */
+  static async collectMigrationChanges({
     previousVersion,
     migration,
     wsService,

@@ -2,9 +2,9 @@ import { ConfigUtils, DWorkspaceV2, VSCodeEvents } from "@dendronhq/common-all";
 import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { AnalyticsUtils } from "./utils/analytics";
-import { getExtension } from "./workspace";
 
 export function isVSCodeTelemetryEnabled(): boolean | undefined {
   // `isTelemetryEnabled` only seems to be available on VSCode 1.55 and above.
@@ -23,7 +23,9 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
     // if the current status was set by configuration, and that configuration has changed, we should update it and report the change
     const status = SegmentClient.getStatus();
     if (SegmentClient.setByConfig(status)) {
-      const disableTelemetry = ConfigUtils.getWorkspace(ws.config).disableTelemetry;
+      const disableTelemetry = ConfigUtils.getWorkspace(
+        ws.config
+      ).disableTelemetry;
       if (
         SegmentClient.isDisabled(status) &&
         !disableTelemetry &&
@@ -58,10 +60,10 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
 
     const segment = SegmentClient.instance({
       forceNew: true,
-      cachePath
+      cachePath,
     });
     Logger.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
-    Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath});
+    Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath });
   }
 
   try {
@@ -78,7 +80,7 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
       const disposable = onDidChangeTelemetryEnabled(() =>
         instantiateSegmentClient()
       );
-      getExtension().addDisposable(disposable);
+      ExtensionProvider.getExtension().addDisposable(disposable);
     }
   } catch (err) {
     Logger.error({

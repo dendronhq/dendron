@@ -6,7 +6,7 @@ import {
   NoteQuickInput,
 } from "@dendronhq/common-all";
 import { QuickPick, TextEditor, Uri } from "vscode";
-import { DendronBtn } from "./buttons";
+import { DendronBtn } from "./ButtonTypes";
 
 export type LookupControllerState = {
   buttons: DendronBtn[];

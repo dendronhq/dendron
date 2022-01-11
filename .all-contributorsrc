@@ -112,7 +112,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/29872822?v=4",
       "profile": "https://github.com/tallguyjenks",
       "contributions": [
-        "doc"
+        "doc",
+        "bug"
       ]
     },
     {
@@ -841,7 +842,9 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/584491?v=4",
       "profile": "https://github.com/cconrad",
       "contributions": [
-        "bug"
+        "bug",
+        "doc",
+        "financial"
       ]
     },
     {
@@ -1106,6 +1109,89 @@
       "name": "Ryan Hill",
       "avatar_url": "https://avatars.githubusercontent.com/u/8260415?v=4",
       "profile": "https://github.com/rlh1994",
+      "contributions": [
+        "doc",
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "jimt",
+      "name": "Jim Tittsler",
+      "avatar_url": "https://avatars.githubusercontent.com/u/180326?v=4",
+      "profile": "https://WikiEducator.org/User:JimTittsler",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "rickbsgu",
+      "name": "Rick Berger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/161474?v=4",
+      "profile": "http://aphorica.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "ThibaultNocchi",
+      "name": "Thibault",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1619359?v=4",
+      "profile": "https://github.com/ThibaultNocchi",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "redsolver",
+      "name": "redsolver",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30355444?v=4",
+      "profile": "https://github.com/redsolver",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "NahomBefekadu",
+      "name": "NahomBefekadu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58083518?v=4",
+      "profile": "https://github.com/NahomBefekadu",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "jaroslavknotek",
+      "name": "jaroslavknotek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46137238?v=4",
+      "profile": "https://github.com/jaroslavknotek",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "foldsters",
+      "name": "Matthew Giallourakis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37962412?v=4",
+      "profile": "https://github.com/foldsters",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "themurtazanazir",
+      "name": "Murtaza Nazir",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34167018?v=4",
+      "profile": "https://github.com/themurtazanazir",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "emmjayvee",
+      "name": "emmjayvee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38247440?v=4",
+      "profile": "https://github.com/emmjayvee",
       "contributions": [
         "doc"
       ]

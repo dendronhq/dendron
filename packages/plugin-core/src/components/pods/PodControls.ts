@@ -1,3 +1,6 @@
+import { assertUnreachable, DVault, VaultUtils } from "@dendronhq/common-all";
+import { DLogger } from "@dendronhq/common-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import {
   ExportPodConfigurationV2,
   ExternalConnectionManager,
@@ -10,13 +13,15 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { CodeCommandInstance } from "../../commands/base";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { getExtension } from "../../workspace";
-import { PodCommandFactory } from "./PodCommandFactory";
-import { assertUnreachable } from "@dendronhq/common-all";
+import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
+import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
+import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../lookup/utils";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations
@@ -154,22 +159,6 @@ export class PodUIControls {
    * Prompt user to pick a pod (v2) type
    * @returns a runnable code command for the selected pod
    */
-  public static async promptForPodTypeForCommand(): Promise<
-    CodeCommandInstance | undefined
-  > {
-    const picked = await PodUIControls.promptForPodType();
-
-    if (!picked) {
-      return;
-    }
-
-    return PodCommandFactory.createPodCommandForPodType(picked);
-  }
-
-  /**
-   * Prompt user to pick a pod (v2) type
-   * @returns a runnable code command for the selected pod
-   */
   public static async promptForPodType(): Promise<PodV2Types | undefined> {
     const newConnectionOptions = Object.keys(PodV2Types)
       .filter((key) => Number.isNaN(Number(key)))
@@ -301,6 +290,88 @@ export class PodUIControls {
     return id;
   }
 
+  /**
+   * Prompts a lookup control that allows user to select notes for export.
+   * @param fromSelection set this flag to true if we are using {@link PodExportScope.LinksInSelection}
+   * @param key key of the command. this will be used for lookup provider subscription.
+   * @param logger logger object used by the command.
+   * @returns
+   */
+  public static async promptForScopeLookup(opts: {
+    fromSelection?: boolean;
+    key: string;
+    logger: DLogger;
+  }): Promise<NoteLookupProviderSuccessResp | undefined> {
+    const { fromSelection, key, logger } = opts;
+    const extraButtons = [
+      MultiSelectBtn.create({ pressed: true, canToggle: false }),
+    ];
+    if (fromSelection) {
+      extraButtons.push(
+        Selection2ItemsBtn.create({ pressed: true, canToggle: false })
+      );
+    }
+    const lcOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+      vaultSelectCanToggle: false,
+      extraButtons,
+    };
+
+    const extension = ExtensionProvider.getExtension();
+    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const provider = extension.noteLookupProviderFactory.create(key, {
+      allowNewNote: false,
+      noHidePickerOnAccept: false,
+    });
+
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: key,
+        controller,
+        logger,
+        onDone: (event: HistoryEvent) => {
+          const data = event.data as NoteLookupProviderSuccessResp;
+          if (data.cancel) {
+            resolve(undefined);
+          }
+          resolve(data);
+        },
+        onHide: () => {
+          resolve(undefined);
+        },
+      });
+      controller.show({
+        title: "Select notes to export.",
+        placeholder: "Lookup notes.",
+        provider,
+        selectAll: true,
+      });
+    });
+  }
+
+  /**
+   * Prompt to select vault
+   * @returns vault
+   *
+   */
+  public static async promptForVaultSelection(): Promise<DVault | undefined> {
+    const { vaults } = ExtensionProvider.getDWorkspace();
+    if (vaults.length === 1) return vaults[0];
+
+    const vaultQuickPick = await VSCodeUtils.showQuickPick(
+      vaults.map((ent) => ({
+        label: VaultUtils.getName(ent),
+        detail: ent.fsPath,
+        data: ent,
+      })),
+      {
+        placeHolder: "Select the vault to export",
+      }
+    );
+    return vaultQuickPick?.data;
+  }
+
   private static getExportConfigChooserQuickPick(): QuickPick<QuickPickItem> {
     const qp = vscode.window.createQuickPick();
     qp.title = "Pick a Pod Configuration or Create a New One";
@@ -358,11 +429,11 @@ export class PodUIControls {
    */
   private static getDescriptionForScope(scope: PodExportScope): string {
     switch (scope) {
-      case PodExportScope.Clipboard:
-        return "Exports the current contents of your clipboard";
+      case PodExportScope.Lookup:
+        return "Prompts user to select note(s) for export";
 
-      case PodExportScope.Selection:
-        return "Exports the current contents of the selected portion of text in the open note editor";
+      case PodExportScope.LinksInSelection:
+        return "Exports all notes in wikilinks of current selected portion of text in the open note editor";
 
       case PodExportScope.Note:
         return "Exports the currently opened note";

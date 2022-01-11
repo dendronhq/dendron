@@ -9,14 +9,7 @@ import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import { HistoryService } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
-import {
-  LookupControllerV3,
-  LookupControllerV3CreateOpts,
-} from "../../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  OnAcceptHook,
-} from "../../components/lookup/LookupProviderV3";
+import { LookupControllerV3CreateOpts } from "../../components/lookup/LookupControllerV3Interface";
 import {
   CONTEXT_DETAIL,
   FULL_MATCH_DETAIL,
@@ -33,6 +26,11 @@ import {
 } from "../testUtilsV3";
 import sinon from "sinon";
 import _ from "lodash";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import {
+  ILookupProviderV3,
+  OnAcceptHook,
+} from "../../components/lookup/LookupProviderV3Interface";
 
 function setupNotesForTest({
   wsRoot,
@@ -275,6 +273,14 @@ suite("Lookup Utils Test", function runSuite() {
   });
 });
 
+function createTestLookupController(
+  lookupCreateOpts: LookupControllerV3CreateOpts
+) {
+  return ExtensionProvider.getExtension().lookupControllerFactory.create(
+    lookupCreateOpts
+  );
+}
+
 suite("NoteLookupProviderUtils", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
@@ -286,13 +292,14 @@ suite("NoteLookupProviderUtils", function () {
     },
     () => {
       let lookupCreateOpts: LookupControllerV3CreateOpts;
-      let provider: NoteLookupProvider;
+      let provider: ILookupProviderV3;
       let showOpts: any;
       this.beforeEach(() => {
         lookupCreateOpts = {
           nodeType: "note",
         };
-        provider = new NoteLookupProvider("foo", {
+        const extension = ExtensionProvider.getExtension();
+        provider = extension.noteLookupProviderFactory.create("foo", {
           allowNewNote: true,
         });
         showOpts = {
@@ -310,7 +317,7 @@ suite("NoteLookupProviderUtils", function () {
 
       describe("WHEN event.done", () => {
         test("THEN returns bare event if onDone callback isn't specified", async () => {
-          const controller = LookupControllerV3.create(lookupCreateOpts);
+          const controller = createTestLookupController(lookupCreateOpts);
 
           controller.show({
             ...showOpts,
@@ -328,7 +335,7 @@ suite("NoteLookupProviderUtils", function () {
         });
 
         test("THEN returns onDone callback output if onDone is specificed", async () => {
-          const controller = LookupControllerV3.create(lookupCreateOpts);
+          const controller = createTestLookupController(lookupCreateOpts);
           controller.show({
             ...showOpts,
             nonInteractive: true,
@@ -353,7 +360,7 @@ suite("NoteLookupProviderUtils", function () {
           };
         };
         test("THEN returns undefined in onError is not specified", async () => {
-          const controller = LookupControllerV3.create(lookupCreateOpts);
+          const controller = createTestLookupController(lookupCreateOpts);
           provider.registerOnAcceptHook(dummyHook);
           controller.show({
             ...showOpts,
@@ -368,7 +375,7 @@ suite("NoteLookupProviderUtils", function () {
         });
 
         test("THEN returns onError callback output if onError is specified", async () => {
-          const controller = LookupControllerV3.create(lookupCreateOpts);
+          const controller = createTestLookupController(lookupCreateOpts);
           provider.registerOnAcceptHook(dummyHook);
           controller.show({
             ...showOpts,
@@ -388,7 +395,7 @@ suite("NoteLookupProviderUtils", function () {
 
       describe("WHEN event.changeState", () => {
         test("THEN onChangeState callback output is returned if onChangeState is provided", (done) => {
-          const controller = LookupControllerV3.create(lookupCreateOpts);
+          const controller = createTestLookupController(lookupCreateOpts);
           controller.show({
             ...showOpts,
             nonInteractive: false,
@@ -414,7 +421,7 @@ suite("NoteLookupProviderUtils", function () {
         });
         describe("AND action.hide", () => {
           test("THEN onHide callback output is returned if onHide is provided", (done) => {
-            const controller = LookupControllerV3.create(lookupCreateOpts);
+            const controller = createTestLookupController(lookupCreateOpts);
             controller.show({
               ...showOpts,
               nonInteractive: false,

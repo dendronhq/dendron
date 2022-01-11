@@ -10,13 +10,15 @@ import {
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
-import { describe } from "mocha";
+import { describe, before } from "mocha";
 import {
+  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   runTestButSkipForWindows,
   setupBeforeAfter,
 } from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -82,6 +84,7 @@ suite("windowDecorations", function () {
             props: {
               created: _.toInteger(CREATED),
               updated: _.toInteger(UPDATED),
+              tags: ["foo", "bar"],
             },
             vault: vaults[0],
             wsRoot,
@@ -132,7 +135,7 @@ suite("windowDecorations", function () {
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations!.length).toEqual(6);
+          expect(wikilinkDecorations!.length).toEqual(7);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -167,7 +170,7 @@ suite("windowDecorations", function () {
           const brokenWikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.brokenWikilink
           );
-          expect(brokenWikilinkDecorations!.length).toEqual(4);
+          expect(brokenWikilinkDecorations!.length).toEqual(5);
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
@@ -599,6 +602,42 @@ suite("windowDecorations", function () {
           );
           done();
         },
+      });
+    });
+
+    describeSingleWS("AND frontmatter is not visible", { ctx }, async () => {
+      before(async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const note = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+          engine,
+        });
+        // Rewrite the file to have id missing in frontmatter
+        const path = NoteUtils.getFullPath({ note, wsRoot });
+        await writeFile(
+          path,
+          ["---", "updated: 234", "created: 123", "---"]
+            .join("\n")
+            .concat("\n".repeat(200))
+        );
+
+        const editor = await WSUtils.openNote(note);
+        editor.revealRange(new vscode.Range(200, 0, 200, 0));
+      });
+
+      test("THEN still warns for frontmatter issues", async () => {
+        const { allWarnings } = (await updateDecorations(
+          VSCodeUtils.getActiveTextEditorOrThrow()
+        ))!;
+        expect(allWarnings!.length).toEqual(1);
+        expect(
+          AssertUtils.assertInString({
+            body: allWarnings![0].message,
+            match: ["id", "missing"],
+          })
+        );
       });
     });
 

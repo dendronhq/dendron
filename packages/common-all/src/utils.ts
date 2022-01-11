@@ -1,30 +1,32 @@
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
+import path from "path";
 import querystring from "querystring";
 import semver from "semver";
 import { COLORS_LIST } from "./colors";
 import {
+  DendronSiteConfig,
+  DHookDict,
+  DVault,
   NoteProps,
   SEOProps,
-  DVault,
-  DHookDict,
-  DendronSiteConfig,
+  NotePropsDict,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   DendronCommandConfig,
+  DendronPreviewConfig,
   DendronWorkspaceConfig,
   genDefaultCommandConfig,
+  genDefaultPreviewConfig,
   genDefaultWorkspaceConfig,
   IntermediateDendronConfig,
   JournalConfig,
-  ScratchConfig,
   LookupConfig,
-  StrictConfigV4,
   NoteLookupConfig,
-  genDefaultPreviewConfig,
-  DendronPreviewConfig,
+  ScratchConfig,
+  StrictConfigV4,
 } from "./types/intermediateConfigs";
 
 /**
@@ -34,21 +36,6 @@ export class DUtils {
   static minimatch = minimatch;
   static semver = semver;
   static querystring = querystring;
-
-  /**
-   * Check if string is numeric
-   * Credit to https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
-   * @param str
-   * @returns
-   */
-  static isNumeric(str: string) {
-    if (typeof str != "string") return false; // we only process strings!
-    return (
-      // @ts-ignore
-      !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-      !isNaN(parseFloat(str))
-    ); // ...and ensure strings of whitespace fail
-  }
 }
 
 export const getSlugger = () => {
@@ -62,6 +49,7 @@ export const getSlugger = () => {
  * @returns boolean
  */
 export const isNumeric = (n: any) => {
+  // eslint-disable-next-line no-restricted-globals, radix
   return !isNaN(parseInt(n)) && isFinite(n);
 };
 
@@ -89,6 +77,16 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+/**
+ * Check if the value u is a falsy value.
+ */
+export function isFalsy(u: any): boolean {
+  if (_.isBoolean(u)) {
+    return u === false;
+  }
+  return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 
 /** Calculates a basic integer hash for the given string.
@@ -210,6 +208,74 @@ export class DefaultMap<K, V> {
   }
 }
 
+/** Maps a `K` to a list of `V`s. */
+export class ListMap<K, V> {
+  private _internalMap = new Map<K, V[]>();
+
+  public get(key: K) {
+    return this._internalMap.get(key);
+  }
+
+  public add(key: K, ...toAdd: V[]) {
+    let values = this._internalMap.get(key);
+    if (values === undefined) values = [];
+    values.push(...toAdd);
+    this._internalMap.set(key, values);
+  }
+
+  public delete(key: K, ...toDelete: V[]) {
+    const values = this._internalMap.get(key);
+    if (values === undefined) return;
+    _.pull(values, ...toDelete);
+    if (values.length === 0) {
+      this._internalMap.delete(key);
+    } else {
+      this._internalMap.set(key, values);
+    }
+  }
+
+  public has(key: K, value: V) {
+    const values = this._internalMap.get(key);
+    if (values === undefined) return false;
+    return values.includes(value);
+  }
+}
+
+export class NoteFNamesDict {
+  private _internalMap = new ListMap<string, string>();
+
+  public constructor(initialNotes?: NoteProps[]) {
+    if (initialNotes) this.addAll(initialNotes);
+  }
+
+  public get(notes: Readonly<NotePropsDict>, fname: string) {
+    const keys = this._internalMap.get(cleanName(fname));
+    if (keys === undefined) return [];
+    return keys.map((key) => notes[key]).filter(isNotUndefined);
+  }
+
+  /** Returns true if dict has `note` exactly with this fname and id. */
+  public has(note: NoteProps): boolean {
+    return !!this._internalMap
+      // there are notes with this fname
+      .get(cleanName(note.fname))
+      // and one of those has matching id
+      ?.some((maybeMatch) => maybeMatch === note.id);
+  }
+
+  public add(note: NoteProps) {
+    if (this.has(note)) return; // avoid duplicates
+    this._internalMap.add(cleanName(note.fname), note.id);
+  }
+
+  public addAll(notes: NoteProps[]) {
+    notes.forEach((note) => this.add(note));
+  }
+
+  public delete(note: NoteProps) {
+    this._internalMap.delete(cleanName(note.fname), note.id);
+  }
+}
 export class FIFOQueue<T> {
   private _internalQueue: T[] = [];
 
@@ -593,6 +659,26 @@ export class ConfigUtils {
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }
 
+  /**
+   * NOTE: _config currently doesn't have a `global` object. We're keeping it here
+   * to make using the API easier when we do add it
+   */
+  static getEnableChildLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps }
+  ): boolean {
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      !_.isUndefined(opts.note.config.global.enableChildLinks)
+    ) {
+      return opts.note.config.global.enableChildLinks;
+    }
+    return true;
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
@@ -663,4 +749,22 @@ export class ConfigUtils {
     const path = `preview.${key}`;
     _.set(config, path, value);
   }
+}
+
+/**
+ * Make name safe for dendron
+ * @param name
+ * @param opts
+ */
+export function cleanName(name: string): string {
+  name = name
+    .replace(new RegExp(_.escapeRegExp(path.sep), "g"), ".")
+    .toLocaleLowerCase();
+  name = name.replace(/ /g, "-");
+  return name;
+}
+
+/** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
+export function normalizeUnixPath(fsPath: string): string {
+  return path.posix.format(path.parse(fsPath));
 }

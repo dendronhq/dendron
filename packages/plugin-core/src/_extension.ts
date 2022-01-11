@@ -7,6 +7,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
+  DWorkspaceV2,
   ExtensionEvents,
   getStage,
   InstallStatus,
@@ -45,10 +46,12 @@ import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { SeedAddCommand } from "./commands/SeedAddCommand";
 import {
   SeedBrowseCommand,
   WebViewPanelFactory,
 } from "./commands/SeedBrowseCommand";
+import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
@@ -75,9 +78,12 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
 import { setupSegmentClient } from "./telemetry";
+import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
+import { isAutoCompletable } from "./utils/AutoCompletable";
 import { MarkdownUtils } from "./utils/md";
+import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
@@ -94,6 +100,81 @@ import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
+
+class ExtensionUtils {
+  /**
+   * Setup segment client
+   * Also setup cache flushing in case of missed uploads
+   */
+  static setupSegmentWithCacheFlush({
+    context,
+    ws,
+  }: {
+    context: vscode.ExtensionContext;
+    ws: DWorkspaceV2;
+  }) {
+    if (getStage() === "prod") {
+      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+      fs.ensureDir(segmentResidualCacheDir);
+      setupSegmentClient(
+        ws,
+        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+      );
+
+      // Try to flush the Segment residual cache every hour:
+      (function tryFlushSegmentCache() {
+        SegmentClient.instance()
+          .tryFlushResidualCache()
+          .then((result) => {
+            Logger.info(
+              `Segment Residual Cache flush attempted. ${JSON.stringify(
+                result
+              )}`
+            );
+          });
+
+        // Repeat once an hour:
+        setTimeout(tryFlushSegmentCache, 3600000);
+      })();
+    }
+  }
+
+  static async startServerProcess({
+    context,
+    start,
+    wsService,
+  }: {
+    context: vscode.ExtensionContext;
+    wsService: WorkspaceService;
+    start: [number, number];
+  }) {
+    const ctx = "startServerProcess";
+    const { port, subprocess } = await startServerProcess();
+    if (subprocess) {
+      WSUtils.handleServerProcess({
+        subprocess,
+        context,
+        onExit: (type: SubProcessExitType) => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                  code: type,
+                });
+                _activate(context);
+              }
+            });
+        },
+      });
+    }
+    const durationStartServer = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
+    updateEngineAPI(port);
+    wsService.writePort(port);
+  }
+}
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -350,6 +431,9 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      MetadataService.instance().setInitialInstall();
+    }
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -403,9 +487,10 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
 
-      // initialize client
-      setupSegmentClient(wsImpl);
+      // // initialize Segment client
+      ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
+      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,
         previousVersion: previousWorkspaceVersion,
@@ -447,31 +532,6 @@ export async function _activate(
             "We have detected a legacy configuration in dendron.yml and migrated to the newest configurations. You can find a backup of the original file in your root directory."
           );
         }
-      }
-      // initialize client
-      if (getStage() === "prod") {
-        const segmentResidualCacheDir = context.globalStorageUri.fsPath;
-        fs.ensureDir(segmentResidualCacheDir);
-        setupSegmentClient(
-          wsImpl,
-          path.join(segmentResidualCacheDir, "segmentresidualcache.log")
-        );
-
-        // Try to flush the Segment residual cache every hour:
-        (function tryFlushSegmentCache() {
-          SegmentClient.instance()
-            .tryFlushResidualCache()
-            .then((result) => {
-              Logger.info(
-                `Segment Residual Cache flush attempted. ${JSON.stringify(
-                  result
-                )}`
-              );
-            });
-
-          // Repeat once an hour:
-          setTimeout(tryFlushSegmentCache, 3600000);
-        })();
       }
 
       // Re-use the id for error reporting too:
@@ -546,33 +606,10 @@ export async function _activate(
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
 
-      const { port, subprocess } = await startServerProcess();
-      if (subprocess) {
-        WSUtils.handleServerProcess({
-          subprocess,
-          context,
-          onExit: (type: SubProcessExitType) => {
-            const txt = "Restart Dendron";
-            vscode.window
-              .showErrorMessage("Dendron engine encountered an error", txt)
-              .then(async (resp) => {
-                if (resp === txt) {
-                  AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
-                    code: type,
-                  });
-                  _activate(context);
-                }
-              });
-          },
-        });
-      }
-      const durationStartServer = getDurationMilliseconds(start);
-      Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-      updateEngineAPI(port);
-      wsService.writePort(port);
+      await ExtensionUtils.startServerProcess({ context, start, wsService });
+
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
-
       if (!reloadSuccess) {
         HistoryService.instance().add({
           source: "extension",
@@ -617,7 +654,7 @@ export async function _activate(
       });
       if (stage !== "test") {
         await ws.activateWatchers();
-        toggleViews(true);
+        togglePluginActiveContext(true);
       }
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
@@ -633,7 +670,7 @@ export async function _activate(
           msg: "watching for a native workspace to be created",
         });
 
-        toggleViews(false);
+        togglePluginActiveContext(false);
         const autoInit = new FileAddWatcher(
           vscode.workspace.workspaceFolders?.map(
             (vscodeFolder) => vscodeFolder.uri.fsPath
@@ -740,7 +777,7 @@ export async function _activate(
       // If automaticallyShowPreview = true, display preview panel on start up
       const note = WSUtils.getActiveNote();
       if (note) {
-        PreviewPanelFactory.getProxy().showPreviewAndUpdate(note);
+        PreviewPanelFactory.getProxy(getExtension()).showPreviewAndUpdate(note);
       }
 
       return true;
@@ -752,9 +789,9 @@ export async function _activate(
   }
 }
 
-function toggleViews(enabled: boolean) {
-  const ctx = "toggleViews";
-  Logger.info({ ctx, msg: `views enabled: ${enabled}` });
+function togglePluginActiveContext(enabled: boolean) {
+  const ctx = "togglePluginActiveContext";
+  Logger.info({ ctx, state: `togglePluginActiveContext: ${enabled}` });
   VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
   VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
@@ -765,7 +802,7 @@ export function deactivate() {
   if (!WorkspaceUtils.isNativeWorkspace(ws)) {
     getExtension().deactivate();
   }
-  toggleViews(false);
+  togglePluginActiveContext(false);
 }
 
 async function showWelcomeOrWhatsNew({
@@ -786,7 +823,6 @@ async function showWelcomeOrWhatsNew({
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
-      MetadataService.instance().setInitialInstall();
 
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
@@ -840,7 +876,7 @@ async function showWelcomeOrWhatsNew({
     await showLapsedUserMessage(assetUri);
   }
 
-  // Show inactive users (users who were active on first week but have not used lookup in a month)
+  // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
   if (await shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();
@@ -887,8 +923,13 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
   );
 
+  // don't display if they have submitted before.
+  if (inactiveSurveySubmitted === "submitted") {
+    return false;
+  }
+
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
+  const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
   const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
   const metaData = MetadataService.instance().getMeta();
 
@@ -918,25 +959,28 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for a month?
+  // was the user active on the first week but has been inactive for a two weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
 
-  if (!_.isUndefined(inactiveSurveySubmitted)) {
+  // if they have cancelled, we should be waiting another 2 weeks.
+  if (inactiveSurveySubmitted === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS;
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
+      isInactive;
     return shouldSendAgain;
+  } else {
+    // this is the first time we are asking them.
+    return (
+      // If the user has been active on first week, but been inactive for more than 2 weeks.
+      metaData.dendronWorkspaceActivated !== undefined &&
+      metaData.firstWsInitialize !== undefined &&
+      isInactive
+    );
   }
-
-  return (
-    // If the user has been active on first week, but been inactive for more than 4 weeks.
-    metaData.dendronWorkspaceActivated !== undefined &&
-    metaData.firstWsInitialize !== undefined &&
-    isInactive
-  );
 }
 
 /**
@@ -978,8 +1022,16 @@ async function _setupCommands(
 ) {
   const existingCommands = await vscode.commands.getCommands();
 
+  // add all commands
   ALL_COMMANDS.map((Cmd) => {
-    const cmd = new Cmd();
+    const cmd = new Cmd(ws);
+
+    // Register commands that implement on `onAutoComplete` with AutoCompletableRegister
+    // to be able to be invoked with auto completion action.
+    if (isAutoCompletable(cmd)) {
+      AutoCompletableRegistrar.register(cmd.key, cmd);
+    }
+
     if (!existingCommands.includes(cmd.key))
       context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -1044,12 +1096,37 @@ async function _setupCommands(
     );
   }
 
+  const addCommand = ({
+    context,
+    key,
+    cmd,
+    existingCommands,
+  }: {
+    context: vscode.ExtensionContext;
+    key: string;
+    cmd: IBaseCommand;
+    existingCommands: string[];
+  }) => {
+    if (!existingCommands.includes(key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          key,
+          sentryReportingCallback(async (args) => {
+            cmd.run(args);
+          })
+        )
+      );
+    }
+  };
+
   if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
     context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        sentryReportingCallback(async () => {
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run();
+        sentryReportingCallback(async (args) => {
+          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
+            args
+          );
         })
       )
     );
@@ -1080,6 +1157,21 @@ async function _setupCommands(
       )
     );
   }
+
+  // NOTE: seed commands currently DO NOT take extension as a first argument
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_ADD.key,
+    cmd: new SeedAddCommand(),
+    existingCommands,
+  });
+
+  addCommand({
+    context,
+    key: DENDRON_COMMANDS.SEED_REMOVE.key,
+    cmd: new SeedRemoveCommand(),
+    existingCommands,
+  });
 
   if (!existingCommands.includes(DENDRON_COMMANDS.SEED_BROWSE.key)) {
     context.subscriptions.push(

@@ -3,10 +3,12 @@ import {
   DNodeUtils,
   NoteProps,
   NoteUtils,
+  SchemaUtils,
   Time,
   VaultUtils,
-  SchemaUtils,
 } from "@dendronhq/common-all";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import path from "path";
 import {
@@ -22,19 +24,16 @@ import {
   window,
   workspace,
 } from "vscode";
+import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { NoteSyncService } from "./services/NoteSyncService";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { AnalyticsUtils } from "./utils/analytics";
 import {
-  getExtension,
-  getDWorkspace,
   DendronExtension,
+  getDWorkspace,
+  getExtension,
   getVaultFromUri,
 } from "./workspace";
-import * as Sentry from "@sentry/node";
-import { FileWatcher } from "./fileWatcher";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
-import { AnalyticsUtils } from "./utils/analytics";
-import { SchemaSyncService } from "./services/SchemaSyncService";
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -69,19 +68,18 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
 export class WorkspaceWatcher {
   /** The documents that have been opened during this session that have not been viewed yet in the editor. */
   private _openedDocuments: Map<string, TextDocument>;
-  private _debouncedOnDidChangeTextDocument: DebouncedFunc<
-    (event: TextDocumentChangeEvent) => Promise<void>
-  >;
   private _quickDebouncedOnDidChangeTextDocument: DebouncedFunc<
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
+  private _schemaSyncService: ISchemaSyncService;
 
-  constructor() {
+  constructor({
+    schemaSyncService,
+  }: {
+    schemaSyncService: ISchemaSyncService;
+  }) {
+    this._schemaSyncService = schemaSyncService;
     this._openedDocuments = new Map();
-    this._debouncedOnDidChangeTextDocument = _.debounce(
-      this.onDidChangeTextDocument,
-      200
-    );
     this._quickDebouncedOnDidChangeTextDocument = _.debounce(
       this.quickOnDidChangeTextDocument,
       50
@@ -99,13 +97,6 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
-      workspace.onDidChangeTextDocument(
-        this._debouncedOnDidChangeTextDocument,
-        this,
-        context.subscriptions
-      )
-    );
     extension.addDisposable(
       workspace.onDidChangeTextDocument(
         this._quickDebouncedOnDidChangeTextDocument,
@@ -152,40 +143,9 @@ export class WorkspaceWatcher {
 
   async onDidSaveTextDocument(document: TextDocument) {
     if (SchemaUtils.isSchemaUri(document.uri)) {
-      await SchemaSyncService.instance().onDidSave({ document });
-    }
-  }
-
-  /** This version of `onDidChangeTextDocument` is debounced for a longer time, and is useful for engine changes that should happen more slowly. */
-  async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
-    try {
-      // `workspace.onDidChangeTextDocument` fires 2 events for every change
-      // the second one changing the dirty state of the page from `true` to `false`
-      if (event.document.isDirty === false) {
-        return;
-      }
-
-      const ctx = {
-        ctx: "WorkspaceWatcher:onDidChangeTextDocument",
-        uri: event.document.uri.fsPath,
-      };
-      Logger.debug({ ...ctx, state: "enter" });
-      this._debouncedOnDidChangeTextDocument.cancel();
-      const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
-        Logger.debug({ ...ctx, state: "uri not in workspace" });
-        return;
-      }
-      Logger.debug({ ...ctx, state: "trigger change handlers" });
-      const contentChanges = event.contentChanges;
-      NoteSyncService.instance().onDidChange(event.document, {
-        contentChanges,
+      await this._schemaSyncService.onDidSave({
+        document,
       });
-      Logger.debug({ ...ctx, state: "exit" });
-      return;
-    } catch (error) {
-      Sentry.captureException(error);
-      throw error;
     }
   }
 

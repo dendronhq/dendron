@@ -9,13 +9,12 @@ import {
   TextEditorVisibleRangesChangeEvent,
   window,
 } from "vscode";
-import { PreviewProxy } from "./components/views/PreviewViewFactory";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { getDWorkspace, getExtension } from "./workspace";
-import { WSUtils } from "./WSUtils";
 
 const context = (scope: string) => {
   const ROOT_CTX = "WindowWatcher";
@@ -26,12 +25,6 @@ const context = (scope: string) => {
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
  */
 export class WindowWatcher {
-  private _previewProxy: PreviewProxy;
-
-  constructor(previewProxy: PreviewProxy) {
-    this._previewProxy = previewProxy;
-  }
-
   private onDidChangeActiveTextEditorHandlers: ((
     e: TextEditor | undefined
   ) => void)[] = [];
@@ -82,12 +75,12 @@ export class WindowWatcher {
           window.activeTextEditor?.document.uri.fsPath
       ) {
         const uri = editor.document.uri;
+        this.triggerNotePreviewUpdate(editor);
         if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });
         this.triggerUpdateDecorations(editor);
-        this.triggerNotePreviewUpdate(editor);
 
         // other components can register handlers for window watcher
         // those handlers get called here
@@ -145,13 +138,8 @@ export class WindowWatcher {
   /**
    * Show note preview panel if applicable
    */
-  async triggerNotePreviewUpdate({ document }: TextEditor) {
-    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
-    if (maybeNote) {
-      this._previewProxy.showPreviewAndUpdate(maybeNote);
-    }
-
-    return;
+  triggerNotePreviewUpdate({ document }: TextEditor) {
+    return ShowPreviewCommand.openDocumentInPreview(document);
   }
 
   private async onFirstOpen(editor: TextEditor) {

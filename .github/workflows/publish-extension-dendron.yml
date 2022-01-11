@@ -35,10 +35,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      
-      - name: Configure NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
 
       - name: Set Environment Variables
         run: |
@@ -48,6 +44,10 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
           echo "NPM_TOKEN=${{ secrets.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Configure NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
 
       - name: Yarn Setup
         run: yarn setup

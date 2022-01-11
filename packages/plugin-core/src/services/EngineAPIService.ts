@@ -22,6 +22,7 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
+  NoteFNamesDict,
   NoteProps,
   NotePropsDict,
   QueryNotesOpts,
@@ -38,8 +39,9 @@ import {
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { getDWorkspace } from "../workspace";
+import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
-export class EngineAPIService implements DEngineClient {
+export class EngineAPIService implements DEngineClient, IEngineAPIService {
   private internalEngine: DEngineClient;
 
   private _trustedWorkspace: boolean = true;
@@ -83,6 +85,7 @@ export class EngineAPIService implements DEngineClient {
   get trustedWorkspace(): boolean {
     return this._trustedWorkspace;
   }
+
   set trustedWorkspace(value: boolean) {
     this._trustedWorkspace = value;
   }
@@ -92,6 +95,13 @@ export class EngineAPIService implements DEngineClient {
   }
   public set notes(arg: NotePropsDict) {
     this.internalEngine.notes = arg;
+  }
+
+  public get noteFnames(): NoteFNamesDict {
+    return this.internalEngine.noteFnames;
+  }
+  public set noteFnames(arg: NoteFNamesDict) {
+    this.internalEngine.noteFnames = arg;
   }
 
   public get wsRoot(): string {

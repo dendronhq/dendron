@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Remove all compiled assets
+
 rm -rf node_modules
 find packages -name "node_modules" -type d -prune -exec rm -rf '{}' +
 find packages -type f -name yarn-error.log -exec rm {} +

@@ -226,7 +226,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           const { color: maybeColor, type: colorType } = NoteUtils.color({
             fname: value,
             vault,
-            notes: engine.notes,
+            engine,
           });
           if (
             colorType === "configured" ||

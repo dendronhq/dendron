@@ -26,6 +26,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
+  NoteFNamesDict,
   NotesCache,
   NotesCacheEntryMap,
   NoteUtils,
@@ -43,6 +44,8 @@ import {
   WriteNoteResp,
   ConfigUtils,
   USER_MESSAGES,
+  DNoteLoc,
+  NoteChangeUpdateEntry,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -79,6 +82,7 @@ export class FileStorage implements DStore {
    * the backlink data in this dictionary hence it starts to contain stale backlink data.
    *  */
   public notes: NotePropsDict;
+  public noteFnames: NoteFNamesDict;
   public schemas: SchemaModuleDict;
   public notesCache: NotesCache;
   public logger: DLogger;
@@ -96,6 +100,7 @@ export class FileStorage implements DStore {
     this.configRoot = wsRoot;
     this.vaults = vaults;
     this.notes = {};
+    this.noteFnames = new NoteFNamesDict();
     this.schemas = {};
     this.notesCache = {
       version: 0,
@@ -124,6 +129,7 @@ export class FileStorage implements DStore {
       errors = errors.concat(initErrors);
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
+        this.noteFnames.add(ent);
       });
 
       const { notes, schemas } = this;
@@ -220,9 +226,10 @@ export class FileStorage implements DStore {
     // if have children, keep this node around as a stub
     if (!_.isEmpty(noteToDelete.children)) {
       this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
+      const prevNote = { ...noteToDelete };
       noteToDelete.stub = true;
       this.updateNote(noteToDelete);
-      out.push({ note: noteToDelete, status: "update" });
+      out.push({ note: noteToDelete, status: "update", prevNote });
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -233,15 +240,21 @@ export class FileStorage implements DStore {
       }
       // remove from parent
       let parentNote = this.notes[noteToDelete.parent] as NoteProps;
+      const parentNotePrev = { ...parentNote };
       parentNote.children = _.reject(
         parentNote.children,
         (ent) => ent === noteToDelete.id
       );
       // delete from note dictionary
       delete this.notes[noteToDelete.id];
+      this.noteFnames.delete(noteToDelete);
       // if parent note is not a stub, update it
       if (!parentNote.stub) {
-        out.push({ note: parentNote, status: "update" });
+        out.push({
+          note: parentNote,
+          status: "update",
+          prevNote: parentNotePrev,
+        });
       }
       out.push({ note: noteToDelete, status: "delete" });
       // check all stubs
@@ -618,6 +631,157 @@ export class FileStorage implements DStore {
     return [start, end];
   }
 
+  /** Update the links inside this note that need to be updated for the rename from `oldLoc` to `newLoc` */
+  private async processNoteChangedByRename({
+    note,
+    oldLoc,
+    newLoc,
+  }: {
+    note: NoteProps;
+    oldLoc: DNoteLoc;
+    newLoc: DNoteLoc;
+  }): Promise<NoteChangeUpdateEntry | undefined> {
+    const prevNote = { ...note };
+    const vault = note.vault;
+    const vaultPath = vault2Path({ vault, wsRoot: this.wsRoot });
+    // read note in case its changed
+    const _n = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
+    const foundLinks = LinkUtils.findLinks({
+      note: _n,
+      engine: this.engine,
+      filter: { loc: oldLoc },
+    });
+    let allLinks = _.orderBy(
+      foundLinks,
+      (link) => {
+        return link.position?.start.offset;
+      },
+      "desc"
+    );
+    if (
+      oldLoc.fname.toLowerCase() === newLoc.fname.toLowerCase() &&
+      oldLoc.vaultName === newLoc.vaultName &&
+      oldLoc.anchorHeader &&
+      newLoc.anchorHeader
+    ) {
+      // Renaming the header, only update links that link to the old header
+      allLinks = _.filter(allLinks, (link): boolean => {
+        // This is a wikilink to this header
+        if (link.to?.anchorHeader === oldLoc.anchorHeader) return true;
+        // Or this is a range reference, and one part of the range includes this header
+        return (
+          link.type === "ref" &&
+          isNotUndefined(oldLoc.anchorHeader) &&
+          this.referenceRangeParts(link.to?.anchorHeader).includes(
+            oldLoc.anchorHeader
+          )
+        );
+      });
+    }
+
+    // only modify links that have same _to_ vault name
+    // explicitly same: has vault prefix
+    // implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
+    allLinks = allLinks.filter((link) => {
+      const oldLocVaultName = oldLoc.vaultName as string;
+      const explicitlySameVault = link.to?.vaultName === oldLocVaultName;
+      const oldLocVault = VaultUtils.getVaultByName({
+        vaults: this.vaults,
+        vname: oldLocVaultName,
+      });
+      const implicitlySameVault =
+        _.isUndefined(link.to?.vaultName) && _.isEqual(note.vault, oldLocVault);
+      return explicitlySameVault || implicitlySameVault;
+    });
+
+    const noteMod = _.reduce(
+      allLinks,
+      (note: NoteProps, link: DLink) => {
+        const oldLink = LinkUtils.dlink2DNoteLink(link);
+        // current implementation adds alias for all notes
+        // check if old note has alias thats different from its fname
+        let alias: string | undefined;
+        if (oldLink.from.alias && oldLink.from.alias !== oldLink.from.fname) {
+          alias = oldLink.from.alias;
+          // Update the alias if it was using the default alias.
+          if (
+            oldLoc.alias?.toLocaleLowerCase() ===
+              oldLink.from.alias.toLocaleLowerCase() &&
+            newLoc.alias
+          ) {
+            alias = newLoc.alias;
+          }
+        }
+        // for hashtag links, we'll have to regenerate the alias
+        if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
+          const fnameWithoutTag = newLoc.fname.slice(TAGS_HIERARCHY.length);
+          // Frontmatter tags don't have the hashtag
+          if (link.type !== "frontmatterTag") alias = `#${fnameWithoutTag}`;
+          else alias = fnameWithoutTag;
+        } else if (oldLink.from.fname.startsWith(TAGS_HIERARCHY)) {
+          // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
+          // And if this used to be a frontmatter tag, the alias being undefined will force it to be removed because a frontmatter tag can't point to something outside of tags hierarchy.
+          alias = undefined;
+        }
+        // for user tag links, we'll have to regenerate the alias
+        if (newLoc.fname.startsWith(USERS_HIERARCHY)) {
+          const fnameWithoutTag = newLoc.fname.slice(USERS_HIERARCHY.length);
+          alias = `@${fnameWithoutTag}`;
+        } else if (oldLink.from.fname.startsWith(USERS_HIERARCHY)) {
+          // If this used to be a user tag but no longer is, the alias is like `@foo.bar` and no longer makes sense.
+          alias = undefined;
+        }
+        // Correctly handle header renames in references with range based references
+        if (
+          oldLoc.anchorHeader &&
+          link.type === "ref" &&
+          isNotUndefined(oldLink.from.anchorHeader) &&
+          oldLink.from.anchorHeader.indexOf(":") > -1 &&
+          isNotUndefined(newLoc.anchorHeader) &&
+          newLoc.anchorHeader.indexOf(":") === -1
+        ) {
+          // This is a reference, old anchor had a ":" in it, a new anchor header is provided and does not have ":" in it.
+          // For example, `![[foo#start:#end]]` to `![[foo#something]]`. In this case, `something` is actually supposed to replace only one part of the range.
+          // Find the part that matches the old header, and replace just that with the new one.
+          let [start, end] = this.referenceRangeParts(
+            oldLink.from.anchorHeader
+          );
+          if (start === oldLoc.anchorHeader) start = newLoc.anchorHeader;
+          if (end === oldLoc.anchorHeader) end = newLoc.anchorHeader;
+          newLoc.anchorHeader = `${start}:#${end}`;
+        }
+        const newBody = LinkUtils.updateLink({
+          note,
+          oldLink,
+          newLink: {
+            ...oldLink,
+            from: {
+              ...newLoc,
+              anchorHeader: newLoc.anchorHeader || oldLink.from.anchorHeader,
+              alias,
+            },
+          },
+        });
+        _n.body = newBody;
+        return _n;
+      },
+      _n
+    );
+    const shouldChange = !(
+      note.body === noteMod.body && note.tags === noteMod.tags
+    );
+    if (shouldChange) {
+      note.body = noteMod.body;
+      note.tags = noteMod.tags;
+      return {
+        note,
+        prevNote,
+        status: "update",
+      };
+    }
+    return;
+  }
+
   async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
     const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
@@ -648,175 +812,37 @@ export class FileStorage implements DStore {
       newLoc.alias = newNoteTitle;
     }
 
+    // const notesToChange = NoteUtils.getNotesWithLinkTo({
     let notesChangedEntries: NoteChangeEntry[] = [];
-    const notesToChange = await NoteUtils.getNotesWithLinkTo({
+    const notesWithLinkTo = NoteUtils.getNotesWithLinkTo({
       note: oldNote,
       notes: this.notes,
     });
     this.logger.info({
       ctx,
-      msg: "notesToChange:gather",
-      notes: notesToChange.map((n) => NoteUtils.toLogObj(n)),
+      msg: "notesWithLinkTo:gather",
+      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
     });
     // update note body of all notes that have changed
-    const notesChanged = await Promise.all(
-      notesToChange.map(async (n) => {
-        const vault = n.vault;
-        const vaultPath = vault2Path({ vault, wsRoot });
-        // read note in case its changed
-        const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
-        const foundLinks = LinkUtils.findLinks({
-          note: _n,
-          engine: this.engine,
-          filter: { loc: oldLoc },
-        });
-        let allLinks = _.orderBy(
-          foundLinks,
-          (link) => {
-            return link.position?.start.offset;
-          },
-          "desc"
-        );
-        if (
-          oldLoc.fname.toLowerCase() === newLoc.fname.toLowerCase() &&
-          oldLoc.vaultName === newLoc.vaultName &&
-          oldLoc.anchorHeader &&
-          newLoc.anchorHeader
-        ) {
-          // Renaming the header, only update links that link to the old header
-          allLinks = _.filter(allLinks, (link): boolean => {
-            // This is a wikilink to this header
-            if (link.to?.anchorHeader === oldLoc.anchorHeader) return true;
-            // Or this is a range reference, and one part of the range includes this header
-            return (
-              link.type === "ref" &&
-              isNotUndefined(oldLoc.anchorHeader) &&
-              this.referenceRangeParts(link.to?.anchorHeader).includes(
-                oldLoc.anchorHeader
-              )
-            );
-          });
-        }
-
-        // only modify links that have same _to_ vault name
-        // explicitly same: has vault prefix
-        // implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
-        allLinks = allLinks.filter((link) => {
-          const oldLocVaultName = oldLoc.vaultName as string;
-          const explicitlySameVault = link.to?.vaultName === oldLocVaultName;
-          const oldLocVault = VaultUtils.getVaultByName({
-            vaults: this.vaults,
-            vname: oldLocVaultName,
-          });
-          const implicitlySameVault =
-            _.isUndefined(link.to?.vaultName) &&
-            _.isEqual(n.vault, oldLocVault);
-          return explicitlySameVault || implicitlySameVault;
-        });
-
-        const noteMod = _.reduce(
-          allLinks,
-          (note: NoteProps, link: DLink) => {
-            const oldLink = LinkUtils.dlink2DNoteLink(link);
-            // current implementation adds alias for all notes
-            // check if old note has alias thats different from its fname
-            let alias: string | undefined;
-            if (
-              oldLink.from.alias &&
-              oldLink.from.alias !== oldLink.from.fname
-            ) {
-              alias = oldLink.from.alias;
-              // Update the alias if it was using the default alias.
-              if (
-                oldLoc.alias?.toLocaleLowerCase() ===
-                  oldLink.from.alias.toLocaleLowerCase() &&
-                newLoc.alias
-              ) {
-                alias = newLoc.alias;
-              }
-            }
-            // for hashtag links, we'll have to regenerate the alias
-            if (newLoc.fname.startsWith(TAGS_HIERARCHY)) {
-              const fnameWithoutTag = newLoc.fname.slice(TAGS_HIERARCHY.length);
-              // Frontmatter tags don't have the hashtag
-              if (link.type !== "frontmatterTag") alias = `#${fnameWithoutTag}`;
-              else alias = fnameWithoutTag;
-            } else if (oldLink.from.fname.startsWith(TAGS_HIERARCHY)) {
-              // If this used to be a hashtag but no longer is, the alias is like `#foo.bar` and no longer makes sense.
-              // And if this used to be a frontmatter tag, the alias being undefined will force it to be removed because a frontmatter tag can't point to something outside of tags hierarchy.
-              alias = undefined;
-            }
-            // for user tag links, we'll have to regenerate the alias
-            if (newLoc.fname.startsWith(USERS_HIERARCHY)) {
-              const fnameWithoutTag = newLoc.fname.slice(
-                USERS_HIERARCHY.length
-              );
-              alias = `@${fnameWithoutTag}`;
-            } else if (oldLink.from.fname.startsWith(USERS_HIERARCHY)) {
-              // If this used to be a user tag but no longer is, the alias is like `@foo.bar` and no longer makes sense.
-              alias = undefined;
-            }
-            // Correctly handle header renames in references with range based references
-            if (
-              oldLoc.anchorHeader &&
-              link.type === "ref" &&
-              isNotUndefined(oldLink.from.anchorHeader) &&
-              oldLink.from.anchorHeader.indexOf(":") > -1 &&
-              isNotUndefined(newLoc.anchorHeader) &&
-              newLoc.anchorHeader.indexOf(":") === -1
-            ) {
-              // This is a reference, old anchor had a ":" in it, a new anchor header is provided and does not have ":" in it.
-              // For example, `![[foo#start:#end]]` to `![[foo#something]]`. In this case, `something` is actually supposed to replace only one part of the range.
-              // Find the part that matches the old header, and replace just that with the new one.
-              let [start, end] = this.referenceRangeParts(
-                oldLink.from.anchorHeader
-              );
-              if (start === oldLoc.anchorHeader) start = newLoc.anchorHeader;
-              if (end === oldLoc.anchorHeader) end = newLoc.anchorHeader;
-              newLoc.anchorHeader = `${start}:#${end}`;
-            }
-            const newBody = LinkUtils.updateLink({
-              note,
-              oldLink,
-              newLink: {
-                ...oldLink,
-                from: {
-                  ...newLoc,
-                  anchorHeader:
-                    newLoc.anchorHeader || oldLink.from.anchorHeader,
-                  alias,
-                },
-              },
-            });
-            _n.body = newBody;
-            return _n;
-          },
-          _n
-        );
-        // const resp = await MDUtilsV4.procTransform(
-        //   { engine: this.engine, fname: n.fname, vault: n.vault },
-        //   { from: oldLoc, to: newLoc }
-        // ).process(_n.body);
-        n.body = noteMod.body;
-        n.tags = noteMod.tags;
-        return n;
-      })
-    ).catch((err) => {
-      this.logger.error({ err });
-      throw new DendronError({ message: " error rename note", payload: err });
+    notesWithLinkTo.forEach(async (n) => {
+      const out = await this.processNoteChangedByRename({
+        note: n,
+        oldLoc,
+        newLoc,
+      });
+      if (out !== undefined) {
+        notesChangedEntries.push(out);
+      }
     });
+
+    await Promise.all(notesChangedEntries);
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
     if (!_.isUndefined(opts.isEventSourceEngine)) {
-      notesChangedEntries = await this.updateOldNoteReferences(
-        notesChanged,
-        ctx,
-        notesChangedEntries
-      );
-      return notesChangedEntries;
+      return this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
     }
     const newNote: NoteProps = {
       ...oldNote,
@@ -874,12 +900,7 @@ export class FileStorage implements DStore {
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
-    notesChangedEntries = await this.updateOldNoteReferences(
-      notesChanged,
-      ctx,
-      notesChangedEntries
-    );
-    // remove old note only when rename is success
+    await this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
@@ -894,31 +915,19 @@ export class FileStorage implements DStore {
     return notesChangedEntries;
   }
 
-  /**
-   *  method to update references of old note
-   */
-  private async updateOldNoteReferences(
-    notesChanged: NoteProps[],
-    ctx: string,
-    notesChangedEntries: NoteChangeEntry[]
-  ) {
-    await Promise.all(
-      notesChanged.map(async (n) => {
+  /** Utility function to write many notes concurrently. */
+  private async writeManyNotes(notesToWrite: NoteProps[]) {
+    const responses = await Promise.all(
+      notesToWrite.map((n) => {
         this.logger.info({
-          ctx,
+          ctx: "writeManyNotes",
           msg: "writeNote:pre",
           note: NoteUtils.toLogObj(n),
         });
         return this.writeNote(n, { updateExisting: true });
       })
     );
-    notesChangedEntries = notesChangedEntries.concat(
-      notesChanged.map((note) => ({
-        status: "update" as const,
-        note,
-      }))
-    );
-    return notesChangedEntries;
+    return responses.flatMap((response) => response.data);
   }
 
   /**
@@ -934,7 +943,7 @@ export class FileStorage implements DStore {
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const ctx = "updateNote";
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
-    const maybeNote = this.notes[note.id];
+    const maybeNote: NoteProps | undefined = this.notes[note.id];
     if (maybeNote) {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
@@ -948,6 +957,10 @@ export class FileStorage implements DStore {
     }
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
     this.notes[note.id] = note;
+    if (maybeNote && maybeNote.fname !== note.fname) {
+      this.noteFnames.delete(maybeNote);
+    }
+    this.noteFnames.add(note);
     return note;
   }
 
@@ -995,6 +1008,7 @@ export class FileStorage implements DStore {
       note.children = existingNote.children;
       // delete existingNote
       delete this.notes[existingNote.id];
+      this.noteFnames.delete(existingNote);
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
@@ -1116,7 +1130,6 @@ export class FileStorage implements DStore {
       note,
       vault: note.vault,
       wsRoot: this.wsRoot,
-      opts: { writeHierarchy: opts?.writeHierarchy },
     });
 
     // schema metadata is only applicable at runtime

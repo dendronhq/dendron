@@ -8,16 +8,12 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import {
-  NoteLookupProvider,
-  NoteLookupProviderSuccessResp,
-} from "../components/lookup/LookupProviderV3";
 import { NoteLookupProviderUtils } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 type CommandInput = {
   multiSelect?: boolean;
@@ -37,7 +33,8 @@ export class InsertNoteLinkCommand extends BasicCommand<
   key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
-    const config = getDWorkspace().config;
+    const extension = ExtensionProvider.getExtension();
+    const config = extension.getDWorkspace().config;
     const insertNoteLinkConfig = ConfigUtils.getCommands(config).insertNoteLink;
     const aliasModeConfig = insertNoteLinkConfig.aliasMode;
     const multiSelectConfig = insertNoteLinkConfig.enableMultiSelect;
@@ -46,12 +43,12 @@ export class InsertNoteLinkCommand extends BasicCommand<
       multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",
     });
-    const lc = LookupControllerV3.create({
+    const lc = extension.lookupControllerFactory.create({
       nodeType: "note",
       disableVaultSelection: true,
       extraButtons: [MultiSelectBtn.create({ pressed: copts.multiSelect })],
     });
-    const provider = new NoteLookupProvider(this.key, {
+    const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });

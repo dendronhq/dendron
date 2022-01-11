@@ -44,7 +44,7 @@ export async function decorateTag({
   let color: string | undefined;
   const { color: foundColor, type: colorType } = NoteUtils.color({
     fname,
-    notes: engine.notes,
+    engine,
   });
   if (colorType === "configured" || !engine.config.noRandomlyColoredTags) {
     color = foundColor;

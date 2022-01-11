@@ -1,3 +1,6 @@
+# Build plugin for CI and release
+# TODO: `buildPatch.sh` is a bad name - it should just be `buildPlugin`
+
 if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $USE_IN_MEMORY_REGISTRY ] ; then
 	echo "start verdaccio"
 	verdaccio > verdaccio.log 2>&1 &

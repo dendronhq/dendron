@@ -31,6 +31,7 @@ import {
   USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
   DNoteAnchorBasic,
+  DNodeProps,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type {
@@ -481,6 +482,46 @@ export class LinkUtils {
     }
   }
 
+  static getNotesFromWikiLinks(opts: {
+    activeNote: DNodeProps;
+    wikiLinks: ParseLinkV2Resp[];
+    engine: DEngineClient;
+  }) {
+    const { activeNote, wikiLinks, engine } = opts;
+    const { vaults, notes, wsRoot } = engine;
+
+    let out: DNodeProps[] = [];
+    wikiLinks.forEach((wikiLink) => {
+      const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
+
+      const vault = wikiLink.vaultName
+        ? (VaultUtils.getVaultByName({
+            vname: wikiLink.vaultName,
+            vaults,
+          }) as DVault)
+        : undefined;
+
+      if (vault) {
+        const note = NoteUtils.getNoteByFnameV5({
+          fname,
+          notes,
+          vault,
+          wsRoot,
+        });
+        if (note) {
+          out.push(note);
+        }
+      } else {
+        const notesWithSameFname = NoteUtils.getNotesByFname({
+          fname,
+          notes,
+        });
+        out = out.concat(notesWithSameFname);
+      }
+    });
+    return out;
+  }
+
   static parseLink(linkMatch: string) {
     linkMatch = NoteUtils.normalizeFname(linkMatch);
     let out: WikiLinkProps = {
@@ -879,6 +920,13 @@ const NODE_TYPES_TO_EXTRACT = [
 ];
 
 export class RemarkUtils {
+  /**
+   * Use this to [[Get the line offset of the frontmatter|dendron://dendron.docs/pkg.plugin-core.dev.cook#get-the-line-offset-of-the-frontmatter]]
+   * Given a string representation of a Dendron note,
+   * return the position of the line right after the frontmatter.
+   * @param fileText file content string to traverse
+   * @returns position in parsed file content right after the frontmatter
+   */
   static getNodePositionPastFrontmatter(fileText: string) {
     const proc = MDUtilsV5.procRemarkParseNoData(
       {},
@@ -1006,92 +1054,11 @@ export class RemarkUtils {
 
   // --- conversion
 
-  static convertLinksToDotNotation(
-    note: NoteProps,
-    changes: NoteChangeEntry[],
-    wikilinkPrefix: string,
-    siblingNotes: NoteProps[]
-  ) {
-    return function (this: Processor) {
-      return (tree: Node, _vfile: VFile) => {
-        const root = tree as DendronASTRoot;
-        const wikiLinks: WikiLinkNoteV4[] = selectAll(
-          DendronASTTypes.WIKI_LINK,
-          root
-        ) as WikiLinkNoteV4[];
-        wikiLinks.forEach((linkNode) => {
-          //lowercase the wikilink
-          let wikilinkValue = linkNode.value.toLowerCase();
-          //replace /\ in wikilink, if any, with .
-          if (wikilinkValue.indexOf("/") >= 0) {
-            wikilinkValue = _.replace(wikilinkValue, /\//g, ".");
-            if (linkNode.data.alias === linkNode.value) {
-              linkNode.data.alias = wikilinkValue;
-            }
-          }
-          // replace spaces in wikilink, if any, with -
-          if (wikilinkValue.indexOf(" ") >= 0) {
-            wikilinkValue = _.replace(wikilinkValue, /\s/g, "-");
-          }
-          const newValue = wikilinkPrefix.concat(wikilinkValue);
-
-          linkNode.value =
-            siblingNotes.filter(
-              (note) => note.fname.toLowerCase() === newValue.toLowerCase()
-            ).length > 0
-              ? newValue
-              : wikilinkValue;
-          changes.push({
-            note,
-            status: "update",
-          });
-        });
-      };
-    };
-  }
-  static convertAssetReferences(
-    note: NoteProps,
-    assetHashMap: Map<string, string>,
-    changes: NoteChangeEntry[]
-  ) {
-    return function (this: Processor) {
-      return (tree: Node, _vfile: VFile) => {
-        const root = tree as DendronASTRoot;
-        const assetReferences = [
-          ...selectAll(DendronASTTypes.IMAGE, root),
-          ...selectAll(DendronASTTypes.LINK, root),
-        ];
-        assetReferences.forEach((asset) => {
-          // @ts-ignore
-          const key = _.replace(asset.url as string, /[\\|/|.]/g, "");
-          const value = assetHashMap.get(key);
-          if (value) {
-            // @ts-ignore
-            asset.url = value;
-          } else {
-            // for realative links
-            const prefix = _.replace(
-              note.fname.substring(0, note.fname.lastIndexOf(".")),
-              /[\\|/|.]/g,
-              ""
-            );
-            const value = assetHashMap.get(prefix.concat(key));
-            // @ts-ignore
-            if (value) asset.url = value;
-          }
-          changes.push({
-            note,
-            status: "update",
-          });
-        });
-      };
-    };
-  }
-
   static convertLinksFromDotNotation(
     note: NoteProps,
     changes: NoteChangeEntry[]
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1127,6 +1094,7 @@ export class RemarkUtils {
         if (dirty) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1140,6 +1108,7 @@ export class RemarkUtils {
     engine: DEngineClient,
     dendronConfig: IntermediateDendronConfig
   ) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1188,6 +1157,7 @@ export class RemarkUtils {
         if (dirty) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1196,6 +1166,7 @@ export class RemarkUtils {
   }
 
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1225,6 +1196,7 @@ export class RemarkUtils {
         if (!_.isEmpty(notesRefLegacy)) {
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1233,6 +1205,7 @@ export class RemarkUtils {
   }
 
   static h1ToTitle(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as Root;
@@ -1247,6 +1220,7 @@ export class RemarkUtils {
           }
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }
@@ -1255,6 +1229,7 @@ export class RemarkUtils {
   }
 
   static h1ToH2(note: NoteProps, changes: NoteChangeEntry[]) {
+    const prevNote = { ...note };
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as Root;
@@ -1267,6 +1242,7 @@ export class RemarkUtils {
           head.depth = 2;
           changes.push({
             note,
+            prevNote,
             status: "update",
           });
         }

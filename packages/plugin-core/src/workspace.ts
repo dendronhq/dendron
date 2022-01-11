@@ -527,7 +527,7 @@ export class DendronExtension implements IDendronExtension {
           )
         );
 
-        const calendarView = new CalendarView();
+        const calendarView = new CalendarView(this);
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,

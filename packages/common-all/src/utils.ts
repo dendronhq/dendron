@@ -532,6 +532,8 @@ export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";
+  minCompatClientVersion?: string;
+  minCompatConfigVersion?: string;
 };
 
 export class ConfigUtils {
@@ -798,9 +800,14 @@ export class ConfigUtils {
     const isValid = clientVersionCompatible && configVersionCompatible;
     if (!isValid) {
       const reason = clientVersionCompatible ? "config" : "client";
-      return { isValid, reason };
+      return {
+        isValid,
+        reason,
+        minCompatClientVersion,
+        minCompatConfigVersion,
+      };
     } else {
-      return { isValid };
+      return { isValid, minCompatClientVersion, minCompatConfigVersion };
     }
   }
 }

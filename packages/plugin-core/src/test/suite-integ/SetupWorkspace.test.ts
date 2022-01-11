@@ -1,13 +1,23 @@
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { beforeEach, afterEach } from "mocha";
-import sinon from "sinon";
-import { window } from "vscode";
+import sinon, { SinonStub } from "sinon";
+import { ExtensionContext, window } from "vscode";
 import { expect } from "../testUtilsv2";
+import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
 
 // eslint-disable-next-line prefer-arrow-callback
 suite("GIVEN SetupWorkspace command", function () {
-  const ctx = setupBeforeAfter(this, {});
+  let homeDirStub: SinonStub;
+
+  const ctx: ExtensionContext = setupBeforeAfter(this, {
+    beforeHook: async () => {
+      homeDirStub = TestEngineUtils.mockHomeDir();
+    },
+    afterHook: async () => {
+      homeDirStub.restore();
+    },
+  });
 
   describeMultiWS(
     "WHEN command is gathering inputs",
@@ -26,7 +36,7 @@ suite("GIVEN SetupWorkspace command", function () {
         showOpenDialog.restore();
       });
 
-      test.skip("THEN file picker is opened", (done) => {
+      test("THEN file picker is opened", (done) => {
         expect(showOpenDialog.calledOnce).toBeTruthy();
         done();
       });

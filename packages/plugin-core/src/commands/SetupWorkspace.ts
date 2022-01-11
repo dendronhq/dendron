@@ -1,10 +1,11 @@
 import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
+import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import PathLike = fs.PathLike;
 import _ from "lodash";
 import path from "path";
-import vscode from "vscode";
+import vscode, { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -48,7 +49,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     let workspaceType = WorkspaceType.CODE;
-    //const defaultUri = Uri.file(resolveTilde("~"));
+    const defaultUri = Uri.file(resolveTilde("~"));
     let rootDirRaw: string | undefined;
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (
@@ -107,7 +108,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
         openLabel: "Create Workspace",
         canSelectFiles: false,
         canSelectFolders: true,
-        //defaultUri,
+        defaultUri,
       };
       rootDirRaw = await VSCodeUtils.openFilePicker(options);
       if (_.isUndefined(rootDirRaw)) {

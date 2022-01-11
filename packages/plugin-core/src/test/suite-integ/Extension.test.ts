@@ -198,6 +198,7 @@ suite("Extension", function () {
     noSetInstallStatus: true,
   });
 
+  // TODO: This test case fails in Windows if the logic in setupBeforeAfter (stubs) is not there. Look into why that is the case
   describeMultiWS(
     "WHEN command is gathering inputs",
     {

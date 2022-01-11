@@ -431,6 +431,9 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      MetadataService.instance().setInitialInstall();
+    }
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -820,7 +823,6 @@ async function showWelcomeOrWhatsNew({
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
-      MetadataService.instance().setInitialInstall();
 
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
@@ -874,7 +876,7 @@ async function showWelcomeOrWhatsNew({
     await showLapsedUserMessage(assetUri);
   }
 
-  // Show inactive users (users who were active on first week but have not used lookup in a month)
+  // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
   if (await shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();
@@ -921,8 +923,13 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
   );
 
+  // don't display if they have submitted before.
+  if (inactiveSurveySubmitted === "submitted") {
+    return false;
+  }
+
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
+  const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
   const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
   const metaData = MetadataService.instance().getMeta();
 
@@ -952,25 +959,28 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for a month?
+  // was the user active on the first week but has been inactive for a two weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
 
-  if (!_.isUndefined(inactiveSurveySubmitted)) {
+  // if they have cancelled, we should be waiting another 2 weeks.
+  if (inactiveSurveySubmitted === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS;
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
+      isInactive;
     return shouldSendAgain;
+  } else {
+    // this is the first time we are asking them.
+    return (
+      // If the user has been active on first week, but been inactive for more than 2 weeks.
+      metaData.dendronWorkspaceActivated !== undefined &&
+      metaData.firstWsInitialize !== undefined &&
+      isInactive
+    );
   }
-
-  return (
-    // If the user has been active on first week, but been inactive for more than 4 weeks.
-    metaData.dendronWorkspaceActivated !== undefined &&
-    metaData.firstWsInitialize !== undefined &&
-    isInactive
-  );
 }
 
 /**

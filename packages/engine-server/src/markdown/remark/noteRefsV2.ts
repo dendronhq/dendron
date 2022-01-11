@@ -199,10 +199,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         const { fname, alias } = ndata.link.from;
 
         const { anchorStart, anchorStartOffset, anchorEnd } = ndata.link.data;
-        let link = alias ? `${alias}|${fname}` : fname;
+        const link = alias ? `${alias}|${fname}` : fname;
         let suffix = "";
 
-        let vaultPrefix = ndata.link.data.vaultName
+        const vaultPrefix = ndata.link.data.vaultName
           ? `${CONSTANTS.DENDRON_DELIMETER}${ndata.link.data.vaultName}/`
           : "";
 
@@ -241,13 +241,15 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   data: string | undefined;
 } {
   let data: string | undefined;
-  let errors: DendronError[] = [];
+  const errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const procOpts = MDUtilsV4.getProcOpts(proc);
   const { shouldApplyPublishRules } = procOpts;
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let { dest, vault, config } = MDUtilsV4.getDendronData(proc);
+  const dendronData = MDUtilsV4.getDendronData(proc);
+  const { dest, config, fname } = dendronData;
+  let { vault } = dendronData;
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
@@ -260,12 +262,26 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
       data: "",
     };
   }
-  let { prettyRefs, wikiLinkOpts } = compilerOpts;
+  const { wikiLinkOpts } = compilerOpts;
+  let { prettyRefs } = compilerOpts;
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
       data,
     };
+  }
+
+  // The note that contains this reference might override the pretty refs option for references inside it.
+  const containingNote = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    vault,
+    engine,
+  });
+  if (
+    containingNote?.custom.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom.usePrettyRefs)
+  ) {
+    prettyRefs = containingNote.custom.usePrettyRefs;
   }
 
   let noteRefs: DNoteLoc[] = [];
@@ -465,7 +481,7 @@ export function convertNoteRefASTV2(
 
   // figure out configs that change how we process the note reference
   const dendronData = MDUtilsV4.getDendronData(proc);
-  const { dest, config, vault: vaultFromProc } = dendronData;
+  const { dest, config, vault: vaultFromProc, fname, vault } = dendronData;
   let { shouldApplyPublishRules } = dendronData;
 
   const { wikiLinkOpts } = compilerOpts;
@@ -479,12 +495,23 @@ export function convertNoteRefASTV2(
     config,
     shouldApplyPublishRules
   );
-
   if (
     prettyRefs &&
     _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
   ) {
     prettyRefs = false;
+  }
+  // The note that contains this reference might override the pretty refs option for references inside it.
+  const containingNote = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    vault,
+    engine,
+  });
+  if (
+    containingNote?.custom.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom.usePrettyRefs)
+  ) {
+    prettyRefs = containingNote.custom.usePrettyRefs;
   }
 
   const duplicateNoteConfig = siteConfig.duplicateNoteBehavior;

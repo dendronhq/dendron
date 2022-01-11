@@ -912,5 +912,97 @@ describe("dendronPub", () => {
       },
       { preSetupHook: ENGINE_HOOKS.setupBasic }
     );
+
+    describe("WHEN config sets usePrettyRefs true", () => {
+      describe("AND note overrides to false", () => {
+        testWithEngine(
+          "THEN renders without pretty refs",
+          async ({ engine, vaults }) => {
+            const config = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
+            config.site = {
+              siteHierarchies: ["with-override"],
+              siteRootDir: "with-override",
+              usePrettyRefs: true,
+            };
+            const resp = await MDUtilsV5.procRehypeFull(
+              {
+                engine,
+                fname: "with-override",
+                vault: vaults[0],
+                config,
+              },
+              { flavor: ProcFlavor.PUBLISHING }
+            ).process(`![[bar]]`);
+            expect(resp).toMatchSnapshot();
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.contents as string,
+                nomatch: ["portal-container"],
+              })
+            ).toBeTruthy();
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              await NoteTestUtilsV4.createNote({
+                fname: "with-override",
+                vault: opts.vaults[0],
+                wsRoot: opts.wsRoot,
+                custom: {
+                  usePrettyRefs: false,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+
+    describe("WHEN config sets usePrettyRefs false", () => {
+      describe("AND note overrides to true", () => {
+        testWithEngine(
+          "THEN renders with pretty refs",
+          async ({ engine, vaults }) => {
+            const config = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
+            config.site = {
+              siteHierarchies: ["with-override"],
+              siteRootDir: "with-override",
+              usePrettyRefs: false,
+            };
+            const resp = await MDUtilsV5.procRehypeFull(
+              {
+                engine,
+                fname: "with-override",
+                vault: vaults[0],
+                config,
+              },
+              { flavor: ProcFlavor.PUBLISHING }
+            ).process(`![[bar]]`);
+            expect(resp).toMatchSnapshot();
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.contents as string,
+                match: ["portal-container"],
+              })
+            ).toBeTruthy();
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              await NoteTestUtilsV4.createNote({
+                fname: "with-override",
+                vault: opts.vaults[0],
+                wsRoot: opts.wsRoot,
+                custom: {
+                  usePrettyRefs: true,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
   });
 });

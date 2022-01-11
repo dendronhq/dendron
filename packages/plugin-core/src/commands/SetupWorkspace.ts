@@ -1,11 +1,10 @@
 import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
-import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import PathLike = fs.PathLike;
 import _ from "lodash";
 import path from "path";
-import vscode, { Uri } from "vscode";
+import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";

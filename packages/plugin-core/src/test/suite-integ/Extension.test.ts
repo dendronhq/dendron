@@ -28,7 +28,7 @@ import { describe, beforeEach, it, afterEach } from "mocha";
 import os from "os";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
-import { ExtensionContext } from "vscode";
+import { ExtensionContext, window } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
   SetupWorkspaceCommand,
@@ -197,6 +197,30 @@ suite("Extension", function () {
     },
     noSetInstallStatus: true,
   });
+
+  describeMultiWS(
+    "WHEN command is gathering inputs",
+    {
+      ctx,
+    },
+    () => {
+      let showOpenDialog: sinon.SinonStub;
+
+      beforeEach(async () => {
+        const cmd = new SetupWorkspaceCommand();
+        showOpenDialog = sinon.stub(window, "showOpenDialog");
+        await cmd.gatherInputs();
+      });
+      afterEach(() => {
+        showOpenDialog.restore();
+      });
+
+      test("THEN file picker is opened", (done) => {
+        expect(showOpenDialog.calledOnce).toBeTruthy();
+        done();
+      });
+    }
+  );
 
   describe("setup CODE workspace", () => {
     afterEach(() => {

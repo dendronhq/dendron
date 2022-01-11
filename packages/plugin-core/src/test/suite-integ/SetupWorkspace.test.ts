@@ -26,7 +26,7 @@ suite("GIVEN SetupWorkspace command", function () {
         showOpenDialog.restore();
       });
 
-      test("THEN file picker is opened", (done) => {
+      test.skip("THEN file picker is opened", (done) => {
         expect(showOpenDialog.calledOnce).toBeTruthy();
         done();
       });

@@ -26,6 +26,7 @@ export enum CLIEvents {
   CLITelemetryDisabled = "CLI_Telemetry_Disabled",
   CLIMigrationSucceeded = "CLI_Migration_Succeeded",
   CLIMigrationFailed = "CLI_Migration_Failed",
+  CLIClientConfigMismatch = "CLI_Client_Config_Mismatch",
 }
 
 export enum TutorialEvents {

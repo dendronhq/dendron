@@ -106,7 +106,7 @@ export abstract class CLICommand<
     this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
-  validateConfig(opts: { wsRoot: string }) {
+  async validateConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
     const ws = new WorkspaceService({ wsRoot });
     const dendronConfig = ws.config;
@@ -140,6 +140,13 @@ export abstract class CLICommand<
         instruction,
       ].join("\n");
       console.log(message);
+
+      // we should wait for this before exiting the process.
+      await CLIAnalyticsUtils.trackSync(CLIEvents.CLIClientConfigMismatch, {
+        ...validationResp,
+        configVersion,
+      });
+
       process.exit();
     }
   }
@@ -182,7 +189,7 @@ export abstract class CLICommand<
     }
 
     if (!this.skipValidation) {
-      this.validateConfig({ wsRoot: args.wsRoot });
+      await this.validateConfig({ wsRoot: args.wsRoot });
     }
 
     this.L.info({ args, state: "enrichArgs:pre" });

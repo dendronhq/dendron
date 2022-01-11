@@ -490,80 +490,48 @@ export async function _activate(
       // // initialize Segment client
       ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
-      // validate dendronConfig.
-      const configVersion = ConfigUtils.getProp(dendronConfig, "version");
-      try {
-        const validationResp = ConfigUtils.configIsValid({
-          clientVersion: currentVersion,
-          configVersion,
+      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
+      const changes = await wsService.runMigrationsIfNecessary({
+        currentVersion,
+        previousVersion: previousWorkspaceVersion,
+        dendronConfig,
+        workspaceInstallStatus,
+        wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
+      });
+
+      if (changes.length > 0) {
+        changes.forEach((change: MigrationChangeSetStatus) => {
+          const event = _.isUndefined(change.error)
+            ? MigrationEvents.MigrationSucceeded
+            : MigrationEvents.MigrationFailed;
+
+          AnalyticsUtils.track(event, {
+            data: change.data,
+          });
         });
+      } else {
+        // no migration changes.
+        // see if we need to force a config migration.
+        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
+        const configMigrationChanges =
+          await wsService.runConfigMigrationIfNecessary({
+            currentVersion,
+            dendronConfig,
+          });
 
-        if (!validationResp.isValid) {
-          if (validationResp.reason === "client") {
-            // client is out of date.
-            // this can only happen if the user manually changed the config version
-            // to be incompatible. (assuming we have correctly implemented the migration)
-            // Dendron should not activate and we should let the user know
-            // how to fix this.
-            vscode.window.showInformationMessage("Client is out of date.", {
-              title: "",
+        if (configMigrationChanges.length > 0) {
+          configMigrationChanges.forEach((change: MigrationChangeSetStatus) => {
+            const event = _.isUndefined(change.error)
+              ? MigrationEvents.MigrationSucceeded
+              : MigrationEvents.MigrationFailed;
+            AnalyticsUtils.track(event, {
+              data: change.data,
             });
-            return false;
-          } else {
-            // config is out of date.
-            // a backwards incompatible config migration is bound to happen.
-
-            // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
-            const changes = await wsService.runMigrationsIfNecessary({
-              currentVersion,
-              previousVersion: previousWorkspaceVersion,
-              dendronConfig,
-              workspaceInstallStatus,
-              wsConfig:
-                await DendronExtension.instanceV2().getWorkspaceSettings(),
-            });
-
-            if (changes.length > 0) {
-              changes.forEach((change: MigrationChangeSetStatus) => {
-                const event = _.isUndefined(change.error)
-                  ? MigrationEvents.MigrationSucceeded
-                  : MigrationEvents.MigrationFailed;
-
-                AnalyticsUtils.track(event, {
-                  data: change.data,
-                });
-              });
-            } else {
-              // no migration changes.
-              // see if we need to force a config migration.
-              // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
-              const configMigrationChanges =
-                await wsService.runConfigMigrationIfNecessary({
-                  currentVersion,
-                  dendronConfig,
-                });
-
-              if (configMigrationChanges.length > 0) {
-                configMigrationChanges.forEach(
-                  (change: MigrationChangeSetStatus) => {
-                    const event = _.isUndefined(change.error)
-                      ? MigrationEvents.MigrationSucceeded
-                      : MigrationEvents.MigrationFailed;
-                    AnalyticsUtils.track(event, {
-                      data: change.data,
-                    });
-                  }
-                );
-                vscode.window.showInformationMessage(
-                  "We have detected a legacy configuration in dendron.yml and migrated to the newest configurations. You can find a backup of the original file in your root directory."
-                );
-              }
-            }
-          }
+          });
+          vscode.window.showInformationMessage(
+            "We have detected a legacy configuration in dendron.yml and migrated to the newest configurations. You can find a backup of the original file in your root directory."
+          );
         }
-      } catch (err: any) {
-        vscode.window.showErrorMessage(err.message);
-        return false;
       }
 
       // Re-use the id for error reporting too:

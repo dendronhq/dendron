@@ -1,3 +1,4 @@
+import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
   createRunnableMarkdownV2PodConfigSchema,
@@ -5,7 +6,9 @@ import {
   isRunnableMarkdownV2PodConfig,
   JSONSchemaType,
   MarkdownExportPodV2,
+  MarkdownExportReturnType,
   MarkdownV2PodConfig,
+  PodExportScope,
   PodV2Types,
   RunnableMarkdownV2PodConfig,
 } from "@dendronhq/pods-core";
@@ -25,7 +28,7 @@ import { BaseExportPodCommand } from "./BaseExportPodCommand";
  */
 export class MarkdownExportPodCommand extends BaseExportPodCommand<
   RunnableMarkdownV2PodConfig,
-  string
+  MarkdownExportReturnType
 > {
   public key = "dendron.markdownexportv2";
 
@@ -50,7 +53,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    const destination = await this.promptUserForDestination();
+    const destination = await this.promptUserForDestination(exportScope);
     if (!destination) {
       return;
     }
@@ -107,26 +110,29 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     exportReturnValue,
     config,
   }: {
-    exportReturnValue: string;
+    exportReturnValue: MarkdownExportReturnType;
     config: RunnableMarkdownV2PodConfig;
   }) {
-    if (config.destination === "clipboard") {
-      //TODO: This error needs to be thrown earlier.
-      // throw new Error(
-      //   "Cannot have clipboard be the destination on a multi-note export"
-      // );
-
-      vscode.env.clipboard.writeText(exportReturnValue);
-    } else {
-      throw new Error("Not yet implemented");
+    const data = exportReturnValue.data?.exportedNotes;
+    if (_.isString(data) && config.destination === "clipboard") {
+      vscode.env.clipboard.writeText(data);
     }
-
-    vscode.window.showInformationMessage(
-      "Finished running Markdown export pod."
-    );
+    const count = data?.length ?? 0;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Markdown Export. ${count} notes exported; Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+      this.L.error(errorMsg);
+    } else {
+      vscode.window.showInformationMessage(
+        "Finished running Markdown export pod."
+      );
+    }
   }
 
-  public createPod(config: RunnableMarkdownV2PodConfig): ExportPodV2<string> {
+  public createPod(
+    config: RunnableMarkdownV2PodConfig
+  ): ExportPodV2<MarkdownExportReturnType> {
     return new MarkdownExportPodV2({
       podConfig: config,
       engine: getEngine(),
@@ -146,9 +152,9 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
    * Prompt the user via Quick Pick(s) to select the destination of the export
    * @returns
    */
-  private async promptUserForDestination(): Promise<
-    "clipboard" | string | undefined
-  > {
+  private async promptUserForDestination(
+    exportScope: PodExportScope
+  ): Promise<"clipboard" | string | undefined> {
     const items: vscode.QuickPickItem[] = [
       {
         label: "clipboard",
@@ -159,14 +165,17 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
         detail: "Exports the contents to a local directory",
       },
     ];
-    const picked = await vscode.window.showQuickPick(items);
+    // Cannot have clipboard be the destination on a multi-note export
+    if (exportScope === PodExportScope.Note) {
+      const picked = await vscode.window.showQuickPick(items);
 
-    if (!picked) {
-      return;
-    }
+      if (!picked) {
+        return;
+      }
 
-    if (picked.label === "clipboard") {
-      return "clipboard";
+      if (picked.label === "clipboard") {
+        return "clipboard";
+      }
     }
 
     // Else, local filesystem, show a file picker dialog:

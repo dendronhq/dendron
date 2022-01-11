@@ -876,7 +876,7 @@ async function showWelcomeOrWhatsNew({
     await showLapsedUserMessage(assetUri);
   }
 
-  // Show inactive users (users who were active on first week but have not used lookup in a month)
+  // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
   if (await shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();

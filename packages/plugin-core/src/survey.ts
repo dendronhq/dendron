@@ -6,6 +6,7 @@ import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
 import { GLOBAL_STATE } from "./constants";
 import { resolve } from "path";
+import { VSCodeUtils } from "./vsCodeUtils";
 
 export class DendronQuickInputSurvey {
   opts: {
@@ -452,212 +453,6 @@ export class LapsedUserPlugDiscordSurvey extends DendronQuickPickSurvey {
   }
 }
 
-export class InactiveUserReasonSurvey extends DendronQuickPickSurvey {
-  async onAnswer(result: vscode.QuickPickItem) {
-    const label = result.label;
-    let extra: string | undefined;
-    let reason: string | undefined;
-    switch (label) {
-      case "I haven't had time to use Dendron, but I plan to return at some point.": {
-        reason = "time";
-        break;
-      }
-      case "I am not sure how to use Dendron.": {
-        reason = "stuck";
-        break;
-      }
-      case "I've encountered a bug which stopped me from using Dendron.": {
-        reason = "bug";
-        extra = await vscode.window.showInputBox({
-          ignoreFocusOut: true,
-          placeHolder: "Type here",
-          prompt: "Could you describe, in simple words, what happened?",
-          title: label,
-        });
-        break;
-      }
-      case "I found a different tool that suits me better.": {
-        reason = "tool";
-        extra = await vscode.window.showInputBox({
-          ignoreFocusOut: true,
-          placeHolder: "Type here",
-          prompt: "What feature was missing in Dendron for your use case?",
-          title: label,
-        });
-        break;
-      }
-      case "Other": {
-        reason = "other";
-        extra = await vscode.window.showInputBox({
-          ignoreFocusOut: true,
-          placeHolder: "Type here",
-          prompt: "Please freely type your reasons here.",
-          title: label,
-        });
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-
-    AnalyticsUtils.track(SurveyEvents.InactiveUserReasonAnswered, {
-      reason,
-      extra,
-    });
-  }
-
-  onReject() {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserReasonRejected);
-  }
-
-  static create() {
-    const title = "What is the reason you stopped using Dendron?";
-    const choices = [
-      {
-        label:
-          "I haven't had time to use Dendron, but I plan to return at some point.",
-      },
-      { label: "I am not sure how to use Dendron." },
-      { label: "I've encountered a bug which stopped me from using Dendron." },
-      { label: "I found a different tool that suits me better." },
-      { label: "Other" },
-    ];
-    return new InactiveUserReasonSurvey({ title, choices, canPickMany: false });
-  }
-}
-
-export class InactiveUserOnboardingSurvey extends DendronQuickPickSurvey {
-  CALENDLY_URL = "https://calendly.com/d/mqtk-rf7q/onboard";
-  openOnboardingLink: boolean = false;
-
-  async onAnswer(result: vscode.QuickPickItem) {
-    if (result.label === "Yes") {
-      this.openOnboardingLink = true;
-      vscode.window.showInformationMessage(
-        "Thank you for considering an onboarding session.",
-        {
-          modal: true,
-          detail: "We will take you to the link after the survey.",
-        },
-        { title: "Proceed with Survey" }
-      );
-    }
-
-    AnalyticsUtils.track(SurveyEvents.InactiveUserGettingStartedHelpAnswered, {
-      result: result.label,
-    });
-  }
-
-  onReject() {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserGettingStartedHelpRejected);
-  }
-
-  static create() {
-    const title =
-      "We offer one-on-one onboarding sessions the help new users get started.";
-    const choices = [{ label: "Yes" }, { label: "No" }];
-    return new InactiveUserOnboardingSurvey({
-      title,
-      choices,
-      canPickMany: false,
-      placeHolder: "Would you like to schedule a 30 minute session?",
-    });
-  }
-}
-
-export class InactiveUserAdditionalCommentSurvey extends DendronQuickInputSurvey {
-  async onAnswer(result: string) {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserAdditionalCommentAnswered, {
-      result,
-    });
-    resolve();
-  }
-
-  onReject() {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserAdditionalCommentRejected);
-  }
-
-  static create() {
-    const title =
-      "Do you have any other comments to leave about your experience?";
-    return new InactiveUserAdditionalCommentSurvey({ title });
-  }
-}
-
-export class InactiveUserPlugDiscordSurvey extends DendronQuickPickSurvey {
-  DISCORD_URL = "https://discord.gg/AE3NRw9";
-  openDiscordLink: boolean = false;
-
-  async onAnswer(result: vscode.QuickPickItem) {
-    if (result.label === "Sure, take me to Discord.") {
-      this.openDiscordLink = true;
-    }
-    AnalyticsUtils.track(SurveyEvents.InactiveUserDiscordPlugAnswered);
-  }
-
-  onReject() {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserDiscordPlugRejected);
-  }
-
-  static create() {
-    const title = "Thanks for sharing feedback. One last thing!";
-    const placeHolder =
-      "We have a Discord community to help users. Would you want an invite?";
-    const choices = [
-      { label: "Sure, take me to Discord." },
-      { label: "I'm already there." },
-      { label: "No thanks." },
-    ];
-    return new InactiveUserPlugDiscordSurvey({
-      title,
-      choices,
-      placeHolder,
-      canPickMany: false,
-    });
-  }
-}
-
-export class InactiveUserFeedbackCallSurvey extends DendronQuickPickSurvey {
-  CALENDLY_URL = "https://calendly.com/d/mqtk-rf7q/onboard";
-  openFeedbackCallLink = false;
-  async onAnswer(result: vscode.QuickPickItem) {
-    if (result.label === "Yes") {
-      this.openFeedbackCallLink = true;
-      vscode.window.showInformationMessage(
-        "Thank you for considering a feedback session.",
-        {
-          modal: true,
-          detail: "We will take you to the link after the survey.",
-        },
-        { title: "Proceed with Survey" }
-      );
-    }
-
-    AnalyticsUtils.track(SurveyEvents.InactiveUserFeedbackCallAnswered, {
-      result: result.label,
-    });
-  }
-
-  onReject() {
-    AnalyticsUtils.track(SurveyEvents.InactiveUserFeedbackCallRejected);
-  }
-
-  static create() {
-    const title =
-      "Would you like to book a call to share more about your experience and how we could improve Dendron? There will be a small monetary compensation if you choose to particiapate.";
-    const placeHolder =
-      "Would you like to schedule a 30 minute feedback session?";
-    const choices = [{ label: "Yes" }, { label: "No" }];
-    return new InactiveUserFeedbackCallSurvey({
-      title,
-      choices,
-      canPickMany: false,
-      placeHolder,
-    });
-  }
-}
-
 export class SurveyUtils {
   /**
    * Asks three questions about background, use case, and prior tools used.
@@ -804,64 +599,20 @@ export class SurveyUtils {
       .showInformationMessage(
         "Hey, we noticed you haven't used Dendron for a while. We would love to have you back! Could you give us some feedback on how we can do better?",
         { modal: true },
-        { title: "Proceed" }
+        { title: "Go to Survey" }
       )
       .then(async (resp) => {
-        if (resp?.title === "Proceed") {
-          const reasonSurvey = InactiveUserReasonSurvey.create();
-          const onboardingSurvey = InactiveUserOnboardingSurvey.create();
-          const additionalCommentSurvey =
-            InactiveUserAdditionalCommentSurvey.create();
-          const feedbackCallSurvey = InactiveUserFeedbackCallSurvey.create();
-          const discordPlugSurvey = InactiveUserPlugDiscordSurvey.create();
-
-          const reasonResults = await reasonSurvey.show(1, 5);
-          const onboardingResults = await onboardingSurvey.show(2, 5);
-          const additionCommentResult = await additionalCommentSurvey.show(
-            3,
-            5
-          );
-          const feedbackCallResults = await feedbackCallSurvey.show(4, 5);
-          const discordPlugResult = await discordPlugSurvey.show(5, 5);
-
-          if (onboardingSurvey.openOnboardingLink) {
-            await vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(onboardingSurvey.CALENDLY_URL)
-            );
-          }
-
-          if (feedbackCallSurvey.openFeedbackCallLink) {
-            await vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(feedbackCallSurvey.CALENDLY_URL)
-            );
-          }
-
-          if (discordPlugSurvey.openDiscordLink) {
-            await vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(discordPlugSurvey.DISCORD_URL)
-            );
-          }
-
-          const answerCount = [
-            reasonResults,
-            onboardingResults,
-            additionCommentResult,
-            feedbackCallResults,
-            discordPlugResult,
-          ].filter((value) => !_.isUndefined(value)).length;
-          AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyAccepted, {
-            answerCount,
-          });
+        if (resp?.title === "Go to Survey") {
+          const AIRTABLE_URL =
+            "https://airtable.com/shry4eLgvVE6WR0Or?prefill_SurveyName=InactiveFeedback";
+          VSCodeUtils.openLink(AIRTABLE_URL);
 
           await StateService.instance().updateGlobalState(
             GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED,
             "submitted"
           );
           vscode.window.showInformationMessage(
-            "Survey submitted! Thanks for helping us make Dendron better 🌱"
+            "Thanks for helping us make Dendron better 🌱"
           );
         } else {
           await StateService.instance().updateGlobalState(

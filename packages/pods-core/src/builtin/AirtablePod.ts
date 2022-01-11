@@ -72,7 +72,6 @@ export type SrcFieldMappingV2 =
   | SimpleSrcField
   | MultiSelectField
   | SingleSelectField
-  | BooleanSrcField
   | LinkedRecordField;
 
 export enum SpecialSrcFieldToKey {

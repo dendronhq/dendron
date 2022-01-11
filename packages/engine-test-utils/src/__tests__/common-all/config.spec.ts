@@ -58,6 +58,8 @@ describe("ConfigUtils", () => {
         });
         expect(resp.isValid).toBeFalsy();
         expect(resp.reason).toEqual("client");
+        expect(resp.minCompatClientVersion).toEqual("0.63.0");
+        expect(resp.minCompatConfigVersion).toEqual("1");
         done();
       });
     });
@@ -88,6 +90,9 @@ describe("ConfigUtils", () => {
           configVersion: 2,
         });
         expect(resp.isValid).toBeFalsy();
+        expect(resp.reason).toEqual("config");
+        expect(resp.minCompatClientVersion).toEqual("0.63.0");
+        expect(resp.minCompatConfigVersion).toEqual("3");
         done();
       });
     });
@@ -98,6 +103,9 @@ describe("ConfigUtils", () => {
           configVersion: 2,
         });
         expect(resp.isValid).toBeFalsy();
+        expect(resp.reason).toEqual("config");
+        expect(resp.minCompatClientVersion).toEqual("0.63.0");
+        expect(resp.minCompatConfigVersion).toEqual("4");
         done();
       });
     });

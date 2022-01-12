@@ -1242,6 +1242,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "carmenbianca",
+      "name": "Carmen Bianca Bakker",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12065945?v=4",
+      "profile": "http://www.carmenbianca.eu",
+      "contributions": [
+        "doc",
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,

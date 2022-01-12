@@ -51,6 +51,30 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+      - name: Log date
+        run: echo "${{ steps.date.outputs.date }}"
+
+      - name: Set default run status
+        run: echo "::set-output name=last_run_status::default" > last_run_status
+
+      - name: Restore last run status
+        id: last_run
+        uses: actions/cache@v2
+        with:
+          path: |
+            last_run_status
+          key: ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.webpack }}-${{ steps.date.outputs.date }}
+          restore-keys: |
+            ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.webpack }}-
+
+      - name: Set last run status
+        id: last_run_status
+        run: cat last_run_status
+
       - name: Gather environment data
         run: |
           ${{ matrix.env }}
@@ -79,7 +103,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows && steps.last_run_status.outputs.last_run_status != 'success''
         uses: actions/cache@v2
         id: node-modules-cache-windows
         with:
@@ -100,6 +124,7 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
+        if: steps.last_run_status.outputs.last_run_status != 'success'
         run: yarn ci:init
         shell: bash
 
@@ -130,5 +155,10 @@ jobs:
           project: ./packages/nextjs-template
 
       - name: Run tests
+        if: steps.last_run_status.outputs.last_run_status != 'success'
         run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 30
+
+      - name: Save run status
+        if: steps.last_run_status.outputs.last_run_status != 'success'
+        run: echo "::set-output name=last_run_status::${{ steps.test_run.outcome }}" > last_run_status

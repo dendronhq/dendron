@@ -10,18 +10,17 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
+import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
-import throttle from "@jcoreio/async-throttle";
 
 export enum DoctorActions {
   FIX_FRONTMATTER = "fixFrontmatter",
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
-  OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
   CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
   REGENERATE_NOTE_ID = "regenerateNoteId",
   FIND_BROKEN_LINKS = "findBrokenLinks",
@@ -228,30 +227,6 @@ export class DoctorService {
             this.L.info(
               `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
             );
-            numChanges += 1;
-            return;
-          } else {
-            return;
-          }
-        };
-        break;
-      }
-      case DoctorActions.OLD_NOTE_REF_TO_NEW: {
-        doctorAction = async (note: NoteProps) => {
-          const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
-          const newBody = await proc()
-            .use(RemarkUtils.oldNoteRef2NewNoteRef(note, changes))
-            .process(note.body);
-          note.body = newBody.toString();
-          if (!_.isEmpty(changes)) {
-            await engineWrite(note, { updateExisting: true });
-            this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
           } else {

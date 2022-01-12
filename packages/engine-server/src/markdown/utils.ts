@@ -45,7 +45,6 @@ import { Node, Parent } from "unist";
 import { hierarchies, RemarkUtils } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
-import { NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
@@ -86,7 +85,6 @@ type ProcOptsFull = ProcOpts & {
   usePrettyRefs?: boolean;
   // shouldn't need to be used
   wikiLinksOpts?: WikiLinksOpts;
-  noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
   blockAnchorsOpts?: BlockAnchorOpts;
 };

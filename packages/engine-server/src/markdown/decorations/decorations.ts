@@ -53,7 +53,6 @@ function runDecorator(
     case DendronASTTypes.WIKI_LINK:
       return decorateWikilink(opts as DecoratorIn<WikiLinkNoteV4>);
     case DendronASTTypes.REF_LINK_V2: // fall-through deliberate
-    case DendronASTTypes.REF_LINK:
       return decorateReference(opts as DecoratorIn<NoteRefNoteV4>);
     default:
       return undefined;

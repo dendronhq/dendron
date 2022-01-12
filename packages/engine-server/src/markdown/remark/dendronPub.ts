@@ -37,8 +37,7 @@ import {
 } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { extendedImage2html } from "./extendedImage";
-import { NoteRefsOpts } from "./noteRefs";
-import { convertNoteRefASTV2 } from "./noteRefsV2";
+import { convertNoteRefASTV2, NoteRefsOptsV2 } from "./noteRefsV2";
 import {
   addError,
   getNoteOrError,
@@ -47,7 +46,7 @@ import {
   userTag2WikiLinkNoteV4,
 } from "./utils";
 
-type PluginOpts = NoteRefsOpts & {
+type PluginOpts = NoteRefsOptsV2 & {
   assetsPrefix?: string;
   insertTitle?: boolean;
   /**
@@ -347,7 +346,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (node.type === DendronASTTypes.REF_LINK_V2) {
         // we have custom compiler for markdown to handle note ref
         const ndata = node.data as NoteRefDataV4;
-        const copts: NoteRefsOpts = {
+        const copts: NoteRefsOptsV2 = {
           wikiLinkOpts: opts?.wikiLinkOpts,
         };
         const procOpts = MDUtilsV4.getProcOpts(proc);

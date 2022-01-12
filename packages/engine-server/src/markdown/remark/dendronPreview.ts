@@ -10,9 +10,8 @@ import { VFile } from "vfile";
 import { RemarkUtils } from ".";
 import { EngineUtils } from "../../utils";
 import { MDUtilsV5 } from "../utilsv5";
-import { NoteRefsOpts } from "./noteRefs";
 
-type PluginOpts = NoteRefsOpts & {};
+type PluginOpts = {};
 
 /**
  *

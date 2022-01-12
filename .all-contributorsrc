@@ -1195,6 +1195,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "dagilleland",
+      "name": "Dan Gilleland",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2947017?v=4",
+      "profile": "https://github.com/dagilleland",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -430,6 +430,48 @@ export class PodUIControls {
   }
 
   /**
+   * Prompt the user via Quick Pick(s) to select the destination of the export
+   * @returns
+   */
+  public static async promptUserForDestination(
+    exportScope: PodExportScope,
+    options: vscode.OpenDialogOptions
+  ): Promise<"clipboard" | string | undefined> {
+    const items: vscode.QuickPickItem[] = [
+      {
+        label: "clipboard",
+        detail: "Puts the contents of the export into your clipboard",
+      },
+      {
+        label: "local filesystem",
+        detail: "Exports the contents to a local directory",
+      },
+    ];
+    // Cannot have clipboard be the destination on a multi-note export
+    if (exportScope === PodExportScope.Note) {
+      const picked = await vscode.window.showQuickPick(items);
+
+      if (!picked) {
+        return;
+      }
+
+      if (picked.label === "clipboard") {
+        return "clipboard";
+      }
+    }
+
+    // Else, local filesystem, show a file picker dialog:
+
+    const fileUri = await vscode.window.showOpenDialog(options);
+
+    if (fileUri && fileUri[0]) {
+      return fileUri[0].fsPath;
+    }
+
+    return;
+  }
+
+  /**
    * Small helper method to get descriptions for {@link promptForExportScope}
    * @param scope
    * @returns
@@ -477,6 +519,8 @@ export class PodUIControls {
 
       case PodV2Types.NotionExportV2:
         return "Exports notes to Notion";
+      case PodV2Types.JSONExportV2:
+        return "Formats notes to JSON and exports it to clipboard or local file system";
 
       default:
         assertUnreachable();

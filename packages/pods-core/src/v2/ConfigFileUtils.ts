@@ -6,6 +6,7 @@ import path from "path";
 import {
   AirtableExportPodV2,
   GoogleDocsExportPodV2,
+  JSONExportPodV2,
   MarkdownExportPodV2,
   PodV2Types,
   NotionExportPodV2,
@@ -121,6 +122,8 @@ export class ConfigFileUtils {
         return MarkdownExportPodV2.config();
       case PodV2Types.NotionExportV2:
         return NotionExportPodV2.config();
+      case PodV2Types.JSONExportV2:
+        return JSONExportPodV2.config();
       default:
         assertUnreachable();
     }

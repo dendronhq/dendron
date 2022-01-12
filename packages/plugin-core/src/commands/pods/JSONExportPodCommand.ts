@@ -1,15 +1,15 @@
 import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   ConfigFileUtils,
-  createRunnableMarkdownV2PodConfigSchema,
+  createRunnableJSONV2PodConfigSchema,
   ExportPodV2,
-  isRunnableMarkdownV2PodConfig,
+  isRunnableJSONV2PodConfig,
+  JSONExportPodV2,
+  JSONExportReturnType,
   JSONSchemaType,
-  MarkdownExportPodV2,
-  MarkdownExportReturnType,
-  MarkdownV2PodConfig,
+  JSONV2PodConfig,
   PodV2Types,
-  RunnableMarkdownV2PodConfig,
+  RunnableJSONV2PodConfig,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -17,28 +17,28 @@ import * as vscode from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getEngine, getExtension } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
- * VSCode command for running the Markdown Export Pod. It is not meant to be
+ * VSCode command for running the JSON Export Pod. It is not meant to be
  * directly invoked throught the command palette, but is invoked by
  * {@link ExportPodV2Command}
  */
-export class MarkdownExportPodCommand extends BaseExportPodCommand<
-  RunnableMarkdownV2PodConfig,
-  MarkdownExportReturnType
+export class JSONExportPodCommand extends BaseExportPodCommand<
+  RunnableJSONV2PodConfig,
+  JSONExportReturnType
 > {
-  public key = "dendron.markdownexportv2";
+  public key = "dendron.jsonexportv2";
 
   public constructor() {
     super(new QuickPickHierarchySelector());
   }
 
   public async gatherInputs(
-    opts?: Partial<MarkdownV2PodConfig>
-  ): Promise<RunnableMarkdownV2PodConfig | undefined> {
-    if (isRunnableMarkdownV2PodConfig(opts)) {
+    opts?: Partial<JSONV2PodConfig>
+  ): Promise<RunnableJSONV2PodConfig | undefined> {
+    if (isRunnableJSONV2PodConfig(opts)) {
       return opts;
     }
 
@@ -55,8 +55,8 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
       openLabel: "Select Export Destination",
-      canSelectFiles: false,
-      canSelectFolders: true,
+      canSelectFiles: true,
+      canSelectFolders: false,
     };
     const destination = await PodUIControls.promptUserForDestination(
       exportScope,
@@ -66,17 +66,9 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    //use FM Title as h1 header
-    const addFrontmatterTitle = await this.promptUserForaddFMTitleSetting();
-    if (addFrontmatterTitle === undefined) return;
-
     const config = {
       exportScope,
-      wikiLinkToURL: opts?.wikiLinkToURL || false,
       destination,
-      addFrontmatterTitle,
-      convertTagNotesToLinks: opts?.convertTagNotesToLinks || false,
-      convertUserNotesToLinks: opts?.convertUserNotesToLinks || false,
     };
 
     // If this is not an already saved pod config, then prompt user whether they
@@ -91,10 +83,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
             "custom",
             `config.${choice}.yml`
           ),
-          configSchema: MarkdownExportPodV2.config(),
+          configSchema: JSONExportPodV2.config(),
           setProperties: _.merge(config, {
             podId: choice,
-            podType: PodV2Types.MarkdownExportV2,
+            podType: PodV2Types.JSONExportV2,
           }),
         });
 
@@ -118,67 +110,32 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     exportReturnValue,
     config,
   }: {
-    exportReturnValue: MarkdownExportReturnType;
-    config: RunnableMarkdownV2PodConfig;
+    exportReturnValue: JSONExportReturnType;
+    config: RunnableJSONV2PodConfig;
   }) {
     const data = exportReturnValue.data?.exportedNotes;
     if (_.isString(data) && config.destination === "clipboard") {
       vscode.env.clipboard.writeText(data);
     }
-    const count = data?.length ?? 0;
     if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Finished Markdown Export. ${count} notes exported; Error encountered: ${ErrorFactory.safeStringify(
+      const errorMsg = `Finished JSON Export. Error encountered: ${ErrorFactory.safeStringify(
         exportReturnValue.error
       )}`;
       this.L.error(errorMsg);
     } else {
-      vscode.window.showInformationMessage(
-        "Finished running Markdown export pod."
-      );
+      vscode.window.showInformationMessage("Finished running JSON export pod.");
     }
   }
 
   public createPod(
-    config: RunnableMarkdownV2PodConfig
-  ): ExportPodV2<MarkdownExportReturnType> {
-    return new MarkdownExportPodV2({
+    config: RunnableJSONV2PodConfig
+  ): ExportPodV2<JSONExportReturnType> {
+    return new JSONExportPodV2({
       podConfig: config,
-      engine: getEngine(),
-      dendronConfig: getDWorkspace().config,
     });
   }
 
-  public getRunnableSchema(): JSONSchemaType<RunnableMarkdownV2PodConfig> {
-    return createRunnableMarkdownV2PodConfigSchema();
-  }
-
-  /*
-   * Region: UI Controls
-   */
-
-  /**
-   * Prompt user with simple quick pick to select whether to use FM title as h1 header or not
-   * @returns
-   */
-  private async promptUserForaddFMTitleSetting(): Promise<boolean | undefined> {
-    const items: vscode.QuickPickItem[] = [
-      {
-        label: "Add note title from FM as h1 header",
-        detail:
-          "Add note title from the frontmatter to the start of exported note",
-      },
-      {
-        label: "Skip adding note FM title as h1 header",
-        detail:
-          "Skip adding note title from the frontmatter to the start of exported note",
-      },
-    ];
-    const picked = await vscode.window.showQuickPick(items, {
-      title: "Do you want to add note frontmatter title as h1 header?",
-    });
-
-    return picked
-      ? picked.label === "Add note title from FM as h1 header"
-      : undefined;
+  public getRunnableSchema(): JSONSchemaType<RunnableJSONV2PodConfig> {
+    return createRunnableJSONV2PodConfigSchema();
   }
 }

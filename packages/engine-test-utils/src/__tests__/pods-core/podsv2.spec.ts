@@ -13,6 +13,7 @@ import {
   ExternalConnectionManager,
   ExternalService,
   GoogleDocsExportPodV2,
+  JSONExportPodV2,
   JSONSchemaType,
   MarkdownExportPodV2,
   NotionExportPodV2,
@@ -21,12 +22,13 @@ import {
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
   RunnableNotionV2PodConfig,
+  RunnableJSONV2PodConfig,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ENGINE_HOOKS } from "../..";
 import { runEngineTestV5 } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 
 /**
  * ConfigFileUtils
@@ -469,6 +471,86 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
+    });
+  });
+
+
+});
+
+
+/**
+ * JSONExportPod
+ */
+
+ describe("GIVEN a JSON Export Pod with a particular config", () => {
+  describe("WHEN exporting a note and destination is clipboard", () => {
+    test("THEN expect note to be exported", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableJSONV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            destination: "clipboard",
+          };
+          const pod = new JSONExportPodV2({
+            podConfig,
+          });
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "bar",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+          const result = await pod.exportNote(props);
+          const data = result.data?.exportedNotes!;
+          expect(_.isString(data)).toBeTruthy();
+          if (_.isString(data)) {
+            expect(result.data?.exportedNotes).toEqual(
+              JSON.stringify(props, null, 4)
+            );
+          }
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("When the destination is file system", () => {
+    let exportDest: string;
+    beforeAll(() => {
+      exportDest = path.join(tmpDir().name, "export.json");
+    });
+    describe("WHEN exporting a note", () => {
+      test("THEN expect note to be exported", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const podConfig: RunnableJSONV2PodConfig = {
+              exportScope: PodExportScope.Note,
+              destination: exportDest,
+            };
+            const pod = new JSONExportPodV2({
+              podConfig,
+            });
+
+            const props = NoteUtils.getNoteByFnameFromEngine({
+              fname: "bar",
+              vault: opts.vaults[0],
+              engine: opts.engine,
+            }) as NoteProps;
+
+            await pod.exportNote(props);
+            const content = fs.readFileSync(path.join(exportDest), {
+              encoding: "utf8",
+            });
+            expect(content).toContain(JSON.stringify(props));
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupBasic,
+          }
+        );
+      });
     });
   });
 });

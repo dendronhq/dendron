@@ -463,7 +463,7 @@
         },
         {
           "command": "dendron.insertNoteIndex",
-          "when": "editorFocus && dendron:pluginActive"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.moveNote",

@@ -164,8 +164,8 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     fPath: path.join(podsDir, "notion.yml"),
     configSchema: NotionExportPodV2.config(),
     setProperties: podConfig4,
-    });
-    
+  });
+
   const podConfigWithoutExportScope = {
     podId: "test-config",
     podType: PodV2Types.MarkdownExportV2,
@@ -188,7 +188,6 @@ describe("GIVEN a PodV2ConfigManager class", () => {
       expect(podConfig).toBeDefined();
       expect(podConfig?.podId).toEqual("foo");
       expect(podConfig?.podType).toEqual(PodV2Types.AirtableExportV2);
-      expect(podConfig?.exportScope).toEqual(PodExportScope.Note);
     });
   });
 
@@ -209,7 +208,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     test("THEN expect all pod configs to be returned", () => {
       const configs = PodV2ConfigManager.getAllPodConfigs(podsDir);
 
-      expect(configs.length).toEqual(4);
+      expect(configs.length).toEqual(5);
     });
   });
 });

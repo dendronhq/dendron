@@ -1204,6 +1204,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "hrmnjt",
+      "name": "Harman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10371494?v=4",
+      "profile": "https://www.hrmnjt.dev",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

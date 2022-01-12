@@ -9,6 +9,7 @@ import { CodeCommandInstance } from "../../commands/base";
 import { AirtableExportPodCommand } from "../../commands/pods/AirtableExportPodCommand";
 import { GoogleDocsExportPodCommand } from "../../commands/pods/GoogleDocsExportPodCommand";
 import { MarkdownExportPodCommand } from "../../commands/pods/MarkdownExportPodCommand";
+import { NotionExportPodCommand } from "../../commands/pods/NotionExportPodCommand";
 import { getExtension } from "../../workspace";
 
 export class PodCommandFactory {
@@ -57,6 +58,16 @@ export class PodCommandFactory {
       }
       case PodV2Types.GoogleDocsExportV2: {
         const cmd = new GoogleDocsExportPodCommand();
+        cmdWithArgs = {
+          key: cmd.key,
+          run(): Promise<void> {
+            return cmd.run(storedConfig);
+          },
+        };
+        break;
+      }
+      case PodV2Types.NotionExportV2: {
+        const cmd = new NotionExportPodCommand();
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -114,7 +125,15 @@ export class PodCommandFactory {
           },
         };
       }
-
+      case PodV2Types.NotionExportV2: {
+        const cmd = new NotionExportPodCommand();
+        return {
+          key: cmd.key,
+          run(): Promise<void> {
+            return cmd.run();
+          },
+        };
+      }
       default:
         assertUnreachable();
     }

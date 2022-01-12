@@ -112,6 +112,21 @@ export class WebViewCommonUtils {
           copyToClipboard(htmlSelection);            
         }  
       });
+
+      /**
+       * Based off https://stackoverflow.com/questions/822452/strip-html-from-text-javascript
+       */
+      function clean(text) {
+        const out = text
+          .replace(/<style[^>]*>.*<\\/style>/gm, "")
+          // Remove script tags and content
+          .replace(/<script[^>]*>.*<\\/script>/gm, "")
+          // Remove all opening, closing and orphan HTML tags
+          .replace(/<[^>]+>/gm, "")
+          // Remove leading spaces and repeated CR/LF
+          .replace(/([\\r\\n]+ +)+/gm, " ");
+          return out;
+      }
       
       /** 
        * Based off of: https://stackoverflow.com/a/5084044/7858768
@@ -152,9 +167,13 @@ export class WebViewCommonUtils {
         container.style.pointerEvents = 'none';
         container.style.opacity = 0;
         
-        const blob = new Blob([html], {type: "text/html"});
-        const item = new ClipboardItem({"text/html": blob});
- 
+        const blob = new Blob([html], { type: "text/html" });
+        const blobPlain = new Blob([clean(html)], { type: "text/plain" });
+        const item = new ClipboardItem({
+          "text/html": blob,
+          "text/plain": blobPlain,
+        });
+
         navigator.clipboard.write([item]).then(function() {
           
         }, function(error) {

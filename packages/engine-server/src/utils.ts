@@ -409,16 +409,16 @@ export class EngineUtils {
         note,
         wsRoot: engine.wsRoot,
       });
-      // const devConfig = ConfigUtils.getProp(engine.config, "dev");
-      // const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
-      // if (linkCandidatesEnabled) {
-      const linkCandidates = LinkUtils.findLinkCandidates({
-        note,
-        notesMap,
-        engine,
-      });
-      note.links = links.concat(linkCandidates);
-      // }
+      const devConfig = ConfigUtils.getProp(engine.config, "dev");
+      const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
+      if (linkCandidatesEnabled) {
+        const linkCandidates = LinkUtils.findLinkCandidates({
+          note,
+          notesMap,
+          engine,
+        });
+        note.links = links.concat(linkCandidates);
+      }
       note.anchors = anchors;
       return note;
     }

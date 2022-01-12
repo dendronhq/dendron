@@ -67,9 +67,9 @@ jobs:
         with:
           path: |
             last_run_status
-          key: ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.webpack }}-${{ steps.date.outputs.date }}
+          key: ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-${{ steps.date.outputs.date }}
           restore-keys: |
-            ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.webpack }}-
+            ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-
 
       - name: Set last run status
         id: last_run_status
@@ -83,16 +83,18 @@ jobs:
           yarn --version
 
       - name: Checkout source
+        if: steps.last_run_status.outputs.last_run_status != 'success'
         uses: actions/checkout@v2
 
       - name: Get yarn cache directory path
+        if: steps.last_run_status.outputs.last_run_status != 'success'
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
       # Retain Node modules across builds; some packages download/build binaries
       # here.
       - name: Restore Node modules cache
-        if: runner.os != 'Windows'
+        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_run_status != 'success'
         uses: actions/cache@v2
         id: node-modules-cache
         with:
@@ -113,6 +115,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-yarn-
 
       - name: Set up Node.js ${{ matrix.node-version }}
+        if: steps.last_run_status.outputs.last_run_status != 'success'
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
@@ -129,25 +132,25 @@ jobs:
         shell: bash
 
       - name: Start Xvfb
-        if: runner.os == 'Linux' && matrix.suite == 'plugin'
+        if: runner.os == 'Linux' && matrix.suite == 'plugin' && steps.last_run_status.outputs.last_run_status != 'success'
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Download notes.zip
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && steps.last_run_status.outputs.last_run_status != 'success'
         uses: wei/curl@master
         with:
           args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
 
       - name: Unzip notes.zip
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && steps.last_run_status.outputs.last_run_status != 'success'
         run: |
           unzip dendron-site.zip -d packages/nextjs-template
           pwd
 
       - name: Run cypress
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && steps.last_run_status.outputs.last_run_status != 'success'
         uses: cypress-io/github-action@v2
         with:
           build: "yarn run template:export"

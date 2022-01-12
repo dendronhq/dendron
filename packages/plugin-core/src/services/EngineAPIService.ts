@@ -235,12 +235,14 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
 
   queryNotesSync({
     qs,
+    originalQS,
     vault,
   }: {
     qs: string;
+    originalQS: string;
     vault?: DVault | undefined;
   }): Required<RespV2<NoteProps[]>> {
-    return this.internalEngine.queryNotesSync({ qs, vault });
+    return this.internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {

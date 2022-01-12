@@ -172,7 +172,11 @@ const NOTES = {
     });
     await engine.writeNote(noteNew);
 
-    const resp = await engine.queryNotes({ qs: "bar", vault });
+    const resp = await engine.queryNotes({
+      qs: "bar",
+      originalQS: "bar",
+      vault,
+    });
     const note = resp.data[0];
 
     return [
@@ -460,7 +464,11 @@ const NOTES_MULTI = {
     });
     await engine.writeNote(noteNew);
 
-    const resp = await engine.queryNotes({ qs: "bar", vault });
+    const resp = await engine.queryNotes({
+      qs: "bar",
+      originalQS: "bar",
+      vault,
+    });
     const note = resp.data[0];
 
     return [
@@ -488,7 +496,11 @@ const NOTES_MULTI = {
       });
       await engine.writeNote(noteNew);
 
-      const resp = await engine.queryNotes({ qs: "bar", vault });
+      const resp = await engine.queryNotes({
+        qs: "bar",
+        originalQS: "bar",
+        vault,
+      });
       const note = resp.data[0];
 
       return [

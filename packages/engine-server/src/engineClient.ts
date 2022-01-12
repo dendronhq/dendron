@@ -272,8 +272,16 @@ export class DendronEngineClient implements DEngineClient {
     };
   }
 
-  queryNotesSync({ qs, vault }: { qs: string; vault?: DVault }) {
-    let items = this.fuseEngine.queryNote({ qs });
+  queryNotesSync({
+    qs,
+    originalQS,
+    vault,
+  }: {
+    qs: string;
+    originalQS: string;
+    vault?: DVault;
+  }) {
+    let items = this.fuseEngine.queryNote({ qs, originalQS });
     if (vault) {
       items = items.filter((ent) => {
         return VaultUtils.isEqual(ent.vault, vault, this.wsRoot);

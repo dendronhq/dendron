@@ -1233,6 +1233,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "rzd-test",
+      "name": "rzd-test",
+      "avatar_url": "https://avatars.githubusercontent.com/u/97254261?v=4",
+      "profile": "https://github.com/rzd-test",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

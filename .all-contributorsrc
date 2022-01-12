@@ -954,7 +954,9 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/597015?v=4",
       "profile": "https://luke.carrier.im/",
       "contributions": [
-        "bug"
+        "bug",
+        "doc",
+        "code"
       ]
     },
     {

@@ -399,7 +399,6 @@ export class EngineUtils {
     engine: DEngineClient;
     notesMap: Map<string, NoteProps>;
   }) {
-    console.log("here");
     const maxNoteLength = ConfigUtils.getWorkspace(engine.config).maxNoteLength;
     if (
       note.body.length <

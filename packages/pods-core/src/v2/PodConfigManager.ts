@@ -60,10 +60,11 @@ export class PodV2ConfigManager {
       const config = ConfigFileUtils.getConfigByFPath({
         fPath,
       });
-
-      // if (isExportPodConfigurationV2(config)) {
-      //   configs.push(config);
-      // }
+      /**
+       *TODO: give some UI feedback if the user config is not Runnable. Either
+       * some visual cue within the quick pick itself or
+       * When the config is open, have some sort of code warning.
+       */
       configs.push(config);
     }
 

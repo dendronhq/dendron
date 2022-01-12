@@ -90,7 +90,8 @@ export class ConfigFileUtils {
           nullable: true,
         },
         exportScope: {
-          description: "export scope of the pod",
+          description:
+            "export scope of the pod. NOTE: Comment out this property if you would like get a UI prompt for export scope selection everytime while running the export pod. ",
           type: "string",
         },
         podType: {

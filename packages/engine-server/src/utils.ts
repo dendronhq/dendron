@@ -399,22 +399,27 @@ export class EngineUtils {
     engine: DEngineClient;
     notesMap: Map<string, NoteProps>;
   }) {
+    console.log("here");
     const maxNoteLength = ConfigUtils.getWorkspace(engine.config).maxNoteLength;
     if (
       note.body.length <
       (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
     ) {
       const links = LinkUtils.findLinks({ note, engine });
+      const anchors = await AnchorUtils.findAnchors({
+        note,
+        wsRoot: engine.wsRoot,
+      });
+      // const devConfig = ConfigUtils.getProp(engine.config, "dev");
+      // const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
+      // if (linkCandidatesEnabled) {
       const linkCandidates = LinkUtils.findLinkCandidates({
         note,
         notesMap,
         engine,
       });
-      const anchors = await AnchorUtils.findAnchors({
-        note,
-        wsRoot: engine.wsRoot,
-      });
       note.links = links.concat(linkCandidates);
+      // }
       note.anchors = anchors;
       return note;
     }

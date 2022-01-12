@@ -155,6 +155,7 @@ jobs:
           project: ./packages/nextjs-template
 
       - name: Run tests
+        id: test_run
         if: steps.last_run_status.outputs.last_run_status != 'success'
         run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 30

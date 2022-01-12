@@ -55,6 +55,14 @@ export class ConfigFileUtils {
           configPrefix = "";
         }
 
+        /**
+         * add NOTE for config options having note property. Mark the option as a comment.
+         * added for exportScope config option
+         */
+        if (podConfig[ent].note) {
+          args.push(`# NOTE: ${podConfig[ent].note}`);
+          configPrefix = "# ";
+        }
         args.push(
           `${configPrefix}${ent}: ${
             setProperties && ent in setProperties
@@ -78,7 +86,7 @@ export class ConfigFileUtils {
   static createExportConfig<T>(opts: { required: (keyof T)[]; properties: T }) {
     return {
       type: "object",
-      required: ["podId", "podType", "exportScope", ...opts.required],
+      required: ["podId", "podType", ...opts.required],
       properties: {
         podId: {
           description: "configuration ID",
@@ -90,9 +98,9 @@ export class ConfigFileUtils {
           nullable: true,
         },
         exportScope: {
-          description:
-            "export scope of the pod. NOTE: Comment out this property if you would like get a UI prompt for export scope selection everytime while running the export pod. ",
+          description: "export scope of the pod.",
           type: "string",
+          note: "When a setting is missing from this config, you will get a UI prompt to select a value for that setting while running the export pod. For this particular exportScope setting, if you would rather not be prompted and always have the same exportScope, simply uncomment the line below.",
         },
         podType: {
           description: "type of pod",

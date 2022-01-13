@@ -128,7 +128,7 @@ jobs:
 
       - name: Initialize
         id: init_run
-        if: steps.node-modules-cache.outputs.cache-hit != 'true') && steps.node-modules-cache-windows.outputs.cache-hit != 'true' && steps.last_run_status.outputs.last_run_status != 'success'
+        if: steps.node-modules-cache.outputs.cache-hit != 'true' && steps.node-modules-cache-windows.outputs.cache-hit != 'true' && steps.last_run_status.outputs.last_run_status != 'success'
         run: yarn ci:init
         shell: bash
 

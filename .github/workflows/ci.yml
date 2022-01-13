@@ -69,6 +69,9 @@ jobs:
         with:
           path: |
             last_run_status
+            last_restore_node_status
+            last_restore_node_windows_status
+            last_init_status
           key: ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-${{ steps.date.outputs.date }}
           restore-keys: |
             ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-
@@ -77,26 +80,24 @@ jobs:
         id: last_run_status
         run: cat last_run_status
 
-      - name: Restore last run status
-        id: last_run_node
-        uses: actions/cache@v2
-        with:
-          path: |
-            last_restore_node_status
-          key: ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-${{ steps.date.outputs.date }}
-          restore-keys: |
-            ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-
-
       - name: Set last run status
         id: last_restore_node_status
         run: cat last_restore_node_status
+
+      - name: Set last run status
+        id: last_restore_node_windows_status
+        run: cat last_restore_node_windows_status
+
+      - name: Set last run status
+        id: last_init_status
+        run: cat last_init_status
 
       - name: Print files
         shell: bash
         run: |
           echo "Cache hit: ${{steps.last_run_status.outputs.last_run_status}}"
           echo "Cache hit: ${{steps.last_restore_node_status.outputs.last_restore_node_status}}"
-          echo "Cache hit: ${{steps.last_run_status.outputs.last_restore_node_windows_status}}"
+          echo "Cache hit: ${{steps.last_restore_node_windows_status.outputs.last_restore_node_windows_status}}"
 
       - name: Gather environment data
         run: |
@@ -117,7 +118,7 @@ jobs:
       # Retain Node modules across builds; some packages download/build binaries
       # here.
       - name: Restore Node modules cache
-        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_restore_node_status != 'success'
+        if: runner.os != 'Windows' && steps.last_restore_node_status.outputs.last_restore_node_status != 'success'
         uses: actions/cache@v2
         id: node-modules-cache
         with:
@@ -128,7 +129,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
-        if: runner.os == 'Windows' && steps.last_run_status.outputs.last_restore_node_windows_status != 'success'
+        if: runner.os == 'Windows' && steps.last_restore_node_windows_status.outputs.last_restore_node_windows_status != 'success'
         uses: actions/cache@v2
         id: node-modules-cache-windows
         with:
@@ -138,11 +139,11 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-yarn-
 
       - name: Save restore node status non-windows
-        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_restore_node_status != 'success'
+        if: runner.os != 'Windows' && steps.last_restore_node_status.outputs.last_restore_node_status != 'success'
         run: echo "::set-output name=last_restore_node_status::${{ steps.node-modules-cache.outcome }}" > last_restore_node_status
 
       - name: Save restore node status windows
-        if: runner.os == 'Windows' && steps.last_run_status.outputs.last_restore_node_windows_status != 'success'
+        if: runner.os == 'Windows' && steps.last_restore_node_windows_status.outputs.last_restore_node_windows_status != 'success'
         run: echo "::set-output name=last_restore_node_windows_status::${{ steps.node-modules-cache-windows.outcome }}" > last_restore_node_windows_status
 
       - name: Set up Node.js ${{ matrix.node-version }}
@@ -164,7 +165,7 @@ jobs:
         shell: bash
 
       - name: Save initialize run status
-        if: steps.last_run_status.outputs.last_init_status != 'success'
+        if: steps.last_init_status.outputs.last_init_status != 'success'
         run: echo "::set-output name=last_init_status::${{ steps.init_run.outcome }}" > last_init_status
 
       - name: Start Xvfb

@@ -82,6 +82,13 @@ jobs:
         id: last_run_status
         run: cat last_run_status
 
+      - name: Print files
+        shell: bash
+        run: |
+          echo "Cache hit: ${{steps.last_run_status.outputs.last_run_status}}"
+          echo "Cache hit: ${{steps.last_run_status.outputs.last_restore_node_status}}"
+          echo "Cache hit: ${{steps.last_run_status.outputs.last_restore_node_windows_status}}"
+
       - name: Gather environment data
         run: |
           ${{ matrix.env }}

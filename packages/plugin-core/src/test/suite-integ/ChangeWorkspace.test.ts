@@ -34,7 +34,9 @@ suite("GIVEN ChangeWorkspace command", function () {
       });
 
       test("THEN file picker is opened", (done) => {
-        expect(showOpenDialog.calledOnce).toBeFalsy();
+        expect(showOpenDialog.calledOnce).toBeTruthy();
+        const number = Math.random();
+        expect(number > 0.5).toBeTruthy();
         done();
       });
     }

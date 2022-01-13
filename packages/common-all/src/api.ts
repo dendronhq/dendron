@@ -294,7 +294,7 @@ abstract class API {
       payload.error = resp.data.error;
     } catch (err: any) {
       this._log(payload.error, "error");
-      payload.error = err?.response?.data?.error;
+      payload.error = err?.response?.data?.error || err;
     }
     if (payload.error) {
       this._log(payload.error, "error");

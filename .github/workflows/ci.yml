@@ -97,9 +97,10 @@ jobs:
       - name: Print files
         shell: bash
         run: |
-          echo "Cache hit: ${{steps.last_run_status.outputs.last_run_status}}"
-          echo "Cache hit: ${{steps.last_restore_node_status.outputs.last_restore_node_status}}"
-          echo "Cache hit: ${{steps.last_restore_node_windows_status.outputs.last_restore_node_windows_status}}"
+          echo "last_run_status: ${{steps.last_run_status.outputs.last_run_status}}"
+          echo "last_restore_node_status: ${{steps.last_restore_node_status.outputs.last_restore_node_status}}"
+          echo "last_restore_node_windows_status: ${{steps.last_restore_node_windows_status.outputs.last_restore_node_windows_status}}"
+          echo "last_init_status: ${{steps.last_init_status.outputs.last_init_status}}"
 
       - name: Gather environment data
         run: |

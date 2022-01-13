@@ -10,7 +10,7 @@ import {
   ALL_MIGRATIONS,
   Migrations,
   MigrateFunction,
-  MigrationServce,
+  MigrationService,
   WorkspaceService,
   DConfig,
   MigrationUtils,
@@ -98,7 +98,7 @@ suite("Migration", function () {
           const dendronConfig = engine.config;
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
-          const out = await MigrationServce.applyMigrationRules({
+          const out = await MigrationService.applyMigrationRules({
             currentVersion: "0.46.0",
             previousVersion: "0.45.0",
             dendronConfig,
@@ -132,7 +132,7 @@ suite("Migration", function () {
             const dendronConfig = engine.config;
             const wsConfig = await getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
-            const out = await MigrationServce.applyMigrationRules({
+            const out = await MigrationService.applyMigrationRules({
               currentVersion: "0.47.1",
               previousVersion: "0.46.0",
               dendronConfig,
@@ -166,7 +166,7 @@ suite("Migration", function () {
             const dendronConfig = engine.config;
             const wsConfig = await getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
-            const out = await MigrationServce.applyMigrationRules({
+            const out = await MigrationService.applyMigrationRules({
               currentVersion: "0.47.1",
               previousVersion: "0.46.0",
               dendronConfig,
@@ -202,7 +202,7 @@ suite("Migration", function () {
           const dendronConfig = engine.config;
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
-          await MigrationServce.applyMigrationRules({
+          await MigrationService.applyMigrationRules({
             currentVersion: "0.52.0",
             previousVersion: "0.51.0",
             dendronConfig,
@@ -236,7 +236,7 @@ suite("Migration", function () {
           const dendronConfig = engine.config;
           const wsConfig = await getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
-          await MigrationServce.applyMigrationRules({
+          await MigrationService.applyMigrationRules({
             currentVersion: "0.51.4",
             previousVersion: "0.51.3",
             dendronConfig,
@@ -270,7 +270,7 @@ suite("Migration", function () {
           const rawConfig = DConfig.getRaw(wsRoot);
           const lookup = rawConfig.commands?.lookup;
           expect(_.isUndefined(lookup)).toBeTruthy();
-          await MigrationServce.applyMigrationRules({
+          await MigrationService.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
             dendronConfig,
@@ -318,7 +318,7 @@ suite("Migration", function () {
           const rawConfig = DConfig.getRaw(wsRoot);
           const lookup = rawConfig.commands?.lookup;
           expect(_.isUndefined(lookup)).toBeTruthy();
-          await MigrationServce.applyMigrationRules({
+          await MigrationService.applyMigrationRules({
             currentVersion: "0.55.2",
             previousVersion: "0.55.1",
             dendronConfig,
@@ -388,7 +388,7 @@ suite("Migration", function () {
           preMigrationCheckItems.forEach((item) => {
             expect(item).toBeTruthy();
           });
-          await MigrationServce.applyMigrationRules({
+          await MigrationService.applyMigrationRules({
             currentVersion: "0.70.0",
             previousVersion: "0.70.0",
             dendronConfig,
@@ -438,7 +438,7 @@ suite("MigrationService", function () {
   ) {
     const { wsRoot, config } = getDWorkspace();
     const wsService = new WorkspaceService({ wsRoot });
-    const out = await MigrationServce.applyMigrationRules({
+    const out = await MigrationService.applyMigrationRules({
       currentVersion,
       previousVersion: "0.62.2",
       migrations,

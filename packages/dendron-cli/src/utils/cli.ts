@@ -24,6 +24,12 @@ export class CLIUtils {
       }).filter((ent) => !_.isUndefined(ent)) as string[]
     ).join(",");
   };
+
+  static getClientVersion() {
+    // eslint-disable-next-line global-require
+    const pkgJSON = require("@dendronhq/dendron-cli/package.json");
+    return pkgJSON.version;
+  }
 }
 
 export class SpinnerUtils {

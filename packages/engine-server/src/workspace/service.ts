@@ -41,7 +41,7 @@ import { MetadataService } from "../metadata";
 import {
   CONFIG_MIGRATIONS,
   MigrationChangeSetStatus,
-  MigrationServce,
+  MigrationService,
 } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
@@ -962,12 +962,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     let changes: MigrationChangeSetStatus[] = [];
 
     if (
-      MigrationServce.shouldRunMigration({
+      MigrationService.shouldRunMigration({
         force: forceUpgrade,
         workspaceInstallStatus,
       })
     ) {
-      changes = await MigrationServce.applyMigrationRules({
+      changes = await MigrationService.applyMigrationRules({
         currentVersion,
         previousVersion,
         dendronConfig,
@@ -1001,7 +1001,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
       // we are on a legacy config.
       // NOTE: this migration will create a `migration-config` backup file in the user's home directory
-      changes = await MigrationServce.applyMigrationRules({
+      changes = await MigrationService.applyMigrationRules({
         currentVersion,
         previousVersion: "0.70.0", // to force apply
         dendronConfig,

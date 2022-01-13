@@ -13,9 +13,9 @@ export type MigrateFunction = (opts: {
   wsService: WorkspaceService;
 }) => Promise<{
   error?: DendronError;
-  data: { 
-    dendronConfig: IntermediateDendronConfig; 
-    wsConfig?: WorkspaceSettings 
+  data: {
+    dendronConfig: IntermediateDendronConfig;
+    wsConfig?: WorkspaceSettings;
   };
 }>;
 

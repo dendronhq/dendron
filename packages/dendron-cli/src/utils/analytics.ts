@@ -1,19 +1,20 @@
 import { RuntimeUtils } from "@dendronhq/common-all";
 import { SegmentUtils } from "@dendronhq/common-server";
+import { CLIUtils } from "./cli";
 
 export class CLIAnalyticsUtils {
   static track(event: string, props?: any) {
-    const cliVersion = process.env.npm_package_version!;
+    const cliVersion = CLIUtils.getClientVersion();
     SegmentUtils.track(event, { type: "cli", cliVersion }, props);
   }
 
   static async trackSync(event: string, props?: any) {
-    const cliVersion = process.env.npm_package_version!;
+    const cliVersion = CLIUtils.getClientVersion();
     await SegmentUtils.trackSync(event, { type: "cli", cliVersion }, props);
   }
 
   static identify() {
-    const cliVersion = process.env.npm_package_version!;
+    const cliVersion = CLIUtils.getClientVersion();
     SegmentUtils.identify({ type: "cli", cliVersion });
   }
 

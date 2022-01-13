@@ -12,6 +12,7 @@ export * from "./constants";
 export * from "./constants/frontend";
 export * from "./constants/views";
 export * from "./constants/lookup";
+export * from "./constants/configs/compat";
 export * from "./error";
 export * from "./time";
 export * from "./utils";

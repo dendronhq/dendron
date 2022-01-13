@@ -4,7 +4,10 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
+import { ERROR_SEVERITY } from "./constants";
+import { DendronError, ErrorMessages } from "./error";
 import { COLORS_LIST } from "./colors";
+import { CONFIG_TO_MINIMUM_COMPAT_MAPPING } from "./constants/configs/compat";
 import {
   DendronSiteConfig,
   DHookDict,
@@ -526,6 +529,13 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
+export type ConfigVaildationResp = {
+  isValid: boolean;
+  reason?: "client" | "config";
+  minCompatClientVersion?: string;
+  minCompatConfigVersion?: string;
+};
+
 export class ConfigUtils {
   static genDefaultConfig(): StrictConfigV4 {
     const common = {
@@ -748,6 +758,70 @@ export class ConfigUtils {
   ) {
     const path = `preview.${key}`;
     _.set(config, path, value);
+  }
+
+  static configIsValid(opts: {
+    clientVersion: string;
+    configVersion: number | undefined;
+  }): ConfigVaildationResp {
+    const { clientVersion, configVersion } = opts;
+
+    if (_.isUndefined(configVersion)) {
+      throw new DendronError({
+        message:
+          "Cannot determine config version. Please make sure the field 'version' is present and correct",
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    }
+
+    const minCompatClientVersion =
+      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion];
+
+    if (_.isUndefined(minCompatClientVersion)) {
+      throw new DendronError({
+        message: ErrorMessages.formatShouldNeverOccurMsg(
+          "Cannot find minimum compatible client version."
+        ),
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    }
+
+    const minCompatConfigVersion = _.findLastKey(
+      CONFIG_TO_MINIMUM_COMPAT_MAPPING,
+      (ent) => {
+        return semver.lte(ent, clientVersion);
+      }
+    );
+
+    if (_.isUndefined(minCompatConfigVersion)) {
+      throw new DendronError({
+        message: ErrorMessages.formatShouldNeverOccurMsg(
+          "cannot find minimum compatible config version."
+        ),
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    }
+
+    const clientVersionCompatible = semver.lte(
+      minCompatClientVersion,
+      clientVersion
+    );
+
+    const configVersionCompatible =
+      Number(minCompatConfigVersion) <= configVersion;
+
+    const isValid = clientVersionCompatible && configVersionCompatible;
+    if (!isValid) {
+      const reason = clientVersionCompatible ? "config" : "client";
+      return {
+        isValid,
+        reason,
+        minCompatClientVersion,
+        minCompatConfigVersion,
+      };
+    } else {
+      return { isValid, minCompatClientVersion, minCompatConfigVersion };
+    }
   }
 }
 

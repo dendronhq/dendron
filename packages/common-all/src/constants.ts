@@ -92,4 +92,6 @@ export type VaultRemoteSource = "local" | "remote";
 
 export enum DENDRON_EMOJIS {
   SEEDLING = "🌱",
+  OKAY = "✅",
+  NOT_OKAY = "❎",
 }

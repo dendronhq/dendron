@@ -27,7 +27,7 @@ import {
   ALL_MIGRATIONS,
   DConfig,
   MigrationChangeSetStatus,
-  MigrationServce,
+  MigrationService,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -91,6 +91,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       desc: "commands related to development of Dendron",
     });
     this.wsRootOptional = true;
+    this.skipValidation = true;
   }
 
   private setEndpoint(publishEndpoint: PublishEndpoint) {
@@ -493,7 +494,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
     const dendronConfig = readYAML(configPath);
     const wsConfig = readJSONWithCommentsSync(wsConfigPath);
-    const changes = await MigrationServce.applyMigrationRules({
+    const changes = await MigrationService.applyMigrationRules({
       currentVersion,
       previousVersion: "0.0.0",
       migrations: migrationsToRun,

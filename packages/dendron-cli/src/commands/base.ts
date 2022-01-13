@@ -14,7 +14,11 @@ import {
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
-import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  ALL_MIGRATIONS,
+  DConfig,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
@@ -108,38 +112,50 @@ export abstract class CLICommand<
 
   async validateConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
-    const ws = new WorkspaceService({ wsRoot });
-    const dendronConfig = ws.config;
-    const configVersion = ConfigUtils.getProp(dendronConfig, "version");
+
+    // we shouldn't use ConfigUtils.getProp for cases when `version` doesn't exist.
+    const configVersion = DConfig.getRaw(wsRoot).version;
     const clientVersion = CLIUtils.getClientVersion();
-    const validationResp = ConfigUtils.configIsValid({
-      clientVersion,
-      configVersion,
-    });
+    let validationResp;
+    try {
+      validationResp = ConfigUtils.configIsValid({
+        clientVersion,
+        configVersion,
+      });
+    } catch (err: any) {
+      this.print(err.message);
+      process.exit();
+    }
     if (!validationResp.isValid) {
       const { reason, minCompatConfigVersion, minCompatClientVersion } =
         validationResp;
       const instruction =
         reason === "client"
           ? "Please make sure dendron-cli is up to date by running the following: \n npm install @dendronhq/dendron-cli@latest"
-          : "Please make sure dendron.yml is up to date by running the following: \n dendron dev show_migration; dendron dev run_migration --migrationVersion={version}";
+          : `Please make sure dendron.yml is up to date by running the following: \n dendron dev run_migration --migrationVersion=${ALL_MIGRATIONS[0].version}`;
       const clientVersionOkay =
         reason === "client" ? DENDRON_EMOJIS.NOT_OKAY : DENDRON_EMOJIS.OKAY;
       const configVersionOkay =
         reason === "config" ? DENDRON_EMOJIS.NOT_OKAY : DENDRON_EMOJIS.OKAY;
 
+      const body = [
+        `current client version:            ${clientVersionOkay} ${clientVersion}`,
+        `current config version:            ${configVersionOkay} ${configVersion}`,
+        reason === "client"
+          ? `minimum compatible client version:    ${minCompatClientVersion}`
+          : `minimum compatible config version:    ${minCompatConfigVersion}`,
+      ].join("\n");
+
       const message = [
         "================================================",
         `${reason} is out of date.`,
         "------------------------------------------------",
-        `current client version:            ${clientVersionOkay} ${clientVersion}`,
-        `minimum compatible client version:    ${minCompatClientVersion}`,
-        `current config version:            ${configVersionOkay} ${configVersion}`,
-        `minimum compatible config version:    ${minCompatConfigVersion}`,
+        body,
         "------------------------------------------------",
         instruction,
       ].join("\n");
-      console.log(message);
+
+      this.print(message);
 
       // we should wait for this before exiting the process.
       await CLIAnalyticsUtils.trackSync(CLIEvents.CLIClientConfigMismatch, {

@@ -5,7 +5,7 @@ import path from "path";
 import querystring from "querystring";
 import semver from "semver";
 import { ERROR_SEVERITY } from "./constants";
-import { DendronError } from "./error";
+import { DendronError, ErrorMessages } from "./error";
 import { COLORS_LIST } from "./colors";
 import { CONFIG_TO_MINIMUM_COMPAT_MAPPING } from "./constants/configs/compat";
 import {
@@ -762,15 +762,26 @@ export class ConfigUtils {
 
   static configIsValid(opts: {
     clientVersion: string;
-    configVersion: number;
+    configVersion: number | undefined;
   }): ConfigVaildationResp {
     const { clientVersion, configVersion } = opts;
+
+    if (_.isUndefined(configVersion)) {
+      throw new DendronError({
+        message:
+          "Cannot determine config version. Please make sure the field 'version' is present and correct",
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    }
+
     const minCompatClientVersion =
       CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion];
 
     if (_.isUndefined(minCompatClientVersion)) {
       throw new DendronError({
-        message: "cannot find minimum compatible client version.",
+        message: ErrorMessages.formatShouldNeverOccurMsg(
+          "Cannot find minimum compatible client version."
+        ),
         severity: ERROR_SEVERITY.FATAL,
       });
     }
@@ -784,7 +795,9 @@ export class ConfigUtils {
 
     if (_.isUndefined(minCompatConfigVersion)) {
       throw new DendronError({
-        message: "cannot find minimum compatible config version.",
+        message: ErrorMessages.formatShouldNeverOccurMsg(
+          "cannot find minimum compatible config version."
+        ),
         severity: ERROR_SEVERITY.FATAL,
       });
     }

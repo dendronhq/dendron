@@ -59,7 +59,9 @@ jobs:
         run: echo "${{ steps.date.outputs.date }}"
 
       - name: Set default run status
-        run: echo "::set-output name=last_run_status::default" > last_run_status
+        run: |
+          echo "::set-output name=last_run_status::default" > last_run_status
+          echo "::set-output name=last_restore_node_status::default" > last_restore_node_status
 
       - name: Restore last run status
         id: last_run

@@ -22,6 +22,11 @@ import { PodClassEntryV4 } from "./types";
 import { NotionExportPod } from "./builtin/NotionPod";
 import { JSONSchemaType } from "ajv";
 import { OrbitImportPod } from "./builtin/OrbitPod";
+import type {
+  Page,
+  TitlePropertyValue,
+} from "@notionhq/client/build/src/api-types";
+import { Client } from "@notionhq/client";
 
 export * from "./basev3";
 export * from "./builtin";
@@ -32,6 +37,7 @@ export * from "./utils";
 export * from "./v2/external-services/ExternalConnectionManager";
 export * from "./v2/external-services/AirtableConnection";
 export * from "./v2/external-services/GoogleDocsConnection";
+export * from "./v2/external-services/NotionConnection";
 export * from "./v2/PodConfigManager";
 export * from "./v2/ExportPodBase";
 export * from "./v2/ConfigFileUtils";
@@ -67,4 +73,4 @@ export function getAllImportPods(): PodClassEntryV4[] {
   ];
 }
 
-export { JSONSchemaType };
+export { JSONSchemaType, Client, Page, TitlePropertyValue };

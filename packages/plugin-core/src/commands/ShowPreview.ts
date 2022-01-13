@@ -321,7 +321,7 @@ export class ShowPreviewCommand extends InputArgCommand<
   }
 
   addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
-    return { providedFile: opts !== undefined };
+    return { providedFile: !_.isEmpty(opts) };
   }
 
   public static openNoteInPreview(note: NoteProps, opts?: PreviewProxyOpts) {

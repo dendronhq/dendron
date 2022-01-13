@@ -63,7 +63,7 @@ const queryTestV1 = ({
   qs: string;
   expectedFNames: string[];
 }) => {
-  const notes = fuseEngine.queryNote({ qs });
+  const notes = fuseEngine.queryNote({ qs, originalQS: qs });
 
   expectedFNames.forEach((expectedFname) => {
     const wasFound = notes.some((n) => n.fname === expectedFname);
@@ -187,6 +187,30 @@ describe("Fuse utility function tests", () => {
       });
     });
 
+    describe("WHEN sorting fuse results with same score, one result having closer hamming distance", () => {
+      let sortedResults: Fuse.FuseResult<NoteIndexProps>[];
+
+      beforeAll(() => {
+        sortedResults = FuseEngine.sortResults({
+          results: [
+            createFoundItem({ fname: "match.a1", updated: 2, score: 0.1 }),
+            createFoundItem({ fname: "match.hi-2.a1", updated: 3, score: 0.1 }),
+          ],
+          originalQS: "match.a",
+        });
+      });
+
+      it("THEN match with closer hamming distance should come first even when its updated date is older", () => {
+        expect(sortedResults[0].item.fname).toEqual("match.a1");
+      });
+
+      it(`THEN keep all other results`, () => {
+        expect(sortedResults.length).toEqual(2);
+        assertContainsFName(sortedResults, "match.a1");
+        assertContainsFName(sortedResults, "match.hi-2.a1");
+      });
+    });
+
     describe("WHEN sorting fuse results", () => {
       let sortResults: Fuse.FuseResult<NoteIndexProps>[];
 
@@ -206,6 +230,7 @@ describe("Fuse utility function tests", () => {
             createFoundItem({ fname: "best-match", updated: 1, score: 0.01 }),
             createFoundItem({ fname: "worst-match", updated: 1, score: 0.99 }),
           ],
+          originalQS: `match`,
         });
       });
 
@@ -251,7 +276,7 @@ describe("Fuse Engine tests with dummy data", () => {
     describe('WHEN querying for "note"', () => {
       let queryResult: NoteIndexProps[];
       beforeAll(() => {
-        queryResult = fuseEngine.queryNote({ qs: "note" });
+        queryResult = fuseEngine.queryNote({ qs: "note", originalQS: "note" });
       });
 
       it("THEN include note-1", () => {
@@ -280,7 +305,7 @@ describe("Fuse Engine tests with dummy data", () => {
     describe('WHEN querying for "NOTE" (case mismatch)', () => {
       let queryResult: NoteIndexProps[];
       beforeAll(() => {
-        queryResult = fuseEngine.queryNote({ qs: "NOTE" });
+        queryResult = fuseEngine.queryNote({ qs: "NOTE", originalQS: "NOTE" });
       });
 
       it("THEN include note-1", () => {
@@ -310,7 +335,10 @@ describe("Fuse Engine tests with dummy data", () => {
       let queryResults: NoteIndexProps[];
 
       beforeAll(() => {
-        queryResults = fuseEngine.queryNote({ qs: "note-1" });
+        queryResults = fuseEngine.queryNote({
+          qs: "note-1",
+          originalQS: "note-1",
+        });
       });
 
       it('THEN exact match "note-1" comes first', () => {
@@ -331,7 +359,10 @@ describe("Fuse Engine tests with dummy data", () => {
       let queryResults: NoteIndexProps[];
 
       beforeAll(() => {
-        queryResults = fuseEngine.queryNote({ qs: "big o" });
+        queryResults = fuseEngine.queryNote({
+          qs: "big o",
+          originalQS: "big o",
+        });
       });
 
       it(`THEN should match 'some.note.name.with.big-o'`, () => {
@@ -343,6 +374,7 @@ describe("Fuse Engine tests with dummy data", () => {
       it("AND case matches THEN should get the note", () => {
         const queryResults = fuseEngine.queryNote({
           qs: "some.note.name.with.big-o",
+          originalQS: "some.note.name.with.big-o",
         });
         assertHasFName(queryResults, "some.note.name.with.big-o");
       });
@@ -350,6 +382,7 @@ describe("Fuse Engine tests with dummy data", () => {
       it("AND case does NOT match THEN should get the note", () => {
         const queryResults = fuseEngine.queryNote({
           qs: "SOME.note.NAME.with.big-o",
+          originalQS: "SOME.note.NAME.with.big-o",
         });
         assertHasFName(queryResults, "some.note.name.with.big-o");
       });
@@ -488,6 +521,7 @@ describe("FuseEngine tests with extracted data.", () => {
       beforeEach(() => {
         notes = fuseEngine.queryNote({
           qs: "dendron.dev.",
+          originalQS: "dendron.dev.",
           onlyDirectChildren: true,
         });
       });

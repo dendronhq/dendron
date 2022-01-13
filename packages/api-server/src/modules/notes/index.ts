@@ -78,7 +78,7 @@ export class NoteController {
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
-      const data = await engine.queryNotes(opts);
+      const data = await engine.queryNotes({ ...opts, originalQS: opts.qs });
       return data;
     } catch (err) {
       return {

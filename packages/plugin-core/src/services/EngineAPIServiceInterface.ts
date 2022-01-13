@@ -92,9 +92,11 @@ export interface IEngineAPIService {
 
   queryNotesSync({
     qs,
+    originalQS,
     vault,
   }: {
     qs: string;
+    originalQS: string;
     vault?: DVault | undefined;
   }): Required<RespV2<NoteProps[]>>;
 

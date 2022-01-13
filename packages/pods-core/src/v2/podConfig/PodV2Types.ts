@@ -5,18 +5,19 @@ export enum PodV2Types {
   AirtableExportV2 = "AirtableExportV2",
   MarkdownExportV2 = "MarkdownExportV2",
   GoogleDocsExportV2 = "GoogleDocsExportV2",
+  NotionExportV2 = "NotionExportV2",
 }
 
 /**
  * Specifies what information to export
  */
 export enum PodExportScope {
-  LinksInSelection = "LinksInSelection",
-  Lookup = "Lookup",
   Note = "Note",
+  Lookup = "Lookup",
   Hierarchy = "Hierarchy",
   Vault = "Vault",
   Workspace = "Workspace",
+  LinksInSelection = "LinksInSelection",
 }
 
 /**

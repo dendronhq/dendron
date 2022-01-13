@@ -292,7 +292,11 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
+    const resp = engine.queryNotesSync({
+      qs: link.from.fname,
+      originalQS: link.from.fname,
+      vault,
+    });
     const out = _.filter(resp.data, (ent) =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );
@@ -520,7 +524,11 @@ export function convertNoteRefASTV2(
   if (link.from.fname.endsWith("*")) {
     // wildcard reference case
     const vault = dendronData.vault;
-    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
+    const resp = engine.queryNotesSync({
+      qs: link.from.fname,
+      originalQS: link.from.fname,
+      vault,
+    });
     const out = _.filter(resp.data, (ent) =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );

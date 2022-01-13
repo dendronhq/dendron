@@ -171,7 +171,8 @@ export abstract class InputArgCommand<TOpts, TOut = any> extends BasicCommand<
   TOpts
 > {
   async gatherInputs(opts?: TOpts): Promise<TOpts | undefined> {
-    return opts;
+    // The cast and return is needed because if `opts` is `undefined` then `run` will just skip doing `execute`
+    return opts || ({} as TOpts);
   }
 
   protected mergeInputs(opts: TOpts, _args?: Partial<TOpts>): TOpts {

@@ -518,7 +518,7 @@ export type QueryNotesOpts = {
    * Original query string (which can contain minor modifications such as mapping '/'->'.')
    * This string is added for sorting the lookup results when there is exact match with
    * original query. */
-  originalQS?: string;
+  originalQS: string;
   onlyDirectChildren?: boolean;
   vault?: DVault;
   createIfNew?: boolean;
@@ -556,7 +556,14 @@ export type DEngine = DCommonProps &
     getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
-    queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
+    queryNotesSync({
+      qs,
+      originalQS,
+    }: {
+      qs: string;
+      originalQS: string;
+      vault?: DVault;
+    }): NoteQueryResp;
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
     renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
     /**

@@ -118,7 +118,7 @@ function DendronSearchComponent(
     const out =
       qs === ""
         ? NoteLookupUtils.fetchRootResults(notes)
-        : lookup?.queryNote({ qs });
+        : lookup?.queryNote({ qs, originalQS: qs });
     setLookupResults(_.isUndefined(out) ? [] : out);
   };
 

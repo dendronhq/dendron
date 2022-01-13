@@ -31,8 +31,11 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     url: string
   ) {
     // Check whichever field has non falsy info
-    const title =
-      (result.ogTitle ?? result.twitterTitle ?? result.dcTitle) || url;
+    const title = (
+      (result.ogTitle ?? result.twitterTitle ?? result.dcTitle) ||
+      url
+    ).trim();
+
     return title ? `[${title}](${url})` : `<${url}>`;
   }
 

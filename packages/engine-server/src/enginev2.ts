@@ -421,10 +421,12 @@ export class DendronEngineV2 implements DEngine {
 
   queryNotesSync({
     qs,
+    originalQS,
   }: {
     qs: string;
+    originalQS: string;
   }): ReturnType<DEngineClient["queryNotesSync"]> {
-    const items = this.fuseEngine.queryNote({ qs });
+    const items = this.fuseEngine.queryNote({ qs, originalQS });
     return {
       error: null,
       data: items.map((ent) => this.notes[ent.id]),

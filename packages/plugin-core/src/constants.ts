@@ -323,7 +323,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   INSERT_NOTE_INDEX: {
     key: "dendron.insertNoteIndex",
     title: `${CMD_PREFIX} Insert Note Index`,
-    when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   MOVE_NOTE: {
     key: "dendron.moveNote",

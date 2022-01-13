@@ -15,14 +15,17 @@ import {
   GoogleDocsExportPodV2,
   JSONSchemaType,
   MarkdownExportPodV2,
+  NotionExportPodV2,
   PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
+  RunnableNotionV2PodConfig,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { ENGINE_HOOKS } from "../..";
 import { runEngineTestV5 } from "../../engine";
 
 /**
@@ -133,6 +136,12 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     exportScope: PodExportScope.Note,
   };
 
+  const podConfig4: ExportPodConfigurationV2 = {
+    podId: "foo-bar",
+    podType: PodV2Types.NotionExportV2,
+    exportScope: PodExportScope.Note,
+  };
+
   ConfigFileUtils.genConfigFileV2({
     fPath: path.join(podsDir, "foo.yml"),
     configSchema: AirtableExportPodV2.config(),
@@ -151,6 +160,23 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     setProperties: podConfig3,
   });
 
+  ConfigFileUtils.genConfigFileV2({
+    fPath: path.join(podsDir, "notion.yml"),
+    configSchema: NotionExportPodV2.config(),
+    setProperties: podConfig4,
+  });
+
+  const podConfigWithoutExportScope = {
+    podId: "test-config",
+    podType: PodV2Types.MarkdownExportV2,
+  };
+
+  ConfigFileUtils.genConfigFileV2({
+    fPath: path.join(podsDir, "test-config.yml"),
+    configSchema: MarkdownExportPodV2.config(),
+    setProperties: podConfigWithoutExportScope,
+  });
+
   describe("WHEN getting a pod config by an existing ID", () => {
     test("THEN expect the pod config to be retrieved", () => {
       const podConfig = PodV2ConfigManager.getPodConfigById({
@@ -162,7 +188,6 @@ describe("GIVEN a PodV2ConfigManager class", () => {
       expect(podConfig).toBeDefined();
       expect(podConfig?.podId).toEqual("foo");
       expect(podConfig?.podType).toEqual(PodV2Types.AirtableExportV2);
-      expect(podConfig?.exportScope).toEqual(PodExportScope.Note);
     });
   });
 
@@ -183,7 +208,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     test("THEN expect all pod configs to be returned", () => {
       const configs = PodV2ConfigManager.getAllPodConfigs(podsDir);
 
-      expect(configs.length).toEqual(3);
+      expect(configs.length).toEqual(5);
     });
   });
 });
@@ -394,6 +419,54 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               vault: vaults[0],
             });
           },
+        }
+      );
+    });
+  });
+});
+
+/**
+ * Notion Export Pod
+ */
+
+describe("GIVEN a Notion Export Pod with a particular config", () => {
+  describe("WHEN exporting a note", () => {
+    test("THEN expect notion doc to be created", async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          const podConfig: RunnableNotionV2PodConfig = {
+            exportScope: PodExportScope.Note,
+            apiKey: "test",
+            parentPageId: "test",
+          };
+
+          const pod = new NotionExportPodV2({
+            podConfig,
+          });
+          const props = NoteUtils.getNoteByFnameFromEngine({
+            fname: "bar",
+            vault: opts.vaults[0],
+            engine: opts.engine,
+          }) as NoteProps;
+          const response = {
+            data: [
+              {
+                dendronId: `${props.id}`,
+                notionId: "test",
+              },
+            ],
+            errors: [],
+          };
+          pod.convertMdToNotionBlock = jest.fn();
+          pod.createPagesInNotion = jest.fn().mockResolvedValue(response);
+          const result = await pod.exportNote(props);
+          const entCreate = result.data?.created!;
+          expect(entCreate.length).toEqual(1);
+          expect(entCreate[0]?.notionId).toEqual("test");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );
     });

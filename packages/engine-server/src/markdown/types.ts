@@ -33,7 +33,6 @@ export type DendronASTNode = Parent & {
 
 export enum DendronASTTypes {
   WIKI_LINK = "wikiLink",
-  REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
   BLOCK_ANCHOR = "blockAnchor",
   HASHTAG = "hashtag",
@@ -103,12 +102,6 @@ export type RehypeLinkData = WikiLinkDataV4 & {
   hName: string;
 };
 
-export type NoteRefNoteV4_LEGACY = DendronASTNode & {
-  type: DendronASTTypes.REF_LINK;
-  value: string;
-  data: NoteRefDataV4_LEGACY;
-};
-
 export type NoteRefNoteV4 = Omit<DendronASTNode, "children"> & {
   type: DendronASTTypes.REF_LINK_V2;
   value: string;
@@ -129,10 +122,6 @@ export type NoteRefDataV4 = {
 export type NoteRefDataRawV4 = {
   link: DNoteRefLinkRaw;
   vaultName?: string;
-};
-
-export type NoteRefDataV4_LEGACY = {
-  link: DNoteRefLink;
 };
 
 export type BlockAnchor = DendronASTNode & {

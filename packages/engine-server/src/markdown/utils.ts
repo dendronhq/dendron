@@ -40,13 +40,13 @@ import remark2rehype from "remark-rehype";
 import remarkStringify from "remark-stringify";
 // @ts-ignore
 import variables from "remark-variables";
+// eslint-disable-next-line import/no-named-default
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { hierarchies, RemarkUtils } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
-import { NoteRefsOpts } from "./remark/noteRefs";
-import { noteRefsV2 } from "./remark/noteRefsV2";
+import { NoteRefsOptsV2, noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
@@ -86,9 +86,9 @@ type ProcOptsFull = ProcOpts & {
   usePrettyRefs?: boolean;
   // shouldn't need to be used
   wikiLinksOpts?: WikiLinksOpts;
-  noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
   blockAnchorsOpts?: BlockAnchorOpts;
+  noteRefOpts?: NoteRefsOptsV2;
 };
 
 type ProcDendron = ProcOpts & {

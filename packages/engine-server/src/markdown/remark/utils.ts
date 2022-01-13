@@ -1,41 +1,45 @@
 import {
-  DNoteAnchor,
-  isNotUndefined,
+  ALIAS_NAME,
   assertUnreachable,
   CONSTANTS,
   DendronError,
   DEngineClient,
   DLink,
+  DNodeProps,
+  DNoteAnchor,
+  DNoteAnchorBasic,
   DNoteAnchorPositioned,
   DNoteLink,
   DNoteLoc,
   DNoteRefData,
   DNoteRefLink,
   DNoteRefLinkRaw,
+  DVault,
   ERROR_STATUS,
   getSlugger,
+  IntermediateDendronConfig,
+  isNotUndefined,
+  LINK_CONTENTS,
+  LINK_NAME,
+  NoteBlock,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
-  Position,
-  NoteBlock,
-  VaultUtils,
   Point,
+  Position,
   TAGS_HIERARCHY,
-  TagUtils,
-  LINK_CONTENTS,
-  LINK_NAME,
-  ALIAS_NAME,
-  IntermediateDendronConfig,
-  DVault,
-  USERS_HIERARCHY_BASE,
   TAGS_HIERARCHY_BASE,
-  DNoteAnchorBasic,
-  DNodeProps,
+  TagUtils,
+  USERS_HIERARCHY_BASE,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { createDisposableLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
+  FootnoteDefinition,
   Heading,
+  Image,
+  Link,
   List,
   ListItem,
   Paragraph,
@@ -43,31 +47,25 @@ import type {
   Table,
   TableCell,
   TableRow,
-  Image,
   Text,
-  Link,
-  FootnoteDefinition,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
-import { createDisposableLogger } from "@dendronhq/common-server";
 import { Processor } from "unified";
 import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { normalizev2 } from "../../utils";
 import { WorkspaceUtils } from "../../workspace";
 import {
   Anchor,
   BlockAnchor,
-  ExtendedImage,
   DendronASTDest,
   DendronASTNode,
   DendronASTRoot,
   DendronASTTypes,
+  ExtendedImage,
   HashTag,
   NoteRefNoteV4,
-  NoteRefNoteV4_LEGACY,
   UserTag,
   WikiLinkNoteV4,
   WikiLinkProps,
@@ -76,8 +74,8 @@ import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 
 const toString = require("mdast-util-to-string");
 
-export { mdastBuilder };
 export { select, selectAll } from "unist-util-select";
+export { mdastBuilder };
 export { visit };
 export { LINK_CONTENTS, LINK_NAME, ALIAS_NAME };
 
@@ -178,7 +176,7 @@ const getLinks = ({
   filter: LinkFilter;
 }) => {
   const wikiLinks: WikiLinkNoteV4[] = [];
-  const noteRefs: (NoteRefNoteV4 | NoteRefNoteV4_LEGACY)[] = [];
+  const noteRefs: NoteRefNoteV4[] = [];
   visit(ast, (node) => {
     switch (node.type) {
       case DendronASTTypes.WIKI_LINK:
@@ -186,9 +184,6 @@ const getLinks = ({
         break;
       case DendronASTTypes.REF_LINK_V2:
         noteRefs.push(node as NoteRefNoteV4);
-        break;
-      case DendronASTTypes.REF_LINK:
-        noteRefs.push(node as NoteRefNoteV4_LEGACY);
         break;
       case DendronASTTypes.HASHTAG: {
         wikiLinks.push(hashTag2WikiLinkNoteV4(node as HashTag));
@@ -345,7 +340,6 @@ export class LinkUtils {
     switch (type) {
       case DendronASTTypes.WIKI_LINK:
         return "wiki";
-      case DendronASTTypes.REF_LINK:
       case DendronASTTypes.REF_LINK_V2:
         return "ref";
       default:
@@ -1155,45 +1149,6 @@ export class RemarkUtils {
         });
 
         if (dirty) {
-          changes.push({
-            note,
-            prevNote,
-            status: "update",
-          });
-        }
-      };
-    };
-  }
-
-  static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
-    const prevNote = { ...note };
-    return function (this: Processor) {
-      return (tree: Node, _vfile: VFile) => {
-        const root = tree as DendronASTRoot;
-        //@ts-ignore
-        const notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll(
-          DendronASTTypes.REF_LINK,
-          root
-        );
-        notesRefLegacy.map((noteRefLegacy) => {
-          const slugger = getSlugger();
-          // @ts-ignore;
-          noteRefLegacy.type = DendronASTTypes.REF_LINK_V2;
-          const { anchorStart, anchorEnd } = noteRefLegacy.data.link.data;
-          if (anchorStart) {
-            noteRefLegacy.data.link.data.anchorStart = normalizev2(
-              anchorStart,
-              slugger
-            );
-          }
-          if (anchorEnd) {
-            noteRefLegacy.data.link.data.anchorEnd = normalizev2(
-              anchorEnd,
-              slugger
-            );
-          }
-        });
-        if (!_.isEmpty(notesRefLegacy)) {
           changes.push({
             note,
             prevNote,

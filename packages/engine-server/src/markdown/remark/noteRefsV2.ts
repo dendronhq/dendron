@@ -31,7 +31,6 @@ import {
   DendronASTTypes,
   NoteRefNoteRawV4,
   NoteRefNoteV4,
-  NoteRefNoteV4_LEGACY,
 } from "../types";
 import { MDUtilsV4, ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
@@ -194,7 +193,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function (node: NoteRefNoteV4_LEGACY) {
+    visitors.refLinkV2 = function (node: NoteRefNoteV4) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;

@@ -71,6 +71,13 @@ jobs:
           restore-keys: |
             ${{ github.run_id }}-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.suite }}-
 
+      - name: Print files
+        shell: bash
+        run: |
+          echo "Cache hit: ${{steps.last_run.outputs.last_run_status}}"
+          echo "Cache hit: ${{steps.last_run.outputs.last_restore_node_status}}"
+          echo "Cache hit: ${{steps.last_run.outputs.last_restore_node_windows_status}}"
+
       - name: Set last run status
         id: last_run_status
         run: cat last_run_status
@@ -94,7 +101,7 @@ jobs:
       # Retain Node modules across builds; some packages download/build binaries
       # here.
       - name: Restore Node modules cache
-        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_run_status != 'success'
+        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_restore_node_status != 'success'
         uses: actions/cache@v2
         id: node-modules-cache
         with:
@@ -105,7 +112,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-1-${{ hashFiles('yarn.lock')}}
 
       - name: Restore Node modules cache for Windows
-        if: runner.os == 'Windows' && steps.last_run_status.outputs.last_run_status != 'success'
+        if: runner.os == 'Windows' && steps.last_run_status.outputs.last_restore_node_windows_status != 'success'
         uses: actions/cache@v2
         id: node-modules-cache-windows
         with:
@@ -113,6 +120,14 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node-version }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.node-version }}-yarn-
+
+      - name: Save restore node status non-windows
+        if: runner.os != 'Windows' && steps.last_run_status.outputs.last_restore_node_status != 'success'
+        run: echo "::set-output name=last_restore_node_status::${{ steps.node-modules-cache.outcome }}" > last_restore_node_status
+
+      - name: Save restore node status windows
+        if: runner.os == 'Windows' && steps.last_run_status.outputs.last_restore_node_windows_status != 'success'
+        run: echo "::set-output name=last_restore_node_windows_status::${{ steps.node-modules-cache-windows.outcome }}" > last_restore_node_windows_status
 
       - name: Set up Node.js ${{ matrix.node-version }}
         if: steps.last_run_status.outputs.last_run_status != 'success'
@@ -128,9 +143,13 @@ jobs:
 
       - name: Initialize
         id: init_run
-        if: steps.node-modules-cache.outputs.cache-hit != 'true' && steps.node-modules-cache-windows.outputs.cache-hit != 'true' && steps.last_run_status.outputs.last_run_status != 'success'
+        if: steps.last_run_status.outputs.last_init_status != 'success'
         run: yarn ci:init
         shell: bash
+
+      - name: Save initialize run status
+        if: steps.last_run_status.outputs.last_init_status != 'success'
+        run: echo "::set-output name=last_init_status::${{ steps.init_run.outcome }}" > last_init_status
 
       - name: Start Xvfb
         if: runner.os == 'Linux' && matrix.suite == 'plugin' && steps.last_run_status.outputs.last_run_status != 'success'

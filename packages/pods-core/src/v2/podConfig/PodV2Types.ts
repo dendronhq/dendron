@@ -12,12 +12,12 @@ export enum PodV2Types {
  * Specifies what information to export
  */
 export enum PodExportScope {
-  LinksInSelection = "LinksInSelection",
-  Lookup = "Lookup",
   Note = "Note",
+  Lookup = "Lookup",
   Hierarchy = "Hierarchy",
   Vault = "Vault",
   Workspace = "Workspace",
+  LinksInSelection = "LinksInSelection",
 }
 
 /**

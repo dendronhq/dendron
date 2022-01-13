@@ -166,6 +166,17 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     setProperties: podConfig4,
   });
 
+  const podConfigWithoutExportScope = {
+    podId: "test-config",
+    podType: PodV2Types.MarkdownExportV2,
+  };
+
+  ConfigFileUtils.genConfigFileV2({
+    fPath: path.join(podsDir, "test-config.yml"),
+    configSchema: MarkdownExportPodV2.config(),
+    setProperties: podConfigWithoutExportScope,
+  });
+
   describe("WHEN getting a pod config by an existing ID", () => {
     test("THEN expect the pod config to be retrieved", () => {
       const podConfig = PodV2ConfigManager.getPodConfigById({
@@ -177,7 +188,6 @@ describe("GIVEN a PodV2ConfigManager class", () => {
       expect(podConfig).toBeDefined();
       expect(podConfig?.podId).toEqual("foo");
       expect(podConfig?.podType).toEqual(PodV2Types.AirtableExportV2);
-      expect(podConfig?.exportScope).toEqual(PodExportScope.Note);
     });
   });
 
@@ -198,7 +208,7 @@ describe("GIVEN a PodV2ConfigManager class", () => {
     test("THEN expect all pod configs to be returned", () => {
       const configs = PodV2ConfigManager.getAllPodConfigs(podsDir);
 
-      expect(configs.length).toEqual(4);
+      expect(configs.length).toEqual(5);
     });
   });
 });

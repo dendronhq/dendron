@@ -62,6 +62,8 @@ jobs:
         run: |
           echo "::set-output name=last_run_status::default" > last_run_status
           echo "::set-output name=last_restore_node_status::default" > last_restore_node_status
+          echo "::set-output name=last_restore_node_windows_status::default" > last_restore_node_windows_status
+          echo "::set-output name=last_init_status::default" > last_init_status
 
       - name: Restore last run status
         id: last_run

@@ -39,6 +39,8 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     opts?: Partial<MarkdownV2PodConfig>
   ): Promise<RunnableMarkdownV2PodConfig | undefined> {
     if (isRunnableMarkdownV2PodConfig(opts)) {
+      const { destination, exportScope } = opts;
+      this.multiNoteExportCheck({ destination, exportScope });
       return opts;
     }
 

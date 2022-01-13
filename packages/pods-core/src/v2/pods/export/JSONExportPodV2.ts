@@ -12,7 +12,7 @@ import { ConfigFileUtils, ExportPodV2 } from "../../..";
 import { JSONV2PodConfig, RunnableJSONV2PodConfig } from "../..";
 
 /**
- * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).
+ * JSON Export Pod (V2 - for compatibility with Pod V2 workflow).
  */
 
 export type JSONExportReturnType = RespV2<{

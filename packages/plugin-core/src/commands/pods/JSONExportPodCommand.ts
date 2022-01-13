@@ -39,6 +39,8 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
     opts?: Partial<JSONV2PodConfig>
   ): Promise<RunnableJSONV2PodConfig | undefined> {
     if (isRunnableJSONV2PodConfig(opts)) {
+      const { destination, exportScope } = opts;
+      this.multiNoteExportCheck({ destination, exportScope });
       return opts;
     }
 

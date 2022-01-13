@@ -162,7 +162,7 @@ jobs:
 
       - name: Initialize
         id: init_run
-        if: steps.last_run_status.outputs.last_init_status != 'success'
+        if: steps.last_init_status.outputs.last_init_status != 'success'
         run: yarn ci:init
         shell: bash
 

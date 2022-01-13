@@ -652,9 +652,15 @@ export class ConfigUtils {
 
   static getEnablePrettyRefs(
     config: IntermediateDendronConfig,
-    shouldApplyPublishRules?: boolean
+    opts?: {
+      note?: NoteProps;
+      shouldApplyPublishRules?: boolean;
+    }
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const override = opts?.note?.config?.global?.enablePrettyRefs;
+    if (override !== undefined) return override;
+
+    return opts?.shouldApplyPublishRules
       ? ConfigUtils.getSite(config).usePrettyRefs
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }

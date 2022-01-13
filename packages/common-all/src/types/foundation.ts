@@ -68,7 +68,9 @@ export type DNodeImage = { url: string; alt: string };
  * Notes have a config property that can override a subset of {@link dendronConfig}
  */
 export type NoteLocalConfig = Partial<{
-  global: Partial<Pick<DendronGlobalConfig, "enableChildLinks">>;
+  global: Partial<
+    Pick<DendronGlobalConfig, "enableChildLinks" | "enablePrettyRefs">
+  >;
 }>;
 export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;
 

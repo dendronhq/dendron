@@ -949,8 +949,12 @@ describe("dendronPub", () => {
                 fname: "with-override",
                 vault: opts.vaults[0],
                 wsRoot: opts.wsRoot,
-                custom: {
-                  usePrettyRefs: false,
+                props: {
+                  config: {
+                    global: {
+                      enablePrettyRefs: false,
+                    },
+                  },
                 },
               });
             },
@@ -995,8 +999,12 @@ describe("dendronPub", () => {
                 fname: "with-override",
                 vault: opts.vaults[0],
                 wsRoot: opts.wsRoot,
-                custom: {
-                  usePrettyRefs: true,
+                props: {
+                  config: {
+                    global: {
+                      enablePrettyRefs: true,
+                    },
+                  },
                 },
               });
             },

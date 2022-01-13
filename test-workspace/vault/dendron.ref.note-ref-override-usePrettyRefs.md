@@ -2,9 +2,9 @@
 id: XeVZSRSqYEr4ZHHstv2iP
 title: note-ref-override-usePrettyRefs
 desc: ''
-updated: 1641890813313
+updated: 1642067062672
 created: 1641890783138
-usePrettyRefs: false
+config: { global: { enablePrettyRefs: false}}
 ---
 
 # Simple

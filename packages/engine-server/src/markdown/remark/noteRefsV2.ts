@@ -277,6 +277,12 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
     vault,
     engine,
   });
+  if (prettyRefs === undefined) {
+    prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
+      note: containingNote,
+      shouldApplyPublishRules,
+    });
+  }
   if (
     containingNote?.custom.usePrettyRefs !== undefined &&
     _.isBoolean(containingNote.custom.usePrettyRefs)
@@ -491,27 +497,21 @@ export function convertNoteRefASTV2(
     shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   }
 
-  let prettyRefs = ConfigUtils.getEnablePrettyRefs(
-    config,
-    shouldApplyPublishRules
-  );
-  if (
-    prettyRefs &&
-    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
-  ) {
-    prettyRefs = false;
-  }
   // The note that contains this reference might override the pretty refs option for references inside it.
   const containingNote = NoteUtils.getNoteByFnameFromEngine({
     fname,
     vault,
     engine,
   });
+  let prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
+    shouldApplyPublishRules,
+    note: containingNote,
+  });
   if (
-    containingNote?.custom.usePrettyRefs !== undefined &&
-    _.isBoolean(containingNote.custom.usePrettyRefs)
+    prettyRefs &&
+    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
   ) {
-    prettyRefs = containingNote.custom.usePrettyRefs;
+    prettyRefs = false;
   }
 
   const duplicateNoteConfig = siteConfig.duplicateNoteBehavior;

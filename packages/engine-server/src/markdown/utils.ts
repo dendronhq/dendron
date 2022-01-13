@@ -389,13 +389,13 @@ export class MDUtilsV4 {
     const { dest, vault, fname, shouldApplyPublishRules, engine } = opts;
     const config = opts.config || engine.config;
     let proc = this.proc(opts);
+    let note: NoteProps | undefined;
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
-      const note = NoteUtils.getNoteByFnameV5({
+      note = NoteUtils.getNoteByFnameFromEngine({
         fname,
-        notes: engine.notes,
         vault,
-        wsRoot: engine.wsRoot,
+        engine,
       });
       const fm = {
         ...note?.custom,
@@ -406,10 +406,10 @@ export class MDUtilsV4 {
 
     let usePrettyRefs = opts.usePrettyRefs;
     if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = ConfigUtils.getEnablePrettyRefs(
-        config,
-        shouldApplyPublishRules
-      );
+      usePrettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
+        shouldApplyPublishRules,
+        note,
+      });
     }
 
     const insertTitle = ConfigUtils.getEnableFMTitle(

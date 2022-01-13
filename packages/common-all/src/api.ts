@@ -511,8 +511,8 @@ export class DendronAPI extends API {
   ): Promise<GetDecorationsPayload> {
     const resp = await this._makeRequest({
       path: "note/decorations",
-      method: "get",
-      qs: req,
+      method: "post",
+      body: req,
     });
     return resp;
   }

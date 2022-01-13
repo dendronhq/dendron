@@ -371,6 +371,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           return;
         }
         const procOpts = MDUtilsV4.getProcOpts(proc);
+        // Markdown publish pod still relies on this
+        if (procOpts.blockAnchorsOpts?.hideBlockAnchors) return;
         const anchorHTML = blockAnchor2html(
           node as BlockAnchor,
           procOpts.blockAnchorsOpts

@@ -53,6 +53,10 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
     label: "Confirm Vault on Create.",
     desc: "Prompt for vault selection when creating new note.",
   },
+  selectVaultModeOnCreate: {
+    label: "Vault Selection Mode On Note Creation.",
+    desc: "Whether to smartly guess the vault for the note when creating new note.",
+  },
   leaveTrace: {
     label: "Leave Trace",
     desc: "Leaves a reference of the destination note in the source note while using selectionExtract",
@@ -62,8 +66,8 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
     desc: "Put `Create New` at the top of the lookup result.",
   },
   fuzzThreshold: {
-    label: "Fuzziness threshold for lookup",
-    desc: "Sets the fuzziness level of lookups 0=exact matches only, 1=max fuzziness.",
+    label: "Fuzziness Threshold For Lookup",
+    desc: "Sets the fuzziness level of lookup",
   },
 };
 

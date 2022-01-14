@@ -284,7 +284,8 @@ suite("Extension", function () {
             lookup: {
               note: {
                 selectionMode: "extract",
-                confirmVaultOnCreate: false,
+                confirmVaultOnCreate: true,
+                selectVaultModeOnCreate: "smart",
                 leaveTrace: false,
                 bubbleUpCreateNew: true,
                 fuzzThreshold: 0.2,

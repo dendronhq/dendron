@@ -631,7 +631,10 @@ export class FileStorage implements DStore {
     return [start, end];
   }
 
-  /** Update the links inside this note that need to be updated for the rename from `oldLoc` to `newLoc` */
+  /**
+   * Update the links inside this note that need to be updated for the rename from `oldLoc` to `newLoc`
+   * Will update the note in place
+   */
   private async processNoteChangedByRename({
     note,
     oldLoc,
@@ -644,6 +647,7 @@ export class FileStorage implements DStore {
     const prevNote = { ...note };
     const vault = note.vault;
     const vaultPath = vault2Path({ vault, wsRoot: this.wsRoot });
+
     // read note in case its changed
     const _n = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
     const foundLinks = LinkUtils.findLinks({
@@ -651,6 +655,9 @@ export class FileStorage implements DStore {
       engine: this.engine,
       filter: { loc: oldLoc },
     });
+
+    // important to order by position since we replace links and this affects
+    // subsequent links
     let allLinks = _.orderBy(
       foundLinks,
       (link) => {
@@ -658,8 +665,11 @@ export class FileStorage implements DStore {
       },
       "desc"
     );
+
+    // perform header updates as needed
     if (
       oldLoc.fname.toLowerCase() === newLoc.fname.toLowerCase() &&
+      // TODO: we don't have a spec on vault name but to be consistent, we should also lowercase
       oldLoc.vaultName === newLoc.vaultName &&
       oldLoc.anchorHeader &&
       newLoc.anchorHeader
@@ -679,9 +689,10 @@ export class FileStorage implements DStore {
       });
     }
 
-    // only modify links that have same _to_ vault name
-    // explicitly same: has vault prefix
-    // implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
+    // filter all links for following criteria:
+    // - only modify links that have same _to_ vault name
+    // - explicitly same: has vault prefix
+    // - implicitly same: to.vaultName is undefined, but link is in a note that's in the vault.
     allLinks = allLinks.filter((link) => {
       const oldLocVaultName = oldLoc.vaultName as string;
       const explicitlySameVault = link.to?.vaultName === oldLocVaultName;
@@ -694,6 +705,8 @@ export class FileStorage implements DStore {
       return explicitlySameVault || implicitlySameVault;
     });
 
+    // perform link substitution
+    // TODO: this should be extracted into a re-usable utility since it comes up quite a lot
     const noteMod = _.reduce(
       allLinks,
       (note: NoteProps, link: DLink) => {
@@ -767,6 +780,8 @@ export class FileStorage implements DStore {
       },
       _n
     );
+
+    // replace note body if needed
     const shouldChange = !(
       note.body === noteMod.body && note.tags === noteMod.tags
     );
@@ -823,6 +838,7 @@ export class FileStorage implements DStore {
       msg: "notesWithLinkTo:gather",
       notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
     });
+
     // update note body of all notes that have changed
     notesWithLinkTo.forEach(async (n) => {
       const out = await this.processNoteChangedByRename({

@@ -6,6 +6,7 @@ export enum PodV2Types {
   MarkdownExportV2 = "MarkdownExportV2",
   GoogleDocsExportV2 = "GoogleDocsExportV2",
   NotionExportV2 = "NotionExportV2",
+  JSONExportV2 = "JSONExportV2",
 }
 
 /**

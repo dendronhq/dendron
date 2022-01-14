@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import {
   assertUnreachable,
+  DendronError,
   DNodeProps,
   DVault,
   NoteProps,
@@ -69,6 +70,24 @@ export abstract class BaseExportPodCommand<
    * Provide a method to get ajv schema of runnable pod config
    */
   public abstract getRunnableSchema(): JSONSchemaType<Config>;
+
+  /**
+   * checks if the destination is compatible with export scope
+   */
+  public multiNoteExportCheck(opts: {
+    destination: string;
+    exportScope: PodExportScope;
+  }) {
+    if (
+      opts.destination === "clipboard" &&
+      opts.exportScope !== PodExportScope.Note
+    ) {
+      throw new DendronError({
+        message:
+          "Multi Note Export cannot have clipboard as destination. Please configure your destination by using Dendron: Configure Export Pod V2 command",
+      });
+    }
+  }
 
   /**
    * Gather the appropriate input payload based on the specified export scope.

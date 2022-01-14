@@ -7,9 +7,6 @@ import {
 import fs from "fs-extra";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
-import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";

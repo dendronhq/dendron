@@ -1234,9 +1234,12 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 
 function updateEngineAPI(port: number | string): void {
   const ext = getExtension();
+
   const svc = EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,
+    vaults: ext.getDWorkspace().vaults,
+    wsRoot: ext.getDWorkspace().wsRoot,
   });
   ext.setEngine(svc);
   ext.port = _.toInteger(port);

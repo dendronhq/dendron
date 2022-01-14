@@ -988,3 +988,16 @@ export const gdocRequiredScopes = [
 ];
 
 export const Oauth2Pods = ["dendron.gdoc"];
+
+export const CONFLICTING_EXTENSIONS = [
+  "yzhang.markdown-all-in-one",
+  "fantasy.markdown-all-in-one-for-web",
+  "foam.foam-vscode",
+  "brianibbotson.add-double-bracket-notation-to-selection",
+  "ianjsikes.md-graph",
+  "thomaskoppelaar.markdown-wiki-links-preview",
+  "svsool.markdown-memo",
+  "kortina.vscode-markdown-notes",
+  "maxedmands.vscode-zettel-markdown-notes",
+  "tchayen.markdown-links",
+];

@@ -11,11 +11,11 @@ import {
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = {
   move: OldNewLocation[];
@@ -152,8 +152,10 @@ export class RenameNoteV2aCommand extends BaseCommand<
           if (ext.fileWatcher) {
             ext.fileWatcher.pause = false;
           }
-          this.L.info({ ctx, msg: "exit" });
+          this.L.info({ ctx, state: "exit:pause_filewatcher" });
         }, 3000);
+      } else {
+        this.L.info({ ctx, state: "exit" });
       }
     }
   }

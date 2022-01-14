@@ -409,6 +409,8 @@ export class EngineUtils {
         note,
         wsRoot: engine.wsRoot,
       });
+      // update links for note
+      note.links = links.concat(links);
       const devConfig = ConfigUtils.getProp(engine.config, "dev");
       const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
       if (linkCandidatesEnabled) {

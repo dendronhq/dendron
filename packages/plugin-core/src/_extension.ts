@@ -37,6 +37,7 @@ import {
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
+import _md from "markdown-it";
 import _ from "lodash";
 import { Duration } from "luxon";
 import os from "os";
@@ -61,6 +62,7 @@ import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import {
   CONFIG,
+  CONFLICTING_EXTENSIONS,
   DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
@@ -662,6 +664,9 @@ export async function _activate(
         workspaceType: ws.type,
         codeWorkspacePresent,
       });
+
+      warnConflictingExtensions();
+
       if (stage !== "test") {
         await ws.activateWatchers();
         togglePluginActiveContext(true);
@@ -1262,4 +1267,65 @@ function updateEngineAPI(port: number | string): void {
   ext.port = _.toInteger(port);
   // const engine = ext.getEngine();
   // return engine;
+}
+
+function warnConflictingExtensions() {
+  const installedExtensions = CONFLICTING_EXTENSIONS.filter(
+    (conflictingExtension) => {
+      return VSCodeUtils.isExtensionInstalled(conflictingExtension);
+    }
+  );
+  const shouldDisplayWarning = installedExtensions.length > 0;
+  if (shouldDisplayWarning) {
+    AnalyticsUtils.track(ExtensionEvents.ConflictingExtensionsWarned, {
+      installedExtensions,
+    });
+    vscode.window
+      .showInformationMessage(
+        "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
+        "Fix conflicts..."
+      )
+      .then(async (resp) => {
+        if (resp === "Fix conflicts...") {
+          await showConflictingExtensionPreview(installedExtensions);
+        }
+      });
+  }
+}
+
+async function showConflictingExtensionPreview(installedExtensions: string[]) {
+  const md = _md();
+
+  const content = [
+    "# Extensions that conflict with Dendron.",
+    "",
+    "The extensions listed below are known to conflict with Dendron.",
+    "",
+    "Neither Dendron nor the conflicting extension may function properly when installed concurrently.",
+    "",
+    "Consider disabling the conflicting extensions when in a Dendron Workspace.",
+    "  - [How to disable extensions for a specific workspace without uninstalling](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension)",
+    "",
+    "## Conflicting Extensions: ",
+    "\n|||\n|-|-|",
+    installedExtensions
+      .map((ext) => {
+        const commandArgs = `"@id:${ext}"`;
+        const commandUri = vscode.Uri.parse(
+          `command:workbench.extensions.search?${JSON.stringify(commandArgs)}`
+        );
+        return `| ${ext} | [View Extension](${commandUri}) |`;
+      })
+      .join("\n"),
+  ].join("\n");
+  const panel = vscode.window.createWebviewPanel(
+    "conflictingExtensionsPreview",
+    "Conflicting Extensions",
+    vscode.ViewColumn.One,
+    {
+      enableCommandUris: true,
+    }
+  );
+  panel.webview.html = md.render(content);
+  AnalyticsUtils.track(ExtensionEvents.ConflictingExtensionsPreviewDisplayed);
 }

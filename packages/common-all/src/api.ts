@@ -294,7 +294,7 @@ abstract class API {
       payload.error = resp.data.error;
     } catch (err: any) {
       this._log(payload.error, "error");
-      payload.error = err?.response?.data?.error;
+      payload.error = err?.response?.data?.error || err;
     }
     if (payload.error) {
       this._log(payload.error, "error");
@@ -511,8 +511,8 @@ export class DendronAPI extends API {
   ): Promise<GetDecorationsPayload> {
     const resp = await this._makeRequest({
       path: "note/decorations",
-      method: "get",
-      qs: req,
+      method: "post",
+      body: req,
     });
     return resp;
   }

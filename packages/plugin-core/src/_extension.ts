@@ -1281,7 +1281,7 @@ function warnConflictingExtensions() {
       installedExtensions,
     });
     vscode.window
-      .showInformationMessage(
+      .showWarningMessage(
         "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
         "Fix conflicts..."
       )

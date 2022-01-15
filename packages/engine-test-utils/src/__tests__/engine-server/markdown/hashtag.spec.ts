@@ -112,6 +112,15 @@ describe("hashtag", () => {
       );
       // @ts-ignore
       expect(getDescendantNode(expect, resp2, 0, 1).value).toEqual("#dolores");
+
+      const resp3 = proc().parse(
+        "Dolorem vero sed (sapiente #dolores) et quam id maxime et ratione."
+      );
+      expect(getDescendantNode(expect, resp3, 0, 1).type).toEqual(
+        DendronASTTypes.HASHTAG
+      );
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp3, 0, 1).value).toEqual("#dolores");
     });
 
     test("doesn't parse trailing unicode punctuation", () => {

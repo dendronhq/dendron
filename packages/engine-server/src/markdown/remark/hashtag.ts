@@ -18,7 +18,7 @@ import { MDUtilsV5 } from "../utilsv5";
  * Mind that this may have non regex-safe characters, run it through `_.escapeRegExp` if needed.
  */
 export const PUNCTUATION_MARKS =
-  ",;:'\"<>?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
+  ",;:'\"<>()?!`~«‹»›„“‟”’❝❞❮❯⹂〝〞〟＂‚‘‛❛❜❟［］【】…‥「」『』·؟،।॥‽⸘¡¿⁈⁉";
 
 /** Can't start with a number or period */
 const GOOD_FIRST_CHARACTER = `[^0-9#@|\\[\\]\\s.${PUNCTUATION_MARKS}]`;

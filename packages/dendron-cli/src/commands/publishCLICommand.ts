@@ -313,7 +313,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { wsRoot, spinner } = opts;
     const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
 
-    let nextPathExists = await this._nextPathExists({
+    const nextPathExists = await this._nextPathExists({
       nextPath,
       spinner,
     });
@@ -333,11 +333,9 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           nextPath,
           spinner,
         });
-        nextPathExists = false;
+        await this._initialize({ nextPath, spinner });
       }
-    }
-
-    if (!nextPathExists) {
+    } else {
       await this._initialize({ nextPath, spinner });
     }
 

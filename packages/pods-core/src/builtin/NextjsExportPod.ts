@@ -129,16 +129,14 @@ export class NextjsExportPodUtils {
       throw new Error("remotes not set up correctly");
     }
 
-    const status = await git.status();
+    let status = await git.status();
     if (status.current !== TEMPLATE_BRANCH) {
-      throw new Error(`${status.current} is not expected branch`);
+      await git.checkout(TEMPLATE_REMOTE_URL);
+      status = await git.status();
     }
     const remoteBranch = `${TEMPLATE_REMOTE}/${TEMPLATE_BRANCH}`;
     if (status.tracking !== remoteBranch) {
       throw new Error(`${status.tracking} is not expected remote branch`);
-    }
-    if (status.ahead !== 0 || !status.isClean()) {
-      throw new Error("working copy is not clean");
     }
 
     await git.fetch();

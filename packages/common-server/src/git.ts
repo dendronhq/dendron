@@ -13,12 +13,15 @@ import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import simpleGit, { SimpleGit } from "simple-git";
+import simpleGit, {
+  SimpleGit,
+  ResetMode as SimpleGitResetMode,
+} from "simple-git";
 import { parse } from "url";
 import { readYAML } from "./files";
 import { vault2Path } from "./filesv2";
 
-export { simpleGit, SimpleGit };
+export { simpleGit, SimpleGit, SimpleGitResetMode };
 
 const formatString = (opts: { txt: string; note: NoteProps }) => {
   const { txt, note } = opts;

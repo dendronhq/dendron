@@ -277,7 +277,7 @@ suite("ReferenceProvider", function () {
               body: hover!.contents.join(""),
               match: [
                 `Note target is missing`,
-                `use "Dendron: Goto Note" command`,
+                `use "Dendron: Go to Note" command`,
               ],
             });
             done();

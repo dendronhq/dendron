@@ -115,7 +115,7 @@
       },
       {
         "command": "dendron.gotoNote",
-        "title": "Dendron: Goto Note"
+        "title": "Dendron: Go to Note"
       },
       {
         "command": "dendron.createSchemaFromHierarchy",

@@ -24,6 +24,7 @@ export default function DendronLogoOrTitle() {
           display: "inline-block",
           height: DENDRON_STYLE_CONSTANTS.HEADER.HEIGHT,
           padding: "4px",
+          width: "100%",
         }}
         className="site-title"
       >
@@ -45,7 +46,6 @@ export function Logo({ logoUrl }: { logoUrl: string }) {
       alt="logo"
       style={{
         objectFit: "contain",
-        width: "100%",
         height: "100%",
         verticalAlign: "top",
       }}
@@ -57,10 +57,11 @@ export function Title({ data }: { data: string }) {
   return (
     <div
       className="site-title"
+      title={data}
       style={{
-        width: "100%",
-        height: "100%",
-        lineHeight: "1.5rem",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       }}
     >
       {data}

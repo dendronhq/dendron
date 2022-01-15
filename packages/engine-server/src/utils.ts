@@ -405,16 +405,22 @@ export class EngineUtils {
       (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
     ) {
       const links = LinkUtils.findLinks({ note, engine });
-      const linkCandidates = LinkUtils.findLinkCandidates({
-        note,
-        notesMap,
-        engine,
-      });
       const anchors = await AnchorUtils.findAnchors({
         note,
         wsRoot: engine.wsRoot,
       });
-      note.links = links.concat(linkCandidates);
+      // update links for note
+      note.links = links.concat(links);
+      const devConfig = ConfigUtils.getProp(engine.config, "dev");
+      const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
+      if (linkCandidatesEnabled) {
+        const linkCandidates = LinkUtils.findLinkCandidates({
+          note,
+          notesMap,
+          engine,
+        });
+        note.links = links.concat(linkCandidates);
+      }
       note.anchors = anchors;
       return note;
     }

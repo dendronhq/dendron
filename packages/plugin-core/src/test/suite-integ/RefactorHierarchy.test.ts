@@ -7,9 +7,6 @@ import {
 import fs from "fs-extra";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
-import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -20,11 +17,24 @@ import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupPro
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 
 suite("RefactorHiearchy", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
+  /**
+   * Setup
+   * refactor.md
+   * ```
+   * - [[refactor.one]]
+   * - [[refactor.two]]
+   * ```
+   *
+   * refactor.one.md
+   * ```
+   * - [[refactor.two]]
+   * ```
+   *
+   */
   describe("GIVEN a workspace with some notes with simple hierarchy", () => {
     let note: DNodeProps;
     let noteOne: DNodeProps;
@@ -60,6 +70,20 @@ suite("RefactorHiearchy", function () {
     });
 
     describe("WHEN scope is undefined", () => {
+      /**
+       * After test
+       * refactor(.*) -> prefix$1
+       *
+       * refactor.md
+       * ```
+       * - [[prefix.one]]
+       * - [[prefix.two]]
+       * ```
+       *
+       * refactor.one.md
+       * ```
+       * - [[prefix.two]]
+       */
       test("THEN scope is all existing notes, all notes and links refactored.", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,

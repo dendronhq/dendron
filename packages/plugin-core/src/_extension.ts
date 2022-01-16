@@ -1306,6 +1306,8 @@ async function showConflictingExtensionPreview(installedExtensions: string[]) {
     "Consider disabling the conflicting extensions when in a Dendron Workspace.",
     "  - [How to disable extensions for a specific workspace without uninstalling](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension)",
     "",
+    "See [Conflicting Extensions](https://wiki.dendron.so/notes/9Id5LUZFfM1m9djl6KgpP) for more details.",
+    "",
     "## Conflicting Extensions: ",
     "\n|||\n|-|-|",
     installedExtensions
@@ -1317,6 +1319,7 @@ async function showConflictingExtensionPreview(installedExtensions: string[]) {
         return `| ${ext} | [View Extension](${commandUri}) |`;
       })
       .join("\n"),
+    "",
   ].join("\n");
   const panel = vscode.window.createWebviewPanel(
     "conflictingExtensionsPreview",

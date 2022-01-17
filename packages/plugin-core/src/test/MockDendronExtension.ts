@@ -52,32 +52,32 @@ export class MockDendronExtension implements IDendronExtension {
   serverWatcher?: FileSystemWatcher | undefined;
 
   get type(): WorkspaceType {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get wsUtils(): IWSUtilsV2 {
     return new WSUtilsV2(this);
   }
   get commandFactory(): ICommandFactory {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get schemaSyncService(): ISchemaSyncService {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get workspaceService(): IWorkspaceService | undefined {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get noteSyncService(): INoteSyncService {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get lookupControllerFactory(): ILookupControllerV3Factory {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
   get noteLookupProviderFactory(): INoteLookupProviderFactory {
-    throw new Error("Method not implemented");
+    throw new Error("Method not implemented in MockDendronExtension");
   }
 
   get schemaLookupProviderFactory(): ISchemaLookupProviderFactory {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
 
   /**
@@ -90,7 +90,7 @@ export class MockDendronExtension implements IDendronExtension {
   }
 
   getClientAPIRootUrl(): Promise<string> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   getDWorkspace(): DWorkspaceV2 {
     const ret: any = {
@@ -101,13 +101,13 @@ export class MockDendronExtension implements IDendronExtension {
     return ret;
   }
   getWorkspaceImplOrThrow(): DWorkspaceV2 {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   getWorkspaceSettings(): Promise<WorkspaceSettings | undefined> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   getDendronWorkspaceSettingsSync():
     | Partial<{
@@ -129,7 +129,7 @@ export class MockDendronExtension implements IDendronExtension {
         "dendron.serverPort": string;
       }>
     | undefined {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   getWorkspaceSettingOrDefault({}: {
     wsConfigKey:
@@ -151,13 +151,13 @@ export class MockDendronExtension implements IDendronExtension {
       | "dendron.serverPort";
     dendronConfigKey: string;
   }) {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   setupViews(_context: ExtensionContext): Promise<void> {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
   addDisposable(_disposable: Disposable): void {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
 
   /**

@@ -285,7 +285,7 @@ suite("Extension", function () {
               note: {
                 selectionMode: "extract",
                 confirmVaultOnCreate: true,
-                selectVaultModeOnCreate: "smart",
+                vaultModeOnCreate: "smart",
                 leaveTrace: false,
                 bubbleUpCreateNew: true,
                 fuzzThreshold: 0.2,

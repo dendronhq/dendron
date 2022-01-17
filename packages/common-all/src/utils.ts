@@ -31,6 +31,7 @@ import {
   ScratchConfig,
   StrictConfigV4,
 } from "./types/intermediateConfigs";
+import Ajv, { JSONSchemaType } from "ajv";
 
 /**
  * Dendron utilities
@@ -767,6 +768,18 @@ export class ConfigUtils {
   }
 
   static configIsValid(opts: {
+    config: Partial<IntermediateDendronConfig>;
+    schema: JSONSchemaType<IntermediateDendronConfig>;
+  }) {
+    const { config, schema } = opts;
+    const ajv = new Ajv();
+
+    const validateConfig = ajv.compile(schema);
+    const isValid = validateConfig(config);
+    return isValid;
+  }
+
+  static configIsCompatible(opts: {
     clientVersion: string;
     configVersion: number | undefined;
   }): ConfigVaildationResp {

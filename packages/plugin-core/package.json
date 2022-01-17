@@ -567,11 +567,11 @@
         },
         {
           "command": "dendron.configureServiceConnection",
-          "when": "dendron:pluginActive"
+          "when": "dendron:pluginActive && dendron:enableExportPodV2"
         },
         {
           "command": "dendron.configureExportPodV2",
-          "when": "dendron:pluginActive"
+          "when": "dendron:pluginActive && dendron:enableExportPodV2"
         },
         {
           "command": "dendron.importPod",
@@ -583,7 +583,7 @@
         },
         {
           "command": "dendron.exportPodv2",
-          "when": "dendron:pluginActive"
+          "when": "dendron:pluginActive && dendron:enableExportPodV2"
         },
         {
           "command": "dendron.publishPod",

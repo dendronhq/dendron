@@ -414,6 +414,10 @@ export type DendronDevConfig = {
    * - engine: Uses the engine watcher, watching the files directly without VSCode
    */
   forceWatcherType?: "plugin" | "engine";
+  /**
+   * Enable export pod v2
+   */
+  enableExportPodV2?: boolean;
 };
 
 export type DendronSiteConfig = {

@@ -2,6 +2,7 @@ import { getAllExportPods, PodClassEntryV4 } from "@dendronhq/pods-core";
 import { PodCommandFactory } from "../../components/pods/PodCommandFactory";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { BaseCommand, CodeCommandInstance } from "../base";
 
 type CommandOutput = void;
@@ -32,6 +33,12 @@ export class ExportPodV2Command extends BaseCommand<
    * undefined if the user didn't select anything.
    */
   async gatherInputs(podId: string): Promise<CommandInput | undefined> {
+    // added check to return if export pod v2 is not enabled in dev config and is run using pod keyboard shortcuts
+    const { config } = ExtensionProvider.getDWorkspace();
+    if (!config.dev?.enableExportPodV2) {
+      return;
+    }
+
     // If a podId is passed in, use this instead of prompting the user
     if (podId) {
       return PodCommandFactory.createPodCommandForStoredConfig({ podId });

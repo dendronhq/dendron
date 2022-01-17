@@ -632,6 +632,14 @@ export async function _activate(
         MarkdownUtils.hasLegacyPreview()
       );
 
+      //used for enablement of export pod v2 command
+      if (!_.isUndefined(dendronConfig.dev?.enableExportPodV2)) {
+        VSCodeUtils.setContext(
+          DendronContext.ENABLEEXPORTPODV2,
+          dendronConfig.dev?.enableExportPodV2 ?? false
+        );
+      }
+
       // round to nearest 10th
       let numNotes = _.size(getEngine().notes);
       if (numNotes > 10) {

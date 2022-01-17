@@ -1242,6 +1242,10 @@
             "engine"
           ],
           "description": "Force the use of a specific type of watcher.\n\n- plugin: Uses VSCode's builtin watcher\n- engine: Uses the engine watcher, watching the files directly without VSCode"
+        },
+        "enableExportPodV2": {
+          "type": "boolean",
+          "description": "Enable experimental Export v2 commands"
         }
       },
       "additionalProperties": false

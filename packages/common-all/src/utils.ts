@@ -671,7 +671,10 @@ export class ConfigUtils {
 
     // Otherwise, this has to be an asset. It can't be anywhere else because of backwards compatibility.
     const logoBase = path.basename(logo); // Why just discard the rest of logo? Because that's what code used to do and I'm preserving backwards compatibility
-    if (assetsPrefix) return `/${assetsPrefix}/assets/${logoBase}`;
+    if (assetsPrefix) {
+      const initialSlash = assetsPrefix.startsWith("/") ? "" : "/";
+      return `${initialSlash}${assetsPrefix}/assets/${logoBase}`;
+    }
     return `/assets/${logoBase}`;
   }
 

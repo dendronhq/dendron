@@ -118,7 +118,7 @@ export abstract class CLICommand<
     const clientVersion = CLIUtils.getClientVersion();
     let validationResp;
     try {
-      validationResp = ConfigUtils.configIsValid({
+      validationResp = ConfigUtils.configIsCompatible({
         clientVersion,
         configVersion,
       });

@@ -49,10 +49,10 @@ describe("WHEN getConfig from note", () => {
 });
 
 describe("ConfigUtils", () => {
-  describe("configIsValid", () => {
+  describe("configIsCompatible", () => {
     describe("GIVEN config v2 and client version 0.62", () => {
       test("THEN config is invalid because client is incompatible", (done) => {
-        const resp = ConfigUtils.configIsValid({
+        const resp = ConfigUtils.configIsCompatible({
           clientVersion: "0.62.0",
           configVersion: 2,
         });
@@ -65,7 +65,7 @@ describe("ConfigUtils", () => {
     });
     describe("GIVEN config v2 and client version 0.63", () => {
       test("THEN config is valid", (done) => {
-        const resp = ConfigUtils.configIsValid({
+        const resp = ConfigUtils.configIsCompatible({
           clientVersion: "0.63.0",
           configVersion: 2,
         });
@@ -75,7 +75,7 @@ describe("ConfigUtils", () => {
     });
     describe("GIVEN config v2 and client version 0.64", () => {
       test("THEN config is valid", (done) => {
-        const resp = ConfigUtils.configIsValid({
+        const resp = ConfigUtils.configIsCompatible({
           clientVersion: "0.64.0",
           configVersion: 2,
         });
@@ -85,7 +85,7 @@ describe("ConfigUtils", () => {
     });
     describe("GIVEN config v2 and client version 0.65", () => {
       test("THEN config is invalid because config is incompatible", (done) => {
-        const resp = ConfigUtils.configIsValid({
+        const resp = ConfigUtils.configIsCompatible({
           clientVersion: "0.65.0",
           configVersion: 2,
         });
@@ -98,7 +98,7 @@ describe("ConfigUtils", () => {
     });
     describe("GIVEN config v2 and client version 0.71", () => {
       test("THEN config is invalid because config is incompatible", (done) => {
-        const resp = ConfigUtils.configIsValid({
+        const resp = ConfigUtils.configIsCompatible({
           clientVersion: "0.71.0",
           configVersion: 2,
         });

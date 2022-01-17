@@ -1,4 +1,6 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
+import { Col } from "antd";
 import Link from "next/link";
 import path from "path";
 import React from "react";
@@ -11,7 +13,9 @@ export default function DendronLogoOrTitle() {
   if (!verifyEngineSliceState(engine)) {
     return null;
   }
-  const title = engine.config.site.title || "";
+  const { title } = ConfigUtils.getSite(engine.config);
+  const logoUrl = ConfigUtils.getSiteLogoUrl(engine.config) || "";
+
   return (
     <Link href={getRootUrl(engine.config.site)}>
       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- `href` will be provided by `Link` */}
@@ -24,11 +28,9 @@ export default function DendronLogoOrTitle() {
         className="site-title"
       >
         {engine.config?.site.logo ? (
-          <Logo
-            logoUrl={"/assets/" + path.basename(engine.config?.site.logo)}
-          />
+          <Logo logoUrl={logoUrl} />
         ) : (
-          <Title data={title} />
+          <Title data={title || ""} />
         )}
       </a>
     </Link>
@@ -52,5 +54,16 @@ export function Logo({ logoUrl }: { logoUrl: string }) {
 }
 
 export function Title({ data }: { data: string }) {
-  return <div className="site-logo">{data}</div>;
+  return (
+    <div
+      className="site-title"
+      style={{
+        width: "100%",
+        height: "100%",
+        lineHeight: "1.5rem",
+      }}
+    >
+      {data}
+    </div>
+  );
 }

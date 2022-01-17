@@ -31,6 +31,7 @@ import {
   ScratchConfig,
   StrictConfigV4,
 } from "./types/intermediateConfigs";
+import { uriRegex } from "./util/regex";
 
 /**
  * Dendron utilities
@@ -658,6 +659,20 @@ export class ConfigUtils {
     return shouldApplyPublishRules
       ? ConfigUtils.getProp(config, "useKatex")
       : ConfigUtils.getPreview(config).enableKatex;
+  }
+
+  static getSiteLogoUrl(config: IntermediateDendronConfig): string | undefined {
+    const { assetsPrefix, logo } = ConfigUtils.getSite(config);
+    if (logo === undefined) return undefined;
+
+    // Let's allow logos that are hosted off-site/in subdomains by passing in a full URL
+    const scheme = logo.match(uriRegex)?.groups?.scheme;
+    if (scheme === "http" || scheme === "https") return logo;
+
+    // Otherwise, this has to be an asset. It can't be anywhere else because of backwards compatibility.
+    const logoBase = path.basename(logo); // Why just discard the rest of logo? Because that's what code used to do and I'm preserving backwards compatibility
+    if (assetsPrefix) return `/${assetsPrefix}/assets/${logoBase}`;
+    return `/assets/${logoBase}`;
   }
 
   static getEnablePrettyRefs(

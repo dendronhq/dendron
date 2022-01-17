@@ -255,7 +255,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command
-    title: `${CMD_PREFIX} Goto Note`,
+    title: `${CMD_PREFIX} Go to Note`,
     when: DendronContext.PLUGIN_ACTIVE,
     keybindings: {
       key: "ctrl+enter",

@@ -21,9 +21,10 @@ import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 
 /**
- * Mock Dendron Extension for testing purposes. Right now, only getEngine() and
- * context are implemented. If you require additional functionality for your
- * tests, either add it here, or extend this class for your own testing scenario
+ * Mock version of IDendronExtension for testing purposes. Right now, only
+ * getEngine() and context are implemented. If you require additional
+ * functionality for your tests, either add it here, or extend this class for
+ * your own testing scenario
  */
 export class MockDendronExtension implements IDendronExtension {
   private _engine: DEngineClient;
@@ -74,7 +75,6 @@ export class MockDendronExtension implements IDendronExtension {
   get noteLookupProviderFactory(): INoteLookupProviderFactory {
     throw new Error("Method not implemented");
   }
-  // schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   get schemaLookupProviderFactory(): ISchemaLookupProviderFactory {
     throw new Error("Method not implemented.");

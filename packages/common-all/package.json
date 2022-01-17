@@ -46,6 +46,7 @@
     "@types/title": "^1.0.5",
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",
+    "ajv": "^8.9.0",
     "axios": "^0.21.4",
     "dropbox": "^4.0.30",
     "fast-levenshtein": "^3.0.0",

@@ -118,6 +118,7 @@ export class NotePickerUtils {
     const engine = ExtensionProvider.getDWorkspace().engine;
     const resp = await NoteLookupUtils.lookup({
       qs: picker.value,
+      originalQS: picker.value,
       engine,
       showDirectChildrenOnly: picker.showDirectChildrenOnly,
     });

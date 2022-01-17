@@ -30,7 +30,7 @@ import path from "path";
 import { Location } from "vscode";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";

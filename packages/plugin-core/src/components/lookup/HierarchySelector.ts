@@ -6,7 +6,7 @@ import { LookupControllerV3CreateOpts } from "./LookupControllerV3Interface";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { NoteLookupProviderUtils } from "./NotePickerUtils";
+import { NoteLookupProviderUtils } from "./NoteLookupProviderUtils";
 
 /**
  * Interface for a user (or test mock) control for selecting a hierarchy. Mostly

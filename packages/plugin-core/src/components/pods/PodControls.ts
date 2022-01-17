@@ -21,7 +21,7 @@ import { getExtension } from "../../workspace";
 import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
 import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
-import { NoteLookupProviderUtils } from "../lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../lookup/NoteLookupProviderUtils";
 
 /**
  * Contains VSCode UI controls for common Pod UI operations

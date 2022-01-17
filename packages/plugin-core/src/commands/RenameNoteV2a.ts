@@ -9,7 +9,7 @@ import {
   PickerUtilsV2,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { FileItem } from "../external/fileutils/FileItem";

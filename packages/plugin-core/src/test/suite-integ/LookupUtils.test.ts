@@ -30,7 +30,7 @@ import {
   ILookupProviderV3,
   OnAcceptHook,
 } from "../../components/lookup/LookupProviderV3Interface";
-import { NoteLookupProviderUtils } from "../../components/lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../../components/lookup/NoteLookupProviderUtils";
 
 function setupNotesForTest({
   wsRoot,

@@ -12,7 +12,7 @@ import * as vscode from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";

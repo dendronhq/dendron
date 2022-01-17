@@ -2,9 +2,9 @@ import { DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
-import { PAGINATE_LIMIT } from "./NotePickerUtils";
+import { NotePickerUtils, PAGINATE_LIMIT } from "./NotePickerUtils";
 import { DendronQuickPickerV2 } from "./types";
-import { NotePickerUtils, PickerUtilsV2 } from "./utils";
+import { PickerUtilsV2 } from "./utils";
 
 export class SchemaPickerUtils {
   static async fetchPickerResultsWithCurrentValue({

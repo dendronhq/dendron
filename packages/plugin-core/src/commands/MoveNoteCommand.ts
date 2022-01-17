@@ -17,7 +17,7 @@ import {
   OldNewLocation,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NotePickerUtils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";

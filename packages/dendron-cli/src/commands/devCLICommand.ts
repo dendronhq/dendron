@@ -163,6 +163,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "dist",
       "dendron-yml.validator.json"
     );
+    const pluginDataPath = path.join(
+      repoRoot,
+      "packages",
+      "plugin-core",
+      "data",
+      "dendron-yml.validator.json"
+    );
     const configType = "StrictConfigV4";
     // NOTE: this is removed by webpack when building plugin which is why we're loading this dynamically
     // eslint-disable-next-line global-require
@@ -177,10 +184,12 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       .createSchema(configType);
     const schemaString = JSON.stringify(schema, null, 2);
     fs.ensureDirSync(path.dirname(pluginOutputPath));
+    fs.ensureDirSync(path.dirname(pluginDataPath));
     await Promise.all([
       fs.writeFile(nextOutputPath, schemaString),
       fs.writeFile(commonOutputPath, schemaString),
       fs.writeFile(pluginOutputPath, schemaString),
+      fs.writeFile(pluginDataPath, schemaString),
     ]);
     return;
   }

@@ -9,3 +9,9 @@ export const containsNonDendronUri = (uri: string): boolean | undefined => {
   if (groups.scheme === "dendron") return false;
   return true;
 };
+
+export function isWebUri(uri: string): boolean {
+  const scheme = uri.match(uriRegex)?.groups?.scheme;
+  if (scheme === "http" || scheme === "https") return true;
+  return false;
+}

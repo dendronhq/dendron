@@ -7,6 +7,7 @@ import {
   NoteUtils,
   createSerializedFuseNoteIndex,
   ConfigUtils,
+  isWebUri,
 } from "@dendronhq/common-all";
 import { simpleGit } from "@dendronhq/common-server";
 import {
@@ -278,7 +279,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       }
     }
     // get logo
-    if (siteConfig.logo) {
+    if (siteConfig.logo && !isWebUri(siteConfig.logo)) {
       const logoPath = path.join(wsRoot, siteConfig.logo);
       fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }

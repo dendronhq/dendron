@@ -45,6 +45,8 @@ export type MarkdownImportPodPlantOpts = ImportPodPlantOpts;
 type MarkdownImportPodConfig = ImportPodConfig & {
   noAddUUID?: boolean;
   indexName?: string;
+  importFrontmatter?: boolean;
+  frontmatterMapping?: { [key: string]: any };
 };
 
 export type MarkdownImportPodResp = {
@@ -82,6 +84,17 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           type: "string",
           description:
             "If you have an index file per directory, merge that file with the directory note",
+          nullable: true,
+        },
+        importFrontmatter: {
+          description: "Import note metadata",
+          type: "boolean",
+          default: false,
+          nullable: true,
+        },
+        frontmatterMapping: {
+          description: "metadata key mappings to use incase of conflicts",
+          type: "object",
           nullable: true,
         },
       },
@@ -397,6 +410,39 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     note.body = lines.join("\n");
   }
 
+  /**
+   * Method to import frontmatter of note. Imports all FM in note.custom,
+   * In case of conflict in keys of dendron and imported note, checks frontmatterMapping provided in the
+   * config. If not provided, concatinates '_imported' in imported FM keys.
+   */
+  handleFrontmatter(opts: {
+    frontmatterMapping?: { [key: string]: any };
+    note: NoteProps;
+  }) {
+    const { note, frontmatterMapping } = opts;
+
+    // map through all imported note's metadata
+    Object.keys(note.data).map((val) => {
+      if (_.has(note, val)) {
+        //check for mapping in frontmatterMapping
+        if (frontmatterMapping && _.has(frontmatterMapping, val)) {
+          note.data = {
+            ...note.data,
+            [frontmatterMapping[val]]: note.data[val],
+          };
+        } else {
+          // append _imported in imported metadata keys
+          note.data = {
+            ...note.data,
+            [`${val}_imported`]: note.data[val],
+          };
+        }
+        delete note.data[val];
+      }
+    });
+    note.custom = _.merge(note.custom, note.data);
+  }
+
   async plant(
     opts: MarkdownImportPodPlantOpts
   ): Promise<MarkdownImportPodResp> {
@@ -415,6 +461,8 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       config,
     });
     const notes = this.hDict2Notes(hDict, config);
+    const { importFrontmatter, frontmatterMapping } =
+      config as MarkdownImportPodConfig;
     const notesClean = await Promise.all(
       notes
         .filter((note) => !note.stub)
@@ -447,6 +495,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           }
           if (config.fnameAsId) {
             note.id = note.fname;
+          }
+          if (importFrontmatter) {
+            this.handleFrontmatter({ note, frontmatterMapping });
           }
           return note;
         })

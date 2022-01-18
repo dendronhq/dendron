@@ -616,6 +616,48 @@ describe("markdown import pod", () => {
       }
     );
   });
+
+  test("import note's frontmatter", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        const vault = vaults[0];
+        vpath = vault2Path({ wsRoot, vault });
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            importFrontmatter: true,
+            frontmatterMapping: {
+              id: "obsidianId",
+            },
+          },
+        });
+        const note = NoteUtils.getNoteOrThrow({
+          fname: "frontmatterTest",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        });
+        expect(note.custom.obsidianId).toContain(`testing`);
+        expect(note.custom.status).toContain(`wip`);
+        expect(note.custom.created_imported).toContain(`10 Jan`);
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await setupImport(importSrc);
+          const content = `---\nid: testing\ncreated: 10 Jan\nstatus: wip\n---\nHello World`;
+          fs.writeFileSync(path.join(importSrc, "frontmatterTest.md"), content);
+        },
+      }
+    );
+  });
 });
 
 describe("markdown export pod", () => {

@@ -131,26 +131,7 @@ export class MockDendronExtension implements IDendronExtension {
     | undefined {
     throw new Error("Method not implemented in MockDendronExtension.");
   }
-  getWorkspaceSettingOrDefault({}: {
-    wsConfigKey:
-      | "dendron.dailyJournalDomain"
-      | "dendron.defaultJournalName"
-      | "dendron.defaultJournalDateFormat"
-      | "dendron.defaultJournalAddBehavior"
-      | "dendron.defaultScratchName"
-      | "dendron.defaultScratchDateFormat"
-      | "dendron.defaultScratchAddBehavior"
-      | "dendron.copyNoteUrlRoot"
-      | "dendron.linkSelectAutoTitleBehavior"
-      | "dendron.defaultLookupCreateBehavior"
-      | "dendron.defaultTimestampDecorationFormat"
-      | "dendron.rootDir"
-      | "dendron.dendronDir"
-      | "dendron.logLevel"
-      | "dendron.trace.server"
-      | "dendron.serverPort";
-    dendronConfigKey: string;
-  }) {
+  getWorkspaceSettingOrDefault() {
     throw new Error("Method not implemented in MockDendronExtension.");
   }
   setupViews(_context: ExtensionContext): Promise<void> {

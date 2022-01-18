@@ -21,6 +21,8 @@ const context = (scope: string) => {
   return ROOT_CTX + ":" + scope;
 };
 
+const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
+
 /**
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
  */
@@ -161,14 +163,35 @@ export class WindowWatcher {
   }
 
   private moveCursorPastFrontmatter(editor: TextEditor) {
+    const ctx = "moveCursorPastFrontmatter";
     const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
       editor.document.getText()
     );
+    const startFsPath = editor.document.uri.fsPath;
     if (!_.isUndefined(nodePosition)) {
       const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
         line: 1,
       });
-      editor.selection = new Selection(position, position);
+      setTimeout(() => {
+        if (
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath === startFsPath
+        ) {
+          const { line, character } = editor.selection.active;
+          if (line === 0 && character === 0) {
+            editor.selection = new Selection(position, position);
+          } else {
+            Logger.info({
+              ctx,
+              msg: "not moving cursor because the cursor was moved before we could get to it",
+            });
+          }
+        } else {
+          Logger.info({
+            ctx,
+            msg: "not moving cursor because the document changed before we could move it",
+          });
+        }
+      }, MOVE_CURSOR_PAST_FRONTMATTER_DELAY);
     }
   }
 

@@ -3,14 +3,14 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
-import { getDWorkspace, getExtension } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
+import { MockPreviewProxy } from "../MockPreviewProxy";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
   describeSingleWS,
@@ -41,9 +41,18 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vault, wsRoot }) => {
-          watcher = new WindowWatcher(
-            new MockDendronExtension(ExtensionProvider.getEngine(), wsRoot, ctx)
-          );
+          const mockExtension = new MockDendronExtension({
+            engine: ExtensionProvider.getEngine(),
+            wsRoot,
+            context: ctx,
+          });
+
+          const previewProxy = new MockPreviewProxy();
+
+          watcher = new WindowWatcher({
+            extension: mockExtension,
+            previewProxy,
+          });
           const vaultPath = vault.fsPath;
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
@@ -71,17 +80,28 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
       },
       () => {
         test("THEN preview panel is not shown", async () => {
-          const { wsRoot, vaults } = getDWorkspace();
+          const mockExtension = new MockDendronExtension({
+            engine: ExtensionProvider.getEngine(),
+            wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+            vaults: ExtensionProvider.getDWorkspace().vaults,
+            context: ctx,
+          });
+
+          const previewProxy: MockPreviewProxy = new MockPreviewProxy();
+
+          const watcher = new WindowWatcher({
+            extension: mockExtension,
+            previewProxy,
+          });
+
+          watcher.activate();
+
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const vaultPath = vaults[0].fsPath;
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
-          const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher!.triggerNotePreviewUpdate(editor!);
-
-          const maybePanel = PreviewPanelFactory.getProxy(
-            getExtension()
-          ).getPanel();
-          expect(maybePanel).toBeFalsy();
+          await VSCodeUtils.openFileInEditor(uri);
+          expect(previewProxy.isOpen()).toBeFalsy();
         });
       }
     );
@@ -98,18 +118,29 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
       },
       () => {
         test("THEN preview panel is shown", async () => {
-          const { wsRoot, vaults } = getDWorkspace();
+          const mockExtension = new MockDendronExtension({
+            engine: ExtensionProvider.getEngine(),
+            wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+            vaults: ExtensionProvider.getDWorkspace().vaults,
+            context: ctx,
+          });
+
+          const previewProxy: MockPreviewProxy = new MockPreviewProxy();
+
+          const watcher = new WindowWatcher({
+            extension: mockExtension,
+            previewProxy,
+          });
+
+          watcher.activate();
+
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const vaultPath = vaults[0].fsPath;
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
-          const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher!.triggerNotePreviewUpdate(editor!);
+          await VSCodeUtils.openFileInEditor(uri);
 
-          const maybePanel = PreviewPanelFactory.getProxy(
-            ExtensionProvider.getExtension()
-          ).getPanel();
-          expect(maybePanel).toBeTruthy();
-          expect(maybePanel?.visible).toBeTruthy();
+          expect(previewProxy.isOpen()).toBeTruthy();
         });
       }
     );

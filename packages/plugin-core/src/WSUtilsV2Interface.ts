@@ -12,6 +12,10 @@ export interface IWSUtilsV2 {
 
   getVaultFromUri(fileUri: Uri): DVault;
 
+  getVaultFromPath(fsPath: string): DVault;
+
+  getNoteFromPath(fsPath: string): NoteProps | undefined;
+
   /** If the text document at `filePath` is open in any editor, return that document. */
   getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined;
 }

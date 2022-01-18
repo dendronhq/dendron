@@ -3,19 +3,19 @@
  * command needs an instance of another command, this adds in a layer of
  * decoupling.
  */
-import { BaseCommand } from "./commands/base";
-import {
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput,
-} from "./commands/ShowPreviewInterface";
-import { ShowPreviewCommand } from "./commands/ShowPreview";
-import vscode from "vscode";
 import { ICommandFactory } from "./commandFactoryInterface";
+import { BaseCommand } from "./commands/base";
+import { GotoNoteCommand } from "./commands/GotoNote";
 import {
   GoToNoteCommandOpts,
   GoToNoteCommandOutput,
 } from "./commands/GoToNoteInterface";
-import { GotoNoteCommand } from "./commands/GotoNote";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
+import {
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput,
+} from "./commands/ShowPreviewInterface";
+import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 
 export class CommandFactory implements ICommandFactory {
@@ -26,7 +26,7 @@ export class CommandFactory implements ICommandFactory {
   }
 
   showPreviewCmd(
-    panel: vscode.WebviewPanel
+    panel: PreviewProxy
   ): BaseCommand<ShowPreviewCommandOpts, ShowPreviewCommandOutput> {
     return new ShowPreviewCommand(panel);
   }

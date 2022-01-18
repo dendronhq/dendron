@@ -34,7 +34,11 @@ suite("CommandRegistrar tests", () => {
         runLegacySingleWorkspaceTest({
           ctx,
           onInit: async ({ engine, wsRoot }) => {
-            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            const mockExtension = new MockDendronExtension({
+              engine,
+              wsRoot,
+              context: ctx,
+            });
             _registrar = new CommandRegistrar(mockExtension);
             const expectedCmdName = _registrar.CUSTOM_COMMAND_PREFIX + TRAIT_ID;
 
@@ -60,7 +64,12 @@ suite("CommandRegistrar tests", () => {
         runLegacySingleWorkspaceTest({
           ctx,
           onInit: async ({ engine, wsRoot }) => {
-            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            const mockExtension = new MockDendronExtension({
+              engine,
+              wsRoot,
+              context: ctx,
+            });
+
             _registrar = new CommandRegistrar(mockExtension);
             const expectedCmdName = _registrar.CUSTOM_COMMAND_PREFIX + TRAIT_ID;
 

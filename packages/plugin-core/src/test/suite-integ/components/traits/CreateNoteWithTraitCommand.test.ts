@@ -29,7 +29,11 @@ suite("CreateNoteWithTraitCommand tests", () => {
         const { engine, wsRoot, vaults } = getDWorkspace();
         const testTrait = new TestTrait();
 
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
 
         const cmd = new CreateNoteWithTraitCommand(
           mockExtension,

@@ -33,12 +33,12 @@ suite("Create Daily Journal Suite", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       onInit: async ({ engine, wsRoot, vaults }) => {
-        const mockExtension = new MockDendronExtension(
+        const mockExtension = new MockDendronExtension({
           engine,
           wsRoot,
-          ctx,
-          vaults
-        );
+          context: ctx,
+          vaults,
+        });
 
         await new CreateDailyJournalCommand(mockExtension).run();
         expect(
@@ -66,7 +66,11 @@ suite("Create Daily Journal Suite", function () {
           },
           { wsRoot }
         );
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
 
         await new CreateDailyJournalCommand(mockExtension).run();
         expect(
@@ -96,7 +100,12 @@ suite("Create Daily Journal Suite", function () {
           },
           { wsRoot }
         );
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
+
         await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
@@ -124,7 +133,11 @@ suite("Create Daily Journal Suite", function () {
           { wsRoot }
         );
         stubVaultPick(vaults);
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
 
         await new CreateDailyJournalCommand(mockExtension).run();
         expect(
@@ -145,7 +158,11 @@ suite("Create Daily Journal Suite", function () {
         return config;
       },
       onInit: async ({ engine, wsRoot }) => {
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
 
         await new CreateDailyJournalCommand(mockExtension).run();
         expect(
@@ -180,7 +197,12 @@ suite("Create Daily Journal Suite", function () {
           fname: "foo.bar.baz",
         });
         await WSUtils.openNote(current);
-        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
 
         await new CreateDailyJournalCommand(mockExtension).run();
         const fname = getActiveEditorBasename();

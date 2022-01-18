@@ -134,6 +134,10 @@ export const NOTE_PRESETS_V4 = {
       "This link goes to [[daily.journal.{{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}]]",
     ].join("\n"),
   }),
+  NOTE_WITH_FM_VARIABLES: CreateNoteFactory({
+    fname: "fm-variables",
+    body: "Title is {{ fm.title }}",
+  }),
   NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-note-ref",
     body: "![[simple-note-ref.one]]",

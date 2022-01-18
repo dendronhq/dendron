@@ -138,7 +138,8 @@ describe(`SchemaUtil tests:`, () => {
         );
       });
 
-      it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
+      // TODO: Reenable once date variable substitution is enabled
+      it.skip("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
         const dateTemplate: SchemaTemplate = {
           id: "date-variables",
           type: "note",
@@ -158,6 +159,30 @@ describe(`SchemaUtil tests:`, () => {
                 "\n" +
                 `This link goes to [[daily.journal.2022.01.10]]`
             );
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupRefs,
+          }
+        );
+      });
+
+      it("WHEN applying a template with fm variables, THEN replace note's body with template's body without errors", async () => {
+        const dateTemplate: SchemaTemplate = {
+          id: "fm-variables",
+          type: "note",
+        };
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const resp = SchemaUtils.applyTemplate({
+              template: dateTemplate,
+              note,
+              engine,
+            });
+
+            expect(resp).toBeTruthy();
+            expect(note.body).toEqual(engine.notes["fm-variables"].body);
+            expect(note.body.trim()).toEqual(`Title is {{ fm.title }}`);
           },
           {
             expect,

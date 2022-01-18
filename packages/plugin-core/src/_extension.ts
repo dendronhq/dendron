@@ -474,6 +474,12 @@ export async function _activate(
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
 
+      // const schema = getConfigJSONSchema();
+      // const configSchemaIsValid = ConfigUtils.validateConfigSchema({ config: dendronConfig, schema });
+      // if (!configSchemaIsValid) {
+
+      // }
+
       // Only set up note traits after workspaceImpl has been set, so that the
       // wsRoot path is known for locating the note trait definition location.
       // TODO: Unwind and simplify dependency ordering logic
@@ -1242,4 +1248,17 @@ function updateEngineAPI(port: number | string): void {
   ext.port = _.toInteger(port);
   // const engine = ext.getEngine();
   // return engine;
+}
+
+/**
+ * Grabs json schema from dist/ if prod. otherwise (dev mode), get it from data/
+ * @returns json schema for config validation
+ */
+function getConfigJSONSchema() {
+  const schemaPath =
+    getStage() === "prod"
+      ? path.join(__dirname, "dendron-yml.validator.json")
+      : path.join(__dirname, "..", "..", "data", "dendron-yml.validator.json");
+  const schema = fs.readJSONSync(schemaPath);
+  return schema;
 }

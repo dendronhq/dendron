@@ -53,7 +53,7 @@ const NOTE: DendronConfigEntryCollection<NoteLookupConfig> = {
     label: "Confirm Vault on Create.",
     desc: "Prompt for vault selection when creating new note.",
   },
-  vaultModeOnCreate: {
+  vaultSelectionModeOnCreate: {
     label: "Vault Selection Mode On Note Creation.",
     desc: "Whether to smartly guess the vault for the note when creating new note.",
   },

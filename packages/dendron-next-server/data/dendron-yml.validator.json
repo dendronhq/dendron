@@ -244,7 +244,7 @@
         "selectionMode": {
           "$ref": "#/definitions/LookupSelectionMode"
         },
-        "vaultModeOnCreate": {
+        "vaultSelectionModeOnCreate": {
           "$ref": "#/definitions/LookupSelectVaultModeOnCreate"
         },
         "confirmVaultOnCreate": {
@@ -262,7 +262,7 @@
       },
       "required": [
         "selectionMode",
-        "vaultModeOnCreate",
+        "vaultSelectionModeOnCreate",
         "confirmVaultOnCreate",
         "leaveTrace",
         "bubbleUpCreateNew",

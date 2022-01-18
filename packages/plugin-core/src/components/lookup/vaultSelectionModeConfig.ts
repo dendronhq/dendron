@@ -22,7 +22,7 @@ export class VaultSelectionModeConfig {
     const ws = ExtensionProvider.getDWorkspace();
     const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
-    const configMode = noteLookupConfig.vaultModeOnCreate;
+    const configMode = noteLookupConfig.vaultSelectionModeOnCreate;
 
     return configMode;
   }

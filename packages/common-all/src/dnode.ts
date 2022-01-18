@@ -1372,7 +1372,7 @@ export class SchemaUtils {
         note.body = tempNote.body;
       }
 
-      // Apply date variable substitution to the body if applicable
+      // Apply date variable substitution to the body based on mustache delimiter if applicable
       // E.g. if template has {{ CURRENT_YEAR }}, new note will contain 2021
       // Use mustache delimiter
       // TODO: Renable date variable substitution until new format is thought through

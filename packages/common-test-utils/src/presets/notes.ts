@@ -132,6 +132,7 @@ export const NOTE_PRESETS_V4 = {
     body: [
       "Today is {{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}",
       "This link goes to [[daily.journal.{{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}]]",
+      "{{ 1 + 1 }} should not be evalated to 2",
     ].join("\n"),
   }),
   NOTE_WITH_FM_VARIABLES: CreateNoteFactory({

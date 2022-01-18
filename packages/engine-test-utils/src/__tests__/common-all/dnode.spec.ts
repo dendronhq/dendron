@@ -157,7 +157,9 @@ describe(`SchemaUtil tests:`, () => {
             expect(note.body.trim()).toEqual(
               `Today is 2022.01.10` +
                 "\n" +
-                `This link goes to [[daily.journal.2022.01.10]]`
+                `This link goes to [[daily.journal.2022.01.10]]` +
+                "\n" +
+                `{{ 1 + 1 }} should not be evalated to 2`
             );
           },
           {

@@ -67,7 +67,7 @@ export class WindowWatcher {
       ) {
         const uri = editor.document.uri;
         this.triggerNotePreviewUpdate(editor);
-        if (this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });

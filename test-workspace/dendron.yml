@@ -38,7 +38,7 @@ site:
 dev:
     enableWebUI: true
     enablePreviewV2: true
-    enableExportPodV2: false
+    enableExportPodV2: true
 commands:
     lookup:
         note:

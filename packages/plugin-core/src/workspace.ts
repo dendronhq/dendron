@@ -382,7 +382,7 @@ export class DendronExtension implements IDendronExtension {
     this._disposableStore = new DisposableStore();
     this.treeViews = {};
     this.setupViews(context);
-    this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(context));
+    this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(this));
     this.wsUtils = new WSUtilsV2(this);
     this.commandFactory = new CommandFactory(this);
     this.schemaSyncService = new SchemaSyncService(this);
@@ -527,7 +527,7 @@ export class DendronExtension implements IDendronExtension {
           )
         );
 
-        const calendarView = new CalendarView();
+        const calendarView = new CalendarView(this);
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,
@@ -695,9 +695,9 @@ export class DendronExtension implements IDendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher();
+    const windowWatcher = new WindowWatcher(this);
 
-    windowWatcher.activate(this.context);
+    windowWatcher.activate();
     for (const editor of vscode.window.visibleTextEditors) {
       windowWatcher.triggerUpdateDecorations(editor);
     }

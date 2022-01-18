@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
   NoteProps,
@@ -8,6 +9,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { RemarkUtils } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import path from "path";
@@ -16,18 +18,21 @@ import {
   FileRenameEvent,
   FileWillRenameEvent,
   Range,
+  Selection,
   TextDocument,
   TextDocumentChangeEvent,
   TextDocumentSaveReason,
   TextDocumentWillSaveEvent,
   TextEdit,
+  TextEditor,
   window,
   workspace,
 } from "vscode";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
-import { AnalyticsUtils } from "./utils/analytics";
+import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
+import { VSCodeUtils } from "./vsCodeUtils";
 import {
   DendronExtension,
   getDWorkspace,
@@ -61,6 +66,11 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
    */
   flush(): ReturnType<T> | undefined;
 }
+
+const context = (scope: string) => {
+  const ROOT_CTX = "WorkspaceWatcher";
+  return ROOT_CTX + ":" + scope;
+};
 
 /**
  * See [[Workspace Watcher|dendron://dendron.docs/pkg.plugin-core.ref.workspace-watcher]] for more docs
@@ -135,6 +145,21 @@ export class WorkspaceWatcher {
     extension.addDisposable(
       workspace.onDidRenameFiles(
         this.onDidRenameFiles,
+        this,
+        context.subscriptions
+      )
+    );
+
+    extension.addDisposable(
+      window.onDidChangeActiveTextEditor(
+        sentryReportingCallback((editor: TextEditor | undefined) => {
+          if (
+            editor?.document &&
+            this.getNewlyOpenedDocument(editor.document)
+          ) {
+            this.onFirstOpen(editor);
+          }
+        }),
         this,
         context.subscriptions
       )
@@ -284,7 +309,7 @@ export class WorkspaceWatcher {
    *
    * Mind that this method is not idempotent, checking the same document twice will always return false for the second time.
    */
-  public getNewlyOpenedDocument(document: TextDocument): boolean {
+  private getNewlyOpenedDocument(document: TextDocument): boolean {
     const key = document.uri.fsPath;
     if (this._openedDocuments?.has(key)) {
       Logger.debug({
@@ -379,5 +404,38 @@ export class WorkspaceWatcher {
     } finally {
       FileWatcher.refreshTree();
     }
+  }
+
+  private async onFirstOpen(editor: TextEditor) {
+    Logger.info({
+      ctx: context("onFirstOpen"),
+      msg: "enter",
+      fname: NoteUtils.uri2Fname(editor.document.uri),
+    });
+    this.moveCursorPastFrontmatter(editor);
+    const config = getExtension().getDWorkspace().config;
+    if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
+      await this.foldFrontmatter();
+    }
+    Logger.info({
+      ctx: context("onFirstOpen"),
+      msg: "exit",
+      fname: NoteUtils.uri2Fname(editor.document.uri),
+    });
+  }
+  private moveCursorPastFrontmatter(editor: TextEditor) {
+    const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
+      editor.document.getText()
+    );
+    if (!_.isUndefined(nodePosition)) {
+      const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
+        line: 1,
+      });
+      editor.selection = new Selection(position, position);
+    }
+  }
+
+  private async foldFrontmatter() {
+    await VSCodeUtils.foldActiveEditorAtPosition({ line: 0 });
   }
 }

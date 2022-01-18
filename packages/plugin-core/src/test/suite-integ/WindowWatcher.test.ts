@@ -1,21 +1,22 @@
 import { ConfigUtils, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { describe, beforeEach } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
+import { MockDendronExtension } from "../MockDendronExtension";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
   describeSingleWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { ExtensionProvider } from "../../ExtensionProvider";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -35,16 +36,14 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   let watcher: WindowWatcher | undefined;
 
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
-    beforeEach(async () => {
-      if (watcher === undefined) {
-        watcher = new WindowWatcher();
-      }
-    });
     test("basic", (done) => {
       runSingleVaultTest({
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vault, wsRoot }) => {
+          watcher = new WindowWatcher(
+            new MockDendronExtension(ExtensionProvider.getEngine(), wsRoot, ctx)
+          );
           const vaultPath = vault.fsPath;
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
@@ -137,7 +136,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
               ExtensionProvider.getExtension().schemaSyncService,
           });
           getExtension().workspaceWatcher?.activate(ctx);
-          watcher!.activate(ctx);
+          watcher!.activate();
           // Open a note
           await WSUtils.openNote(
             NoteUtils.getNoteByFnameV5({
@@ -166,7 +165,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           });
           getExtension().workspaceWatcher?.activate(ctx);
 
-          watcher!.activate(ctx);
+          watcher!.activate();
           // Open a note
           const first = NoteUtils.getNoteByFnameV5({
             vault: vaults[0],

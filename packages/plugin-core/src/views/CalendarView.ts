@@ -13,19 +13,20 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 import { WebViewUtils } from "./utils";
 
 export class CalendarView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
+  private _extension: IDendronExtension;
 
-  constructor() {
-    const dendronWorkspace = getExtension();
-    dendronWorkspace.addDisposable(
+  constructor(extension: IDendronExtension) {
+    this._extension = extension;
+    this._extension.addDisposable(
       vscode.window.onDidChangeActiveTextEditor(
         // An `ChangeActiveTextEditor` event might be immediately followed by a new one (e.g. switch TextDocument).
         // This would result in the first call to unset `noteActive` and the seconde one to set it again. This might create flashing UI changes that disturb the eye.
@@ -33,7 +34,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
         this
       )
     );
-    dendronWorkspace.addDisposable(
+    this._extension.addDisposable(
       vscode.workspace.onDidSaveTextDocument(
         this.onDidSaveTextDocumentHandler,
         this
@@ -50,7 +51,7 @@ export class CalendarView implements vscode.WebviewViewProvider {
     }
     const ctx = "CalendarView:openTextDocument";
     if (
-      !getExtension().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+      !this._extension.workspaceService?.isPathInWorkspace(document.uri.fsPath)
     ) {
       Logger.info({
         ctx,
@@ -59,7 +60,8 @@ export class CalendarView implements vscode.WebviewViewProvider {
       });
       return;
     }
-    const note = WSUtils.getNoteFromDocument(document);
+    const utils = new WSUtilsV2(this._extension);
+    const note = utils.getNoteFromDocument(document);
     if (note) {
       Logger.info({
         ctx,
@@ -95,13 +97,13 @@ export class CalendarView implements vscode.WebviewViewProvider {
         const { id, fname } = msg.data;
         let note: NoteProps | undefined;
         // eslint-disable-next-line no-cond-assign
-        if (id && (note = getEngine().notes[id])) {
-          await new GotoNoteCommand(getExtension()).execute({
+        if (id && (note = this._extension.getEngine().notes[id])) {
+          await new GotoNoteCommand(this._extension).execute({
             qs: note.fname,
             vault: note.vault,
           });
         } else if (fname) {
-          await new CreateDailyJournalCommand().execute({
+          await new CreateDailyJournalCommand(this._extension).execute({
             fname,
           });
         }

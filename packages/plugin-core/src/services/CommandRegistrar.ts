@@ -1,6 +1,7 @@
 import { NoteTrait } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { CreateNoteWithTraitCommand } from "../commands/CreateNoteWithTraitCommand";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 /**
  * Manages registration of new VS Code commands. This service is intended for
@@ -8,6 +9,7 @@ import { CreateNoteWithTraitCommand } from "../commands/CreateNoteWithTraitComma
  * are registered onActivate() should not use this class
  */
 export class CommandRegistrar {
+  private _extension: IDendronExtension;
   private context: vscode.ExtensionContext;
 
   private disposables: {
@@ -20,15 +22,20 @@ export class CommandRegistrar {
     [traitId: string]: string;
   };
 
-  constructor(context: vscode.ExtensionContext) {
-    this.context = context;
+  constructor(extension: IDendronExtension) {
+    this._extension = extension;
+    this.context = extension.context;
     this.registeredCommands = {};
     this.disposables = {};
   }
 
   registerCommandForTrait(trait: NoteTrait): string {
     const commandId = trait.id;
-    const cmd = new CreateNoteWithTraitCommand(commandId, trait);
+    const cmd = new CreateNoteWithTraitCommand(
+      this._extension,
+      commandId,
+      trait
+    );
 
     const registeredCmdName = this.CUSTOM_COMMAND_PREFIX + commandId;
     this.registeredCommands[commandId] = registeredCmdName;

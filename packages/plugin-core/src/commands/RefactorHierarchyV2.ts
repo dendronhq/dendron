@@ -14,7 +14,7 @@ import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
-import { NoteLookupProviderUtils } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../vsCodeUtils";

@@ -14,7 +14,6 @@ import {
   CONTEXT_DETAIL,
   FULL_MATCH_DETAIL,
   HIERARCHY_MATCH_DETAIL,
-  NoteLookupProviderUtils,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
 import { Logger } from "../../logger";
@@ -31,6 +30,7 @@ import {
   ILookupProviderV3,
   OnAcceptHook,
 } from "../../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../../components/lookup/NoteLookupProviderUtils";
 
 function setupNotesForTest({
   wsRoot,

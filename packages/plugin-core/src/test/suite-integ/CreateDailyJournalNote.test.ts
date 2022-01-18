@@ -7,6 +7,7 @@ import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
 import { WSUtils } from "../../WSUtils";
+import { MockDendronExtension } from "../MockDendronExtension";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -26,15 +27,20 @@ const stubVaultPick = (vaults: DVault[]) => {
 };
 
 suite("Create Daily Journal Suite", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this);
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async ({}) => {
-        await new CreateDailyJournalCommand().run();
+      onInit: async ({ engine, wsRoot, vaults }) => {
+        const mockExtension = new MockDendronExtension(
+          engine,
+          wsRoot,
+          ctx,
+          vaults
+        );
+
+        await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           getActiveEditorBasename().startsWith("daily.journal")
         ).toBeTruthy();
@@ -46,7 +52,7 @@ suite("Create Daily Journal Suite", function () {
   test("default journal vault", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ engine, wsRoot, vaults }) => {
         withConfig(
           (config) => {
             ConfigUtils.setNoteLookupProps(
@@ -60,7 +66,9 @@ suite("Create Daily Journal Suite", function () {
           },
           { wsRoot }
         );
-        await new CreateDailyJournalCommand().run();
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
+        await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
             vaults[0].fsPath
@@ -74,7 +82,7 @@ suite("Create Daily Journal Suite", function () {
   test("default journal vault set with lookup Confirm", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ engine, wsRoot, vaults }) => {
         withConfig(
           (config) => {
             ConfigUtils.setNoteLookupProps(
@@ -88,7 +96,8 @@ suite("Create Daily Journal Suite", function () {
           },
           { wsRoot }
         );
-        await new CreateDailyJournalCommand().run();
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+        await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
             vaults[0].fsPath
@@ -102,7 +111,7 @@ suite("Create Daily Journal Suite", function () {
   test("default journal vault not set with lookup Confirm", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ engine, wsRoot, vaults }) => {
         withConfig(
           (config) => {
             ConfigUtils.setNoteLookupProps(
@@ -115,7 +124,9 @@ suite("Create Daily Journal Suite", function () {
           { wsRoot }
         );
         stubVaultPick(vaults);
-        await new CreateDailyJournalCommand().run();
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
+        await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
             vaults[2].fsPath
@@ -133,8 +144,10 @@ suite("Create Daily Journal Suite", function () {
         ConfigUtils.setJournalProps(config, "dailyDomain", "bar");
         return config;
       },
-      onInit: async () => {
-        await new CreateDailyJournalCommand().run();
+      onInit: async ({ engine, wsRoot }) => {
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
+        await new CreateDailyJournalCommand(mockExtension).run();
         expect(
           getActiveEditorBasename().startsWith("bar.journal")
         ).toBeTruthy();
@@ -160,14 +173,16 @@ suite("Create Daily Journal Suite", function () {
         ConfigUtils.setJournalProps(config, "name", "journey");
         return config;
       },
-      onInit: async ({ wsRoot, vaults }) => {
+      onInit: async ({ engine, wsRoot, vaults }) => {
         const current = await NoteTestUtilsV4.createNote({
           wsRoot,
           vault: vaults[0],
           fname: "foo.bar.baz",
         });
         await WSUtils.openNote(current);
-        await new CreateDailyJournalCommand().run();
+        const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+
+        await new CreateDailyJournalCommand(mockExtension).run();
         const fname = getActiveEditorBasename();
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, "0");

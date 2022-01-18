@@ -172,11 +172,18 @@ export class WindowWatcher {
       const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
         line: 1,
       });
+      // If the user opened the document with something like the search window,
+      // then VSCode is supposed to move the cursor to where the match is.
+      // But if we move the cursor here, then it overwrites VSCode's move.
+      // Worse, when VSCode calls this function the cursor hasn't updated yet
+      // so the location will still be 0, so we have to delay a bit to let it update first.
       setTimeout(() => {
+        // Since we delayed, a new document could have opened. Make sure we're still in the document we expect
         if (
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath === startFsPath
         ) {
           const { line, character } = editor.selection.active;
+          // Move the cursor, but only if it hasn't already been moved by VSCode, another extension, or a very quick user
           if (line === 0 && character === 0) {
             editor.selection = new Selection(position, position);
           } else {

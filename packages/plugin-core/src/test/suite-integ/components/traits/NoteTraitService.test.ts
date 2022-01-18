@@ -1,10 +1,14 @@
 import { NoteTrait } from "@dendronhq/common-all";
-import { describe, afterEach } from "mocha";
+import { afterEach, describe } from "mocha";
 import vscode from "vscode";
 import { CommandRegistrar } from "../../../../services/CommandRegistrar";
 import { NoteTraitManager } from "../../../../services/NoteTraitService";
+import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
-import { setupBeforeAfter } from "../../../testUtilsV3";
+import {
+  runLegacySingleWorkspaceTest,
+  setupBeforeAfter,
+} from "../../../testUtilsV3";
 
 //TODO: Expand coverage once other methods of NoteTraitManager are implemented
 suite("NoteTraitManager tests", () => {
@@ -14,21 +18,31 @@ suite("NoteTraitManager tests", () => {
 
   describe(`GIVEN a NoteTraitManager`, () => {
     const TRAIT_ID = "test-trait";
-    const registrar = new CommandRegistrar(ctx);
-
-    const traitManager = new NoteTraitManager(registrar);
 
     const trait: NoteTrait = {
       id: TRAIT_ID,
     };
 
     describe(`WHEN registering a new trait`, () => {
+      let registrar: CommandRegistrar;
       afterEach(() => {
-        registrar.unregisterTrait(trait);
+        if (registrar) {
+          registrar.unregisterTrait(trait);
+        }
       });
       test(`THEN expect the trait to be found by the manager`, async () => {
-        const resp = traitManager.registerTrait(trait);
-        expect(resp.error).toBeFalsy();
+        runLegacySingleWorkspaceTest({
+          ctx,
+          onInit: async ({ engine, wsRoot }) => {
+            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            registrar = new CommandRegistrar(mockExtension);
+
+            const traitManager = new NoteTraitManager(registrar);
+            const resp = traitManager.registerTrait(trait);
+
+            expect(resp.error).toBeFalsy();
+          },
+        });
       });
     });
   });

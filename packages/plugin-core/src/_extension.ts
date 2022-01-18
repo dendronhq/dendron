@@ -95,7 +95,7 @@ import {
 } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
-import { WorkspaceInitFactory } from "./workspace/workspaceInitializer";
+import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -1234,9 +1234,12 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 
 function updateEngineAPI(port: number | string): void {
   const ext = getExtension();
+
   const svc = EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,
+    vaults: ext.getDWorkspace().vaults,
+    wsRoot: ext.getDWorkspace().wsRoot,
   });
   ext.setEngine(svc);
   ext.port = _.toInteger(port);

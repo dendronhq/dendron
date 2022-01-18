@@ -15,6 +15,7 @@ import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { DendronBtn } from "./ButtonTypes";
+import { NotePickerUtils } from "./NotePickerUtils";
 import {
   DendronQuickPickerV2,
   LookupEffectType,
@@ -25,7 +26,7 @@ import {
   LookupSplitType,
   VaultSelectionMode,
 } from "./types";
-import { NotePickerUtils, PickerUtilsV2 } from "./utils";
+import { PickerUtilsV2 } from "./utils";
 
 export type ButtonType =
   | LookupEffectType

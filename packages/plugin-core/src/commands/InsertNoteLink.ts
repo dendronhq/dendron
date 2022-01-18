@@ -8,7 +8,7 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
-import { NoteLookupProviderUtils } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";

@@ -53,9 +53,9 @@ import {
 } from "../../components/lookup/types";
 import {
   createNoActiveItem,
-  NotePickerUtils,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
+import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
 import { CONFIG } from "../../constants";
 import { StateService } from "../../services/stateService";
 import { clipboard } from "../../utils";

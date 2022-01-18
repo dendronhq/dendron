@@ -14,10 +14,10 @@ import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import {
-  NoteLookupProviderUtils,
   OldNewLocation,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";

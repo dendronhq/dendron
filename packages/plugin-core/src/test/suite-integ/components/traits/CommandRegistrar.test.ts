@@ -1,9 +1,13 @@
 import { NoteTrait } from "@dendronhq/common-all";
-import { beforeEach, describe, afterEach } from "mocha";
-import { CommandRegistrar } from "../../../../services/CommandRegistrar";
+import { afterEach, beforeEach, describe } from "mocha";
 import vscode from "vscode";
+import { CommandRegistrar } from "../../../../services/CommandRegistrar";
+import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
-import { setupBeforeAfter } from "../../../testUtilsV3";
+import {
+  runLegacySingleWorkspaceTest,
+  setupBeforeAfter,
+} from "../../../testUtilsV3";
 
 suite("CommandRegistrar tests", () => {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -12,45 +16,65 @@ suite("CommandRegistrar tests", () => {
 
   describe(`GIVEN a Command Registrar`, () => {
     const TRAIT_ID = "test-trait";
-    const registrar = new CommandRegistrar(ctx);
-    const expectedCmdName = registrar.CUSTOM_COMMAND_PREFIX + TRAIT_ID;
 
     const trait: NoteTrait = {
       id: TRAIT_ID,
     };
 
     describe(`WHEN registering a command for a new trait`, () => {
+      let _registrar: CommandRegistrar | undefined;
+
       beforeEach(() => {});
 
       afterEach(() => {
-        registrar.unregisterTrait(trait);
+        _registrar?.unregisterTrait(trait);
       });
 
       test(`THEN the command has been registered`, async () => {
-        const cmd = registrar.registerCommandForTrait(trait);
-        expect(cmd).toEqual(expectedCmdName);
+        runLegacySingleWorkspaceTest({
+          ctx,
+          onInit: async ({ engine, wsRoot }) => {
+            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            _registrar = new CommandRegistrar(mockExtension);
+            const expectedCmdName = _registrar.CUSTOM_COMMAND_PREFIX + TRAIT_ID;
 
-        expect(registrar.registeredCommands[TRAIT_ID]).toEqual(expectedCmdName);
+            const cmd = _registrar.registerCommandForTrait(trait);
+            expect(cmd).toEqual(expectedCmdName);
 
-        const allCmds = await vscode.commands.getCommands(true);
+            expect(_registrar.registeredCommands[TRAIT_ID]).toEqual(
+              expectedCmdName
+            );
 
-        expect(allCmds.includes(expectedCmdName)).toBeTruthy();
+            const allCmds = await vscode.commands.getCommands(true);
+
+            expect(allCmds.includes(expectedCmdName)).toBeTruthy();
+          },
+        });
       });
     });
 
     describe(`WHEN unregistering a command`, () => {
-      beforeEach(() => {
-        registrar.registerCommandForTrait(trait);
-      });
+      let _registrar: CommandRegistrar | undefined;
 
       test(`THEN the command has been unregistered`, async () => {
-        registrar.unregisterTrait(trait);
+        runLegacySingleWorkspaceTest({
+          ctx,
+          onInit: async ({ engine, wsRoot }) => {
+            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            _registrar = new CommandRegistrar(mockExtension);
+            const expectedCmdName = _registrar.CUSTOM_COMMAND_PREFIX + TRAIT_ID;
 
-        expect(registrar.registeredCommands[expectedCmdName]).toBeFalsy();
+            _registrar.registerCommandForTrait(trait);
 
-        const allCmds = await vscode.commands.getCommands();
+            _registrar.unregisterTrait(trait);
 
-        expect(allCmds.includes(expectedCmdName)).toBeFalsy();
+            expect(_registrar.registeredCommands[expectedCmdName]).toBeFalsy();
+
+            const allCmds = await vscode.commands.getCommands();
+
+            expect(allCmds.includes(expectedCmdName)).toBeFalsy();
+          },
+        });
       });
     });
   });

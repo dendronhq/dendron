@@ -6,7 +6,7 @@ import {
   DendronPublishingConfig,
   GoogleAnalyticsConfig,
 } from "../../types/configs/publishing/publishing";
-import { SEOConfig } from "../../types/configs/publishing/seo";
+import { SEOConfig, SEOImage } from "../../types/configs/publishing/seo";
 import {
   GithubConfig,
   GithubEditViewModeEnum,
@@ -66,6 +66,17 @@ const GA: DendronConfigEntryCollection<GoogleAnalyticsConfig> = {
   },
 };
 
+const IMAGE: DendronConfigEntryCollection<SEOImage> = {
+  url: {
+    label: "URL",
+    desc: "URL of image",
+  },
+  alt: {
+    label: "alt",
+    desc: "alt text for image",
+  },
+};
+
 const SEO: DendronConfigEntryCollection<SEOConfig> = {
   title: {
     label: "Title",
@@ -83,10 +94,7 @@ const SEO: DendronConfigEntryCollection<SEOConfig> = {
     label: "Twitter",
     desc: "set SEO twitter.",
   },
-  image: {
-    label: "Image",
-    desc: "Set SEO image.",
-  },
+  image: IMAGE,
 };
 
 export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =

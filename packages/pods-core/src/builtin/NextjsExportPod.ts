@@ -8,6 +8,7 @@ import {
   createSerializedFuseNoteIndex,
   ConfigUtils,
   isWebUri,
+  getStage,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -231,21 +232,23 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return payload.toString();
   }
 
-  _writeEnvFile({
+  private async _writeEnvFile({
     siteConfig,
     dest,
   }: {
     siteConfig: DendronSiteConfig;
     dest: URI;
   }) {
-    // add .env.production if necessary
-    // TODO: don't overwrite if somethign exists
+    // add .env.production, next will use this to replace `process.env` vars when building
+    const vars: string[] = [];
     if (siteConfig.assetsPrefix) {
-      fs.writeFileSync(
-        path.join(dest.fsPath, ".env.production"),
-        `NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`
-      );
+      vars.push(`NEXT_PUBLIC_ASSET_PREFIX=${siteConfig.assetsPrefix}`);
     }
+    vars.push(`NEXT_PUBLIC_STAGE=${getStage()}`);
+
+    const envFile = path.join(dest.fsPath, ".env.production");
+    this.L.debug(`Added env variables to export: ${vars}`);
+    await fs.writeFile(envFile, vars.join("\n"));
   }
 
   async copyAssets({
@@ -432,27 +435,29 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         ]);
       })
     );
+
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
-    fs.writeJSONSync(
-      podDstPath,
-      {
-        ...payload,
-        notes: removeBodyFromNotesDict(payload.notes),
-      },
-      { encoding: "utf8", spaces: 2 }
-    );
-    fs.writeJSONSync(podConfigDstPath, engineConfig, {
-      encoding: "utf8",
-      spaces: 2,
-    });
-
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");
     const fuseIndex = createSerializedFuseNoteIndex(publishedNotes);
-    fs.writeJsonSync(fuseDstPath, fuseIndex);
-
-    this._writeEnvFile({ siteConfig, dest });
+    // Concurrently write out data
+    await Promise.all([
+      fs.writeJson(
+        podDstPath,
+        {
+          ...payload,
+          notes: removeBodyFromNotesDict(payload.notes),
+        },
+        { encoding: "utf8", spaces: 2 }
+      ),
+      fs.writeJSON(podConfigDstPath, engineConfig, {
+        encoding: "utf8",
+        spaces: 2,
+      }),
+      fs.writeJson(fuseDstPath, fuseIndex),
+      this._writeEnvFile({ siteConfig, dest }),
+    ]);
 
     const publicPath = path.join(podDstDir, "..", "public");
     const publicDataPath = path.join(publicPath, "data");

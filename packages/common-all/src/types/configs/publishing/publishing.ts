@@ -55,10 +55,12 @@ export type UseVaultBehaviorPayload = { vault: DVault } | string[];
 
 export type DuplicateNoteActionPayload = UseVaultBehaviorPayload;
 
-export type DuplicateNoteBehavior = {
+export type UseVaultBehavior = {
   action: DuplicateNoteAction;
   payload: DuplicateNoteActionPayload;
 };
+
+export type DuplicateNoteBehavior = UseVaultBehavior;
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };

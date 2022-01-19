@@ -265,10 +265,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
-    const siteConfig = config.site;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
 
     // if copyAssets not set, skip it
-    if (!config.site.copyAssets) {
+    if (!publishingConfig.copyAssets) {
       this.L.info({ ctx, msg: "skip copying" });
       return;
     }
@@ -299,31 +299,34 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     this.L.info({ ctx, msg: "finish copying assets" });
 
     // custom headers
-    if (siteConfig.customHeaderPath) {
-      const headerPath = path.join(wsRoot, siteConfig.customHeaderPath);
+    const customHeaderPath = publishingConfig.customHeaderPath;
+    if (customHeaderPath) {
+      const headerPath = path.join(wsRoot, customHeaderPath);
       if (fs.existsSync(headerPath)) {
         fs.copySync(headerPath, path.join(destPublicPath, "header.html"));
       }
     }
     // get favicon
-    if (siteConfig.siteFaviconPath) {
-      const faviconPath = path.join(wsRoot, siteConfig.siteFaviconPath);
+    const siteFaviconPath = publishingConfig.siteFaviconPath;
+    if (siteFaviconPath) {
+      const faviconPath = path.join(wsRoot, siteFaviconPath);
       if (fs.existsSync(faviconPath)) {
         fs.copySync(faviconPath, path.join(destPublicPath, "favicon.ico"));
       }
     }
     // get logo
-    if (siteConfig.logo && !isWebUri(siteConfig.logo)) {
-      const logoPath = path.join(wsRoot, siteConfig.logo);
+    const logo = ConfigUtils.getLogo(config);
+    if (logo && !isWebUri(logo)) {
+      const logoPath = path.join(wsRoot, logo);
       fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
     // /get cname
-    if (siteConfig.githubCname) {
-      fs.writeFileSync(
-        path.join(destPublicPath, "CNAME"),
-        siteConfig.githubCname,
-        { encoding: "utf8" }
-      );
+    const githubConfig = ConfigUtils.getGithubConfig(config);
+    const githubCname = githubConfig.cname;
+    if (githubCname) {
+      fs.writeFileSync(path.join(destPublicPath, "CNAME"), githubCname, {
+        encoding: "utf8",
+      });
     }
   }
 
@@ -381,6 +384,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
+    // TODO: rewrite override logic to follow v5 namespace
+    // but respect v4 values if present.
     const siteConfig = getSiteConfig({
       siteConfig: engine.config.site,
       overrides: podConfig.overrides,

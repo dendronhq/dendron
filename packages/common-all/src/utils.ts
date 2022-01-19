@@ -1,3 +1,5 @@
+// TODO: remove this disable once we deprecate old site config.
+/* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
@@ -18,6 +20,7 @@ import {
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
+  configIsV4,
   DendronCommandConfig,
   DendronPreviewConfig,
   DendronWorkspaceConfig,
@@ -30,8 +33,15 @@ import {
   NoteLookupConfig,
   ScratchConfig,
   StrictConfigV4,
+  StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
+import {
+  DendronPublishingConfig,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
+import { GithubConfig } from "./types/configs/publishing/github";
 
 /**
  * Dendron utilities
@@ -487,14 +497,25 @@ export class PublishUtils {
   static getSEOPropsFromConfig(
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
-    const { title, twitter, description: excerpt, image } = config.site;
-    return {
-      title,
-      twitter,
-      excerpt,
-      image,
-    };
+    if (configIsV4(config)) {
+      const {
+        title,
+        twitter,
+        description: excerpt,
+        image,
+      } = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return { title, twitter, excerpt, image };
+    } else {
+      const {
+        title,
+        twitter,
+        description: excerpt,
+        image,
+      } = ConfigUtils.getPublishing(config).seo;
+      return { title, twitter, excerpt, image };
+    }
   }
+
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
     const { title, created, updated, image } = note;
     const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
@@ -538,7 +559,7 @@ export type ConfigVaildationResp = {
 };
 
 export class ConfigUtils {
-  static genDefaultConfig(): StrictConfigV4 {
+  static genDefaultConfig(): StrictConfigV5 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
@@ -547,32 +568,33 @@ export class ConfigUtils {
       dev: {
         enablePreviewV2: true,
       },
-      site: {
-        copyAssets: true,
-        siteHierarchies: ["root"],
-        siteRootDir: "docs",
-        usePrettyRefs: true,
-        title: "Dendron",
-        description: "Personal knowledge space",
-        siteLastModified: true,
-        gh_edit_branch: "main",
-      },
+      // site: {
+      //   copyAssets: true,
+      //   siteHierarchies: ["root"],
+      //   siteRootDir: "docs",
+      //   usePrettyRefs: true,
+      //   title: "Dendron",
+      //   description: "Personal knowledge space",
+      //   siteLastModified: true,
+      //   gh_edit_branch: "main",
+      // },
     };
 
     return {
-      version: 4,
+      version: 5,
       ...common,
       commands: genDefaultCommandConfig(),
       workspace: genDefaultWorkspaceConfig(),
       preview: genDefaultPreviewConfig(),
-    } as StrictConfigV4;
+      publishing: genDefaultPublishingConfig(),
+    } as StrictConfigV5;
   }
 
   // get
-  static getProp<K extends keyof StrictConfigV4>(
+  static getProp<K extends keyof StrictConfigV5>(
     config: IntermediateDendronConfig,
     key: K
-  ): StrictConfigV4[K] {
+  ): StrictConfigV5[K] {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
@@ -597,8 +619,30 @@ export class ConfigUtils {
     return out;
   }
 
-  static getSite(config: IntermediateDendronConfig): DendronSiteConfig {
+  static getPublishing(
+    config: IntermediateDendronConfig
+  ): DendronPublishingConfig {
+    return ConfigUtils.getProp(config, "publishing");
+  }
+
+  static getSite(
+    config: IntermediateDendronConfig
+  ): DendronSiteConfig | undefined {
     return ConfigUtils.getProp(config, "site");
+  }
+
+  // This is only used temporarily until we make migration mandatory.
+  // Grabs the appropriate util for retrieving publishing configs.
+  // if config is v4, grabs from site
+  // if config is v5, grabs from publishing
+  // if neither, v5 default is assumed by `.getPublising`
+  // Use this only when both namespace refers to the property with the same name.
+  static getPublishingConfig(
+    config: IntermediateDendronConfig
+  ): DendronPublishingConfig | DendronSiteConfig {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)!
+      : ConfigUtils.getPublishing(config);
   }
 
   static getVaults(config: IntermediateDendronConfig): DVault[] {
@@ -661,8 +705,57 @@ export class ConfigUtils {
       : ConfigUtils.getPreview(config).enableKatex;
   }
 
+  static getHierarchyConfig(
+    config: IntermediateDendronConfig
+  ): { [key: string]: HierarchyConfig } | undefined {
+    if (configIsV4(config)) {
+      const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return siteConfig.config as { [key: string]: HierarchyConfig };
+    } else {
+      return ConfigUtils.getPublishing(config).hierarchy;
+    }
+  }
+
+  static getGithubConfig(config: IntermediateDendronConfig): GithubConfig {
+    if (configIsV4(config)) {
+      const {
+        gh_edit_link,
+        gh_edit_link_text,
+        gh_edit_repository,
+        gh_edit_branch,
+        gh_edit_view_mode,
+        githubCname,
+      } = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return {
+        cname: githubCname,
+        // gh_edit_link is wrongly a string in old config
+        enableEditLink: gh_edit_link === "true",
+        editLinkText: gh_edit_link_text,
+        editBranch: gh_edit_branch,
+        editViewMode: gh_edit_view_mode,
+        editRepository: gh_edit_repository,
+      };
+    } else {
+      return ConfigUtils.getPublishing(config).github;
+    }
+  }
+
+  static getLogo(config: IntermediateDendronConfig): string | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)!.logo
+      : ConfigUtils.getPublishing(config).logoPath;
+  }
+
+  static getAssetsPrefix(
+    config: IntermediateDendronConfig
+  ): string | undefined {
+    return ConfigUtils.getPublishingConfig(config).assetsPrefix;
+  }
+
   static getSiteLogoUrl(config: IntermediateDendronConfig): string | undefined {
-    const { assetsPrefix, logo } = ConfigUtils.getSite(config);
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+    const logo = ConfigUtils.getLogo(config);
+
     if (logo === undefined) return undefined;
 
     // Let's allow logos that are hosted off-site/in subdomains by passing in a full URL
@@ -687,8 +780,12 @@ export class ConfigUtils {
     const override = opts?.note?.config?.global?.enablePrettyRefs;
     if (override !== undefined) return override;
 
+    const publishRule = configIsV4(config)
+      ? ConfigUtils.getSite(config)?.usePrettyRefs
+      : ConfigUtils.getPublishing(config).enablePrettyRefs;
+
     return opts?.shouldApplyPublishRules
-      ? ConfigUtils.getSite(config).usePrettyRefs
+      ? publishRule
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }
 
@@ -736,6 +833,15 @@ export class ConfigUtils {
     value: DendronWorkspaceConfig[K]
   ) {
     const path = `workspace.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setPublishProp<K extends keyof DendronPublishingConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronPublishingConfig[K]
+  ) {
+    const path = `publishing.${key}`;
     _.set(config, path, value);
   }
 

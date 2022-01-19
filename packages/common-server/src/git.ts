@@ -50,12 +50,13 @@ export class GitUtils {
     ) {
       return false;
     }
+    const githubConfig = ConfigUtils.getGithubConfig(config);
     return _.every([
-      config.site.gh_edit_link,
-      config.site.gh_edit_link_text,
-      config.site.gh_edit_repository,
-      config.site.gh_edit_branch,
-      config.site.gh_edit_view_mode,
+      githubConfig.enableEditLink,
+      githubConfig.editLinkText,
+      githubConfig.editRepository,
+      githubConfig.editBranch,
+      githubConfig.editViewMode,
     ]);
   }
   /**
@@ -93,14 +94,15 @@ export class GitUtils {
     const vaults = ConfigUtils.getVaults(config);
     const mvault = VaultUtils.matchVault({ wsRoot, vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
-    const gitRepoUrl = config.site.gh_edit_repository;
+    const githubConfig = ConfigUtils.getGithubConfig(config);
+    const gitRepoUrl = githubConfig.editRepository;
     // if we have a vault, we don't need to include the vault name as an offset
     if (mvault && vaultUrl) {
       return _.join(
         [
           this.git2Github(vaultUrl),
-          config.site.gh_edit_view_mode,
-          config.site.gh_edit_branch,
+          githubConfig.editViewMode,
+          githubConfig.editBranch,
           note.fname + ".md",
         ],
         "/"
@@ -121,8 +123,8 @@ export class GitUtils {
     return _.join(
       [
         gitRepoUrl,
-        config.site.gh_edit_view_mode,
-        config.site.gh_edit_branch,
+        githubConfig.editViewMode,
+        githubConfig.editBranch,
         gitNotePath,
       ],
       "/"

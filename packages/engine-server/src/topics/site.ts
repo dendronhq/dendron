@@ -5,7 +5,7 @@ import {
   DendronSiteConfig,
   DendronSiteFM,
   DNodeUtils,
-  DuplicateNoteAction,
+  DuplicateNoteActionEnum,
   DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
@@ -16,6 +16,7 @@ import {
   UseVaultBehavior,
   VaultUtils,
   BooleanResp,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -46,7 +47,7 @@ export class SiteUtils {
     }
     // check if note is note blocked
     const hconfig = this.getConfigForHierarchy({
-      config: config.site,
+      config,
       noteOrName: note,
     });
     const noteVault = VaultUtils.matchVault({
@@ -65,7 +66,7 @@ export class SiteUtils {
     }
 
     // check if allowed in hconfig
-    let publishByDefault = undefined;
+    let publishByDefault;
     if (!_.isUndefined(hconfig?.publishByDefault)) {
       // handle property being a boolean or an object
       publishByDefault = _.isBoolean(hconfig.publishByDefault)
@@ -87,9 +88,10 @@ export class SiteUtils {
     const { note, config } = opts;
     // check if note is in index
     const domain = DNodeUtils.domainName(note.fname);
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (
-      config.site.siteHierarchies[0] !== "root" &&
-      config.site.siteHierarchies.indexOf(domain) < 0
+      publishingConfig.siteHierarchies[0] !== "root" &&
+      publishingConfig.siteHierarchies.indexOf(domain) < 0
     ) {
       return false;
     }
@@ -221,7 +223,7 @@ export class SiteUtils {
     logger.info({ ctx: "filterByHiearchy:enter", domain, config });
     const sconfig = config.site;
     const hConfig = this.getConfigForHierarchy({
-      config: sconfig,
+      config,
       noteOrName: domain,
     });
     const notesForHiearchy = _.clone(engine.notes);
@@ -239,11 +241,13 @@ export class SiteUtils {
     });
 
     let domainNote: NoteProps | undefined;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const duplicateNoteBehavior = publishingConfig.duplicateNoteBehavior;
     // duplicate notes found with same name, need to intelligently resolve
     if (notes.length > 1) {
       domainNote = SiteUtils.handleDup({
         allowStubs: false,
-        dupBehavior: sconfig.duplicateNoteBehavior,
+        dupBehavior: duplicateNoteBehavior,
         engine,
         config,
         fname: domain,
@@ -283,7 +287,7 @@ export class SiteUtils {
     domainNote.parent = null;
 
     // if note is hoempage, set permalink to indicate this
-    if (domainNote.fname === sconfig.siteIndex) {
+    if (domainNote.fname === publishingConfig.siteIndex) {
       domainNote.custom.permalink = "/";
     }
 
@@ -310,7 +314,7 @@ export class SiteUtils {
       const siteFM = note.custom || ({} as DendronSiteFM);
 
       // TODO: legacy behavior around stubs, will need to remove
-      if (sconfig.writeStubs && note.stub) {
+      if (publishingConfig.writeStubs && note.stub) {
         delete note.stub;
         // eslint-disable-next-line no-await-in-loop
         await engine.writeNote(note);
@@ -387,23 +391,23 @@ export class SiteUtils {
   }
 
   static getConfigForHierarchy(opts: {
-    config: DendronSiteConfig;
+    config: IntermediateDendronConfig;
     noteOrName: NoteProps | string;
   }) {
     const { config, noteOrName } = opts;
     const fname = _.isString(noteOrName) ? noteOrName : noteOrName.fname;
     const domain = DNodeUtils.domainName(fname);
-    const siteConfig = config;
-    // get config
-    let rConfig: HierarchyConfig = _.defaults(
-      _.get(siteConfig.config, "root", {
+
+    const hierarchyConfig = ConfigUtils.getHierarchyConfig(config);
+    const rConfig: HierarchyConfig = _.defaults(
+      _.get(hierarchyConfig, "root", {
         publishByDefault: true,
         noindexByDefault: false,
         customFrontmatter: [],
       })
     );
-    let hConfig: HierarchyConfig = _.defaults(
-      _.get(siteConfig.config, domain),
+    const hConfig: HierarchyConfig = _.defaults(
+      _.get(hierarchyConfig, domain),
       rConfig
     );
     return hConfig;
@@ -432,11 +436,12 @@ export class SiteUtils {
   }) {
     const { config, wsRoot, stage } = opts;
     let siteRootPath: string;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (stage === "dev") {
       siteRootPath = path.join(wsRoot, "build", "site");
       fs.ensureDirSync(siteRootPath);
     } else {
-      siteRootPath = resolvePath(config.site.siteRootDir, wsRoot);
+      siteRootPath = resolvePath(publishingConfig.siteRootDir, wsRoot);
     }
     return siteRootPath;
   }
@@ -460,7 +465,7 @@ export class SiteUtils {
       allowStubs,
     } = _.defaults(opts, {
       dupBehavior: {
-        action: DuplicateNoteAction.USE_VAULT,
+        action: DuplicateNoteActionEnum.useVault,
         payload: [],
       } as UseVaultBehavior,
       allowStubs: true,
@@ -511,7 +516,7 @@ export class SiteUtils {
       }
     } else {
       const vault = dupBehavior.payload.vault;
-      let maybeDomainNotes = noteCandidates.filter((n) =>
+      const maybeDomainNotes = noteCandidates.filter((n) =>
         VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
       );
       const logger = createLogger(LOGGER_NAME);
@@ -536,7 +541,7 @@ export class SiteUtils {
       }
       domainNote = maybeDomainNotes[0];
     }
-    let domainId = domainNote.id;
+    const domainId = domainNote.id;
     // merge children
     domainNote.children = getUniqueChildrenIds(noteCandidates);
     // update parents

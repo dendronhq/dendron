@@ -499,7 +499,6 @@ export function convertNoteRefASTV2(
     MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
 
   const { wikiLinkOpts } = compilerOpts;
-  const siteConfig = ConfigUtils.getSite(config);
 
   // The note that contains this reference might override the pretty refs option for references inside it.
   const containingNote = NoteUtils.getNoteByFnameFromEngine({
@@ -518,7 +517,8 @@ export function convertNoteRefASTV2(
     prettyRefs = false;
   }
 
-  const duplicateNoteConfig = siteConfig.duplicateNoteBehavior;
+  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const duplicateNoteConfig = publishingConfig.duplicateNoteBehavior;
   // process note references.
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {

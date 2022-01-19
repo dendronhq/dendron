@@ -10,14 +10,12 @@ import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3";
-import {
-  PickerUtilsV2,
-} from "../components/lookup/utils";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { VaultSelectionModeConfig } from "../components/lookup/vaultSelectionModeConfig";
+import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 
 export type CommandOpts = {
@@ -116,7 +114,8 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     // this vault logic can be deferred there.
     let vault = opts.vaultOverride;
     if (!opts.vaultOverride) {
-      const selectionMode = VaultSelectionModeConfig.getVaultSelectionMode();
+      const selectionMode =
+        VaultSelectionModeConfigUtils.getVaultSelectionMode();
 
       const currentVault = PickerUtilsV2.getVaultForOpenEditor();
       const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({

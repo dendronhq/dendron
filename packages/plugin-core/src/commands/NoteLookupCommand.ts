@@ -59,7 +59,7 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import { AutoCompleter } from "../utils/autoCompleter";
-import { VaultSelectionModeConfig } from "../components/lookup/vaultSelectionModeConfig";
+import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -204,7 +204,7 @@ export class NoteLookupCommand
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt;
     } else {
       vaultButtonPressed =
-        VaultSelectionModeConfig.shouldAlwaysPromptVaultSelection();
+        VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     }
 
     const ctx = "NoteLookupCommand:gatherInput";

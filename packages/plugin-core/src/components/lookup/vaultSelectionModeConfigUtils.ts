@@ -6,7 +6,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
  * Class responsible for proxying interaction with vault
  * selection mode configuration.
  * */
-export class VaultSelectionModeConfig {
+export class VaultSelectionModeConfigUtils {
   public static getVaultSelectionMode() {
     if (
       ConfigUtils.getCommands(ExtensionProvider.getDWorkspace().config).lookup

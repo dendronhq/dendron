@@ -2,7 +2,7 @@ import _ from "lodash";
 import { config, ConfigKey } from "./config";
 import { Stage } from "./types";
 
-let overrideStage = undefined;
+let overrideStage: string | undefined;
 
 /** Get the env variables we are interested in.
  *
@@ -39,7 +39,8 @@ export function getStage(): Stage {
     stage ||
     STAGE ||
     NODE_ENV ||
-    process.env.NODE_ENV;
+    process.env.NODE_ENV ||
+    overrideStage;
   // TODO
   if (stageOut === "development") {
     stageOut = "dev";

@@ -1,5 +1,6 @@
 import {
   APIUtils,
+  assertUnreachable,
   BulkAddNoteOpts,
   ConfigWriteOpts,
   DendronAPI,
@@ -38,12 +39,20 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Event, EventEmitter } from "vscode";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
+import { IEngineEventService } from "./EngineEventService";
 
-export class EngineAPIService implements DEngineClient, IEngineAPIService {
+export class EngineAPIService
+  implements DEngineClient, IEngineAPIService, IEngineEventService
+{
   private internalEngine: DEngineClient;
 
   private _trustedWorkspace: boolean = true;
+
+  private _onNoteChangeEmitter = new EventEmitter<NoteProps>();
+  private _onNoteCreatedEmitter = new EventEmitter<NoteProps>();
+  private _onNoteDeletedEmitter = new EventEmitter<NoteProps>();
 
   static createEngine({
     port,
@@ -82,6 +91,24 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
 
   constructor({ engineClient }: { engineClient: DEngineClient }) {
     this.internalEngine = engineClient;
+  }
+
+  get onNoteChange(): Event<NoteProps> {
+    return this._onNoteChangeEmitter.event;
+  }
+
+  get onNoteCreated(): Event<NoteProps> {
+    return this._onNoteCreatedEmitter.event;
+  }
+
+  get onNoteDeleted(): Event<NoteProps> {
+    return this._onNoteDeletedEmitter.event;
+  }
+
+  dispose() {
+    this._onNoteChangeEmitter.dispose();
+    this._onNoteCreatedEmitter.dispose();
+    this._onNoteDeletedEmitter.dispose();
   }
 
   get trustedWorkspace(): boolean {
@@ -167,7 +194,10 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<NoteProps> {
-    return this.internalEngine.updateNote(note, opts);
+    return this.internalEngine.updateNote(note, opts).then((value) => {
+      this._onNoteChangeEmitter.fire(value);
+      return value;
+    });
   }
 
   updateSchema(schema: SchemaModuleProps): Promise<void> {
@@ -186,7 +216,29 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
       }
     }
 
-    return this.internalEngine.writeNote(note, opts);
+    const promise = this.internalEngine.writeNote(note, opts);
+
+    promise.then((value) => {
+      if (!value.error && value.data) {
+        value.data.forEach((entry) => {
+          switch (entry.status) {
+            case "create":
+              this._onNoteCreatedEmitter.fire(entry.note);
+              break;
+            case "update":
+              this._onNoteChangeEmitter.fire(entry.note);
+              break;
+            case "delete":
+              this._onNoteDeletedEmitter.fire(entry.note);
+              break;
+            default:
+              assertUnreachable();
+          }
+        });
+      }
+    });
+
+    return promise;
   }
 
   writeSchema(schema: SchemaModuleProps): Promise<void> {
@@ -200,7 +252,16 @@ export class EngineAPIService implements DEngineClient, IEngineAPIService {
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
-    return this.internalEngine.deleteNote(id, opts);
+    return this.internalEngine.deleteNote(id, opts).then((value) => {
+      if (value.data !== undefined) {
+        value.data.forEach((noteChangeEntry) => {
+          if (noteChangeEntry.status === "delete") {
+            this._onNoteDeletedEmitter.fire(noteChangeEntry.note);
+          }
+        });
+      }
+      return value;
+    });
   }
 
   deleteSchema(

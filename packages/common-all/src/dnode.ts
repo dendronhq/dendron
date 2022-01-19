@@ -1372,10 +1372,11 @@ export class SchemaUtils {
         note.body = tempNote.body;
       }
 
-      // Apply date variable substitution to the body if applicable
+      // Apply date variable substitution to the body based on mustache delimiter if applicable
       // E.g. if template has {{ CURRENT_YEAR }}, new note will contain 2021
       // Use mustache delimiter
-      _.templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g;
+      // TODO: Renable date variable substitution when new format is thought through
+      /*_.templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g;
 
       const currentDate = Time.now();
       const compiledSchemaTemplate = _.template(note.body);
@@ -1386,7 +1387,7 @@ export class SchemaUtils {
         CURRENT_HOUR: currentDate.toFormat("HH"),
         CURRENT_MINUTE: currentDate.toFormat("mm"),
         CURRENT_SECOND: currentDate.toFormat("ss"),
-      });
+      });*/
 
       return true;
     }

@@ -218,6 +218,63 @@ export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   });
 };
 
+/**
+ * Diamond schema is laid out such that:
+ *    bar
+ *   /   \
+ * ch1   ch2
+ *   \   /
+ *    gch
+ * */
+export const setupSchemaWithDiamondGrandchildren: PreSetupHookFunction = async (
+  opts
+) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault = vaults[0];
+  NoteTestUtilsV4.createSchema({
+    fname: "bar",
+    wsRoot,
+    vault,
+    modifier: (schema) => {
+      const schemas = [
+        SchemaUtils.createFromSchemaOpts({
+          id: "bar",
+          parent: "root",
+          fname: "bar",
+          children: ["ch1", "ch2"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "ch1",
+          children: ["gch"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "ch2",
+          children: ["gch"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "gch",
+          template: { id: "template.gch", type: "note" },
+          vault,
+        }),
+      ];
+      schemas.map((s) => {
+        schema.schemas[s.id] = s;
+      });
+      return schema;
+    },
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "gch template",
+    fname: "template.gch",
+    vault,
+  });
+};
+
 export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;
@@ -635,6 +692,7 @@ export const ENGINE_HOOKS = {
   setupBasic,
   setupHierarchyForLookupTests,
   setupSchemaPreseet,
+  setupSchemaWithDiamondGrandchildren,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,
   setupSchemaWithExpansion,

@@ -66,7 +66,9 @@ describe(`schemaParser tests:`, () => {
 
       beforeAll(() => {
         // Bar schemas are at 0 index in the basic setup case.
-        const barSchemaGroup = payload.schemas[0];
+        const barSchemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "bar"
+        )[0];
 
         barSchema = barSchemaGroup.schemas["bar"];
         ch1Schema = barSchemaGroup.schemas["ch1"];
@@ -128,7 +130,83 @@ describe(`schemaParser tests:`, () => {
     // Make sure we aren't forgetting the other schemas that are present.
     it(`THEN 'foo' schema is also present`, () => {
       // Foo schemas are at index [1] in the basic case.
-      const fooSchemaGroup = payload.schemas[1];
+      const fooSchemaGroup = payload.schemas.filter(
+        (sch) => sch.fname === "foo"
+      )[0];
+      expect(fooSchemaGroup.schemas["foo"]).toBeTruthy();
+    });
+  });
+
+  describe(`WHEN parsing non-inlined schema with diamond schema relationship`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithDiamondGrandchildren
+      );
+    });
+
+    it(`THEN payload has no errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND 'bar' related schemas are present`, () => {
+      let barSchema: SchemaProps;
+      let ch1Schema: SchemaProps;
+      let ch2Schema: SchemaProps;
+      let barSchemaGroup: SchemaModuleProps;
+
+      beforeAll(() => {
+        // Bar schemas are at 0 index in the basic setup case.
+        barSchemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "bar"
+        )[0];
+
+        barSchema = barSchemaGroup.schemas["bar"];
+        ch1Schema = barSchemaGroup.schemas["ch1"];
+        ch2Schema = barSchemaGroup.schemas["ch2"];
+
+        expect(barSchema).toBeDefined();
+        expect(ch1Schema).toBeDefined();
+        expect(ch2Schema).toBeDefined();
+      });
+
+      it(`THEN bar schema has 2 children`, () => {
+        expect(barSchema.children.length).toEqual(2);
+      });
+
+      it(`THEN both of the children are accounted`, () => {
+        expect(barSchema.children[0]).toEqual("ch1");
+        expect(barSchema.children[1]).toEqual("ch2");
+      });
+
+      it(`THEN first link to grandchild, grandchild stays as is`, () => {
+        let ch1 = barSchemaGroup.schemas["ch1"];
+        let gch = barSchemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.id).toEqual("gch");
+        expect(gch.parent).toEqual("ch1");
+      });
+
+      it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
+        let ch2 = barSchemaGroup.schemas["ch2"];
+        let gch = barSchemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.id.startsWith("gch_")).toBeTruthy();
+        expect(gch.parent).toEqual("ch2");
+        expect(gch.data.pattern).toEqual("gch");
+      });
+    });
+
+    // Make sure we aren't forgetting the other schemas that are present.
+    it(`THEN 'foo' schema is also present`, () => {
+      // Foo schemas are at index [1] in the basic case.
+      const fooSchemaGroup = payload.schemas.filter(
+        (sch) => sch.fname === "foo"
+      )[0];
       expect(fooSchemaGroup.schemas["foo"]).toBeTruthy();
     });
   });

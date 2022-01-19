@@ -7,6 +7,7 @@ import {
   SchemaUtils,
   Time,
   VaultUtils,
+  Wrap,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { RemarkUtils } from "@dendronhq/engine-server";
@@ -414,7 +415,7 @@ export class WorkspaceWatcher {
       msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
-    this.moveCursorPastFrontmatter(editor);
+    WorkspaceWatcher.moveCursorPastFrontmatter(editor);
     const config = getExtension().getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
@@ -426,7 +427,7 @@ export class WorkspaceWatcher {
     });
   }
 
-  private moveCursorPastFrontmatter(editor: TextEditor) {
+  static moveCursorPastFrontmatter(editor: TextEditor) {
     const ctx = "moveCursorPastFrontmatter";
     const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
       editor.document.getText()
@@ -441,7 +442,7 @@ export class WorkspaceWatcher {
       // But if we move the cursor here, then it overwrites VSCode's move.
       // Worse, when VSCode calls this function the cursor hasn't updated yet
       // so the location will still be 0, so we have to delay a bit to let it update first.
-      setTimeout(() => {
+      Wrap.setTimeout(() => {
         // Since we delayed, a new document could have opened. Make sure we're still in the document we expect
         if (
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath === startFsPath
@@ -451,13 +452,13 @@ export class WorkspaceWatcher {
           if (line === 0 && character === 0) {
             editor.selection = new Selection(position, position);
           } else {
-            Logger.info({
+            Logger.debug({
               ctx,
               msg: "not moving cursor because the cursor was moved before we could get to it",
             });
           }
         } else {
-          Logger.info({
+          Logger.debug({
             ctx,
             msg: "not moving cursor because the document changed before we could move it",
           });

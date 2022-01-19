@@ -1,14 +1,21 @@
 // @ts-nocheck
 
-import { NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  NoteProps,
+  NoteUtils,
+  WorkspaceOpts,
+  Wrap,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { describe } from "mocha";
+import { describe, before, beforeEach, afterEach } from "mocha";
+import sinon from "sinon";
 import path from "path";
 import * as vscode from "vscode";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
+  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   runSuiteButSkipForWindows,
   setupBeforeAfter,
@@ -19,6 +26,7 @@ import { Position } from "vscode";
 import * as _ from "lodash";
 import { WSUtils } from "../../WSUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -176,5 +184,67 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         },
       });
     });
+  });
+
+  describe("GIVEN the user opening a file", () => {
+    describeSingleWS(
+      "WHEN user opens the file for the first time",
+      { ctx },
+      () => {
+        let note: NoteProps;
+        before(async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          note = await NoteTestUtilsV4.createNoteWithEngine({
+            engine,
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+          });
+        });
+        test("THEN the cursor moves past the frontmatter", async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const stubTimeout = sinon.stub(Wrap, "setTimeout");
+          const editor = await WSUtils.openNote(note);
+          WorkspaceWatcher.moveCursorPastFrontmatter(editor);
+          stubTimeout.callArg(0);
+          // the selection should have been moved past the frontmatter
+          const { line, character } = editor.selection.active;
+          expect(line).toEqual(7);
+          expect(character).toEqual(3);
+          stubTimeout.restore();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "WHEN the user opens the file through the search",
+      { ctx },
+      () => {
+        let note: NoteProps;
+        before(async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          note = await NoteTestUtilsV4.createNoteWithEngine({
+            engine,
+            fname: "test",
+            vault: vaults[0],
+            wsRoot,
+          });
+        });
+        test("THEN the cursor moves past the frontmatter", async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const stubTimeout = sinon.stub(Wrap, "setTimeout");
+          const editor = await WSUtils.openNote(note);
+          // pre-move the selection, like what would happen when opening through the serach
+          editor.selection = new vscode.Selection(5, 0, 5, 0);
+          WorkspaceWatcher.moveCursorPastFrontmatter(editor);
+          stubTimeout.callArg(0);
+          // the selection didn't move from what it was before
+          const { line, character } = editor.selection.active;
+          expect(line).toEqual(5);
+          expect(character).toEqual(0);
+          stubTimeout.restore();
+        });
+      }
+    );
   });
 });

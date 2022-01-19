@@ -865,3 +865,19 @@ export function cleanName(name: string): string {
 export function normalizeUnixPath(fsPath: string): string {
   return path.posix.format(path.parse(fsPath));
 }
+
+/** Wrapper(s) for easier testing, to wrap functions where we don't want to mock the global function. */
+export class Wrap {
+  /** A useless wrapper around `setTimeout`. Useful for testing.
+   *
+   * If you are testing code that uses `setTimeout`, you can switch that code over to this wrapper instead,
+   * and then mock the wrapper. We can't entirely mock `setTimeout` because that seems to break VSCode.
+   */
+  static setTimeout(
+    callback: (...args: any[]) => void,
+    ms: number,
+    ...args: any[]
+  ) {
+    return setTimeout(callback, ms, ...args);
+  }
+}

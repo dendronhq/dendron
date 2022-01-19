@@ -7,6 +7,7 @@ import {
   SchemaUtils,
   Time,
   VaultUtils,
+  Wrap,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { RemarkUtils } from "@dendronhq/engine-server";
@@ -39,6 +40,8 @@ import {
   getExtension,
   getVaultFromUri,
 } from "./workspace";
+
+const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
 interface DebouncedFunc<T extends (...args: any[]) => any> {
   /**
@@ -412,7 +415,7 @@ export class WorkspaceWatcher {
       msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
-    this.moveCursorPastFrontmatter(editor);
+    WorkspaceWatcher.moveCursorPastFrontmatter(editor);
     const config = getExtension().getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
@@ -423,15 +426,44 @@ export class WorkspaceWatcher {
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
   }
-  private moveCursorPastFrontmatter(editor: TextEditor) {
+
+  static moveCursorPastFrontmatter(editor: TextEditor) {
+    const ctx = "moveCursorPastFrontmatter";
     const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
       editor.document.getText()
     );
+    const startFsPath = editor.document.uri.fsPath;
     if (!_.isUndefined(nodePosition)) {
       const position = VSCodeUtils.point2VSCodePosition(nodePosition.end, {
         line: 1,
       });
-      editor.selection = new Selection(position, position);
+      // If the user opened the document with something like the search window,
+      // then VSCode is supposed to move the cursor to where the match is.
+      // But if we move the cursor here, then it overwrites VSCode's move.
+      // Worse, when VSCode calls this function the cursor hasn't updated yet
+      // so the location will still be 0, so we have to delay a bit to let it update first.
+      Wrap.setTimeout(() => {
+        // Since we delayed, a new document could have opened. Make sure we're still in the document we expect
+        if (
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath === startFsPath
+        ) {
+          const { line, character } = editor.selection.active;
+          // Move the cursor, but only if it hasn't already been moved by VSCode, another extension, or a very quick user
+          if (line === 0 && character === 0) {
+            editor.selection = new Selection(position, position);
+          } else {
+            Logger.debug({
+              ctx,
+              msg: "not moving cursor because the cursor was moved before we could get to it",
+            });
+          }
+        } else {
+          Logger.debug({
+            ctx,
+            msg: "not moving cursor because the document changed before we could move it",
+          });
+        }
+      }, MOVE_CURSOR_PAST_FRONTMATTER_DELAY);
     }
   }
 

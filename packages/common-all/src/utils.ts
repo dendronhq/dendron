@@ -17,6 +17,7 @@ import {
   NoteProps,
   SEOProps,
   NotePropsDict,
+  LegacyDuplicateNoteBehavior,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
@@ -38,6 +39,7 @@ import {
 import { isWebUri } from "./util/regex";
 import {
   DendronPublishingConfig,
+  DuplicateNoteBehavior,
   genDefaultPublishingConfig,
   HierarchyConfig,
 } from "./types/configs/publishing/publishing";
@@ -752,6 +754,44 @@ export class ConfigUtils {
     return ConfigUtils.getPublishingConfig(config).assetsPrefix;
   }
 
+  static getEnableContainers(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.useContainers
+      : ConfigUtils.getPublishing(config).enableContainers;
+  }
+
+  static getEnableRandomlyColoredTags(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? !ConfigUtils.getSite(config)?.noRandomlyColoredTags
+      : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
+  }
+
+  static getEnablePrettlyLinks(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.usePrettyLinks
+      : ConfigUtils.getPublishing(config).enablePrettyLinks;
+  }
+
+  static getGATracking(config: IntermediateDendronConfig): string | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.ga_tracking
+      : ConfigUtils.getPublishing(config).ga?.tracking;
+  }
+
+  static getSiteLastModified(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.siteLastModified
+      : ConfigUtils.getPublishing(config).enableSiteLastModified;
+  }
+
   static getSiteLogoUrl(config: IntermediateDendronConfig): string | undefined {
     const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
     const logo = ConfigUtils.getLogo(config);
@@ -836,6 +876,15 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
+  static setSiteProp<K extends keyof DendronSiteConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronSiteConfig[K]
+  ) {
+    const path = `site.${key}`;
+    _.set(config, path, value);
+  }
+
   static setPublishProp<K extends keyof DendronPublishingConfig>(
     config: IntermediateDendronConfig,
     key: K,
@@ -843,6 +892,66 @@ export class ConfigUtils {
   ) {
     const path = `publishing.${key}`;
     _.set(config, path, value);
+  }
+
+  static overridePublishingConfig(
+    config: IntermediateDendronConfig,
+    value: DendronSiteConfig | DendronPublishingConfig
+  ) {
+    if (configIsV4(config)) {
+      return {
+        ...config,
+        site: value,
+      } as StrictConfigV4;
+    } else {
+      return {
+        ...config,
+        publishing: value,
+      } as StrictConfigV5;
+    }
+  }
+
+  static unsetSiteProp<K extends keyof DendronSiteConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    const path = `site.${key}`;
+    _.unset(config, path);
+  }
+
+  static unsetPublishProp<K extends keyof DendronPublishingConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    const path = `publishing.${key}`;
+    _.unset(config, path);
+  }
+
+  static setDuplicateNoteBehavior(
+    config: IntermediateDendronConfig,
+    value: DuplicateNoteBehavior | LegacyDuplicateNoteBehavior
+  ): void {
+    if (configIsV4(config)) {
+      ConfigUtils.setSiteProp(
+        config,
+        "duplicateNoteBehavior",
+        value as LegacyDuplicateNoteBehavior
+      );
+    } else {
+      ConfigUtils.setPublishProp(
+        config,
+        "duplicateNoteBehavior",
+        value as DuplicateNoteBehavior
+      );
+    }
+  }
+
+  static unsetDuplicateNoteBehavior(config: IntermediateDendronConfig): void {
+    if (configIsV4(config)) {
+      ConfigUtils.unsetSiteProp(config, "duplicateNoteBehavior");
+    } else {
+      ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
+    }
   }
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {

@@ -14,12 +14,13 @@ import {
   OrderedMatcher,
   RenameNoteOpts,
   RespV2,
+  VaultPickerItem,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _, { orderBy } from "lodash";
 import path from "path";
-import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -47,10 +48,6 @@ export const UPDATET_SOURCE = {
 export const CONTEXT_DETAIL = "current note context";
 export const HIERARCHY_MATCH_DETAIL = "hierarchy match";
 export const FULL_MATCH_DETAIL = "hierarchy match and current note context";
-
-export type VaultPickerItem = { vault: DVault; label: string } & Partial<
-  Omit<QuickPickItem, "label">
->;
 
 function isDVaultArray(
   overrides?: VaultPickerItem[] | DVault[]

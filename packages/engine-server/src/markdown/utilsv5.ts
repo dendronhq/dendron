@@ -346,6 +346,9 @@ export class MDUtilsV5 {
               shouldApplyPublishRules
             );
           }
+          const config = data.config as IntermediateDendronConfig;
+          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          const assetsPrefix = publishingConfig.assetsPrefix;
 
           proc = proc.use(dendronPub, {
             insertTitle,
@@ -353,7 +356,6 @@ export class MDUtilsV5 {
             ...data.publishOpts,
           });
 
-          const config = data.config as IntermediateDendronConfig;
           const shouldApplyPublishRules =
             MDUtilsV5.shouldApplyPublishingRules(proc);
 

@@ -5,7 +5,7 @@ import {
   DendronError,
   DEngineClient,
   Disposable,
-  DuplicateNoteAction,
+  DuplicateNoteActionEnum,
   DUser,
   DUtils,
   DVault,
@@ -244,14 +244,27 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     ConfigUtils.setVaults(config, vaults);
 
     // update dup note behavior
-    if (!config.site.duplicateNoteBehavior) {
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    if (!publishingConfig.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getVaults(config);
-      config.site.duplicateNoteBehavior = {
-        action: DuplicateNoteAction.USE_VAULT,
+      const updatedDuplicateNoteBehavior = {
+        action: DuplicateNoteActionEnum.useVault,
         payload: vaults.map((v) => VaultUtils.getName(v)),
       };
-    } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
-      config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
+      ConfigUtils.setDuplicateNoteBehavior(
+        config,
+        updatedDuplicateNoteBehavior
+      );
+    } else if (_.isArray(publishingConfig.duplicateNoteBehavior.payload)) {
+      const updatedDuplicateNoteBehavior =
+        publishingConfig.duplicateNoteBehavior;
+      (updatedDuplicateNoteBehavior.payload as string[]).push(
+        VaultUtils.getName(vault)
+      );
+      ConfigUtils.setDuplicateNoteBehavior(
+        config,
+        updatedDuplicateNoteBehavior
+      );
     }
     if (updateConfig) {
       await this.setConfig(config);
@@ -632,20 +645,25 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         ConfigUtils.setWorkspaceProp(config, "workspaces", workspaces);
       }
     }
-
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (
-      config.site.duplicateNoteBehavior &&
-      _.isArray(config.site.duplicateNoteBehavior.payload)
+      publishingConfig.duplicateNoteBehavior &&
+      _.isArray(publishingConfig.duplicateNoteBehavior.payload)
     ) {
       const vaults = ConfigUtils.getVaults(config);
       if (vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
-        config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
+        ConfigUtils.unsetDuplicateNoteBehavior(config);
       } else {
         // otherwise pull the removed vault from payload
-        config.site.duplicateNoteBehavior.payload = _.pull(
-          config.site.duplicateNoteBehavior.payload,
-          vault.fsPath
+        const updatedDuplicateNoteBehavior =
+          publishingConfig.duplicateNoteBehavior;
+
+        _.pull(updatedDuplicateNoteBehavior.payload as string[], vault.fsPath);
+
+        ConfigUtils.setDuplicateNoteBehavior(
+          config,
+          updatedDuplicateNoteBehavior
         );
       }
     }

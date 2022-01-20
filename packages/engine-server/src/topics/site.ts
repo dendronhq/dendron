@@ -17,6 +17,7 @@ import {
   VaultUtils,
   BooleanResp,
   ConfigUtils,
+  DendronPublishingConfig,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -148,9 +149,9 @@ export class SiteUtils {
     const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
-    config.site = DConfig.cleanSiteConfig(config.site);
-    const sconfig = config.site;
-    const { siteHierarchies } = sconfig;
+
+    const cleanPublishingConfig = DConfig.cleanSiteConfig(config);
+    const { siteHierarchies } = cleanPublishingConfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];
     const hiearchiesToPublish: NotePropsDict[] = [];
@@ -221,7 +222,6 @@ export class SiteUtils {
     const { domain, engine, navOrder, config } = opts;
     const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHiearchy:enter", domain, config });
-    const sconfig = config.site;
     const hConfig = this.getConfigForHierarchy({
       config,
       noteOrName: domain,
@@ -413,6 +413,7 @@ export class SiteUtils {
     return hConfig;
   }
 
+  // TODO: deprecate
   static getDomains(opts: {
     notes: NotePropsDict;
     config: DendronSiteConfig;
@@ -559,7 +560,9 @@ export class SiteUtils {
     return domainNote;
   }
 
-  static validateConfig(sconfig: DendronSiteConfig): BooleanResp {
+  static validateConfig(
+    sconfig: DendronSiteConfig | DendronPublishingConfig
+  ): BooleanResp {
     // asset prefix needs one slash
     if (!_.isUndefined(sconfig.assetsPrefix)) {
       if (!sconfig.assetsPrefix.startsWith("/")) {

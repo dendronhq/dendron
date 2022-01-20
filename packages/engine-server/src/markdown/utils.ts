@@ -437,10 +437,15 @@ export class MDUtilsV4 {
   ) {
     const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
-    const siteNotesDir = config.site.siteNotesDir;
+
+    // siteNotesDir is deprecated in new publishing namespace
+    // and procHTML is not used anywhere other than 11ty and old tests.
+    // TODO: deprecate old procs
+    const siteNotesDir = config.site!.siteNotesDir;
     const absUrl = PublishUtils.getAbsUrlForAsset({ config });
     const linkPrefix = absUrl + "/" + siteNotesDir + "/";
     const wikiLinksOpts = { useId: true, prefix: linkPrefix };
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     let proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,
@@ -451,7 +456,7 @@ export class MDUtilsV4 {
       noteRefOpts: { wikiLinkOpts: wikiLinksOpts, prettyRefs: true },
       publishOpts: {
         assetsPrefix:
-          getStage() === "prod" ? config.site.assetsPrefix : undefined,
+          getStage() === "prod" ? publishingConfig.assetsPrefix : undefined,
         insertTitle: ConfigUtils.getProp(config, "useFMTitle"),
         transformNoPublish: true,
       },
@@ -460,7 +465,8 @@ export class MDUtilsV4 {
       config,
     });
     proc = proc.use(publishSite, { noteIndex });
-    if (config.site.useContainers) {
+    const enableContainers = ConfigUtils.getEnableContainers(config);
+    if (enableContainers) {
       proc = proc.use(containers);
     }
     return MDUtilsV4.procRehype({
@@ -628,7 +634,7 @@ export class PublishUtils {
   }) {
     const suffix = opts.suffix || "";
     const { config } = opts;
-    const { assetsPrefix } = config.site;
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
     const siteUrl = this.getSiteUrl(config);
     let sitePrefix = _.trimEnd(siteUrl, "/");
     if (assetsPrefix) {
@@ -642,8 +648,9 @@ export class PublishUtils {
   }
 
   static getSiteUrl = (config: IntermediateDendronConfig) => {
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (getStage() !== "dev") {
-      const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
+      const siteUrl = process.env["SITE_URL"] || publishingConfig.siteUrl;
       return siteUrl;
     } else {
       return (

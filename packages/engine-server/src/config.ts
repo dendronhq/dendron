@@ -8,6 +8,10 @@ import {
   getStage,
   Time,
   ConfigUtils,
+  DendronPublishingConfig,
+  GithubEditViewModeEnum,
+  CleanDendronPublishingConfig,
+  configIsV4,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -49,29 +53,53 @@ export class DConfig {
     return config;
   }
 
-  static getSiteIndex(sconfig: DendronSiteConfig) {
-    let { siteIndex, siteHierarchies } = sconfig;
+  static getSiteIndex(sconfig: DendronSiteConfig | DendronPublishingConfig) {
+    const { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
 
   /**
    * fill in defaults
    */
-  static cleanSiteConfig(config: DendronSiteConfig): CleanDendronSiteConfig {
-    let out: DendronSiteConfig = _.defaults(config, {
-      copyAssets: true,
-      usePrettyRefs: true,
-      siteNotesDir: "notes",
-      siteFaviconPath: "favicon.ico",
-      gh_edit_link: true,
-      gh_edit_link_text: "Edit this page on GitHub",
-      gh_edit_branch: "main",
-      gh_root: "docs/",
-      gh_edit_view_mode: "edit",
-      writeStubs: true,
-      description: "Personal knowledge space",
-    });
-    let { siteRootDir, siteHierarchies, siteIndex, siteUrl } = out;
+  static cleanSiteConfig(
+    config: IntermediateDendronConfig
+  ): CleanDendronSiteConfig | CleanDendronPublishingConfig {
+    let out: DendronSiteConfig | DendronPublishingConfig;
+    if (configIsV4(config)) {
+      const siteConfig = ConfigUtils.getSite(config);
+      out = _.defaults(siteConfig, {
+        copyAssets: true,
+        usePrettyRefs: true,
+        siteNotesDir: "notes",
+        siteFaviconPath: "favicon.ico",
+        gh_edit_link: true,
+        gh_edit_link_text: "Edit this page on GitHub",
+        gh_edit_branch: "main",
+        gh_root: "docs/",
+        gh_edit_view_mode: "edit",
+        writeStubs: true,
+        description: "Personal knowledge space",
+      });
+    } else {
+      const publishingConfig = ConfigUtils.getPublishing(config);
+      out = _.defaultsDeep(publishingConfig, {
+        copyAssets: true,
+        enablePrettyRefs: true,
+        siteFaviconPath: "favicon.ico",
+        github: {
+          enableEditLink: true,
+          editLinkText: "Edit this page on Github",
+          editBranch: "main",
+          editViewMode: GithubEditViewModeEnum.edit,
+        },
+        writeStubs: true,
+        seo: {
+          description: "Personal Knowledge Space",
+        },
+      });
+    }
+    const { siteRootDir, siteHierarchies } = out;
+    let { siteIndex, siteUrl } = out;
     if (process.env["SITE_URL"]) {
       siteUrl = process.env["SITE_URL"];
     }
@@ -95,7 +123,8 @@ export class DConfig {
         message: `siteHiearchies must have at least one hiearchy`,
       });
     }
-    siteIndex = this.getSiteIndex(config);
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    siteIndex = this.getSiteIndex(publishingConfig);
     return {
       ...out,
       siteIndex,

@@ -1,6 +1,10 @@
 import fs from "fs-extra";
 import path from "path";
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  NoteProps,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
 
@@ -70,7 +74,8 @@ export function getPublicDir() {
 
 export async function getCustomHead() {
   const config = await getConfig();
-  const customHeadPathConfig = config.site.customHeaderPath;
+  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const customHeadPathConfig = publishingConfig.customHeaderPath;
   if (_.isUndefined(customHeadPathConfig)) {
     return null;
   }

@@ -41,12 +41,13 @@ class GitUtils {
     ) {
       return false;
     }
+    const githubConfig = ConfigUtils.getGithubConfig(config);
     return _.every([
-      config.site.gh_edit_link,
-      config.site.gh_edit_link_text,
-      config.site.gh_edit_repository,
-      config.site.gh_edit_branch,
-      config.site.gh_edit_view_mode,
+      githubConfig.gh_edit_link,
+      githubConfig.gh_edit_link_text,
+      githubConfig.gh_edit_repository,
+      githubConfig.gh_edit_branch,
+      githubConfig.gh_edit_view_mode,
     ]);
   };
 
@@ -67,14 +68,15 @@ class GitUtils {
     const vaults = ConfigUtils.getVaults(config);
     const mvault = VaultUtils.matchVaultV2({ vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
-    const gitRepoUrl = config.site.gh_edit_repository;
+    const githubConfig = ConfigUtils.getGithubConfig(config);
+    const gitRepoUrl = githubConfig.editRepository;
     // if we have a vault, we don't need to include the vault name as an offset
     if (mvault && vaultUrl) {
       return _.join(
         [
           this.git2Github(vaultUrl),
-          config.site.gh_edit_view_mode,
-          config.site.gh_edit_branch,
+          githubConfig.editViewMode,
+          githubConfig.editBranch,
           note.fname + ".md",
         ],
         "/"
@@ -95,8 +97,8 @@ class GitUtils {
     return _.join(
       [
         gitRepoUrl,
-        config.site.gh_edit_view_mode,
-        config.site.gh_edit_branch,
+        githubConfig.editViewMode,
+        githubConfig.editBranch,
         gitNotePath,
       ],
       "/"
@@ -123,7 +125,9 @@ export function FooterText() {
     return null;
   }
 
-  const { siteLastModified, gh_edit_link_text } = config.site;
+  const siteLastModified = ConfigUtils.getSiteLastModified(config);
+  const githubConfig = ConfigUtils.getGithubConfig(config);
+
   const lastUpdated = ms2ShortDate(noteActive.updated);
   return (
     <Row>
@@ -141,7 +145,7 @@ export function FooterText() {
               href={GitUtils.githubUrl({ note: noteActive, config })}
               target="_blank"
             >
-              {gh_edit_link_text}
+              {githubConfig.editLinkText}
             </Link>
           )}
         </Col>

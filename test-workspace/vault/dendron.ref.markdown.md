@@ -2,7 +2,7 @@
 id: 9eae08fb-5e3f-4a7e-a989-3f206825d490
 title: Markdown
 desc: ""
-updated: 1627069555582
+updated: 1642663336126
 created: 1614629618966
 ---
 
@@ -53,6 +53,18 @@ graph TD;
 * foo
 * bar
 * baz
+
+#### Numbered list
+
+1. first
+2. second
+3. third
+
+And a list without contents
+
+5.
+6.
+7.
 
 ### Footnotes
 

@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-137-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -372,6 +372,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://invak.id/"><img src="https://avatars.githubusercontent.com/u/38114607?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tsvetomir Bonev</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ainvakid404" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/imalightbulb"><img src="https://avatars.githubusercontent.com/u/66677431?v=4?s=100" width="100px;" alt=""/><br /><sub><b>I'm a lightbulb</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aimalightbulb" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/henry-js"><img src="https://avatars.githubusercontent.com/u/79054685?v=4?s=100" width="100px;" alt=""/><br /><sub><b>James</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ahenry-js" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://www.callum-macdonald.com/"><img src="https://avatars.githubusercontent.com/u/690997?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Callum Macdonald</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=chmac" title="Code">💻</a></td>
   </tr>
 </table>
 

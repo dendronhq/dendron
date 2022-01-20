@@ -1299,6 +1299,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "chmac",
+      "name": "Callum Macdonald",
+      "avatar_url": "https://avatars.githubusercontent.com/u/690997?v=4",
+      "profile": "http://www.callum-macdonald.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

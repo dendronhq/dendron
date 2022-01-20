@@ -4,7 +4,6 @@ import {
   WorkspaceType,
   ConfigUtils,
   LookupSelectionModeEnum,
-  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -16,15 +15,13 @@ import {
   MigrationUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import fs from "fs-extra";
-import path from "path";
 import { describe, test } from "mocha";
 import semver from "semver";
 import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
+import { getExtension, getDWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import {
@@ -32,7 +29,6 @@ import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { readYAML } from "@dendronhq/common-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 
 const getMigration = ({
@@ -338,94 +334,94 @@ suite("Migration", function () {
       });
     });
 
-    test("migrate to 0.70.0 (preview namespace migration)", (done) => {
-      DendronExtension.version = () => "0.70.0";
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        modConfigCb: (config) => {
-          config["useFMTitle"] = false;
-          config["useNoteTitleForLink"] = false;
-          config["mermaid"] = false;
-          config["usePrettyRefs"] = false;
-          config["useKatex"] = false;
-          config["lookupDontBubbleUpCreateNew"] = true;
+    // test("migrate to 0.70.0 (preview namespace migration)", (done) => {
+    //   DendronExtension.version = () => "0.70.0";
+    //   runLegacyMultiWorkspaceTest({
+    //     ctx,
+    //     modConfigCb: (config) => {
+    //       config["useFMTitle"] = false;
+    //       config["useNoteTitleForLink"] = false;
+    //       config["mermaid"] = false;
+    //       config["usePrettyRefs"] = false;
+    //       config["useKatex"] = false;
+    //       config["lookupDontBubbleUpCreateNew"] = true;
 
-          delete config.preview;
+    //       delete config.preview;
 
-          return config;
-        },
-        onInit: async ({ engine, wsRoot }) => {
-          const dendronConfig = DConfig.getRaw(
-            wsRoot
-          ) as IntermediateDendronConfig;
+    //       return config;
+    //     },
+    //     onInit: async ({ engine, wsRoot }) => {
+    //       const dendronConfig = DConfig.getRaw(
+    //         wsRoot
+    //       ) as IntermediateDendronConfig;
 
-          const wsConfig = await getExtension().getWorkspaceSettings();
-          const wsService = new WorkspaceService({ wsRoot });
+    //       const wsConfig = await getExtension().getWorkspaceSettings();
+    //       const wsService = new WorkspaceService({ wsRoot });
 
-          const oldKeys = [
-            "useFMTitle",
-            "useNoteTitleForLink",
-            "mermaid",
-            "usePrettyRefs",
-            "useKatex",
-            "lookupDontBubbleUpCreateNew",
-          ];
+    //       const oldKeys = [
+    //         "useFMTitle",
+    //         "useNoteTitleForLink",
+    //         "mermaid",
+    //         "usePrettyRefs",
+    //         "useKatex",
+    //         "lookupDontBubbleUpCreateNew",
+    //       ];
 
-          const originalDeepCopy = _.cloneDeep(dendronConfig);
+    //       const originalDeepCopy = _.cloneDeep(dendronConfig);
 
-          // deleting here because it's populated during init.
-          dendronConfig["version"] = 3;
-          delete dendronConfig["preview"];
+    //       // deleting here because it's populated during init.
+    //       dendronConfig["version"] = 3;
+    //       delete dendronConfig["preview"];
 
-          // all old configs should exist prior to migration
-          const preMigrationCheckItems = [
-            _.isUndefined(dendronConfig["preview"]),
-            oldKeys.every(
-              (value) => !_.isUndefined(_.get(dendronConfig, value))
-            ),
-          ];
+    //       // all old configs should exist prior to migration
+    //       const preMigrationCheckItems = [
+    //         _.isUndefined(dendronConfig["preview"]),
+    //         oldKeys.every(
+    //           (value) => !_.isUndefined(_.get(dendronConfig, value))
+    //         ),
+    //       ];
 
-          preMigrationCheckItems.forEach((item) => {
-            expect(item).toBeTruthy();
-          });
-          await MigrationService.applyMigrationRules({
-            currentVersion: "0.70.0",
-            previousVersion: "0.70.0",
-            dendronConfig,
-            wsConfig,
-            wsService,
-            logger: Logger,
-            migrations: getMigration({ from: "0.69.0", to: "0.70.0" }),
-          });
+    //       preMigrationCheckItems.forEach((item) => {
+    //         expect(item).toBeTruthy();
+    //       });
+    //       await MigrationService.applyMigrationRules({
+    //         currentVersion: "0.70.0",
+    //         previousVersion: "0.70.0",
+    //         dendronConfig,
+    //         wsConfig,
+    //         wsService,
+    //         logger: Logger,
+    //         migrations: getMigration({ from: "0.69.0", to: "0.70.0" }),
+    //       });
 
-          // backup of the original should exist.
-          const allWSRootFiles = fs.readdirSync(wsRoot, {
-            withFileTypes: true,
-          });
-          const maybeBackupFileName = allWSRootFiles
-            .filter((ent) => ent.isFile())
-            .filter((fileEnt) =>
-              fileEnt.name.includes("migrate-config")
-            )[0].name;
-          expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
+    //       // backup of the original should exist.
+    //       const allWSRootFiles = fs.readdirSync(wsRoot, {
+    //         withFileTypes: true,
+    //       });
+    //       const maybeBackupFileName = allWSRootFiles
+    //         .filter((ent) => ent.isFile())
+    //         .filter((fileEnt) =>
+    //           fileEnt.name.includes("migrate-config")
+    //         )[0].name;
+    //       expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
 
-          const backupContent = readYAML(
-            path.join(wsRoot, maybeBackupFileName)
-          ) as IntermediateDendronConfig;
-          delete backupContent["preview"];
-          expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
+    //       const backupContent = readYAML(
+    //         path.join(wsRoot, maybeBackupFileName)
+    //       ) as IntermediateDendronConfig;
+    //       delete backupContent["preview"];
+    //       expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
 
-          const postMigrationDendronConfig = (await engine.getConfig()).data!;
-          const postMigrationKeys = Object.keys(postMigrationDendronConfig);
-          expect(postMigrationKeys.includes("preview")).toBeTruthy();
-          expect(
-            oldKeys.every((value) => postMigrationKeys.includes(value))
-          ).toBeFalsy();
+    //       const postMigrationDendronConfig = (await engine.getConfig()).data!;
+    //       const postMigrationKeys = Object.keys(postMigrationDendronConfig);
+    //       expect(postMigrationKeys.includes("preview")).toBeTruthy();
+    //       expect(
+    //         oldKeys.every((value) => postMigrationKeys.includes(value))
+    //       ).toBeFalsy();
 
-          done();
-        },
-      });
-    });
+    //       done();
+    //     },
+    //   });
+    // });
   });
 });
 

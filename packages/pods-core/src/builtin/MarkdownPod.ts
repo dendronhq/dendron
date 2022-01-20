@@ -87,13 +87,15 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           nullable: true,
         },
         importFrontmatter: {
-          description: "Import note metadata",
+          description:
+            "Import note metadata. In case of any conflicts, the conflicting fields are prefixed with _import",
           type: "boolean",
-          default: false,
+          default: true,
           nullable: true,
         },
         frontmatterMapping: {
-          description: "metadata key mappings to use incase of conflicts",
+          description:
+            "An optional set of variable mappings, with the key being the variable name in the import source and the value being the resulting variable name in Dendron. See https://wiki.dendron.so/notes/f23a6290-2dec-45dc-b616-c218ee53db6b.html for examples.",
           type: "object",
           nullable: true,
         },
@@ -413,7 +415,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   /**
    * Method to import frontmatter of note. Imports all FM in note.custom,
    * In case of conflict in keys of dendron and imported note, checks frontmatterMapping provided in the
-   * config. If not provided, concatinates '_imported' in imported FM keys.
+   * config. If not provided, concatenates '_imported' in imported FM keys.
    */
   handleFrontmatter(opts: {
     frontmatterMapping?: { [key: string]: any };
@@ -461,7 +463,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       config,
     });
     const notes = this.hDict2Notes(hDict, config);
-    const { importFrontmatter, frontmatterMapping } =
+    const { importFrontmatter = true, frontmatterMapping } =
       config as MarkdownImportPodConfig;
     const notesClean = await Promise.all(
       notes

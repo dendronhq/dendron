@@ -20,9 +20,9 @@ export type PersistedNotionPodConfig = NotionV2PodConfig &
 /**
  * This is the set of parameters required for actual execution of the Pod
  */
-export type RunnableNotionV2PodConfig = Omit<
+export type RunnableNotionV2PodConfig = Pick<
   NotionV2PodConfig,
-  "podId" | "podType"
+  "parentPageId" | "exportScope"
 > &
   Pick<NotionConnection, "apiKey">;
 
@@ -32,7 +32,9 @@ export type RunnableNotionV2PodConfig = Omit<
  * @param object
  * @returns
  */
-export function isRunnableNotionV2PodConfig(object: any) {
+export function isRunnableNotionV2PodConfig(
+  object: any
+): object is RunnableNotionV2PodConfig {
   return (
     object !== undefined &&
     "apiKey" in object &&
@@ -54,10 +56,6 @@ export function createRunnableNotionV2PodConfigSchema(): JSONSchemaType<Runnable
       },
       parentPageId: {
         type: "string",
-      },
-      description: {
-        type: "string",
-        nullable: true,
       },
     },
   };

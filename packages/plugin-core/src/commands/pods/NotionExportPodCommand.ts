@@ -59,6 +59,7 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
   async gatherInputs(
     opts?: Partial<NotionV2PodConfig & NotionConnection>
   ): Promise<RunnableNotionV2PodConfig | undefined> {
+    if (isRunnableNotionV2PodConfig(opts)) return opts;
     let apiKey: string | undefined = opts?.apiKey;
     let connectionId: string | undefined = opts?.connectionId;
 
@@ -104,11 +105,13 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     if (!exportScope) {
       return;
     }
-
-    const pagesMap = await this.getAllNotionPages(apiKey);
-    const parentPage = await this.promptForParentPage(Object.keys(pagesMap));
-    if (_.isUndefined(parentPage)) return;
-    const parentPageId = pagesMap[parentPage];
+    let parentPageId = opts?.parentPageId;
+    if (_.isUndefined(parentPageId)) {
+      const pagesMap = await this.getAllNotionPages(apiKey);
+      const parentPage = await this.promptForParentPage(Object.keys(pagesMap));
+      if (_.isUndefined(parentPage)) return;
+      parentPageId = pagesMap[parentPage];
+    }
 
     const inputs = {
       exportScope,
@@ -119,35 +122,38 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
       connectionId,
     };
 
-    if (!isRunnableNotionV2PodConfig(inputs)) {
-      let id = inputs.podId;
-      if (!id) {
-        const picked = await PodUIControls.promptForGenericId();
+    if (!opts?.podId) {
+      const choice = await PodUIControls.promptToSaveInputChoicesAsNewConfig();
 
-        if (!picked) {
-          return;
-        }
-        id = picked;
+      if (choice !== undefined && choice !== false) {
+        const configPath = ConfigFileUtils.genConfigFileV2({
+          fPath: path.join(
+            getExtension().podsDir,
+            "custom",
+            `config.${choice}.yml`
+          ),
+          configSchema: NotionExportPodV2.config(),
+          setProperties: _.merge(inputs, {
+            podId: choice,
+            podType: PodV2Types.NotionExportV2,
+            connectionId: inputs.connectionId,
+          }),
+        });
+
+        vscode.window
+          .showInformationMessage(
+            `Configuration saved to ${configPath}`,
+            "Open Config"
+          )
+          .then((selectedItem) => {
+            if (selectedItem) {
+              VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
+            }
+          });
       }
-
-      const configPath = ConfigFileUtils.genConfigFileV2({
-        fPath: path.join(getExtension().podsDir, "custom", `config.${id}.yml`),
-        configSchema: NotionExportPodV2.config(),
-        setProperties: _.merge(inputs, {
-          podId: id,
-          connectionId: inputs.connectionId,
-        }),
-      });
-
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(configPath));
-      //TODO: Modify message:
-      window.showInformationMessage(
-        "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again."
-      );
-      return;
-    } else {
-      return inputs;
     }
+
+    return inputs;
   }
 
   public async onExportComplete({

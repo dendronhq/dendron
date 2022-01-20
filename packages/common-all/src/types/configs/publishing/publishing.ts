@@ -45,6 +45,9 @@ export type DendronPublishingConfig = {
   enablePrettyLinks: boolean;
 };
 
+export type CleanDendronPublishingConfig = DendronPublishingConfig &
+  Required<Pick<DendronPublishingConfig, "siteIndex" | "siteUrl">>;
+
 export enum DuplicateNoteActionEnum {
   useVault = "useVault",
 }
@@ -84,6 +87,7 @@ export type GoogleAnalyticsConfig = {
 export function genDefaultPublishingConfig(): DendronPublishingConfig {
   return {
     copyAssets: true,
+    enablePrettyRefs: true,
     siteHierarchies: ["root"],
     writeStubs: false,
     enableContainers: false,

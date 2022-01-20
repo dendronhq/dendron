@@ -318,7 +318,8 @@ suite("VaultAddCommand", function () {
           const config = readYAML(
             path.join(wsRoot, "dendron.yml")
           ) as IntermediateDendronConfig;
-          expect(config.site.duplicateNoteBehavior).toEqual({
+          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          expect(publishingConfig.duplicateNoteBehavior).toEqual({
             action: "useVault",
             payload: [VaultUtils.getName(vault), "vault2"],
           });

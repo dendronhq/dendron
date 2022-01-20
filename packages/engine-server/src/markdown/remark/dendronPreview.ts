@@ -1,5 +1,10 @@
-import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
-import { createLogger, vault2Path } from "@dendronhq/common-server";
+import {
+  APIUtils,
+  AssetGetRequest,
+  ConfigUtils,
+  isWebUri,
+} from "@dendronhq/common-all";
+import { createDisposableLogger, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
 import path from "path";
@@ -10,6 +15,8 @@ import { VFile } from "vfile";
 import { RemarkUtils } from ".";
 import { EngineUtils } from "../../utils";
 import { MDUtilsV5 } from "../utilsv5";
+import fs from "fs-extra";
+import mimeTypes from "mime-types";
 
 type PluginOpts = {};
 
@@ -29,10 +36,10 @@ function handleImage({
   useFullPathUrl?: boolean;
 }) {
   const ctx = "handleImage";
-  const logger = createLogger("handleImage");
+  const { logger, dispose } = createDisposableLogger("handleImage");
   // ignore web images
-  if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
-    logger.info({ ctx, url: node.url });
+  if (isWebUri(node.url)) {
+    logger.debug({ ctx, url: node.url });
     return;
   }
   // assume that the path is relative to vault
@@ -61,6 +68,29 @@ function handleImage({
     useFullPathUrl,
     opts: MDUtilsV5.getProcOpts(proc),
   });
+  dispose();
+}
+
+/** URL encode the image to avoid having to proxy it.
+ *
+ * This might slow down the preview because the engine has to encode all the
+ * images for every preview update. It also means more data has to be
+ * transferred to the preview with each update (with normal operation preview
+ * would have cached the images).
+ */
+function encodeImage(opts: { proc: Unified.Processor; node: Image }) {
+  const { proc, node } = opts;
+  if (isWebUri(node.url)) return;
+  // We need the full path to read the image file
+  handleImage({ ...opts, useFullPathUrl: true });
+  try {
+    const imageFile = fs.readFileSync(node.url);
+    const mime = mimeTypes.lookup(node.url);
+    node.url = `data:${mime};base64,${imageFile.toString("base64")}`;
+  } catch (err) {
+    // If anything happens, defer to original handleImage
+    return handleImage({ proc, node });
+  }
 }
 
 function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {
@@ -68,6 +98,12 @@ function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _index, _parent) => {
       if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
+        // Possible workaround for when preview can't access images directly
+        const { config } = MDUtilsV5.getProcData(proc);
+        if (ConfigUtils.getDev(config)?.enablePreviewDirectImage) {
+          return encodeImage({ proc, node });
+        }
+        // Normally, the engine proxies images for the preview
         return handleImage({ proc, node });
       }
     });

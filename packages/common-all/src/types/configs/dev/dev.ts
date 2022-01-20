@@ -30,6 +30,8 @@ export type DendronDevConfig = {
    * Enable new preview as default
    */
   enablePreviewV2?: boolean;
+  /** When enabled, engine will include images when rendering the preview instead of separately proxying them to the preview. Disabled by default. */
+  enablePreviewDirectImage?: boolean;
 };
 
 /**

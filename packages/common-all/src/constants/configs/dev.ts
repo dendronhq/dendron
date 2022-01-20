@@ -26,4 +26,8 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Enable Preview V2",
     desc: "Use preview V2 as the default preview.",
   },
+  enablePreviewDirectImage: {
+    label: "Enable Preview Direct Image",
+    desc: "Enable the engine to directly encode and send images with the preview instead of proxying them separately. Enabling this may slow down the preview. Defaults to false (images are proxied).",
+  },
 };

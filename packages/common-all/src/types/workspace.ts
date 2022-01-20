@@ -414,6 +414,8 @@ export type DendronDevConfig = {
    * - engine: Uses the engine watcher, watching the files directly without VSCode
    */
   forceWatcherType?: "plugin" | "engine";
+  /** When enabled, engine will include images when rendering the preview instead of separately proxying them to the preview. Disabled by default. */
+  enablePreviewDirectImage?: boolean;
 };
 
 export type DendronSiteConfig = {

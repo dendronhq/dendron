@@ -10,6 +10,7 @@ import { COLORS_LIST } from "./colors";
 import { CONFIG_TO_MINIMUM_COMPAT_MAPPING } from "./constants/configs/compat";
 import {
   DendronSiteConfig,
+  DendronDevConfig,
   DHookDict,
   DVault,
   NoteProps,
@@ -601,6 +602,10 @@ export class ConfigUtils {
     return ConfigUtils.getProp(config, "site");
   }
 
+  static getDev(config: IntermediateDendronConfig): DendronDevConfig {
+    return ConfigUtils.getProp(config, "dev") || {};
+  }
+
   static getVaults(config: IntermediateDendronConfig): DVault[] {
     return ConfigUtils.getWorkspace(config).vaults;
   }
@@ -737,6 +742,10 @@ export class ConfigUtils {
   ) {
     const path = `workspace.${key}`;
     _.set(config, path, value);
+  }
+
+  static setDev(config: IntermediateDendronConfig, dev: DendronDevConfig) {
+    this.setProp(config, "dev", dev);
   }
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {

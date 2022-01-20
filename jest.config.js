@@ -2,7 +2,7 @@ module.exports = {
   preset: "ts-jest",
   clearMocks: true,
   coverageDirectory: "coverage",
-  coverageReporters: ["text", "clover"],
+  coverageReporters: ["text", "clover", "html"],
   coverageThreshold: {
     global: {
       branches: 80,

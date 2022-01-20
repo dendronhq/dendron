@@ -1,4 +1,8 @@
-import { IntermediateDendronConfig, URI } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  URI,
+} from "@dendronhq/common-all";
 import {
   PublishCLICommand,
   PublishCLICommandCLIOpts,
@@ -138,7 +142,7 @@ describe("WHEN run `dendron publish build`", () => {
         async ({ wsRoot }) => {
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.assetsPrefix = "foo";
+              ConfigUtils.setPublishProp(config, "assetsPrefix", "foo");
               return config;
             },
             { wsRoot }
@@ -177,7 +181,7 @@ describe("WHEN run `dendron publish build`", () => {
 
           const cpath = NextjsExportPodUtils.getDendronConfigPath(dest);
           const config = fs.readJSONSync(cpath) as IntermediateDendronConfig;
-          expect(config.site.siteUrl).toEqual(siteUrlOverride);
+          expect(config.publishing!.siteUrl).toEqual(siteUrlOverride);
         },
         {
           expect,

@@ -10,7 +10,7 @@ function genDefaultConfig() {
 const WRITE = {
   NEW_CONFIG: new TestPresetEntryV4(async ({ engine }) => {
     const config = genDefaultConfig();
-    config.site.copyAssets = false;
+    ConfigUtils.setPublishProp(config, "copyAssets", false);
     const resp = await engine.writeConfig({ config });
     const cpath = path.join(engine.configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
     const configOnFile = readYAML(cpath);

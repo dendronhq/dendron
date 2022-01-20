@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  DendronSiteConfig,
+  DendronPublishingConfig,
   DEngineClient,
   DVault,
   DVaultVisibility,
@@ -81,12 +81,16 @@ const setupConfig = ({
   siteConfig,
 }: {
   wsRoot: string;
-  siteConfig?: Partial<DendronSiteConfig>;
+  siteConfig?: Partial<DendronPublishingConfig>;
 }) => {
   TestConfigUtils.withConfig(
     (config) => {
-      config.site.siteUrl = "https://foo.com";
-      config.site = _.merge(config.site, siteConfig);
+      ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
+      const mergedPublishingConfig = _.merge(
+        config.publishing,
+        siteConfig
+      ) as DendronPublishingConfig;
+      ConfigUtils.overridePublishingConfig(config, mergedPublishingConfig);
       return config;
     },
     { wsRoot }
@@ -213,7 +217,11 @@ describe("GIVEN NextExport pod", () => {
                   const vaults = ConfigUtils.getVaults(config);
                   const vault2 = vaults.find((ent) => ent.fsPath === "vault2");
                   vault2!.visibility = DVaultVisibility.PRIVATE;
-                  config.site.siteUrl = "https://foo.com";
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "siteUrl",
+                    "https://foo.com"
+                  );
                   return config;
                 },
                 { wsRoot: opts.wsRoot }
@@ -252,7 +260,7 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.siteUrl = "https://foo.com";
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -284,7 +292,7 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.siteUrl = "https://foo.com";
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -316,8 +324,12 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.siteUrl = "https://foo.com";
-              config.site.assetsPrefix = "/customPrefix";
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
+              ConfigUtils.setPublishProp(
+                config,
+                "assetsPrefix",
+                "/customPrefix"
+              );
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -352,7 +364,7 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.siteUrl = "https://foo.com";
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -391,7 +403,7 @@ describe("nextjs export", () => {
           await ENGINE_HOOKS.setupBasic(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.githubCname = "11ty.dendron.so";
+              ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
               return config;
             },
             { wsRoot: opts.wsRoot }

@@ -12,7 +12,7 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
@@ -257,7 +257,11 @@ describe("hashtag", () => {
               });
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.site.noRandomlyColoredTags = true;
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "enableRandomlyColoredTags",
+                    true
+                  );
                   return config;
                 },
                 { wsRoot }

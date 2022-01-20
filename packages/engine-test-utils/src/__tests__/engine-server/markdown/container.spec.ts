@@ -3,6 +3,7 @@ import { ENGINE_HOOKS } from "../../../presets";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
+import { ConfigUtils } from "@dendronhq/common-all";
 
 describe("containers", () => {
   const containerText = [
@@ -15,8 +16,8 @@ describe("containers", () => {
     name: "REGULAR_CASE",
     setupFunc: async ({ engine, vaults, extra }) => {
       // create copy of engine config
-      let config = { ...engine.config };
-      config.site.useContainers = true;
+      const config = { ...engine.config };
+      ConfigUtils.setPublishProp(config, "enableContainers", true);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV4.procFull({
           engine,

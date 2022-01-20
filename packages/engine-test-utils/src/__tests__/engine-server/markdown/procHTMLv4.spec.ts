@@ -34,9 +34,10 @@ describe("GIVEN procHTMLv4", () => {
               await ENGINE_HOOKS.setupBasic(opts);
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.site.siteUrl = "https://foo.com";
-                  config.site.assetsPrefix = "/customPrefix";
-                  config.site.siteNotesDir = "notes";
+                  // procHTML is still in v4 config. (but never used elsewhere)
+                  config.site!.siteUrl = "https://foo.com";
+                  config.site!.assetsPrefix = "/customPrefix";
+                  config.site!.siteNotesDir = "notes";
                   return config;
                 },
                 { wsRoot: opts.wsRoot }

@@ -165,6 +165,10 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Enable Frontmatter Tags",
       desc: "Show Frontmatter tags in published site.",
     },
+    enableHashesForFMTags: {
+      label: "Enable Hashes for Frontmatter Tags",
+      desc: "Display a `#` symbol in front of frontmatter tags in the tags listing.",
+    },
     enableRandomlyColoredTags: {
       label: "Enable Randomly Colored Tags",
       desc: "Display randomly generated colors for tags.",

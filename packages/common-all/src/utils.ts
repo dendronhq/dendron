@@ -894,6 +894,15 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
+  static setGithubProp<K extends keyof GithubConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: GithubConfig[K]
+  ) {
+    const path = `publishing.github.${key}`;
+    _.set(config, path, value);
+  }
+
   static overridePublishingConfig(
     config: IntermediateDendronConfig,
     value: DendronSiteConfig | DendronPublishingConfig
@@ -909,6 +918,13 @@ export class ConfigUtils {
         publishing: value,
       } as StrictConfigV5;
     }
+  }
+
+  static unsetProp<K extends keyof IntermediateDendronConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    _.unset(config, key);
   }
 
   static unsetSiteProp<K extends keyof DendronSiteConfig>(

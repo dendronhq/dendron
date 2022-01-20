@@ -29,6 +29,7 @@ export type DendronPublishingConfig = {
   siteRepoDir?: string;
   siteUrl?: string;
   enableFrontmatterTags: boolean;
+  enableHashesForFMTags: boolean;
   enableRandomlyColoredTags?: boolean;
   hierarchy?: { [key: string]: HierarchyConfig };
   duplicateNoteBehavior?: DuplicateNoteBehavior;
@@ -97,6 +98,7 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     github: genDefaultGithubConfig(),
     enableSiteLastModified: true,
     enableFrontmatterTags: true,
+    enableHashesForFMTags: false,
     enableRandomlyColoredTags: true,
     enablePrettyLinks: true,
   };

@@ -1,7 +1,7 @@
 import {
   DendronSiteConfig,
   DendronSiteFM,
-  DuplicateNoteAction,
+  DuplicateNoteActionEnum,
   DVault,
   DVaultVisibility,
   NotePropsDict,
@@ -49,7 +49,7 @@ const basicSetup = (preSetupHook?: SetupHookFunction) => ({
 const dupNote = (payload: DVault | string[]) => {
   const out: any = {
     duplicateNoteBehavior: {
-      action: DuplicateNoteAction.USE_VAULT,
+      action: DuplicateNoteActionEnum.useVault,
     },
   };
   if (_.isArray(payload)) {

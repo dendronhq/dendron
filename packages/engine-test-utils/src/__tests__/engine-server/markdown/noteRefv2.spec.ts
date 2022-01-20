@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
   WorkspaceOpts,
@@ -925,7 +926,7 @@ describe("noteRefV2", () => {
         const vault1 = vaults[0];
         TestConfigUtils.withConfig(
           (config) => {
-            config.site.siteHierarchies = ["foo"];
+            ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
             return config;
           },
           { wsRoot }

@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../..";
 import { ENGINE_HOOKS } from "../../../../presets";
@@ -32,7 +33,11 @@ describe("GIVEN image link", () => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.assetsPrefix = "/some-prefix";
+              ConfigUtils.setPublishProp(
+                config,
+                "assetsPrefix",
+                "/some-prefix"
+              );
               return config;
             },
             { wsRoot: opts.wsRoot }

@@ -308,7 +308,7 @@ describe("dendronPub", () => {
           preSetupHook: async ({ wsRoot, vaults }) => {
             TestConfigUtils.withConfig(
               (c) => {
-                c.site.showFrontMatterTags = false;
+                ConfigUtils.setPublishProp(c, "enableFrontmatterTags", false);
                 return c;
               },
               { wsRoot }
@@ -347,7 +347,11 @@ describe("dendronPub", () => {
               });
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.site.useHashesForFMTags = true;
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "enableHashesForFMTags",
+                    true
+                  );
                   return config;
                 },
                 { wsRoot }
@@ -680,7 +684,10 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[dupe]]");
-          const dupNoteVaultPayload = engine.config.site.duplicateNoteBehavior
+          const publishingConfig = ConfigUtils.getPublishingConfig(
+            engine.config
+          );
+          const dupNoteVaultPayload = publishingConfig.duplicateNoteBehavior
             ?.payload as string[];
           await checkVFile(out as any, `dupe in ${dupNoteVaultPayload[0]}`);
         },
@@ -714,7 +721,7 @@ describe("dendronPub", () => {
     test("fail: ambiguous", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
-          delete engine.config.site["duplicateNoteBehavior"];
+          ConfigUtils.unsetPublishProp(engine.config, "duplicateNoteBehavior");
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,

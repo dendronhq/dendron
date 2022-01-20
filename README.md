@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-133-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-134-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -366,6 +366,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/rzd-test"><img src="https://avatars.githubusercontent.com/u/97254261?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rzd-test</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Arzd-test" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.carmenbianca.eu"><img src="https://avatars.githubusercontent.com/u/12065945?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Carmen Bianca Bakker</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=carmenbianca" title="Documentation">📖</a> <a href="#example-carmenbianca" title="Examples">💡</a></td>
     <td align="center"><a href="https://github.com/KamQb"><img src="https://avatars.githubusercontent.com/u/76776123?v=4?s=100" width="100px;" alt=""/><br /><sub><b>KamQb</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=KamQb" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/sahil48"><img src="https://avatars.githubusercontent.com/u/6100774?v=4?s=100" width="100px;" alt=""/><br /><sub><b>sahil48</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asahil48" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

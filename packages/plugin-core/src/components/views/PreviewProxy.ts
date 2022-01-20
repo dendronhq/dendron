@@ -29,7 +29,7 @@ export interface PreviewProxy {
   /**
    * Is the view open? A view can be opened but not visible - for example, if a
    * tab for it exists but it's not in focus in the editor group. If a view is
-   * open, then it is necessarily visible.
+   * visible, then it is necessarily open.
    */
   isOpen(): boolean;
 }

@@ -63,7 +63,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    */
   show(note?: NoteProps): void {
     if (this._panel) {
-      if (!this._panel.visible) {
+      if (!this.isVisible()) {
         this._panel.reveal();
       }
     } else {

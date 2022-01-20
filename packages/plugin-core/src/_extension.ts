@@ -769,6 +769,7 @@ export async function _activate(
       start: startActivate,
       assetUri,
     });
+
     if (DendronExtension.isActive(context)) {
       HistoryService.instance().add({
         source: "extension",
@@ -776,7 +777,10 @@ export async function _activate(
       });
       // If automaticallyShowPreview = true, display preview panel on start up
       const note = WSUtils.getActiveNote();
-      if (note) {
+      if (
+        note &&
+        ws.workspaceService?.config.preview?.automaticallyShowPreview
+      ) {
         PreviewPanelFactory.create(getExtension()).show(note);
       }
 

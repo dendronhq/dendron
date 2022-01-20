@@ -50,7 +50,6 @@ import { Logger } from "../logger";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { BaseCommand } from "./base";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { AutoCompleter } from "../utils/autoCompleter";
 import { AutoCompletable } from "../utils/AutoCompletable";
 import { ExtensionProvider } from "../ExtensionProvider";
 import {
@@ -59,6 +58,8 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
 import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -196,6 +197,16 @@ export class NoteLookupCommand
       initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
       selectionType,
     } as CommandRunOpts);
+
+    let vaultButtonPressed: boolean;
+    if (copts.vaultSelectionMode) {
+      vaultButtonPressed =
+        copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt;
+    } else {
+      vaultButtonPressed =
+        VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
+    }
+
     const ctx = "NoteLookupCommand:gatherInput";
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
@@ -203,8 +214,7 @@ export class NoteLookupCommand
     this._controller = extension.lookupControllerFactory.create({
       nodeType: "note",
       disableVaultSelection,
-      vaultButtonPressed:
-        copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt,
+      vaultButtonPressed,
       extraButtons: [
         MultiSelectBtn.create({ pressed: copts.multiSelect }),
         CopyNoteLinkBtn.create(copts.copyNoteLink),

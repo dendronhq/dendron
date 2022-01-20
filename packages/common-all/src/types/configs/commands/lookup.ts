@@ -7,11 +7,18 @@ export enum LookupSelectionModeEnum {
   none = "none",
 }
 
+export enum LookupSelectVaultModeOnCreateEnum {
+  smart = "smart",
+  alwaysPrompt = "alwaysPrompt",
+}
+
 /**
  * String literal type generated from {@link NoteLookupSelectionBehaviorEnum}
  */
 export type LookupSelectionMode = keyof typeof LookupSelectionModeEnum;
 
+export type LookupSelectVaultModeOnCreate =
+  keyof typeof LookupSelectVaultModeOnCreateEnum;
 /**
  * Namespace for configuring lookup commands
  */
@@ -24,6 +31,7 @@ export type LookupConfig = {
  */
 export type NoteLookupConfig = {
   selectionMode: LookupSelectionMode;
+  vaultSelectionModeOnCreate: LookupSelectVaultModeOnCreate;
   confirmVaultOnCreate: boolean;
   leaveTrace: boolean;
   bubbleUpCreateNew: boolean;
@@ -38,7 +46,8 @@ export function genDefaultLookupConfig(): LookupConfig {
   return {
     note: {
       selectionMode: LookupSelectionModeEnum.extract,
-      confirmVaultOnCreate: false,
+      confirmVaultOnCreate: true,
+      vaultSelectionModeOnCreate: LookupSelectVaultModeOnCreateEnum.smart,
       leaveTrace: false,
       bubbleUpCreateNew: true,
       /**

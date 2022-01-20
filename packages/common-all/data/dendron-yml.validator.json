@@ -244,6 +244,9 @@
         "selectionMode": {
           "$ref": "#/definitions/LookupSelectionMode"
         },
+        "vaultSelectionModeOnCreate": {
+          "$ref": "#/definitions/LookupSelectVaultModeOnCreate"
+        },
         "confirmVaultOnCreate": {
           "type": "boolean"
         },
@@ -259,6 +262,7 @@
       },
       "required": [
         "selectionMode",
+        "vaultSelectionModeOnCreate",
         "confirmVaultOnCreate",
         "leaveTrace",
         "bubbleUpCreateNew",
@@ -275,6 +279,13 @@
         "none"
       ],
       "description": "String literal type generated from  {@link  NoteLookupSelectionBehaviorEnum }"
+    },
+    "LookupSelectVaultModeOnCreate": {
+      "type": "string",
+      "enum": [
+        "smart",
+        "alwaysPrompt"
+      ]
     },
     "RandomNoteConfig": {
       "type": "object",
@@ -927,7 +938,21 @@
           "type": "string"
         },
         "image": {
-          "type": "string"
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "alt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url",
+            "alt"
+          ],
+          "additionalProperties": false,
+          "description": "Default SEO image for published pages"
         },
         "useContainers": {
           "type": "boolean",

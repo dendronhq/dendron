@@ -9,6 +9,8 @@ import {
   ConfigUtils,
   isWebUri,
   getStage,
+  configIsV4,
+  DendronPublishingConfig,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -55,17 +57,29 @@ export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
   mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
 
 function getSiteConfig({
-  siteConfig,
+  config,
   overrides,
 }: {
-  siteConfig: DendronSiteConfig;
-  overrides?: Partial<DendronSiteConfig>;
-}): DendronSiteConfig {
-  return {
-    ...siteConfig,
-    ...overrides,
-    usePrettyLinks: true,
-  };
+  config: IntermediateDendronConfig;
+  overrides?: Partial<DendronSiteConfig> | Partial<DendronPublishingConfig>;
+}): DendronSiteConfig | DendronPublishingConfig {
+  if (configIsV4(config)) {
+    const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
+    return {
+      ...siteConfig,
+      ...overrides,
+      usePrettyLinks: true,
+    } as DendronSiteConfig;
+  } else {
+    const publishingConfig = ConfigUtils.getPublishing(
+      config
+    ) as DendronPublishingConfig;
+    return {
+      ...publishingConfig,
+      ...overrides,
+      enablePrettyLinks: true,
+    } as DendronPublishingConfig;
+  }
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
@@ -236,7 +250,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     siteConfig,
     dest,
   }: {
-    siteConfig: DendronSiteConfig;
+    siteConfig: DendronSiteConfig | DendronPublishingConfig;
     dest: URI;
   }) {
     // add .env.production, next will use this to replace `process.env` vars when building
@@ -384,20 +398,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
-    // TODO: rewrite override logic to follow v5 namespace
-    // but respect v4 values if present.
+
     const siteConfig = getSiteConfig({
-      siteConfig: engine.config.site,
+      config: engine.config,
       overrides: podConfig.overrides,
     });
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const engineConfig: IntermediateDendronConfig = {
-      ...engine.config,
-      site: siteConfig,
-    };
+    const engineConfig: IntermediateDendronConfig =
+      ConfigUtils.overridePublishingConfig(engine.config, siteConfig);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,

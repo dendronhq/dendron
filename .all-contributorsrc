@@ -1280,6 +1280,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "imalightbulb",
+      "name": "I'm a lightbulb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66677431?v=4",
+      "profile": "https://github.com/imalightbulb",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

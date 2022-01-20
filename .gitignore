@@ -3,6 +3,7 @@ node_modules
 /out/
 /logs/
 /build
+packages/coverage
 lerna-debug.log
 local
 vendor

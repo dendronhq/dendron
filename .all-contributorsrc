@@ -1270,6 +1270,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "invakid404",
+      "name": "Tsvetomir Bonev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38114607?v=4",
+      "profile": "https://invak.id/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

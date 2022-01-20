@@ -1410,54 +1410,24 @@ export class SchemaUtils {
    *
    * @returns True if template type is "note". False otherwise
    */
-  static async applyTemplate(opts: {
-    template: SchemaTemplate;
+  static applyTemplate(opts: {
+    templateNote: NoteProps;
     note: NoteProps;
     engine: DEngineClient;
   }) {
-    let tempNote: NoteProps | undefined;
-    let vaultToSearch: DVault | undefined;
-    const { template, note, engine } = opts;
-    if (template.type === "note") {
-      const { link, vaultName } = this.parseDendronURI(template.id);
+    const { templateNote, note } = opts;
+    if (templateNote.type === "note") {
+      const tempNoteProps = _.pick(templateNote, this.TEMPLATE_COPY_PROPS);
 
-      // If vault name is specified in template, search notes by vault (if valid vault) and template id
-      if (!_.isUndefined(vaultName)) {
-        vaultToSearch = VaultUtils.getVaultByName({
-          vname: vaultName,
-          vaults: engine.vaults,
-        });
-        if (!_.isUndefined(vaultToSearch)) {
-          // Vault + template id should be unique so there should be at most 1 match
-          tempNote = NoteUtils.getNoteByFnameFromEngine({
-            fname: link,
-            engine,
-            vault: vaultToSearch,
-          });
-        }
-      }
-
-      // If vault is not specified in template, search notes by template id
-      if (_.isUndefined(vaultName)) {
-        tempNote = await NoteUtils.getNoteFromMultiVaultWithPrompt({
-          fname: link,
-          engineClient: engine,
-        });
-      }
-      if (_.isUndefined(tempNote)) {
-        throw Error(`No template found for ${template.id}`);
-      }
-
-      const tempNoteProps = _.pick(tempNote, this.TEMPLATE_COPY_PROPS);
       _.forEach(tempNoteProps, (v, k) => {
         // @ts-ignore
         note[k] = v;
       });
       // If note body exists, append template's body instead of overriding
       if (note.body) {
-        note.body += `\n${tempNote.body}`;
+        note.body += `\n${templateNote.body}`;
       } else {
-        note.body = tempNote.body;
+        note.body = templateNote.body;
       }
 
       // Apply date variable substitution to the body based on mustache delimiter if applicable

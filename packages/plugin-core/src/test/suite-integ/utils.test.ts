@@ -1,8 +1,8 @@
-import { VaultUtils } from "@dendronhq/common-all";
+import { VaultPickerItem, VaultUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import sinon from "sinon";
-import { PickerUtilsV2, VaultPickerItem } from "../../components/lookup/utils";
+import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";

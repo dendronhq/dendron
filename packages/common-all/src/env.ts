@@ -12,12 +12,13 @@ let overrideStage: string | undefined;
  * `const {stage} = process.env;`.
  */
 function getProcEnvs() {
-  const stage = process?.env["stage"];
-  const NODE_ENV = process?.env["NODE_ENV"];
-  const STAGE = process?.env["STAGE"];
-  const REACT_APP_STAGE = process?.env["REACT_APP_STAGE"];
-  const BUILD_STAGE = process?.env["BUILD_STAGE"];
-  const GITHUB_ACTIONS = process?.env["GITHUB_ACTIONS"];
+  const _env = process?.env || ({} as any);
+  const stage = _env["stage"];
+  const NODE_ENV = _env["NODE_ENV"];
+  const STAGE = _env["STAGE"];
+  const REACT_APP_STAGE = _env["REACT_APP_STAGE"];
+  const BUILD_STAGE = _env["BUILD_STAGE"];
+  const GITHUB_ACTIONS = _env["GITHUB_ACTIONS"];
   return {
     stage,
     NODE_ENV,

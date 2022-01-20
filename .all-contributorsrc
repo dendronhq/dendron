@@ -1261,6 +1261,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "sahil48",
+      "name": "sahil48",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6100774?v=4",
+      "profile": "https://github.com/sahil48",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

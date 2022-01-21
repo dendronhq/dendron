@@ -1,12 +1,12 @@
 import {
-  WorkspaceType,
-  DWorkspaceV2,
-  WorkspaceSettings,
   DEngineClient,
   DVault,
+  DWorkspaceV2,
+  WorkspaceSettings,
+  WorkspaceType,
 } from "@dendronhq/common-all";
-import { IWorkspaceService } from "@dendronhq/engine-server";
-import { ExtensionContext, FileSystemWatcher, Disposable } from "vscode";
+import { IWorkspaceService, WorkspaceService } from "@dendronhq/engine-server";
+import { Disposable, ExtensionContext, FileSystemWatcher } from "vscode";
 import { ICommandFactory } from "../commandFactoryInterface";
 import { ILookupControllerV3Factory } from "../components/lookup/LookupControllerV3Interface";
 import {
@@ -21,23 +21,27 @@ import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 
 /**
- * Mock version of IDendronExtension for testing purposes. Right now, only
- * getEngine() and context are implemented. If you require additional
+ * Mock version of IDendronExtension for testing purposes. If you require additional
  * functionality for your tests, either add it here, or extend this class for
  * your own testing scenario
  */
 export class MockDendronExtension implements IDendronExtension {
-  private _engine: DEngineClient;
-  private _context: ExtensionContext;
-  private _wsRoot: string;
+  private _engine: DEngineClient | undefined;
+  private _context: ExtensionContext | undefined;
+  private _wsRoot: string | undefined;
   private _vaults: DVault[] | undefined;
 
-  constructor(
-    engine: DEngineClient,
-    wsRoot: string,
-    context: ExtensionContext,
-    vaults?: DVault[]
-  ) {
+  constructor({
+    engine,
+    wsRoot,
+    context,
+    vaults,
+  }: {
+    engine?: DEngineClient;
+    wsRoot?: string;
+    context?: ExtensionContext;
+    vaults?: DVault[];
+  }) {
     this._engine = engine;
     this._context = context;
     this._wsRoot = wsRoot;
@@ -46,6 +50,9 @@ export class MockDendronExtension implements IDendronExtension {
 
   port?: number | undefined;
   get context(): ExtensionContext {
+    if (!this._context) {
+      throw new Error("Context not initialized in MockDendronExtension");
+    }
     return this._context;
   }
 
@@ -64,7 +71,12 @@ export class MockDendronExtension implements IDendronExtension {
     throw new Error("Method not implemented in MockDendronExtension");
   }
   get workspaceService(): IWorkspaceService | undefined {
-    throw new Error("Method not implemented in MockDendronExtension");
+    if (!this._wsRoot) {
+      throw new Error("WSRoot not initialized in MockDendronExtension");
+    }
+    return new WorkspaceService({
+      wsRoot: this._wsRoot,
+    });
   }
   get noteSyncService(): INoteSyncService {
     throw new Error("Method not implemented in MockDendronExtension");
@@ -138,7 +150,7 @@ export class MockDendronExtension implements IDendronExtension {
     throw new Error("Method not implemented in MockDendronExtension.");
   }
   addDisposable(_disposable: Disposable): void {
-    throw new Error("Method not implemented in MockDendronExtension.");
+    this._context?.subscriptions.push(_disposable);
   }
 
   /**
@@ -146,6 +158,9 @@ export class MockDendronExtension implements IDendronExtension {
    * @returns
    */
   getEngine(): IEngineAPIService {
+    if (!this._engine) {
+      throw new Error("Engine not initialized in MockDendronExtension");
+    }
     return this._engine as IEngineAPIService;
   }
 }

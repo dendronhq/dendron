@@ -1,6 +1,6 @@
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
-import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
@@ -15,9 +15,17 @@ export class WindowWatcher {
   ) => void)[] = [];
 
   private _extension: IDendronExtension;
+  private _preview: PreviewProxy;
 
-  constructor(extension: IDendronExtension) {
+  constructor({
+    extension,
+    previewProxy,
+  }: {
+    extension: IDendronExtension;
+    previewProxy: PreviewProxy;
+  }) {
     this._extension = extension;
+    this._preview = previewProxy;
   }
 
   activate() {
@@ -66,8 +74,13 @@ export class WindowWatcher {
           window.activeTextEditor?.document.uri.fsPath
       ) {
         const uri = editor.document.uri;
-        this.triggerNotePreviewUpdate(editor);
-        if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+        if (
+          !WorkspaceUtils.isPathInWorkspace({
+            wsRoot: this._extension.getDWorkspace().wsRoot,
+            vaults: this._extension.getDWorkspace().vaults,
+            fpath: uri.fsPath,
+          })
+        ) {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });
@@ -78,6 +91,17 @@ export class WindowWatcher {
         this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
           value.call(this, editor)
         );
+
+        // If automatically show preview is enabled, then open the preview
+        // whenever text editor changed, as long as it's not already opened:
+        if (
+          this._extension.workspaceService?.config.preview
+            ?.automaticallyShowPreview
+        ) {
+          if (!this._preview.isOpen()) {
+            this._preview.show();
+          }
+        }
       } else {
         Logger.info({ ctx, editor: "undefined" });
       }
@@ -115,12 +139,5 @@ export class WindowWatcher {
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
     debouncedUpdateDecorations.debouncedFn(editor);
     return;
-  }
-
-  /**
-   * Show note preview panel if applicable
-   */
-  triggerNotePreviewUpdate({ document }: TextEditor) {
-    return ShowPreviewCommand.openDocumentInPreview(document);
   }
 }

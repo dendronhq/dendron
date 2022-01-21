@@ -34,7 +34,11 @@ suite("NoteTraitManager tests", () => {
         runLegacySingleWorkspaceTest({
           ctx,
           onInit: async ({ engine, wsRoot }) => {
-            const mockExtension = new MockDendronExtension(engine, wsRoot, ctx);
+            const mockExtension = new MockDendronExtension({
+              engine,
+              wsRoot,
+              context: ctx,
+            });
             registrar = new CommandRegistrar(mockExtension);
 
             const traitManager = new NoteTraitManager(registrar);

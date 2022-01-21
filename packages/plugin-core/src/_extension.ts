@@ -779,6 +779,7 @@ export async function _activate(
       start: startActivate,
       assetUri,
     });
+
     if (DendronExtension.isActive(context)) {
       HistoryService.instance().add({
         source: "extension",
@@ -786,8 +787,11 @@ export async function _activate(
       });
       // If automaticallyShowPreview = true, display preview panel on start up
       const note = WSUtils.getActiveNote();
-      if (note) {
-        PreviewPanelFactory.getProxy(getExtension()).showPreviewAndUpdate(note);
+      if (
+        note &&
+        ws.workspaceService?.config.preview?.automaticallyShowPreview
+      ) {
+        PreviewPanelFactory.create(getExtension()).show(note);
       }
 
       return true;
@@ -1134,6 +1138,9 @@ async function _setupCommands(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_PREVIEW.key,
         sentryReportingCallback(async (args) => {
+          if (args === undefined) {
+            args = {};
+          }
           await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
             args
           );

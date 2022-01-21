@@ -41,6 +41,7 @@ import {
   INoteLookupProviderFactory,
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
+import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
@@ -695,7 +696,10 @@ export class DendronExtension implements IDendronExtension {
       throw new Error(`rootDir not set when activating Watcher`);
     }
 
-    const windowWatcher = new WindowWatcher(this);
+    const windowWatcher = new WindowWatcher({
+      extension: this,
+      previewProxy: PreviewPanelFactory.create(this),
+    });
 
     windowWatcher.activate();
     for (const editor of vscode.window.visibleTextEditors) {

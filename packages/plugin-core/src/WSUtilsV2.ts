@@ -25,6 +25,33 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     this.extension = extension;
   }
 
+  getVaultFromPath(fsPath: string): DVault {
+    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    return VaultUtils.getVaultByFilePath({
+      wsRoot,
+      vaults,
+      fsPath,
+    });
+  }
+
+  getNoteFromPath(fsPath: string): NoteProps | undefined {
+    const { engine, wsRoot } = this.extension.getDWorkspace();
+    const fname = path.basename(fsPath, ".md");
+    let vault: DVault;
+    try {
+      vault = this.getVaultFromPath(fsPath);
+    } catch (err) {
+      // No vault
+      return undefined;
+    }
+    return NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      wsRoot,
+      notes: engine.notes,
+    });
+  }
+
   /**
    * Prefer NOT to use this method and instead get WSUtilsV2 passed in as
    * dependency or use IDendronExtension.wsUtils.

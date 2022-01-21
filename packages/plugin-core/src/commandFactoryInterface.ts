@@ -1,17 +1,17 @@
-import vscode from "vscode";
 import { BaseCommand } from "./commands/base";
-import {
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput,
-} from "./commands/ShowPreviewInterface";
 import {
   GoToNoteCommandOpts,
   GoToNoteCommandOutput,
 } from "./commands/GoToNoteInterface";
+import {
+  ShowPreviewCommandOpts,
+  ShowPreviewCommandOutput,
+} from "./commands/ShowPreviewInterface";
+import { PreviewProxy } from "./components/views/PreviewProxy";
 
 export interface ICommandFactory {
   showPreviewCmd(
-    panel: vscode.WebviewPanel
+    panel: PreviewProxy
   ): BaseCommand<ShowPreviewCommandOpts, ShowPreviewCommandOutput>;
 
   goToNoteCmd(): BaseCommand<GoToNoteCommandOpts, GoToNoteCommandOutput>;

@@ -1,6 +1,6 @@
 import { DNodeUtils, NoteProps } from "@dendronhq/common-all";
-import { getDWorkspace } from "../workspace";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export enum ProceedCancel {
   PROCEED = "proceed",
@@ -36,7 +36,7 @@ export class QuickPickUtil {
     notes: NoteProps[]
   ): Promise<NoteProps | undefined> {
     const inputItems = notes.map((ent) => {
-      const workspace = getDWorkspace();
+      const workspace = ExtensionProvider.getDWorkspace();
       return DNodeUtils.enhancePropForQuickInputV3({
         wsRoot: workspace.wsRoot,
         props: ent,

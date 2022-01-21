@@ -1,314 +1,30 @@
-import {
-  DendronEditorViewKey,
-  DendronError,
-  DNoteAnchor,
-  ErrorFactory,
-  ERROR_STATUS,
-  getWebEditorViewEntry,
-  NoteProps,
-  NotePropsDict,
-  NoteUtils,
-  NoteViewMessage,
-  VaultUtils,
-} from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
-import _ from "lodash";
-import open from "open";
-import path from "path";
-import * as vscode from "vscode";
-import {
-  PreviewProxyOpts,
-  PreviewPanelFactory,
-} from "../components/views/PreviewViewFactory";
-import { DENDRON_COMMANDS } from "../constants";
-import { Logger } from "../logger";
-import { QuickPickUtil } from "../utils/quickPick";
-import { WebViewUtils } from "../views/utils";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getEngine, getExtension } from "../workspace";
-import { WSUtils } from "../WSUtils";
-import { InputArgCommand } from "./base";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
-
+import _ from "lodash";
+import path from "path";
+import { PreviewProxy } from "../components/views/PreviewProxy";
+import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { InputArgCommand } from "./base";
 import {
   ShowPreviewCommandOpts,
   ShowPreviewCommandOutput,
 } from "./ShowPreviewInterface";
-import { ExtensionProvider } from "../ExtensionProvider";
-
-export const extractHeaderAnchorIfExists = (
-  link: string
-): DNoteAnchor | undefined => {
-  if (link.indexOf("#") === -1) {
-    return undefined;
-  } else {
-    const tokens = link.split("#");
-    const anchorValue = tokens[tokens.length - 1];
-    return {
-      type: "header",
-      value: anchorValue,
-      depth: tokens.length - 1,
-    };
-  }
-};
 
 /**
- * Extract the last part of the path component
- * @param data
- * @returns
+ * Command to show the preview. If the desire is to programmatically show the
+ * preview webview, then prefer to get an instance of {@link PreviewProxy}
+ * instead of creating an instance of this command.
  */
-export const extractNoteIdFromHref = (data: {
-  id?: string;
-  href?: string;
-}): string | undefined => {
-  if (data.href === undefined) {
-    throw ErrorFactory.createInvalidStateError({ message: `href is missing.` });
-  }
-  // For some cases such as markdown value='[head2](#head2)' the href isn't as nice
-  // and looks like href='http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2'
-  // which currently happens when linking within the same note so we will consider it a special
-  // case of parsing for now and return the id of the current note.
-  if (data.href.includes("vscode/note-preview")) {
-    return data.id;
-  }
-  /**
-   * Will return a link like 'vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foobar'
-   * The path component includes a `/` (eg. `/foobar`) so we remove it
-   */
-  const { path: hrefPath } = vscode.Uri.parse(data.href);
-  const out = path.basename(hrefPath, ".html");
-  return out;
-};
-
-export enum LinkType {
-  WIKI = "WIKI",
-  ASSET = "ASSET",
-  WEBSITE = "WEBSITE",
-  MARKDOWN = "MARKDOWN",
-  UNKNOWN = "UNKNOWN",
-}
-
-/** This wrapper class is mostly here to allow easier stubbing for testing. */
-export class ShowPreviewNoteUtil {
-  static getNoteById(id: string) {
-    return getEngine().notes[id];
-  }
-}
-
-export class ShowPreviewAssetOpener {
-  static async openWithDefaultApp(filePath: string) {
-    await open(filePath).catch((err) => {
-      const error = DendronError.createFromStatus({
-        status: ERROR_STATUS.UNKNOWN,
-        innerError: err,
-      });
-      Logger.error({ error });
-    });
-  }
-}
-
-const vaultlessAssetPath = ({
-  data,
-  wsRoot,
-}: {
-  data: NoteViewMessage["data"];
-  wsRoot: string;
-}) => {
-  const assetPathRelative = data.href?.substring(data.href?.indexOf("assets/"));
-
-  if (assetPathRelative === undefined) {
-    Logger.info({
-      msg: `Did not find 'assets/' string within asset type link.`,
-    });
-    return;
-  }
-  const noteId = data.id;
-  if (noteId === undefined) {
-    Logger.info({
-      msg: `LinkData did not contain note id data:'${ErrorFactory.safeStringify(
-        data
-      )}'`,
-    });
-    return;
-  }
-
-  const note: NoteProps | undefined = ShowPreviewNoteUtil.getNoteById(noteId);
-  if (note === undefined) {
-    Logger.info({
-      msg: `Note was not found for id: '${noteId}'`,
-    });
-    return;
-  }
-
-  const assetPathFull = path.join(
-    vault2Path({ vault: note.vault, wsRoot }),
-    assetPathRelative
-  );
-
-  return assetPathFull;
-};
-
-const handleAssetLink = async ({
-  data,
-  wsRoot,
-}: {
-  data: NoteViewMessage["data"];
-  wsRoot: string;
-}) => {
-  const assetFullPath: undefined | string = vaultlessAssetPath({
-    data,
-    wsRoot,
-  });
-
-  if (assetFullPath === undefined) {
-    Logger.error({
-      msg: `Was not able to construct asset path for data:'${ErrorFactory.safeStringify(
-        data
-      )}' wsRoot:'${wsRoot}'`,
-    });
-    return;
-  }
-
-  await ShowPreviewAssetOpener.openWithDefaultApp(assetFullPath);
-};
-
-export const getNavigationTargetNoteForWikiLink = async ({
-  data,
-  notes,
-}: {
-  data: NoteViewMessage["data"];
-  notes: NotePropsDict;
-}) => {
-  // wiki links will have the following format
-  //
-  // with `prettyLinks` set to false
-  //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo.html'
-  //
-  // with `prettyLinks` set to true
-  //    with anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo'
-  //    without anchor: vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#foobar'
-  //
-  // And when the target of the link is a note in different vault without specifying
-  // the vault explicitly the href is going to have the file name of the node in place of the id:
-  // Example of href note inf different vault without vault specified:
-  // vscode-webview://25d7783e-df29-479c-9838-386c17dbf9b6/dendron.ref.links.target-different-vault
-  //
-  if (!data.href) {
-    throw ErrorFactory.createInvalidStateError({
-      message: `href is missing from data: '${ErrorFactory.safeStringify(
-        data
-      )}'`,
-    });
-  }
-
-  const noteId = extractNoteIdFromHref(data);
-  if (!noteId) {
-    throw ErrorFactory.createInvalidStateError({
-      message: `Failed to extract noteId from '${ErrorFactory.safeStringify(
-        data
-      )}'`,
-    });
-  }
-
-  const anchor = extractHeaderAnchorIfExists(data.href);
-  let note: NoteProps | undefined = notes[noteId];
-
-  if (note === undefined) {
-    // If we could not find the note by the extracted id (when the note is within the same
-    // vault we should have been able to find the note by id) there is a good chance that the name
-    // of the note was in place of the id in the HREF (as in case of navigating to a note
-    // in a different vault without explicit vault specification). Hence we will attempt
-    // to find the note by file name.
-    const candidates = NoteUtils.getNotesByFname({ fname: noteId, notes });
-
-    if (candidates.length === 1) {
-      note = candidates[0];
-    } else if (candidates.length > 1) {
-      // We have more than one candidate hence lets as the user which candidate they would like
-      // to navigate to
-      note = await QuickPickUtil.showChooseNote(candidates);
-    }
-  }
-
-  return {
-    note,
-    anchor,
-  };
-};
-
-export const handleLink = async ({
-  linkType,
-  data,
-  wsRoot,
-}: {
-  linkType: LinkType;
-  data: NoteViewMessage["data"];
-  wsRoot: string;
-}) => {
-  switch (linkType) {
-    case LinkType.ASSET: {
-      await handleAssetLink({ data, wsRoot });
-      break;
-    }
-    case LinkType.WIKI: {
-      try {
-        const noteData = await getNavigationTargetNoteForWikiLink({
-          data,
-          notes: getEngine().notes,
-        });
-
-        if (noteData.note === undefined) {
-          // One valid case for note being undefined if user clicked on target note in
-          // different vault which had ambiguous vault and upon being prompted
-          // to select a note in quick user cancelled.
-          return;
-        }
-
-        return getExtension().commandFactory.goToNoteCmd().execute({
-          qs: noteData.note.fname,
-          vault: noteData.note.vault,
-          column: vscode.ViewColumn.One,
-          anchor: noteData.anchor,
-        });
-      } catch (err) {
-        Logger.error({ error: ErrorFactory.wrapIfNeeded(err) });
-        return;
-      }
-    }
-    case LinkType.WEBSITE: {
-      // Updated preview appears to already open the external links in the browser by itself
-      // Hence running `VSCodeUtils.openLink(data.href!);` causes double opening
-      // of the link within the browser.
-      return;
-    }
-    case LinkType.MARKDOWN: {
-      // assume local note - open relative to current vault
-      const note = getEngine().notes[data.id!];
-      if (!note) return;
-
-      // noteId in this case is name of file
-      const fullPath = path.join(
-        getEngine().wsRoot,
-        VaultUtils.getRelPath(note.vault),
-        note.id
-      );
-      return VSCodeUtils.openLink(fullPath);
-    }
-    default: {
-      // default, do nothing. let vscode link handler handle it
-      return;
-    }
-  }
-};
-
 export class ShowPreviewCommand extends InputArgCommand<
   ShowPreviewCommandOpts,
   ShowPreviewCommandOutput
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
-  _panel: vscode.WebviewPanel;
-  constructor(previewPanel: vscode.WebviewPanel) {
+  _panel: PreviewProxy;
+  constructor(previewPanel: PreviewProxy) {
     super();
     this._panel = previewPanel;
   }
@@ -324,17 +40,55 @@ export class ShowPreviewCommand extends InputArgCommand<
     return { providedFile: !_.isEmpty(opts) };
   }
 
-  public static openNoteInPreview(note: NoteProps, opts?: PreviewProxyOpts) {
-    const extension = ExtensionProvider.getExtension();
-    return PreviewPanelFactory.showNoteWhenReady({ note, opts, extension });
+  /**
+   *
+   * @param opts if a Uri is defined through this parameter, then that Uri will
+   * be shown in preview. If unspecified, then preview will follow default
+   * behavior of showing the contents of the currently in-focus Dendron note.
+   */
+  async execute(opts?: ShowPreviewCommandOpts) {
+    let note: NoteProps | undefined;
+
+    if (!_.isEmpty(opts)) {
+      // Used a context menu to open preview for a specific note
+      try {
+        note = ExtensionProvider.getWSUtils().getNoteFromPath(opts!.path);
+      } catch {
+        // Sometimes VSCode gives us a weird `opts` when no note was selected, so fall back to active note
+        note = ExtensionProvider.getWSUtils().getActiveNote();
+      }
+    } else {
+      // Used the command bar or keyboard shortcut to open preview for active note
+      this._panel.show();
+    }
+
+    if (note) {
+      this._panel.show(note);
+    } else if (opts?.path) {
+      // We can't find the note, so this is not in the Dendron workspace.
+      // Preview the file anyway if it's a markdown file.
+      await this.openFileInPreview(opts.path);
+    } else {
+      // Not file selected for preview, default to open file
+      const editor = VSCodeUtils.getActiveTextEditor();
+      if (editor) {
+        await this.openFileInPreview(editor.document.uri.fsPath);
+      }
+    }
   }
 
-  /** Show a file in the preview. Only use this for files that are not notes, like a markdown file outside any vault. */
-  public static async openFileInPreview(filePath: string) {
+  /**
+   * Show a file in the preview. Only use this for files that are not notes,
+   * like a markdown file outside any vault.
+   * @param filePath
+   * @returns
+   */
+  private async openFileInPreview(filePath: string) {
     // Only preview markdown files
     if (path.extname(filePath) !== ".md") return;
-    const { wsRoot } = getDWorkspace();
-    // If the file is already open in an editor, get the text from there to make sure we have an up-to-date view in case changes are not persisted yet
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    // If the file is already open in an editor, get the text from there to make
+    // sure we have an up-to-date view in case changes are not persisted yet
     const openFile =
       ExtensionProvider.getWSUtils().getMatchingTextDocument(filePath);
     const contents =
@@ -346,69 +100,7 @@ export class ShowPreviewCommand extends InputArgCommand<
       wsRoot,
       contents,
     });
-    return this.openNoteInPreview(
-      dummyFileNote,
-      // Don't sync note because it doesn't actually exist
-      { syncChangedNote: false }
-    );
-  }
 
-  public static openDocumentInPreview(document: vscode.TextDocument) {
-    const maybeNote = WSUtils.tryGetNoteFromDocument(document);
-    if (maybeNote) return this.openNoteInPreview(maybeNote);
-    else return this.openFileInPreview(document.uri.fsPath);
-  }
-
-  async execute(opts?: ShowPreviewCommandOpts) {
-    const ext = getExtension();
-    const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
-    const preserveFocus = true;
-    const port = ext.port!;
-    const engine = ext.getEngine();
-    const { wsRoot } = engine;
-
-    const { bundleName: name } = getWebEditorViewEntry(
-      DendronEditorViewKey.NOTE_PREVIEW
-    );
-
-    const webViewAssets = WebViewUtils.getJsAndCss(name);
-
-    const html = WebViewUtils.getWebviewContent({
-      ...webViewAssets,
-      port,
-      wsRoot,
-      panel: this._panel,
-    });
-
-    this._panel.webview.html = html;
-
-    this._panel.reveal(viewColumn, preserveFocus);
-    let note: NoteProps | undefined;
-
-    if (opts) {
-      // Used a context menu to open preview for a specific note
-      try {
-        note = WSUtils.getNoteFromPath(opts.fsPath);
-      } catch {
-        // Sometimes VSCode gives us a weird `opts` when no note was selected, so fall back to active note
-        note = WSUtils.getActiveNote();
-      }
-    } else {
-      // Used the command bar or keyboard shortcut to open preview for active note
-      note = WSUtils.getActiveNote();
-    }
-
-    if (note) {
-      await ShowPreviewCommand.openNoteInPreview(note);
-    } else if (opts?.path) {
-      // We can't find the note, so this is not in the Dendron workspace.
-      // Preview the file anyway if it's a markdown file.
-      await ShowPreviewCommand.openFileInPreview(opts.fsPath);
-    } else {
-      // Not file selected for preview, default ot open file
-      const editor = VSCodeUtils.getActiveTextEditor();
-      if (editor)
-        await ShowPreviewCommand.openFileInPreview(editor.document.uri.fsPath);
-    }
+    this._panel.show(dummyFileNote);
   }
 }

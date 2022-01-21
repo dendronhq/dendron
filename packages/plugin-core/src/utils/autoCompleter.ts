@@ -4,7 +4,7 @@
 import { FuseEngine } from "@dendronhq/common-all";
 import * as _ from "lodash";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
-import { CREATE_NEW_DETAIL } from "../components/lookup/constants";
+import { CREATE_NEW_DETAIL_LIST } from "../components/lookup/constants";
 
 export class AutoCompleter {
   /**
@@ -143,7 +143,7 @@ export class AutoCompleter {
     const fnames = _.uniq(
       _quickPick.items
         // Remove create new since it does not make sense for name auto completion.
-        .filter((item) => item.detail !== CREATE_NEW_DETAIL)
+        .filter((item) => CREATE_NEW_DETAIL_LIST.includes(item.detail || ""))
         .map((item) => item.fname)
     );
 

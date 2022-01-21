@@ -41,10 +41,10 @@ import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Event, EventEmitter } from "vscode";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
-import { IEngineEventService } from "./EngineEventService";
+import { EngineEvents } from "./EngineEventService";
 
 export class EngineAPIService
-  implements DEngineClient, IEngineAPIService, IEngineEventService
+  implements DEngineClient, IEngineAPIService, EngineEvents
 {
   private internalEngine: DEngineClient;
 

@@ -516,7 +516,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2(this);
+        const provider = new DendronTreeViewV2(this, this._engine!); // TODO: Check ! here
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;

@@ -211,6 +211,63 @@ describe(`schemaParser tests:`, () => {
     });
   });
 
+  describe(`WHEN parsing schema with inclusion of Diamond.`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+    let includesExpansion: SchemaModuleProps;
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithIncludeOfDiamond
+      );
+
+      includesExpansion = payload.schemas.filter(
+        (sch) => sch.fname === "includesDiamond"
+      )[0];
+    });
+
+    it(`THEN payload does NOT have errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND parses schema that includes diamond schema`, () => {
+      it(`THEN reference a schema from diamond include`, () => {
+        expect(
+          includesExpansion.schemas["includesDiamond"].children[0]
+        ).toEqual("a-ch1");
+        expect(
+          includesExpansion.schemas["includesDiamond"].children[1]
+        ).toEqual("a-ch2");
+      });
+
+      it(`THEN diamond include is appropriately cloned`, () => {
+        expect(includesExpansion.schemas["a-ch1"].children[0]).toEqual(
+          "withDiamond.gch"
+        );
+        expect(
+          includesExpansion.schemas["a-ch2"].children[0].startsWith(
+            "withDiamond.gch_"
+          )
+        ).toBeTruthy();
+
+        const assertContainsExpectedSchema = (id: string) => {
+          const schema = includesExpansion.schemas[id];
+
+          expect(schema.data!.template!.id).toEqual("template.test");
+          expect(schema.data!.template!.type).toEqual("note");
+        };
+        assertContainsExpectedSchema(
+          includesExpansion.schemas["a-ch1"].children[0]
+        );
+        assertContainsExpectedSchema(
+          includesExpansion.schemas["a-ch2"].children[0]
+        );
+      });
+    });
+  });
+
   describe(`WHEN parsing non-inlined schema with patterns`, () => {
     let payload: {
       schemas: SchemaModuleProps[];

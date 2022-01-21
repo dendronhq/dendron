@@ -326,6 +326,79 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
 };
 
 /**
+ * Sets up schema which includes a schema that has Diamond grandchildren
+ *
+ * */
+export const setupSchemaWithIncludeOfDiamond: PreSetupHookFunction = async (
+  opts
+) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault1 = vaults[0];
+
+  const withDiamond = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "withDiamond.schema.yml"
+  );
+  fs.writeFileSync(
+    withDiamond,
+    `
+version: 1
+schemas:
+  - id: withDiamond
+    children:
+      - ch1
+      - ch2
+    title: withDiamond
+    parent: root
+  - id: ch1
+    children:
+      - gch
+  - id: ch2
+    children:
+      - gch
+  - id: gch
+    template: template.test
+`
+  );
+
+  const includesDiamondPath = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "includesDiamond.schema.yml"
+  );
+  fs.writeFileSync(
+    includesDiamondPath,
+    `
+version: 1
+
+imports:
+  - withDiamond
+
+schemas:
+  - id: includesDiamond
+    parent: root
+    namespace: true
+    children:
+      - a-ch1
+      - a-ch2
+  - id: a-ch1
+    children:
+      - withDiamond.gch
+  - id: a-ch2
+    children:
+      - withDiamond.gch
+`
+  );
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "template.test",
+    vault: vault1,
+  });
+};
+
+/**
  * Sets up workspace which has a schema that uses YAML expansion syntax ('<<' type of expansion). */
 export const setupSchemaWithExpansion: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
@@ -693,6 +766,7 @@ export const ENGINE_HOOKS = {
   setupHierarchyForLookupTests,
   setupSchemaPreseet,
   setupSchemaWithDiamondGrandchildren,
+  setupSchemaWithIncludeOfDiamond,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,
   setupSchemaWithExpansion,

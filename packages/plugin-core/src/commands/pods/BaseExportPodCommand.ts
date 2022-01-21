@@ -329,6 +329,7 @@ export abstract class BaseExportPodCommand<
   }
 
   addAnalyticsPayload(opts: { config: Config; payload: NoteProps[] }) {
+    if (_.isUndefined(opts)) return;
     return {
       exportScope: opts.config.exportScope,
     };

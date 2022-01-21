@@ -327,10 +327,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
               childClone.data === undefined ||
               childClone.data.pattern === undefined
             ) {
-              if (childClone.data === undefined) {
-                childClone.data = {};
-              }
-              childClone.data.pattern = childId;
+              _.set(childClone, "data.pattern", childId);
             }
 
             // Parent likely already has a reference to the original child identifier

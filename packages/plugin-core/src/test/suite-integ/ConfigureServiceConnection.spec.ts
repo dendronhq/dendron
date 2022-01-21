@@ -20,17 +20,22 @@ suite("ConfigureServiceConnection", function () {
     },
   });
 
-  describe("WHEN there is no service config present for selected Service Type", () => {
-    test("THEN new service config miust be created", (done) => {
+  describe("WHEN ConfigureServiceConnection is run with Create New option", () => {
+    test("THEN new service config must be created", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async () => {
           const cmd = new ConfigureServiceConnection();
+          sinon.stub(vscode.window, "showQuickPick").returns(
+            Promise.resolve({
+              label: "Create New Service Config",
+            }) as Thenable<vscode.QuickPickItem>
+          );
           const serviceType = ExternalService.Airtable;
-          cmd.gatherInputs = async () => {
-            return { serviceType };
-          };
+          sinon
+            .stub(PodUIControls, "promptForExternalServiceType")
+            .returns(Promise.resolve(serviceType));
           sinon
             .stub(PodUIControls, "promptForGenericId")
             .returns(Promise.resolve("airtable"));
@@ -48,24 +53,18 @@ suite("ConfigureServiceConnection", function () {
     });
   });
 
-  describe("WHEN service config for selected Service Type is present", () => {
+  describe("WHEN service config are present", () => {
     test("THEN service config of selected connection Id must open ", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async () => {
           const cmd = new ConfigureServiceConnection();
-          const serviceType = ExternalService.Airtable;
-          cmd.gatherInputs = async () => {
-            return { serviceType };
-          };
-          sinon
-            .stub(vscode.window, "showQuickPick")
-            .returns(
-              Promise.resolve({
-                label: "airtable-2",
-              }) as Thenable<vscode.QuickPickItem>
-            );
+          sinon.stub(vscode.window, "showQuickPick").returns(
+            Promise.resolve({
+              label: "airtable-2",
+            }) as Thenable<vscode.QuickPickItem>
+          );
           //setup
           const configPath = path.join(
             getExtension().podsDir,

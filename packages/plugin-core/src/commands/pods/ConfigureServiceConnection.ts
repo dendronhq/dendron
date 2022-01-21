@@ -1,7 +1,4 @@
-import {
-  ExternalConnectionManager,
-  ExternalService,
-} from "@dendronhq/pods-core";
+import { ExternalConnectionManager } from "@dendronhq/pods-core";
 import path from "path";
 import { QuickPickItem, Uri, window } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
@@ -12,9 +9,7 @@ import { BasicCommand } from "../base";
 
 type CommandOutput = void;
 
-type CommandInput = { serviceType: ExternalService };
-
-type CommandOpts = CommandInput;
+type CommandOpts = {};
 
 export class ConfigureServiceConnection extends BasicCommand<
   CommandOpts,
@@ -22,40 +17,35 @@ export class ConfigureServiceConnection extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONFIGURE_SERVICE_CONNECTION.key;
 
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const serviceType = await PodUIControls.promptForExternalServiceType();
-    if (!serviceType) return;
-    return {
-      serviceType,
-    };
-  }
-
-  async execute(opts: CommandOpts) {
+  async execute(_opts: CommandOpts) {
     const ctx = { ctx: "ConfigureServiceConnection" };
-    const { serviceType } = opts;
-    this.L.info({ ctx, serviceType, msg: "enter" });
+    this.L.info({ ctx, msg: "enter" });
     let configFilePath: string;
     const mngr = new ExternalConnectionManager(getExtension().podsDir);
-    const existingConnections = await mngr.getAllConfigsByType(serviceType);
-    if (existingConnections.length > 0) {
-      const items = existingConnections.map<QuickPickItem>((value) => {
-        return { label: value.connectionId };
-      });
-      const userChoice = await window.showQuickPick(items, {
+    const allServiceConfigs = await mngr.getAllValidConfigs();
+    const items = allServiceConfigs.map<QuickPickItem>((value) => {
+      return { label: value.connectionId };
+    });
+    const createNewServiceLabel = { label: "Create New Service Config" };
+    const userChoice = await window.showQuickPick(
+      items.concat(createNewServiceLabel),
+      {
         title: "Pick the service connection config",
         ignoreFocusOut: true,
-      });
-      if (!userChoice) return;
+      }
+    );
+    if (!userChoice) return;
+    if (userChoice.label === createNewServiceLabel.label) {
+      const serviceType = await PodUIControls.promptForExternalServiceType();
+      if (!serviceType) return;
+      await PodUIControls.createNewServiceConfig(serviceType);
+    } else {
       const configRoothPath = mngr.configRootPath;
       configFilePath = path.join(
         configRoothPath,
         `svcconfig.${userChoice.label}.yml`
       );
-    } else {
-      const id = await PodUIControls.promptForGenericId();
-      if (!id) return;
-      configFilePath = await mngr.createNewConfig({ serviceType, id });
+      await VSCodeUtils.openFileInEditor(Uri.file(configFilePath));
     }
-    await VSCodeUtils.openFileInEditor(Uri.file(configFilePath));
   }
 }

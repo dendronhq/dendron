@@ -233,33 +233,7 @@ export class PodUIControls {
     }
 
     if (selectedServiceOption.label === createNewOptionString) {
-      switch (connectionType) {
-        case ExternalService.Airtable: {
-          await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
-          vscode.window.showInformationMessage(
-            `First setup a new ${connectionType} connection and then re-run the pod command.`
-          );
-          break;
-        }
-        case ExternalService.GoogleDocs: {
-          const id = await this.promptToCreateNewServiceConfig(
-            ExternalService.GoogleDocs
-          );
-          await launchGoogleOAuthFlow(id);
-          vscode.window.showInformationMessage(
-            "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
-          );
-          break;
-        }
-        case ExternalService.Notion: {
-          await this.promptToCreateNewServiceConfig(ExternalService.Notion);
-          vscode.window.showInformationMessage(
-            `First setup a new ${connectionType} connection and then re-run the pod command.`
-          );
-          break;
-        }
-        default:
-      }
+      await PodUIControls.createNewServiceConfig(connectionType);
       return;
     } else {
       const config = mngr.getConfigById<T>({ id: selectedServiceOption.label });
@@ -272,6 +246,37 @@ export class PodUIControls {
       }
 
       return config;
+    }
+  }
+
+  public static async createNewServiceConfig(connectionType: ExternalService) {
+    switch (connectionType) {
+      case ExternalService.Airtable: {
+        await this.promptToCreateNewServiceConfig(ExternalService.Airtable);
+        vscode.window.showInformationMessage(
+          `First setup a new ${connectionType} connection and then re-run the pod command.`
+        );
+        break;
+      }
+      case ExternalService.GoogleDocs: {
+        const id = await this.promptToCreateNewServiceConfig(
+          ExternalService.GoogleDocs
+        );
+        await launchGoogleOAuthFlow(id);
+        vscode.window.showInformationMessage(
+          "Google OAuth is a beta feature. Please contact us at support@dendron.so or on Discord to first gain access. Then, try again and authenticate with Google on your browser to continue."
+        );
+        break;
+      }
+      case ExternalService.Notion: {
+        await this.promptToCreateNewServiceConfig(ExternalService.Notion);
+        vscode.window.showInformationMessage(
+          `First setup a new ${connectionType} connection and then re-run the pod command.`
+        );
+        break;
+      }
+      default:
+        assertUnreachable();
     }
   }
 

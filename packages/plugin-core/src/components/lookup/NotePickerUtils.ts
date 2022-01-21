@@ -15,7 +15,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
-import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
+import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2, TransformedQueryString } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
 
@@ -60,8 +60,10 @@ export class NotePickerUtils {
 
   static createNoActiveItem({
     fname,
+    detail,
   }: {
     fname: string;
+    detail: string;
   }): DNodePropsQuickInputV2 {
     const props = DNodeUtils.create({
       id: CREATE_NEW_LABEL,
@@ -73,7 +75,7 @@ export class NotePickerUtils {
     return {
       ...props,
       label: CREATE_NEW_LABEL,
-      detail: CREATE_NEW_DETAIL,
+      detail,
       alwaysShow: true,
     };
   }
@@ -130,7 +132,12 @@ export class NotePickerUtils {
         return [this.enhanceNoteForQuickInput({ note, engine })];
       }
     }
-    return [NotePickerUtils.createNoActiveItem({ fname: picker.value })];
+    return [
+      NotePickerUtils.createNoActiveItem({
+        fname: picker.value,
+        detail: CREATE_NEW_NOTE_DETAIL,
+      }),
+    ];
   }
 
   private static enhanceNoteForQuickInput(input: {

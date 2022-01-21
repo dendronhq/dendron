@@ -2,6 +2,7 @@ import { DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
+import { CREATE_NEW_SCHEMA_DETAIL } from "./constants";
 import { NotePickerUtils, PAGINATE_LIMIT } from "./NotePickerUtils";
 import { DendronQuickPickerV2 } from "./types";
 import { PickerUtilsV2 } from "./utils";
@@ -17,7 +18,12 @@ export class SchemaPickerUtils {
     const node = SchemaUtils.getModuleRoot(resp.data[0]);
     const perfectMatch = node.fname === picker.value;
     return !perfectMatch
-      ? [NotePickerUtils.createNoActiveItem({ fname: picker.value })]
+      ? [
+          NotePickerUtils.createNoActiveItem({
+            fname: picker.value,
+            detail: CREATE_NEW_SCHEMA_DETAIL,
+          }),
+        ]
       : [
           DNodeUtils.enhancePropForQuickInputV3({
             wsRoot,

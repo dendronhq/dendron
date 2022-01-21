@@ -123,13 +123,36 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN replace note's body with template's body", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
-            const resp = SchemaUtils.applyTemplate({
+            const resp = await SchemaUtils.applyTemplate({
               template,
               note,
               engine,
             });
             expect(resp).toBeTruthy();
             expect(note.body).toEqual(engine.notes["foo"].body);
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+          }
+        );
+      });
+
+      it("WHEN applying a template that doesn't exist, THEN throw an error", async () => {
+        const missingTemplate: SchemaTemplate = {
+          id: "thisDoesNotExistfoo",
+          type: "note",
+        };
+
+        await runEngineTestV5(
+          async ({ engine }) => {
+            expect(async () =>
+              SchemaUtils.applyTemplate({
+                template: missingTemplate,
+                note,
+                engine,
+              })
+            ).rejects.toThrow("No template found for thisDoesNotExistfoo");
           },
           {
             expect,
@@ -146,7 +169,7 @@ describe(`SchemaUtil tests:`, () => {
         };
         await runEngineTestV5(
           async ({ engine }) => {
-            const resp = SchemaUtils.applyTemplate({
+            const resp = await SchemaUtils.applyTemplate({
               template: dateTemplate,
               note,
               engine,
@@ -176,7 +199,7 @@ describe(`SchemaUtil tests:`, () => {
         };
         await runEngineTestV5(
           async ({ engine }) => {
-            const resp = SchemaUtils.applyTemplate({
+            const resp = await SchemaUtils.applyTemplate({
               template: dateTemplate,
               note,
               engine,
@@ -205,7 +228,7 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
-            const resp = SchemaUtils.applyTemplate({
+            const resp = await SchemaUtils.applyTemplate({
               template,
               note,
               engine,
@@ -231,7 +254,7 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN do nothing and return false ", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
-            const resp = SchemaUtils.applyTemplate({
+            const resp = await SchemaUtils.applyTemplate({
               template: { id: "foo", type: "snippet" },
               note,
               engine,

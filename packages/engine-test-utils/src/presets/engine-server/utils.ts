@@ -326,6 +326,55 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
 };
 
 /**
+ * Diamond schema is laid out such that:
+ *    bar
+ *   /   \
+ * ch1   ch2 (namespace: true)
+ *   \   /
+ *    gch
+ * */
+export const setupSchemaWithDiamondAndParentNamespace: PreSetupHookFunction =
+  async (opts) => {
+    await setupBasic(opts);
+    const { wsRoot, vaults } = opts;
+    const vault1 = vaults[0];
+
+    const withDiamond = path.join(
+      resolvePath(vault1.fsPath, wsRoot),
+      "withDiamond.schema.yml"
+    );
+    fs.writeFileSync(
+      withDiamond,
+      `
+version: 1
+schemas:
+  - id: withDiamond
+    children:
+      - ch1
+      - ch2
+    title: withDiamond
+    parent: root
+  - id: ch1
+    children:
+      - gch
+  - id: ch2
+    namespace: true
+    children:
+      - gch
+  - id: gch
+    template: template.test
+`
+    );
+
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      body: "Template text",
+      fname: "template.test",
+      vault: vault1,
+    });
+  };
+
+/**
  * Sets up schema which includes a schema that has Diamond grandchildren
  *
  * */
@@ -767,6 +816,7 @@ export const ENGINE_HOOKS = {
   setupSchemaPreseet,
   setupSchemaWithDiamondGrandchildren,
   setupSchemaWithIncludeOfDiamond,
+  setupSchemaWithDiamondAndParentNamespace,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,
   setupSchemaWithExpansion,

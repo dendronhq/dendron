@@ -137,6 +137,85 @@ describe(`schemaParser tests:`, () => {
     });
   });
 
+  describe(`WHEN parsing schema with diamond schema relationship that has namespace parent`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithDiamondAndParentNamespace
+      );
+    });
+
+    it(`THEN payload has no errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND diamond schemas are present`, () => {
+      let grandParent: SchemaProps;
+      let ch1Schema: SchemaProps;
+      let ch2Schema: SchemaProps;
+      let schemaGroup: SchemaModuleProps;
+
+      beforeAll(() => {
+        // Bar schemas are at 0 index in the basic setup case.
+        schemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "withDiamond"
+        )[0];
+
+        grandParent = schemaGroup.schemas["withDiamond"];
+        ch1Schema = schemaGroup.schemas["ch1"];
+        ch2Schema = schemaGroup.schemas["ch2"];
+
+        expect(grandParent).toBeDefined();
+        expect(ch1Schema).toBeDefined();
+        expect(ch2Schema).toBeDefined();
+      });
+
+      it(`THEN grandparent schema has 2 children`, () => {
+        expect(grandParent.children.length).toEqual(2);
+      });
+
+      it(`THEN both of the children are accounted`, () => {
+        expect(grandParent.children[0]).toEqual("ch1");
+        expect(grandParent.children[1]).toEqual("ch2");
+      });
+
+      it(`THEN first link to grandchild, grandchild stays as is`, () => {
+        let ch1 = schemaGroup.schemas["ch1"];
+        let gch = schemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.id).toEqual("gch");
+        expect(gch.parent).toEqual("ch1");
+      });
+
+      it(`THEN grandchild from second first link has expected template.`, () => {
+        let ch1 = schemaGroup.schemas["ch1"];
+        let gch = schemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.data.template?.id).toEqual("template.test");
+      });
+
+      it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
+        let ch2 = schemaGroup.schemas["ch2"];
+        let gch = schemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.id.startsWith("gch_")).toBeTruthy();
+        expect(gch.parent).toEqual("ch2");
+        expect(gch.data.pattern).toEqual("gch");
+      });
+
+      it(`THEN grandchild from second link has expected template.`, () => {
+        let ch2 = schemaGroup.schemas["ch2"];
+        let gch = schemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.data.template?.id).toEqual("template.test");
+      });
+    });
+  });
+
   describe(`WHEN parsing non-inlined schema with diamond schema relationship`, () => {
     let payload: {
       schemas: SchemaModuleProps[];

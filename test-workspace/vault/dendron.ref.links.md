@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1641847291330
+updated: 1639433681546
 created: 1608518909864
 ---
 
@@ -151,9 +151,3 @@ const x = 1;
 [[/vault/root.schema.yml]]
 
 And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
-
-## Link to a file containing images
-
-We should be able to see these images in preview and when hovering over the link.
-
-![[dendron.ref.image]]

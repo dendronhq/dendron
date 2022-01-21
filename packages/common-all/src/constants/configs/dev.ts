@@ -26,4 +26,8 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Enable Preview V2",
     desc: "Use preview V2 as the default preview.",
   },
+  enableExportPodV2: {
+    label: "Enable Export Pod V2",
+    desc: "Enable experimental Export V2 command",
+  },
 };

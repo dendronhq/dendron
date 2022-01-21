@@ -39,7 +39,7 @@ export abstract class BaseExportPodCommand<
     R
   >
   extends BaseCommand<
-    { config: Config; payload: string | NoteProps[] },
+    { config: Config; payload: NoteProps[] },
     any,
     Config,
     Partial<Config>
@@ -326,5 +326,11 @@ export abstract class BaseExportPodCommand<
     return Object.values(engine.notes).filter(
       (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)
     );
+  }
+
+  addAnalyticsPayload(opts: { config: Config; payload: NoteProps[] }) {
+    return {
+      exportScope: opts.config.exportScope,
+    };
   }
 }

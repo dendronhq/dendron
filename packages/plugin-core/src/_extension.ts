@@ -4,6 +4,7 @@ import {
   SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
+  ConfigEvents,
   ConfigUtils,
   CONSTANTS,
   DendronError,
@@ -632,6 +633,15 @@ export async function _activate(
         MarkdownUtils.hasLegacyPreview()
       );
 
+      //used for enablement of export pod v2 command
+      VSCodeUtils.setContext(
+        DendronContext.ENABLE_EXPORT_PODV2,
+        dendronConfig.dev?.enableExportPodV2 ?? false
+      );
+
+      if (dendronConfig.dev?.enableExportPodV2) {
+        AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
+      }
       // round to nearest 10th
       let numNotes = _.size(getEngine().notes);
       if (numNotes > 10) {

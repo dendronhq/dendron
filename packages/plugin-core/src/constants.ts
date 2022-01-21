@@ -16,6 +16,7 @@ export enum DendronContext {
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
+  ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -541,12 +542,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CONFIGURE_SERVICE_CONNECTION: {
     key: "dendron.configureServiceConnection",
     title: `${CMD_PREFIX} Configure Service Connection`,
-    when: DendronContext.PLUGIN_ACTIVE,
+    enablement: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.ENABLE_EXPORT_PODV2}`,
   },
   CONFIGURE_EXPORT_POD_V2: {
     key: "dendron.configureExportPodV2",
     title: `${CMD_PREFIX} Configure Export Pod V2`,
-    when: DendronContext.PLUGIN_ACTIVE,
+    enablement: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.ENABLE_EXPORT_PODV2}`,
   },
   IMPORT_POD: {
     key: "dendron.importPod",
@@ -561,7 +562,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   EXPORT_POD_V2: {
     key: "dendron.exportPodv2",
     title: `${CMD_PREFIX} Export Pod V2`,
-    when: DendronContext.PLUGIN_ACTIVE,
+    enablement: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.ENABLE_EXPORT_PODV2}`,
   },
   PUBLISH_POD: {
     key: "dendron.publishPod",

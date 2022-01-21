@@ -259,11 +259,13 @@
       },
       {
         "command": "dendron.configureServiceConnection",
-        "title": "Dendron: Configure Service Connection"
+        "title": "Dendron: Configure Service Connection",
+        "enablement": "dendron:pluginActive && dendron:enableExportPodV2"
       },
       {
         "command": "dendron.configureExportPodV2",
-        "title": "Dendron: Configure Export Pod V2"
+        "title": "Dendron: Configure Export Pod V2",
+        "enablement": "dendron:pluginActive && dendron:enableExportPodV2"
       },
       {
         "command": "dendron.importPod",
@@ -275,7 +277,8 @@
       },
       {
         "command": "dendron.exportPodv2",
-        "title": "Dendron: Export Pod V2"
+        "title": "Dendron: Export Pod V2",
+        "enablement": "dendron:pluginActive && dendron:enableExportPodV2"
       },
       {
         "command": "dendron.publishPod",
@@ -566,23 +569,11 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.configureServiceConnection",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.configureExportPodV2",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.importPod",
           "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.exportPod",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.exportPodv2",
           "when": "dendron:pluginActive"
         },
         {

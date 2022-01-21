@@ -30,6 +30,10 @@ export type DendronDevConfig = {
    * Enable new preview as default
    */
   enablePreviewV2?: boolean;
+  /**
+   * Enable export pod v2
+   */
+  enableExportPodV2?: boolean;
 };
 
 /**

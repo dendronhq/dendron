@@ -2,7 +2,7 @@
 id: 9eae08fb-5e3f-4a7e-a989-3f206825d490
 title: Markdown
 desc: ""
-updated: 1642663336126
+updated: 1642749469735
 created: 1614629618966
 ---
 
@@ -57,7 +57,7 @@ graph TD;
 #### Numbered list
 
 1. first
-2. second
+2. a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long item
 3. third
 
 And a list without contents

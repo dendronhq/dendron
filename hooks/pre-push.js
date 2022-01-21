@@ -1,7 +1,34 @@
+/* eslint-disable no-console */
 const { checkToken } = require("./common");
 const { exec } = require("./exec");
+const madge = require("madge");
+const path = require("path");
+
+/**
+ * Uses madge to check for circular dependencies. Issues soft warning if
+ * circular dependencies detected
+ */
+function checkCircularDependencies() {
+  const rootPath = exec("git rev-parse --show-toplevel").stdout;
+  const filePath = path.resolve(rootPath, "packages/plugin-core");
+  madge(filePath, {
+    fileExtensions: ["ts"],
+  }).then((res) => {
+    if (res.circular().length === 0) {
+      console.log("No circular dependencies detected");
+    } else {
+      console.warn(
+        `WARNING: ${
+          res.circular().length
+        } circular dependencies detected in plugin-core. Please ensure you are not introducing new circular dependencies by running the following on the commit prior to your change: \nnpm -g install madge && cd $DENDRON_REPO_ROOT/packages/plugin-core && madge --circular --extensions ts .\n\nFor more details, see https://docs.dendron.so/notes/773e0b5a-510f-4c21-acf4-2d1ab3ed741e/#avoiding-circular-dependencies`
+      );
+    }
+  });
+}
 
 function main() {
+  checkCircularDependencies();
+
   // Where we would push if we ran `git push`
   let upstream;
   try {

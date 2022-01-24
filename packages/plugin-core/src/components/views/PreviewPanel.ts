@@ -3,6 +3,7 @@ import {
   DendronEditorViewKey,
   DMessageEnum,
   getWebEditorViewEntry,
+  isWebUri,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
@@ -200,6 +201,20 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           if (!_.isUndefined(maybeNote)) {
             this.sendRefreshMessage(this._panel!, maybeNote);
           }
+          break;
+        }
+        case NoteViewMessageEnum.imagePreviewUrl: {
+          Logger.debug({ ctx, "msg.type": "imagePreviewUrl" });
+          const { href } = msg.data;
+          if (!href || isWebUri(href)) break;
+          this._panel?.webview.postMessage({
+            type: NoteViewMessageEnum.imagePreviewUrl,
+            data: {
+              url: href,
+              mappedTo: this._panel.webview.asWebviewUri(vscode.Uri.file(href)),
+            },
+            source: "vscode",
+          });
           break;
         }
         default:

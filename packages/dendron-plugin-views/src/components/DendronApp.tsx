@@ -3,6 +3,7 @@ import {
   DMessageSource,
   LookupViewMessageEnum,
   NoteUtils,
+  NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import {
@@ -95,6 +96,12 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
+      case NoteViewMessageEnum.imagePreviewUrl: {
+        logger.info({ ctx, msg: "imagePreviewUrl:pre" });
+        ideDispatch(ideSlice.actions.setImageUrl(msg.data.payload));
+        logger.info({ ctx, msg: "imagePreviewUrl:post" });
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

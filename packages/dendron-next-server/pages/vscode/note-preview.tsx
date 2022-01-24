@@ -254,6 +254,22 @@ function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
     }
   }, [noteContent, engine.config]);
 
+  // hook: update image URLs
+  React.useEffect(() => {
+    console.log("Mapping image URLs"); // TODO remove
+    for (const element of document.getElementsByTagName("img")) {
+      const mappedSrc = ide.imageUrls[element.src];
+      if (mappedSrc) element.src = mappedSrc;
+      else if (mappedSrc === undefined) {
+        postVSCodeMessage({
+          type: NoteViewMessageEnum.imagePreviewUrl,
+          data: { href: element.src },
+          source: DMessageSource.webClient,
+        });
+      }
+    }
+  });
+
   if (!noteId) {
     return <></>;
   }

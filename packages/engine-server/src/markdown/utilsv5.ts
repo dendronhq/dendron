@@ -33,7 +33,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
-import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
+import { dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks } from "./remark/wikiLinks";
@@ -337,7 +337,7 @@ export class MDUtilsV5 {
           // Add flavor specific plugins. These need to come before `dendronPub`
           // to fix extended image URLs before they get converted to HTML
           if (opts.flavor === ProcFlavor.PREVIEW) {
-            proc = proc.use(dendronPreview);
+            //proc = proc.use(dendronPreview);
           }
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
             proc = proc.use(dendronHoverPreview);

@@ -759,6 +759,8 @@ export enum CalendarViewMessageType {
 export enum NoteViewMessageEnum {
   "onClick" = "onClick",
   "onGetActiveEditor" = "onGetActiveEditor",
+  /** The preview can ask the plugin for preview-encoded images. */
+  "imagePreviewUrl" = "imagePreviewUrl",
 }
 
 export enum LookupViewMessageEnum {

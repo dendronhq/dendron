@@ -24,13 +24,13 @@ export class ConfigureServiceConnection extends BasicCommand<
     const mngr = new ExternalConnectionManager(getExtension().podsDir);
     const allServiceConfigs = await mngr.getAllValidConfigs();
     const items = allServiceConfigs.map<QuickPickItem>((value) => {
-      return { label: value.connectionId };
+      return { label: value.connectionId, description: value.serviceType };
     });
-    const createNewServiceLabel = { label: "Create New Service Config" };
+    const createNewServiceLabel = { label: "Create New Service Connection" };
     const userChoice = await window.showQuickPick(
       items.concat(createNewServiceLabel),
       {
-        title: "Pick the service connection config",
+        title: "Pick the Service Connection Configuration or Create a New One",
         ignoreFocusOut: true,
       }
     );

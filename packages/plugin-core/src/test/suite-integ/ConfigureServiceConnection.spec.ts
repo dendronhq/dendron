@@ -29,7 +29,7 @@ suite("ConfigureServiceConnection", function () {
           const cmd = new ConfigureServiceConnection();
           sinon.stub(vscode.window, "showQuickPick").returns(
             Promise.resolve({
-              label: "Create New Service Config",
+              label: "Create New Service Connection",
             }) as Thenable<vscode.QuickPickItem>
           );
           const serviceType = ExternalService.Airtable;

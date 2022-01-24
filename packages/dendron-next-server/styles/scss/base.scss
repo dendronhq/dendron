@@ -92,6 +92,8 @@ pre {
 
 li {
   margin: 0.25em 0;
+  // Otherwise empty list items stack on top of each other
+  min-height: 1rem;
 }
 
 img {

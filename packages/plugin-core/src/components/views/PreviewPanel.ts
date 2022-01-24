@@ -207,11 +207,14 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           Logger.debug({ ctx, "msg.type": "imagePreviewUrl" });
           const { href } = msg.data;
           if (!href || isWebUri(href)) break;
-          this._panel?.webview.postMessage({
+          const mappedTo = this._panel!.webview.asWebviewUri(
+            vscode.Uri.file(href)
+          );
+          this._panel!.webview.postMessage({
             type: NoteViewMessageEnum.imagePreviewUrl,
             data: {
               url: href,
-              mappedTo: this._panel.webview.asWebviewUri(vscode.Uri.file(href)),
+              mappedTo,
             },
             source: "vscode",
           });

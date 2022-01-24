@@ -38,23 +38,8 @@ function handleImage({
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
   const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
-  if (useFullPathUrl === true) {
-    logger.info({ ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl });
-    node.url = fpath;
-    return;
-  }
-  const resp = EngineUtils.getEnginePort({ wsRoot });
-  if (resp.error) {
-    logger.error(resp.error);
-    return;
-  }
-  const port: number = resp.data;
-  const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
-  const params: AssetGetRequest = {
-    fpath,
-    ws: wsRoot,
-  };
-  node.url = APIUtils.genUrlWithQS({ url, params });
+  logger.info({ ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl });
+  node.url = fpath;
   logger.info({
     ctx,
     url: node.url,

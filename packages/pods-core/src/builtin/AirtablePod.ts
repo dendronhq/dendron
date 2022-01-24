@@ -1,6 +1,5 @@
 import Airtable, { FieldSet, Records } from "@dendronhq/airtable";
 import {
-  assertUnreachable,
   DendronCompositeError,
   DendronError,
   DEngineClient,
@@ -303,7 +302,12 @@ export class AirtableUtils {
         return { data: recordIds.map((ent) => ent!.id) };
       }
       default:
-        assertUnreachable(fieldMapping);
+        return {
+          error: new DendronError({
+            message: `The type ${type} provided in srcFieldMapping is invalid. Please update the pod config by running Dendron: Configure Export Pod V2 command.`,
+            severity: ERROR_SEVERITY.MINOR,
+          }),
+        };
     }
   }
 

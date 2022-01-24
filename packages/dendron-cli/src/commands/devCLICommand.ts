@@ -297,7 +297,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         default:
-          return assertUnreachable();
+          return assertUnreachable(cmd);
       }
     } catch (err: any) {
       this.L.error(err);

@@ -370,7 +370,7 @@ export class NextJSPublishUtils {
         return;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(target);
     }
   }
 }

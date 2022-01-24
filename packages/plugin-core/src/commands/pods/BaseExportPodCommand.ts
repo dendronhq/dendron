@@ -162,7 +162,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(inputs.exportScope);
     }
 
     return {
@@ -231,7 +231,7 @@ export abstract class BaseExportPodCommand<
           }
 
           default:
-            assertUnreachable();
+            assertUnreachable(opts.config.exportScope);
         }
       }
     );

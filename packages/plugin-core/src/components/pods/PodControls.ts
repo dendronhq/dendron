@@ -497,7 +497,7 @@ export class PodUIControls {
         return "Exports all notes in the Dendron workspace";
 
       default:
-        assertUnreachable();
+        assertUnreachable(scope);
     }
   }
 
@@ -523,7 +523,7 @@ export class PodUIControls {
         return "Formats notes to JSON and exports it to clipboard or local file system";
 
       default:
-        assertUnreachable();
+        assertUnreachable(type);
     }
   }
 }

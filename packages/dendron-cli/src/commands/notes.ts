@@ -117,6 +117,15 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
                 },
               });
               break;
+            case undefined:
+              throw new DendronError({
+                message: "Unknown output format requested",
+                payload: {
+                  ctx: "NoteCLICommand.execute",
+                  cmd,
+                  output,
+                },
+              });
             default:
               assertUnreachable(output);
           }

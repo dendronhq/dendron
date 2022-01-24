@@ -98,8 +98,16 @@ export default class RenameProvider implements vscode.RenameProvider {
         case "fmtag": {
           return reference.range;
         }
+        case undefined:
+          throw new DendronError({
+            message: "Unknown reference type",
+            payload: {
+              ctx: "RenameProvider.getRangeForReference",
+              refType,
+            },
+          });
         default: {
-          assertUnreachable();
+          assertUnreachable(refType);
         }
       }
     }

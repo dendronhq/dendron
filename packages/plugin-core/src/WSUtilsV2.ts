@@ -98,12 +98,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   }
 
   /**
-   * See {@link IWSUtilsV2.getNoteFromMultiVaultWithPrompt}
+   * See {@link IWSUtilsV2.getNoteFromMultiVault}
    */
-  async getNoteFromMultiVaultWithPrompt(opts: {
-    fname: string;
-    vault?: DVault;
-  }) {
+  async getNoteFromMultiVault(opts: { fname: string; vault?: DVault }) {
     const { fname, vault } = opts;
     let existingNote: NoteProps | undefined;
     const engine = ExtensionProvider.getEngine();

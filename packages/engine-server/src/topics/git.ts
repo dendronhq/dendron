@@ -127,6 +127,37 @@ export class Git {
     });
   }
 
+  /** Creates a dangling stash commit without changing the index or working tree. */
+  async stashCreate() {
+    const { stdout } = await this._execute(`git stash create`);
+    return stdout;
+  }
+
+  /** Confirms that the commit given (output of {@link Git.stashCreate}) is a valid commit. */
+  async isValidStashCommit(commit: string): Promise<boolean> {
+    try {
+      const { localUrl: cwd } = this.opts;
+      const { exitCode } = await execa.command(`git stash show ${commit}`, {
+        cwd,
+      });
+      return exitCode === 0;
+    } catch {
+      // If we can't verify for some reason, just say it's invalid for safety. That way we won't attempt any destructive actions.
+      return false;
+    }
+  }
+
+  /** Applies a stash commit created by {@link Git.stashCreate}. */
+  async stashApplyCommit(commit: string) {
+    await this._execute(`git stash apply ${commit}`);
+  }
+
+  /** Same as `git reset`. If a parameter is passed, it's `git reset --soft` or `git reset --hard`. */
+  async reset(resetType?: "soft" | "hard") {
+    const typeFlag = resetType === undefined ? "" : `--${resetType}`;
+    await this._execute(`git reset ${typeFlag}`);
+  }
+
   // === extra commands
 
   async addAll() {

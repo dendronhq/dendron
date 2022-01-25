@@ -1,6 +1,11 @@
-import { DVaultSync, DVault, ConfigUtils } from "@dendronhq/common-all";
+import {
+  DVaultSync,
+  DVault,
+  ConfigUtils,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { Git, SyncActionStatus } from "@dendronhq/engine-server";
 import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
@@ -10,6 +15,7 @@ import { SyncCommand } from "../../commands/Sync";
 import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import fs from "fs-extra";
 
 suite("workspace sync command", function () {
   let ctx: vscode.ExtensionContext;
@@ -354,8 +360,8 @@ suite("workspace sync command", function () {
     });
   });
 
-  describe("edge cases", () => {
-    test("has remote, but branch has no upstream", (done) => {
+  describe("WHEN repo has remote, but branch has no upstream", () => {
+    test("THEN Dendron commits and warns about missing upstream", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
@@ -386,6 +392,71 @@ suite("workspace sync command", function () {
           expect(SyncCommand.countDone(pushed)).toEqual(0);
           expect(pushed[0].status === SyncActionStatus.NO_UPSTREAM);
           done();
+        },
+      });
+    });
+  });
+
+  describe("WHEN there are tracked, uncommitted changes", () => {
+    test("THEN Dendron stashes and restores the changes", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults, engine }) => {
+          const remoteDir = tmpDir().name;
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+          // Add everything and push, so that there's no untracked changes
+          const git = new Git({ localUrl: wsRoot });
+          await git.addAll();
+          await git.commit({ msg: "add all and commit" });
+          await git.push();
+          // Update root note so there are tracked changes
+          const fpath = NoteUtils.getFullPath({
+            note: NoteUtils.getNoteByFnameFromEngine({
+              fname: "root",
+              vault: vaults[0],
+              engine,
+            })!,
+            wsRoot,
+          });
+          await fs.appendFile(fpath, "Similique non atque");
+          // Also create an untracked change
+          const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
+            engine,
+            fname: "untracked-new-note",
+            vault: vaults[0],
+            wsRoot,
+            body: "Quia dolores rem ad et aut.",
+          });
+
+          const out = await new SyncCommand().execute();
+          const { committed, pulled, pushed } = out;
+          // Should skip committing since it's set to no commit
+          expect(SyncCommand.countDone(committed)).toEqual(0);
+          // Should still stash and pull
+          expect(SyncCommand.countDone(pulled)).toEqual(1);
+          expect(pulled[0].status === SyncActionStatus.DONE);
+          // the changes, tracked and untracked, should be restored after the pull
+          await FileTestUtils.assertInFile({
+            fpath,
+            match: ["Similique non atque"],
+          });
+          await FileTestUtils.assertInFile({
+            fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
+            match: ["Quia dolores rem ad et aut."],
+          });
+          GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
+          // nothing to push
+          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+          done();
+        },
+        modConfigCb: (config) => {
+          ConfigUtils.setWorkspaceProp(
+            config,
+            "workspaceVaultSyncMode",
+            "noCommit"
+          );
+          return config;
         },
       });
     });

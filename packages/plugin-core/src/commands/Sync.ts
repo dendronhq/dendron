@@ -73,13 +73,13 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const message = ["Finished sync."];
 
     // Report anything unusual the user probably should know about
-    const uncommitted = SyncCommand.filteredRepoNames(
+    const unpulled = SyncCommand.filteredRepoNames(
       committed,
-      SyncActionStatus.UNCOMMITTED_CHANGES
+      SyncActionStatus.CANT_STASH
     ).join(", ");
-    if (uncommitted.length > 0) {
+    if (unpulled.length > 0) {
       message.push(
-        `Skipped pulling repos ${uncommitted} because they have uncommitted changes.`
+        `Skipped pulling repos ${unpulled} because they have uncommitted changes, and we failed to stash them.`
       );
     }
     const noUpstream = _.uniq([

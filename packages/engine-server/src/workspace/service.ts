@@ -62,12 +62,13 @@ export type PathExistBehavior = "delete" | "abort" | "continue";
 export enum SyncActionStatus {
   DONE = "",
   NO_CHANGES = "it has no changes",
-  UNCOMMITTED_CHANGES = "it has uncommitted changes",
   NO_REMOTE = "it has no remote",
   NO_UPSTREAM = "the current branch has no upstream",
   SKIP_CONFIG = "it is configured so",
   NOT_PERMITTED = "user is not permitted to push to one or more vaults",
   NEW = "newly clond repository",
+  CANT_STASH = "failed to stash changes in working directory",
+  CANT_RESTORE = "failed to restore stashed changes",
   ERROR = "error while syncing",
 }
 
@@ -849,6 +850,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   /** Returns the list of vaults that were attempted to be pulled, even if there was nothing to pull. */
   async pullVaults(): Promise<SyncActionResult[]> {
+    const ctx = "pullVaults";
     const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
       _.map(
@@ -864,12 +866,33 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
             return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
           if (!(await this.shouldVaultsSync("pull", rootVaults)))
             return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
-          if (await git.hasChanges({ untrackedFiles: "no" }))
-            return {
-              repo,
-              vaults,
-              status: SyncActionStatus.UNCOMMITTED_CHANGES,
-            };
+
+          let stashed: string | undefined;
+          if (await git.hasChanges({ untrackedFiles: "no" })) {
+            // stash away changes, otherwise pull will fail
+            try {
+              stashed = await git.stashCreate();
+              this.logger.info({ ctx, vaults, repo, stashed });
+              // this shouldn't fail, but for safety's sake
+              if (_.isEmpty(stashed) || !git.isValidStashCommit(stashed)) {
+                throw new DendronError({
+                  message: "unable to stash changes",
+                  payload: { stashed },
+                });
+              }
+              // stash create doesn't change the working directory, so we need to get rid of the tracked changes
+              await git.reset("hard");
+            } catch (err: any) {
+              this.logger.error({
+                ctx: "pullVaults",
+                vaults,
+                repo,
+                err,
+                stashed,
+              });
+              return { repo, vaults, status: SyncActionStatus.CANT_STASH };
+            }
+          }
           try {
             await git.pull();
             return { repo, vaults, status: SyncActionStatus.DONE };
@@ -879,6 +902,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
               message: `error pulling vault${stderr}`,
               payload: { err, repoPath: repo },
             });
+          } finally {
+            // Try to restore changes if we stashed them, even if there were errors. We don't want to lose the users changes.
+            if (stashed) {
+              git.stashApplyCommit(stashed);
+            }
           }
         }
       )

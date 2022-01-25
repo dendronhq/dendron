@@ -34,7 +34,7 @@ import {
 } from "./diagnostics";
 import _ from "lodash";
 import visit from "unist-util-visit";
-import { NodeUtils } from "..";
+import { MdastUtils } from "..";
 
 /** Dispatches the correct decorator based on the type of AST node. */
 function runDecorator(
@@ -100,7 +100,7 @@ export async function runAllDecorators(
     const tree = proc.parse(text);
 
     // eslint-disable-next-line no-await-in-loop
-    await NodeUtils.visitAsync(tree, [], async (nodeIn) => {
+    await MdastUtils.visitAsync(tree, [], async (nodeIn) => {
       // This was parsed, it must have a position
       const node = nodeIn as NonOptional<DendronASTNode, "position">;
 

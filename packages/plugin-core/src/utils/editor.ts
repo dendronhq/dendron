@@ -16,7 +16,7 @@ import {
   UserTag,
   HashTag,
   linkedNoteType,
-  NodeUtils,
+  MdastUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -219,7 +219,7 @@ export async function isBrokenWikilink(): Promise<boolean> {
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
   let type: DECORATION_TYPES | undefined;
   let fname: string;
-  await NodeUtils.visitAsync(
+  await MdastUtils.visitAsync(
     parsedLine,
     [
       DendronASTTypes.WIKI_LINK,

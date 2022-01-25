@@ -426,7 +426,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         setTimeout(() => {
           if (ext.fileWatcher) {
             ext.fileWatcher.pause = false;
-            FileWatcher.refreshTree();
+            FileWatcher.refreshBacklinks();
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);

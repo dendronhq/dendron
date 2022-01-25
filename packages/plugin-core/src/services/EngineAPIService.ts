@@ -32,6 +32,7 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
+  ResponseUtil,
   RespRequired,
   RespV2,
   SchemaModuleDict,
@@ -187,7 +188,17 @@ export class EngineAPIService
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return this.internalEngine.bulkAddNotes(opts);
+    const promise = this.internalEngine.bulkAddNotes(opts);
+
+    promise.then((resp) => {
+      if (!ResponseUtil.hasError(resp)) {
+        resp.data.forEach((entry) => {
+          this.emitEventsForNoteChangeEntry(entry);
+        });
+      }
+    });
+
+    return promise;
   }
 
   updateNote(
@@ -221,19 +232,7 @@ export class EngineAPIService
     promise.then((value) => {
       if (!value.error && value.data) {
         value.data.forEach((entry) => {
-          switch (entry.status) {
-            case "create":
-              this._onNoteCreatedEmitter.fire(entry.note);
-              break;
-            case "update":
-              this._onNoteChangeEmitter.fire(entry.note);
-              break;
-            case "delete":
-              this._onNoteDeletedEmitter.fire(entry.note);
-              break;
-            default:
-              assertUnreachable();
-          }
+          this.emitEventsForNoteChangeEntry(entry);
         });
       }
     });
@@ -309,7 +308,16 @@ export class EngineAPIService
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
-    return this.internalEngine.renameNote(opts);
+    const promise = this.internalEngine.renameNote(opts);
+    promise.then((value) => {
+      if (!value.error && value.data) {
+        value.data.forEach((entry) => {
+          this.emitEventsForNoteChangeEntry(entry);
+        });
+      }
+    });
+
+    return promise;
   }
 
   renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
@@ -330,5 +338,21 @@ export class EngineAPIService
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {
     return this.internalEngine.getDecorations(opts);
+  }
+
+  private emitEventsForNoteChangeEntry(entry: NoteChangeEntry) {
+    switch (entry.status) {
+      case "create":
+        this._onNoteCreatedEmitter.fire(entry.note);
+        break;
+      case "update":
+        this._onNoteChangeEmitter.fire(entry.note);
+        break;
+      case "delete":
+        this._onNoteDeletedEmitter.fire(entry.note);
+        break;
+      default:
+        assertUnreachable();
+    }
   }
 }

@@ -88,7 +88,7 @@ import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
-import { DendronTreeView } from "./views/DendronTreeView";
+import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import {
@@ -177,15 +177,16 @@ class ExtensionUtils {
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-    updateEngineAPI(port);
+
     wsService.writePort(port);
+
+    return port;
   }
 }
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
@@ -612,7 +613,20 @@ export async function _activate(
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
 
-      await ExtensionUtils.startServerProcess({ context, start, wsService });
+      const port = await ExtensionUtils.startServerProcess({
+        context,
+        start,
+        wsService,
+      });
+
+      // Setup the Engine API Service and the tree view
+      const engineAPIService = updateEngineAPI(port);
+
+      // TODO: Check settings if treeviewV2 is enabled
+      const treeView = new NativeTreeView(engineAPIService);
+      treeView.show();
+
+      context.subscriptions.push(treeView);
 
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
@@ -1274,7 +1288,7 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
-function updateEngineAPI(port: number | string): void {
+function updateEngineAPI(port: number | string): EngineAPIService {
   const ext = getExtension();
 
   const svc = EngineAPIService.createEngine({
@@ -1285,8 +1299,8 @@ function updateEngineAPI(port: number | string): void {
   });
   ext.setEngine(svc);
   ext.port = _.toInteger(port);
-  // const engine = ext.getEngine();
-  // return engine;
+
+  return svc;
 }
 
 function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {

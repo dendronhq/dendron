@@ -9,7 +9,6 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { PodUIControls } from "../../components/pods/PodControls";
-import * as vscode from "vscode";
 import { getExtension } from "../../workspace";
 import { describe } from "mocha";
 
@@ -19,17 +18,20 @@ suite(" Configure ExportPod V2 ", function () {
       sinon.restore();
     },
   });
-  describe("WHEN ConfigureExportV2 is run and there is no config", () => {
-    test("THEN a new config is generated for the pod", (done) => {
+  describe("WHEN ConfigureExportV2 is run with New Export", () => {
+    test("THEN new config must be created", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async () => {
           const cmd = new ConfigureExportPodV2();
+          sinon
+            .stub(PodUIControls, "promptForExportConfigOrNewExport")
+            .returns(Promise.resolve("New Export"));
           const podType = PodV2Types.GoogleDocsExportV2;
-          cmd.gatherInputs = async () => {
-            return { podType };
-          };
+          sinon
+            .stub(PodUIControls, "promptForPodType")
+            .returns(Promise.resolve(podType));
           sinon
             .stub(PodUIControls, "promptForGenericId")
             .returns(Promise.resolve("foo"));
@@ -45,24 +47,16 @@ suite(" Configure ExportPod V2 ", function () {
     });
   });
 
-  describe("WHEN configs are present for selected pod type", () => {
+  describe("WHEN custom configs are present", () => {
     test("THEN config of selected podId must open", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async () => {
           const cmd = new ConfigureExportPodV2();
-          const podType = PodV2Types.MarkdownExportV2;
-          cmd.gatherInputs = async () => {
-            return { podType };
-          };
           sinon
-            .stub(vscode.window, "showQuickPick")
-            .returns(
-              Promise.resolve({
-                label: "foobar",
-              }) as Thenable<vscode.QuickPickItem>
-            );
+            .stub(PodUIControls, "promptForExportConfigOrNewExport")
+            .returns(Promise.resolve({ podId: "foobar" }));
           //setup
           const configPath = path.join(
             getExtension().podsDir,

@@ -60,16 +60,19 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       canSelectFiles: false,
       canSelectFolders: true,
     };
-    const destination = await PodUIControls.promptUserForDestination(
-      exportScope,
-      options
-    );
+    const destination =
+      opts && opts.destination
+        ? opts.destination
+        : await PodUIControls.promptUserForDestination(exportScope, options);
     if (!destination) {
       return;
     }
 
     //use FM Title as h1 header
-    const addFrontmatterTitle = await this.promptUserForaddFMTitleSetting();
+    const addFrontmatterTitle =
+      opts && opts.addFrontmatterTitle
+        ? opts.addFrontmatterTitle
+        : await this.promptUserForaddFMTitleSetting();
     if (addFrontmatterTitle === undefined) return;
 
     const config = {

@@ -1,10 +1,6 @@
-import {
-  ConfigFileUtils,
-  PodV2ConfigManager,
-  PodV2Types,
-} from "@dendronhq/pods-core";
+import { ConfigFileUtils } from "@dendronhq/pods-core";
 import path from "path";
-import { QuickPickItem, Uri, window } from "vscode";
+import { Uri } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -13,9 +9,7 @@ import { BasicCommand } from "../base";
 
 type CommandOutput = void;
 
-type CommandInput = { podType: PodV2Types };
-
-type CommandOpts = CommandInput;
+type CommandOpts = {};
 
 export class ConfigureExportPodV2 extends BasicCommand<
   CommandOpts,
@@ -23,35 +17,19 @@ export class ConfigureExportPodV2 extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.CONFIGURE_EXPORT_POD_V2.key;
 
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const podType = await PodUIControls.promptForPodType();
-    if (!podType) return;
-    return {
-      podType,
-    };
-  }
-
-  async execute(opts: CommandOpts) {
+  async execute() {
     const ctx = { ctx: "ConfigureExportPodV2" };
-    const { podType } = opts;
-    this.L.info({ ctx, podType, msg: "enter" });
+    this.L.info({ ctx, msg: "enter" });
     const podsDir = path.join(getExtension().podsDir, "custom");
     let configFilePath: string;
-    const existingConfigs = await PodV2ConfigManager.getAllConfigsByType({
-      type: podType,
-      podsDir,
-    });
-    if (existingConfigs.length > 0) {
-      const items = existingConfigs.map<QuickPickItem>((value) => {
-        return { label: value.podId };
-      });
-      const userChoice = await window.showQuickPick(items, {
-        title: "Pick the pod config",
-        ignoreFocusOut: true,
-      });
-      if (!userChoice) return;
-      configFilePath = path.join(podsDir, `config.${userChoice.label}.yml`);
-    } else {
+    const exportChoice = await PodUIControls.promptForExportConfigOrNewExport();
+    if (exportChoice === undefined) {
+      return;
+    } else if (exportChoice === "New Export") {
+      const podType = await PodUIControls.promptForPodType();
+      if (!podType) {
+        return;
+      }
       const id = await PodUIControls.promptForGenericId();
       if (!id) return;
       configFilePath = ConfigFileUtils.genConfigFileV2({
@@ -59,6 +37,8 @@ export class ConfigureExportPodV2 extends BasicCommand<
         configSchema: ConfigFileUtils.getConfigSchema(podType),
         setProperties: { podId: id, podType },
       });
+    } else {
+      configFilePath = path.join(podsDir, `config.${exportChoice.podId}.yml`);
     }
     await VSCodeUtils.openFileInEditor(Uri.file(configFilePath));
   }

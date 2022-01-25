@@ -1249,10 +1249,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@dendronhq/common-all@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.78.4.tgz#a603e8d225b7f96771b92f43898d21e348eb2781"
-  integrity sha512-rRQR/DBZnIR8wqY+ieM+hPKzopvOQH5lox4IGjjX0PmBuPMMXPYpB+xpfuH44oMccsrtOunU9RwgFIypV6q4Hg==
+"@dendronhq/common-all@^0.79.0":
+  version "0.79.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.79.0.tgz#d18265f94ee75c233604b2619ae668e0ea5d00e7"
+  integrity sha512-MzLA+JanlHTe95hlHAdL/y+vbylCz8aqcTnBK33gVX4nUXd+l2aiV6EZUCCa9z1RBUqXvAwwtjELTD9uKWUQ2Q==
   dependencies:
     "@dendronhq/title" "^3.4.3"
     "@types/github-slugger" "^1.3.0"
@@ -1283,13 +1283,13 @@
     vscode-uri "^2.1.2"
     yamljs "^0.3.0"
 
-"@dendronhq/common-frontend@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.78.4.tgz#7ac36be1156f450af7292d28ec9c2e336bc6f0b8"
-  integrity sha512-UXUbYbvOINKahlWvuI6JhfwP1B8hEHHNuSGrusHpcownpSsxaWsI+8QIdygQ/BLjY3sz0hphKGQFa6/moHqt3Q==
+"@dendronhq/common-frontend@^0.79.0":
+  version "0.79.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.79.0.tgz#32a3fcf040e51b4c79a4123d167a93bd7f9d12e1"
+  integrity sha512-BTOAS9h5r217hSbUN6+WGe2hoeHfNzexlS8abn2KOOcQXk4gVHc8PnDSEKUz3MYSYVUDMyOAgn3le4SMKIRlwg==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.78.4"
+    "@dendronhq/common-all" "^0.79.0"
     "@reduxjs/toolkit" "^1.5.1"
     "@types/lodash" "^4.14.161"
     "@types/node" "^14.11.2"

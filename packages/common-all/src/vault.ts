@@ -4,11 +4,7 @@ import { normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault, WorkspaceFolderRaw } from "./types";
-import { QuickPickItem } from "vscode";
 
-export type VaultPickerItem = { vault: DVault; label: string } & Partial<
-  Omit<QuickPickItem, "label">
->;
 export class VaultUtils {
   static getName(vault: DVault): string {
     if (vault.seed) {

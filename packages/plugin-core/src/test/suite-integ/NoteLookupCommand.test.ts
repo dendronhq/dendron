@@ -7,6 +7,7 @@ import {
   LookupSelectionModeEnum,
   NoteQuickInput,
   NoteUtils,
+  SchemaUtils,
   Time,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -25,7 +26,7 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, Done } from "mocha";
+import { afterEach, beforeEach, describe, Done } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";
@@ -57,6 +58,7 @@ import {
 } from "../../components/lookup/utils";
 import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
 import { CONFIG } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
 import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -65,6 +67,7 @@ import { WSUtils } from "../../WSUtils";
 import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   withConfig,
@@ -748,6 +751,433 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+
+    describeMultiWS(
+      "WHEN schema template references to a template note that lies in a different vault",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          // Template is in vault2
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 template",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+        },
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: {
+                    id: "template.ch2",
+                    type: "note",
+                  },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        test("THEN template body gets applied to new note", async () => {
+          const cmd = new NoteLookupCommand();
+          await cmd.run({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+
+          const newNote = NoteUtils.getNoteByFnameFromEngine({
+            fname: "food.ch2",
+            engine,
+            vault: vaults[0],
+          });
+          expect(_.trim(newNote?.body)).toEqual("food ch2 template");
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN schema template references to a template note that lies in a different vault using xvault notation",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          // Template is in vault2
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 template",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+        },
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: {
+                    id: `dendron://${vaults[1].fsPath}/template.ch2`,
+                    type: "note",
+                  },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        test("THEN template body gets applied to new note", async () => {
+          const cmd = new NoteLookupCommand();
+          await cmd.run({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+
+          const newNote = NoteUtils.getNoteByFnameFromEngine({
+            fname: "food.ch2",
+            engine,
+            vault: vaults[0],
+          });
+          expect(_.trim(newNote?.body)).toEqual("food ch2 template");
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN schema template references to a template note that lies in multiple vaults",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          // Template is in vault2 and vaultThree
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            genRandomId: true,
+            body: "food ch2 template in vault 2",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            genRandomId: true,
+            body: "food ch2 template in vaultThree",
+            fname: "template.ch2",
+            vault: vaults[2],
+          });
+        },
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: {
+                    id: "template.ch2",
+                    type: "note",
+                  },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        let showQuickPick: sinon.SinonStub;
+
+        beforeEach(async () => {
+          showQuickPick = sinon.stub(vscode.window, "showQuickPick");
+        });
+        afterEach(() => {
+          showQuickPick.restore();
+        });
+
+        test("THEN user is prompted to select vault", async () => {
+          const cmd = new NoteLookupCommand();
+          await cmd.run({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+          expect(showQuickPick.calledOnce).toBeTruthy();
+        });
+
+        test("AND user picks from prompted vault, THEN template body gets applied to new note", async () => {
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+
+          // Pick vault 2
+          showQuickPick.onFirstCall().returns(
+            Promise.resolve({
+              lable: "vault2",
+              vault: vaults[1],
+            }) as Thenable<vscode.QuickPickItem>
+          );
+          const cmd = new NoteLookupCommand();
+          await cmd.run({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+
+          const newNote = NoteUtils.getNoteByFnameFromEngine({
+            fname: "food.ch2",
+            engine,
+            vault: vaults[0],
+          });
+          expect(showQuickPick.calledOnce).toBeTruthy();
+          expect(_.trim(newNote?.body)).toEqual("food ch2 template in vault 2");
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN schema template references to a template note that lies in a different vault using xvault notation that points to the wrong vault",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          // Template is in vault2
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 template",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+        },
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: {
+                    id: `dendron://missingVault/template.ch2`,
+                    type: "note",
+                  },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        test("THEN exception gets thrown about missing vault", async () => {
+          const cmd = new NoteLookupCommand();
+          const gatherOut = await cmd.gatherInputs({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+
+          const enrichOut = await cmd.enrichInputs(gatherOut);
+
+          await expect(async () =>
+            cmd.execute({
+              ...enrichOut!,
+            })
+          ).toThrow(`vault with name missingVault not found`);
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN schema template references to a template note that lies in a different vault using incorrect xvault notation",
+      {
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          // Template is in vault2
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 template",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+        },
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: {
+                    id: `blah://${vaults[1].fsPath}/template.ch2`,
+                    type: "note",
+                  },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        test("THEN exception gets thrown about missing template", async () => {
+          const cmd = new NoteLookupCommand();
+          const gatherOut = await cmd.gatherInputs({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+
+          const enrichOut = await cmd.enrichInputs(gatherOut);
+          const { vaults } = ExtensionProvider.getDWorkspace();
+
+          await expect(async () =>
+            cmd.execute({
+              ...enrichOut!,
+            })
+          ).toThrow(
+            `No template found for blah://${vaults[1].fsPath}/template.ch2`
+          );
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN schema template references to a missing template note",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          NoteTestUtilsV4.createSchema({
+            fname: "food",
+            wsRoot,
+            vault,
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  id: "food",
+                  parent: "root",
+                  fname: "food",
+                  children: ["ch2"],
+                  vault,
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "ch2",
+                  template: { id: "food.missing", type: "note" },
+                  namespace: true,
+                  vault,
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+        },
+      },
+      () => {
+        test("THEN exception gets thrown about missing note", async () => {
+          const cmd = new NoteLookupCommand();
+          const gatherOut = await cmd.gatherInputs({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+
+          const enrichOut = await cmd.enrichInputs(gatherOut);
+
+          await expect(async () =>
+            cmd.execute({
+              ...enrichOut!,
+            })
+          ).toThrow("No template found for food.missing");
+        });
+      }
+    );
 
     test("new node matching schema prefix defaults to first matching schema child name", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -2347,7 +2777,7 @@ suite("NoteLookupCommand", function () {
   });
 });
 
-suite("stateService", function () {
+suite.skip("stateService", function () {
   let homeDirStub: SinonStub;
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async (ctx) => {

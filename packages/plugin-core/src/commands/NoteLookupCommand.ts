@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  CONSTANTS,
   DendronError,
   DVault,
   ERROR_STATUS,
@@ -9,7 +10,9 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaUtils,
+  VaultUtils,
   VSCodeEvents,
+  SchemaTemplate,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -60,6 +63,7 @@ import {
 import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import { AutoCompleter } from "../utils/autoCompleter";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -451,11 +455,11 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-
       nodeNew = NoteUtils.create({ fname, vault });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
+
       const schemaMatchResult = SchemaUtils.matchPath({
         notePath: fname,
         schemaModDict: engine.schemas,
@@ -477,7 +481,7 @@ export class NoteLookupCommand
       maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
     if (maybeSchema && maybeTemplate) {
       SchemaUtils.applyTemplate({
-        template: maybeTemplate,
+        templateNote: await this.getNoteForSchemaTemplate(maybeTemplate),
         note: nodeNew,
         engine,
       });
@@ -504,6 +508,52 @@ export class NoteLookupCommand
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
+  }
+
+  /**
+   * Find corresponding note for given schema template. Supports cross-vault lookup.
+   *
+   * @param schemaTemplate
+   */
+  private async getNoteForSchemaTemplate(schemaTemplate: SchemaTemplate) {
+    let maybeVault: DVault | undefined;
+    const { link, vaultName } = this.parseDendronURI(schemaTemplate.id);
+    const engine = ExtensionProvider.getEngine();
+
+    // If vault is specified, lookup by template id + vault
+    if (!_.isUndefined(vaultName)) {
+      maybeVault = VaultUtils.getVaultByNameOrThrow({
+        vname: vaultName,
+        vaults: engine.vaults,
+      });
+    }
+
+    const maybeNote =
+      await WSUtilsV2.instance().getNoteFromMultiVaultWithPrompt({
+        fname: link,
+        vault: maybeVault,
+      });
+    if (_.isUndefined(maybeNote)) {
+      throw new DendronError({
+        message: `No template found for ${schemaTemplate.id}`,
+      });
+    }
+    return maybeNote;
+  }
+
+  private parseDendronURI(linkString: string) {
+    if (linkString.startsWith(CONSTANTS.DENDRON_DELIMETER)) {
+      const [vaultName, link] = linkString
+        .split(CONSTANTS.DENDRON_DELIMETER)[1]
+        .split("/");
+      return {
+        vaultName,
+        link,
+      };
+    }
+    return {
+      link: linkString,
+    };
   }
 
   /**

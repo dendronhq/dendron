@@ -35,6 +35,7 @@ import {
   SchemaLookupProviderSuccessResp,
 } from "./LookupProviderV3Interface";
 import { IDendronExtension } from "../../dendronExtensionInterface";
+import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_SCHEMA_DETAIL } from "./constants";
 
 /** This function presumes that 'CreateNew' should be shown and determines whether
  *  CreateNew should be at the top of the look up results or not. */
@@ -416,6 +417,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       if (shouldAddCreateNew) {
         const entryCreateNew = NotePickerUtils.createNoActiveItem({
           fname: queryOrig,
+          detail: CREATE_NEW_NOTE_DETAIL,
         });
 
         const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
@@ -690,7 +692,10 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       updatedItems =
         this.opts.allowNewNote && !perfectMatch
           ? updatedItems.concat([
-              NotePickerUtils.createNoActiveItem({ fname: querystring }),
+              NotePickerUtils.createNoActiveItem({
+                fname: querystring,
+                detail: CREATE_NEW_SCHEMA_DETAIL,
+              }),
             ])
           : updatedItems;
 

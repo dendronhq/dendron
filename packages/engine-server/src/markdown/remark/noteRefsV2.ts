@@ -36,7 +36,7 @@ import { MDUtilsV4, ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import { MdastUtils, ProcFlavor } from "..";
+import { MdastUtils } from "..";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
@@ -854,7 +854,6 @@ function convertNoteRefHelperAST(
         end ? end.index + 1 : undefined
       )
     );
-    const procFlavor = MDUtilsV5.getProcOpts(proc).flavor;
     // Copy the current proc to preserve all options
     let tmpProc = MDUtilsV4.procFull(procOpts);
     // but change the fname and vault to the referenced note, since we're inside that note now
@@ -864,10 +863,7 @@ function convertNoteRefHelperAST(
       vault: note.vault,
     });
     if (isV5Active) {
-      if (
-        procOpts.dest === DendronASTDest.HTML ||
-        procFlavor === ProcFlavor.HOVER_PREVIEW
-      ) {
+      if (procOpts.dest === DendronASTDest.HTML) {
         tmpProc = MDUtilsV5.procRemarkFull(
           {
             ...MDUtilsV5.getProcData(proc),
@@ -888,7 +884,7 @@ function convertNoteRefHelperAST(
       const out3 = tmpProc.runSync(out) as Parent;
       return { error: null, data: out3 };
     } else {
-      const out2 = tmpProc.stringify(tmpProc.runSync(out));
+      const out2 = tmpProc.stringify(out);
       out = tmpProc.parse(out2) as Parent;
       return { error: null, data: out };
     }

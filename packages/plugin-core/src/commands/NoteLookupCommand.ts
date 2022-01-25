@@ -518,11 +518,10 @@ export class NoteLookupCommand
       });
     }
 
-    const maybeNote =
-      await WSUtilsV2.instance().getNoteFromMultiVaultWithPrompt({
-        fname: link,
-        vault: maybeVault,
-      });
+    const maybeNote = await WSUtilsV2.instance().getNoteFromMultiVault({
+      fname: link,
+      vault: maybeVault,
+    });
     if (_.isUndefined(maybeNote)) {
       throw new DendronError({
         message: `No template found for ${schemaTemplate.id}`,

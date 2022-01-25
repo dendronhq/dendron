@@ -16,7 +16,7 @@ export interface IWSUtilsV2 {
   getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined;
 
   /**
-   * Find note by fname.
+   * Find note by fname across all vaults.
    *
    * If vault is specified, search notes by corresponding vault and fname. If no match, return undefined.
    * If vault is not specified, search all notes by id.
@@ -24,7 +24,7 @@ export interface IWSUtilsV2 {
    *    - If one match, assume that is intended note and return.
    *    - If multiple matches, prompt user to select vault from matches
    */
-  getNoteFromMultiVaultWithPrompt(opts: {
+  getNoteFromMultiVault(opts: {
     fname: string;
     vault?: DVault;
   }): Promise<NoteProps | undefined>;

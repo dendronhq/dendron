@@ -2777,7 +2777,7 @@ suite("NoteLookupCommand", function () {
   });
 });
 
-suite.skip("stateService", function () {
+suite("stateService", function () {
   let homeDirStub: SinonStub;
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async (ctx) => {

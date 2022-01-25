@@ -11,7 +11,7 @@ import {
   DEngineClient,
   LinkFilter,
   LinkUtils,
-  MDUtilsV4,
+  MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -917,7 +917,7 @@ describe("h1ToTitle", () => {
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
-        const proc = MDUtilsV4.procFull({
+        const proc = MDUtilsV5.procRemarkFull({
           dest: DendronASTDest.MD_REGULAR,
           engine,
           fname: "foo",

@@ -4,7 +4,8 @@ import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
-import { MDUtilsV4, PublishUtils } from "../utils";
+import { PublishUtils } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
 
 type PluginOpts = {
   noteIndex: NoteProps;
@@ -16,7 +17,7 @@ type PluginOpts = {
  */
 function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
   const proc = this;
-  let { dest, config } = MDUtilsV4.getDendronData(proc);
+  const { dest, config } = MDUtilsV5.getProcData(proc);
   function transformer(tree: Node, _file: VFile) {
     if (dest !== DendronASTDest.HTML) {
       return;

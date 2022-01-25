@@ -16,7 +16,7 @@ import {
   UserTag,
   HashTag,
   linkedNoteType,
-  MDUtilsV4,
+  NodeUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -26,8 +26,8 @@ import vscode, {
   TextEditor,
   TextEditorEdit,
 } from "vscode";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
 
 export function isAnythingSelected(): boolean {
@@ -203,7 +203,7 @@ export async function isBrokenWikilink(): Promise<boolean> {
   const { editor, selection } = VSCodeUtils.getSelection();
   if (!editor || !selection) return false;
   const note = WSUtils.getNoteFromDocument(editor.document);
-  const { engine } = getDWorkspace();
+  const { engine } = ExtensionProvider.getDWorkspace();
   if (!note) return false;
   const line = editor.document.lineAt(selection.start.line).text;
   const proc = MDUtilsV5.procRemarkParse(
@@ -219,7 +219,7 @@ export async function isBrokenWikilink(): Promise<boolean> {
   let link: WikiLinkNoteV4 | UserTag | HashTag | undefined;
   let type: DECORATION_TYPES | undefined;
   let fname: string;
-  await MDUtilsV4.visitAsync(
+  await NodeUtils.visitAsync(
     parsedLine,
     [
       DendronASTTypes.WIKI_LINK,

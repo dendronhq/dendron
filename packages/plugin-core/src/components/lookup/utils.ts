@@ -27,7 +27,8 @@ import { getDWorkspace, getExtension } from "../../workspace";
 import { getButtonCategory } from "./buttons";
 import { DendronBtn } from "./ButtonTypes";
 import {
-  CREATE_NEW_DETAIL,
+  CREATE_NEW_DETAIL_LIST,
+  CREATE_NEW_NOTE_DETAIL,
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
@@ -70,7 +71,7 @@ export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
   return {
     ...props,
     label: CREATE_NEW_LABEL,
-    detail: CREATE_NEW_DETAIL,
+    detail: CREATE_NEW_NOTE_DETAIL,
     alwaysShow: true,
   };
 }
@@ -431,7 +432,11 @@ export class PickerUtilsV2 {
     if (!node) {
       return true;
     }
-    if (node.detail === CREATE_NEW_DETAIL || node.stub || node.schemaStub) {
+    if (
+      CREATE_NEW_DETAIL_LIST.includes(node.detail || "") ||
+      node.stub ||
+      node.schemaStub
+    ) {
       return true;
     } else {
       return false;
@@ -442,7 +447,11 @@ export class PickerUtilsV2 {
     if (!node) {
       return true;
     }
-    if (node.detail === CREATE_NEW_DETAIL || node.stub || node.schemaStub) {
+    if (
+      CREATE_NEW_DETAIL_LIST.includes(node.detail || "") ||
+      node.stub ||
+      node.schemaStub
+    ) {
       return true;
     } else {
       return false;

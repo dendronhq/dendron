@@ -369,8 +369,7 @@ export class DendronEngineV2 implements DEngine {
         delete noteNew.stub;
         updateExisting = true;
       } else {
-        debugger;
-        noteNew = await NoteUtils.createWithSchema({
+        noteNew = NoteUtils.createWithSchema({
           noteOpts: { fname: npath, vault },
           engine: this,
         });

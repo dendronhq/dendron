@@ -14,4 +14,18 @@ export interface IWSUtilsV2 {
 
   /** If the text document at `filePath` is open in any editor, return that document. */
   getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined;
+
+  /**
+   * Find note by fname.
+   *
+   * If vault is specified, search notes by corresponding vault and fname. If no match, return undefined.
+   * If vault is not specified, search all notes by id.
+   *    - If no match, return undefined
+   *    - If one match, assume that is intended note and return.
+   *    - If multiple matches, prompt user to select vault from matches
+   */
+  getNoteFromMultiVaultWithPrompt(opts: {
+    fname: string;
+    vault?: DVault;
+  }): Promise<NoteProps | undefined>;
 }

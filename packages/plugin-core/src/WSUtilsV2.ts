@@ -7,7 +7,9 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { VaultPickerItem } from "./components/lookup/utils";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
@@ -66,6 +68,51 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       wsRoot,
       notes: engine.notes,
     });
+  }
+
+  /**
+   * See {@link IWSUtilsV2.getNoteFromMultiVaultWithPrompt}
+   */
+  async getNoteFromMultiVaultWithPrompt(opts: {
+    fname: string;
+    vault?: DVault;
+  }) {
+    const { fname, vault } = opts;
+    let existingNote: NoteProps | undefined;
+    const engine = ExtensionProvider.getEngine();
+    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
+      fname,
+      engine,
+      vault,
+    });
+
+    if (maybeNotes.length === 1) {
+      // Only one match so use that as note
+      existingNote = maybeNotes[0];
+    } else if (maybeNotes.length > 1) {
+      // If there are multiple notes with this fname, prompt user to select which vault
+      const vaults: VaultPickerItem[] = maybeNotes.map((noteProps) => {
+        return {
+          vault: noteProps.vault,
+          label: VaultUtils.getName(noteProps.vault),
+        };
+      });
+
+      const items = vaults.map((vaultPickerItem) => ({
+        ...vaultPickerItem,
+        label: vaultPickerItem.label
+          ? vaultPickerItem.label
+          : vaultPickerItem.vault.fsPath,
+      }));
+      const resp = await vscode.window.showQuickPick(items, {
+        title: "Select Vault",
+      });
+
+      if (!_.isUndefined(resp)) {
+        existingNote = _.find(maybeNotes, { vault: resp.vault });
+      }
+    } // Else no match in which case we return undefined
+    return existingNote;
   }
 
   getVaultFromDocument(document: vscode.TextDocument) {

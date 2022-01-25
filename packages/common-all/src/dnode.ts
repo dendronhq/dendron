@@ -6,7 +6,6 @@ import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
-import * as vscode from "vscode";
 import { URI } from "vscode-uri";
 import {
   CONSTANTS,
@@ -49,7 +48,7 @@ import {
   randomColor,
 } from "./utils";
 import { genUUID } from "./uuid";
-import { VaultPickerItem, VaultUtils } from "./vault";
+import { VaultUtils } from "./vault";
 
 /**
  * Utilities for dealing with nodes
@@ -414,13 +413,13 @@ export class NoteUtils {
     return DNodeUtils.create({ ...cleanOpts, type: "note" });
   }
 
-  static async createWithSchema({
+  static createWithSchema({
     noteOpts,
     engine,
   }: {
     noteOpts: NoteOpts;
     engine: DEngineClient;
-  }): Promise<NoteProps> {
+  }): NoteProps {
     const note = NoteUtils.create(noteOpts);
     const maybeMatch = SchemaUtils.matchPath({
       notePath: noteOpts.fname,
@@ -431,11 +430,18 @@ export class NoteUtils {
       NoteUtils.addSchema({ note, schemaModule, schema });
       const maybeTemplate = schema.data.template;
       if (maybeTemplate) {
-        await SchemaUtils.applyTemplate({
-          template: maybeTemplate,
-          note,
-          engine,
+        // TODO: Support xvault with user prompting for this flow
+        const tempNote = _.find(_.values(engine.notes), {
+          fname: maybeTemplate.id,
         });
+
+        if (tempNote) {
+          SchemaUtils.applyTemplate({
+            templateNote: tempNote,
+            note,
+            engine,
+          });
+        }
       }
     }
     return note;
@@ -875,7 +881,10 @@ export class NoteUtils {
       vault: toVault,
     });
 
-    if (maybeNotes.length > 1) {
+    if (maybeNotes.length === 1) {
+      // Only one match so use that as note
+      existingNote = maybeNotes[0];
+    } else if (maybeNotes.length > 1) {
       // If there are multiple notes with this fname, default to one that's in the same vault first.
       const sameVaultNote = _.filter(maybeNotes, (n) =>
         VaultUtils.isEqual(n.vault, fromVault, wsRoot)
@@ -887,54 +896,7 @@ export class NoteUtils {
         // Otherwise, just pick one, doesn't matter which.
         existingNote = maybeNotes[0];
       }
-    } else {
-      // Just 1 note
-      existingNote = maybeNotes[0];
-    }
-    return existingNote;
-  }
-
-  /**
-   * Similar to {@link getNoteFromMultiVault} but instead of defaulting to first note for multiple matches,
-   * we prompt the user to pick which vault from which the note lies
-   */
-  static async getNoteFromMultiVaultWithPrompt(opts: {
-    fname: string;
-    engineClient: DEngineClient;
-    vault?: DVault;
-  }) {
-    const { fname, engineClient, vault } = opts;
-    let existingNote: NoteProps | undefined;
-    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      engine: engineClient,
-      vault,
-    });
-
-    if (maybeNotes.length === 1) {
-      // Only one match so use that as note
-      existingNote = maybeNotes[0];
-    } else if (maybeNotes.length > 1) {
-      // If there are multiple notes with this fname, prompt user to select which vault
-      const vaults: VaultPickerItem[] = maybeNotes.map((noteProps) => {
-        return {
-          vault: noteProps.vault,
-          label: VaultUtils.getName(noteProps.vault),
-        };
-      });
-
-      const items = vaults.map((ent) => ({
-        ...ent,
-        label: ent.label ? ent.label : ent.vault.fsPath,
-      }));
-      const resp = await vscode.window.showQuickPick(items, {
-        title: "Select Vault",
-      });
-
-      if (!_.isUndefined(resp)) {
-        existingNote = _.find(maybeNotes, { vault: resp.vault });
-      }
-    } // else no match in which case we return undefined
+    } // Else no match in which case we return undefined
     return existingNote;
   }
 
@@ -1399,65 +1361,27 @@ export class SchemaUtils {
   ];
 
   /**
-   * Append the contents of a template (if applicable) to the end of the {@param note}. If template does not exist, do not modify the note.
+   * Apply template note to provided {@param note}.
    *
-   * Attempt to find the template in the following order:
-   * 1. If vault is specified in the template id, search notes by corresponding vault and id. If no match, do nothing.
-   * 2. If vault is not specified, search all notes by id.
-   *    - If no match, do nothing.
-   *    - If one match, assume that is intended template.
-   *    - If multiple matches, prompt user to select template
-   *
-   * @returns True if template type is "note". False otherwise
+   * Changes include appending template note's body to end of provided note.
    */
-  static async applyTemplate(opts: {
-    template: SchemaTemplate;
+  static applyTemplate(opts: {
+    templateNote: NoteProps;
     note: NoteProps;
     engine: DEngineClient;
   }) {
-    let tempNote: NoteProps | undefined;
-    let vaultToSearch: DVault | undefined;
-    const { template, note, engine } = opts;
-    if (template.type === "note") {
-      const { link, vaultName } = this.parseDendronURI(template.id);
-
-      // If vault name is specified in template, search notes by vault (if valid vault) and template id
-      if (!_.isUndefined(vaultName)) {
-        vaultToSearch = VaultUtils.getVaultByName({
-          vname: vaultName,
-          vaults: engine.vaults,
-        });
-        if (!_.isUndefined(vaultToSearch)) {
-          // Vault + template id should be unique so there should be at most 1 match
-          tempNote = NoteUtils.getNoteByFnameFromEngine({
-            fname: link,
-            engine,
-            vault: vaultToSearch,
-          });
-        }
-      }
-
-      // If vault is not specified in template, search notes by template id
-      if (_.isUndefined(vaultName)) {
-        tempNote = await NoteUtils.getNoteFromMultiVaultWithPrompt({
-          fname: link,
-          engineClient: engine,
-        });
-      }
-      if (_.isUndefined(tempNote)) {
-        throw Error(`No template found for ${template.id}`);
-      }
-
-      const tempNoteProps = _.pick(tempNote, this.TEMPLATE_COPY_PROPS);
+    const { templateNote, note } = opts;
+    if (templateNote.type === "note") {
+      const tempNoteProps = _.pick(templateNote, this.TEMPLATE_COPY_PROPS);
       _.forEach(tempNoteProps, (v, k) => {
         // @ts-ignore
         note[k] = v;
       });
       // If note body exists, append template's body instead of overriding
       if (note.body) {
-        note.body += `\n${tempNote.body}`;
+        note.body += `\n${templateNote.body}`;
       } else {
-        note.body = tempNote.body;
+        note.body = templateNote.body;
       }
 
       // Apply date variable substitution to the body based on mustache delimiter if applicable
@@ -2032,21 +1956,6 @@ export class SchemaUtils {
 
   static isSchemaUri(uri: URI) {
     return uri.fsPath.endsWith(".schema.yml");
-  }
-
-  static parseDendronURI(linkString: string) {
-    if (linkString.startsWith(CONSTANTS.DENDRON_DELIMETER)) {
-      const [vaultName, link] = linkString
-        .split(CONSTANTS.DENDRON_DELIMETER)[1]
-        .split("/");
-      return {
-        vaultName,
-        link,
-      };
-    }
-    return {
-      link: linkString,
-    };
   }
 
   // /**

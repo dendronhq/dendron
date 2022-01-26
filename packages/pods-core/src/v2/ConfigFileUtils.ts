@@ -125,7 +125,7 @@ export class ConfigFileUtils {
       case PodV2Types.JSONExportV2:
         return JSONExportPodV2.config();
       default:
-        assertUnreachable();
+        assertUnreachable(podType);
     }
   }
 }

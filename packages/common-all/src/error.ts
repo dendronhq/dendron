@@ -189,20 +189,34 @@ export class ErrorMessages {
  *
  * An example of how this function may be used is below:
  *
- *     type Names = "bar" | "baz";
+ * ```ts
+ * type Names = "bar" | "baz";
  *
- *     function foo(name: Names) {
- *       if (name === "bar") { ... }
- *       else if (name === "baz") { ... }
- *       else assertUnreachable(name);
- *     }
+ * function foo(name: Names) {
+ *   if (name === "bar") { ... }
+ *   else if (name === "baz") { ... }
+ *   else assertUnreachable(name);
+ * }
+ * ```
  *
  * Let's say someone changes the type Names to `type Names = "bar" | "baz" | "ham";`. Thanks to this
  * assertion, the compiler will warn them that this branch is now reachable, and something is wrong.
  *
- * @param x
+ * Here's another example:
+ *
+ * ```
+ * switch (msg.type) {
+ *   case GraphViewMessageType.onSelect:
+ *   // ...
+ *   // ... all the cases
+ *   default:
+ *     assertUnreachable(msg.type);
+ * }
+ * ```
+ *
+ * Warning! Never use this function without a parameter. It won't actually do any type checks then.
  */
-export function assertUnreachable(_never?: never): never {
+export function assertUnreachable(_never: never): never {
   throw new DendronError({
     message: ErrorMessages.formatShouldNeverOccurMsg(),
   });

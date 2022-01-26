@@ -100,7 +100,7 @@ export class ExternalConnectionManager {
         return file;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(serviceType);
     }
   }
 

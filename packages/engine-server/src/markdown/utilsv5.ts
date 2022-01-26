@@ -426,7 +426,7 @@ export class MDUtilsV5 {
       case ProcMode.NO_DATA:
         break;
       default:
-        assertUnreachable();
+        assertUnreachable(opts.mode);
     }
     return proc;
   }

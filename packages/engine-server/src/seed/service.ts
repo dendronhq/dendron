@@ -205,7 +205,7 @@ export class SeedService {
         break;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(mode);
     }
     return {
       data: {

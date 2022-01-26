@@ -69,7 +69,7 @@ export class PodCommandFactory {
       }
       case PodV2Types.NotionExportV2: {
         const cmd = new NotionExportPodCommand();
-         cmdWithArgs = {
+        cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
             return cmd.run(storedConfig);
@@ -77,7 +77,7 @@ export class PodCommandFactory {
         };
         break;
       }
-      
+
       case PodV2Types.JSONExportV2: {
         const cmd = new JSONExportPodCommand();
         cmdWithArgs = {
@@ -146,7 +146,7 @@ export class PodCommandFactory {
           },
         };
       }
-      
+
       case PodV2Types.JSONExportV2: {
         const cmd = new JSONExportPodCommand();
         return {
@@ -157,7 +157,7 @@ export class PodCommandFactory {
         };
       }
       default:
-        assertUnreachable();
+        assertUnreachable(podType);
     }
   }
 }

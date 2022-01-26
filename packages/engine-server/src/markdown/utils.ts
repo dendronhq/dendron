@@ -513,7 +513,7 @@ export class MDUtilsV4 {
   }
 }
 
-/** Contains functions that help dealing with mdast trees. */
+/** Contains functions that help dealing with MarkDown Abstract Syntax Trees. */
 export class MdastUtils {
   /** Find the index of the list element for which the predicate `fn` returns true.
    *

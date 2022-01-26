@@ -276,7 +276,7 @@ export class PodUIControls {
         break;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(connectionType);
     }
   }
 

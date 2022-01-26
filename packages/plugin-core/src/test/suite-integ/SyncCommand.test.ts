@@ -14,8 +14,13 @@ import * as vscode from "vscode";
 import { SyncCommand } from "../../commands/Sync";
 import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 import fs from "fs-extra";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 suite("workspace sync command", function () {
   let ctx: vscode.ExtensionContext;
@@ -397,70 +402,531 @@ suite("workspace sync command", function () {
     });
   });
 
-  describe("WHEN there are tracked, uncommitted changes", () => {
-    test("THEN Dendron stashes and restores the changes", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          const remoteDir = tmpDir().name;
-          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-          // Add everything and push, so that there's no untracked changes
-          const git = new Git({ localUrl: wsRoot });
-          await git.addAll();
-          await git.commit({ msg: "add all and commit" });
-          await git.push();
-          // Update root note so there are tracked changes
-          const fpath = NoteUtils.getFullPath({
-            note: NoteUtils.getNoteByFnameFromEngine({
-              fname: "root",
-              vault: vaults[0],
-              engine,
-            })!,
-            wsRoot,
-          });
-          await fs.appendFile(fpath, "Similique non atque");
-          // Also create an untracked change
-          const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
-            engine,
-            fname: "untracked-new-note",
+  describeSingleWS(
+    "WHEN there are tracked, uncommitted changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron stashes and restores the changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
             vault: vaults[0],
-            wsRoot,
-            body: "Quia dolores rem ad et aut.",
-          });
+            engine,
+          })!,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+        // Also create an untracked change
+        const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          fname: "untracked-new-note",
+          vault: vaults[0],
+          wsRoot,
+          body: "Quia dolores rem ad et aut.",
+        });
 
-          const out = await new SyncCommand().execute();
-          const { committed, pulled, pushed } = out;
-          // Should skip committing since it's set to no commit
-          expect(SyncCommand.countDone(committed)).toEqual(0);
-          // Should still stash and pull
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(pulled[0].status === SyncActionStatus.DONE);
-          // the changes, tracked and untracked, should be restored after the pull
-          await FileTestUtils.assertInFile({
-            fpath,
-            match: ["Similique non atque"],
-          });
-          await FileTestUtils.assertInFile({
-            fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
-            match: ["Quia dolores rem ad et aut."],
-          });
-          GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
-          // nothing to push
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
-          expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
-          done();
-        },
-        modConfigCb: (config) => {
-          ConfigUtils.setWorkspaceProp(
-            config,
-            "workspaceVaultSyncMode",
-            "noCommit"
-          );
-          return config;
-        },
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: ["Similique non atque"],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
+          match: ["Quia dolores rem ad et aut."],
+        });
+        GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
       });
-    });
-  });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN there are tracked, uncommitted changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron stashes and restores the changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
+            vault: vaults[0],
+            engine,
+          })!,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+        // Also create an untracked change
+        const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          fname: "untracked-new-note",
+          vault: vaults[0],
+          wsRoot,
+          body: "Quia dolores rem ad et aut.",
+        });
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: ["Similique non atque"],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
+          match: ["Quia dolores rem ad et aut."],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN git pull adds changes that conflict with local changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron still restores local changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        const note = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+        // Also create an untracked change
+        const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          fname: "untracked-new-note",
+          vault: vaults[0],
+          wsRoot,
+          body: "Quia dolores rem ad et aut.",
+        });
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: [
+            // The uncommitted changes in this repo, restored
+            "Similique non atque",
+            // The pulled changes from the secondary dir
+            "Aut ut nisi dolores quae et",
+            // There's a merge conflict because of the pulled changes
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
+          match: ["Quia dolores rem ad et aut."],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN git pull adds changes that don't conflict with local changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron still restores local changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        const otherNote = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "non-conflicting",
+          vault: vaults[0],
+          wsRoot,
+          engine,
+        });
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: otherNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+        const otherNoteFpath = NoteUtils.getFullPath({
+          note: otherNote,
+          wsRoot,
+        });
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: [
+            // The uncommitted changes in this repo, restored
+            "Similique non atque",
+          ],
+          nomatch: [
+            // No merge conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: otherNoteFpath,
+          // we have the change that we pulled in
+          match: ["Aut ut nisi dolores quae et"],
+          nomatch: [
+            // No merge conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN git pull causes a rebase",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN rebase works, and Dendron still restores local changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        const otherNote = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "non-conflicting",
+          vault: vaults[0],
+          wsRoot,
+          engine,
+        });
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "first commit" });
+        await git.push();
+        // Update root note and add a commit that's not in remote, so there'll be something to rebase
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+        const otherNoteFpath = NoteUtils.getFullPath({
+          note: otherNote,
+          wsRoot,
+        });
+        await git.addAll();
+        await git.commit({ msg: "second commit" });
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: otherNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Update root note so there are tracked changes
+        await fs.appendFile(fpath, "Similique non atque\n");
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: [
+            // The uncommitted changes in this repo, restored
+            "Similique non atque",
+            // the rebased change is still there too
+            "Deserunt culpa in expedita",
+          ],
+          nomatch: [
+            // No merge conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: otherNoteFpath,
+          // we have the change that we pulled in
+          match: ["Aut ut nisi dolores quae et"],
+          nomatch: [
+            // No merge conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        expect(SyncCommand.countDone(pushed)).toEqual(1);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN git pull causes a rebase but hits a conflict",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN rebase works, and Dendron restores local changes with the conflict", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "first commit" });
+        await git.push();
+        // Update root note and add a commit that's not in remote, so there'll be something to rebase
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+        await git.addAll();
+        await git.commit({ msg: "second commit" });
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Update root note so there are tracked changes
+        await fs.appendFile(fpath, "Similique non atque\n");
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: [
+            // The uncommitted changes in this repo, restored
+            "Similique non atque",
+            // the rebased change is still there too
+            "Deserunt culpa in expedita",
+            // there will be a conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
 });
 
 async function checkoutNewBranch(wsRoot: string, branch: string) {

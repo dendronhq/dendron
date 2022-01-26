@@ -614,6 +614,7 @@ export class SurveyUtils {
           vscode.window.showInformationMessage(
             "Thanks for helping us make Dendron better 🌱"
           );
+          AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyAccepted);
         } else {
           await StateService.instance().updateGlobalState(
             GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED,

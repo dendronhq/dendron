@@ -350,7 +350,7 @@ export class EngineAPIService
         this._onNoteDeletedEmitter.fire(entry.note);
         break;
       default:
-        assertUnreachable();
+        assertUnreachable(entry);
     }
   }
 }

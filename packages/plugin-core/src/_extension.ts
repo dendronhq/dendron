@@ -622,11 +622,16 @@ export async function _activate(
       // Setup the Engine API Service and the tree view
       const engineAPIService = updateEngineAPI(port);
 
-      // TODO: Check settings if treeviewV2 is enabled
-      const treeView = new NativeTreeView(engineAPIService);
-      treeView.show();
+      // TODO: This should eventually be consolidated with other view setup
+      // logic as in workspace.ts, but right now this needs an instance of
+      // EngineAPIService for init
 
-      context.subscriptions.push(treeView);
+      // If the web UI dev flag is not set, then setup a native tree view:
+      if (!ws.workspaceService?.config.dev?.enableWebUI) {
+        const treeView = new NativeTreeView(engineAPIService);
+        treeView.show();
+        context.subscriptions.push(treeView);
+      }
 
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);

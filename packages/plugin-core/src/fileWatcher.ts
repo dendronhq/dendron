@@ -151,9 +151,6 @@ export class FileWatcher {
           note,
           fmChangeOnly: false,
         });
-        // TODO: This needs to be changed to createNote if maybeNote doesn't
-        // exist - otherwise, EngineAPIService  will propagate the wrong event
-        // type to EngineEvent listeners.
         await engine.updateNote(note as NoteProps, {
           newNode: true,
         });

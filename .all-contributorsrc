@@ -1308,6 +1308,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "skfile",
+      "name": "Vik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/60110907?v=4",
+      "profile": "https://github.com/skfile",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

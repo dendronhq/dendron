@@ -3,8 +3,8 @@ import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 const L = Logger;
@@ -40,12 +40,13 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
-    const workspaceService = getExtension().workspaceService;
+    const workspaceService = ExtensionProvider.getExtension().workspaceService;
     if (_.isUndefined(workspaceService))
       throw new DendronError({
         message: "Workspace is not initialized",
         severity: ERROR_SEVERITY.FATAL,
       });
+    const engine = ExtensionProvider.getEngine();
 
     const { committed, pulled, pushed } = await window.withProgress(
       {
@@ -55,7 +56,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       },
       async (progress) => {
         progress.report({ increment: 0, message: "committing repos" });
-        const committed = await workspaceService.commitAndAddAll();
+        const committed = await workspaceService.commitAndAddAll({ engine });
         L.info(committed);
         progress.report({ increment: 25, message: "pulling repos" });
         const pulled = await workspaceService.pullVaults();

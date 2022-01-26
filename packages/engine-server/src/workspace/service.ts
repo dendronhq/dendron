@@ -3,6 +3,7 @@ import {
   CONSTANTS,
   CURRENT_CONFIG_VERSION,
   DendronError,
+  DEngineClient,
   Disposable,
   DuplicateNoteAction,
   DUser,
@@ -36,6 +37,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import os from "os";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
@@ -53,30 +55,15 @@ import {
 } from "../utils";
 import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
-import { IWorkspaceService } from "./workspaceServiceInterface";
+import {
+  IWorkspaceService,
+  SyncActionResult,
+  SyncActionStatus,
+} from "./workspaceServiceInterface";
 
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
-
-export enum SyncActionStatus {
-  DONE = "",
-  NO_CHANGES = "it has no changes",
-  NO_REMOTE = "it has no remote",
-  NO_UPSTREAM = "the current branch has no upstream",
-  SKIP_CONFIG = "it is configured so",
-  NOT_PERMITTED = "user is not permitted to push to one or more vaults",
-  NEW = "newly clond repository",
-  CANT_STASH = "failed to stash changes in working directory",
-  CANT_RESTORE = "failed to restore stashed changes",
-  ERROR = "error while syncing",
-}
-
-export type SyncActionResult = {
-  repo: string;
-  vaults: DVault[];
-  status: SyncActionStatus;
-};
 
 export type WorkspaceServiceCreateOpts = {
   wsRoot: string;
@@ -519,7 +506,31 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return true;
   }
 
-  async commitAndAddAll(): Promise<SyncActionResult[]> {
+  private static async generateCommitMessage({
+    vaults,
+    engine,
+  }: {
+    vaults: DVault[];
+    engine: DEngineClient;
+  }): Promise<string> {
+    const { version } = (await engine.info()).data || { version: "unknown" };
+
+    return [
+      "Dendron workspace sync",
+      "",
+      "## Synced vaults:",
+      ...vaults.map((vault) => `- ${VaultUtils.getName(vault)}`),
+      "",
+      `Dendron version: ${version}`,
+      `Hostname: ${os.hostname()}`,
+    ].join("\n");
+  }
+
+  async commitAndAddAll({
+    engine,
+  }: {
+    engine: DEngineClient;
+  }): Promise<SyncActionResult[]> {
     const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
       _.map(
@@ -533,7 +544,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
             return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
           try {
             await git.addAll();
-            await git.commit({ msg: "update" });
+            await git.commit({
+              msg: await WorkspaceService.generateCommitMessage({
+                vaults,
+                engine,
+              }),
+            });
             return { repo, vaults, status: SyncActionStatus.DONE };
           } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";

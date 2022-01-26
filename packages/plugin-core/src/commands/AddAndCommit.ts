@@ -2,8 +2,8 @@ import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 const L = Logger;
@@ -16,7 +16,11 @@ export class AddAndCommit extends BasicCommand<CommandOpts, void> {
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
-    const resp = await getExtension().workspaceService!.commitAndAddAll();
+    const engine = ExtensionProvider.getEngine();
+    const workspaceService = ExtensionProvider.getExtension().workspaceService;
+    const resp = await workspaceService!.commitAndAddAll({
+      engine,
+    });
     if (_.isEmpty(resp)) {
       window.showInformationMessage(`no files to add or commit`);
       return;

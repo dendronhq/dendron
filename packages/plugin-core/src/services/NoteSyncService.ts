@@ -1,16 +1,14 @@
 import {
   ConfigUtils,
-  ContextualUIEvents,
   DVault,
   NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DLogger, file2Note, string2Note } from "@dendronhq/common-server";
+import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
-  HistoryService,
   LinkUtils,
   MDUtilsV5,
   WorkspaceUtils,
@@ -28,7 +26,6 @@ import {
 } from "vscode";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
-import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 
 /**
@@ -36,6 +33,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
  */
 export interface INoteSyncService extends Disposable {
   /**
+   * @deprecated - use EngineEvents interface instead
    * Event that fires after a set of NoteProps has been changed AND those
    * changes have been reflected on the engine side
    */
@@ -67,8 +65,6 @@ export class NoteSyncService implements INoteSyncService {
 
   _textDocumentEventHandle: Disposable;
   _textDocumentChangeEventHandle: Disposable;
-  _onFSDidCreateEvent: Disposable;
-  _onFSDidDeleteEvent: Disposable;
 
   _extension: IDendronExtension;
 
@@ -90,9 +86,7 @@ export class NoteSyncService implements INoteSyncService {
   constructor(
     ext: IDendronExtension,
     textDocumentEvent: Event<TextDocument>,
-    textDocumentChangeEvent: Event<TextDocumentChangeEvent>,
-    onFSDidCreateEvent: Event<vscode.Uri>,
-    onFSDidDeleteEvent: Event<vscode.Uri>
+    textDocumentChangeEvent: Event<TextDocumentChangeEvent>
   ) {
     this.L = Logger;
     this._extension = ext;
@@ -103,15 +97,11 @@ export class NoteSyncService implements INoteSyncService {
       _.debounce(this.onDidChange, 200),
       this
     );
-
-    this._onFSDidCreateEvent = onFSDidCreateEvent(this.onFSCreate, this);
-    this._onFSDidDeleteEvent = onFSDidDeleteEvent(this.onFSDelete, this);
   }
 
   dispose() {
     this._textDocumentEventHandle.dispose();
     this._textDocumentChangeEventHandle.dispose();
-    this._onFSDidCreateEvent.dispose();
   }
 
   private async syncNoteContents(opts: {
@@ -300,120 +290,6 @@ export class NoteSyncService implements INoteSyncService {
       vault,
     });
     this._emitter.fire(props);
-  }
-
-  private async onFSCreate(file: vscode.Uri) {
-    const ctx = "NoteSyncService:onFSCreate";
-
-    const fsPath = file.fsPath;
-    this.L.info({ ctx, fsPath });
-    const fname = path.basename(fsPath, ".md");
-
-    const recentEvents = HistoryService.instance().lookBack();
-    this.L.debug({ ctx, recentEvents, fname });
-    let note: NoteProps | undefined;
-    if (
-      _.find(recentEvents, (event) => {
-        return _.every([
-          event?.uri?.fsPath === fsPath,
-          event.source === "engine",
-          event.action === "create",
-        ]);
-      })
-    ) {
-      this.L.debug({ ctx, fsPath, msg: "create by engine, ignoring" });
-      return;
-    }
-
-    try {
-      this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-      const { vaults, engine, wsRoot } = this._extension.getDWorkspace();
-      const vault = VaultUtils.getVaultByFilePath({
-        vaults,
-        fsPath,
-        wsRoot,
-      });
-      note = file2Note(fsPath, vault);
-
-      // check if note exist as
-      const maybeNote = NoteUtils.getNoteByFnameV5({
-        fname,
-        vault,
-        notes: engine.notes,
-        wsRoot,
-      }) as NoteProps;
-      if (maybeNote) {
-        note = {
-          ...note,
-          ..._.pick(maybeNote, ["children", "parent"]),
-        } as NoteProps;
-        delete note["stub"];
-        delete note["schemaStub"];
-        //TODO recognise vscode's create new file menu option to create a note.
-      }
-
-      // add note
-      note = await this.syncNoteMetadata({
-        note,
-        fmChangeOnly: false,
-      });
-      await engine.updateNote(note as NoteProps, {
-        newNode: true,
-      });
-
-      this._emitter.fire(note);
-    } catch (err: any) {
-      this.L.error({ ctx, error: err });
-      throw err;
-    }
-  }
-
-  private async onFSDelete(file: vscode.Uri) {
-    const ctx = "NoteSyncService:onFSDelete";
-
-    const fsPath = file.fsPath;
-
-    this.L.info({ ctx, fsPath });
-    const fname = path.basename(fsPath, ".md");
-
-    // check if we should ignore
-    const recentEvents = HistoryService.instance().lookBack(5);
-    this.L.debug({ ctx, recentEvents, fname });
-    if (
-      _.find(recentEvents, (event) => {
-        return _.every([
-          event?.uri?.fsPath === fsPath,
-          event.source === "engine",
-          _.includes(["delete", "rename"], event.action),
-        ]);
-      })
-    ) {
-      this.L.debug({
-        ctx,
-        fsPath,
-        msg: "recent action by engine, ignoring",
-      });
-      return;
-    }
-    try {
-      const engine = this._extension.getEngine();
-      this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-      const nodeToDelete = _.find(engine.notes, { fname });
-      if (_.isUndefined(nodeToDelete)) {
-        throw new Error(`${fname} not found`);
-      }
-      await engine.deleteNote(nodeToDelete.id, { metaOnly: true });
-      HistoryService.instance().add({
-        action: "delete",
-        source: "watcher",
-        uri: vscode.Uri.parse(fsPath),
-      });
-      AnalyticsUtils.track(ContextualUIEvents.ContextualUIDelete);
-    } catch (err) {
-      this.L.info({ ctx, fsPath, err });
-      // NOTE: ignore, many legitimate reasons why this might happen
-      // this.L.error({ ctx, err: JSON.stringify(err) });
-    }
   }
 
   private getFrontmatterPosition = (

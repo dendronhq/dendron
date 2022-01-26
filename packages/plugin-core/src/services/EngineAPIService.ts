@@ -42,7 +42,7 @@ import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Event, EventEmitter } from "vscode";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
-import { EngineEvents } from "./EngineEventService";
+import { EngineEvents } from "./EngineEvents";
 
 export class EngineAPIService
   implements DEngineClient, IEngineAPIService, EngineEvents
@@ -254,9 +254,7 @@ export class EngineAPIService
     return this.internalEngine.deleteNote(id, opts).then((value) => {
       if (value.data !== undefined) {
         value.data.forEach((noteChangeEntry) => {
-          if (noteChangeEntry.status === "delete") {
-            this._onNoteDeletedEmitter.fire(noteChangeEntry.note);
-          }
+          this.emitEventsForNoteChangeEntry(noteChangeEntry);
         });
       }
       return value;

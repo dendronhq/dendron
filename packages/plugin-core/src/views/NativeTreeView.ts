@@ -9,7 +9,7 @@ import _ from "lodash";
 import path from "path";
 import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { EngineEvents } from "../services/EngineEventService";
+import { EngineEvents } from "../services/EngineEvents";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 
 /**

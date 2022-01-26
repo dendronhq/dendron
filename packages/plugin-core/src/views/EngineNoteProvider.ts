@@ -10,7 +10,7 @@ import vscode, { ProviderResult, ThemeIcon } from "vscode";
 import { ICONS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { EngineEvents } from "../services/EngineEventService";
+import { EngineEvents } from "../services/EngineEvents";
 import { TreeNote } from "./TreeNote";
 
 /**
@@ -92,6 +92,13 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
     });
 
     this._engineEvents.onNoteDeleted((_noteProps) => {
+      this.refreshTreeView();
+    });
+
+    // We also need to listen to onNoteChange, because a note 'deletion' may get
+    // signalled as an update with the stub property changed to true when it is
+    // 'deleted' but has children nodes.
+    this._engineEvents.onNoteChange((_noteProps) => {
       this.refreshTreeView();
     });
   }

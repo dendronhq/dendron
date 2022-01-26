@@ -981,14 +981,14 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     LAST_LOOKUP_TIME !== undefined &&
     CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
 
-  // if they have cancelled, we should be waiting another 2 weeks.
+  // if they have cancelled last time, we should be waiting another 2 weeks.
   if (inactiveSurveySubmitted === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
       CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
       isInactive;
     if (shouldSendAgain) {
-      AnalyticsUtils.track(SurveyEvents.InactiveUserPromptReason, {
+      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
         reason: "reprompt",
         currentTime,
         ...metaData,
@@ -1002,7 +1002,7 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
       metaData.firstWsInitialize !== undefined &&
       isInactive;
     if (shouldSend) {
-      AnalyticsUtils.track(SurveyEvents.InactiveUserPromptReason, {
+      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
         reason: "initial_prompt",
         currentTime,
         ...metaData,

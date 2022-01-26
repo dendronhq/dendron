@@ -1321,6 +1321,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "LegendL3n",
+      "name": "David Gomes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10091092?v=4",
+      "profile": "https://davidsec.blog",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -66,7 +66,9 @@ describe(`schemaParser tests:`, () => {
 
       beforeAll(() => {
         // Bar schemas are at 0 index in the basic setup case.
-        const barSchemaGroup = payload.schemas[0];
+        const barSchemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "bar"
+        )[0];
 
         barSchema = barSchemaGroup.schemas["bar"];
         ch1Schema = barSchemaGroup.schemas["ch1"];
@@ -128,8 +130,220 @@ describe(`schemaParser tests:`, () => {
     // Make sure we aren't forgetting the other schemas that are present.
     it(`THEN 'foo' schema is also present`, () => {
       // Foo schemas are at index [1] in the basic case.
-      const fooSchemaGroup = payload.schemas[1];
+      const fooSchemaGroup = payload.schemas.filter(
+        (sch) => sch.fname === "foo"
+      )[0];
       expect(fooSchemaGroup.schemas["foo"]).toBeTruthy();
+    });
+  });
+
+  describe(`WHEN parsing schema with diamond schema relationship that has namespace parent`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithDiamondAndParentNamespace
+      );
+    });
+
+    it(`THEN payload has no errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND diamond schemas are present`, () => {
+      let grandParent: SchemaProps;
+      let ch1Schema: SchemaProps;
+      let ch2Schema: SchemaProps;
+      let schemaGroup: SchemaModuleProps;
+
+      beforeAll(() => {
+        // Bar schemas are at 0 index in the basic setup case.
+        schemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "withDiamond"
+        )[0];
+
+        grandParent = schemaGroup.schemas["withDiamond"];
+        ch1Schema = schemaGroup.schemas["ch1"];
+        ch2Schema = schemaGroup.schemas["ch2"];
+
+        expect(grandParent).toBeDefined();
+        expect(ch1Schema).toBeDefined();
+        expect(ch2Schema).toBeDefined();
+      });
+
+      it(`THEN grandparent schema has 2 children`, () => {
+        expect(grandParent.children.length).toEqual(2);
+      });
+
+      it(`THEN both of the children are accounted`, () => {
+        expect(grandParent.children[0]).toEqual("ch1");
+        expect(grandParent.children[1]).toEqual("ch2");
+      });
+
+      it(`THEN first link to grandchild, grandchild stays as is`, () => {
+        let ch1 = schemaGroup.schemas["ch1"];
+        let gch = schemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.id).toEqual("gch");
+        expect(gch.parent).toEqual("ch1");
+      });
+
+      it(`THEN grandchild from second first link has expected template.`, () => {
+        let ch1 = schemaGroup.schemas["ch1"];
+        let gch = schemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.data.template?.id).toEqual("template.test");
+      });
+
+      it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
+        let ch2 = schemaGroup.schemas["ch2"];
+        let gch = schemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.id.startsWith("gch_")).toBeTruthy();
+        expect(gch.parent).toEqual("ch2");
+        expect(gch.data.pattern).toEqual("gch");
+      });
+
+      it(`THEN grandchild from second link has expected template.`, () => {
+        let ch2 = schemaGroup.schemas["ch2"];
+        let gch = schemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.data.template?.id).toEqual("template.test");
+      });
+    });
+  });
+
+  describe(`WHEN parsing non-inlined schema with diamond schema relationship`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithDiamondGrandchildren
+      );
+    });
+
+    it(`THEN payload has no errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND 'bar' related schemas are present`, () => {
+      let barSchema: SchemaProps;
+      let ch1Schema: SchemaProps;
+      let ch2Schema: SchemaProps;
+      let barSchemaGroup: SchemaModuleProps;
+
+      beforeAll(() => {
+        // Bar schemas are at 0 index in the basic setup case.
+        barSchemaGroup = payload.schemas.filter(
+          (sch) => sch.fname === "bar"
+        )[0];
+
+        barSchema = barSchemaGroup.schemas["bar"];
+        ch1Schema = barSchemaGroup.schemas["ch1"];
+        ch2Schema = barSchemaGroup.schemas["ch2"];
+
+        expect(barSchema).toBeDefined();
+        expect(ch1Schema).toBeDefined();
+        expect(ch2Schema).toBeDefined();
+      });
+
+      it(`THEN bar schema has 2 children`, () => {
+        expect(barSchema.children.length).toEqual(2);
+      });
+
+      it(`THEN both of the children are accounted`, () => {
+        expect(barSchema.children[0]).toEqual("ch1");
+        expect(barSchema.children[1]).toEqual("ch2");
+      });
+
+      it(`THEN first link to grandchild, grandchild stays as is`, () => {
+        let ch1 = barSchemaGroup.schemas["ch1"];
+        let gch = barSchemaGroup.schemas[ch1.children[0]];
+
+        expect(gch.id).toEqual("gch");
+        expect(gch.parent).toEqual("ch1");
+      });
+
+      it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
+        let ch2 = barSchemaGroup.schemas["ch2"];
+        let gch = barSchemaGroup.schemas[ch2.children[0]];
+
+        expect(gch.id.startsWith("gch_")).toBeTruthy();
+        expect(gch.parent).toEqual("ch2");
+        expect(gch.data.pattern).toEqual("gch");
+      });
+    });
+
+    // Make sure we aren't forgetting the other schemas that are present.
+    it(`THEN 'foo' schema is also present`, () => {
+      // Foo schemas are at index [1] in the basic case.
+      const fooSchemaGroup = payload.schemas.filter(
+        (sch) => sch.fname === "foo"
+      )[0];
+      expect(fooSchemaGroup.schemas["foo"]).toBeTruthy();
+    });
+  });
+
+  describe(`WHEN parsing schema with inclusion of Diamond.`, () => {
+    let payload: {
+      schemas: SchemaModuleProps[];
+      errors: DendronError[] | null;
+    };
+    let includesExpansion: SchemaModuleProps;
+
+    beforeAll(async () => {
+      payload = await parseSchemas(
+        ENGINE_HOOKS.setupSchemaWithIncludeOfDiamond
+      );
+
+      includesExpansion = payload.schemas.filter(
+        (sch) => sch.fname === "includesDiamond"
+      )[0];
+    });
+
+    it(`THEN payload does NOT have errors`, () => {
+      expect(payload.errors).toEqual(null);
+    });
+
+    describe(`AND parses schema that includes diamond schema`, () => {
+      it(`THEN reference a schema from diamond include`, () => {
+        expect(
+          includesExpansion.schemas["includesDiamond"].children[0]
+        ).toEqual("a-ch1");
+        expect(
+          includesExpansion.schemas["includesDiamond"].children[1]
+        ).toEqual("a-ch2");
+      });
+
+      it(`THEN diamond include is appropriately cloned`, () => {
+        expect(includesExpansion.schemas["a-ch1"].children[0]).toEqual(
+          "withDiamond.gch"
+        );
+        expect(
+          includesExpansion.schemas["a-ch2"].children[0].startsWith(
+            "withDiamond.gch_"
+          )
+        ).toBeTruthy();
+
+        const assertContainsExpectedSchema = (id: string) => {
+          const schema = includesExpansion.schemas[id];
+
+          expect(schema.data!.template!.id).toEqual("template.test");
+          expect(schema.data!.template!.type).toEqual("note");
+        };
+        assertContainsExpectedSchema(
+          includesExpansion.schemas["a-ch1"].children[0]
+        );
+        assertContainsExpectedSchema(
+          includesExpansion.schemas["a-ch2"].children[0]
+        );
+      });
     });
   });
 

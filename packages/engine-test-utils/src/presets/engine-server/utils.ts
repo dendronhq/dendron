@@ -218,6 +218,63 @@ export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   });
 };
 
+/**
+ * Diamond schema is laid out such that:
+ *    bar
+ *   /   \
+ * ch1   ch2
+ *   \   /
+ *    gch
+ * */
+export const setupSchemaWithDiamondGrandchildren: PreSetupHookFunction = async (
+  opts
+) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault = vaults[0];
+  NoteTestUtilsV4.createSchema({
+    fname: "bar",
+    wsRoot,
+    vault,
+    modifier: (schema) => {
+      const schemas = [
+        SchemaUtils.createFromSchemaOpts({
+          id: "bar",
+          parent: "root",
+          fname: "bar",
+          children: ["ch1", "ch2"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "ch1",
+          children: ["gch"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "ch2",
+          children: ["gch"],
+          vault,
+        }),
+        SchemaUtils.createFromSchemaRaw({
+          id: "gch",
+          template: { id: "template.gch", type: "note" },
+          vault,
+        }),
+      ];
+      schemas.map((s) => {
+        schema.schemas[s.id] = s;
+      });
+      return schema;
+    },
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "gch template",
+    fname: "template.gch",
+    vault,
+  });
+};
+
 export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;
@@ -265,6 +322,128 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
     body: "ch2 template",
     fname: "bar.template.ch2",
     vault,
+  });
+};
+
+/**
+ * Diamond schema is laid out such that:
+ *    bar
+ *   /   \
+ * ch1   ch2 (namespace: true)
+ *   \   /
+ *    gch
+ * */
+export const setupSchemaWithDiamondAndParentNamespace: PreSetupHookFunction =
+  async (opts) => {
+    await setupBasic(opts);
+    const { wsRoot, vaults } = opts;
+    const vault1 = vaults[0];
+
+    const withDiamond = path.join(
+      resolvePath(vault1.fsPath, wsRoot),
+      "withDiamond.schema.yml"
+    );
+    fs.writeFileSync(
+      withDiamond,
+      `
+version: 1
+schemas:
+  - id: withDiamond
+    children:
+      - ch1
+      - ch2
+    title: withDiamond
+    parent: root
+  - id: ch1
+    children:
+      - gch
+  - id: ch2
+    namespace: true
+    children:
+      - gch
+  - id: gch
+    template: template.test
+`
+    );
+
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      body: "Template text",
+      fname: "template.test",
+      vault: vault1,
+    });
+  };
+
+/**
+ * Sets up schema which includes a schema that has Diamond grandchildren
+ *
+ * */
+export const setupSchemaWithIncludeOfDiamond: PreSetupHookFunction = async (
+  opts
+) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault1 = vaults[0];
+
+  const withDiamond = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "withDiamond.schema.yml"
+  );
+  fs.writeFileSync(
+    withDiamond,
+    `
+version: 1
+schemas:
+  - id: withDiamond
+    children:
+      - ch1
+      - ch2
+    title: withDiamond
+    parent: root
+  - id: ch1
+    children:
+      - gch
+  - id: ch2
+    children:
+      - gch
+  - id: gch
+    template: template.test
+`
+  );
+
+  const includesDiamondPath = path.join(
+    resolvePath(vault1.fsPath, wsRoot),
+    "includesDiamond.schema.yml"
+  );
+  fs.writeFileSync(
+    includesDiamondPath,
+    `
+version: 1
+
+imports:
+  - withDiamond
+
+schemas:
+  - id: includesDiamond
+    parent: root
+    namespace: true
+    children:
+      - a-ch1
+      - a-ch2
+  - id: a-ch1
+    children:
+      - withDiamond.gch
+  - id: a-ch2
+    children:
+      - withDiamond.gch
+`
+  );
+
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "template.test",
+    vault: vault1,
   });
 };
 
@@ -635,6 +814,9 @@ export const ENGINE_HOOKS = {
   setupBasic,
   setupHierarchyForLookupTests,
   setupSchemaPreseet,
+  setupSchemaWithDiamondGrandchildren,
+  setupSchemaWithIncludeOfDiamond,
+  setupSchemaWithDiamondAndParentNamespace,
   setupSchemaPresetWithNamespaceTemplate,
   setupInlineSchema,
   setupSchemaWithExpansion,

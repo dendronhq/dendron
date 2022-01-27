@@ -24,6 +24,7 @@ import AjvErrors from "ajv-errors";
 
 class AJVProvider {
   static ajv: Ajv;
+
   static getAjv() {
     if (this.ajv === undefined) {
       this.ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
@@ -50,6 +51,7 @@ export class ParserBaseV2 {
     return this.opts.logger;
   }
 }
+
 const DEFAULT_LOG_CTX = "parsingSchemas";
 
 async function getSchemasFromImport(
@@ -301,16 +303,48 @@ export class SchemaParserV2 extends ParserBaseV2 {
     });
 
     const addConnections = (parent: SchemaProps) => {
-      _.forEach(parent.children, (ch) => {
-        const child = schemasDict[ch];
-        if (child) {
-          DNodeUtils.addChild(parent, child);
+      _.forEach(parent.children, (childId) => {
+        const child = schemasDict[childId];
 
-          addConnections(child);
+        if (child) {
+          if (child.parent === null) {
+            // Child does not have a parent pointers hence we can linkup the parent child as is.
+            DNodeUtils.addChild(parent, child);
+            addConnections(child);
+          } else {
+            // Child already contains a parent pointer hence we need to create a schema clone
+            // otherwise we would end up writing over the already existing parent pointer.
+            const childClone = _.cloneDeep(child);
+            // We use a dictionary hence we need to generate a brand new identifier for our clone.
+            childClone.id = `${childId}_${genUUID()}`;
+            schemasDict[childClone.id] = childClone;
+
+            // When it comes to schemas we often use the id as a matching pattern
+            // unless there is a pattern explicitly specified. Since we created a randomized
+            // identifier the id of our clone no longer can be used for pattern matching.
+            // Hence if there isn't a pattern we will set the pattern to match original id.
+            if (
+              childClone.data === undefined ||
+              childClone.data.pattern === undefined
+            ) {
+              _.set(childClone, "data.pattern", childId);
+            }
+
+            // Parent likely already has a reference to the original child identifier
+            // so for us to be able to add new generated child id without creating duplicates
+            // in the parent we will need to take out the original child id.
+            if (parent.children.includes(childId)) {
+              parent.children = parent.children.filter((ch) => ch !== childId);
+            }
+
+            // Finally we can create the connection between parent and the child clone.
+            DNodeUtils.addChild(parent, childClone);
+            addConnections(childClone);
+          }
         } else {
           throw new DendronError({
             status: ERROR_STATUS.MISSING_SCHEMA,
-            message: JSON.stringify({ parent, missingChild: ch }),
+            message: JSON.stringify({ parent, missingChild: childId }),
           });
         }
       });

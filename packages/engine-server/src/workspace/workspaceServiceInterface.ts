@@ -14,13 +14,22 @@ export enum SyncActionStatus {
   NEW = "newly clond repository",
   CANT_STASH = "failed to stash changes in working directory",
   CANT_RESTORE = "failed to restore stashed changes",
+  MERGE_CONFLICT = "has a merge conflict that needs to be resolved",
+  MERGE_CONFLICT_LOSES_CHANGES = "pulling would cause a merge conflict that would lose local changes",
+  MERGE_CONFLICT_AFTER_PULL = "a merge conflict happened after the pull",
+  REBASE_IN_PROGRESS = "there's a rebase in progress",
   ERROR = "error while syncing",
+}
+
+export enum SyncExtraActions {
+  REBASE_CONTINUED = "rebase continued",
 }
 
 export type SyncActionResult = {
   repo: string;
   vaults: DVault[];
   status: SyncActionStatus;
+  extraActions: SyncExtraActions[];
 };
 
 export interface IWorkspaceService {

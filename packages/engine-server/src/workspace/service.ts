@@ -60,6 +60,7 @@ import {
   SyncActionResult,
   SyncActionStatus,
 } from "./workspaceServiceInterface";
+import { SyncExtraActions } from ".";
 
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
@@ -873,19 +874,38 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         [...allReposVaults.entries()],
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
+          const extraActions: SyncExtraActions[] = [];
+          const makeResult = (status: SyncActionStatus) => {
+            return {
+              extraActions,
+              repo,
+              vaults,
+              status,
+            };
+          };
 
           const git = new Git({ localUrl: repo });
-          // It's impossible to pull if there is no remote, or if there are tracked files that have changes
+          // It's impossible to pull if there is no remote or upstream
           if (!(await git.hasRemote()))
-            return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+            return makeResult(SyncActionStatus.NO_REMOTE);
           if (_.isUndefined(await git.getUpstream()))
-            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
+            return makeResult(SyncActionStatus.NO_UPSTREAM);
+          // If the vault was configured not to pull, then skip it
           if (!(await this.shouldVaultsSync("pull", rootVaults)))
-            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+            return makeResult(SyncActionStatus.SKIP_CONFIG);
+          // If there's a merge conflict, then we can't continue
+          if (await git.hasMergeConflicts())
+            return makeResult(SyncActionStatus.MERGE_CONFLICT);
+          // If there's a rebase in progress but no merge conflicts, see if we can resolve the rebase.
+          if (await git.hasRebaseInProgress()) {
+            const continued = await git.rebaseContinue();
+            if (!continued)
+              return makeResult(SyncActionStatus.REBASE_IN_PROGRESS);
+          }
 
+          // If there are tracked changes, we need to stash them to pull
           let stashed: string | undefined;
           if (await git.hasChanges({ untrackedFiles: "no" })) {
-            // stash away changes, otherwise pull will fail
             try {
               stashed = await git.stashCreate();
               this.logger.info({ ctx, vaults, repo, stashed });
@@ -906,12 +926,30 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
                 err,
                 stashed,
               });
-              return { repo, vaults, status: SyncActionStatus.CANT_STASH };
+              return makeResult(SyncActionStatus.CANT_STASH);
             }
           }
           try {
             await git.pull();
-            return { repo, vaults, status: SyncActionStatus.DONE };
+            if (
+              (await git.hasMergeConflicts()) ||
+              (await git.hasRebaseInProgress())
+            ) {
+              if (stashed) {
+                // There was a merge conflict during the pull, and we have stashed changes.
+                // We can't apply the stash in this state, so we'd lose the users changes.
+                // Abort the rebase.
+                await git.rebaseAbort();
+                return makeResult(
+                  SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
+                );
+              } else {
+                return makeResult(SyncActionStatus.MERGE_CONFLICT_AFTER_PULL);
+              }
+            }
+
+            // pull went well, everything is in order. The finally block will restore any stashed changes.
+            return makeResult(SyncActionStatus.DONE);
           } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({

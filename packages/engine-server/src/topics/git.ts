@@ -2,6 +2,7 @@ import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { exitCode } from "process";
 
 /**
  * Work directly with git repositories
@@ -114,6 +115,27 @@ export class Git {
       shell: true,
       cwd,
     });
+  }
+
+  /** Attempt to continue the current rebase.
+   *
+   * If this operation fails, or if there's still a rebase after the continue
+   * (e.g. multiple rebase steps that conflict), returns false.
+   * Otherwise returns true.
+   */
+  async rebaseContinue() {
+    let exitCode = -1;
+    try {
+      exitCode = (await this._execute("git rebase --continue")).exitCode;
+    } catch {
+      // We can't continue the rebase, there are unresolved conflicts or something else preventing it
+      return false;
+    }
+    return exitCode === 0 && (await this.hasRebaseInProgress()) === null;
+  }
+
+  async rebaseAbort() {
+    await this._execute("git rebase --abort");
   }
 
   async push(setUpstream?: { remote: string; branch: string }) {
@@ -246,7 +268,7 @@ export class Git {
    * - `"am"` if there's a "mailbox rebase" in progress.
    * - `"regular"` if the 2 special rebase types don't apply, but there is a rebase in progress.
    */
-  async hasRebaseInProgress(): Promise<
+  async typeOfRebaseInProgress(): Promise<
     "regular" | "interactive" | "am" | null
   > {
     if (await fs.pathExists(this.getWorkTreePath("rebase-apply"))) {
@@ -268,6 +290,10 @@ export class Git {
     } else {
       return null;
     }
+  }
+
+  async hasRebaseInProgress(): Promise<boolean> {
+    return (await this.typeOfRebaseInProgress()) !== null;
   }
 
   async hasRemote() {

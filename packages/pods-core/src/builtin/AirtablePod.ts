@@ -304,7 +304,7 @@ export class AirtableUtils {
       default:
         return {
           error: new DendronError({
-            message: `The type ${type} provided in srcFieldMapping is invalid. Please update the pod config by running Dendron: Configure Export Pod V2 command.`,
+            message: `The type ${type} provided in srcFieldMapping is invalid. Please check the valid types here: https://wiki.dendron.so/notes/oTW7BFzKIlOd6iQnnNulg.html#sourcefieldmapping and update the pod config by running Dendron: Configure Export Pod V2 command.`,
             severity: ERROR_SEVERITY.MINOR,
           }),
         };

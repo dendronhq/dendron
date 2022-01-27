@@ -9,6 +9,7 @@ import {
   ResponseUtil,
   RespV2,
   RespV3,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { JSONSchemaType } from "ajv";
@@ -67,7 +68,7 @@ class AirtableUtilsV2 {
           return _records;
         } catch (error: any) {
           let message;
-          if (error?.statusCode === 422) {
+          if (error?.statusCode === StatusCodes.UNPROCESSABLE_ENTITY) {
             const airtableError = error as AirtableError;
             if (airtableError.error === "INVALID_MULTIPLE_CHOICE_OPTIONS") {
               // example airtable error message: 'Insufficient permissions to create new select option ""scope.xyz""'
@@ -78,7 +79,7 @@ class AirtableUtilsV2 {
               );
               message = field
                 ? `The choice ${value} for field ${field} does not exactly match with an existing option. Please check what values are allowed in Airtable`
-                : "";
+                : airtableError.message;
             } else if (airtableError.error === "INVALID_VALUE_FOR_COLUMN") {
               message = airtableError.message;
             }
@@ -86,7 +87,7 @@ class AirtableUtilsV2 {
           const _error = new DendronError({
             innerError: error as Error,
             payload: record,
-            message: `Error with Airtable. ${message}`,
+            message: `Error during Airtable Export. ${message}`,
           });
           errors.push(_error);
           return;

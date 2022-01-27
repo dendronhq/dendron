@@ -1,6 +1,7 @@
 import { assertUnreachable, DendronError } from "@dendronhq/common-all";
 import {
   ExportPodConfigurationV2,
+  PodExportScope,
   PodV2ConfigManager,
   PodV2Types,
 } from "@dendronhq/pods-core";
@@ -21,7 +22,8 @@ export class PodCommandFactory {
    * @returns A pod command configured with the found configuration
    */
   public static createPodCommandForStoredConfig(
-    configId: Pick<ExportPodConfigurationV2, "podId">
+    configId: Pick<ExportPodConfigurationV2, "podId">,
+    exportScope?: PodExportScope
   ): CodeCommandInstance {
     const storedConfig = PodV2ConfigManager.getPodConfigById({
       podsDir: path.join(getExtension().podsDir, "custom"),
@@ -33,7 +35,10 @@ export class PodCommandFactory {
         message: `No pod config with id ${configId.podId} found.`,
       });
     }
-
+    // overrides the exportScope of stored config with the exportScope passed in args
+    if (exportScope) {
+      storedConfig.exportScope = exportScope;
+    }
     let cmdWithArgs: CodeCommandInstance;
 
     switch (storedConfig.podType) {

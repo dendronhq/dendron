@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -111,30 +111,51 @@ function DendronSearchComponent(
     }
   }, [searchQueryValue]);
 
-  const onLookup = (qs: string) => {
-    if (_.isUndefined(qs)) {
-      return;
-    }
-    const out =
-      qs === ""
-        ? NoteLookupUtils.fetchRootResults(notes)
-        : lookup?.queryNote({ qs, originalQS: qs });
-    setLookupResults(_.isUndefined(out) ? [] : out);
-  };
+  const onLookup = useCallback(
+    (qs: string) => {
+      if (_.isUndefined(qs)) {
+        return;
+      }
+      const out =
+        qs === ""
+          ? NoteLookupUtils.fetchRootResults(notes)
+          : lookup?.queryNote({ qs, originalQS: qs });
+      setLookupResults(_.isUndefined(out) ? [] : out);
+    },
+    [lookup, notes, setLookupResults]
+  );
 
-  const onClickLookup = () => {
+  const onClickLookup = useCallback(() => {
     const qs = NoteLookupUtils.getQsForCurrentLevel(initValue);
     onLookup(qs);
-  };
+  }, [initValue, onLookup]);
 
-  const onChangeLookup = (val: string) => {
-    setSearchQueryValue(val);
-    onLookup(val);
-  };
+  const onChangeLookup = useCallback(
+    (val: string) => {
+      setSearchQueryValue(val);
+      onLookup(val);
+    },
+    [onLookup, setSearchQueryValue]
+  );
 
-  const onChangeSearch = (val: string) => {
-    setSearchQueryValue(val);
-  };
+  const onChangeSearch = useCallback(
+    (val: string) => {
+      setSearchQueryValue(val);
+    },
+    [setSearchQueryValue]
+  );
+
+  const onSelect = useCallback(
+    (_selection, option) => {
+      const id = option.key?.toString()!;
+      dendronRouter.changeActiveNote(id, { noteIndex });
+      dispatch(
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
+      );
+      setSearchQueryValue("");
+    },
+    [dendronRouter, dispatch, noteIndex]
+  );
 
   if (error) {
     return (
@@ -159,14 +180,7 @@ function DendronSearchComponent(
         results === SearchMode.SEARCH_MODE ? onChangeSearch : onChangeLookup
       }
       // @ts-ignore
-      onSelect={(_selection, option) => {
-        const id = option.key?.toString()!;
-        dendronRouter.changeActiveNote(id, { noteIndex });
-        dispatch(
-          browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
-        );
-        setSearchQueryValue("");
-      }}
+      onSelect={onSelect}
       placeholder={
         loading
           ? "Loading Search"

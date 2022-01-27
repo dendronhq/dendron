@@ -101,8 +101,6 @@ type CommandEntry = {
   title: string;
   keybindings?: KeyBinding;
   icon?: string;
-  // shortcut-only copy of a command entry
-  shortcut?: boolean;
   // this will be used in `commandPalette` contribution point.
   when?: string;
   // this will be used in `commands` contribution point.
@@ -399,9 +397,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
   },
   LOOKUP_JOURNAL: {
-    key: "dendron.lookupNote",
-    shortcut: true,
-    title: `${CMD_PREFIX} Lookup (Journal Note)`,
+    key: "dendron.lookupJournalNote",
+    title: `${CMD_PREFIX} Lookup Journal Note`,
     keybindings: {
       key: "ctrl+shift+j",
       mac: "cmd+shift+j",
@@ -410,20 +407,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       },
       when: DendronContext.PLUGIN_ACTIVE,
     },
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_SCRATCH: {
-    key: "dendron.lookupNote",
-    shortcut: true,
-    title: `${CMD_PREFIX} Lookup (Scratch Note)`,
+    key: "dendron.lookupScratchNote",
+    title: `${CMD_PREFIX} Lookup Scratch Note`,
     keybindings: {
       key: "ctrl+shift+s",
       mac: "cmd+shift+s",
-      args: {
-        noteType: "scratch",
-        selectionType: "selection2link",
-      },
       when: DendronContext.PLUGIN_ACTIVE,
     },
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",

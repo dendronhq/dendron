@@ -53,17 +53,14 @@ function updateCommandPalettes() {
 
 function updateCommands() {
   console.log("update commands...");
-  const commands = _.map(
-    _.filter(DENDRON_COMMANDS, (ent) => _.isUndefined(ent.shortcut)),
-    (ent) => {
-      const configProps = _.omit(ent, ["key", "keybindings", "when"]);
-      const key = ent["key"];
-      return {
-        command: key,
-        ...configProps,
-      };
-    }
-  );
+  const commands = _.map(_.filter(DENDRON_COMMANDS), (ent) => {
+    const configProps = _.omit(ent, ["key", "keybindings", "when"]);
+    const key = ent["key"];
+    return {
+      command: key,
+      ...configProps,
+    };
+  });
   return commands;
 }
 

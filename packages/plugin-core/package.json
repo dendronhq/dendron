@@ -186,6 +186,14 @@
         "title": "Dendron: hidden"
       },
       {
+        "command": "dendron.lookupJournalNote",
+        "title": "Dendron: Lookup Journal Note"
+      },
+      {
+        "command": "dendron.lookupScratchNote",
+        "title": "Dendron: Lookup Scratch Note"
+      },
+      {
         "command": "dendron.lookupSchema",
         "title": "Dendron: Lookup Schema"
       },
@@ -503,6 +511,14 @@
         {
           "command": "dendron.lookupNoteAutoComplete",
           "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
+        },
+        {
+          "command": "dendron.lookupJournalNote",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.lookupScratchNote",
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.lookupSchema",
@@ -946,7 +962,7 @@
         "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
       },
       {
-        "command": "dendron.lookupNote",
+        "command": "dendron.lookupJournalNote",
         "key": "ctrl+shift+j",
         "mac": "cmd+shift+j",
         "args": {
@@ -955,13 +971,9 @@
         "when": "dendron:pluginActive"
       },
       {
-        "command": "dendron.lookupNote",
+        "command": "dendron.lookupScratchNote",
         "key": "ctrl+shift+s",
         "mac": "cmd+shift+s",
-        "args": {
-          "noteType": "scratch",
-          "selectionType": "selection2link"
-        },
         "when": "dendron:pluginActive"
       },
       {

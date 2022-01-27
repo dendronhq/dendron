@@ -6,4 +6,4 @@ You are looking at the Dendron Developer [Workspace](https://wiki.dendron.so/not
 - NOTE: the following are Dendron specific links. Make sure that the [Dendron Extension](https://marketplace.visualstudio.com/items?itemName=dendron.dendron) is installed. The web version of each link is listed next to the dendron link
 
 - [[Dendron User Guide|dendron://dendron.dendron-site/dendron]] (https://wiki.dendron.so)
-- [[Dendron Developer Guide|dendron://dendron.docs/dev]] (https://wiki.dendron.so/notes/3489b652-cd0e-4ac8-a734-08094dc043eb.html)
+- [[Dendron Developer Guide|dendron://dendron.docs/dev]] (https://docs.dendron.so/notes/3489b652-cd0e-4ac8-a734-08094dc043eb.html)

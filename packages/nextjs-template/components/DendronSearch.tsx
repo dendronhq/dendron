@@ -119,6 +119,13 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
     [lookup, notes, setLookupResults]
   );
 
+  // This is needed to make sure the lookup results are updated when notes are fetched
+  useEffect(() => {
+    if (results === SearchMode.LOOKUP_MODE) {
+      onLookup(searchQueryValue);
+    }
+  }, [notes, results, onLookup]);
+
   const onClickLookup = useCallback(() => {
     const qs = NoteLookupUtils.getQsForCurrentLevel(initValue);
     onLookup(qs);
@@ -167,7 +174,11 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
 
   let autocompleteChildren;
   if (!verifyNoteData({ notes })) {
-    autocompleteChildren = <DendronSpinner />;
+    autocompleteChildren = (
+      <AutoComplete.Option value="Loading...">
+        <DendronSpinner />
+      </AutoComplete.Option>
+    );
   } else if (results === SearchMode.SEARCH_MODE) {
     autocompleteChildren = searchResults?.map(({ item: note, matches }) => {
       return (
@@ -244,11 +255,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       }
       // @ts-ignore
       onSelect={onSelect}
-      placeholder={
-        loading
-          ? "Loading Search"
-          : "For full text search please use the '?' prefix. e.g. ? Onboarding"
-      }
+      placeholder="For full text search please use the '?' prefix. e.g. ? Onboarding"
     >
       {autocompleteChildren}
     </AutoComplete>

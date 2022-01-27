@@ -1,6 +1,6 @@
 import {
   IntermediateDendronConfig,
-  SerializedFuseIndex
+  SerializedFuseIndex,
 } from "@dendronhq/common-all";
 import { getAssetUrl } from "./links";
 import { NoteData } from "./types";

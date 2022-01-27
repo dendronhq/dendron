@@ -1,5 +1,5 @@
 import {
-  assertUnreachable,
+  DendronError,
   DendronTreeViewKey,
   DMessage,
   LookupModifierStatePayload,
@@ -105,7 +105,13 @@ export class LookupView implements vscode.WebviewViewProvider {
             break;
           }
           default: {
-            assertUnreachable();
+            throw new DendronError({
+              message: "Got unexpected button category",
+              payload: {
+                ctx: "LookupView.onDidReceiveMessageHandler",
+                category,
+              },
+            });
           }
         }
         break;

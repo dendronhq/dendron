@@ -223,7 +223,13 @@ export class ConvertLinkCommand extends BasicCommand<
         break;
       }
       default: {
-        assertUnreachable();
+        throw new DendronError({
+          message: "Unexpected option selected",
+          payload: {
+            ctx: "prepareBrokenLinkOperation",
+            label: option.label,
+          },
+        });
       }
     }
     return text;
@@ -282,12 +288,13 @@ export class ConvertLinkCommand extends BasicCommand<
         }
         break;
       }
+      case undefined:
       case "fmtag":
       case "refv2": {
         throw ConvertLinkCommand.noAvailableOperationError();
       }
       default: {
-        assertUnreachable();
+        assertUnreachable(refType);
       }
     }
     throw new DendronError({

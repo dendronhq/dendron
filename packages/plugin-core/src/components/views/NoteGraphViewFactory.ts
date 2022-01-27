@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  DendronError,
   DMessageEnum,
   GraphViewMessage,
   GraphViewMessageType,
@@ -80,9 +81,16 @@ export class NoteGraphPanelFactory {
             }
             break;
           }
-
+          case GraphViewMessageType.onReady:
+            throw new DendronError({
+              message: "Unexpected message received from the graph view",
+              payload: {
+                ctx: "NoteGraphPanelFactory",
+                "msg.type": msg.type,
+              },
+            });
           default:
-            assertUnreachable();
+            assertUnreachable(msg.type);
         }
       });
 

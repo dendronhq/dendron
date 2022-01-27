@@ -210,7 +210,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         default:
-          assertUnreachable();
+          assertUnreachable(cmd);
       }
     } catch (err: any) {
       this.L.error(err);
@@ -305,7 +305,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         return;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(target);
     }
   }
 

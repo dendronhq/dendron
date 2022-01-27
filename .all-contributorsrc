@@ -1067,7 +1067,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/978461?v=4",
       "profile": "http://nicklas.gummesson.net",
       "contributions": [
-        "bug"
+        "bug",
+        "code"
       ]
     },
     {
@@ -1224,7 +1225,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/37425558?v=4",
       "profile": "https://github.com/aglucky",
       "contributions": [
-        "bug"
+        "bug",
+        "doc"
       ]
     },
     {
@@ -1279,7 +1281,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/38114607?v=4",
       "profile": "https://invak.id/",
       "contributions": [
-        "bug"
+        "bug",
+        "code"
       ]
     },
     {
@@ -1306,7 +1309,35 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/690997?v=4",
       "profile": "http://www.callum-macdonald.com/",
       "contributions": [
+        "code",
+        "bug"
+      ]
+    },
+    {
+      "login": "skfile",
+      "name": "Vik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/60110907?v=4",
+      "profile": "https://github.com/skfile",
+      "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "LegendL3n",
+      "name": "David Gomes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10091092?v=4",
+      "profile": "https://davidsec.blog",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Binly42",
+      "name": "Binly42",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15514941?v=4",
+      "profile": "https://github.com/Binly42",
+      "contributions": [
+        "bug"
       ]
     }
   ],

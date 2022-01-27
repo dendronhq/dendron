@@ -152,6 +152,7 @@ function DendronSearchComponent(
       allowClear
       style={{ width: "100%" }}
       value={searchQueryValue}
+      getPopupContainer={(trigger) => trigger.parentElement}
       // @ts-ignore
       onClick={results === SearchMode.SEARCH_MODE ? () => null : onClickLookup}
       onChange={

@@ -624,7 +624,7 @@ export class LinkUtils {
   }: {
     link: DNoteLink;
     dest: DendronASTDest;
-  }): string | never {
+  }): string {
     switch (dest) {
       case DendronASTDest.MD_DENDRON: {
         if (this.isHashtagLink(link.from)) {
@@ -654,7 +654,14 @@ export class LinkUtils {
         return [ref, `[[`, alias, vaultPrefix, value, anchor, `]]`].join("");
       }
       default:
-        return assertUnreachable();
+        throw new DendronError({
+          message: "Tried to render a link to an unexpected format",
+          payload: {
+            ctx: "renderNoteLink",
+            dest,
+            link,
+          },
+        });
     }
   }
 

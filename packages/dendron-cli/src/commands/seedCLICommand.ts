@@ -141,7 +141,7 @@ export class SeedCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { data };
         }
         default:
-          return assertUnreachable();
+          return assertUnreachable(cmd);
       }
     } catch (err: any) {
       this.L.error(err);

@@ -162,7 +162,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       default:
-        assertUnreachable();
+        assertUnreachable(inputs.exportScope);
     }
 
     return {
@@ -231,7 +231,7 @@ export abstract class BaseExportPodCommand<
           }
 
           default:
-            assertUnreachable();
+            assertUnreachable(opts.config.exportScope);
         }
       }
     );
@@ -329,6 +329,7 @@ export abstract class BaseExportPodCommand<
   }
 
   addAnalyticsPayload(opts: { config: Config; payload: NoteProps[] }) {
+    if (_.isUndefined(opts)) return;
     return {
       exportScope: opts.config.exportScope,
     };

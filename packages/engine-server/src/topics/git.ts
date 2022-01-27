@@ -15,7 +15,7 @@ export class Git {
     public opts: { localUrl: string; remoteUrl?: string; bare?: boolean }
   ) {}
 
-  async _execute(cmd: string): Promise<{ stdout: string; stderr: string }> {
+  async _execute(cmd: string) {
     const [git, ...args] = cmd.split(" ");
     return execa(git, args, { cwd: this.opts.localUrl });
   }
@@ -214,6 +214,60 @@ export class Git {
       `git status --porcelain${untrackedFilesArg}`
     );
     return !_.isEmpty(stdout);
+  }
+
+  /** These are the short status symbols git uses to identify files with merge conflicts.
+   *
+   * See the [git docs](https://www.git-scm.com/docs/git-status#_short_format) for details.
+   * The symbol pairs marked "unmerged" are the states that can happen when there is a merge conflict.
+   */
+  private static MERGE_CONFLICT_REGEX = /^(DD|AA|UU|AU|UA|DU|UD)/;
+
+  /** Returns true if there are merge conflicts, caused by a merge or rebase. */
+  async hasMergeConflicts() {
+    const { stdout } = await this._execute("git status --porcelain");
+    return Git.MERGE_CONFLICT_REGEX.test(stdout);
+  }
+
+  /** Gets the path of a file inside of the `.git` folder. */
+  private getWorkTreePath(...names: string[]) {
+    const gitRoot = this.opts.localUrl;
+    return path.join(gitRoot, ".git", ...names);
+  }
+
+  /** If there's a rebase in progress, returns what type of rebase that is. Otherwise returns `null` if a rebase is **not** in progress.
+   *
+   * See relevant [git code](https://github.com/git/git/blob/b23dac905bde28da47543484320db16312c87551/wt-status.c#L1666) for which files to check.
+   * Thanks to [this amazing answer](https://stackoverflow.com/a/67245016) on StackOverflow.
+   *
+   * @returns one of the following:
+   * - `null` if there is no rebase in progress.
+   * - `"interactive"` if there's an interactive rebase (`git rebase --interactive`) in progress.
+   * - `"am"` if there's a "mailbox rebase" in progress.
+   * - `"regular"` if the 2 special rebase types don't apply, but there is a rebase in progress.
+   */
+  async hasRebaseInProgress(): Promise<
+    "regular" | "interactive" | "am" | null
+  > {
+    if (await fs.pathExists(this.getWorkTreePath("rebase-apply"))) {
+      if (
+        await fs.pathExists(this.getWorkTreePath("rebase-apply", "applying"))
+      ) {
+        return "am";
+      } else {
+        return "regular";
+      }
+    } else if (await fs.pathExists(this.getWorkTreePath("rebase-merge"))) {
+      if (
+        await fs.pathExists(this.getWorkTreePath("rebase-merge", "interactive"))
+      ) {
+        return "interactive";
+      } else {
+        return "regular";
+      }
+    } else {
+      return null;
+    }
   }
 
   async hasRemote() {

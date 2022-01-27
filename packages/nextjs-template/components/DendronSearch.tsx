@@ -30,10 +30,6 @@ const OMITTED_PART_TEXT = " ... ";
 const SEARCH_DELAY = 300;
 
 export function DendronSearch(props: DendronCommonProps) {
-  if (!verifyNoteData(props)) {
-    return <DendronSpinner />;
-  }
-
   return <DebouncedDendronSearchComponent {...props} />;
 }
 
@@ -42,7 +38,7 @@ type SearchFunction = (
   setResults: (results: SearchResults) => void
 ) => void;
 
-function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
+function DebouncedDendronSearchComponent(props: DendronCommonProps) {
   // Splitting this part from DendronSearchComponent so that the debounced
   // function doesn't get reset every time value changes.
   const results = useFetchFuse(props.notes);
@@ -75,9 +71,7 @@ enum SearchMode {
   SEARCH_MODE = "searchMode",
 }
 
-function DendronSearchComponent(
-  props: DendronPageWithNoteDataProps & SearchProps
-) {
+function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   const { noteIndex, dendronRouter, search, error, loading, notes } = props;
 
   const [searchResults, setSearchResults] =
@@ -113,7 +107,7 @@ function DendronSearchComponent(
 
   const onLookup = useCallback(
     (qs: string) => {
-      if (_.isUndefined(qs)) {
+      if (_.isUndefined(qs) || !notes || !verifyNoteData({ notes })) {
         return;
       }
       const out =
@@ -147,6 +141,10 @@ function DendronSearchComponent(
 
   const onSelect = useCallback(
     (_selection, option) => {
+      if (!noteIndex) {
+        return;
+      }
+
       const id = option.key?.toString()!;
       dendronRouter.changeActiveNote(id, { noteIndex });
       dispatch(
@@ -165,6 +163,71 @@ function DendronSearchComponent(
         message="Error loading data for the search."
       />
     );
+  }
+
+  let autocompleteChildren;
+  if (!verifyNoteData({ notes })) {
+    autocompleteChildren = <DendronSpinner />;
+  } else if (results === SearchMode.SEARCH_MODE) {
+    autocompleteChildren = searchResults?.map(({ item: note, matches }) => {
+      return (
+        <AutoComplete.Option key={note.id} value={note.fname}>
+          <Row justify="center" align="middle">
+            <Col xs={0} md={1}>
+              <div style={{ position: "relative", top: -12, left: 0 }}>
+                <FileTextOutlined style={{ color: "#43B02A" }} />
+              </div>
+            </Col>
+            <Col
+              xs={24}
+              sm={24}
+              md={11}
+              lg={11}
+              style={{ borderRight: "1px solid #d4dadf" }}
+            >
+              <Row>
+                <Typography.Text>
+                  <TitleHighlight
+                    hit={{ item: note, matches }}
+                    attribute="title"
+                    title={note.title}
+                  />
+                </Typography.Text>
+              </Row>
+              <Row>
+                <Typography.Text type="secondary" ellipsis>
+                  {note.fname}
+                </Typography.Text>
+              </Row>
+            </Col>
+            <Col
+              className="gutter-row"
+              xs={24}
+              sm={24}
+              md={11}
+              lg={11}
+              offset={1}
+            >
+              <Row>
+                <MatchBody
+                  matches={matches}
+                  id={note.id}
+                  noteBodies={noteBodies}
+                />
+              </Row>
+            </Col>
+          </Row>
+        </AutoComplete.Option>
+      );
+    });
+  } else {
+    autocompleteChildren = lookupResults.map((noteIndex: NoteIndexProps) => {
+      return (
+        <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
+          <div>{noteIndex.fname}</div>
+        </AutoComplete.Option>
+      );
+    });
   }
 
   return (
@@ -187,65 +250,7 @@ function DendronSearchComponent(
           : "For full text search please use the '?' prefix. e.g. ? Onboarding"
       }
     >
-      {results === SearchMode.SEARCH_MODE
-        ? searchResults?.map(({ item: note, matches }) => {
-            return (
-              <AutoComplete.Option key={note.id} value={note.fname}>
-                <Row justify="center" align="middle">
-                  <Col xs={0} md={1}>
-                    <div style={{ position: "relative", top: -12, left: 0 }}>
-                      <FileTextOutlined style={{ color: "#43B02A" }} />
-                    </div>
-                  </Col>
-                  <Col
-                    xs={24}
-                    sm={24}
-                    md={11}
-                    lg={11}
-                    style={{ borderRight: "1px solid #d4dadf" }}
-                  >
-                    <Row>
-                      <Typography.Text>
-                        <TitleHighlight
-                          hit={{ item: note, matches }}
-                          attribute="title"
-                          title={note.title}
-                        />
-                      </Typography.Text>
-                    </Row>
-                    <Row>
-                      <Typography.Text type="secondary" ellipsis>
-                        {note.fname}
-                      </Typography.Text>
-                    </Row>
-                  </Col>
-                  <Col
-                    className="gutter-row"
-                    xs={24}
-                    sm={24}
-                    md={11}
-                    lg={11}
-                    offset={1}
-                  >
-                    <Row>
-                      <MatchBody
-                        matches={matches}
-                        id={note.id}
-                        noteBodies={noteBodies}
-                      />
-                    </Row>
-                  </Col>
-                </Row>
-              </AutoComplete.Option>
-            );
-          })
-        : lookupResults.map((noteIndex: NoteIndexProps) => {
-            return (
-              <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
-                <div>{noteIndex.fname}</div>
-              </AutoComplete.Option>
-            );
-          })}
+      {autocompleteChildren}
     </AutoComplete>
   );
 }

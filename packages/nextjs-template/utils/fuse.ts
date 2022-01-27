@@ -19,7 +19,10 @@ type FuseIndexProvider = () => Promise<FuseNoteIndex | FuseNote>;
  * just add an arrow function as the parameter. See `useGenerateFuse` for a
  * good example of what to do.
  */
-function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
+function useFuse(
+  notes: NotePropsDict | undefined,
+  provider: FuseIndexProvider
+) {
   const [error, setError] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);
   const [fuse, setFuse] = useState<FuseNote>();
@@ -28,6 +31,10 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
     if (_.isUndefined(fuse)) {
       setLoading(true);
       const req = async () => {
+        if (!notes) {
+          return;
+        }
+
         try {
           const value = await provider();
           if (value instanceof Fuse) {
@@ -61,7 +68,7 @@ function useFuse(notes: NotePropsDict, provider: FuseIndexProvider) {
 }
 
 /** A react hook to fetch the exported fuse index. */
-export function useFetchFuse(notes: NotePropsDict) {
+export function useFetchFuse(notes: NotePropsDict | undefined) {
   return useFuse(notes, fetchFuseIndex);
 }
 

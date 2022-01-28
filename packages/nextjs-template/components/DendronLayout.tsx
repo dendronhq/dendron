@@ -159,7 +159,7 @@ export default function DendronLayout(
             className="site-layout-sidebar"
             style={{
               flex: "0 0 auto",
-              width: `calc((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2 + ${
+              width: `calc(max((100% - ${LAYOUT.BREAKPOINTS.lg}) / 2, 0px) + ${
                 // eslint-disable-next-line no-nested-ternary
                 isResponsive
                   ? isCollapsed

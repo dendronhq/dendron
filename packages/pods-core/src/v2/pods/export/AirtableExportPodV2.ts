@@ -9,6 +9,7 @@ import {
   ResponseUtil,
   RespV2,
   RespV3,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { JSONSchemaType } from "ajv";
@@ -27,6 +28,12 @@ export type AirtableExportPodV2Constructor = {
   airtable: Airtable;
   config: RunnableAirtableV2PodConfig;
   engine: DEngineClient;
+};
+
+type AirtableError = {
+  error: string;
+  message: string;
+  statusCode: number;
 };
 
 export type AirtableExportReturnType = RespV2<{
@@ -59,11 +66,28 @@ class AirtableUtilsV2 {
         try {
           const _records = await func(record);
           return _records;
-        } catch (error) {
+        } catch (error: any) {
+          let message;
+          if (error?.statusCode === StatusCodes.UNPROCESSABLE_ENTITY) {
+            const airtableError = error as AirtableError;
+            if (airtableError.error === "INVALID_MULTIPLE_CHOICE_OPTIONS") {
+              // example airtable error message: 'Insufficient permissions to create new select option ""scope.xyz""'
+              const value = airtableError.message.split('""')[1];
+              const field = _.findKey(
+                record[0].fields,
+                _.partial(_.isEqual, value)
+              );
+              message = field
+                ? `The choice ${value} for field ${field} does not exactly match with an existing option. Please check what values are allowed in Airtable`
+                : airtableError.message;
+            } else if (airtableError.error === "INVALID_VALUE_FOR_COLUMN") {
+              message = airtableError.message;
+            }
+          }
           const _error = new DendronError({
             innerError: error as Error,
             payload: record,
-            message: "error with airtable",
+            message: `Error during Airtable Export. ${message}`,
           });
           errors.push(_error);
           return;

@@ -206,7 +206,7 @@ export abstract class BaseExportPodCommand<
                   throw err;
                 }
               } else {
-                throw new Error("Invalid Payload Type in Text Export");
+                throw new Error("Invalid Payload Type in Note Export");
               }
             }
             break;

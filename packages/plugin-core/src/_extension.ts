@@ -1295,8 +1295,9 @@ async function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
       .then(async (resp) => {
         if (resp === "Fix conflicts...") {
           const cmd = new DoctorCommand(opts.ext);
-          await cmd.run({
+          await cmd.execute({
             action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+            scope: "workspace",
             data: { installStatus },
           });
         }

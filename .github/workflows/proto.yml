@@ -83,6 +83,6 @@ jobs:
         run: yarn bootstrap:buildCI
         shell: bash
 
-      # - name: Run tests
-      #   run: yarn ci:test:${{ matrix.suite }}
+      - name: Run tests
+        run: yarn ci:test:${{ matrix.suite }}
       #   timeout-minutes: 30

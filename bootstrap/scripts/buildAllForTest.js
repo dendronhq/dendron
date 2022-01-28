@@ -20,7 +20,7 @@ $(
   `npx lerna run buildCI --parallel --scope "@dendronhq/{common-test-utils,api-server}"`
 );
 $(
-  `npx lerna run buildCI --parallel --scope "@dendronhq/dendron-cli"`
+  `npx lerna run buildCI --parallel --scope "{common-frontend,dendron-cli}"`
 );
 $(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils" `);
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);

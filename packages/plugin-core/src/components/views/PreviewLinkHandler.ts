@@ -267,7 +267,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     }
   }
 
-  private vaultlessAssetPath({
+  public vaultlessAssetPath({
     data,
     wsRoot,
   }: {

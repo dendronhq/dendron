@@ -15,23 +15,23 @@ jobs:
 
       matrix:
         os:
-          # - macos-latest
-          # - ubuntu-latest
+          - macos-latest
+          - ubuntu-latest
           - windows-latest
         node-version:
           - 12.x
-          # - 14.x
+          - 14.x
         suite:
           - cli
           - plugin
 
         include:
-          # - os: macos-latest
-          #   env: env
-          #   versions: ""
-          # - os: ubuntu-latest
-          #   env: env
-          #   versions: ""
+          - os: macos-latest
+            env: env
+            versions: ""
+          - os: ubuntu-latest
+            env: env
+            versions: ""
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
           - os: windows-latest

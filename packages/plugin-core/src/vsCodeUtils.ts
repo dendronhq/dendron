@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   CONSTANTS,
   DendronError,
   getStage,
@@ -24,6 +25,18 @@ type PointOffset = { line?: number; column?: number };
 
 // NOTE: used for tests
 let _MOCK_CONTEXT: undefined | vscode.ExtensionContext;
+
+/** The severity of a message shown by {@link VSCodeUtils.showMessage}.
+ *
+ * The function will call `vscode.window.show(Information|Warning|Error)Message` with the parameters given to it.
+ *
+ * The severities map to numbers for easy comparison, `INFO < WARN && WARN < ERROR`.
+ */
+export enum MessageSeverity {
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+}
 
 /**
  * IMPORTANT: Do not import from  workspace.ts from this file. Any utils that
@@ -365,6 +378,22 @@ export class VSCodeUtils {
     );
     panel.webview.html = rawHTML ? content : _md().render(content);
   };
+
+  static showMessage(
+    severity: MessageSeverity,
+    ...opts: Parameters<typeof vscode.window["showInformationMessage"]>
+  ) {
+    switch (severity) {
+      case MessageSeverity.INFO:
+        return vscode.window.showInformationMessage(...opts);
+      case MessageSeverity.WARN:
+        return vscode.window.showWarningMessage(...opts);
+      case MessageSeverity.ERROR:
+        return vscode.window.showErrorMessage(...opts);
+      default:
+        assertUnreachable(severity);
+    }
+  }
 
   /** Convert a `Point` from a parsed remark node to a `vscode.Poisition`
    *

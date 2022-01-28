@@ -84,7 +84,7 @@ export class WorkspaceCLICommand extends CLICommand<
         }
         case WorkspaceCommands.ADD_AND_COMMIT: {
           const ws = new WorkspaceService({ wsRoot });
-          await ws.commitAndAddAll();
+          await ws.commitAndAddAll({ engine: engine! });
           break;
         }
         case WorkspaceCommands.PUSH: {
@@ -101,7 +101,7 @@ export class WorkspaceCLICommand extends CLICommand<
         case WorkspaceCommands.SYNC: {
           const ws = new WorkspaceService({ wsRoot });
           this.print("commit and add...");
-          await ws.commitAndAddAll();
+          await ws.commitAndAddAll({ engine: engine! });
           this.print("pull...");
           await ws.pullVaults();
           this.print("push...");

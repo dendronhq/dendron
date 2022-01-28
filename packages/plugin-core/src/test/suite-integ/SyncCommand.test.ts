@@ -10,7 +10,6 @@ import { Git, SyncActionStatus } from "@dendronhq/engine-server";
 import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
-import * as vscode from "vscode";
 import { SyncCommand } from "../../commands/Sync";
 import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
@@ -23,8 +22,7 @@ import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 
 suite("workspace sync command", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this, {});
 
   describe("no repo", () => {
     test("do nothing", (done) => {
@@ -600,9 +598,11 @@ suite("workspace sync command", function () {
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
-        // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
+        // Should still stash and pull, but notice the merge conflict after restoring
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(
+          pulled[0].status === SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
+        );
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -842,7 +842,7 @@ suite("workspace sync command", function () {
   );
 
   describeSingleWS(
-    "WHEN git pull causes a rebase but hits a conflict",
+    "WHEN git pull causes a rebase but hits a conflict, and there are local changes",
     {
       ctx,
       modConfigCb: (config) => {
@@ -855,7 +855,7 @@ suite("workspace sync command", function () {
       },
     },
     () => {
-      test("THEN rebase works, and Dendron restores local changes with the conflict", async () => {
+      test("THEN pull fails, and Dendron restores local changes", async () => {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
@@ -902,19 +902,25 @@ suite("workspace sync command", function () {
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(
+          pulled[0].status === SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
+        );
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
           match: [
             // The uncommitted changes in this repo, restored
             "Similique non atque",
-            // the rebased change is still there too
+            // the stuff before the pull is still there
             "Deserunt culpa in expedita",
-            // there will be a conflict
+          ],
+          nomatch: [
+            // no conflict because we rolled it back
             "<<<<<",
             ">>>>>",
+            // We failed to pull
+            "Aut ut nisi dolores quae et",
           ],
         });
         // There should be tracked, uncommitted changes
@@ -924,6 +930,37 @@ suite("workspace sync command", function () {
         // nothing to push
         expect(SyncCommand.countDone(pushed)).toEqual(0);
         expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN the remote is bad",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron warns that it can't connect to the remote", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        // Don't actually set up the remote, just add it
+        const remoteUrl = tmpDir().name;
+        await GitTestUtils.createRepoForWorkspace(wsRoot);
+        const git = new Git({ localUrl: wsRoot, remoteUrl });
+        await git.remoteAdd();
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // There are some changes to commit
+        expect(SyncCommand.countDone(committed)).toEqual(1);
+        // Should fail to push or pull
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(pulled[0].status === SyncActionStatus.BAD_REMOTE);
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status === SyncActionStatus.BAD_REMOTE);
       });
     }
   );

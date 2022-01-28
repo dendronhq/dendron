@@ -1,5 +1,4 @@
 import {
-  assertUnreachable,
   DendronError,
   ERROR_SEVERITY,
   VaultUtils,
@@ -10,13 +9,8 @@ import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
-
-enum Severity {
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
-}
 
 const L = Logger;
 
@@ -92,13 +86,13 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const message = ["Finished sync."];
 
     // Report anything unusual the user probably should know about
-    let maxSeverity: Severity = Severity.INFO;
+    let maxMessageSeverity: MessageSeverity = MessageSeverity.INFO;
     const makeMessage = (
       status: SyncActionStatus,
       results: SyncActionResult[][],
       fn: (repos: string) => {
         msg: string;
-        severity: Severity;
+        severity: MessageSeverity;
       }
     ) => {
       const uniqResults = _.uniq(_.flattenDeep(results));
@@ -106,27 +100,33 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       if (repos.length === 0) return;
       const { msg, severity } = fn(repos.join(", "));
       message.push(msg);
-      if (severity > maxSeverity) maxSeverity = severity;
+      if (severity > maxMessageSeverity) maxMessageSeverity = severity;
     };
 
     // Errors, sync is probably misconfigured or there's something wrong with git
     makeMessage(SyncActionStatus.CANT_STASH, [pulled], (repos) => {
       return {
         msg: `Can't pull ${repos} because there are local changes that can't be stashed.`,
-        severity: Severity.ERROR,
+        severity: MessageSeverity.ERROR,
       };
     });
     makeMessage(SyncActionStatus.NOT_PERMITTED, [pushed], (repos) => {
       return {
         msg: `Can't pull ${repos} because this user is not permitted.`,
-        severity: Severity.ERROR,
+        severity: MessageSeverity.ERROR,
+      };
+    });
+    makeMessage(SyncActionStatus.BAD_REMOTE, [pulled, pushed], (repos) => {
+      return {
+        msg: `Can't pull or push ${repos} because of a connection problem. Check your internet connection, repository permissions, and credentials.`,
+        severity: MessageSeverity.ERROR,
       };
     });
     // Warnings, need user interaction to continue sync
     makeMessage(SyncActionStatus.MERGE_CONFLICT, [pulled], (repos) => {
       return {
         msg: `Can't pull ${repos} because they have merge conflicts that must be resolved manually.`,
-        severity: Severity.WARN,
+        severity: MessageSeverity.WARN,
       };
     });
     makeMessage(
@@ -135,7 +135,17 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       (repos) => {
         return {
           msg: `Pulled ${repos} but they have merge conflicts that must be resolved.`,
-          severity: Severity.WARN,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE,
+      [pulled],
+      (repos) => {
+        return {
+          msg: `Pulled ${repos} but encountered merge conflicts when restoring local changes.`,
+          severity: MessageSeverity.WARN,
         };
       }
     );
@@ -145,20 +155,26 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       (repos) => {
         return {
           msg: `Can't pull ${repos} because there are local changes, and pulling will cause a merge conflict. You must commit your local changes first.`,
-          severity: Severity.WARN,
+          severity: MessageSeverity.WARN,
         };
       }
     );
     makeMessage(SyncActionStatus.REBASE_IN_PROGRESS, [pulled], (repos) => {
       return {
         msg: `Can't pull ${repos} because there's a rebase in progress that must be resolved.`,
-        severity: Severity.WARN,
+        severity: MessageSeverity.WARN,
       };
     });
     makeMessage(SyncActionStatus.NO_UPSTREAM, [pulled, pushed], (repos) => {
       return {
         msg: `Skipped pulling or pushing ${repos} because they don't have upstream branches configured.`,
-        severity: Severity.WARN,
+        severity: MessageSeverity.WARN,
+      };
+    });
+    makeMessage(SyncActionStatus.UNPULLED_CHANGES, [pushed], (repos) => {
+      return {
+        msg: `Can't push ${repos} because there are unpulled changes.`,
+        severity: MessageSeverity.WARN,
       };
     });
 
@@ -172,21 +188,13 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     message.push(`and pushing ${pushedDone} ${repos(pushedDone)}.`);
     const finalMessage = message.join(" ");
 
-    // Typescript thinks `maxSeverity` can only be `INFO` if I use a switch here for some reason. The if chain typechecks correctly.
-    if (maxSeverity === Severity.INFO) {
-      window.showInformationMessage(finalMessage);
-    } else if (maxSeverity === Severity.WARN) {
-      window.showWarningMessage(finalMessage);
-    } else if (maxSeverity === Severity.ERROR) {
-      window.showErrorMessage(finalMessage);
-    } else {
-      assertUnreachable(maxSeverity);
-    }
+    VSCodeUtils.showMessage(maxMessageSeverity, finalMessage, {});
 
     return {
       committed,
       pulled,
       pushed,
+      finalMessage,
     };
   }
 }

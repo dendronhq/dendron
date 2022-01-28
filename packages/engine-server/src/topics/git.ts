@@ -138,6 +138,10 @@ export class Git {
     await this._execute("git rebase --abort");
   }
 
+  async fetch() {
+    return this._execute("git fetch");
+  }
+
   async push(setUpstream?: { remote: string; branch: string }) {
     const { localUrl: cwd } = this.opts;
     let setUpstremArg = "";
@@ -169,9 +173,21 @@ export class Git {
     }
   }
 
-  /** Applies a stash commit created by {@link Git.stashCreate}. */
+  /** Applies a stash commit created by {@link Git.stashCreate}.
+   *
+   * @returns true if the stash applied cleanly, false if there was a merge conflict.
+   *  False doesn't mean the stash wasn't applied, just that it conflicted.
+   */
   async stashApplyCommit(commit: string) {
-    await this._execute(`git stash apply ${commit}`);
+    try {
+      await this._execute(`git stash apply ${commit}`);
+      return true;
+    } catch (error) {
+      // This can return a non-0 exit code and "fail" just because of merge conflicts.
+      if (await this.hasMergeConflicts()) return false;
+      // If it's something else though, do actually fail
+      throw error;
+    }
   }
 
   /** Same as `git reset`. If a parameter is passed, it's `git reset --soft` or `git reset --hard`. */
@@ -238,6 +254,17 @@ export class Git {
     return !_.isEmpty(stdout);
   }
 
+  /** Check that local has changes that upstream doesn't. */
+  async hasPushableChanges(upstream: string) {
+    return !(
+      (await this.diff({
+        nameOnly: true,
+        oldCommit: upstream,
+        newCommit: "HEAD",
+      })) === ""
+    );
+  }
+
   /** These are the short status symbols git uses to identify files with merge conflicts.
    *
    * See the [git docs](https://www.git-scm.com/docs/git-status#_short_format) for details.
@@ -249,6 +276,11 @@ export class Git {
   async hasMergeConflicts() {
     const { stdout } = await this._execute("git status --porcelain");
     return Git.MERGE_CONFLICT_REGEX.test(stdout);
+  }
+
+  async hasAccessToRemote(): Promise<boolean> {
+    const { exitCode } = await this._execute("git ls-remote --exit-code");
+    return exitCode === 0;
   }
 
   /** Gets the path of a file inside of the `.git` folder. */
@@ -299,6 +331,27 @@ export class Git {
   async hasRemote() {
     const { stdout } = await this._execute("git remote");
     return !_.isEmpty(stdout);
+  }
+
+  /** Checks if a push to remote would succeed by checking if the upstream contains commits that the local branch doesn't.  */
+  async hasPushableRemote(): Promise<boolean> {
+    try {
+      // Fetch the remote so we have an up-to-date view of what's on there
+      await this.fetch();
+      const branch = await this.getCurrentBranch();
+      const upstream = await this.getUpstream();
+      if (upstream === undefined) return false; // no upstream, no push
+      const { stdout } = await this._execute(
+        `git branch ${branch} --contains ${upstream}`
+      );
+      // If the output is empty, then upstream has something that local doesn't
+      // in which case we can't push
+      return !_.isEmpty(_.trim(stdout));
+    } catch {
+      // Erring on the side of pushing here.
+      // The worst case is that push might get rejected.
+      return true;
+    }
   }
 
   /** Gets the upstream `origin/branch` the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */

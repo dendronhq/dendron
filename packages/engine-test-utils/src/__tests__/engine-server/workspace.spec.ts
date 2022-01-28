@@ -199,7 +199,7 @@ describe("WorkspaceService", () => {
 
   testWithEngine(
     "commitAll",
-    async ({ wsRoot, vaults }) => {
+    async ({ wsRoot, engine, vaults }) => {
       await NoteTestUtilsV4.modifyNoteByPath(
         { wsRoot, vault: vaults[0], fname: "foo" },
         (note: NoteProps) => {
@@ -214,7 +214,7 @@ describe("WorkspaceService", () => {
       });
       const resp = await new WorkspaceService({
         wsRoot,
-      }).commitAndAddAll();
+      }).commitAndAddAll({ engine });
       expect(resp.length).toEqual(3);
       expect(
         resp.filter((r) => r.status === SyncActionStatus.DONE).length

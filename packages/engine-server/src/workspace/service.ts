@@ -888,6 +888,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
             return makeResult(SyncActionStatus.NO_REMOTE);
           if (_.isUndefined(await git.getUpstream()))
             return makeResult(SyncActionStatus.NO_UPSTREAM);
+          if (!(await git.hasAccessToRemote()))
+            return makeResult(SyncActionStatus.BAD_REMOTE);
           // If the vault was configured not to pull, then skip it
           if (!(await this.shouldVaultsSync("pull", rootVaults)))
             return makeResult(SyncActionStatus.SKIP_CONFIG);
@@ -929,6 +931,18 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
           }
           try {
             await git.pull();
+            if (stashed) {
+              const restored = await git.stashApplyCommit(stashed);
+              stashed = undefined;
+              if (!restored)
+                return makeResult(
+                  SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
+                );
+            }
+            // pull went well, everything is in order. The finally block will restore any stashed changes.
+            return makeResult(SyncActionStatus.DONE);
+          } catch (err: any) {
+            // Failed to pull, let's see why:
             if (
               (await git.hasMergeConflicts()) ||
               (await git.hasRebaseInProgress())
@@ -944,16 +958,21 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
               } else {
                 return makeResult(SyncActionStatus.MERGE_CONFLICT_AFTER_PULL);
               }
+            } else {
+              const stderr = err?.stderr || "";
+              const vaultNames = vaults
+                .map((vault) => VaultUtils.getName(vault))
+                .join(",");
+              throw new DendronError({
+                message: `Failed to pull ${vaultNames}: ${stderr}`,
+                payload: {
+                  err,
+                  vaults,
+                  repo,
+                  stashed,
+                },
+              });
             }
-
-            // pull went well, everything is in order. The finally block will restore any stashed changes.
-            return makeResult(SyncActionStatus.DONE);
-          } catch (err: any) {
-            const stderr = err.stderr ? `: ${err.stderr}` : "";
-            throw new DendronError({
-              message: `error pulling vault${stderr}`,
-              payload: { err, repoPath: repo },
-            });
           } finally {
             // Try to restore changes if we stashed them, even if there were errors. We don't want to lose the users changes.
             if (stashed) {
@@ -975,27 +994,32 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
           const git = new Git({ localUrl: repo });
+          const makeResult = (status: SyncActionStatus) => {
+            return {
+              repo,
+              vaults,
+              status,
+            };
+          };
 
+          if (!(await this.shouldVaultsSync("push", rootVaults)))
+            return makeResult(SyncActionStatus.SKIP_CONFIG);
           if (!(await git.hasRemote()))
             return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
           const upstream = await git.getUpstream();
           if (_.isUndefined(upstream))
-            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
-          if (
-            (await git.diff({
-              nameOnly: true,
-              oldCommit: upstream,
-              newCommit: "HEAD",
-            })) === ""
-          )
-            return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
-          if (!(await this.shouldVaultsSync("push", rootVaults)))
-            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+            return makeResult(SyncActionStatus.NO_UPSTREAM);
+          if (!(await git.hasAccessToRemote()))
+            return makeResult(SyncActionStatus.BAD_REMOTE);
+          if (!(await git.hasPushableChanges(upstream)))
+            return makeResult(SyncActionStatus.NO_CHANGES);
+          if (!(await git.hasPushableRemote()))
+            return makeResult(SyncActionStatus.UNPULLED_CHANGES);
           if (!_.every(_.map(vaults, this.user.canPushVault)))
-            return { repo, vaults, status: SyncActionStatus.NOT_PERMITTED };
+            return makeResult(SyncActionStatus.NOT_PERMITTED);
           try {
             await git.push();
-            return { repo, vaults, status: SyncActionStatus.DONE };
+            return makeResult(SyncActionStatus.DONE);
           } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({

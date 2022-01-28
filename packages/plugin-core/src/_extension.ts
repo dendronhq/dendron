@@ -668,7 +668,7 @@ export async function _activate(
       });
 
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-        await warnIncompatibleExtensions({ ext: ws });
+        warnIncompatibleExtensions({ ext: ws });
       }
 
       if (stage !== "test") {
@@ -1273,7 +1273,7 @@ function updateEngineAPI(port: number | string): void {
   // return engine;
 }
 
-async function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
+function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
   const installStatus = INCOMPATIBLE_EXTENSIONS.map((extId) => {
     return { id: extId, installed: VSCodeUtils.isExtensionInstalled(extId) };
   });
@@ -1287,7 +1287,7 @@ async function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
     AnalyticsUtils.track(ExtensionEvents.IncompatibleExtensionsWarned, {
       installedExtensions,
     });
-    await vscode.window
+    vscode.window
       .showWarningMessage(
         "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
         "Fix conflicts..."

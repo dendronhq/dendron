@@ -108,7 +108,7 @@ jobs:
         shell: bash
 
       - name: Build
-        run: yarn bootstrap:build
+        run: yarn bootstrap:buildCI
         shell: bash
 
       # - name: Start Xvfb

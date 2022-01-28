@@ -7,10 +7,14 @@ import {
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { Disposable, TextEditor, TreeView, window } from "vscode";
+import {
+  Disposable,
+  TextEditor,
+  TreeDataProvider,
+  TreeView,
+  window,
+} from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { EngineEvents } from "../services/EngineEvents";
-import { EngineNoteProvider } from "./EngineNoteProvider";
 
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
@@ -19,11 +23,12 @@ import { EngineNoteProvider } from "./EngineNoteProvider";
 export class NativeTreeView implements Disposable {
   private treeView: TreeView<NoteProps> | undefined;
   private _handler: Disposable | undefined;
-  private _events: EngineEvents;
+  private _createDataProvider: () => TreeDataProvider<NoteProps>;
 
-  constructor(events: EngineEvents) {
-    this._events = events;
+  constructor(treeDataProviderFactory: () => TreeDataProvider<NoteProps>) {
+    this._createDataProvider = treeDataProviderFactory;
   }
+
   dispose() {
     if (this._handler) {
       this._handler.dispose();
@@ -40,7 +45,7 @@ export class NativeTreeView implements Disposable {
    * Creates the Tree View and shows it in the UI (registers with vscode.window)
    */
   async show() {
-    const treeDataProvider = new EngineNoteProvider(this._events);
+    const treeDataProvider = this._createDataProvider();
     const result = treeDataProvider.getChildren() as Promise<
       NoteProps | undefined | null
     >;

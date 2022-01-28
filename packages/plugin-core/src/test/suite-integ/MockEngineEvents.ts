@@ -1,42 +1,27 @@
-import { NoteProps } from "@dendronhq/common-all";
-import { Event, EventEmitter } from "vscode";
-import { EngineEvents } from "../../services/EngineEvents";
+import { Event, NoteChangeEntry } from "@dendronhq/common-all";
+import { EngineEvents } from "@dendronhq/engine-server";
+import { EventEmitter } from "vscode";
 
 /**
  * Convenience class for testing classes that rely on EngineEvents signaling
  */
 export class MockEngineEvents implements EngineEvents {
-  _onNoteChangeEmitter = new EventEmitter<NoteProps>();
-  _onNoteCreatedEmitter = new EventEmitter<NoteProps>();
-  _onNoteDeletedEmitter = new EventEmitter<NoteProps>();
+  _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
-  get onNoteChange(): Event<NoteProps> {
-    return this._onNoteChangeEmitter.event;
+  get onNoteChanged(): Event<NoteChangeEntry[]> {
+    return this._onNoteChangedEmitter.event;
   }
 
-  get onNoteCreated(): Event<NoteProps> {
-    return this._onNoteCreatedEmitter.event;
-  }
-
-  get onNoteDeleted(): Event<NoteProps> {
-    return this._onNoteDeletedEmitter.event;
-  }
-
-  public testFireonNoteChange(noteProps: NoteProps) {
-    this._onNoteChangeEmitter.fire(noteProps);
-  }
-
-  public testFireonNoteCreated(noteProps: NoteProps) {
-    this._onNoteCreatedEmitter.fire(noteProps);
-  }
-
-  public testFireonNoteDeleted(noteProps: NoteProps) {
-    this._onNoteDeletedEmitter.fire(noteProps);
+  /**
+   * Use this method to mock an engine change event to trigger a response from
+   * the component you're testing.
+   * @param entries
+   */
+  public testFireOnNoteChanged(entries: NoteChangeEntry[]) {
+    this._onNoteChangedEmitter.fire(entries);
   }
 
   dispose() {
-    this._onNoteChangeEmitter.dispose();
-    this._onNoteCreatedEmitter.dispose();
-    this._onNoteDeletedEmitter.dispose();
+    this._onNoteChangedEmitter.dispose();
   }
 }

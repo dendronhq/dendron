@@ -1,6 +1,5 @@
 import {
   APIUtils,
-  assertUnreachable,
   BulkAddNoteOpts,
   ConfigWriteOpts,
   DendronAPI,
@@ -15,6 +14,7 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  Event,
   GetDecorationsOpts,
   GetDecorationsPayload,
   GetNoteBlocksOpts,
@@ -32,28 +32,25 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
-  ResponseUtil,
   RespRequired,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
-import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  EngineEvents,
+  HistoryService,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Event, EventEmitter } from "vscode";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
-import { EngineEvents } from "./EngineEvents";
 
 export class EngineAPIService
   implements DEngineClient, IEngineAPIService, EngineEvents
 {
-  private internalEngine: DEngineClient;
-
+  private _internalEngine: DEngineClient;
+  private _engineEvents: EngineEvents;
   private _trustedWorkspace: boolean = true;
-
-  private _onNoteChangeEmitter = new EventEmitter<NoteProps>();
-  private _onNoteCreatedEmitter = new EventEmitter<NoteProps>();
-  private _onNoteDeletedEmitter = new EventEmitter<NoteProps>();
 
   static createEngine({
     port,
@@ -82,7 +79,10 @@ export class EngineAPIService
       history,
     });
 
-    const newSvc = new EngineAPIService({ engineClient: newClientBase });
+    const newSvc = new EngineAPIService({
+      engineClient: newClientBase,
+      engineEvents: newClientBase,
+    });
 
     if (enableWorkspaceTrust !== undefined) {
       newSvc._trustedWorkspace = enableWorkspaceTrust;
@@ -90,26 +90,22 @@ export class EngineAPIService
     return newSvc;
   }
 
-  constructor({ engineClient }: { engineClient: DEngineClient }) {
-    this.internalEngine = engineClient;
+  constructor({
+    engineClient,
+    engineEvents,
+  }: {
+    engineClient: DEngineClient;
+    engineEvents: EngineEvents;
+  }) {
+    this._internalEngine = engineClient;
+    this._engineEvents = engineEvents;
   }
-
-  get onNoteChange(): Event<NoteProps> {
-    return this._onNoteChangeEmitter.event;
-  }
-
-  get onNoteCreated(): Event<NoteProps> {
-    return this._onNoteCreatedEmitter.event;
-  }
-
-  get onNoteDeleted(): Event<NoteProps> {
-    return this._onNoteDeletedEmitter.event;
+  get onNoteChanged(): Event<NoteChangeEntry[]> {
+    return this._engineEvents.onNoteChanged;
   }
 
   dispose() {
-    this._onNoteChangeEmitter.dispose();
-    this._onNoteCreatedEmitter.dispose();
-    this._onNoteDeletedEmitter.dispose();
+    this._engineEvents.dispose();
   }
 
   get trustedWorkspace(): boolean {
@@ -121,98 +117,85 @@ export class EngineAPIService
   }
 
   public get notes(): NotePropsDict {
-    return this.internalEngine.notes;
+    return this._internalEngine.notes;
   }
   public set notes(arg: NotePropsDict) {
-    this.internalEngine.notes = arg;
+    this._internalEngine.notes = arg;
   }
 
   public get noteFnames(): NoteFNamesDict {
-    return this.internalEngine.noteFnames;
+    return this._internalEngine.noteFnames;
   }
   public set noteFnames(arg: NoteFNamesDict) {
-    this.internalEngine.noteFnames = arg;
+    this._internalEngine.noteFnames = arg;
   }
 
   public get wsRoot(): string {
-    return this.internalEngine.wsRoot;
+    return this._internalEngine.wsRoot;
   }
   public set wsRoot(arg: string) {
-    this.internalEngine.wsRoot = arg;
+    this._internalEngine.wsRoot = arg;
   }
 
   public get schemas(): SchemaModuleDict {
-    return this.internalEngine.schemas;
+    return this._internalEngine.schemas;
   }
   public set schemas(arg: SchemaModuleDict) {
-    this.internalEngine.schemas = arg;
+    this._internalEngine.schemas = arg;
   }
 
   public get links(): DLink[] {
-    return this.internalEngine.links;
+    return this._internalEngine.links;
   }
   public set links(arg: DLink[]) {
-    this.internalEngine.links = arg;
+    this._internalEngine.links = arg;
   }
 
   public get vaults(): DVault[] {
-    return this.internalEngine.vaults;
+    return this._internalEngine.vaults;
   }
   public set vaults(arg: DVault[]) {
-    this.internalEngine.vaults = arg;
+    this._internalEngine.vaults = arg;
   }
 
   public get configRoot(): string {
-    return this.internalEngine.configRoot;
+    return this._internalEngine.configRoot;
   }
   public set configRoot(arg: string) {
-    this.internalEngine.configRoot = arg;
+    this._internalEngine.configRoot = arg;
   }
 
   public get config(): IntermediateDendronConfig {
-    return this.internalEngine.config;
+    return this._internalEngine.config;
   }
   public set config(arg: IntermediateDendronConfig) {
-    this.internalEngine.config = arg;
+    this._internalEngine.config = arg;
   }
 
   public get hooks(): DHookDict {
-    return this.internalEngine.hooks;
+    return this._internalEngine.hooks;
   }
   public set hooks(arg: DHookDict) {
-    this.internalEngine.hooks = arg;
+    this._internalEngine.hooks = arg;
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {
-    return this.internalEngine.refreshNotes(opts);
+    return this._internalEngine.refreshNotes(opts);
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    const promise = this.internalEngine.bulkAddNotes(opts);
-
-    promise.then((resp) => {
-      if (!ResponseUtil.hasError(resp)) {
-        resp.data.forEach((entry) => {
-          this.emitEventsForNoteChangeEntry(entry);
-        });
-      }
-    });
-
-    return promise;
+    return this._internalEngine.bulkAddNotes(opts);
   }
 
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<NoteProps> {
-    return this.internalEngine.updateNote(note, opts).then((value) => {
-      this._onNoteChangeEmitter.fire(value);
-      return value;
-    });
+    return this._internalEngine.updateNote(note, opts);
   }
 
   updateSchema(schema: SchemaModuleProps): Promise<void> {
-    return this.internalEngine.updateSchema(schema);
+    return this._internalEngine.updateSchema(schema);
   }
 
   writeNote(
@@ -227,70 +210,53 @@ export class EngineAPIService
       }
     }
 
-    const promise = this.internalEngine.writeNote(note, opts);
-
-    promise.then((value) => {
-      if (!value.error && value.data) {
-        value.data.forEach((entry) => {
-          this.emitEventsForNoteChangeEntry(entry);
-        });
-      }
-    });
-
-    return promise;
+    return this._internalEngine.writeNote(note, opts);
   }
 
   writeSchema(schema: SchemaModuleProps): Promise<void> {
-    return this.internalEngine.writeSchema(schema);
+    return this._internalEngine.writeSchema(schema);
   }
   init(): Promise<DEngineInitResp> {
-    return this.internalEngine.init();
+    return this._internalEngine.init();
   }
 
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
-    return this.internalEngine.deleteNote(id, opts).then((value) => {
-      if (value.data !== undefined) {
-        value.data.forEach((noteChangeEntry) => {
-          this.emitEventsForNoteChangeEntry(noteChangeEntry);
-        });
-      }
-      return value;
-    });
+    return this._internalEngine.deleteNote(id, opts);
   }
 
   deleteSchema(
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<DEngineInitResp> {
-    return this.internalEngine.deleteSchema(id, opts);
+    return this._internalEngine.deleteSchema(id, opts);
   }
 
   info(): Promise<RespRequired<EngineInfoResp>> {
-    return this.internalEngine.info();
+    return this._internalEngine.info();
   }
 
   sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp> {
-    return this.internalEngine.sync(opts);
+    return this._internalEngine.sync(opts);
   }
 
   getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
     // opts.npath = opts.overrides?.types
-    return this.internalEngine.getNoteByPath(opts);
+    return this._internalEngine.getNoteByPath(opts);
   }
 
   getSchema(qs: string): Promise<RespV2<SchemaModuleProps>> {
-    return this.internalEngine.getSchema(qs);
+    return this._internalEngine.getSchema(qs);
   }
 
   querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>> {
-    return this.internalEngine.querySchema(qs);
+    return this._internalEngine.querySchema(qs);
   }
 
   queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>> {
-    return this.internalEngine.queryNotes(opts);
+    return this._internalEngine.queryNotes(opts);
   }
 
   queryNotesSync({
@@ -302,55 +268,30 @@ export class EngineAPIService
     originalQS: string;
     vault?: DVault | undefined;
   }): Required<RespV2<NoteProps[]>> {
-    return this.internalEngine.queryNotesSync({ qs, originalQS, vault });
+    return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
-    const promise = this.internalEngine.renameNote(opts);
-    promise.then((value) => {
-      if (!value.error && value.data) {
-        value.data.forEach((entry) => {
-          this.emitEventsForNoteChangeEntry(entry);
-        });
-      }
-    });
-
-    return promise;
+    return this._internalEngine.renameNote(opts);
   }
 
   renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
-    return this.internalEngine.renderNote(opts);
+    return this._internalEngine.renderNote(opts);
   }
 
   getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
-    return this.internalEngine.getNoteBlocks(opts);
+    return this._internalEngine.getNoteBlocks(opts);
   }
 
   writeConfig(opts: ConfigWriteOpts): Promise<RespV2<void>> {
-    return this.internalEngine.writeConfig(opts);
+    return this._internalEngine.writeConfig(opts);
   }
 
   getConfig(): Promise<RespV2<IntermediateDendronConfig>> {
-    return this.internalEngine.getConfig();
+    return this._internalEngine.getConfig();
   }
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {
-    return this.internalEngine.getDecorations(opts);
-  }
-
-  private emitEventsForNoteChangeEntry(entry: NoteChangeEntry) {
-    switch (entry.status) {
-      case "create":
-        this._onNoteCreatedEmitter.fire(entry.note);
-        break;
-      case "update":
-        this._onNoteChangeEmitter.fire(entry.note);
-        break;
-      case "delete":
-        this._onNoteDeletedEmitter.fire(entry.note);
-        break;
-      default:
-        assertUnreachable(entry);
-    }
+    return this._internalEngine.getDecorations(opts);
   }
 }

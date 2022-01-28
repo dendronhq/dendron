@@ -19,6 +19,8 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
+  Event,
+  EventEmitter,
   FuseEngine,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -51,6 +53,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
+import { EngineEvents } from "./EngineEvents";
 import { HistoryService } from "./history";
 import { EngineUtils } from "./utils";
 
@@ -59,7 +62,9 @@ type DendronEngineClientOpts = {
   ws: string;
 };
 
-export class DendronEngineClient implements DEngineClient {
+export class DendronEngineClient implements DEngineClient, EngineEvents {
+  private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
+
   public notes: NotePropsDict;
   public noteFnames: NoteFNamesDict;
   public wsRoot: string;
@@ -141,6 +146,13 @@ export class DendronEngineClient implements DEngineClient {
     };
   }
 
+  get onNoteChanged(): Event<NoteChangeEntry[]> {
+    return this._onNoteChangedEmitter.event;
+  }
+
+  dispose() {
+    this._onNoteChangedEmitter.dispose();
+  }
   /**
    * Load all nodes
    */
@@ -182,6 +194,9 @@ export class DendronEngineClient implements DEngineClient {
     const resp = await this.api.engineBulkAdd({ opts, ws: this.ws });
     const changed = resp.data;
     await this.refreshNotesV2(changed);
+
+    this._onNoteChangedEmitter.fire(resp.data);
+
     return resp;
   }
 
@@ -195,6 +210,11 @@ export class DendronEngineClient implements DEngineClient {
       throw new DendronError({ message: "no data" });
     }
     await this.refreshNotesV2(resp.data);
+
+    if (resp.data !== undefined) {
+      this._onNoteChangedEmitter.fire(resp.data);
+    }
+
     return {
       error: null,
       data: resp.data,
@@ -361,6 +381,10 @@ export class DendronEngineClient implements DEngineClient {
       throw resp.error;
     }
     await this.refreshNotesV2(resp.data as NoteChangeEntry[]);
+
+    if (resp.data) {
+      this._onNoteChangedEmitter.fire(resp.data);
+    }
     return resp;
   }
 
@@ -393,9 +417,17 @@ export class DendronEngineClient implements DEngineClient {
     if (_.isUndefined(noteClean)) {
       throw new DendronError({ message: "error updating note", payload: resp });
     }
-    await this.refreshNotesV2([
-      { note: noteClean, prevNote: note, status: "update" },
-    ]);
+    const changeEntry: NoteChangeEntry = {
+      note: noteClean,
+      prevNote: note,
+      status: "update",
+    };
+    await this.refreshNotesV2([changeEntry]);
+
+    if (resp.data) {
+      this._onNoteChangedEmitter.fire([changeEntry]);
+    }
+
     return noteClean;
   }
 
@@ -417,6 +449,9 @@ export class DendronEngineClient implements DEngineClient {
       changed = _.reject(changed, (ent) => ent.status === "delete");
     }
     await this.refreshNotesV2(changed);
+
+    this._onNoteChangedEmitter.fire(resp.data);
+
     return resp;
   }
 

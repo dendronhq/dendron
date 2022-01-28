@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { NoteChangeEntry, NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
@@ -36,7 +36,12 @@ suite("EngineNoteProvider Tests", function testSuite() {
             done();
           });
 
-          mockEvents.testFireonNoteCreated(testNoteProps);
+          const entry: NoteChangeEntry = {
+            note: testNoteProps,
+            status: "create",
+          };
+
+          mockEvents.testFireOnNoteChanged([entry]);
         },
       });
     });
@@ -61,7 +66,13 @@ suite("EngineNoteProvider Tests", function testSuite() {
             done();
           });
 
-          mockEvents.testFireonNoteChange(testNoteProps);
+          const entry: NoteChangeEntry = {
+            prevNote: testNoteProps,
+            note: testNoteProps,
+            status: "update",
+          };
+
+          mockEvents.testFireOnNoteChanged([entry]);
         },
       });
     });
@@ -86,7 +97,12 @@ suite("EngineNoteProvider Tests", function testSuite() {
             done();
           });
 
-          mockEvents.testFireonNoteDeleted(testNoteProps);
+          const entry: NoteChangeEntry = {
+            note: testNoteProps,
+            status: "delete",
+          };
+
+          mockEvents.testFireOnNoteChanged([entry]);
         },
       });
     });

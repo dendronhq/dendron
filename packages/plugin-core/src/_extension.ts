@@ -88,6 +88,7 @@ import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
+import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
@@ -628,7 +629,11 @@ export async function _activate(
 
       // If the web UI dev flag is not set, then setup a native tree view:
       if (!ws.workspaceService?.config.dev?.enableWebUI) {
-        const treeView = new NativeTreeView(engineAPIService);
+        const providerConstructor = function () {
+          return new EngineNoteProvider(engineAPIService);
+        };
+
+        const treeView = new NativeTreeView(providerConstructor);
         treeView.show();
         context.subscriptions.push(treeView);
       }

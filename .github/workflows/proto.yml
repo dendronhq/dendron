@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     strategy:
-      fail-fast: true
+      fail-fast: false
 
       matrix:
         os:
@@ -23,15 +23,15 @@ jobs:
           # - 14.x
         suite:
           - cli
-          # - plugin
+          - plugin
 
         include:
-          - os: macos-latest
-            env: env
-            versions: ""
-          - os: ubuntu-latest
-            env: env
-            versions: ""
+          # - os: macos-latest
+          #   env: env
+          #   versions: ""
+          # - os: ubuntu-latest
+          #   env: env
+          #   versions: ""
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
           - os: windows-latest
@@ -89,6 +89,6 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      # - name: Run tests
-      #   run: yarn ci:test:${{ matrix.suite }}
-      #   timeout-minutes: 30
+      - name: Run tests
+        run: yarn ci:test:${{ matrix.suite }}
+        timeout-minutes: 30

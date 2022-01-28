@@ -17,13 +17,11 @@ $(`npx lerna run buildCI --scope @dendronhq/common-server `);
 $(`npx lerna run buildCI --scope @dendronhq/engine-server `);
 $(`npx lerna run buildCI --scope @dendronhq/pods-core `);
 $(
-  `npx lerna run buildCI --parallel --scope "@dendronhq/{common-test-utils,api-server,common-assets}"`
+  `npx lerna run buildCI --parallel --scope "@dendronhq/{common-test-utils,api-server}"`
 );
 $(
-  `npx lerna run buildCI --parallel --scope "@dendronhq/{common-frontend,dendron-cli}"`
+  `npx lerna run buildCI --parallel --scope "@dendronhq/dendron-cli"`
 );
 $(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils" `);
-// $(`npx lerna run buildCI --scope "@dendronhq/dendron-plugin-views"`);
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);
-// $(`npx yarn dendron dev sync_assets --fast`);
 console.log("done");

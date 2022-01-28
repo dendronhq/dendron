@@ -11,13 +11,11 @@ on:
 jobs:
   test:
     strategy:
-      # Allow other matrix jobs to continue after one fails, allowing us to
-      # isolate platform-specific issues.
-      fail-fast: false
+      fail-fast: true
 
       matrix:
         os:
-          # - macos-latest
+          - macos-latest
           - ubuntu-latest
           # - windows-latest
         node-version:

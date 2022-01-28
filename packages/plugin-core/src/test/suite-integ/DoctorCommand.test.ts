@@ -1,6 +1,6 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -10,10 +10,10 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { INCOMPATIBLE_EXTENSIONS } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
-import { MockDendronExtension } from "../MockDendronExtension";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -31,7 +31,7 @@ suite("DoctorCommandTest", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         // create files without frontmatter
         const vaultDirRoot = path.join(
           wsRoot,
@@ -44,13 +44,8 @@ suite("DoctorCommandTest", function () {
 
         // reload
         await new ReloadIndexCommand().run();
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.FIX_FRONTMATTER,
@@ -77,7 +72,7 @@ suite("DoctorCommandTest", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vaultDirRoot = path.join(
           wsRoot,
           VaultUtils.getRelPath(vaults[0])
@@ -91,13 +86,8 @@ suite("DoctorCommandTest", function () {
         await new ReloadIndexCommand().run();
         const testFileUri = vscode.Uri.file(testFile);
         await VSCodeUtils.openFileInEditor(testFileUri);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.FIX_FRONTMATTER,
@@ -137,13 +127,8 @@ suite("DoctorCommandTest", function () {
       onInit: async ({ wsRoot, engine, vaults }) => {
         await WSUtils.openNote(note);
 
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.FIX_FRONTMATTER,
@@ -173,7 +158,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
@@ -188,13 +173,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -231,7 +211,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
@@ -240,13 +220,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -281,7 +256,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     runLegacySingleWorkspaceTest({
       ctx,
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
@@ -293,13 +268,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -336,7 +306,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const file = await NoteTestUtilsV4.createNote({
@@ -350,13 +320,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -396,7 +361,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         await NoteTestUtilsV4.createNote({
@@ -419,13 +384,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault: vault2,
           wsRoot,
         });
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -481,7 +441,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ engine, wsRoot, vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         await NoteTestUtilsV4.createNote({
@@ -506,13 +466,8 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault: vault2,
           wsRoot,
         });
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
@@ -583,13 +538,8 @@ suite("REGENERATE_NOTE_ID", function () {
         });
         const oldId = oldNote.id;
         await WSUtils.openNote(oldNote);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.REGENERATE_NOTE_ID,
@@ -646,13 +596,8 @@ suite("REGENERATE_NOTE_ID", function () {
           wsRoot,
         }).id;
 
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             action: DoctorActionsEnum.REGENERATE_NOTE_ID,
@@ -703,13 +648,13 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
   const ctx = setupBeforeAfter(this);
 
   describeMultiWS(
-    "",
+    "GIVEN findIncompatibleExtensions selected",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
       ctx,
     },
     () => {
-      test("", async () => {
+      test("THEN List all as not installed if found none", async () => {
         const extension = ExtensionProvider.getExtension();
         const cmd = new DoctorCommand(extension);
         const previewSpy = sinon.spy(cmd, "showIncompatibleExtensionPreview");
@@ -719,61 +664,43 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
         });
 
         const out = await previewSpy.returnValues[0];
-        expect(out.installStatus.length === 10).toBeTruthy();
+        expect(out.installStatus.length).toEqual(10);
+        expect(
+          out.installStatus.every((status) => !status.installed)
+        ).toBeTruthy();
         expect(previewSpy.calledOnce).toBeTruthy();
+      });
+
+      test("THEN List all extension that are incompatible", async () => {
+        const extension = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(extension);
+        const previewSpy = sinon.spy(cmd, "showIncompatibleExtensionPreview");
+        await cmd.execute({
+          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+          scope: "workspace",
+          data: {
+            installStatus: INCOMPATIBLE_EXTENSIONS.map((id) => {
+              return {
+                id,
+                installed: true,
+              };
+            }),
+          },
+        });
+
+        const out = await previewSpy.returnValues[0];
+        expect(out.installStatus.length).toEqual(10);
+        expect(
+          out.installStatus.every((status) => status.installed)
+        ).toBeTruthy();
+        expect(
+          await AssertUtils.assertInString({
+            body: out.contents,
+            match: ["[View Extension]"],
+            nomatch: ["Not Installed"],
+          })
+        ).toBeTruthy();
       });
     }
   );
-
-  test("", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
-      postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults, engine }) => {
-        const vault = vaults[0];
-        const oldNote = NoteUtils.getNoteOrThrow({
-          fname: "foo",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        });
-        const oldId = oldNote.id;
-        await WSUtils.openNote(oldNote);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-        const cmd = new DoctorCommand(mockExtension);
-        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
-          Promise.resolve({
-            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
-            scope: "file",
-          })
-        );
-        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-
-        try {
-          quickPickStub
-            .onCall(0)
-            .returns(
-              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-            );
-          await cmd.run();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          expect(note?.id).toNotEqual(oldId);
-        } finally {
-          gatherInputsStub.restore();
-          quickPickStub.restore();
-        }
-        done();
-      },
-    });
-  });
 });

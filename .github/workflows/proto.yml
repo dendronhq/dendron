@@ -25,7 +25,7 @@ jobs:
           # - 14.x
         suite:
           - cli
-          # - plugin
+          - plugin
 
         include:
           # - os: macos-latest
@@ -129,6 +129,6 @@ jobs:
       #     unzip dendron-site.zip -d packages/nextjs-template
       #     pwd
 
-      # - name: Run tests
-      #   run: yarn ci:test:${{ matrix.suite }}
-      #   timeout-minutes: 30
+      - name: Run tests
+        run: yarn ci:test:${{ matrix.suite }}
+        timeout-minutes: 30

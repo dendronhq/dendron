@@ -6,7 +6,8 @@
   "license": "GPLv3",
   "scripts": {
     "watch": "echo nop",
-    "build": "node scripts/buildStyles.js"
+    "build": "node scripts/buildStyles.js",
+    "buildCI": "yarn build"
   },
   "gitHead": "4ba39ff9fcec3bd1f0ba4fbd663cb3b49449609b"
 }

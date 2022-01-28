@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "buildCI": "echo nop",
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",

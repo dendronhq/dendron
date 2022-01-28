@@ -97,13 +97,14 @@
     "start": "yarn build:index && node scripts/start.js",
     "setup": "yarn build:index && yarn build:styles",
     "build": "yarn build:dev && yarn build:styles",
+    "buildCI": "echo nop",
     "build:dev": "yarn setup && npx cross-env BUILD_DEV=1 node scripts/build.js",
     "build:prod": "yarn setup && node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
     "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",
     "test-local": "node scripts/test.js",
-    "clean": "yarn rimraf build public/static public/*.css public/index.html node_modules",
+    "clean": "yarn rimraf build public/static public/*.css public/index.html node_modules || 0",
     "rimraf": "npx rimraf"
   },
   "eslintConfig": {
@@ -184,6 +185,7 @@
   "devDependencies": {
     "@types/lodash": "^4.14.176",
     "@types/mermaid": "^8.2.7",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "rimraf": "^3.0.2"
   }
 }

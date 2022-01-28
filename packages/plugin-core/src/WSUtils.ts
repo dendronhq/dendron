@@ -21,6 +21,7 @@ import { WSUtilsV2 } from "./WSUtilsV2";
 /**
  * Prefer to use WSUtilsV2 instead of this class to prevent circular dependencies.
  * (move methods from this file to WSUtilsV2 as needed).
+ * See [[Migration of static  methods to a non-static|dendron://dendron.docs/dev.ref.impactful-change-notice#migration-of-static--methods-to-a-non-static]]
  * */
 export class WSUtils {
   static handleServerProcess({
@@ -106,6 +107,9 @@ export class WSUtils {
     }
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static getVaultFromPath(fsPath: string) {
     const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     return VaultUtils.getVaultByFilePath({
@@ -115,6 +119,9 @@ export class WSUtils {
     });
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static getNoteFromPath(fsPath: string) {
     const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
@@ -133,21 +140,32 @@ export class WSUtils {
     });
   }
 
-  //moved
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static getVaultFromDocument(document: vscode.TextDocument) {
     return this.getVaultFromPath(document.uri.fsPath);
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static getNoteFromDocument(document: vscode.TextDocument) {
     return this.getNoteFromPath(document.uri.fsPath);
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static tryGetNoteFromDocument = (
     document: vscode.TextDocument
   ): NoteProps | undefined => {
     return new WSUtilsV2(getExtension()).tryGetNoteFromDocument(document);
   };
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static getActiveNote() {
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) return this.getNoteFromDocument(editor.document);

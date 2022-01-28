@@ -1028,7 +1028,7 @@
     "webpack:dev:watch": "yarn webpack --watch",
     "webpack:prod": "webpack --config webpack.prod.js",
     "watch": "yarn compile --watch",
-    "buildCI": "yarn compile",
+    "buildCI": "yarn rimraf out && yarn compile",
     "build": "yarn compile",
     "build:dev": "yarn webpack",
     "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",

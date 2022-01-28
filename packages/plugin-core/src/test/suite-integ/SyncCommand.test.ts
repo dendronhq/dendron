@@ -66,7 +66,9 @@ suite("workspace sync command", function () {
           expect(SyncCommand.countDone(committed)).toEqual(1);
           // Nothing to pull or push since we don't have a remote set up
           expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(pulled[0].status).toEqual(SyncActionStatus.NO_REMOTE);
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.NO_REMOTE);
           done();
         },
         ctx,
@@ -93,11 +95,13 @@ suite("workspace sync command", function () {
           // Should not attempt to commit since this is technically a workspace vault, and the default is noCommit
           // (the repo is at the root of the workspace, vault doesn't have it's own repo)
           expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should attempt to pull since the remote is set up
           expect(SyncCommand.countDone(pulled)).toEqual(1);
           // Should not push since there are no comitted changes
           // (no commit since createRepo..., unlike other tests where changeConfig creates a commit)
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
           done();
         },
         ctx,
@@ -137,6 +141,7 @@ suite("workspace sync command", function () {
           const { committed, pulled, pushed } = out;
           // Nothing should get committed since "noCommit" is used
           expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should pull and push since configuration allows it
           expect(SyncCommand.countDone(pulled)).toEqual(1);
           expect(SyncCommand.countDone(pushed)).toEqual(1);
@@ -172,6 +177,7 @@ suite("workspace sync command", function () {
           expect(SyncCommand.countDone(pulled)).toEqual(1);
           // Should not push since "noPush" is used
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
       });
@@ -200,8 +206,11 @@ suite("workspace sync command", function () {
           const { committed, pulled, pushed } = out as any;
           // Nothing should be done since "skip" is used
           expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(pulled[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
       });
@@ -262,6 +271,7 @@ suite("workspace sync command", function () {
           const { committed, pulled, pushed } = out;
           // Nothing should get committed since "noCommit" is used
           expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should pull and push since configuration allows it
           expect(SyncCommand.countDone(pulled)).toEqual(1);
           expect(SyncCommand.countDone(pushed)).toEqual(1);
@@ -297,6 +307,7 @@ suite("workspace sync command", function () {
           expect(SyncCommand.countDone(pulled)).toEqual(1);
           // Should not push since "noPush" is used
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
       });
@@ -325,8 +336,11 @@ suite("workspace sync command", function () {
           const { committed, pulled, pushed } = out;
           // Nothing should be done since "skip" is used
           expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(pulled[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
       });
@@ -391,9 +405,9 @@ suite("workspace sync command", function () {
           // Won't be able to pull or push because new branch has no upstream.
           // This should be gracefully handled.
           expect(SyncCommand.countDone(pulled)).toEqual(0);
-          expect(pulled[0].status === SyncActionStatus.NO_UPSTREAM);
+          expect(pulled[0].status).toEqual(SyncActionStatus.NO_UPSTREAM);
           expect(SyncCommand.countDone(pushed)).toEqual(0);
-          expect(pushed[0].status === SyncActionStatus.NO_UPSTREAM);
+          expect(pushed[0].status).toEqual(SyncActionStatus.NO_UPSTREAM);
           done();
         },
       });
@@ -401,67 +415,35 @@ suite("workspace sync command", function () {
   });
 
   describeSingleWS(
-    "WHEN there are tracked, uncommitted changes",
+    "WHEN there are no changes",
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
     },
     () => {
-      test("THEN Dendron stashes and restores the changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+      test("THEN Dendron skips committing", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        // Add everything and push, so that there's no untracked changes
+        // Add everything and push, so that there's no changes
         const git = new Git({ localUrl: wsRoot });
         await git.addAll();
         await git.commit({ msg: "add all and commit" });
         await git.push();
-        // Update root note so there are tracked changes
-        const fpath = NoteUtils.getFullPath({
-          note: NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vaults[0],
-            engine,
-          })!,
-          wsRoot,
-        });
-        await fs.appendFile(fpath, "Similique non atque");
-        // Also create an untracked change
-        const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
-          engine,
-          fname: "untracked-new-note",
-          vault: vaults[0],
-          wsRoot,
-          body: "Quia dolores rem ad et aut.",
-        });
 
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
-        // Should still stash and pull
+        expect(committed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
+        // Should still pull
         expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
-        // the changes, tracked and untracked, should be restored after the pull
-        await FileTestUtils.assertInFile({
-          fpath,
-          match: ["Similique non atque"],
-        });
-        await FileTestUtils.assertInFile({
-          fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
-          match: ["Quia dolores rem ad et aut."],
-        });
-        GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
-        // nothing to push
+        // nothing to push either
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+        expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
   );
@@ -512,9 +494,75 @@ suite("workspace sync command", function () {
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
         expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: ["Similique non atque"],
+        });
+        await FileTestUtils.assertInFile({
+          fpath: NoteUtils.getFullPath({ note: untrackedChange, wsRoot }),
+          match: ["Quia dolores rem ad et aut."],
+        });
+        GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
+        // nothing to push
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN there are tracked, uncommitted changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron stashes and restores the changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
+            vault: vaults[0],
+            engine,
+          })!,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+        // Also create an untracked change
+        const untrackedChange = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          fname: "untracked-new-note",
+          vault: vaults[0],
+          wsRoot,
+          body: "Quia dolores rem ad et aut.",
+        });
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(1);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -530,7 +578,7 @@ suite("workspace sync command", function () {
         ).toBeTruthy();
         // nothing to push
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+        expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
   );
@@ -600,8 +648,8 @@ suite("workspace sync command", function () {
         expect(SyncCommand.countDone(committed)).toEqual(0);
         // Should still stash and pull, but notice the merge conflict after restoring
         expect(SyncCommand.countDone(pulled)).toEqual(0);
-        expect(
-          pulled[0].status === SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
+        expect(pulled[0].status).toEqual(
+          SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
         );
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
@@ -626,7 +674,7 @@ suite("workspace sync command", function () {
         ).toBeTruthy();
         // nothing to push
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+        expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
       });
     }
   );
@@ -697,9 +745,9 @@ suite("workspace sync command", function () {
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
         expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -729,7 +777,7 @@ suite("workspace sync command", function () {
         ).toBeTruthy();
         // nothing to push
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+        expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
   );
@@ -804,9 +852,9 @@ suite("workspace sync command", function () {
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
         expect(SyncCommand.countDone(pulled)).toEqual(1);
-        expect(pulled[0].status === SyncActionStatus.DONE);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -837,6 +885,93 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         expect(SyncCommand.countDone(pushed)).toEqual(1);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN git pull causes a rebase but hits a conflict, and there are no local changes",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(
+          config,
+          "workspaceVaultSyncMode",
+          "noCommit"
+        );
+        return config;
+      },
+    },
+    () => {
+      test("THEN pull succeeds but there's a merge conflict", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot });
+        await git.addAll();
+        await git.commit({ msg: "first commit" });
+        await git.push();
+        // Update root note and add a commit that's not in remote, so there'll be something to rebase
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+        await git.addAll();
+        await git.commit({ msg: "second commit" });
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip committing since it's set to no commit
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
+        // Should still stash and pull
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(pulled[0].status).toEqual(
+          SyncActionStatus.MERGE_CONFLICT_AFTER_PULL
+        );
+        // the changes, tracked and untracked, should be restored after the pull
+        await FileTestUtils.assertInFile({
+          fpath,
+          match: [
+            // the stuff before the pull is still there
+            "Deserunt culpa in expedita",
+            // The pulled stuff is there
+            "Aut ut nisi dolores quae et",
+            // there's a merge conflict
+            "<<<<<",
+            ">>>>>",
+          ],
+        });
+        // There should be tracked, uncommitted changes
+        expect(
+          await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
+        ).toBeTruthy();
+        // can't push because there's a merge conflict that happened during the pull
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
       });
     }
   );
@@ -901,10 +1036,11 @@ suite("workspace sync command", function () {
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
         expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
         expect(SyncCommand.countDone(pulled)).toEqual(0);
-        expect(
-          pulled[0].status === SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
+        expect(pulled[0].status).toEqual(
+          SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
         );
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
@@ -927,9 +1063,151 @@ suite("workspace sync command", function () {
         expect(
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
-        // nothing to push
+        // can't push because we couldn't pull the changes
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.NO_CHANGES);
+        expect(pushed[0].status).toEqual(SyncActionStatus.UNPULLED_CHANGES);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN there is a merge conflict",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron skips doing stuff", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
+        await git.addAll();
+        await git.commit({ msg: "first commit" });
+        await git.push();
+        // Update root note and add a commit that's not in remote, so there'll be something to rebase
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+        await git.addAll();
+        await git.commit({ msg: "second commit" });
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Cause an ongoing rebase
+        try {
+          await git.pull();
+        } catch {
+          // deliberately ignored
+        }
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip everything since there's an ongoing rebase the user needs to resolve
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(pulled[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN there is a rebase in progress, but the merge conflict has been resolved already",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron skips doing stuff", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        const rootNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vaults[0],
+          engine,
+        })!;
+        // Add everything and push, so that there's no untracked changes
+        const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
+        await git.addAll();
+        await git.commit({ msg: "first commit" });
+        await git.push();
+        // Update root note and add a commit that's not in remote, so there'll be something to rebase
+        const fpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+        await git.addAll();
+        await git.commit({ msg: "second commit" });
+
+        // Clone to a second location, then push a change through that
+        const secondaryDir = tmpDir().name;
+        const secondaryGit = new Git({
+          localUrl: secondaryDir,
+          remoteUrl: remoteDir,
+        });
+        await secondaryGit.clone(".");
+        const secondaryFpath = NoteUtils.getFullPath({
+          note: rootNote,
+          wsRoot: secondaryDir,
+        });
+        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+        await secondaryGit.addAll();
+        await secondaryGit.commit({ msg: "secondary" });
+        await secondaryGit.push();
+
+        // Cause an ongoing rebase
+        try {
+          await git.pull();
+        } catch {
+          // deliberately ignored
+        }
+        // Mark the conflict as resolved
+        await git.add(fpath);
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should skip everything since there's an ongoing rebase the user needs to resolve
+        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(committed[0].status).toEqual(
+          SyncActionStatus.REBASE_IN_PROGRESS
+        );
+        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(pulled[0].status).toEqual(SyncActionStatus.REBASE_IN_PROGRESS);
+        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(pushed[0].status).toEqual(SyncActionStatus.REBASE_IN_PROGRESS);
       });
     }
   );
@@ -946,11 +1224,10 @@ suite("workspace sync command", function () {
     () => {
       test("THEN Dendron warns that it can't connect to the remote", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        // Don't actually set up the remote, just add it
-        const remoteUrl = tmpDir().name;
-        await GitTestUtils.createRepoForWorkspace(wsRoot);
-        const git = new Git({ localUrl: wsRoot, remoteUrl });
-        await git.remoteAdd();
+        const remoteDir = tmpDir().name;
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        // Delete the remote at this point so we can't use it
+        await fs.rm(remoteDir, { force: true, recursive: true });
 
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
@@ -958,9 +1235,9 @@ suite("workspace sync command", function () {
         expect(SyncCommand.countDone(committed)).toEqual(1);
         // Should fail to push or pull
         expect(SyncCommand.countDone(pulled)).toEqual(0);
-        expect(pulled[0].status === SyncActionStatus.BAD_REMOTE);
+        expect(pulled[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
         expect(SyncCommand.countDone(pushed)).toEqual(0);
-        expect(pushed[0].status === SyncActionStatus.BAD_REMOTE);
+        expect(pushed[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
       });
     }
   );

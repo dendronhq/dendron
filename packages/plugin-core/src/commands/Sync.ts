@@ -123,12 +123,16 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       };
     });
     // Warnings, need user interaction to continue sync
-    makeMessage(SyncActionStatus.MERGE_CONFLICT, [pulled], (repos) => {
-      return {
-        msg: `Can't pull ${repos} because they have merge conflicts that must be resolved manually.`,
-        severity: MessageSeverity.WARN,
-      };
-    });
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT,
+      [committed, pulled, pushed],
+      (repos) => {
+        return {
+          msg: `Skipped ${repos} because they have merge conflicts that must be resolved manually.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
     makeMessage(
       SyncActionStatus.MERGE_CONFLICT_AFTER_PULL,
       [pulled],
@@ -159,12 +163,16 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
         };
       }
     );
-    makeMessage(SyncActionStatus.REBASE_IN_PROGRESS, [pulled], (repos) => {
-      return {
-        msg: `Can't pull ${repos} because there's a rebase in progress that must be resolved.`,
-        severity: MessageSeverity.WARN,
-      };
-    });
+    makeMessage(
+      SyncActionStatus.REBASE_IN_PROGRESS,
+      [pulled, pushed, committed],
+      (repos) => {
+        return {
+          msg: `Skipped ${repos} because there's a rebase in progress that must be resolved.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
     makeMessage(SyncActionStatus.NO_UPSTREAM, [pulled, pushed], (repos) => {
       return {
         msg: `Skipped pulling or pushing ${repos} because they don't have upstream branches configured.`,

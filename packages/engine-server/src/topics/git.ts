@@ -2,7 +2,6 @@ import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { exitCode } from "process";
 
 /**
  * Work directly with git repositories
@@ -115,23 +114,6 @@ export class Git {
       shell: true,
       cwd,
     });
-  }
-
-  /** Attempt to continue the current rebase.
-   *
-   * If this operation fails, or if there's still a rebase after the continue
-   * (e.g. multiple rebase steps that conflict), returns false.
-   * Otherwise returns true.
-   */
-  async rebaseContinue() {
-    let exitCode = -1;
-    try {
-      exitCode = (await this._execute("git rebase --continue")).exitCode;
-    } catch {
-      // We can't continue the rebase, there are unresolved conflicts or something else preventing it
-      return false;
-    }
-    return exitCode === 0 && (await this.hasRebaseInProgress()) === null;
   }
 
   async rebaseAbort() {
@@ -279,8 +261,12 @@ export class Git {
   }
 
   async hasAccessToRemote(): Promise<boolean> {
-    const { exitCode } = await this._execute("git ls-remote --exit-code");
-    return exitCode === 0;
+    try {
+      const { exitCode } = await this._execute("git ls-remote --exit-code");
+      return exitCode === 0;
+    } catch {
+      return false;
+    }
   }
 
   /** Gets the path of a file inside of the `.git` folder. */

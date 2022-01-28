@@ -93,8 +93,22 @@ jobs:
           git config --global user.name CI
           git config --global user.email ci@dendron.so
 
-      - name: Initialize
-        run: yarn ci:init
+      - name: Restore typescript lib cache
+        uses: actions/cache@v2
+        id: node-modules-cache
+        with:
+          path: |
+            packages/*/lib/*
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Bootstrap
+        run: yarn bootstrap:bootstrap
+        shell: bash
+
+      - name: Build
+        run: yarn bootstrap:build
         shell: bash
 
       # - name: Start Xvfb

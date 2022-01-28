@@ -47,8 +47,8 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -b",
-		"watch": "tsc -b -w",
+		"compile": "tsc -b --verbose",
+		"watch": "tsc -b -w --verbose",
 		"test-alt": "sh ./scripts/e2e.sh"
 	},
 	"devDependencies": {

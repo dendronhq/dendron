@@ -28,7 +28,7 @@
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
-    "compile": "tsc -b tsconfig.build.json",
+    "compile": "tsc -b tsconfig.build.json --verbose",
     "test": "echo 0",
     "watch": "yarn compile --watch",
     "test:unit": "echo 0",

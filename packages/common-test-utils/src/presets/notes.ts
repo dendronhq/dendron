@@ -130,8 +130,8 @@ export const NOTE_PRESETS_V4 = {
   NOTE_WITH_DATE_VARIABLES: CreateNoteFactory({
     fname: "date-variables",
     body: [
-      "Today is {{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}",
-      "This link goes to [[daily.journal.{{ CURRENT_YEAR }}.{{ CURRENT_MONTH }}.{{ CURRENT_DAY }}]]",
+      "Today is <%= CURRENT_YEAR %>.<%=CURRENT_MONTH %>.<%=CURRENT_DAY%>",
+      "This link goes to [[daily.journal.<%=CURRENT_YEAR%>.<%= CURRENT_MONTH%>.<%= CURRENT_DAY %>]]",
       "{{ 1 + 1 }} should not be evalated to 2",
     ].join("\n"),
   }),

@@ -1372,22 +1372,34 @@ export class SchemaUtils {
         note.body = tempNote.body;
       }
 
-      // Apply date variable substitution to the body based on mustache delimiter if applicable
-      // E.g. if template has {{ CURRENT_YEAR }}, new note will contain 2021
-      // Use mustache delimiter
-      // TODO: Renable date variable substitution when new format is thought through
-      /*_.templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g;
-
+      // Apply date variable substitution to the body based on lodash interpolate delimiter if applicable
+      // E.g. if template has <%= CURRENT_YEAR %>, new note will contain 2021
       const currentDate = Time.now();
-      const compiledSchemaTemplate = _.template(note.body);
-      note.body = compiledSchemaTemplate({
-        CURRENT_YEAR: currentDate.toFormat("yyyy"),
-        CURRENT_MONTH: currentDate.toFormat("LL"),
-        CURRENT_DAY: currentDate.toFormat("dd"),
-        CURRENT_HOUR: currentDate.toFormat("HH"),
-        CURRENT_MINUTE: currentDate.toFormat("mm"),
-        CURRENT_SECOND: currentDate.toFormat("ss"),
-      });*/
+
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_YEAR\s*%>/g,
+        currentDate.toFormat("yyyy")
+      );
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_MONTH\s*%>/g,
+        currentDate.toFormat("LL")
+      );
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_DAY\s*%>/g,
+        currentDate.toFormat("dd")
+      );
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_HOUR\s*%>/g,
+        currentDate.toFormat("HH")
+      );
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_MINUTE\s*%>/g,
+        currentDate.toFormat("mm")
+      );
+      note.body = note.body.replace(
+        /<%=\s*CURRENT_SECOND\s*%>/g,
+        currentDate.toFormat("ss")
+      );
 
       return true;
     }

@@ -138,8 +138,7 @@ describe(`SchemaUtil tests:`, () => {
         );
       });
 
-      // TODO: Reenable once date variable substitution is enabled
-      it.skip("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
+      it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
         const dateTemplate: SchemaTemplate = {
           id: "date-variables",
           type: "note",

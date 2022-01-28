@@ -14,6 +14,7 @@ import {
   InstallStatus,
   MigrationEvents,
   NativeWorkspaceEvents,
+  SurveyEvents,
   Time,
   VaultUtils,
   VSCodeEvents,
@@ -944,7 +945,8 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
 
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
   const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
-  const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
+  const currentTime = Time.now().toSeconds();
+  const CUR_TIME = Duration.fromObject({ seconds: currentTime });
   const metaData = MetadataService.instance().getMeta();
 
   const FIRST_INSTALL =
@@ -979,21 +981,34 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     LAST_LOOKUP_TIME !== undefined &&
     CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
 
-  // if they have cancelled, we should be waiting another 2 weeks.
+  // if they have cancelled last time, we should be waiting another 2 weeks.
   if (inactiveSurveySubmitted === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
       CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
       isInactive;
+    if (shouldSendAgain) {
+      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
+        reason: "reprompt",
+        currentTime,
+        ...metaData,
+      });
+    }
     return shouldSendAgain;
   } else {
     // this is the first time we are asking them.
-    return (
-      // If the user has been active on first week, but been inactive for more than 2 weeks.
+    const shouldSend =
       metaData.dendronWorkspaceActivated !== undefined &&
       metaData.firstWsInitialize !== undefined &&
-      isInactive
-    );
+      isInactive;
+    if (shouldSend) {
+      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
+        reason: "initial_prompt",
+        currentTime,
+        ...metaData,
+      });
+    }
+    return shouldSend;
   }
 }
 

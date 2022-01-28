@@ -76,6 +76,7 @@ export enum SurveyEvents {
   InactiveUserSurveyPrompted = "Inactive_User_Survey_Prompted",
   InactiveUserSurveyAccepted = "Inactive_User_Survey_Accepted",
   InactiveUserSurveyRejected = "Inactive_User_Survey_Rejected",
+  InactiveUserSurveyPromptReason = "Inactive_User_Prompt_Reason",
 }
 
 export enum ConfigEvents {

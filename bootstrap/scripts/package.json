@@ -20,7 +20,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "compile": "tsc -p tsconfig.build.json",
+    "compile": "tsc -b tsconfig.build.json",
     "watch": "yarn compile --watch"
   },
   "dependencies": {

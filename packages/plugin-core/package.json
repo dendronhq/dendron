@@ -1031,7 +1031,7 @@
     "build": "yarn compile",
     "build:dev": "yarn webpack",
     "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",
-    "compile": "tsc -p tsconfig.build.json",
+    "compile": "tsc -b tsconfig.build.json",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",

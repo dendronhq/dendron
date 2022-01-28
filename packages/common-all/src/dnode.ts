@@ -1377,27 +1377,27 @@ export class SchemaUtils {
       const currentDate = Time.now();
 
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_YEAR\\s*%>", "g"),
+        /<%=\s*CURRENT_YEAR\s*%>/g,
         currentDate.toFormat("yyyy")
       );
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_MONTH\\s*%>", "g"),
+        /<%=\s*CURRENT_MONTH\s*%>/g,
         currentDate.toFormat("LL")
       );
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_DAY\\s*%>", "g"),
+        /<%=\s*CURRENT_DAY\s*%>/g,
         currentDate.toFormat("dd")
       );
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_HOUR\\s*%>", "g"),
+        /<%=\s*CURRENT_HOUR\s*%>/g,
         currentDate.toFormat("HH")
       );
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_MINUTE\\s*%>", "g"),
+        /<%=\s*CURRENT_MINUTE\s*%>/g,
         currentDate.toFormat("mm")
       );
       note.body = note.body.replace(
-        new RegExp("<%=\\s*CURRENT_SECOND\\s*%>", "g"),
+        /<%=\s*CURRENT_SECOND\s*%>/g,
         currentDate.toFormat("ss")
       );
 

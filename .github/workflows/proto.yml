@@ -17,28 +17,28 @@ jobs:
 
       matrix:
         os:
-          - macos-latest
+          # - macos-latest
           - ubuntu-latest
-          - windows-latest
+          # - windows-latest
         node-version:
           - 12.x
-          - 14.x
+          # - 14.x
         suite:
           - cli
-          - plugin
+          # - plugin
 
         include:
-          - os: macos-latest
-            env: env
-            versions: ""
+          # - os: macos-latest
+          #   env: env
+          #   versions: ""
           - os: ubuntu-latest
             env: env
             versions: ""
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
-          - os: windows-latest
-            env: Get-ChildItem Env:\
-            versions: choco --version
+          # - os: windows-latest
+          #   env: Get-ChildItem Env:\
+          #   versions: choco --version
 
     timeout-minutes: 40
 
@@ -83,7 +83,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-yarn-
 
       - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -97,32 +97,24 @@ jobs:
         run: yarn ci:init
         shell: bash
 
-      - name: Start Xvfb
-        if: runner.os == 'Linux' && matrix.suite == 'plugin'
-        run: |
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          echo 'DISPLAY=:99.0' >>$GITHUB_ENV
+      # - name: Start Xvfb
+      #   if: runner.os == 'Linux' && matrix.suite == 'plugin'
+      #   run: |
+      #     Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      #     echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      - name: Download notes.zip
-        if: runner.os == 'Linux'
-        uses: wei/curl@master
-        with:
-          args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
+      # - name: Download notes.zip
+      #   if: runner.os == 'Linux'
+      #   uses: wei/curl@master
+      #   with:
+      #     args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
 
-      - name: Unzip notes.zip
-        if: runner.os == 'Linux'
-        run: |
-          unzip dendron-site.zip -d packages/nextjs-template
-          pwd
+      # - name: Unzip notes.zip
+      #   if: runner.os == 'Linux'
+      #   run: |
+      #     unzip dendron-site.zip -d packages/nextjs-template
+      #     pwd
 
-      - name: Run cypress
-        if: runner.os == 'Linux'
-        uses: cypress-io/github-action@v2
-        with:
-          build: "yarn run template:export"
-          start: "yarn run template:start"
-          project: ./packages/nextjs-template
-
-      - name: Run tests
-        run: yarn ci:test:${{ matrix.suite }}
-        timeout-minutes: 30
+      # - name: Run tests
+      #   run: yarn ci:test:${{ matrix.suite }}
+      #   timeout-minutes: 30

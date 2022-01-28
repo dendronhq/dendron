@@ -1,5 +1,8 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
-import { BAD_FRONTMATTER_CODE, DoctorActions } from "@dendronhq/engine-server";
+import {
+  BAD_FRONTMATTER_CODE,
+  DoctorActionsEnum,
+} from "@dendronhq/engine-server";
 import isUrl from "is-url";
 import _ from "lodash";
 import {
@@ -21,10 +24,11 @@ import { NoteLookupCommand } from "../commands/NoteLookupCommand";
 import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
 import { LookupSelectionTypeEnum } from "../components/lookup/types";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getExtension } from "../workspace";
+import { DendronExtension } from "../workspace";
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
@@ -62,10 +66,10 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
           isPreferred: true,
           kind: CodeActionKind.QuickFix,
           command: {
-            command: new DoctorCommand().key,
+            command: new DoctorCommand(ExtensionProvider.getExtension()).key,
             title: "Fix the frontmatter",
             arguments: [
-              { scope: "file", action: DoctorActions.FIX_FRONTMATTER },
+              { scope: "file", action: DoctorActionsEnum.FIX_FRONTMATTER },
             ],
           },
         };
@@ -119,7 +123,7 @@ export const refactorProvider: CodeActionProvider = {
         isPreferred: true,
         kind: CodeActionKind.RefactorExtract,
         command: {
-          command: new GotoNoteCommand(getExtension()).key,
+          command: new GotoNoteCommand(ExtensionProvider.getExtension()).key,
           title: "Add missing note for wikilink declaration",
           arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },

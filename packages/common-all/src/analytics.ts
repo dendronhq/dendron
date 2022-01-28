@@ -41,6 +41,8 @@ export enum TutorialEvents {
 
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
+  IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
+  IncompatibleExtensionsPreviewDisplayed = "Incompatible_Extensions_Preview_Displayed",
 }
 
 export enum LookupEvents {

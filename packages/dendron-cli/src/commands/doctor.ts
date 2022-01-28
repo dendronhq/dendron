@@ -1,5 +1,5 @@
 import { NoteProps } from "@dendronhq/common-all";
-import { DoctorService, DoctorActions } from "@dendronhq/engine-server";
+import { DoctorService, DoctorActionsEnum } from "@dendronhq/engine-server";
 // @ts-ignore
 import _ from "lodash";
 import yargs from "yargs";
@@ -12,7 +12,7 @@ import {
 } from "./utils";
 
 type CommandCLIOpts = {
-  action: DoctorActions;
+  action: DoctorActionsEnum;
   query?: string;
   /**
    * pass in note candidates directly to
@@ -47,8 +47,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "what action the doctor should take",
       type: "string",
       requiresArg: true,
-      choices: Object.values(DoctorActions),
-      // default: DoctorActions.FIX_FM
+      choices: Object.values(DoctorActionsEnum),
     });
     args.option("query", {
       describe: "run doctor over a query",

@@ -11,6 +11,7 @@ import {
   INoteLookupProviderFactory,
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
+import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
@@ -56,6 +57,7 @@ export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;
   serverWatcher?: vscode.FileSystemWatcher;
+  fileWatcher?: FileWatcher;
   type: WorkspaceType;
   wsUtils: IWSUtilsV2;
   commandFactory: ICommandFactory;

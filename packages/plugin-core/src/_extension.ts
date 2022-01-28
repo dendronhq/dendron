@@ -38,6 +38,7 @@ import {
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
+import _md from "markdown-it";
 import _ from "lodash";
 import { Duration } from "luxon";
 import os from "os";
@@ -62,6 +63,7 @@ import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import {
   CONFIG,
+  INCOMPATIBLE_EXTENSIONS,
   DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
@@ -99,6 +101,8 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
+import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
+import { IDendronExtension } from "./dendronExtensionInterface";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -663,6 +667,11 @@ export async function _activate(
         workspaceType: ws.type,
         codeWorkspacePresent,
       });
+
+      if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+        warnIncompatibleExtensions({ ext: ws });
+      }
+
       if (stage !== "test") {
         await ws.activateWatchers();
         togglePluginActiveContext(true);
@@ -1277,4 +1286,36 @@ function updateEngineAPI(port: number | string): void {
   ext.port = _.toInteger(port);
   // const engine = ext.getEngine();
   // return engine;
+}
+
+function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
+  const installStatus = INCOMPATIBLE_EXTENSIONS.map((extId) => {
+    return { id: extId, installed: VSCodeUtils.isExtensionInstalled(extId) };
+  });
+
+  const installedExtensions = installStatus
+    .filter((status) => status.installed)
+    .map((status) => status.id);
+
+  const shouldDisplayWarning = installStatus.some((status) => status.installed);
+  if (shouldDisplayWarning) {
+    AnalyticsUtils.track(ExtensionEvents.IncompatibleExtensionsWarned, {
+      installedExtensions,
+    });
+    vscode.window
+      .showWarningMessage(
+        "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
+        "Fix conflicts..."
+      )
+      .then(async (resp) => {
+        if (resp === "Fix conflicts...") {
+          const cmd = new DoctorCommand(opts.ext);
+          await cmd.execute({
+            action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+            scope: "workspace",
+            data: { installStatus },
+          });
+        }
+      });
+  }
 }

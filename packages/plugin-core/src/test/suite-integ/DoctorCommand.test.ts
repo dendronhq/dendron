@@ -1,19 +1,22 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DoctorActions } from "@dendronhq/engine-server";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { DoctorCommand } from "../../commands/Doctor";
+import { DoctorCommand, PluginDoctorActionsEnum } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { INCOMPATIBLE_EXTENSIONS } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -41,10 +44,11 @@ suite("DoctorCommandTest", function () {
 
         // reload
         await new ReloadIndexCommand().run();
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "workspace",
           })
         );
@@ -82,10 +86,11 @@ suite("DoctorCommandTest", function () {
         await new ReloadIndexCommand().run();
         const testFileUri = vscode.Uri.file(testFile);
         await VSCodeUtils.openFileInEditor(testFileUri);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "file",
           })
         );
@@ -122,10 +127,11 @@ suite("DoctorCommandTest", function () {
       onInit: async ({ wsRoot, engine, vaults }) => {
         await WSUtils.openNote(note);
 
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "file",
           })
         );
@@ -167,10 +173,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -213,10 +220,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -260,10 +268,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -311,10 +320,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           wsRoot,
         });
         await WSUtils.openNote(file);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -374,10 +384,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault: vault2,
           wsRoot,
         });
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
@@ -455,10 +466,11 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           vault: vault2,
           wsRoot,
         });
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
@@ -526,10 +538,11 @@ suite("REGENERATE_NOTE_ID", function () {
         });
         const oldId = oldNote.id;
         await WSUtils.openNote(oldNote);
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.REGENERATE_NOTE_ID,
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
             scope: "file",
           })
         );
@@ -583,10 +596,11 @@ suite("REGENERATE_NOTE_ID", function () {
           wsRoot,
         }).id;
 
-        const cmd = new DoctorCommand();
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.REGENERATE_NOTE_ID,
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
             scope: "workspace",
           })
         );
@@ -628,4 +642,65 @@ suite("REGENERATE_NOTE_ID", function () {
       },
     });
   });
+});
+
+suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
+  const ctx = setupBeforeAfter(this);
+
+  describeMultiWS(
+    "GIVEN findIncompatibleExtensions selected",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      ctx,
+    },
+    () => {
+      test("THEN List all as not installed if found none", async () => {
+        const extension = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(extension);
+        const previewSpy = sinon.spy(cmd, "showIncompatibleExtensionPreview");
+        await cmd.execute({
+          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+          scope: "workspace",
+        });
+
+        const out = await previewSpy.returnValues[0];
+        expect(out.installStatus.length).toEqual(10);
+        expect(
+          out.installStatus.every((status) => !status.installed)
+        ).toBeTruthy();
+        expect(previewSpy.calledOnce).toBeTruthy();
+      });
+
+      test("THEN List all extension that are incompatible", async () => {
+        const extension = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(extension);
+        const previewSpy = sinon.spy(cmd, "showIncompatibleExtensionPreview");
+        await cmd.execute({
+          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+          scope: "workspace",
+          data: {
+            installStatus: INCOMPATIBLE_EXTENSIONS.map((id) => {
+              return {
+                id,
+                installed: true,
+              };
+            }),
+          },
+        });
+
+        const out = await previewSpy.returnValues[0];
+        expect(out.installStatus.length).toEqual(10);
+        expect(
+          out.installStatus.every((status) => status.installed)
+        ).toBeTruthy();
+        expect(
+          await AssertUtils.assertInString({
+            body: out.contents,
+            match: ["[View Extension]"],
+            nomatch: ["Not Installed"],
+          })
+        ).toBeTruthy();
+      });
+    }
+  );
 });

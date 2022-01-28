@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   DVault,
+  ExtensionEvents,
   isNotUndefined,
   NoteProps,
   NoteUtils,
@@ -9,27 +10,28 @@ import {
 } from "@dendronhq/common-all";
 import {
   DoctorService,
-  DoctorActions,
+  DoctorActionsEnum,
   BackfillService,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import fs from "fs-extra";
-import { QuickPick, ViewColumn, window } from "vscode";
+import { QuickPick, QuickPickItem, Uri, ViewColumn, window } from "vscode";
 import {
   ChangeScopeBtn,
   DoctorBtn,
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
-import { DENDRON_COMMANDS } from "../constants";
+import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
+import { AnalyticsUtils } from "../utils/analytics";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 const md = _md();
 type Finding = {
@@ -37,9 +39,19 @@ type Finding = {
   fix?: string;
 };
 
+type IncompatibleExtensionInstallStatus = {
+  id: string;
+  installed: boolean;
+};
+
+type CommandOptsData = {
+  installStatus?: IncompatibleExtensionInstallStatus[];
+};
+
 type CommandOpts = {
-  action: DoctorActions;
+  action: DoctorActionsEnum | PluginDoctorActionsEnum;
   scope: DoctorScopeType;
+  data?: CommandOptsData;
 };
 
 type CommandOutput = {
@@ -66,8 +78,18 @@ type DoctorQuickInput = {
 
 type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
+export enum PluginDoctorActionsEnum {
+  FIND_INCOMPATIBLE_EXTENSIONS = "findIncompatibleExtensions",
+}
+
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.DOCTOR.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
 
   createQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut, items } = _.defaults(opts, {
@@ -100,14 +122,24 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (inputs && inputs.action && inputs.scope) return inputs;
     // eslint-disable-next-line no-async-promise-executor
     const out = new Promise<CommandOpts | undefined>(async (resolve) => {
-      const values = _.map(DoctorActions, (ent) => {
+      const doctorActionQuickPickItems = _.map(DoctorActionsEnum, (ent) => {
         return { label: ent };
-      });
+      }) as QuickPickItem[];
+      const pluginDoctorActionQuickPickItems = _.map(
+        PluginDoctorActionsEnum,
+        (ent) => {
+          return { label: ent };
+        }
+      ) as QuickPickItem[];
+      const allDoctorActionQuickPickItems = doctorActionQuickPickItems.concat(
+        pluginDoctorActionQuickPickItems
+      );
+
       const changeScopeButton = ChangeScopeBtn.create(false);
       const quickPick = this.createQuickPick({
         title: "Doctor",
         placeholder: "Select a Doctor Action.",
-        items: values,
+        items: allDoctorActionQuickPickItems,
         buttons: [changeScopeButton],
       });
       const scope = (quickPick.buttons[0] as IDoctorQuickInputButton).type;
@@ -118,7 +150,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const doctorScope = (quickPick.buttons[0] as IDoctorQuickInputButton)
           .type;
         return resolve({
-          action: doctorAction as DoctorActions,
+          action: doctorAction as DoctorActionsEnum | PluginDoctorActionsEnum,
           scope: doctorScope,
         });
       });
@@ -206,11 +238,60 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     panel.webview.html = md.render(content.join("\n"));
   }
 
+  async showIncompatibleExtensionPreview(opts: {
+    installStatus: IncompatibleExtensionInstallStatus[];
+  }) {
+    const { installStatus } = opts;
+    const contents = [
+      "# Extensions that are incompatible with Dendron.",
+      "",
+      "The extensions listed below are known to be incompatible with Dendron.",
+      "",
+      "Neither Dendron nor the extension may function properly when installed concurrently.",
+      "",
+      "Consider disabling the incompatible extensions when in a Dendron Workspace.",
+      "  - [How to disable extensions for a specific workspace without uninstalling](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension)",
+      "",
+      "See [Incompatible Extensions](https://wiki.dendron.so/notes/9Id5LUZFfM1m9djl6KgpP) for more details.",
+      "",
+      "## Incompatible Extensions: ",
+      "",
+      "||||",
+      "|-|-|-|",
+      installStatus
+        .map((status) => {
+          const commandArgs = `"@id:${status.id}"`;
+          const commandUri = Uri.parse(
+            `command:workbench.extensions.search?${JSON.stringify(commandArgs)}`
+          );
+          const message = status.installed
+            ? `[View Extension](${commandUri})`
+            : "Not Installed";
+          return `| ${status.id} | | ${message} | `;
+        })
+        .join("\n"),
+      "",
+    ].join("\n");
+
+    const panel = window.createWebviewPanel(
+      "incompatibleExtensionsPreview",
+      "Incompatible Extensions",
+      ViewColumn.One,
+      {
+        enableCommandUris: true,
+      }
+    );
+    panel.webview.html = md.render(contents);
+    AnalyticsUtils.track(
+      ExtensionEvents.IncompatibleExtensionsPreviewDisplayed
+    );
+    return { installStatus, contents };
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
-    const ext = getExtension();
-    const { wsRoot, config } = getDWorkspace();
+    const { wsRoot, config } = this.extension.getDWorkspace();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
       throw Error("rootDir undefined");
@@ -219,8 +300,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       throw Error("no config found");
     }
 
-    if (ext.fileWatcher) {
-      ext.fileWatcher.pause = true;
+    if (this.extension.fileWatcher) {
+      this.extension.fileWatcher.pause = true;
     }
     // Make sure to save any changes in the file because Doctor reads them from
     // disk, and won't see changes that haven't been saved.
@@ -245,7 +326,19 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     switch (opts.action) {
-      case DoctorActions.FIX_FRONTMATTER: {
+      case PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS: {
+        const installStatus =
+          opts.data?.installStatus ||
+          INCOMPATIBLE_EXTENSIONS.map((ext) => {
+            return {
+              id: ext,
+              installed: VSCodeUtils.isExtensionInstalled(ext),
+            };
+          });
+        await this.showIncompatibleExtensionPreview({ installStatus });
+        break;
+      }
+      case DoctorActionsEnum.FIX_FRONTMATTER: {
         await new BackfillService().updateNotes({
           engine,
           note,
@@ -254,7 +347,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         break;
       }
-      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+      case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         let notes;
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
@@ -277,8 +370,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             break;
           }
           window.showInformationMessage("creating missing links...");
-          if (ext.fileWatcher) {
-            ext.fileWatcher.pause = true;
+          if (this.extension.fileWatcher) {
+            this.extension.fileWatcher.pause = true;
           }
           await ds.executeDoctorActions({
             action: opts.action,
@@ -289,12 +382,12 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
-        if (ext.fileWatcher) {
-          ext.fileWatcher.pause = false;
+        if (this.extension.fileWatcher) {
+          this.extension.fileWatcher.pause = false;
         }
         break;
       }
-      case DoctorActions.FIND_BROKEN_LINKS: {
+      case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         let notes;
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
@@ -331,8 +424,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    if (ext.fileWatcher) {
-      ext.fileWatcher.pause = false;
+    if (this.extension.fileWatcher) {
+      this.extension.fileWatcher.pause = false;
     }
     await new ReloadIndexCommand().execute();
     // Decorations don't auto-update here, I think because the contents of the

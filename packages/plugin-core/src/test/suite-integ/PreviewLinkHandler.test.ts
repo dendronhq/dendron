@@ -13,7 +13,7 @@ import { MockDendronExtension } from "../MockDendronExtension";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
-suite("ShowPreview utility methods", () => {
+suite("PreviewLinkHandler", () => {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     noSetTimeout: true,
     beforeHook: () => {},

@@ -989,7 +989,7 @@ export const gdocRequiredScopes = [
 
 export const Oauth2Pods = ["dendron.gdoc"];
 
-export const CONFLICTING_EXTENSIONS = [
+export const INCOMPATIBLE_EXTENSIONS = [
   "yzhang.markdown-all-in-one",
   "fantasy.markdown-all-in-one-for-web",
   "foam.foam-vscode",

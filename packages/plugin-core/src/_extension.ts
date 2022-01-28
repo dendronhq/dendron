@@ -62,7 +62,7 @@ import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import {
   CONFIG,
-  CONFLICTING_EXTENSIONS,
+  INCOMPATIBLE_EXTENSIONS,
   DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
@@ -100,6 +100,8 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
+import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
+import { IDendronExtension } from "./dendronExtensionInterface";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -665,7 +667,9 @@ export async function _activate(
         codeWorkspacePresent,
       });
 
-      warnConflictingExtensions();
+      if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+        await warnIncompatibleExtensions({ ext: ws });
+      }
 
       if (stage !== "test") {
         await ws.activateWatchers();
@@ -1269,66 +1273,33 @@ function updateEngineAPI(port: number | string): void {
   // return engine;
 }
 
-function warnConflictingExtensions() {
-  const installedExtensions = CONFLICTING_EXTENSIONS.filter(
-    (conflictingExtension) => {
-      return VSCodeUtils.isExtensionInstalled(conflictingExtension);
-    }
-  );
-  const shouldDisplayWarning = installedExtensions.length > 0;
+async function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
+  const installStatus = INCOMPATIBLE_EXTENSIONS.map((extId) => {
+    return { id: extId, installed: VSCodeUtils.isExtensionInstalled(extId) };
+  });
+
+  const installedExtensions = installStatus
+    .filter((status) => status.installed)
+    .map((status) => status.id);
+
+  const shouldDisplayWarning = installStatus.some((status) => status.installed);
   if (shouldDisplayWarning) {
-    AnalyticsUtils.track(ExtensionEvents.ConflictingExtensionsWarned, {
+    AnalyticsUtils.track(ExtensionEvents.IncompatibleExtensionsWarned, {
       installedExtensions,
     });
-    vscode.window
+    await vscode.window
       .showWarningMessage(
         "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
         "Fix conflicts..."
       )
       .then(async (resp) => {
         if (resp === "Fix conflicts...") {
-          await showConflictingExtensionPreview(installedExtensions);
+          const cmd = new DoctorCommand(opts.ext);
+          await cmd.run({
+            action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+            data: { installStatus },
+          });
         }
       });
   }
-}
-
-async function showConflictingExtensionPreview(installedExtensions: string[]) {
-  const md = _md();
-
-  const content = [
-    "# Extensions that conflict with Dendron.",
-    "",
-    "The extensions listed below are known to conflict with Dendron.",
-    "",
-    "Neither Dendron nor the conflicting extension may function properly when installed concurrently.",
-    "",
-    "Consider disabling the conflicting extensions when in a Dendron Workspace.",
-    "  - [How to disable extensions for a specific workspace without uninstalling](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension)",
-    "",
-    "See [Conflicting Extensions](https://wiki.dendron.so/notes/9Id5LUZFfM1m9djl6KgpP) for more details.",
-    "",
-    "## Conflicting Extensions: ",
-    "\n|||\n|-|-|",
-    installedExtensions
-      .map((ext) => {
-        const commandArgs = `"@id:${ext}"`;
-        const commandUri = vscode.Uri.parse(
-          `command:workbench.extensions.search?${JSON.stringify(commandArgs)}`
-        );
-        return `| ${ext} | [View Extension](${commandUri}) |`;
-      })
-      .join("\n"),
-    "",
-  ].join("\n");
-  const panel = vscode.window.createWebviewPanel(
-    "conflictingExtensionsPreview",
-    "Conflicting Extensions",
-    vscode.ViewColumn.One,
-    {
-      enableCommandUris: true,
-    }
-  );
-  panel.webview.html = md.render(content);
-  AnalyticsUtils.track(ExtensionEvents.ConflictingExtensionsPreviewDisplayed);
 }

@@ -1,6 +1,6 @@
 import { WorkspaceOpts } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import { DoctorActions } from "@dendronhq/engine-server";
+import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
 import path from "path";
@@ -124,7 +124,7 @@ const runDoctor = (opts: Omit<DoctorCLICommandOpts, "server">) => {
 };
 
 describe("h1 to h2", () => {
-  const action = DoctorActions.HI_TO_H2;
+  const action = DoctorActionsEnum.HI_TO_H2;
 
   test("basic", async () => {
     // this test can run a bit long
@@ -249,7 +249,7 @@ describe("h1 to h2", () => {
 });
 
 describe("H1_TO_TITLE", () => {
-  const action = DoctorActions.H1_TO_TITLE;
+  const action = DoctorActionsEnum.H1_TO_TITLE;
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
@@ -317,7 +317,7 @@ describe("H1_TO_TITLE", () => {
 });
 
 describe("CREATE_MISSING_LINKED_NOTES", () => {
-  const action = DoctorActions.CREATE_MISSING_LINKED_NOTES;
+  const action = DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES;
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
@@ -684,7 +684,7 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
 });
 
 describe("FIND_BROKEN_LINKS", () => {
-  const action = DoctorActions.FIND_BROKEN_LINKS;
+  const action = DoctorActionsEnum.FIND_BROKEN_LINKS;
 
   describe("WHEN broken link exists", () => {
     test("THEN findBrokenLinks finds it", async () => {

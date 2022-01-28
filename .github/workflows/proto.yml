@@ -95,7 +95,7 @@ jobs:
 
       - name: Restore typescript lib cache
         uses: actions/cache@v2
-        id: node-modules-cache
+        id: ts-cache
         with:
           path: |
             packages/*/lib/*

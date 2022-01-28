@@ -135,99 +135,8 @@ type VisitorParentsIndices = ({
   ancestors: ParentWithIndex[];
 }) => boolean | undefined | "skip";
 
+/** @deprecated Please use {@link MDUtilsV5} instead. */
 export class MDUtilsV4 {
-  /** Find the index of the list element for which the predicate `fn` returns true.
-   *
-   * @returns The index where the element was found, -1 otherwise.
-   */
-  static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
-    for (var i = 0; i < array.length; i++) {
-      if (fn(array[i], i)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  /** A simplified and adapted version of visitParents from unist-utils-visit-parents, that also keeps track of indices of the ancestors as well.
-   *
-   * The limitations are:
-   * * `test`, if used, can only be a string representing the type of the node that you want to visit
-   * * Adding or removing siblings is undefined behavior
-   * Please modify this function to add support for these if needed.
-   */
-  static visitParentsIndices({
-    nodes,
-    test,
-    visitor,
-  }: {
-    nodes: Node[];
-    test?: string;
-    visitor: VisitorParentsIndices;
-  }) {
-    function recursiveTraversal(
-      nodes: Node[],
-      ancestors: ParentWithIndex[]
-    ): boolean | undefined {
-      for (let i = 0; i < nodes.length; i++) {
-        // visit the current node
-        const node = nodes[i];
-        let action: boolean | undefined | "skip" = undefined;
-        if (_.isUndefined(test) || node.type === test) {
-          action = visitor({ node, index: i, ancestors });
-        }
-        if (action === "skip") return; // don't traverse the children of this node
-        if (action === false) return false; // stop traversing completely
-
-        // visit the children of this node, if any
-        // @ts-ignore
-        if (node.children) {
-          const parent = node as Parent;
-          const newAncestors = [...ancestors, { ancestor: parent, index: i }];
-          const action = recursiveTraversal(parent.children, newAncestors);
-          if (action === false) return; // stopping traversal
-        }
-      }
-      return true; // continue traversal if needed
-    }
-    // Start recursion with no ancestors (everything is top level)
-    recursiveTraversal(nodes, []);
-  }
-
-  /** Similar to `unist-utils-visit`, but allows async visitors.
-   *
-   * Children are visited in-order, not concurrently.
-   *
-   * @param test Use an empty list to visit all nodes, otherwise specify node types to be visited.
-   * @param visitor Similar to `unist-util-visit`, returning true or undefined continues traversal, false stops traversal, and "skip" skips the children of that node.
-   *
-   * Depth-first pre-order traversal, same as `unist-util-visits`.
-   */
-  static async visitAsync(
-    tree: Node,
-    test: string[],
-    visitor: (
-      node: Node
-    ) =>
-      | void
-      | undefined
-      | boolean
-      | "skip"
-      | Promise<void | undefined | boolean | "skip">
-  ) {
-    const visitQueue = new FIFOQueue([tree]);
-    while (visitQueue.length > 0) {
-      const node = visitQueue.dequeue()!;
-      if (test.length === 0 || test.includes(node.type)) {
-        // eslint-disable-next-line no-await-in-loop
-        const out = await visitor(node);
-        if (out === false) return;
-        if (out === "skip") continue;
-      }
-      if (RemarkUtils.isParent(node)) visitQueue.enqueueAll(node.children);
-    }
-  }
-
   static genMDMsg(msg: string): Parent {
     return root(paragraph(text(msg)));
   }
@@ -310,33 +219,6 @@ export class MDUtilsV4 {
   static setProcOpts(proc: Unified.Processor, data: Partial<ProcOptsFull>) {
     const procOpts = proc.data(DendronProcDataKeys.PROC_OPTS) as ProcOptsFull;
     return proc.data(DendronProcDataKeys.PROC_OPTS, { ...procOpts, ...data });
-  }
-
-  static matchHeading(
-    node: Node,
-    text: string,
-    opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
-  ) {
-    const { depth, slugger } = opts;
-    if (node.type !== DendronASTTypes.HEADING) {
-      return false;
-    }
-
-    // wildcard is always true
-    if (text === "*") {
-      return true;
-    }
-
-    if (text) {
-      var headingText = toString(node);
-      return text.trim().toLowerCase() === slugger.slug(headingText.trim());
-    }
-
-    if (depth) {
-      return (node as Heading).depth <= depth;
-    }
-
-    return true;
   }
 
   /**
@@ -628,6 +510,128 @@ export class MDUtilsV4 {
       noteIndex,
     });
     return proc;
+  }
+}
+
+/** Contains functions that help dealing with MarkDown Abstract Syntax Trees. */
+export class MdastUtils {
+  /** Find the index of the list element for which the predicate `fn` returns true.
+   *
+   * @returns The index where the element was found, -1 otherwise.
+   */
+  static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
+    for (var i = 0; i < array.length; i++) {
+      if (fn(array[i], i)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /** A simplified and adapted version of visitParents from unist-utils-visit-parents, that also keeps track of indices of the ancestors as well.
+   *
+   * The limitations are:
+   * * `test`, if used, can only be a string representing the type of the node that you want to visit
+   * * Adding or removing siblings is undefined behavior
+   * Please modify this function to add support for these if needed.
+   */
+  static visitParentsIndices({
+    nodes,
+    test,
+    visitor,
+  }: {
+    nodes: Node[];
+    test?: string;
+    visitor: VisitorParentsIndices;
+  }) {
+    function recursiveTraversal(
+      nodes: Node[],
+      ancestors: ParentWithIndex[]
+    ): boolean | undefined {
+      for (let i = 0; i < nodes.length; i++) {
+        // visit the current node
+        const node = nodes[i];
+        let action: boolean | undefined | "skip";
+        if (_.isUndefined(test) || node.type === test) {
+          action = visitor({ node, index: i, ancestors });
+        }
+        if (action === "skip") return; // don't traverse the children of this node
+        if (action === false) return false; // stop traversing completely
+
+        // visit the children of this node, if any
+        // @ts-ignore
+        if (node.children) {
+          const parent = node as Parent;
+          const newAncestors = [...ancestors, { ancestor: parent, index: i }];
+          const action = recursiveTraversal(parent.children, newAncestors);
+          if (action === false) return; // stopping traversal
+        }
+      }
+      return true; // continue traversal if needed
+    }
+    // Start recursion with no ancestors (everything is top level)
+    recursiveTraversal(nodes, []);
+  }
+
+  /** Similar to `unist-utils-visit`, but allows async visitors.
+   *
+   * Children are visited in-order, not concurrently.
+   *
+   * @param test Use an empty list to visit all nodes, otherwise specify node types to be visited.
+   * @param visitor Similar to `unist-util-visit`, returning true or undefined continues traversal, false stops traversal, and "skip" skips the children of that node.
+   *
+   * Depth-first pre-order traversal, same as `unist-util-visits`.
+   */
+  static async visitAsync(
+    tree: Node,
+    test: string[],
+    visitor: (
+      node: Node
+    ) =>
+      | void
+      | undefined
+      | boolean
+      | "skip"
+      | Promise<void | undefined | boolean | "skip">
+  ) {
+    const visitQueue = new FIFOQueue([tree]);
+    while (visitQueue.length > 0) {
+      const node = visitQueue.dequeue()!;
+      if (test.length === 0 || test.includes(node.type)) {
+        // eslint-disable-next-line no-await-in-loop
+        const out = await visitor(node);
+        if (out === false) return;
+        if (out === "skip") continue;
+      }
+      if (RemarkUtils.isParent(node)) visitQueue.enqueueAll(node.children);
+    }
+  }
+
+  static matchHeading(
+    node: Node,
+    text: string,
+    opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
+  ) {
+    const { depth, slugger } = opts;
+    if (node.type !== DendronASTTypes.HEADING) {
+      return false;
+    }
+
+    // wildcard is always true
+    if (text === "*") {
+      return true;
+    }
+
+    if (text) {
+      const headingText = toString(node);
+      return text.trim().toLowerCase() === slugger.slug(headingText.trim());
+    }
+
+    if (depth) {
+      return (node as Heading).depth <= depth;
+    }
+
+    return true;
   }
 }
 

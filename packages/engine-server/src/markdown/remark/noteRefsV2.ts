@@ -36,6 +36,7 @@ import { MDUtilsV4, ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
+import { MdastUtils } from "..";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
@@ -999,11 +1000,11 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
-  let foundIndex = MDUtilsV4.findIndex(nodes, (node: Node, idx: number) => {
+  const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
     if (idx === 0 && match === "*") {
       return false;
     }
-    return MDUtilsV4.matchHeading(node, match, { slugger });
+    return MdastUtils.matchHeading(node, match, { slugger });
   });
   if (foundIndex < 0) return null;
   return { type: "header", index: foundIndex, anchorType: "header" };
@@ -1025,7 +1026,7 @@ function findBlockAnchor({
   // Find the anchor in the nodes
   let foundIndex: number | undefined;
   let foundAncestors: ParentWithIndex[] = [];
-  MDUtilsV4.visitParentsIndices({
+  MdastUtils.visitParentsIndices({
     nodes,
     test: DendronASTTypes.BLOCK_ANCHOR,
     visitor: ({ node, index, ancestors }) => {

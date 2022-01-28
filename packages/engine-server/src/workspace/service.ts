@@ -874,10 +874,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         [...allReposVaults.entries()],
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
-          const extraActions: SyncExtraActions[] = [];
           const makeResult = (status: SyncActionStatus) => {
             return {
-              extraActions,
               repo,
               vaults,
               status,

@@ -13,7 +13,6 @@ export enum SyncActionStatus {
   NOT_PERMITTED = "user is not permitted to push to one or more vaults",
   NEW = "newly clond repository",
   CANT_STASH = "failed to stash changes in working directory",
-  CANT_RESTORE = "failed to restore stashed changes",
   MERGE_CONFLICT = "has a merge conflict that needs to be resolved",
   MERGE_CONFLICT_LOSES_CHANGES = "pulling would cause a merge conflict that would lose local changes",
   MERGE_CONFLICT_AFTER_PULL = "a merge conflict happened after the pull",
@@ -21,15 +20,10 @@ export enum SyncActionStatus {
   ERROR = "error while syncing",
 }
 
-export enum SyncExtraActions {
-  REBASE_CONTINUED = "rebase continued",
-}
-
 export type SyncActionResult = {
   repo: string;
   vaults: DVault[];
   status: SyncActionStatus;
-  extraActions: SyncExtraActions[];
 };
 
 export interface IWorkspaceService {

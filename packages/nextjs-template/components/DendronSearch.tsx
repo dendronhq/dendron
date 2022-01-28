@@ -5,16 +5,12 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
 import type Fuse from "fuse.js";
-import {
-  DendronCommonProps,
-  DendronPageWithNoteDataProps,
-  verifyNoteData,
-} from "../utils/types";
+import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
@@ -29,11 +25,10 @@ const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
 const SEARCH_DELAY = 300;
 
-export function DendronSearch(props: DendronCommonProps) {
-  if (!verifyNoteData(props)) {
-    return <DendronSpinner />;
-  }
+/** Cap search results count at some reasonable number */
+const MAX_SEARCH_RESULTS = 30;
 
+export function DendronSearch(props: DendronCommonProps) {
   return <DebouncedDendronSearchComponent {...props} />;
 }
 
@@ -42,7 +37,7 @@ type SearchFunction = (
   setResults: (results: SearchResults) => void
 ) => void;
 
-function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
+function DebouncedDendronSearchComponent(props: DendronCommonProps) {
   // Splitting this part from DendronSearchComponent so that the debounced
   // function doesn't get reset every time value changes.
   const results = useFetchFuse(props.notes);
@@ -56,7 +51,12 @@ function DebouncedDendronSearchComponent(props: DendronPageWithNoteDataProps) {
         if (_.isUndefined(query)) {
           return;
         }
-        setResults(fuse.search(query.substring(1)));
+
+        const fuseResults = fuse
+          .search(query.substring(1))
+          .slice(0, MAX_SEARCH_RESULTS);
+
+        setResults(fuseResults);
       }, SEARCH_DELAY)
     : undefined;
   return (
@@ -75,9 +75,7 @@ enum SearchMode {
   SEARCH_MODE = "searchMode",
 }
 
-function DendronSearchComponent(
-  props: DendronPageWithNoteDataProps & SearchProps
-) {
+function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   const { noteIndex, dendronRouter, search, error, loading, notes } = props;
 
   const [searchResults, setSearchResults] =
@@ -111,30 +109,63 @@ function DendronSearchComponent(
     }
   }, [searchQueryValue]);
 
-  const onLookup = (qs: string) => {
-    if (_.isUndefined(qs)) {
-      return;
-    }
-    const out =
-      qs === ""
-        ? NoteLookupUtils.fetchRootResults(notes)
-        : lookup?.queryNote({ qs, originalQS: qs });
-    setLookupResults(_.isUndefined(out) ? [] : out);
-  };
+  const onLookup = useCallback(
+    (qs: string) => {
+      if (_.isUndefined(qs) || !notes || !verifyNoteData({ notes })) {
+        return;
+      }
+      const out =
+        qs === ""
+          ? NoteLookupUtils.fetchRootResults(notes)
+          : lookup?.queryNote({ qs, originalQS: qs });
 
-  const onClickLookup = () => {
+      setLookupResults(_.isUndefined(out) ? [] : out);
+    },
+    [lookup, notes, setLookupResults]
+  );
+
+  // This is needed to make sure the lookup results are updated when notes are fetched
+  useEffect(() => {
+    if (results === SearchMode.LOOKUP_MODE) {
+      onLookup(searchQueryValue);
+    }
+  }, [notes]); // intentionally not including searchQueryValue, so that it triggers only when notes are fetched
+
+  const onClickLookup = useCallback(() => {
     const qs = NoteLookupUtils.getQsForCurrentLevel(initValue);
     onLookup(qs);
-  };
+  }, [initValue, onLookup]);
 
-  const onChangeLookup = (val: string) => {
-    setSearchQueryValue(val);
-    onLookup(val);
-  };
+  const onChangeLookup = useCallback(
+    (val: string) => {
+      setSearchQueryValue(val);
+      onLookup(val);
+    },
+    [onLookup, setSearchQueryValue]
+  );
 
-  const onChangeSearch = (val: string) => {
-    setSearchQueryValue(val);
-  };
+  const onChangeSearch = useCallback(
+    (val: string) => {
+      setSearchQueryValue(val);
+    },
+    [setSearchQueryValue]
+  );
+
+  const onSelect = useCallback(
+    (_selection, option) => {
+      if (!noteIndex) {
+        return;
+      }
+
+      const id = option.key?.toString()!;
+      dendronRouter.changeActiveNote(id, { noteIndex });
+      dispatch(
+        browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
+      );
+      setSearchQueryValue("");
+    },
+    [dendronRouter, dispatch, noteIndex]
+  );
 
   if (error) {
     return (
@@ -144,6 +175,75 @@ function DendronSearchComponent(
         message="Error loading data for the search."
       />
     );
+  }
+
+  let autocompleteChildren;
+  if (!verifyNoteData({ notes })) {
+    autocompleteChildren = (
+      <AutoComplete.Option value="Loading...">
+        <DendronSpinner />
+      </AutoComplete.Option>
+    );
+  } else if (results === SearchMode.SEARCH_MODE) {
+    autocompleteChildren = searchResults?.map(({ item: note, matches }) => {
+      return (
+        <AutoComplete.Option key={note.id} value={note.fname}>
+          <Row justify="center" align="middle">
+            <Col xs={0} md={1}>
+              <div style={{ position: "relative", top: -12, left: 0 }}>
+                <FileTextOutlined style={{ color: "#43B02A" }} />
+              </div>
+            </Col>
+            <Col
+              xs={24}
+              sm={24}
+              md={11}
+              lg={11}
+              style={{ borderRight: "1px solid #d4dadf" }}
+            >
+              <Row>
+                <Typography.Text>
+                  <TitleHighlight
+                    hit={{ item: note, matches }}
+                    attribute="title"
+                    title={note.title}
+                  />
+                </Typography.Text>
+              </Row>
+              <Row>
+                <Typography.Text type="secondary" ellipsis>
+                  {note.fname}
+                </Typography.Text>
+              </Row>
+            </Col>
+            <Col
+              className="gutter-row"
+              xs={24}
+              sm={24}
+              md={11}
+              lg={11}
+              offset={1}
+            >
+              <Row>
+                <MatchBody
+                  matches={matches}
+                  id={note.id}
+                  noteBodies={noteBodies}
+                />
+              </Row>
+            </Col>
+          </Row>
+        </AutoComplete.Option>
+      );
+    });
+  } else {
+    autocompleteChildren = lookupResults.map((noteIndex: NoteIndexProps) => {
+      return (
+        <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
+          <div>{noteIndex.fname}</div>
+        </AutoComplete.Option>
+      );
+    });
   }
 
   return (
@@ -159,79 +259,10 @@ function DendronSearchComponent(
         results === SearchMode.SEARCH_MODE ? onChangeSearch : onChangeLookup
       }
       // @ts-ignore
-      onSelect={(_selection, option) => {
-        const id = option.key?.toString()!;
-        dendronRouter.changeActiveNote(id, { noteIndex });
-        dispatch(
-          browserEngineSlice.actions.setLoadingStatus(LoadingStatus.PENDING)
-        );
-        setSearchQueryValue("");
-      }}
-      placeholder={
-        loading
-          ? "Loading Search"
-          : "For full text search please use the '?' prefix. e.g. ? Onboarding"
-      }
+      onSelect={onSelect}
+      placeholder="For full text search please use the '?' prefix. e.g. ? Onboarding"
     >
-      {results === SearchMode.SEARCH_MODE
-        ? searchResults?.map(({ item: note, matches }) => {
-            return (
-              <AutoComplete.Option key={note.id} value={note.fname}>
-                <Row justify="center" align="middle">
-                  <Col xs={0} md={1}>
-                    <div style={{ position: "relative", top: -12, left: 0 }}>
-                      <FileTextOutlined style={{ color: "#43B02A" }} />
-                    </div>
-                  </Col>
-                  <Col
-                    xs={24}
-                    sm={24}
-                    md={11}
-                    lg={11}
-                    style={{ borderRight: "1px solid #d4dadf" }}
-                  >
-                    <Row>
-                      <Typography.Text>
-                        <TitleHighlight
-                          hit={{ item: note, matches }}
-                          attribute="title"
-                          title={note.title}
-                        />
-                      </Typography.Text>
-                    </Row>
-                    <Row>
-                      <Typography.Text type="secondary" ellipsis>
-                        {note.fname}
-                      </Typography.Text>
-                    </Row>
-                  </Col>
-                  <Col
-                    className="gutter-row"
-                    xs={24}
-                    sm={24}
-                    md={11}
-                    lg={11}
-                    offset={1}
-                  >
-                    <Row>
-                      <MatchBody
-                        matches={matches}
-                        id={note.id}
-                        noteBodies={noteBodies}
-                      />
-                    </Row>
-                  </Col>
-                </Row>
-              </AutoComplete.Option>
-            );
-          })
-        : lookupResults.map((noteIndex: NoteIndexProps) => {
-            return (
-              <AutoComplete.Option key={noteIndex.id} value={noteIndex.fname}>
-                <div>{noteIndex.fname}</div>
-              </AutoComplete.Option>
-            );
-          })}
+      {autocompleteChildren}
     </AutoComplete>
   );
 }

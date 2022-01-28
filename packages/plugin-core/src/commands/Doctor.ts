@@ -285,6 +285,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     AnalyticsUtils.track(
       ExtensionEvents.IncompatibleExtensionsPreviewDisplayed
     );
+    return { installStatus, contents };
   }
 
   async execute(opts: CommandOpts) {

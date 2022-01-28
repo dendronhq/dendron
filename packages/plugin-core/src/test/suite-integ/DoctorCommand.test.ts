@@ -8,13 +8,15 @@ import _ from "lodash";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { DoctorCommand } from "../../commands/Doctor";
+import { DoctorCommand, PluginDoctorActionsEnum } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
 import { expect } from "../testUtilsv2";
 import {
+  describeMultiWS,
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -687,6 +689,85 @@ suite("REGENERATE_NOTE_ID", function () {
           expect(root?.id).toNotEqual(oldRootId);
           expect(foo?.id).toNotEqual(oldFooId);
           expect(bar?.id).toNotEqual(oldBarId);
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+        }
+        done();
+      },
+    });
+  });
+});
+
+suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
+  const ctx = setupBeforeAfter(this);
+
+  describeMultiWS(
+    "",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      ctx,
+    },
+    () => {
+      test("", async () => {
+        const extension = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(extension);
+        const previewSpy = sinon.spy(cmd, "showIncompatibleExtensionPreview");
+        await cmd.execute({
+          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+          scope: "workspace",
+        });
+
+        const out = await previewSpy.returnValues[0];
+        expect(out.installStatus.length === 10).toBeTruthy();
+        expect(previewSpy.calledOnce).toBeTruthy();
+      });
+    }
+  );
+
+  test("", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults, engine }) => {
+        const vault = vaults[0];
+        const oldNote = NoteUtils.getNoteOrThrow({
+          fname: "foo",
+          notes: engine.notes,
+          vault,
+          wsRoot,
+        });
+        const oldId = oldNote.id;
+        await WSUtils.openNote(oldNote);
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+          vaults,
+        });
+        const cmd = new DoctorCommand(mockExtension);
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
+            scope: "file",
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const note = NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          expect(note?.id).toNotEqual(oldId);
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();

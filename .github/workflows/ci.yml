@@ -36,10 +36,10 @@ jobs:
         include:
           - os: macos-latest
             env: env
-            versions: ''
+            versions: ""
           - os: ubuntu-latest
             env: env
-            versions: ''
+            versions: ""
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
           - os: windows-latest
@@ -126,7 +126,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           build: "yarn run template:export"
-          start: "yarn run template:start" 
+          start: "yarn run template:start"
           project: ./packages/nextjs-template
 
       - name: Run tests

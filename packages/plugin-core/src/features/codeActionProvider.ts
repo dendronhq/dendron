@@ -1,5 +1,8 @@
 import { ContextualUIEvents } from "@dendronhq/common-all";
-import { BAD_FRONTMATTER_CODE, DoctorActions } from "@dendronhq/engine-server";
+import {
+  BAD_FRONTMATTER_CODE,
+  DoctorActionsEnum,
+} from "@dendronhq/engine-server";
 import isUrl from "is-url";
 import _ from "lodash";
 import {
@@ -65,7 +68,7 @@ export const doctorFrontmatterProvider: CodeActionProvider = {
             command: new DoctorCommand().key,
             title: "Fix the frontmatter",
             arguments: [
-              { scope: "file", action: DoctorActions.FIX_FRONTMATTER },
+              { scope: "file", action: DoctorActionsEnum.FIX_FRONTMATTER },
             ],
           },
         };

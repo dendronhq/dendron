@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DoctorActions } from "@dendronhq/engine-server";
+import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -44,7 +44,7 @@ suite("DoctorCommandTest", function () {
         const cmd = new DoctorCommand();
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "workspace",
           })
         );
@@ -85,7 +85,7 @@ suite("DoctorCommandTest", function () {
         const cmd = new DoctorCommand();
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "file",
           })
         );
@@ -125,7 +125,7 @@ suite("DoctorCommandTest", function () {
         const cmd = new DoctorCommand();
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.FIX_FRONTMATTER,
+            action: DoctorActionsEnum.FIX_FRONTMATTER,
             scope: "file",
           })
         );
@@ -170,7 +170,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -216,7 +216,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -263,7 +263,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -314,7 +314,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "file",
           })
         );
@@ -377,7 +377,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
@@ -458,7 +458,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
             scope: "workspace",
           })
         );
@@ -529,7 +529,7 @@ suite("REGENERATE_NOTE_ID", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.REGENERATE_NOTE_ID,
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
             scope: "file",
           })
         );
@@ -586,7 +586,7 @@ suite("REGENERATE_NOTE_ID", function () {
         const cmd = new DoctorCommand();
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
-            action: DoctorActions.REGENERATE_NOTE_ID,
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
             scope: "workspace",
           })
         );

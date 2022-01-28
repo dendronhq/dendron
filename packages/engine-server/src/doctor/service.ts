@@ -16,7 +16,7 @@ import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
 
-export enum DoctorActions {
+export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
@@ -27,7 +27,7 @@ export enum DoctorActions {
 }
 
 export type DoctorServiceOpts = {
-  action: DoctorActions;
+  action: DoctorActionsEnum;
   query?: string;
   candidates?: NoteProps[];
   limit?: number;
@@ -157,14 +157,14 @@ export class DoctorService {
 
     let doctorAction: (note: NoteProps) => Promise<any>;
     switch (action) {
-      case DoctorActions.FIX_FRONTMATTER: {
+      case DoctorActionsEnum.FIX_FRONTMATTER: {
         console.log(
           "the CLI currently doesn't support this action. please run this using the plugin"
         );
         return { exit };
       }
       // eslint-disable-next-line no-fallthrough
-      case DoctorActions.H1_TO_TITLE: {
+      case DoctorActionsEnum.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
@@ -188,7 +188,7 @@ export class DoctorService {
         };
         break;
       }
-      case DoctorActions.HI_TO_H2: {
+      case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
@@ -212,7 +212,7 @@ export class DoctorService {
         };
         break;
       }
-      case DoctorActions.REMOVE_STUBS: {
+      case DoctorActionsEnum.REMOVE_STUBS: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
           if (_.trim(note.body) === "") {
@@ -225,7 +225,7 @@ export class DoctorService {
             await engineDelete(note);
             const vname = VaultUtils.getName(note.vault);
             this.L.info(
-              `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
+              `doctor ${DoctorActionsEnum.REMOVE_STUBS} ${note.fname} ${vname}`
             );
             numChanges += 1;
             return;
@@ -235,7 +235,7 @@ export class DoctorService {
         };
         break;
       }
-      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+      case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         notes = this.getBrokenLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
           await engineGetNoteByPath({
@@ -247,7 +247,7 @@ export class DoctorService {
         };
         break;
       }
-      case DoctorActions.REGENERATE_NOTE_ID: {
+      case DoctorActionsEnum.REGENERATE_NOTE_ID: {
         doctorAction = async (note: NoteProps) => {
           if (note.id === "root") return; // Root notes are special, preserve them
           note.id = genUUID();
@@ -259,7 +259,7 @@ export class DoctorService {
         };
         break;
       }
-      case DoctorActions.FIND_BROKEN_LINKS: {
+      case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         resp = [];
         doctorAction = async (note: NoteProps) => {
           const brokenLinks = this.findBrokenLinks(note, notes, engine);
@@ -301,7 +301,7 @@ export class DoctorService {
       Promise.resolve()
     );
     this.L.info({ msg: "doctor done", numChanges });
-    if (action === DoctorActions.FIND_BROKEN_LINKS && !opts.quiet) {
+    if (action === DoctorActionsEnum.FIND_BROKEN_LINKS && !opts.quiet) {
       console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
     }
     return { exit, resp };

@@ -15,28 +15,28 @@ jobs:
 
       matrix:
         os:
-          - macos-latest
-          - ubuntu-latest
-          # - windows-latest
+          # - macos-latest
+          # - ubuntu-latest
+          - windows-latest
         node-version:
           - 12.x
           # - 14.x
         suite:
-          # - cli
-          - plugin
+          - cli
+          # - plugin
 
         include:
-          # - os: macos-latest
-          #   env: env
-          #   versions: ""
+          - os: macos-latest
+            env: env
+            versions: ""
           - os: ubuntu-latest
             env: env
             versions: ""
           # Running natively under Windows requires some further work on paths
           # and file access patterns.
-          # - os: windows-latest
-          #   env: Get-ChildItem Env:\
-          #   versions: choco --version
+          - os: windows-latest
+            env: Get-ChildItem Env:\
+            versions: choco --version
 
     timeout-minutes: 40
 
@@ -89,6 +89,6 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      - name: Run tests
-        run: yarn ci:test:${{ matrix.suite }}
+      # - name: Run tests
+      #   run: yarn ci:test:${{ matrix.suite }}
       #   timeout-minutes: 30

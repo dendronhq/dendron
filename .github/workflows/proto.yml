@@ -22,8 +22,8 @@ jobs:
           - 12.x
           # - 14.x
         suite:
-          - cli
-          # - plugin
+          # - cli
+          - plugin
 
         include:
           # - os: macos-latest

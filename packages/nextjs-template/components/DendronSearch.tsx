@@ -5,16 +5,12 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
 import type Fuse from "fuse.js";
-import {
-  DendronCommonProps,
-  DendronPageWithNoteDataProps,
-  verifyNoteData,
-} from "../utils/types";
+import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
@@ -28,6 +24,9 @@ const NOTE_SNIPPET_BEFORE_AFTER = 100;
 const OMITTED_PART_TEXT = " ... ";
 /** How long to wait for before triggering fuse search, in ms. Required for performance reasons since fuse search is expensive. */
 const SEARCH_DELAY = 300;
+
+/** Cap search results count at some reasonable number */
+const MAX_SEARCH_RESULTS = 30;
 
 export function DendronSearch(props: DendronCommonProps) {
   return <DebouncedDendronSearchComponent {...props} />;
@@ -52,7 +51,12 @@ function DebouncedDendronSearchComponent(props: DendronCommonProps) {
         if (_.isUndefined(query)) {
           return;
         }
-        setResults(fuse.search(query.substring(1)));
+
+        const fuseResults = fuse
+          .search(query.substring(1))
+          .slice(0, MAX_SEARCH_RESULTS);
+
+        setResults(fuseResults);
       }, SEARCH_DELAY)
     : undefined;
   return (
@@ -114,6 +118,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
         qs === ""
           ? NoteLookupUtils.fetchRootResults(notes)
           : lookup?.queryNote({ qs, originalQS: qs });
+
       setLookupResults(_.isUndefined(out) ? [] : out);
     },
     [lookup, notes, setLookupResults]
@@ -124,7 +129,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
     if (results === SearchMode.LOOKUP_MODE) {
       onLookup(searchQueryValue);
     }
-  }, [notes, results, onLookup]);
+  }, [notes]); // intentionally not including searchQueryValue, so that it triggers only when notes are fetched
 
   const onClickLookup = useCallback(() => {
     const qs = NoteLookupUtils.getQsForCurrentLevel(initValue);

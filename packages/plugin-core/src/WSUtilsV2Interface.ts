@@ -18,4 +18,11 @@ export interface IWSUtilsV2 {
 
   /** If the text document at `filePath` is open in any editor, return that document. */
   getMatchingTextDocument(filePath: string): vscode.TextDocument | undefined;
+
+  openFileInEditorUsingFullFname(
+    vault: DVault,
+    fnameWithExtension: string
+  ): Promise<vscode.TextEditor>;
+
+  openNote(note: NoteProps): Promise<vscode.TextEditor>;
 }

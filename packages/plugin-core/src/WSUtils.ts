@@ -154,6 +154,9 @@ export class WSUtils {
     return;
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   private static async openFileInEditorUsingFullFname(
     vault: DVault,
     fnameWithExtension: string
@@ -183,6 +186,9 @@ export class WSUtils {
     return editor as vscode.TextEditor;
   }
 
+  /**
+    @deprecated. Use same method in {@link WSUtilsV2}
+  **/
   static async openNote(note: NoteProps) {
     const { vault, fname } = note;
     const fnameWithExtension = `${fname}.md`;

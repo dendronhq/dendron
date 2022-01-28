@@ -11,7 +11,7 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
-import { isInsidePath } from "@dendronhq/common-server";
+import { isInsidePath, vault2Path } from "@dendronhq/common-server";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 
@@ -148,5 +148,24 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       }
       return path.relative(filePath, documentPath) === "";
     })[0];
+  }
+
+  async openFileInEditorUsingFullFname(
+    vault: DVault,
+    fnameWithExtension: string
+  ) {
+    const wsRoot = this.extension.getDWorkspace().wsRoot;
+    const vpath = vault2Path({ vault, wsRoot });
+    const notePath = path.join(vpath, fnameWithExtension);
+    const editor = await VSCodeUtils.openFileInEditor(
+      vscode.Uri.file(notePath)
+    );
+    return editor as vscode.TextEditor;
+  }
+
+  async openNote(note: NoteProps) {
+    const { vault, fname } = note;
+    const fnameWithExtension = `${fname}.md`;
+    return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
   }
 }

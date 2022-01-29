@@ -1,7 +1,3 @@
-# Builds and publishes the release. This will publish packages to npm and
-# publish the release extension to the VS Code and Open VSX Marketplaces. This
-# is manually triggered once the release build is smoke-tested and ready for
-# release.
 name: Proto
 
 on:

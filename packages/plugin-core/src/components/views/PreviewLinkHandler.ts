@@ -267,7 +267,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     }
   }
 
-  private vaultlessAssetPath({
+  public vaultlessAssetPath({
     data,
     wsRoot,
   }: {
@@ -303,7 +303,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
 
     const assetPathFull = path.join(
       vault2Path({ vault: note.vault, wsRoot }),
-      assetPathRelative
+      decodeURIComponent(assetPathRelative)
     );
 
     return assetPathFull;

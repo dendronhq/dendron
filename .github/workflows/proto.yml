@@ -85,6 +85,11 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
+      # Linux will run tests for nextjs-template
+      - name: Sync Assets
+        if: runner.os == 'Linux'
+        run: yarn dendron dev sync_assets --fast
+
       - name: Download notes.zip
         if: runner.os == 'Linux'
         uses: wei/curl@master

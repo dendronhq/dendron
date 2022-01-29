@@ -11,11 +11,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "buildCI": "echo nop",
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
-    "build:sitemap:ts": "tsc -p tsconfig.sitemap.json && mv dist/scripts/sitemap.js .",
+    "build:sitemap:ts": "tsc -b tsconfig.sitemap.json && mv dist/scripts/sitemap.js . --verbose",
     "build:sitemap": "next-sitemap --config sitemap.js",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",

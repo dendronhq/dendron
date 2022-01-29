@@ -1,115 +1,90 @@
+# Builds and publishes the release. This will publish packages to npm and
+# publish the release extension to the VS Code and Open VSX Marketplaces. This
+# is manually triggered once the release build is smoke-tested and ready for
+# release.
 name: Proto
 
-on:
-  push:
-    branches:
-      - proto/*
+on: workflow_dispatch
 jobs:
-  test:
+  build:
+    environment: plugin-development
     strategy:
-      fail-fast: false
+      fail-fast: true
 
-      matrix:
-        os:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-        node-version:
-          - 12.x
-          - 14.x
-        suite:
-          - cli
-          - plugin
+    timeout-minutes: 30
 
-        include:
-          - os: macos-latest
-            env: env
-            versions: ""
-          - os: ubuntu-latest
-            env: env
-            versions: ""
-          # Running natively under Windows requires some further work on paths
-          # and file access patterns.
-          - os: windows-latest
-            env: Get-ChildItem Env:\
-            versions: choco --version
-
-    timeout-minutes: 40
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Gather environment data
         run: |
-          ${{ matrix.env }}
           node --version
           npm --version
           yarn --version
 
+      - name: Configure Git user
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
       - name: Checkout source
         uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "${{ matrix.node-version }}"
-          cache: "yarn"
-          cache-dependency-path: yarn.lock
+          node-version: 14.x
 
-      # Publish tests won't work if we haven't configured our committer details.
-      - name: Configure Git user
+      - name: Yarn Setup
+        run: yarn setup
+
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
+
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
+
+      - name: Set Environment Variables
         run: |
-          git config --global user.name CI
-          git config --global user.email ci@dendron.so
+          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
 
-      - name: Restore typescript lib cache
-        uses: actions/cache@v2
-        id: ts-cache
+      - name: Build the VSIX
+        run: |
+          yarn build:patch:local:ci
+
+      - name: Check for VSIX
+        run: |
+          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
+          if [ $vsixCount = 1 ]; then
+            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
+            echo "found a single .vsix file named $vsix"
+            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
+            else
+            echo "error: expected 1 .vsix file, found $vsixCount"
+            exit 1
+          fi
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
         with:
-          path: |
-            packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          name: vsix
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error
 
-      - name: Sets env vars for publish test
-        run: |
-          echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
-        if: runner.os == 'Linux'
-
-      - name: Bootstrap
-        run: yarn bootstrap:bootstrap
-        shell: bash
-
-      - name: Build
-        run: yarn bootstrap:buildCI
-        shell: bash
-
-      - name: Start Xvfb
-        if: runner.os == 'Linux' && matrix.suite == 'plugin'
-        run: |
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          echo 'DISPLAY=:99.0' >>$GITHUB_ENV
-
-      - name: Download notes.zip
-        if: runner.os == 'Linux'
-        uses: wei/curl@master
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
+          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Unzip notes.zip
-        if: runner.os == 'Linux'
+      - name: Publish VSIX to S3
         run: |
-          unzip dendron-site.zip -d packages/nextjs-template
-          pwd
-
-      - name: Run cypress
-        if: runner.os == 'Linux'
-        uses: cypress-io/github-action@v2
-        with:
-          build: "yarn run template:export"
-          start: "yarn run template:start"
-          project: ./packages/nextjs-template
-
-      - name: Run tests
-        run: yarn ci:test:${{ matrix.suite }}
-        timeout-minutes: 30
+          BUCKET=org-dendron-public-assets
+          aws s3 cp --acl public-read ${{ env.VSIX_RELATIVE_PATH }} s3://$BUCKET/publish/${{ env.VSIX_FILE_NAME }}
+          echo https://$BUCKET.s3.amazonaws.com/publish/${{ env.VSIX_FILE_NAME }}

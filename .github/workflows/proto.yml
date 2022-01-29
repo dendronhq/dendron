@@ -71,6 +71,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+      - name: Sets env vars for publish test
+        run: |
+          echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
+        if: runner.os == 'Linux'
+
       - name: Bootstrap
         run: yarn bootstrap:bootstrap
         shell: bash
@@ -84,11 +89,6 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
-
-      # Linux will run tests for nextjs-template
-      - name: Sync Assets
-        if: runner.os == 'Linux'
-        run: yarn dendron dev sync_assets --fast
 
       - name: Download notes.zip
         if: runner.os == 'Linux'

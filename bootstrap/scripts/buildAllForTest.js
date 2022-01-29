@@ -41,6 +41,7 @@ if (TEST_NEXT_TEMPLATE) {
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);
 
 if (TEST_NEXT_TEMPLATE) {
+  $(`npx lerna run build --scope "@dendronhq/dendron-plugin-views"`);
   $(`npx yarn dendron dev sync_assets --fast`);
 }
 console.log("done");

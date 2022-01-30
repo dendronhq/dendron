@@ -39,6 +39,7 @@ import {
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
+  ResponseUtil,
   RespRequired,
   RespV2,
   SchemaModuleDict,
@@ -412,16 +413,38 @@ export class DendronEngineClient implements DEngineClient, EngineEvents {
   }
 
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
+    const existing = await this.api.engineGetNoteByPath({
+      vault: note.vault,
+      ws: this.ws,
+      npath: note.id,
+      createIfNew: false,
+    });
+
+    if (ResponseUtil.hasError(existing)) {
+      throw new DendronError({
+        message: "error updating note",
+        payload: existing.error,
+      });
+    }
+
     const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
     const noteClean = resp.data;
     if (_.isUndefined(noteClean)) {
       throw new DendronError({ message: "error updating note", payload: resp });
     }
-    const changeEntry: NoteChangeEntry = {
-      note: noteClean,
-      prevNote: note,
-      status: "update",
-    };
+
+    // If no note existed, treat this as a create.
+    const changeEntry: NoteChangeEntry = existing.data?.note
+      ? {
+          note: noteClean,
+          prevNote: existing.data?.note,
+          status: "update",
+        }
+      : {
+          status: "create",
+          note: noteClean,
+        };
+
     await this.refreshNotesV2([changeEntry]);
 
     if (resp.data) {

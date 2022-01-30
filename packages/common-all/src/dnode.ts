@@ -7,7 +7,6 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
 import { URI } from "vscode-uri";
-import { NoteChangeEntry } from "../lib";
 import {
   CONSTANTS,
   ERROR_STATUS,
@@ -27,6 +26,7 @@ import {
   DNodePropsQuickInputV2,
   DNoteLoc,
   DVault,
+  NoteChangeEntry,
   NoteLocalConfig,
   NoteOpts,
   NoteProps,

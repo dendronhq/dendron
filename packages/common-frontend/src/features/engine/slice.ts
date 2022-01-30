@@ -159,7 +159,7 @@ export const engineSlice = createSlice({
       }
       // this is a new node
       if (!state.notes[note.id]) {
-        NoteUtils.addParent({
+        NoteUtils.addOrUpdateParents({
           note,
           notesList: _.values(state.notes),
           createStubs: true,

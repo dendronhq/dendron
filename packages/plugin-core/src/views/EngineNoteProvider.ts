@@ -87,7 +87,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
   }
 
   private setupSubscriptions(): void {
-    this._engineEvents.onNoteChanged(() => {
+    this._engineEvents.onEngineNoteStateChanged(() => {
       this.refreshTreeView();
     });
   }

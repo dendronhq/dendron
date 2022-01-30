@@ -100,8 +100,8 @@ export class EngineAPIService
     this._internalEngine = engineClient;
     this._engineEvents = engineEvents;
   }
-  get onNoteChanged(): Event<NoteChangeEntry[]> {
-    return this._engineEvents.onNoteChanged;
+  get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
+    return this._engineEvents.onEngineNoteStateChanged;
   }
 
   dispose() {

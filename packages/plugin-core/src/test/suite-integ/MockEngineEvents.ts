@@ -6,10 +6,10 @@ import { EventEmitter } from "vscode";
  * Convenience class for testing classes that rely on EngineEvents signaling
  */
 export class MockEngineEvents implements EngineEvents {
-  _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
+  _onNoteStateChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
-  get onNoteChanged(): Event<NoteChangeEntry[]> {
-    return this._onNoteChangedEmitter.event;
+  get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
+    return this._onNoteStateChangedEmitter.event;
   }
 
   /**
@@ -18,10 +18,10 @@ export class MockEngineEvents implements EngineEvents {
    * @param entries
    */
   public testFireOnNoteChanged(entries: NoteChangeEntry[]) {
-    this._onNoteChangedEmitter.fire(entries);
+    this._onNoteStateChangedEmitter.fire(entries);
   }
 
   dispose() {
-    this._onNoteChangedEmitter.dispose();
+    this._onNoteStateChangedEmitter.dispose();
   }
 }

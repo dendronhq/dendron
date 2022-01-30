@@ -1042,7 +1042,7 @@ export class FileStorage implements DStore {
     this.logger.info({
       ctx,
       msg: "exit",
-      changed: changed.map((n) => NoteUtils.toLogObj(n)),
+      changed: changed.map((n) => NoteUtils.toLogObj(n.note)),
     });
     return changed;
   }

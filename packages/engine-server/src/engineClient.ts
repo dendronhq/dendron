@@ -426,13 +426,6 @@ export class DendronEngineClient implements DEngineClient, EngineEvents {
       createIfNew: false,
     });
 
-    if (ResponseUtil.hasError(existing)) {
-      throw new DendronError({
-        message: "error updating note",
-        payload: existing.error,
-      });
-    }
-
     const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
     const noteClean = resp.data;
     if (_.isUndefined(noteClean)) {

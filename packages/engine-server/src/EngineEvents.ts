@@ -5,9 +5,7 @@ import { Disposable, Event, NoteChangeEntry } from "@dendronhq/common-all";
  */
 export interface EngineEvents extends Disposable {
   /**
-   * Event that fires after a set of NoteProps has been changed AND those
-   * changes have been reflected on the engine side. Note creation, deletion,
-   * and updates are all fired from this event.
+   * Event that fires upon the changing of note state in the engine.
    */
-  get onNoteChanged(): Event<NoteChangeEntry[]>;
+  get onEngineNoteStateChanged(): Event<NoteChangeEntry[]>;
 }

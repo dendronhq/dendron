@@ -21,31 +21,33 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             wsRoot,
           });
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(2);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(2);
 
-              noteChangeEntries.forEach((entry) => {
-                if (entry.status === "update") {
-                  const updateEntry = entry as NoteChangeUpdateEntry;
+                noteChangeEntries.forEach((entry) => {
+                  if (entry.status === "update") {
+                    const updateEntry = entry as NoteChangeUpdateEntry;
 
-                  // The root should have been updated to reflect the additional alpha child note:
-                  expect(updateEntry.note.fname).toEqual("root");
-                  expect(updateEntry.prevNote.children.length).toEqual(2);
-                  expect(updateEntry.note.children.length).toEqual(3);
-                  expect(
-                    updateEntry.note.children.find((name) => name === "alpha")
-                  ).toBeTruthy();
-                } else if (entry.status === "create") {
-                  expect(entry.note.fname).toEqual("alpha");
-                }
-              });
+                    // The root should have been updated to reflect the additional alpha child note:
+                    expect(updateEntry.note.fname).toEqual("root");
+                    expect(updateEntry.prevNote.children.length).toEqual(2);
+                    expect(updateEntry.note.children.length).toEqual(3);
+                    expect(
+                      updateEntry.note.children.find((name) => name === "alpha")
+                    ).toBeTruthy();
+                  } else if (entry.status === "create") {
+                    expect(entry.note.fname).toEqual("alpha");
+                  }
+                });
 
-              done();
-            } catch (err) {
-              done(err);
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.writeNote(newNote);
         },
@@ -70,34 +72,36 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             wsRoot,
           });
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(3);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(3);
 
-              noteChangeEntries.forEach((entry) => {
-                if (entry.status === "update") {
-                  const updateEntry = entry as NoteChangeUpdateEntry;
-                  expect(updateEntry.note.fname).toEqual("bar");
-                  expect(updateEntry.prevNote.children.length).toEqual(0);
-                  expect(updateEntry.note.children.length).toEqual(1);
-                } else if (entry.status === "create") {
-                  if (entry.note.fname === "bar.child") {
-                    expect(entry.note.stub).toBeTruthy();
-                  } else if (entry.note.fname === "bar.child.grandchild") {
-                    expect(entry.note.stub).toBeFalsy();
-                  } else {
-                    done({
-                      message: `Unexpected note created with id: ${entry.note.fname}`,
-                    });
+                noteChangeEntries.forEach((entry) => {
+                  if (entry.status === "update") {
+                    const updateEntry = entry as NoteChangeUpdateEntry;
+                    expect(updateEntry.note.fname).toEqual("bar");
+                    expect(updateEntry.prevNote.children.length).toEqual(0);
+                    expect(updateEntry.note.children.length).toEqual(1);
+                  } else if (entry.status === "create") {
+                    if (entry.note.fname === "bar.child") {
+                      expect(entry.note.stub).toBeTruthy();
+                    } else if (entry.note.fname === "bar.child.grandchild") {
+                      expect(entry.note.stub).toBeFalsy();
+                    } else {
+                      done({
+                        message: `Unexpected note created with id: ${entry.note.fname}`,
+                      });
+                    }
                   }
-                }
-              });
+                });
 
-              done();
-            } catch (err) {
-              done(err);
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.writeNote(newNote);
         },
@@ -120,17 +124,19 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
           const fooUpdated = { ...engine.notes["foo"] };
           fooUpdated.id = "updatedID";
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              noteChangeEntries.forEach((entry) => {
-                // TODO: Add validation once scenario works.
-                console.log(entry);
-              });
-              done();
-            } catch (err) {
-              done(err);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                noteChangeEntries.forEach((entry) => {
+                  // TODO: Add validation once scenario works.
+                  console.log(entry);
+                });
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           await engineClient.writeNote(fooUpdated);
         },
@@ -164,41 +170,43 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             wsRoot,
           });
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(2);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(2);
 
-              noteChangeEntries.forEach((entry) => {
-                if (entry.status !== "create") {
-                  done({
-                    message: `NoteChangeEntry with unexpected status: ${entry.status}`,
-                  });
-                  return;
-                }
+                noteChangeEntries.forEach((entry) => {
+                  if (entry.status !== "create") {
+                    done({
+                      message: `NoteChangeEntry with unexpected status: ${entry.status}`,
+                    });
+                    return;
+                  }
 
-                if (entry.note.fname === "alpha") {
-                  alphaCreateCallbackReceived = true;
-                } else if (entry.note.fname === "beta") {
-                  betaCreateCallbackReceived = true;
+                  if (entry.note.fname === "alpha") {
+                    alphaCreateCallbackReceived = true;
+                  } else if (entry.note.fname === "beta") {
+                    betaCreateCallbackReceived = true;
+                  } else {
+                    done({
+                      message: `NoteChangeEntry with unexpected fname: ${entry.note.fname}`,
+                    });
+                    return;
+                  }
+                });
+
+                if (alphaCreateCallbackReceived && betaCreateCallbackReceived) {
+                  done();
                 } else {
                   done({
-                    message: `NoteChangeEntry with unexpected fname: ${entry.note.fname}`,
+                    message: `Did not receive updates for both alpha and beta note updates.`,
                   });
-                  return;
                 }
-              });
-
-              if (alphaCreateCallbackReceived && betaCreateCallbackReceived) {
-                done();
-              } else {
-                done({
-                  message: `Did not receive updates for both alpha and beta note updates.`,
-                });
+              } catch (err) {
+                done(err);
               }
-            } catch (err) {
-              done(err);
             }
-          });
+          );
 
           engineClient.bulkAddNotes({
             notes: [alpha, beta],
@@ -221,21 +229,23 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
           const fooUpdated = { ...engine.notes["foo"] };
           fooUpdated.title = "updated";
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(1);
-              const updatedEntry =
-                noteChangeEntries[0] as NoteChangeUpdateEntry;
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(1);
+                const updatedEntry =
+                  noteChangeEntries[0] as NoteChangeUpdateEntry;
 
-              expect(updatedEntry.status).toEqual("update");
-              expect(updatedEntry.note.title).toEqual("updated");
-              expect(updatedEntry.prevNote.title).toEqual("Foo");
+                expect(updatedEntry.status).toEqual("update");
+                expect(updatedEntry.note.title).toEqual("updated");
+                expect(updatedEntry.prevNote.title).toEqual("Foo");
 
-              done();
-            } catch (err) {
-              done(err);
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.updateNote(fooUpdated);
         },
@@ -257,21 +267,23 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
           // foo has one child in the ENGINE_HOOKS.setupBasic setup
           const foo = engine.notes["foo"];
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(1);
-              const updatedEntry =
-                noteChangeEntries[0] as NoteChangeUpdateEntry;
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(1);
+                const updatedEntry =
+                  noteChangeEntries[0] as NoteChangeUpdateEntry;
 
-              expect(updatedEntry.status).toEqual("update");
-              expect(updatedEntry.note.fname).toEqual("foo");
-              expect(updatedEntry.note.stub).toBeTruthy();
+                expect(updatedEntry.status).toEqual("update");
+                expect(updatedEntry.note.fname).toEqual("foo");
+                expect(updatedEntry.note.stub).toBeTruthy();
 
-              done();
-            } catch (err) {
-              done(err);
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.deleteNote(foo.id);
         },
@@ -293,32 +305,34 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
           // bar has no children in the ENGINE_HOOKS_MULTI.setupBasicMulti setup.
           const bar = engine.notes["bar"];
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              expect(noteChangeEntries.length).toEqual(2);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                expect(noteChangeEntries.length).toEqual(2);
 
-              noteChangeEntries.forEach((entry) => {
-                if (entry.status === "delete") {
-                  expect(entry.status).toEqual("delete");
-                  expect(entry.note.fname).toEqual(bar.fname);
-                } else if (entry.status === "update") {
-                  const updateEntry = entry as NoteChangeUpdateEntry;
+                noteChangeEntries.forEach((entry) => {
+                  if (entry.status === "delete") {
+                    expect(entry.status).toEqual("delete");
+                    expect(entry.note.fname).toEqual(bar.fname);
+                  } else if (entry.status === "update") {
+                    const updateEntry = entry as NoteChangeUpdateEntry;
 
-                  expect(updateEntry.note.fname).toEqual("root");
-                  expect(updateEntry.note.children.length).toEqual(1);
-                  expect(updateEntry.prevNote.children.length).toEqual(2);
-                } else {
-                  done({
-                    message: "Unexpectedly received a create NoteChangeEntry",
-                  });
-                }
-              });
+                    expect(updateEntry.note.fname).toEqual("root");
+                    expect(updateEntry.note.children.length).toEqual(1);
+                    expect(updateEntry.prevNote.children.length).toEqual(2);
+                  } else {
+                    done({
+                      message: "Unexpectedly received a create NoteChangeEntry",
+                    });
+                  }
+                });
 
-              done();
-            } catch (err) {
-              done(err);
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.deleteNote(bar.id);
         },
@@ -349,20 +363,22 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
           const engineClient = engine as DendronEngineClient;
           const bar = engine.notes["bar"];
 
-          engineClient.onNoteChanged((noteChangeEntries: NoteChangeEntry[]) => {
-            try {
-              noteChangeEntries.forEach((entry) => {
-                if (entry.status === "create") {
-                  expect(entry.note.fname).toEqual("cab");
-                } else if (entry.status === "delete") {
-                  expect(entry.note.fname).toEqual("bar");
-                }
-              });
-              done();
-            } catch (err) {
-              done(err);
+          engineClient.onEngineNoteStateChanged(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              try {
+                noteChangeEntries.forEach((entry) => {
+                  if (entry.status === "create") {
+                    expect(entry.note.fname).toEqual("cab");
+                  } else if (entry.status === "delete") {
+                    expect(entry.note.fname).toEqual("bar");
+                  }
+                });
+                done();
+              } catch (err) {
+                done(err);
+              }
             }
-          });
+          );
 
           engineClient.renameNote({
             oldLoc: { fname: bar.fname, vaultName: vaults[0].fsPath },

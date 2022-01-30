@@ -147,7 +147,13 @@ export class DendronEngineClient implements DEngineClient, EngineEvents {
     };
   }
 
-  get onNoteChanged(): Event<NoteChangeEntry[]> {
+  /**
+   * Event that fires upon the changing of note state in the engine after a set
+   * of NoteProps has been changed AND those changes have been reflected on the
+   * engine side. Note creation, deletion, and updates are all fired from this
+   * event.
+   */
+  get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
     return this._onNoteChangedEmitter.event;
   }
 

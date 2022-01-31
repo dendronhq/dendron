@@ -761,7 +761,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>  
 
 # Foo.One
 
@@ -774,18 +774,16 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+<div class=\\"portal-parent-fader-bottom\\"></div>  
 
 # Foo.Two
 
 blah
 
-</div>    
-</div>
+</div></div>
 Regular wikilink: [Two](foo.two.md)
 
-</div>    
-</div>
+</div></div>
 
 
 </div></div>
@@ -1030,40 +1028,13 @@ exports[`noteRefV2 common cases compile "MD_REGULAR: recursive" 1`] = `
 VFile {
   "contents": "# Root
 
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
-<a href=\\"foo.one\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
 # Foo.One
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
-<a href=\\"foo.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
 
 # Foo.Two
 
 blah
 
-</div>    
-</div>
 Regular wikilink: [Two](foo.two)
-
-</div>    
-</div>
 
 
 ",

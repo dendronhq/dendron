@@ -37,6 +37,7 @@ import { createDisposableLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
   FootnoteDefinition,
+  FrontmatterContent,
   Heading,
   Image,
   Link,
@@ -1045,6 +1046,10 @@ export class RemarkUtils {
 
   static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
     return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
+  }
+
+  static isFrontmatter(node: Node): node is FrontmatterContent {
+    return node.type === DendronASTTypes.FRONTMATTER;
   }
 
   static isNodeWithPosition<N extends Node>(

@@ -16,6 +16,35 @@ import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
 import type { NoteFNamesDict } from "../utils";
 
+export enum DendronASTDest {
+  MD_ENHANCED_PREVIEW = "MD_ENHANCED_PREVIEW",
+  MD_REGULAR = "MD_REGULAR",
+  MD_DENDRON = "MD_DENDRON",
+  HTML = "HTML",
+}
+
+/**
+ * If processor should run in an alternative flavor
+ */
+export enum ProcFlavor {
+  /**
+   * No special processing
+   */
+  REGULAR = "REGULAR",
+  /**
+   * Apply publishing rules
+   */
+  PUBLISHING = "PUBLISHING",
+  /**
+   * Apply preview rules
+   */
+  PREVIEW = "PREVIEW",
+  /**
+   * Apply hover preview rules (used for the preview when hovering over a link)
+   */
+  HOVER_PREVIEW = "HOVER_PREVIEW",
+}
+
 export enum ResponseCode {
   OK = 200,
   // 412
@@ -334,6 +363,10 @@ export type RenderNoteOpts = {
   id: string;
   /** Optionally, an entire note can be provided to be rendered. If provided, the engine won't look up the note by id and will instead render this note. */
   note?: NoteProps;
+  /** `HTML` by default. */
+  dest?: DendronASTDest;
+  /** `Preview` by default. */
+  flavor?: ProcFlavor;
 };
 
 export type RefreshNotesOpts = {

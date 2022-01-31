@@ -10,6 +10,7 @@ import {
   NoteProps,
   DateTime,
   ConfigUtils,
+  ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -47,6 +48,8 @@ import { extendedImage } from "./remark/extendedImage";
 import { WorkspaceService } from "../workspace";
 import { DateTimeFormatOptions } from "luxon";
 
+export { ProcFlavor };
+
 /**
  * What mode a processor should run in
  */
@@ -66,27 +69,6 @@ export enum ProcMode {
   IMPORT = "IMPORT",
 }
 
-/**
- * If processor should run in an alternative flavor
- */
-export enum ProcFlavor {
-  /**
-   * No special processing
-   */
-  REGULAR = "REGULAR",
-  /**
-   * Apply publishing rules
-   */
-  PUBLISHING = "PUBLISHING",
-  /**
-   * Apply preview rules
-   */
-  PREVIEW = "PREVIEW",
-  /**
-   * Apply hover preview rules (used for the preview when hovering over a link)
-   */
-  HOVER_PREVIEW = "HOVER_PREVIEW",
-}
 /**
  * Options for how processor should function
  */

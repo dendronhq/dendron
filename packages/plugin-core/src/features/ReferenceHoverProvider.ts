@@ -5,12 +5,12 @@ import {
   NoteUtils,
   VaultUtils,
   containsNonDendronUri,
+  DendronError,
 } from "@dendronhq/common-all";
 import { findNonNoteFile, vault2Path } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
-  MDUtilsV5,
   ProcFlavor,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -19,13 +19,14 @@ import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import {
   containsImageExt,
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { DendronExtension, getDWorkspace, getEngine } from "../workspace";
+import { DendronExtension } from "../workspace";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -37,9 +38,10 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>;
     vault?: DVault;
   }): Promise<string> {
+    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({
       vault: PickerUtilsV2.getVaultForOpenEditor(),
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot,
     });
     const fullPath = path.join(vpath, refAtPos.ref);
     const foundUri = Uri.file(fullPath);
@@ -71,7 +73,6 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       ? ` in vault "${refAtPos.vaultName}"`
       : "";
 
-    const config = getDWorkspace().config;
     const autoCreateOnDefinition =
       ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
     const ctrlClickToCreate = autoCreateOnDefinition ? "Ctrl+Click or " : "";
@@ -93,7 +94,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>,
     vault?: DVault
   ) {
-    const { vaults, wsRoot } = getDWorkspace();
+    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
     // This could be a non-note file
     // Could be a non-note file link
     const nonNoteFile = await findNonNoteFile({
@@ -124,7 +125,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         new vscode.Position(range.end.line, range.end.character - 2)
       );
 
-      const engine = getEngine();
+      const engine = ExtensionProvider.getEngine();
       let vault: DVault | undefined;
 
       if (refAtPos.vaultName) {
@@ -149,9 +150,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
 
       // Check if what's being referenced is a note.
       let note: NoteProps;
-      const maybeNotes = NoteUtils.getNotesByFname({
+      const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
         fname: refAtPos.ref,
-        notes: engine.notes,
+        engine,
         // If vault is specified, search only that vault. Otherwise search all vaults.
         vault,
       });
@@ -179,18 +180,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         note = maybeNotes[0];
       }
 
-      // For notes, let's use the noteRef functionality to render the referenced portion
-      const proc = MDUtilsV5.procRemarkFull(
-        {
-          dest: DendronASTDest.MD_REGULAR,
-          engine,
-          vault: note.vault,
-          fname: note.fname,
-        },
-        {
-          flavor: ProcFlavor.HOVER_PREVIEW,
-        }
-      );
+      // For notes, let's use the noteRef functionality to render the referenced portion.
       const referenceText = ["![["];
       if (refAtPos.vaultName)
         referenceText.push(`dendron://${refAtPos.vaultName}/`);
@@ -204,19 +194,43 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
           `:#${AnchorUtils.anchor2string(refAtPos.anchorEnd)}`
         );
       referenceText.push("]]");
-
-      try {
-        const reference = await proc.process(referenceText.join(""));
-        return new vscode.Hover(reference.toString(), hoverRange);
-      } catch (err) {
-        Logger.info({
+      const reference = referenceText.join("");
+      // now we create a fake note so we can pass this to the engine
+      const id = `note.id-${reference}`;
+      const fakeNote = NoteUtils.createForFake({
+        // Mostly same as the note...
+        fname: note.fname,
+        vault: note.vault,
+        // except the changed ID to avoid caching
+        id,
+        // And using the reference as the text of the note
+        contents: reference,
+      });
+      const rendered = await engine.renderNote({
+        id: fakeNote.id,
+        note: fakeNote,
+        dest: DendronASTDest.MD_REGULAR,
+        flavor: ProcFlavor.HOVER_PREVIEW,
+      });
+      if (rendered.error) {
+        const error =
+          rendered.error instanceof DendronError
+            ? rendered.error
+            : new DendronError({
+                message: "Error while rendering hover",
+                payload: rendered.error,
+              });
+        Sentry.captureException(error);
+        Logger.error({
           ctx,
-          referenceText: referenceText.join(""),
-          refAtPos,
-          err,
+          msg: "Error while rendering the hover",
+          error,
         });
-        return null;
       }
+      if (rendered.data) {
+        return new vscode.Hover(rendered.data, hoverRange);
+      }
+      return null;
     } catch (error) {
       Sentry.captureException(error);
       throw error;

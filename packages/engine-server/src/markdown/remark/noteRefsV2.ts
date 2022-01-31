@@ -32,13 +32,13 @@ import {
   NoteRefNoteRawV4,
   NoteRefNoteV4,
 } from "../types";
-import { MDUtilsV4, ParentWithIndex } from "../utils";
+import { ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import { MdastUtils, ProcFlavor } from "..";
+import { MdastUtils } from "..";
 
-const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
+const LINK_REGEX = /^!\[\[(.+?)\]\]/;
 
 type PluginOpts = CompilerOpts;
 
@@ -119,10 +119,10 @@ function attachParser(proc: Unified.Processor) {
       const link = LinkUtils.parseNoteRef(linkMatch);
       // If the link is same file [[#header]], it's implicitly to the same file it's located in
       if (link.from.fname === "")
-        link.from.fname = MDUtilsV4.getDendronData(proc).fname;
+        link.from.fname = MDUtilsV5.getProcData(proc).fname;
       const { value } = LinkUtils.parseLink(linkMatch);
 
-      let refNote: NoteRefNoteV4 = {
+      const refNote: NoteRefNoteV4 = {
         type: DendronASTTypes.REF_LINK_V2,
         data: {
           link,
@@ -143,7 +143,7 @@ function attachParser(proc: Unified.Processor) {
       if (procOpts?.mode === ProcMode.NO_DATA) {
         const link = LinkUtils.parseNoteRefRaw(linkMatch);
         const { value } = LinkUtils.parseLink(linkMatch);
-        let refNote: NoteRefNoteRawV4 = {
+        const refNote: NoteRefNoteRawV4 = {
           type: DendronASTTypes.REF_LINK_V2,
           data: {
             link,
@@ -155,9 +155,9 @@ function attachParser(proc: Unified.Processor) {
         const link = LinkUtils.parseNoteRef(linkMatch);
         // If the link is same file [[#header]], it's implicitly to the same file it's located in
         if (link.from?.fname === "")
-          link.from.fname = MDUtilsV4.getDendronData(proc).fname;
+          link.from.fname = MDUtilsV5.getProcData(proc).fname;
         const { value } = LinkUtils.parseLink(linkMatch);
-        let refNote: NoteRefNoteV4 = {
+        const refNote: NoteRefNoteV4 = {
           type: DendronASTTypes.REF_LINK_V2,
           data: {
             link,
@@ -190,10 +190,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
   const copts = _.defaults(opts || {}, {});
-  const { dest } = MDUtilsV4.getDendronData(proc);
+  const { dest } = MDUtilsV5.getProcData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function (node: NoteRefNoteV4) {
+    visitors.refLinkV2 = function refLinkV2(node: NoteRefNoteV4) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
@@ -243,13 +243,11 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   let data: string | undefined;
   const errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
-  const procOpts = MDUtilsV4.getProcOpts(proc);
-  const { shouldApplyPublishRules } = procOpts;
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  const dendronData = MDUtilsV4.getDendronData(proc);
-  const { dest, config, fname } = dendronData;
-  let { vault } = dendronData;
+  const procData = MDUtilsV5.getProcData(proc);
+  const { engine, noteRefLvl: refLvl, dest, config, fname } = procData;
+  let { vault } = procData;
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
@@ -323,10 +321,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
         note,
         link,
         refLvl: refLvl + 1,
-        proc: MDUtilsV4.setDendronData(proc(), {
-          overrides: { insertTitle: false },
-        }),
-        //proc,
+        proc,
         compilerOpts,
       });
       if (error) {
@@ -374,7 +369,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
       return msg;
     }
   });
-  return { error, data: out.join("\n") };
+  return { error: undefined, data: out.join("\n") };
 }
 
 export function convertNoteRefASTV2(
@@ -472,34 +467,29 @@ export function convertNoteRefASTV2(
       }
     } catch (err) {
       const msg = `Error rendering note reference for ${note?.fname}`;
-      return MDUtilsV4.genMDErrorMsg(msg);
+      return MdastUtils.genMDErrorMsg(msg);
     }
   }
 
   const errors: DendronError[] = [];
   const { link, proc, compilerOpts, procOpts } = opts;
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+  const procData = MDUtilsV5.getProcData(proc);
+  const { engine, noteRefLvl: refLvl } = procData;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
-      data: [MDUtilsV4.genMDErrorMsg("too many nested note refs")],
+      data: [MdastUtils.genMDErrorMsg("too many nested note refs")],
     };
   }
 
   // figure out configs that change how we process the note reference
-  const dendronData = MDUtilsV4.getDendronData(proc);
-  const { dest, config, vault: vaultFromProc, fname, vault } = dendronData;
-  let { shouldApplyPublishRules } = dendronData;
+  const { dest, config, vault: vaultFromProc, fname, vault } = procData;
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
 
   const { wikiLinkOpts } = compilerOpts;
   const siteConfig = ConfigUtils.getSite(config);
-
-  if (MDUtilsV5.isV5Active(proc)) {
-    shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
-  }
 
   // The note that contains this reference might override the pretty refs option for references inside it.
   const containingNote = NoteUtils.getNoteByFnameFromEngine({
@@ -523,7 +513,7 @@ export function convertNoteRefASTV2(
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     // wildcard reference case
-    const vault = dendronData.vault;
+    const vault = procData.vault;
     const resp = engine.queryNotesSync({
       qs: link.from.fname,
       originalQS: link.from.fname,
@@ -538,7 +528,7 @@ export function convertNoteRefASTV2(
     );
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
-      return { error, data: [MDUtilsV4.genMDErrorMsg(msg)] };
+      return { error: undefined, data: [MdastUtils.genMDErrorMsg(msg)] };
     }
 
     const processedRefs = noteRefs.map((ref) => {
@@ -553,11 +543,11 @@ export function convertNoteRefASTV2(
         note = file2Note(npath, vault as DVault);
       } catch (err) {
         const msg = `error reading file, ${npath}`;
-        return MDUtilsV4.genMDMsg(msg);
+        return MdastUtils.genMDMsg(msg);
       }
       return processRef(ref, note, fname);
     });
-    return { error, data: processedRefs };
+    return { error: undefined, data: processedRefs };
   } else {
     // single reference case.
     let note: NoteProps;
@@ -572,7 +562,10 @@ export function convertNoteRefASTV2(
 
     // check for edge cases
     if (resp.error) {
-      return { error, data: [MDUtilsV4.genMDErrorMsg(resp.error.message)] };
+      return {
+        error: undefined,
+        data: [MdastUtils.genMDErrorMsg(resp.error.message)],
+      };
     }
 
     // multiple results
@@ -580,9 +573,9 @@ export function convertNoteRefASTV2(
       // applying publish rules but no behavior defined for duplicate notes
       if (shouldApplyPublishRules && _.isUndefined(duplicateNoteConfig)) {
         return {
-          error,
+          error: undefined,
           data: [
-            MDUtilsV4.genMDErrorMsg(
+            MdastUtils.genMDErrorMsg(
               `Error rendering note reference. There are multiple notes with the name ${link.from.fname}. Please specify the vault prefix.`
             ),
           ],
@@ -602,9 +595,9 @@ export function convertNoteRefASTV2(
         });
         if (!maybeNote) {
           return {
-            error,
+            error: undefined,
             data: [
-              MDUtilsV4.genMDErrorMsg(
+              MdastUtils.genMDErrorMsg(
                 `Error rendering note reference for ${link.from.fname}`
               ),
             ],
@@ -632,7 +625,7 @@ export function convertNoteRefASTV2(
       const fname = note.fname;
       return processRef(ref, note, fname);
     });
-    return { error, data: processedRefs };
+    return { error: undefined, data: processedRefs };
   }
 }
 
@@ -644,6 +637,7 @@ function removeListItems({
   nodes: ParentWithIndex[];
   remove: "before-index" | "after-index";
 }): void {
+  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < nodes.length; i++) {
     const list = nodes[i];
     const listItem = nodes[i + 1];
@@ -688,6 +682,7 @@ function removeExceptSingleItem(nodes: ParentWithIndex[]) {
 /** If there are nested lists with a single item in them, replaces the outer single-item lists with the first multi-item list. */
 function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
   let outermost: ParentWithIndex | undefined;
+  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < nodes.length; i++) {
     const list = nodes[i];
     if (list.ancestor.type !== DendronASTTypes.LIST) continue;
@@ -816,16 +811,15 @@ function convertNoteRefHelperAST(
   const { proc, refLvl, link, note } = opts;
   let noteRefProc = proc();
   // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
-
-  const engine = MDUtilsV4.getEngineFromProc(noteRefProc).engine;
+  MDUtilsV5.setProcData(noteRefProc, {
+    fname: note.fname,
+    insideNoteRef: true,
+    vault: note.vault,
+  });
+  const engine = MDUtilsV5.getProcData(noteRefProc).engine;
   const wsRoot = engine.wsRoot;
   noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
-  MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
-
-  const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
-
-  const isV5Active = MDUtilsV5.isV5Active(proc);
+  MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
 
   const bodyAST: DendronASTNode = noteRefProc.parse(
     note.body
@@ -841,57 +835,29 @@ function convertNoteRefHelperAST(
     anchorEnd,
     bodyAST,
     makeErrorData: (anchorName, anchorType) => {
-      return MDUtilsV4.genMDMsg(`${anchorType} anchor ${anchorName} not found`);
+      return MdastUtils.genMDMsg(
+        `${anchorType} anchor ${anchorName} not found`
+      );
     },
   });
   if (data) return { data, error };
 
   // slice of interested range
   try {
-    let out = root(
+    const out = root(
       bodyAST.children.slice(
         (start ? start.index : 0) + anchorStartOffset,
         end ? end.index + 1 : undefined
       )
     );
-    const procFlavor = MDUtilsV5.getProcOpts(proc).flavor;
-    // Copy the current proc to preserve all options
-    let tmpProc = MDUtilsV4.procFull(procOpts);
-    // but change the fname and vault to the referenced note, since we're inside that note now
-    tmpProc = MDUtilsV4.setDendronData(tmpProc, {
-      insideNoteRef: true,
-      fname: note.fname,
-      vault: note.vault,
-    });
-    if (isV5Active) {
-      if (
-        procOpts.dest === DendronASTDest.HTML ||
-        procFlavor === ProcFlavor.HOVER_PREVIEW
-      ) {
-        tmpProc = MDUtilsV5.procRemarkFull(
-          {
-            ...MDUtilsV5.getProcData(proc),
-            insideNoteRef: true,
-            fname: note.fname,
-            vault: note.vault,
-          },
-          MDUtilsV5.getProcOpts(proc)
-        );
-      }
-    }
     // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
     // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
     out.children.push(...footnotes);
 
-    const { dest } = MDUtilsV4.getDendronData(tmpProc);
-    if (dest === DendronASTDest.HTML) {
-      const out3 = tmpProc.runSync(out) as Parent;
-      return { error: null, data: out3 };
-    } else {
-      const out2 = tmpProc.stringify(tmpProc.runSync(out));
-      out = tmpProc.parse(out2) as Parent;
-      return { error: null, data: out };
-    }
+    return {
+      error: null,
+      data: noteRefProc.runSync(out) as Parent,
+    };
   } catch (err) {
     console.log(
       JSON.stringify({
@@ -905,7 +871,7 @@ function convertNoteRefHelperAST(
         message: "error processing note ref",
         payload: err,
       }),
-      data: MDUtilsV4.genMDMsg("error processing ref"),
+      data: MdastUtils.genMDMsg("error processing ref"),
     };
   }
 }
@@ -916,8 +882,8 @@ function convertNoteRefHelper(
   const { body, proc, refLvl, link } = opts;
   const noteRefProc = proc();
   // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
-  MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
+  MDUtilsV5.setProcData(noteRefProc, { fname: link.from.fname });
+  MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
 
@@ -1110,7 +1076,7 @@ function renderPrettyAST(opts: {
   link?: string;
 }) {
   const { content, title, link } = opts;
-  let linkLine = _.isUndefined(link)
+  const linkLine = _.isUndefined(link)
     ? ""
     : `<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`;
   const top = `<div class="portal-container">

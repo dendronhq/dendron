@@ -195,6 +195,12 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
+  static setNoteRefLvl(proc: Processor, lvl: number) {
+    // backwards compatibility
+    MDUtilsV4.setNoteRefLvl(proc, lvl);
+    return this.setProcData(proc, { noteRefLvl: lvl });
+  }
+
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
     // TODO: for backwards compatibility

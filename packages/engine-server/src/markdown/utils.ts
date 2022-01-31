@@ -515,6 +515,14 @@ export class MDUtilsV4 {
 
 /** Contains functions that help dealing with MarkDown Abstract Syntax Trees. */
 export class MdastUtils {
+  static genMDMsg(msg: string): Parent {
+    return root(paragraph(text(msg)));
+  }
+
+  static genMDErrorMsg(msg: string): Parent {
+    return root(blockquote(text(msg)));
+  }
+
   /** Find the index of the list element for which the predicate `fn` returns true.
    *
    * @returns The index where the element was found, -1 otherwise.

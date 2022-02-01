@@ -304,7 +304,6 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
       wikiLinksOpts: { useId: true },
     });
     const text = `![[foo.md]]`;
-    debugger;
     return processText({ text, proc });
   },
   verifyFuncDict: {

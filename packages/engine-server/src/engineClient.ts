@@ -39,7 +39,6 @@ import {
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
-  ResponseUtil,
   RespRequired,
   RespV2,
   SchemaModuleDict,

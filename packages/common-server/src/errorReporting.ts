@@ -32,7 +32,11 @@ export function initializeSentry(environment: Stage): void {
   Sentry.init({
     dsn,
     defaultIntegrations: false,
-    tracesSampleRate: 1.0,
+    // Error stack trace sample rate: send all errors to sentry
+    sampleRate: 1.0,
+    // Transaction sample rate. Transactions are activities like page loads and api calls
+    // The configuration property name is a bit misleading. We don't use them right now.
+    tracesSampleRate: 0.0,
     enabled: true,
     environment,
     attachStacktrace: true,

@@ -781,12 +781,7 @@ describe("noteRefV2", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents,
-              match: ["01", "02", "03"],
-            })
-          ).toBeTruthy();
+          expect(resp).toMatchSnapshot();
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;

@@ -118,6 +118,23 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"vkqcjFr0BMpXjUPN1NVBF.html#^block\\">Root</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>

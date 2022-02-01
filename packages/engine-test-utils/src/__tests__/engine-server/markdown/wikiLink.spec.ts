@@ -1,5 +1,4 @@
 import {
-  AssertUtils,
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -240,12 +239,7 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ['<a href="', 'html#^block">Root</a>'],
-            })
-          ).toBeTruthy();
+          await checkVFile(resp, '<a href="', 'html#^block">Root</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;

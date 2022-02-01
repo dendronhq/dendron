@@ -206,10 +206,14 @@ describe("hashtag", () => {
               vault: note.vault,
             });
             const resp = await proc.process(`#color`);
-            await checkVFile(
-              resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>'
-            );
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>',
+                ],
+              })
+            ).toBeTruthy();
           },
           {
             expect,
@@ -235,11 +239,15 @@ describe("hashtag", () => {
               vault: note.vault,
             });
             const resp = await proc.process(`#color #uncolored`);
-            await checkVFile(
-              resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>',
-              '<a href="tags.uncolored.html">#uncolored</a>'
-            );
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>',
+                  '<a href="tags.uncolored.html">#uncolored</a>',
+                ],
+              })
+            ).toBeTruthy();
           },
           {
             expect,
@@ -277,10 +285,14 @@ describe("hashtag", () => {
               vault: note.vault,
             });
             const resp = await proc.process(`#parent.color`);
-            await checkVFile(
-              resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
-            );
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>',
+                ],
+              })
+            ).toBeTruthy();
           },
           {
             expect,
@@ -306,10 +318,14 @@ describe("hashtag", () => {
               vault: note.vault,
             });
             const resp = await proc.process(`#parent.color`);
-            await checkVFile(
-              resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
-            );
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>',
+                ],
+              })
+            ).toBeTruthy();
           },
           {
             expect,
@@ -340,10 +356,14 @@ describe("hashtag", () => {
               vault: note.vault,
             });
             const resp = await proc.process(`#parent.color`);
-            await checkVFile(
-              resp,
-              '<a class="color-tag" style="--tag-color: #00FF11;" href="tags.parent.color.html">#parent.color</a>'
-            );
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [
+                  '<a class="color-tag" style="--tag-color: #00FF11;" href="tags.parent.color.html">#parent.color</a>',
+                ],
+              })
+            ).toBeTruthy();
           },
           {
             expect,

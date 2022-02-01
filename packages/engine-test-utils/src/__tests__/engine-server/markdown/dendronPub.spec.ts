@@ -673,7 +673,12 @@ describe("dendronPub", () => {
           }).process("![[dupe]]");
           const dupNoteVaultPayload = engine.config.site.duplicateNoteBehavior
             ?.payload as string[];
-          await checkVFile(out, `dupe in ${dupNoteVaultPayload[0]}`);
+          expect(
+            AssertUtils.assertInString({
+              body: out.toString(),
+              match: [`dupe in ${dupNoteVaultPayload[0]}`],
+            })
+          );
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {

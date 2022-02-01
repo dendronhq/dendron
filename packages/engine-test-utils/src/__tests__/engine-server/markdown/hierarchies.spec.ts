@@ -3,10 +3,30 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  MDUtilsV5,
+  ProcDataFullOptsV5,
+} from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
+
+function procDendronForPublish(
+  opts: Omit<ProcDataFullOptsV5, "dest"> & {
+    noteIndex: NoteProps;
+    configOverride?: IntermediateDendronConfig;
+  }
+) {
+  const { engine, configOverride, fname, vault } = opts;
+  const proc = MDUtilsV5.procRehypeFull({
+    engine,
+    config: configOverride,
+    fname,
+    vault,
+  });
+  return proc;
+}
 
 describe("hierarchies", () => {
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
@@ -14,7 +34,7 @@ describe("hierarchies", () => {
     name: "BASIC",
     setupFunc: async ({ engine, vaults, extra }) => {
       if (extra.dest !== DendronASTDest.HTML) {
-        const proc = MDUtilsV4.procDendron({
+        const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           dest: extra.dest,
@@ -23,7 +43,7 @@ describe("hierarchies", () => {
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        const proc = MDUtilsV4.procDendronForPublish({
+        const proc = procDendronForPublish({
           engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
@@ -54,17 +74,17 @@ describe("hierarchies", () => {
         hierarchyDisplay: false,
       };
       if (extra.dest !== DendronASTDest.HTML) {
-        const proc = MDUtilsV4.procDendron({
+        const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
-          configOverride,
+          config: configOverride,
           dest: extra.dest,
           vault: vaults[0],
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        const proc = MDUtilsV4.procDendronForPublish({
+        const proc = procDendronForPublish({
           engine,
           configOverride,
           fname: "foo",
@@ -92,7 +112,7 @@ describe("hierarchies", () => {
     name: "NO_HIERARCHY_VIA_FM",
     setupFunc: async ({ engine, vaults, extra }) => {
       if (extra.dest !== DendronASTDest.HTML) {
-        const proc = MDUtilsV4.procDendron({
+        const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           dest: extra.dest,
@@ -101,7 +121,7 @@ describe("hierarchies", () => {
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        const proc = MDUtilsV4.procDendronForPublish({
+        const proc = procDendronForPublish({
           engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
@@ -141,17 +161,16 @@ describe("hierarchies", () => {
         hierarchyDisplayTitle: "Better Children",
       };
       if (extra.dest !== DendronASTDest.HTML) {
-        const proc = MDUtilsV4.procDendron({
+        const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
-          configOverride,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        const proc = MDUtilsV4.procDendronForPublish({
+        const proc = procDendronForPublish({
           engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
@@ -179,7 +198,7 @@ describe("hierarchies", () => {
     name: "SKIP_LEVELS",
     setupFunc: async ({ engine, vaults, extra }) => {
       if (extra.dest !== DendronASTDest.HTML) {
-        const proc = MDUtilsV4.procDendron({
+        const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "daily",
           dest: extra.dest,
@@ -188,7 +207,7 @@ describe("hierarchies", () => {
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
       } else {
-        const proc = MDUtilsV4.procDendronForPublish({
+        const proc = procDendronForPublish({
           engine,
           fname: "daily",
           noteIndex: engine.notes["daily"],

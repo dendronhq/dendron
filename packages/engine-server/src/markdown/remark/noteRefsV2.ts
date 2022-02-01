@@ -11,18 +11,18 @@ import {
   getSlugger,
   isBlockAnchor,
   NoteProps,
-  NotePropsDict,
   NoteUtils,
   RespV2,
   VaultUtils,
   ConfigUtils,
+  DEngineClient,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { RemarkUtils } from "../remark";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
-import Unified, { Plugin } from "unified";
+import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
 import {
@@ -36,7 +36,7 @@ import { ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import { MdastUtils } from "..";
+import { MdastUtils, MDUtilsV4 } from "..";
 
 const LINK_REGEX = /^!\[\[(.+?)\]\]/;
 
@@ -70,12 +70,12 @@ const tryGetNotes = ({
   fname,
   vname,
   vaults,
-  notes,
+  engine,
 }: {
   fname: string;
   vname?: string;
   vaults: DVault[];
-  notes: NotePropsDict;
+  engine: DEngineClient;
 }) => {
   const maybeVault = vname
     ? VaultUtils.getVaultByName({
@@ -83,9 +83,9 @@ const tryGetNotes = ({
         vname,
       })
     : undefined;
-  const maybeNotes = NoteUtils.getNotesByFname({
+  const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
     fname,
-    notes,
+    engine,
     vault: maybeVault,
   });
   if (maybeNotes.length === 0) {
@@ -244,7 +244,9 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   const errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
-  const { engine, noteRefLvl: refLvl, dest, config, fname } = procData;
+  const { noteRefLvl: refLvl, dest, config, fname } = procData;
+  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
+  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
   let { vault } = procData;
   const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
 
@@ -331,11 +333,10 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
         let suffix = "";
         let href = wikiLinkOpts?.useId ? note.id : fname;
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtils.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameFromEngine({
             fname,
-            notes: engine.notes,
+            engine,
             vault,
-            wsRoot: engine.wsRoot,
           });
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
@@ -474,7 +475,9 @@ export function convertNoteRefASTV2(
   const errors: DendronError[] = [];
   const { link, proc, compilerOpts, procOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
-  const { engine, noteRefLvl: refLvl } = procData;
+  const { noteRefLvl: refLvl } = procData;
+  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
+  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -486,7 +489,10 @@ export function convertNoteRefASTV2(
 
   // figure out configs that change how we process the note reference
   const { dest, config, vault: vaultFromProc, fname, vault } = procData;
-  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
+  const shouldApplyPublishRules =
+    MDUtilsV5.shouldApplyPublishingRules(proc) ||
+    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
 
   const { wikiLinkOpts } = compilerOpts;
   const siteConfig = ConfigUtils.getSite(config);
@@ -557,7 +563,7 @@ export function convertNoteRefASTV2(
       fname,
       vname,
       vaults: engine.vaults,
-      notes: engine.notes,
+      engine,
     });
 
     // check for edge cases
@@ -809,14 +815,38 @@ function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
-  let noteRefProc = proc();
-  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-  MDUtilsV5.setProcData(noteRefProc, {
-    fname: note.fname,
-    insideNoteRef: true,
-    vault: note.vault,
-  });
-  const engine = MDUtilsV5.getProcData(noteRefProc).engine;
+  const { dest } = MDUtilsV5.getProcData(proc);
+  let noteRefProc: Processor;
+  // Workaround until all usages of MDUtilsV4 are removed
+  const engine =
+    MDUtilsV5.getProcData(proc).engine ||
+    MDUtilsV4.getEngineFromProc(proc).engine;
+  if (dest === DendronASTDest.HTML) {
+    // For HTML, we need to make sure that we don't use a processor with HTML
+    // target. Otherwise as we process recursive references, the HTML output
+    // from deeper levels is broken (everything gets converted into `<div>`s for
+    // some reason)
+    noteRefProc = MDUtilsV5.procRemarkFull(
+      {
+        ...MDUtilsV5.getProcData(proc),
+        insideNoteRef: true,
+        fname: note.fname,
+        vault: note.vault,
+        engine,
+      },
+      MDUtilsV5.getProcOpts(proc)
+    );
+  } else {
+    // Otherwise, just clone the existing proc instead of creating a new one.
+    // This will largely preserve existing opts, we just need to change a few.
+    noteRefProc = proc();
+    // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
+    MDUtilsV5.setProcData(noteRefProc, {
+      fname: note.fname,
+      insideNoteRef: true,
+      vault: note.vault,
+    });
+  }
   const wsRoot = engine.wsRoot;
   noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
   MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
@@ -854,9 +884,10 @@ function convertNoteRefHelperAST(
     // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
     out.children.push(...footnotes);
 
+    const data = noteRefProc.runSync(out) as Parent;
     return {
       error: null,
-      data: noteRefProc.runSync(out) as Parent,
+      data,
     };
   } catch (err) {
     console.log(

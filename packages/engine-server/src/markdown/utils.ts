@@ -137,14 +137,6 @@ type VisitorParentsIndices = ({
 
 /** @deprecated Please use {@link MDUtilsV5} instead. */
 export class MDUtilsV4 {
-  static genMDMsg(msg: string): Parent {
-    return root(paragraph(text(msg)));
-  }
-
-  static genMDErrorMsg(msg: string): Parent {
-    return root(blockquote(text(msg)));
-  }
-
   static getDendronData(proc: Processor) {
     return proc.data("dendron") as DendronASTData;
   }
@@ -494,20 +486,6 @@ export class MDUtilsV4 {
       fname,
       dest,
       vault,
-    });
-    return proc;
-  }
-
-  static procDendronForPublish(
-    opts: Omit<ProcDendron, "dest"> & { noteIndex: NoteProps }
-  ) {
-    const { engine, configOverride, fname, vault, noteIndex } = opts;
-    const proc = MDUtilsV4.procHTML({
-      engine,
-      config: configOverride,
-      fname,
-      vault,
-      noteIndex,
     });
     return proc;
   }

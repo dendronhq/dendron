@@ -67,10 +67,14 @@ function footnoteDef2html(definition: FootnoteDefinition) {
 // eslint-disable-next-line func-names
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
-  const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
-  let hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
-    ? true
-    : opts?.hierarchyDisplay;
+  const { config } = MDUtilsV5.getProcData(this);
+  // MDUtilsV4 explicitly passes these options in, while MDUtilsV5 relies on the config. We need to check both here for now.
+  const hierarchyDisplayTitle =
+    opts?.hierarchyDisplayTitle || config?.hierarchyDisplayTitle || "Children";
+  let hierarchyDisplay: undefined | boolean = opts?.hierarchyDisplay;
+  if (hierarchyDisplay === undefined)
+    hierarchyDisplay = config?.hierarchyDisplay;
+  if (hierarchyDisplay === undefined) hierarchyDisplay = true;
 
   function transformer(tree: Node): void {
     const root = tree as Root;

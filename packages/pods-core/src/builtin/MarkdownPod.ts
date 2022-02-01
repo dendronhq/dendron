@@ -13,7 +13,6 @@ import {
   DendronASTTypes,
   Image,
   Link,
-  MDUtilsV4,
   MDUtilsV5,
   RemarkUtils,
   selectAll,
@@ -540,7 +539,8 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note, config, dendronConfig } = opts;
     const { wikiLinkToURL = false } = config;
-    let remark = MDUtilsV4.procFull({
+    debugger;
+    let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...engine.config,
@@ -549,8 +549,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine,
       fname: note.fname,
       vault: note.vault,
-      shouldApplyPublishRules: false,
-      blockAnchorsOpts: { hideBlockAnchors: true },
+      hideBlockAnchors: true,
     });
     if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
       remark = remark.use(

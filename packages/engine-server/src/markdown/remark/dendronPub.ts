@@ -193,6 +193,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
+        // If the target is Dendron, no processing of links is needed
+        if (dest === DendronASTDest.MD_DENDRON) return;
         const _node = node as WikiLinkNoteV4;
         // @ts-ignore
         let value = node.value as string;
@@ -344,6 +346,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {
+        // If the target is Dendron, no processing of refs is needed
+        if (dest === DendronASTDest.MD_DENDRON) return;
         // we have custom compiler for markdown to handle note ref
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOptsV2 = {
@@ -366,16 +370,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         // no transform
-        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
+        if (
+          dest === DendronASTDest.MD_ENHANCED_PREVIEW ||
+          dest === DendronASTDest.MD_REGULAR
+        ) {
           return;
         }
-        const procOpts = MDUtilsV4.getProcOpts(proc);
-        // Markdown publish pod still relies on this
-        if (procOpts.blockAnchorsOpts?.hideBlockAnchors) return;
-        const anchorHTML = blockAnchor2html(
-          node as BlockAnchor,
-          procOpts.blockAnchorsOpts
-        );
+        const anchorHTML = blockAnchor2html(node as BlockAnchor);
         let target: Node | undefined;
         const grandParent = ancestors[ancestors.length - 2];
         if (

@@ -3,9 +3,9 @@ import { DendronError } from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { BlockAnchor, DendronASTDest } from "../types";
-import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
 import { html } from "mdast-builder";
+import { MDUtilsV5 } from "..";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
@@ -71,19 +71,20 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "blockAnchor");
 }
 
-function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
+function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
 
   if (visitors) {
     visitors.blockAnchor = function (node: BlockAnchor): string | Element {
-      const { dest } = MDUtilsV4.getDendronData(proc);
+      const { dest } = MDUtilsV5.getProcData(proc);
       const fullId = node.id;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
           return fullId;
         case DendronASTDest.MD_REGULAR:
-          return opts?.hideBlockAnchors ? "" : fullId;
+          // Regular markdown has no concept of anchors, so best to strip it out
+          return "";
         case DendronASTDest.MD_ENHANCED_PREVIEW:
           return `<a aria-hidden="true" class="block-anchor anchor-heading" id="${fullId}" href="#${fullId}">^${fullId}</a>`;
         default:

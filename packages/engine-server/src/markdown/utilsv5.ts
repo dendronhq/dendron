@@ -35,9 +35,9 @@ import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
 import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
-import { dendronPub } from "./remark/dendronPub";
+import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
-import { wikiLinks } from "./remark/wikiLinks";
+import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
@@ -112,6 +112,8 @@ export type ProcDataFullOptsV5 = {
    * frontmatter variables exposed for substitution
    */
   fm?: any;
+  wikiLinksOpts?: WikiLinksOpts;
+  publishOpts?: DendronPubOpts;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -264,7 +266,7 @@ export class MDUtilsV5 {
       .use(abbrPlugin)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
       .use(noteRefsV2)
-      .use(wikiLinks)
+      .use(wikiLinks, data.wikiLinksOpts)
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
@@ -348,6 +350,7 @@ export class MDUtilsV5 {
           proc = proc.use(dendronPub, {
             insertTitle,
             transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
+            ...data.publishOpts,
           });
 
           const config = data.config as IntermediateDendronConfig;

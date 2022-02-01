@@ -2,7 +2,9 @@
 
 exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 1`] = `
 VFile {
-  "contents": "((foo))
+  "contents": "# Foo
+
+((foo))
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -14,7 +16,9 @@ VFile {
 
 exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 2`] = `
 VFile {
-  "contents": "((foo))
+  "contents": "# Foo
+
+((foo))
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -26,24 +30,24 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"/undefined/foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header2\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header2</h2>
+<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\">Header2</h2>
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -54,24 +58,24 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: WITH_ANCHOR" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"/undefined/foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header2\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header2</h2>
+<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\">Header2</h2>
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -82,24 +86,24 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: WITH_NOTE_LINK_TITLE" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header2\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header2</h2>
+<div class=\\"portal-parent-fader-bottom\\"></div><h2 id=\\"header2\\">Header2</h2>
 <p>task2</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -116,7 +120,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-
+<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -149,7 +153,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
-<a href=\\"two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -181,7 +185,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -190,7 +194,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
-<a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.one-id\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -201,7 +205,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
-<a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -242,7 +246,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -274,7 +278,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -300,12 +304,12 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: tags section shouldn't be included in references" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -315,7 +319,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -326,12 +330,12 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: tags section shouldn't be included in references" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -341,7 +345,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -352,12 +356,12 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: tags section shouldn't be included in references" 3`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -367,7 +371,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -378,23 +382,23 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: wildcard without a following header" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"reprehenderit\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#reprehenderit\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"reprehenderit\\">Reprehenderit</h1>
 <p>Sapiente sed accusamus eum.</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -405,23 +409,23 @@ VFile {
 
 exports[`noteRefV2 common cases compile "HTML: wildcard without a following header" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"reprehenderit\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#reprehenderit\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Reprehenderit</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"reprehenderit\\">Reprehenderit</h1>
 <p>Sapiente sed accusamus eum.</p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -438,7 +442,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
-<a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"9PWiDMWFaN0S0xRSknl7A\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -450,7 +454,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
-<a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"Cz36NVIxADFE7S4h2KYW3\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -462,7 +466,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
-<a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"xqF5jLyKelWX54vZztajJ\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -488,7 +492,9 @@ VFile {
 
 exports[`noteRefV2 common cases compile "MD_DENDRON: WITH_PUBLISHING" 1`] = `
 VFile {
-  "contents": "![[dendron://vault1/bar]]
+  "contents": "# Root
+
+![[dendron://vault1/bar]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -500,7 +506,9 @@ VFile {
 
 exports[`noteRefV2 common cases compile "MD_DENDRON: XVAULT_CASE" 1`] = `
 VFile {
-  "contents": "![[dendron://vault2/two]]
+  "contents": "# Root
+
+![[dendron://vault2/two]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -512,7 +520,9 @@ VFile {
 
 exports[`noteRefV2 common cases compile "MD_DENDRON: recursive" 1`] = `
 VFile {
-  "contents": "![[foo]]
+  "contents": "# Root
+
+![[foo]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -524,7 +534,9 @@ VFile {
 
 exports[`noteRefV2 common cases compile "MD_DENDRON: regular" 1`] = `
 VFile {
-  "contents": "![[foo]]
+  "contents": "# Foo
+
+![[foo]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -536,7 +548,9 @@ VFile {
 
 exports[`noteRefV2 common cases compile "MD_DENDRON: wildcard" 1`] = `
 VFile {
-  "contents": "![[journal.2020.08.*]]
+  "contents": "# Root
+
+![[journal.2020.08.*]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -763,6 +777,7 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>  
 
+
 # Foo.One
 
 <div class=\\"portal-container\\">
@@ -776,12 +791,15 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>  
 
+
 # Foo.Two
 
 blah
 
+
 </div></div>
 Regular wikilink: [Two](foo.two.md)
+
 
 </div></div>
 
@@ -1034,7 +1052,9 @@ VFile {
 
 blah
 
+
 Regular wikilink: [Two](foo.two)
+
 
 
 ",
@@ -1126,13 +1146,13 @@ journal3
 
 exports[`noteRefV2 with block anchors compile "HTML: a reference inside a reference" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1142,7 +1162,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1155,7 +1175,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1166,13 +1186,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: a reference inside a reference" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1182,7 +1202,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1195,7 +1215,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1206,13 +1226,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: a reference inside a reference, all using same file references" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1222,7 +1242,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1235,7 +1255,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1246,13 +1266,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: a reference inside a reference, all using same file references" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1262,7 +1282,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1275,7 +1295,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1286,13 +1306,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: a single top level list" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1304,7 +1324,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1315,13 +1335,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: a single top level list" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1333,7 +1353,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1344,13 +1364,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after a paragraph block" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1361,7 +1381,7 @@ Sint minus fuga omnis non.</p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1372,13 +1392,13 @@ Sint minus fuga omnis non.</p>
 
 exports[`noteRefV2 with block anchors compile "HTML: after a paragraph block" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1389,7 +1409,7 @@ Sint minus fuga omnis non.</p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1400,13 +1420,13 @@ Sint minus fuga omnis non.</p>
 
 exports[`noteRefV2 with block anchors compile "HTML: after list block" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1419,7 +1439,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1430,13 +1450,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after list block" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1449,7 +1469,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1460,13 +1480,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after table block" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1493,7 +1513,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1504,13 +1524,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after table block" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1537,7 +1557,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1548,13 +1568,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after table" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1581,7 +1601,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1592,13 +1612,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: after table" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1625,7 +1645,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1636,13 +1656,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: immediately after a paragraph" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1654,7 +1674,7 @@ Sint minus fuga omnis non.
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1665,13 +1685,13 @@ Sint minus fuga omnis non.
 
 exports[`noteRefV2 with block anchors compile "HTML: immediately after a paragraph" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1683,7 +1703,7 @@ Sint minus fuga omnis non.
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1694,13 +1714,13 @@ Sint minus fuga omnis non.
 
 exports[`noteRefV2 with block anchors compile "HTML: immediately after last list element" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1713,7 +1733,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1724,13 +1744,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: immediately after last list element" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1743,7 +1763,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1754,13 +1774,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: in paragraph" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1771,7 +1791,7 @@ Sint minus fuga omnis non. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1782,13 +1802,13 @@ Sint minus fuga omnis non. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: in paragraph" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1799,7 +1819,7 @@ Sint minus fuga omnis non. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1810,13 +1830,13 @@ Sint minus fuga omnis non. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: in table" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1843,7 +1863,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1854,13 +1874,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: in table" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1887,7 +1907,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1898,13 +1918,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: list element" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1916,7 +1936,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1927,13 +1947,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: list element" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1945,7 +1965,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1956,13 +1976,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item without children" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -1974,7 +1994,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -1985,13 +2005,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: nested list element targeting a single item without children" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2003,7 +2023,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2014,13 +2034,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: nested list element" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2032,7 +2052,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2043,13 +2063,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: nested list element" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2061,7 +2081,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2072,13 +2092,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range across multiple lists" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2095,7 +2115,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2106,13 +2126,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range across multiple lists" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2129,7 +2149,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2140,13 +2160,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a block anchor to a header" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2157,7 +2177,7 @@ Sapiente sed accusamus eum. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2168,13 +2188,13 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a block anchor to a header" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2185,7 +2205,7 @@ Sapiente sed accusamus eum. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2196,25 +2216,25 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a header to a block anchor" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2225,25 +2245,25 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a header to a block anchor" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^end\\" href=\\"#^end\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Sint minus fuga omnis non.
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2254,13 +2274,13 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a list to a paragraph" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2275,7 +2295,7 @@ Sint minus fuga omnis non. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2286,13 +2306,13 @@ Sint minus fuga omnis non. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a list to a paragraph" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2307,7 +2327,7 @@ Sint minus fuga omnis non. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2318,13 +2338,13 @@ Sint minus fuga omnis non. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a paragraph to a list" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2339,7 +2359,7 @@ Sapiente sed accusamus eum. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2350,13 +2370,13 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range from a paragraph to a list" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2371,7 +2391,7 @@ Sapiente sed accusamus eum. </p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2382,13 +2402,13 @@ Sapiente sed accusamus eum. </p>
 
 exports[`noteRefV2 with block anchors compile "HTML: range that has an invalid end block anchor" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2398,7 +2418,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2409,13 +2429,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range that has an invalid end block anchor" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2425,7 +2445,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2436,13 +2456,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range that has an invalid start block anchor" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2452,7 +2472,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2463,13 +2483,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range that has an invalid start block anchor" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2479,7 +2499,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2490,13 +2510,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range within list" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2510,7 +2530,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2521,13 +2541,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range within list" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2541,7 +2561,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2552,13 +2572,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range within nested lists" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2579,7 +2599,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2590,13 +2610,13 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: range within nested lists" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"foo-bar\\">Foo Bar</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -2617,7 +2637,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -2628,23 +2648,23 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: with footnotes" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"illum-nostrum\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#illum-nostrum\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Illum Nostrum</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"illum-nostrum\\">Illum Nostrum</h1>
 <p>Illum in aut eos voluptas nostrum possimus commodi. <a id=\\"fnref-quo\\" class=\\"fnref\\" href=\\"#fn-quo\\">quo</a></p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
 <p>Laborum libero quia ducimus.</p>
 <p>Iure neque alias dolorem. <a id=\\"fnref-minus\\" class=\\"fnref\\" href=\\"#fn-minus\\">minus</a></p>
 <hr>
-<h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-minus\\" style=\\"width: 0; height: 0;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
 </ol>
@@ -2652,9 +2672,9 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>
-<h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<h2 id=\\"footnotes-1\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-quo\\" style=\\"width: 0; height: 0;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
 </ol>",
@@ -2667,23 +2687,23 @@ VFile {
 
 exports[`noteRefV2 with block anchors compile "HTML: with footnotes" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"illum-nostrum\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#illum-nostrum\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Illum Nostrum</h1>
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<h1 id=\\"illum-nostrum\\">Illum Nostrum</h1>
 <p>Illum in aut eos voluptas nostrum possimus commodi. <a id=\\"fnref-quo\\" class=\\"fnref\\" href=\\"#fn-quo\\">quo</a></p>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.ch1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#start\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>start</h1>
+<div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
 <p>Laborum libero quia ducimus.</p>
 <p>Iure neque alias dolorem. <a id=\\"fnref-minus\\" class=\\"fnref\\" href=\\"#fn-minus\\">minus</a></p>
 <hr>
-<h2 id=\\"footnotes\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-minus\\" style=\\"width: 0; height: 0;\\"></span><p>Et porro minus facilis qui.<a class=\\"fn\\" href=\\"#fnref-minus\\">˄</a></p></li>
 </ol>
@@ -2691,9 +2711,9 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>
-<h2 id=\\"footnotes-1\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footnotes-1\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Footnotes</h2>
+<h2 id=\\"footnotes-1\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-quo\\" style=\\"width: 0; height: 0;\\"></span><p>Id et velit ducimus quo ut.<a class=\\"fn\\" href=\\"#fnref-quo\\">˄</a></p></li>
 </ol>",

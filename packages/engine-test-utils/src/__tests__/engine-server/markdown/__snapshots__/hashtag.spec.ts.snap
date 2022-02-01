@@ -24,12 +24,12 @@ VFile {
 
 exports[`hashtag rendering colors overrides color cascading from parent 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #00FF11;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"fA0xmg315yNpAWTvNxCoH.html\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -40,12 +40,12 @@ VFile {
 
 exports[`hashtag rendering colors when configured with noRandomlyGeneratedColors, only uses explicit colors 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color.html\\">#color</a> <a href=\\"tags.uncolored.html\\">#uncolored</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"WklDiSsE1sYVZgedOCotl.html\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -56,12 +56,12 @@ VFile {
 
 exports[`hashtag rendering colors with color 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color.html\\">#color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"mRyebnQbvBnOZQDiHh8sd.html\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -72,12 +72,12 @@ VFile {
 
 exports[`hashtag rendering colors with color cascading from parent, self exists 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"z2IoVTqaUB3zpazwv2PkE.html\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -88,12 +88,12 @@ VFile {
 
 exports[`hashtag rendering colors with color cascading from parent, self missing 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"af1Cvl0muwR8cROktWrFz.html\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -104,7 +104,7 @@ VFile {
 
 exports[`hashtag rendering compile "HTML: inside a link" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>
 <hr>
 <strong>Children</strong>
@@ -121,7 +121,7 @@ VFile {
 
 exports[`hashtag rendering compile "HTML: inside a link" 2`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>
 <hr>
 <strong>Children</strong>
@@ -138,7 +138,7 @@ VFile {
 
 exports[`hashtag rendering compile "HTML: simple" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"tags.my-hash.tag0.html\\">#my-hash.tag0</a></p>
 <hr>
 <strong>Children</strong>

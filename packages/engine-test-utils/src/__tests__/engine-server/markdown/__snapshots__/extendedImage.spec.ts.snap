@@ -2,7 +2,7 @@
 
 exports[`extendedImage rendering compile "HTML: multiple style props" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;max-height:400px;opacity:0.8;\\"></p>
 <hr>
 <strong>Children</strong>
@@ -19,7 +19,7 @@ VFile {
 
 exports[`extendedImage rendering compile "HTML: no alt" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><img src=\\"/assets/image.png\\" style=\\"width:50%;\\"></p>
 <hr>
 <strong>Children</strong>
@@ -36,7 +36,7 @@ VFile {
 
 exports[`extendedImage rendering compile "HTML: single style prop" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;\\"></p>
 <hr>
 <strong>Children</strong>
@@ -53,7 +53,9 @@ VFile {
 
 exports[`extendedImage rendering compile "MD_DENDRON: multiple style props" 1`] = `
 VFile {
-  "contents": "![alt text](/assets/image.png){width: 50%, max-height: 400px, opacity: 0.8}
+  "contents": "# Root
+
+![alt text](/assets/image.png){width: 50%, max-height: 400px, opacity: 0.8}
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -65,7 +67,9 @@ VFile {
 
 exports[`extendedImage rendering compile "MD_DENDRON: no alt" 1`] = `
 VFile {
-  "contents": "![](/assets/image.png){width: 50%}
+  "contents": "# Root
+
+![](/assets/image.png){width: 50%}
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -77,7 +81,9 @@ VFile {
 
 exports[`extendedImage rendering compile "MD_DENDRON: single style prop" 1`] = `
 VFile {
-  "contents": "![alt text](/assets/image.png){width: 50%}
+  "contents": "# Root
+
+![alt text](/assets/image.png){width: 50%}
 
 ",
   "cwd": "<PROJECT_ROOT>",

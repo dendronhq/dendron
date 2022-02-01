@@ -21,7 +21,7 @@ function proc(
   dendron: DendronASTData,
   opts?: DendronPubOpts
 ) {
-  return MDUtilsV4.procFull({
+  return MDUtilsV5.procRehypeFull({
     engine,
     ...dendron,
     publishOpts: opts,
@@ -173,7 +173,7 @@ describe("dendronPub", () => {
           assetsPrefix: "bond/",
         }
       ).processSync(`![alt-text](image-url.jpg)`);
-      await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
+      await checkVFile(out, '<img src="image-url.jpg" alt="alt-text">');
     });
 
     testWithEngine(
@@ -191,7 +191,7 @@ describe("dendronPub", () => {
             assetsPrefix: "/bond/",
           }
         ).processSync(`![alt-text](/image-url.jpg)`);
-        await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
+        await checkVFile(out, '<img src="/image-url.jpg" alt="alt-text">');
       }
     );
   });
@@ -361,7 +361,7 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[foo]]");
-          await checkVFile(out, 'a href="foo.html');
+          await checkVFile(out, 'a href="foo"');
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {
@@ -390,12 +390,7 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[foo1]]\n![[foo2]]\n![[foo3]]");
-          await checkVFile(
-            out,
-            'a href="foo1.html',
-            'a href="foo2.html',
-            'a href="foo3.html'
-          );
+          await checkVFile(out, 'a href="foo1', 'a href="foo2', 'a href="foo3');
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {
@@ -434,7 +429,7 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[foo1]] ![[foo2]]");
-          await checkVFile(out, 'a href="foo1.html', 'a href="foo2.html');
+          await checkVFile(out, 'a href="foo1', 'a href="foo2');
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {
@@ -600,8 +595,8 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[bar.*]]");
-          await checkVFile(out, 'a href="bar.one.html');
-          await checkVFile(out, 'a href="bar.two.html');
+          await checkVFile(out, 'a href="bar.one');
+          await checkVFile(out, 'a href="bar.two');
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {

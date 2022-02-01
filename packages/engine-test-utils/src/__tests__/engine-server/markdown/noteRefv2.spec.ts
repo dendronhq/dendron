@@ -8,7 +8,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
+import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
@@ -58,7 +58,7 @@ describe("legacy note ref", () => {
   const BAD_REF = createProcTests({
     name: "BAD_REF",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = await MDUtilsV4.procFull({
+      const proc2 = MDUtilsV5.procRemarkFull({
         config: {
           ...engine.config,
         },
@@ -91,7 +91,7 @@ describe("noteRefV2", () => {
     const REGULAR_CASE = createProcTests({
       name: "regular",
       setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = await MDUtilsV4.procFull({
+        const proc2 = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           wikiLinksOpts: { useId: true },
@@ -130,7 +130,7 @@ describe("noteRefV2", () => {
           expect(resp).toMatchSnapshot();
           await checkVFile(
             resp,
-            `<a href="foo.html" class="portal-arrow">Go to text <span class="right-arrow">`
+            `<a href="foo" class="portal-arrow">Go to text <span class="right-arrow">`
           );
           return [];
         },
@@ -355,7 +355,7 @@ describe("noteRefV2", () => {
       },
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
-        return await processNote({
+        return processNote({
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -639,7 +639,7 @@ describe("noteRefV2", () => {
     const RECURSIVE_TEST_CASES = createProcTests({
       name: "recursive",
       setupFunc: async ({ engine, extra, vaults }) => {
-        const resp = await MDUtilsV4.procFull({
+        const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
@@ -666,6 +666,7 @@ describe("noteRefV2", () => {
               actual: await AssertUtils.assertInString({
                 body: resp.toString(),
                 match: ["# Foo", "# Foo.One", "# Foo.Two", "Regular wikilink"],
+                nomatch: ["portal-container"],
               }),
               expected: true,
             },
@@ -710,7 +711,7 @@ describe("noteRefV2", () => {
     // const RECURSIVE_TOO_DEEP_TEST_CASES = createProcTests({
     //   name: "RECURSIVE_TOO_DEEP_TEST_CASES",
     //   setupFunc: async ({ engine, extra, vaults }) => {
-    //     const resp = await MDUtilsV4.procFull({
+    //     const resp = MDUtilsV5.procRemarkFull({
     //       engine,
     //       dest: extra.dest,
     //       vault: vaults[0],
@@ -749,7 +750,7 @@ describe("noteRefV2", () => {
       name: "wildcard",
       setupFunc: async ({ engine, extra, vaults }) => {
         const note = engine.notes["id.journal"];
-        const resp = await MDUtilsV4.procFull({
+        const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
@@ -793,7 +794,7 @@ describe("noteRefV2", () => {
       name: "XVAULT_CASE",
       setupFunc: async ({ engine, extra, vaults }) => {
         const note = engine.notes["one"];
-        const resp = await MDUtilsV4.procFull({
+        const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
@@ -867,7 +868,7 @@ describe("noteRefV2", () => {
       name: "WITH_PUBLISHING",
       setupFunc: async ({ engine, extra, vaults }) => {
         const note = engine.notes["foo"];
-        const resp = await MDUtilsV4.procFull({
+        const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],

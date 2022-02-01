@@ -4,7 +4,6 @@ import {
   DVault,
   SchemaOpts,
   NoteProps,
-  SchemaTemplate,
 } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
@@ -106,7 +105,6 @@ describe(`SchemaUtil tests:`, () => {
     const noteFactory: TestNoteFactory =
       TestNoteFactory.defaultUnitTestFactory();
     let note: NoteProps;
-    const template: SchemaTemplate = { id: "foo", type: "note" };
     const currentDate = new Date(2022, 0, 10);
     let clock: sinon.SinonFakeTimers;
 
@@ -123,8 +121,9 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN replace note's body with template's body", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
+            const templateNote: NoteProps = engine.notes["foo"];
             const resp = SchemaUtils.applyTemplate({
-              template,
+              templateNote,
               note,
               engine,
             });
@@ -139,14 +138,11 @@ describe(`SchemaUtil tests:`, () => {
       });
 
       it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
-        const dateTemplate: SchemaTemplate = {
-          id: "date-variables",
-          type: "note",
-        };
         await runEngineTestV5(
           async ({ engine }) => {
+            const dateTemplate: NoteProps = engine.notes["date-variables"];
             const resp = SchemaUtils.applyTemplate({
-              template: dateTemplate,
+              templateNote: dateTemplate,
               note,
               engine,
             });
@@ -169,14 +165,11 @@ describe(`SchemaUtil tests:`, () => {
       });
 
       it("WHEN applying a template with fm variables, THEN replace note's body with template's body without errors", async () => {
-        const dateTemplate: SchemaTemplate = {
-          id: "fm-variables",
-          type: "note",
-        };
         await runEngineTestV5(
           async ({ engine }) => {
+            const fmTemplate: NoteProps = engine.notes["fm-variables"];
             const resp = SchemaUtils.applyTemplate({
-              template: dateTemplate,
+              templateNote: fmTemplate,
               note,
               engine,
             });
@@ -204,8 +197,9 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
+            const templateNote: NoteProps = engine.notes["foo"];
             const resp = SchemaUtils.applyTemplate({
-              template,
+              templateNote,
               note,
               engine,
             });
@@ -230,8 +224,10 @@ describe(`SchemaUtil tests:`, () => {
       it("WHEN applying a template, THEN do nothing and return false ", async () => {
         await runEngineTestV5(
           async ({ engine }) => {
+            const templateNote: NoteProps = engine.notes["foo"];
+            templateNote.type = "schema";
             const resp = SchemaUtils.applyTemplate({
-              template: { id: "foo", type: "snippet" },
+              templateNote,
               note,
               engine,
             });

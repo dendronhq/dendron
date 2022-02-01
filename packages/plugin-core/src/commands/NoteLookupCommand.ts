@@ -8,13 +8,16 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  RespV3,
   SchemaUtils,
+  VaultUtils,
   VSCodeEvents,
+  SchemaTemplate,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Uri } from "vscode";
+import { Uri, window } from "vscode";
 import {
   CopyNoteLinkBtn,
   DirectChildFilterBtn,
@@ -59,7 +62,9 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import { AutoCompleter } from "../utils/autoCompleter";
+import { parseRef } from "../utils/md";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -451,11 +456,11 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-
       nodeNew = NoteUtils.create({ fname, vault });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
+
       const schemaMatchResult = SchemaUtils.matchPath({
         notePath: fname,
         schemaModDict: engine.schemas,
@@ -476,11 +481,18 @@ export class NoteLookupCommand
     const maybeTemplate =
       maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
     if (maybeSchema && maybeTemplate) {
-      SchemaUtils.applyTemplate({
-        template: maybeTemplate,
-        note: nodeNew,
-        engine,
-      });
+      const resp = await this.getNoteForSchemaTemplate(maybeTemplate);
+      if (resp.error) {
+        window.showWarningMessage(
+          `Warning: Problem with ${maybeSchema.fname} schema. ${resp.error.message}`
+        );
+      } else {
+        SchemaUtils.applyTemplate({
+          templateNote: resp.data,
+          note: nodeNew,
+          engine,
+        });
+      }
     }
 
     const maybeJournalTitleOverride = this.journalTitleOverride();
@@ -504,6 +516,53 @@ export class NoteLookupCommand
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
+  }
+
+  /**
+   * Find corresponding note for given schema template. Supports cross-vault lookup.
+   *
+   * @param schemaTemplate
+   */
+  private async getNoteForSchemaTemplate(
+    schemaTemplate: SchemaTemplate
+  ): Promise<RespV3<NoteProps>> {
+    let maybeVault: DVault | undefined;
+    let maybeNote: NoteProps | undefined;
+    const { ref, vaultName } = parseRef(schemaTemplate.id);
+    const engine = ExtensionProvider.getEngine();
+
+    // If vault is specified, lookup by template id + vault
+    if (!_.isUndefined(vaultName)) {
+      maybeVault = VaultUtils.getVaultByName({
+        vname: vaultName,
+        vaults: engine.vaults,
+      });
+      // If vault is not found, skip lookup through rest of notes and return error
+      if (_.isUndefined(maybeVault)) {
+        return {
+          error: new DendronError({
+            message: `No vault found for ${vaultName}`,
+          }),
+        };
+      }
+    }
+
+    if (ref) {
+      maybeNote = await WSUtilsV2.instance().findNoteFromMultiVaultAsync({
+        fname: ref,
+        vault: maybeVault,
+      });
+    }
+    if (_.isUndefined(maybeNote)) {
+      return {
+        error: new DendronError({
+          message: `No template found for ${schemaTemplate.id}`,
+        }),
+      };
+    }
+    return {
+      data: maybeNote,
+    };
   }
 
   /**

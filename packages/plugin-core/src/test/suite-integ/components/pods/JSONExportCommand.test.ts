@@ -18,13 +18,12 @@ suite("JSONExportPodCommand", function () {
       },
       () => {
         const cmd = new JSONExportPodCommand();
-        test("THEN multi notes export error message must be displayed", () => {
-          expect(
-            async () =>
-              await cmd.gatherInputs({
-                exportScope: PodExportScope.Vault,
-                destination: "clipboard",
-              })
+        test("THEN multi notes export error message must be displayed", async () => {
+          await expect(async () =>
+            cmd.gatherInputs({
+              exportScope: PodExportScope.Vault,
+              destination: "clipboard",
+            })
           ).toThrow(
             "Multi Note Export cannot have clipboard as destination. Please configure your destination by using Dendron: Configure Export Pod V2 command"
           );

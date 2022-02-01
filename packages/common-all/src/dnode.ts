@@ -38,7 +38,6 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
-  SchemaTemplate,
 } from "./types";
 import {
   DefaultMap,
@@ -430,7 +429,20 @@ export class NoteUtils {
       NoteUtils.addSchema({ note, schemaModule, schema });
       const maybeTemplate = schema.data.template;
       if (maybeTemplate) {
-        SchemaUtils.applyTemplate({ template: maybeTemplate, note, engine });
+        // TODO: Support xvault with user prompting for this flow
+        const tempNote = NoteUtils.getNoteByFnameFromEngine({
+          fname: maybeTemplate.id,
+          vault: note.vault,
+          engine,
+        });
+
+        if (tempNote) {
+          SchemaUtils.applyTemplate({
+            templateNote: tempNote,
+            note,
+            engine,
+          });
+        }
       }
     }
     return note;
@@ -870,7 +882,10 @@ export class NoteUtils {
       vault: toVault,
     });
 
-    if (maybeNotes.length > 1) {
+    if (maybeNotes.length === 1) {
+      // Only one match so use that as note
+      existingNote = maybeNotes[0];
+    } else if (maybeNotes.length > 1) {
       // If there are multiple notes with this fname, default to one that's in the same vault first.
       const sameVaultNote = _.filter(maybeNotes, (n) =>
         VaultUtils.isEqual(n.vault, fromVault, wsRoot)
@@ -882,10 +897,7 @@ export class NoteUtils {
         // Otherwise, just pick one, doesn't matter which.
         existingNote = maybeNotes[0];
       }
-    } else {
-      // Just 1 note
-      existingNote = maybeNotes[0];
-    }
+    } // Else no match in which case we return undefined
     return existingNote;
   }
 
@@ -1349,27 +1361,28 @@ export class SchemaUtils {
     "image",
   ];
 
+  /**
+   * Apply template note to provided {@param note}.
+   *
+   * Changes include appending template note's body to end of provided note.
+   */
   static applyTemplate(opts: {
-    template: SchemaTemplate;
+    templateNote: NoteProps;
     note: NoteProps;
     engine: DEngineClient;
   }) {
-    const { template, note, engine } = opts;
-    if (template.type === "note") {
-      const tempNote = _.find(_.values(engine.notes), { fname: template.id });
-      if (_.isUndefined(tempNote)) {
-        throw Error(`no template found for ${template.id}`);
-      }
-      const tempNoteProps = _.pick(tempNote, this.TEMPLATE_COPY_PROPS);
+    const { templateNote, note } = opts;
+    if (templateNote.type === "note") {
+      const tempNoteProps = _.pick(templateNote, this.TEMPLATE_COPY_PROPS);
       _.forEach(tempNoteProps, (v, k) => {
         // @ts-ignore
         note[k] = v;
       });
       // If note body exists, append template's body instead of overriding
       if (note.body) {
-        note.body += `\n${tempNote.body}`;
+        note.body += `\n${templateNote.body}`;
       } else {
-        note.body = tempNote.body;
+        note.body = templateNote.body;
       }
 
       // Apply date variable substitution to the body based on lodash interpolate delimiter if applicable

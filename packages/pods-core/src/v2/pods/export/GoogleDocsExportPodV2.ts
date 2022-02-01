@@ -67,18 +67,14 @@ export class GoogleDocsExportPodV2
   constructor({
     podConfig,
     engine,
-    vaults,
-    wsRoot,
   }: {
     podConfig: RunnableGoogleDocsV2PodConfig;
     engine: DEngineClient;
-    vaults: DVault[];
-    wsRoot: string;
   }) {
     this._config = podConfig;
     this._engine = engine;
-    this._vaults = vaults;
-    this._wsRoot = wsRoot;
+    this._vaults = engine.vaults;
+    this._wsRoot = engine.wsRoot;
   }
 
   async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
@@ -331,5 +327,27 @@ export class GoogleDocsExportPodV2
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;
+  }
+}
+
+export class GoogleDocsUtils {
+  static async updateNoteWithCustomFrontmatter(
+    records: GoogleDocsFields[],
+    engine: DEngineClient
+  ) {
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { documentId, revisionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          documentId,
+          revisionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
   }
 }

@@ -8,7 +8,7 @@ import {
   GoogleDocsConnection,
   GoogleDocsExportPodV2,
   GoogleDocsExportReturnType,
-  GoogleDocsFields,
+  GoogleDocsUtils,
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
   JSONSchemaType,
@@ -24,7 +24,7 @@ import { PodUIControls } from "../../components/pods/PodControls";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getEngine, getExtension } from "../../workspace";
+import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -45,13 +45,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   public createPod(
     config: RunnableGoogleDocsV2PodConfig
   ): ExportPodV2<GoogleDocsExportReturnType> {
-    const { wsRoot, vaults } = getDWorkspace();
-
     return new GoogleDocsExportPodV2({
       podConfig: config,
-      engine: getEngine(),
-      wsRoot,
-      vaults,
+      engine: ExtensionProvider.getEngine(),
     });
   }
 
@@ -178,6 +174,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     payload: NoteProps[];
     config: RunnableGoogleDocsV2PodConfig;
   }) {
+    const engine = ExtensionProvider.getEngine();
     const { exportReturnValue } = opts;
     let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
@@ -185,10 +182,16 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     const createdCount = createdDocs?.length ?? 0;
     const updatedCount = updatedDocs?.length ?? 0;
     if (createdDocs && createdCount > 0) {
-      await this.updateNoteWithCustomFrontmatter(createdDocs);
+      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+        createdDocs,
+        engine
+      );
     }
     if (updatedDocs && updatedCount > 0) {
-      await this.updateNoteWithCustomFrontmatter(updatedDocs);
+      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+        updatedDocs,
+        engine
+      );
     }
     if (ResponseUtil.hasError(exportReturnValue)) {
       errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
@@ -202,23 +205,5 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       );
     }
     return errorMsg;
-  }
-
-  private async updateNoteWithCustomFrontmatter(records: GoogleDocsFields[]) {
-    const engine = ExtensionProvider.getEngine();
-    await Promise.all(
-      records.map(async (record) => {
-        if (_.isUndefined(record)) return;
-        const { documentId, revisionId, dendronId } = record;
-        if (!dendronId) return;
-        const note = engine.notes[dendronId];
-        note.custom = {
-          ...note.custom,
-          documentId,
-          revisionId,
-        };
-        await engine.writeNote(note, { updateExisting: true });
-      })
-    );
   }
 }

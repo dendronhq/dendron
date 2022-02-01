@@ -1,6 +1,7 @@
 import {
   DendronCompositeError,
   DendronError,
+  DEngineClient,
   IDendronError,
   NoteProps,
   ResponseUtil,
@@ -148,4 +149,25 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
       },
     }) as JSONSchemaType<NotionV2PodConfig>;
   }
+}
+
+export class NotionUtils {
+  static updateNotionIdForNewlyCreatedNotes = async (
+    records: NotionFields[],
+    engine: DEngineClient
+  ) => {
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { notionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          notionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
+  };
 }

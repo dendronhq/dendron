@@ -548,7 +548,6 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine,
       fname: note.fname,
       vault: note.vault,
-      hideBlockAnchors: true,
     });
     if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
       remark = remark.use(

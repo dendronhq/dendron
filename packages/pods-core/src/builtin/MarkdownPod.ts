@@ -539,7 +539,6 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note, config, dendronConfig } = opts;
     const { wikiLinkToURL = false } = config;
-    debugger;
     let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {

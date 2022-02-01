@@ -277,7 +277,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
 
         let useId = copts?.useId;
-        if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
+        if (
+          useId === undefined &&
+          MDUtilsV5.isV5Active(proc) &&
+          dest === DendronASTDest.HTML
+        ) {
           useId = true;
         }
 

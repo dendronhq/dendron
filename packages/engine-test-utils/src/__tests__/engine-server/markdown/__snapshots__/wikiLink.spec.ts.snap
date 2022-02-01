@@ -121,7 +121,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"vkqcjFr0BMpXjUPN1NVBF.html#^block\\">Root</a></p>
+<p><a href=\\"root.html#^block\\">Root</a></p>
 <hr>
 <strong>Children</strong>
 <ol>

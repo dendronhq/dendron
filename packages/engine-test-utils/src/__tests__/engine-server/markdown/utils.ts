@@ -63,6 +63,9 @@ export const createProcForTest = (opts: {
   useIdAsLink?: boolean;
 }) => {
   const { engine, dest, vault, fname } = opts;
+  // This was false by default for MDUtilsV4, but became true for MDUtilsV5.
+  // Using IDs for the links breaks snapshots since note ids are random.
+  if (opts.useIdAsLink === undefined) opts.useIdAsLink = false;
   const data = {
     engine,
     dest,

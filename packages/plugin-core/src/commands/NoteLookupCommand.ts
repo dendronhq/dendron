@@ -550,6 +550,7 @@ export class NoteLookupCommand
     if (ref) {
       maybeNote = await WSUtilsV2.instance().findNoteFromMultiVaultAsync({
         fname: ref,
+        quickpickTitle: "Select which template to apply",
         vault: maybeVault,
       });
     }

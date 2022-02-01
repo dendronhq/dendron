@@ -869,16 +869,16 @@ export class NoteUtils {
 
   static getNoteFromMultiVault(opts: {
     fname: string;
-    notes: NotePropsDict | NoteProps[];
+    engine: DEngineClient;
     fromVault: DVault;
     wsRoot: string;
     toVault?: DVault;
   }) {
-    const { fname, notes, fromVault, toVault, wsRoot } = opts;
+    const { fname, engine, fromVault, toVault, wsRoot } = opts;
     let existingNote: NoteProps | undefined;
-    const maybeNotes = NoteUtils.getNotesByFname({
+    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
       fname,
-      notes,
+      engine,
       vault: toVault,
     });
 

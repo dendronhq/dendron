@@ -33,10 +33,15 @@ export interface IWSUtilsV2 {
    * If vault is not specified, search all notes by id.
    *    - If no match, return undefined
    *    - If one match, assume that is intended note and return.
-   *    - If multiple matches, prompt user to select vault from matches
+   *    - If multiple matches, prompt user via quickpick to select vault from matches
+   *
+   * @param fname: name of note to look for
+   * @param quickpickTitle: title of quickpick to display if multiple matches are found
+   * @param vault?: if provided, vault to search note from
    */
   findNoteFromMultiVaultAsync(opts: {
     fname: string;
+    quickpickTitle: string;
     vault?: DVault;
   }): Promise<NoteProps | undefined>;
 }

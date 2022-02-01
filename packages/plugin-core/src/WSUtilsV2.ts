@@ -99,8 +99,12 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   /**
    * See {@link IWSUtilsV2.findNoteFromMultiVaultAsync}.
    */
-  async findNoteFromMultiVaultAsync(opts: { fname: string; vault?: DVault }) {
-    const { fname, vault } = opts;
+  async findNoteFromMultiVaultAsync(opts: {
+    fname: string;
+    quickpickTitle: string;
+    vault?: DVault;
+  }) {
+    const { fname, quickpickTitle, vault } = opts;
     let existingNote: NoteProps | undefined;
     const engine = ExtensionProvider.getEngine();
     const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
@@ -117,7 +121,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       const vaults = maybeNotes.map((noteProps) => {
         return {
           vault: noteProps.vault,
-          label: VaultUtils.getName(noteProps.vault),
+          label: `${fname} from ${VaultUtils.getName(noteProps.vault)}`,
         };
       });
 
@@ -128,7 +132,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
           : vaultPickerItem.vault.fsPath,
       }));
       const resp = await vscode.window.showQuickPick(items, {
-        title: "Select Vault",
+        title: quickpickTitle,
       });
 
       if (!_.isUndefined(resp)) {

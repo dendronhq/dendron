@@ -1367,6 +1367,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "BillMoriarty",
+      "name": "Bill Moriarty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/463054?v=4",
+      "profile": "https://billmoriarty.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -940,11 +940,8 @@ function convertNoteRefHelper(
     // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
     // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
     bodyAST.children.push(...footnotes);
-    debugger;
     const procTree = noteRefProc.runSync(bodyAST);
-    debugger;
     let out = noteRefProc.stringify(procTree);
-    debugger;
     if (anchorStartOffset) {
       out = out.split("\n").slice(anchorStartOffset).join("\n");
     }

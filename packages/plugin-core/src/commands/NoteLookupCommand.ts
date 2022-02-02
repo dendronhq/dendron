@@ -486,7 +486,8 @@ export class NoteLookupCommand
         window.showWarningMessage(
           `Warning: Problem with ${maybeSchema.fname} schema. ${resp.error.message}`
         );
-      } else {
+      } else if (!_.isUndefined(resp.data)) {
+        // Only apply schema if note is found
         SchemaUtils.applyTemplate({
           templateNote: resp.data,
           note: nodeNew,
@@ -525,9 +526,8 @@ export class NoteLookupCommand
    */
   private async getNoteForSchemaTemplate(
     schemaTemplate: SchemaTemplate
-  ): Promise<RespV3<NoteProps>> {
+  ): Promise<RespV3<NoteProps | undefined>> {
     let maybeVault: DVault | undefined;
-    let maybeNote: NoteProps | undefined;
     const { ref, vaultName } = parseRef(schemaTemplate.id);
     const engine = ExtensionProvider.getEngine();
 
@@ -547,23 +547,18 @@ export class NoteLookupCommand
       }
     }
 
-    if (ref) {
-      maybeNote = await WSUtilsV2.instance().findNoteFromMultiVaultAsync({
+    if (!_.isUndefined(ref)) {
+      return WSUtilsV2.instance().findNoteFromMultiVaultAsync({
         fname: ref,
-        quickpickTitle: "Select which template to apply",
+        quickpickTitle:
+          "Select which template to apply or press [ESC] to not apply a template",
         vault: maybeVault,
       });
-    }
-    if (_.isUndefined(maybeNote)) {
+    } else {
       return {
-        error: new DendronError({
-          message: `No template found for ${schemaTemplate.id}`,
-        }),
+        data: undefined,
       };
     }
-    return {
-      data: maybeNote,
-    };
   }
 
   /**

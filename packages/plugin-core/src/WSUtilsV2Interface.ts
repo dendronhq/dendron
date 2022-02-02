@@ -1,5 +1,5 @@
 import vscode, { Uri } from "vscode";
-import { DVault, NoteProps } from "@dendronhq/common-all";
+import { DVault, NoteProps, RespV3 } from "@dendronhq/common-all";
 
 export interface IWSUtilsV2 {
   getNoteFromDocument(document: vscode.TextDocument): undefined | NoteProps;
@@ -31,9 +31,9 @@ export interface IWSUtilsV2 {
    *
    * If vault is specified, search notes by corresponding vault and fname. If no match, return undefined.
    * If vault is not specified, search all notes by id.
-   *    - If no match, return undefined
+   *    - If no match, return error about missing note
    *    - If one match, assume that is intended note and return.
-   *    - If multiple matches, prompt user via quickpick to select vault from matches
+   *    - If multiple matches, prompt user via quickpick to select vault from matches. If user escapes out, return undefined
    *
    * @param fname: name of note to look for
    * @param quickpickTitle: title of quickpick to display if multiple matches are found
@@ -43,5 +43,5 @@ export interface IWSUtilsV2 {
     fname: string;
     quickpickTitle: string;
     vault?: DVault;
-  }): Promise<NoteProps | undefined>;
+  }): Promise<RespV3<NoteProps | undefined>>;
 }

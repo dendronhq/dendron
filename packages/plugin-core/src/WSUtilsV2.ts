@@ -2,9 +2,11 @@ import { IDendronExtension } from "./dendronExtensionInterface";
 import vscode from "vscode";
 import path from "path";
 import {
+  DendronError,
   DVault,
   NoteProps,
   NoteUtils,
+  RespV3,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -103,7 +105,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     fname: string;
     quickpickTitle: string;
     vault?: DVault;
-  }) {
+  }): Promise<RespV3<NoteProps | undefined>> {
     const { fname, quickpickTitle, vault } = opts;
     let existingNote: NoteProps | undefined;
     const engine = ExtensionProvider.getEngine();
@@ -137,9 +139,22 @@ export class WSUtilsV2 implements IWSUtilsV2 {
 
       if (!_.isUndefined(resp)) {
         existingNote = _.find(maybeNotes, { vault: resp.vault });
+      } else {
+        // If user escaped out of quickpick, then do not return error. Return undefined note instead
+        return {
+          data: existingNote,
+        };
       }
-    } // Else no match in which case we return undefined
-    return existingNote;
+    } else {
+      return {
+        error: new DendronError({
+          message: `No note found for ${fname}`,
+        }),
+      };
+    }
+    return {
+      data: existingNote,
+    };
   }
 
   getVaultFromDocument(document: vscode.TextDocument) {

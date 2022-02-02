@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-147-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-148-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -388,6 +388,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://billmoriarty.com"><img src="https://avatars.githubusercontent.com/u/463054?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bill Moriarty</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABillMoriarty" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://ScriptOps.com"><img src="https://avatars.githubusercontent.com/u/362756?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jamie Bilinski</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jbilinski" title="Documentation">📖</a></td>
     <td align="center"><a href="https://thanoslefteris.com"><img src="https://avatars.githubusercontent.com/u/64284?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thanos Lefteris</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aalefteris" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=alefteris" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://hotsixredbull.blogspot.kr/"><img src="https://avatars.githubusercontent.com/u/7041617?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yi Seunggi</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AhotSixRedBull" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

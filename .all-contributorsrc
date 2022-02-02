@@ -1358,6 +1358,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "dweisiger",
+      "name": "d1onysus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13951458?v=4",
+      "profile": "https://github.com/dweisiger",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

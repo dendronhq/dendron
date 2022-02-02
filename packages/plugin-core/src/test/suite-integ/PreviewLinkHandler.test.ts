@@ -54,9 +54,9 @@ suite("PreviewLinkHandler", () => {
             expect(
               await AssertUtils.assertInString({
                 body: withoutURLEncode as string,
-                match: ["assets/dummy-pdf.pdf"],
+                match: [path.join("assets", "dummy-pdf.pdf")],
               })
-            );
+            ).toBeTruthy();
 
             // with urlencoded parts (space as %20)
             const withURLEncode = handler.vaultlessAssetPath({
@@ -70,9 +70,9 @@ suite("PreviewLinkHandler", () => {
             expect(
               await AssertUtils.assertInString({
                 body: withURLEncode as string,
-                match: ["assets/file with space.pdf"],
+                match: [path.join("assets", "file with space.pdf")],
               })
-            );
+            ).toBeTruthy();
 
             done();
           },

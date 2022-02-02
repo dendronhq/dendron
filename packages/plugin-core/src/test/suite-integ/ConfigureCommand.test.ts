@@ -1,6 +1,5 @@
 import { describe } from "mocha";
 import path from "path";
-import * as vscode from "vscode";
 import { ConfigureCommand } from "../../commands/ConfigureCommand";
 import { CONFIG } from "../../constants";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -9,8 +8,7 @@ import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ConfigureCommand", () => {
   describe("basic", function () {
-    let ctx: vscode.ExtensionContext;
-    ctx = setupBeforeAfter(this);
+    const ctx = setupBeforeAfter(this);
 
     test("ok", (done) => {
       runLegacySingleWorkspaceTest({

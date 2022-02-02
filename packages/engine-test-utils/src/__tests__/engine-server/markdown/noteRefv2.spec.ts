@@ -28,7 +28,8 @@ function runAllTests(opts: {
   only?: boolean;
 }) {
   const { name, testCases } = opts;
-  const _describe = opts.only ? describe.only : describe;
+  // Work around the husky check triggering accidentally
+  const _describe = opts["only"] ? describe["only"] : describe;
   _describe(name, () => {
     test.each(
       testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])

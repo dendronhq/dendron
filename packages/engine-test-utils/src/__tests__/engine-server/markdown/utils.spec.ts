@@ -378,7 +378,10 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
     },
     [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkVFile(respProcess, `[Bar](../vault2/bar.md)`);
+      await checkVFile(
+        respProcess,
+        `[Bar](${path.join("..", "vault2", "bar.md")})`
+      );
     },
   },
   preSetupHook: async (opts) => {

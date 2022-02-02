@@ -2,11 +2,14 @@ import { IDendronExtension } from "./dendronExtensionInterface";
 import vscode from "vscode";
 import path from "path";
 import {
+  DendronError,
   DVault,
   NoteProps,
   NoteUtils,
+  RespV3,
   VaultUtils,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -93,6 +96,65 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       wsRoot,
       notes: engine.notes,
     });
+  }
+
+  /**
+   * See {@link IWSUtilsV2.findNoteFromMultiVaultAsync}.
+   */
+  async findNoteFromMultiVaultAsync(opts: {
+    fname: string;
+    quickpickTitle: string;
+    vault?: DVault;
+  }): Promise<RespV3<NoteProps | undefined>> {
+    const { fname, quickpickTitle, vault } = opts;
+    let existingNote: NoteProps | undefined;
+    const engine = ExtensionProvider.getEngine();
+    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
+      fname,
+      engine,
+      vault,
+    });
+
+    if (maybeNotes.length === 1) {
+      // Only one match so use that as note
+      existingNote = maybeNotes[0];
+    } else if (maybeNotes.length > 1) {
+      // If there are multiple notes with this fname, prompt user to select which vault
+      const vaults = maybeNotes.map((noteProps) => {
+        return {
+          vault: noteProps.vault,
+          label: `${fname} from ${VaultUtils.getName(noteProps.vault)}`,
+        };
+      });
+
+      const items = vaults.map((vaultPickerItem) => ({
+        ...vaultPickerItem,
+        label: vaultPickerItem.label
+          ? vaultPickerItem.label
+          : vaultPickerItem.vault.fsPath,
+      }));
+      const resp = await vscode.window.showQuickPick(items, {
+        title: quickpickTitle,
+      });
+
+      if (!_.isUndefined(resp)) {
+        existingNote = _.find(maybeNotes, { vault: resp.vault });
+      } else {
+        // If user escaped out of quickpick, then do not return error. Return undefined note instead
+        return {
+          data: existingNote,
+        };
+      }
+    } else {
+      return {
+        error: new DendronError({
+          message: `No note found for ${fname}`,
+        }),
+      };
+    }
+    return {
+      data: existingNote,
+    };
   }
 
   getVaultFromDocument(document: vscode.TextDocument) {

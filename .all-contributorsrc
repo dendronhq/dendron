@@ -1396,6 +1396,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "hotSixRedBull",
+      "name": "Yi Seunggi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7041617?v=4",
+      "profile": "http://hotsixredbull.blogspot.kr/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

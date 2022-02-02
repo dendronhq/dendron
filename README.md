@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-142-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-143-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -383,6 +383,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
   <tr>
     <td align="center"><a href="https://github.com/Binly42"><img src="https://avatars.githubusercontent.com/u/15514941?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Binly42</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABinly42" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/eleweek"><img src="https://avatars.githubusercontent.com/u/1133550?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexander Putilin</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=eleweek" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/pvorona"><img src="https://avatars.githubusercontent.com/u/11915087?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pavel Vorona</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=pvorona" title="Code">💻</a></td>
   </tr>
 </table>
 

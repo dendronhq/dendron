@@ -478,7 +478,7 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
  */
 export function cleanupVSCodeContextSubscriptions(ctx: ExtensionContext) {
   ctx.subscriptions.forEach((disposable) => {
-    disposable.dispose();
+    disposable?.dispose();
   });
 }
 

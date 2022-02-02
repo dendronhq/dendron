@@ -57,7 +57,7 @@ export class CommandRegistrar {
     }
 
     if (trait.id in this.disposables) {
-      this.disposables[trait.id].dispose();
+      this.disposables[trait.id]?.dispose();
       delete this.disposables[trait.id];
     }
   }

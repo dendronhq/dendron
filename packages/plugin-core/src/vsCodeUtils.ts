@@ -274,6 +274,10 @@ export class VSCodeUtils {
     vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(link));
   }
 
+  closeAllEditors() {
+    return vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  }
+
   static async openWS(wsFile: string) {
     return vscode.commands.executeCommand(
       "vscode.openFolder",

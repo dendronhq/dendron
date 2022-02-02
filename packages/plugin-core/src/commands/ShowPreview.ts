@@ -59,6 +59,7 @@ export class ShowPreviewCommand extends InputArgCommand<
     this._panel.show();
 
     if (note) {
+      this._panel.show(note);
       return { note };
     } else if (opts?.fsPath) {
       const fsPath = opts.fsPath;

@@ -414,7 +414,11 @@ export function convertNoteRefASTV2(
       if (prettyRefs) {
         let suffix = "";
         let useId = wikiLinkOpts?.useId;
-        if (MDUtilsV5.isV5Active(proc) && dest === DendronASTDest.HTML) {
+        if (
+          useId === undefined &&
+          MDUtilsV5.isV5Active(proc) &&
+          dest === DendronASTDest.HTML
+        ) {
           useId = true;
         }
         let href = useId ? note.id : fname;
@@ -936,9 +940,11 @@ function convertNoteRefHelper(
     // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
     // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
     bodyAST.children.push(...footnotes);
-    let out = noteRefProc
-      .processSync(noteRefProc.stringify(bodyAST))
-      .toString();
+    debugger;
+    const procTree = noteRefProc.runSync(bodyAST);
+    debugger;
+    let out = noteRefProc.stringify(procTree);
+    debugger;
     if (anchorStartOffset) {
       out = out.split("\n").slice(anchorStartOffset).join("\n");
     }

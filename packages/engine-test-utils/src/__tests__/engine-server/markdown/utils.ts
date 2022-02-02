@@ -312,6 +312,15 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
       config: configOverride,
       fname,
       vault,
+      // Otherwise links generated in tests use randomly generated IDs which is unstable for snaps
+      wikiLinksOpts: {
+        useId: false,
+      },
+      publishOpts: {
+        wikiLinkOpts: {
+          useId: false,
+        },
+      },
     });
     const resp = await proc.process(text);
     return { resp };

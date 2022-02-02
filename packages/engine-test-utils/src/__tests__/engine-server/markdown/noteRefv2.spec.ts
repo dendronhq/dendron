@@ -755,6 +755,15 @@ describe("noteRefV2", () => {
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
+          // Otherwise links use random note ids which are unstable in snaps
+          wikiLinksOpts: {
+            useId: false,
+          },
+          publishOpts: {
+            wikiLinkOpts: {
+              useId: false,
+            },
+          },
         }).process(note.body);
         return { resp };
       },

@@ -24,7 +24,16 @@ function proc(
   return MDUtilsV5.procRehypeFull({
     engine,
     ...dendron,
-    publishOpts: opts,
+    wikiLinksOpts: {
+      useId: false,
+      ...opts?.wikiLinkOpts,
+    },
+    publishOpts: {
+      wikiLinkOpts: {
+        useId: false,
+      },
+      ...opts,
+    },
   });
 }
 
@@ -673,7 +682,7 @@ describe("dendronPub", () => {
           }).process("![[dupe]]");
           const dupNoteVaultPayload = engine.config.site.duplicateNoteBehavior
             ?.payload as string[];
-          await checkVFile(out, `dupe in ${dupNoteVaultPayload[0]}`);
+          await checkVFile(out as any, `dupe in ${dupNoteVaultPayload[0]}`);
         },
         {
           preSetupHook: async ({ wsRoot, vaults }) => {

@@ -1386,6 +1386,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "alefteris",
+      "name": "Thanos Lefteris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64284?v=4",
+      "profile": "https://thanoslefteris.com",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

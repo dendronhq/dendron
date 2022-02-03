@@ -104,9 +104,10 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   async findNoteFromMultiVaultAsync(opts: {
     fname: string;
     quickpickTitle: string;
+    nonStubOnly?: boolean;
     vault?: DVault;
   }): Promise<RespV3<NoteProps | undefined>> {
-    const { fname, quickpickTitle, vault } = opts;
+    const { fname, quickpickTitle, nonStubOnly = false, vault } = opts;
     let existingNote: NoteProps | undefined;
     const engine = ExtensionProvider.getEngine();
     const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
@@ -115,12 +116,16 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       vault,
     });
 
-    if (maybeNotes.length === 1) {
+    const filteredNotes = nonStubOnly
+      ? maybeNotes.filter((note) => !note.stub)
+      : maybeNotes;
+
+    if (filteredNotes.length === 1) {
       // Only one match so use that as note
-      existingNote = maybeNotes[0];
-    } else if (maybeNotes.length > 1) {
+      existingNote = filteredNotes[0];
+    } else if (filteredNotes.length > 1) {
       // If there are multiple notes with this fname, prompt user to select which vault
-      const vaults = maybeNotes.map((noteProps) => {
+      const vaults = filteredNotes.map((noteProps) => {
         return {
           vault: noteProps.vault,
           label: `${fname} from ${VaultUtils.getName(noteProps.vault)}`,
@@ -138,7 +143,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       });
 
       if (!_.isUndefined(resp)) {
-        existingNote = _.find(maybeNotes, { vault: resp.vault });
+        existingNote = _.find(filteredNotes, { vault: resp.vault });
       } else {
         // If user escaped out of quickpick, then do not return error. Return undefined note instead
         return {

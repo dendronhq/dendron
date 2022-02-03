@@ -884,6 +884,64 @@ suite("NoteLookupCommand", function () {
     );
 
     describeMultiWS(
+      "WHEN schema template references to a template note and there exists a stub with the same name",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1
+          const vault = vaults[0];
+          // Template is in vault1
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 template",
+            fname: "template.ch2",
+            vault,
+          });
+          // template.ch2 is now a stub in vault2
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            body: "food ch2 child note",
+            fname: "template.ch2.child",
+            vault: vaults[1],
+          });
+          const template: SchemaTemplate = {
+            id: "template.ch2",
+            type: "note",
+          };
+          await setupSchemaCrossVault({ wsRoot, vault, template });
+        },
+      },
+      () => {
+        let showQuickPick: sinon.SinonStub;
+
+        beforeEach(() => {
+          showQuickPick = sinon.stub(vscode.window, "showQuickPick");
+        });
+        afterEach(() => {
+          showQuickPick.restore();
+        });
+
+        test("THEN user does not get prompted with stub suggesstion and template note body gets applied to new note", async () => {
+          const cmd = new NoteLookupCommand();
+          await cmd.run({
+            initialValue: "food.ch2",
+            noConfirm: true,
+          });
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+
+          const newNote = NoteUtils.getNoteByFnameFromEngine({
+            fname: "food.ch2",
+            engine,
+            vault: vaults[0],
+          });
+          expect(showQuickPick.calledOnce).toBeFalsy();
+          expect(_.trim(newNote?.body)).toEqual("food ch2 template");
+        });
+      }
+    );
+
+    describeMultiWS(
       "WHEN schema template references to a template note that lies in multiple vaults without cross vault notation",
       {
         ctx,

@@ -552,6 +552,7 @@ export class NoteLookupCommand
         fname: ref,
         quickpickTitle:
           "Select which template to apply or press [ESC] to not apply a template",
+        nonStubOnly: true,
         vault: maybeVault,
       });
     } else {

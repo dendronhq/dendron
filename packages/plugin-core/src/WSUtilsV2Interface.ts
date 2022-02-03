@@ -37,11 +37,13 @@ export interface IWSUtilsV2 {
    *
    * @param fname: name of note to look for
    * @param quickpickTitle: title of quickpick to display if multiple matches are found
+   * @param nonStubOnly?: if provided, boolean to determine whether to return non-stub notes only. Default behavior is to return all
    * @param vault?: if provided, vault to search note from
    */
   findNoteFromMultiVaultAsync(opts: {
     fname: string;
     quickpickTitle: string;
+    nonStubOnly?: boolean;
     vault?: DVault;
   }): Promise<RespV3<NoteProps | undefined>>;
 }

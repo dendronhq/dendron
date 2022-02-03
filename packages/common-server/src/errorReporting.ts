@@ -25,6 +25,20 @@ export function rewriteFilename(filename: string) {
   }
 }
 
+// This offers some protection against accidentally sending too many errors to Sentry
+const BAD_ERROR_SAMPLE_RATE = 0.001;
+
+export function isBadErrorThatShouldBeSampled(
+  error: string | Error | { message: string } | null | undefined
+) {
+  return (
+    error &&
+    typeof error !== "string" &&
+    error.message &&
+    error.message.includes("ENOENT: no such file or directory")
+  );
+}
+
 export function initializeSentry(environment: Stage): void {
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
@@ -63,6 +77,13 @@ export function eventModifier(
   hint: Sentry.EventHint | undefined
 ): Sentry.Event | PromiseLike<Sentry.Event | null> | null {
   const error = hint?.originalException;
+
+  if (
+    isBadErrorThatShouldBeSampled(error) &&
+    Math.random() > BAD_ERROR_SAMPLE_RATE
+  ) {
+    return null;
+  }
 
   // Add more information to the event extras payload:
   if (error && error instanceof DendronError) {

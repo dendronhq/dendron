@@ -257,28 +257,15 @@ suite("Extension", function () {
           workspaceInitializer: new BlankInitializer(),
         });
         const resp = readYAML(path.join(wsRoot, "dendron.yml"));
+
         expect(resp).toEqual({
-          version: 4,
+          version: 5,
           useFMTitle: true,
           useNoteTitleForLink: true,
           mermaid: true,
           useKatex: true,
           dev: {
             enablePreviewV2: true,
-          },
-          site: {
-            copyAssets: true,
-            siteHierarchies: ["root"],
-            siteRootDir: "docs",
-            usePrettyRefs: true,
-            title: "Dendron",
-            description: "Personal knowledge space",
-            siteLastModified: true,
-            gh_edit_branch: "main",
-            duplicateNoteBehavior: {
-              action: "useVault",
-              payload: ["vault"],
-            },
           },
           commands: {
             lookup: {
@@ -304,7 +291,11 @@ suite("Extension", function () {
             },
           },
           workspace: {
-            vaults: [{ fsPath: "vault" }],
+            vaults: [
+              {
+                fsPath: "vault",
+              },
+            ],
             journal: {
               dailyDomain: "daily",
               name: "journal",
@@ -317,27 +308,27 @@ suite("Extension", function () {
               addBehavior: "asOwnDomain",
             },
             task: {
-              addBehavior: "childOfCurrent",
-              dateFormat: "",
               name: "",
-              prioritySymbols: {
-                H: "high",
-                L: "low",
-                M: "medium",
-              },
+              dateFormat: "",
+              addBehavior: "childOfCurrent",
               statusSymbols: {
                 "": " ",
+                wip: "w",
+                done: "x",
                 assigned: "a",
+                moved: "m",
                 blocked: "b",
                 delegated: "l",
-                done: "x",
                 dropped: "d",
-                moved: "m",
                 pending: "y",
-                wip: "w",
               },
-              createTaskSelectionType: "selection2link",
+              prioritySymbols: {
+                H: "high",
+                M: "medium",
+                L: "low",
+              },
               todoIntegration: false,
+              createTaskSelectionType: "selection2link",
             },
             graph: {
               zoomSpeed: 1,
@@ -345,11 +336,11 @@ suite("Extension", function () {
             enableAutoCreateOnDefinition: false,
             enableXVaultWikiLink: false,
             enableRemoteVaultInit: true,
+            enableUserTags: true,
+            enableHashTags: true,
             workspaceVaultSyncMode: "noCommit",
             enableAutoFoldFrontmatter: false,
             enableEditorDecorations: true,
-            enableHashTags: true,
-            enableUserTags: true,
             maxPreviewsCached: 10,
             maxNoteLength: 204800,
           },
@@ -360,6 +351,34 @@ suite("Extension", function () {
             enablePrettyRefs: true,
             enableKatex: true,
             automaticallyShowPreview: false,
+          },
+          publishing: {
+            copyAssets: true,
+            enablePrettyRefs: true,
+            siteHierarchies: ["root"],
+            writeStubs: false,
+            enableContainers: false,
+            generateChangelog: false,
+            siteRootDir: "docs",
+            seo: {
+              title: "Dendron",
+              description: "Personal Knowledge Space",
+            },
+            github: {
+              enableEditLink: true,
+              editLinkText: "Edit this page on GitHub",
+              editBranch: "main",
+              editViewMode: "tree",
+            },
+            enableSiteLastModified: true,
+            enableFrontmatterTags: true,
+            enableHashesForFMTags: false,
+            enableRandomlyColoredTags: true,
+            enablePrettyLinks: true,
+            duplicateNoteBehavior: {
+              action: "useVault",
+              payload: ["vault"],
+            },
           },
         });
 

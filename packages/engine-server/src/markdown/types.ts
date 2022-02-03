@@ -4,6 +4,7 @@ import {
   DNoteRefLinkRaw,
   DVault,
   NoteProps,
+  DendronASTDest,
 } from "@dendronhq/common-all";
 import { Heading, Image, Parent, Root } from "mdast";
 import { Processor } from "unified";
@@ -13,6 +14,7 @@ import { WikiLinksOpts } from "./remark/wikiLinks";
 export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
+export { DendronASTDest };
 
 // --- General
 
@@ -53,13 +55,6 @@ export enum DendronASTTypes {
   LINK = "link",
   FOOTNOTE_DEFINITION = "footnoteDefinition",
   FOOTNOTE_REFERENCE = "footnoteReference",
-}
-
-export enum DendronASTDest {
-  MD_ENHANCED_PREVIEW = "MD_ENHANCED_PREVIEW",
-  MD_REGULAR = "MD_REGULAR",
-  MD_DENDRON = "MD_DENDRON",
-  HTML = "HTML",
 }
 
 export enum VaultMissingBehavior {

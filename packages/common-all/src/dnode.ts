@@ -1342,6 +1342,32 @@ export class NoteUtils {
       body: opts.contents,
     });
   }
+
+  static FAKE_ID_PREFIX = "fake-";
+
+  static isFakeId(id: string) {
+    return id.startsWith(this.FAKE_ID_PREFIX);
+  }
+
+  /** Create a fake note object for something that is not actually a note in the workspace.
+   *
+   * For example when we need to render a piece of an actual note. If you need
+   * to create a fake note for an actual file, prefer
+   * {@link NoteUtils.createForFile} instead.
+   */
+  static createForFake(opts: {
+    contents: string;
+    fname: string;
+    id: string;
+    vault: DVault;
+  }) {
+    return this.create({
+      fname: opts.fname,
+      id: `${this.FAKE_ID_PREFIX}${opts.id}`,
+      vault: opts.vault,
+      body: opts.contents,
+    });
+  }
 }
 
 type SchemaMatchResult = {

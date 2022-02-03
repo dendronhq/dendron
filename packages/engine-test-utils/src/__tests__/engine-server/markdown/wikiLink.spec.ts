@@ -239,7 +239,7 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="root.html#^block">Root</a>');
+          await checkVFile(resp, '<a href="', 'html#^block">Root</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;

@@ -7,7 +7,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Alpha</span></div>
-
+<a href=\\"alpha\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -23,18 +23,14 @@ VFile {
 
 exports[`dendronPub frontmatter tags WHEN configured with useHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-* * *
-
-## Tags
-
-1. [#first](tags.first.html)
-2. [#second](tags.second.html)
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">#first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">#second</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -44,11 +40,8 @@ has fm tags
 
 exports[`dendronPub frontmatter tags are not rendered when disabled 1`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -58,11 +51,8 @@ has fm tags
 
 exports[`dendronPub frontmatter tags are not rendered when missing 1`] = `
 VFile {
-  "contents": "# Fmtags
-
-has no fm tags
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has no fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -72,18 +62,14 @@ has no fm tags
 
 exports[`dendronPub frontmatter tags are rendered when available multiple tags 1`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-* * *
-
-## Tags
-
-1. [first](tags.first.html)
-2. [second](tags.second.html)
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">second</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -93,18 +79,14 @@ has fm tags
 
 exports[`dendronPub frontmatter tags are rendered when available multiple tags 2`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-* * *
-
-## Tags
-
-1. [first](tags.first.html)
-2. [second](tags.second.html)
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">second</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -114,17 +96,13 @@ has fm tags
 
 exports[`dendronPub frontmatter tags are rendered when available single tag 1`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-* * *
-
-## Tags
-
-1. [first](tags.first.html)
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -134,17 +112,13 @@ has fm tags
 
 exports[`dendronPub frontmatter tags are rendered when available single tag 2`] = `
 VFile {
-  "contents": "# Fmtags
-
-has fm tags
-
-* * *
-
-## Tags
-
-1. [first](tags.first.html)
-
-",
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -166,35 +140,28 @@ VFile {
 
 exports[`dendronPub note reference WHEN refs are back to back THEN render all 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo1</span></div>
-<a href=\\"foo1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div> <div class=\\"portal-container\\">
+</div></div><p></p> <p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo2</span></div>
-<a href=\\"foo2.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo2\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div>
-
-",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -204,49 +171,40 @@ VFile {
 
 exports[`dendronPub note reference WHEN refs are right on the next line THEN render all 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo1</span></div>
-<a href=\\"foo1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo1\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div>
-<div class=\\"portal-container\\">
+</div></div><p></p>
+<p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo2</span></div>
-<a href=\\"foo2.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo2\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div>
-<div class=\\"portal-container\\">
+</div></div><p></p>
+<p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo3</span></div>
-<a href=\\"foo3.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo3\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div>
-
-",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -256,23 +214,18 @@ VFile {
 
 exports[`dendronPub note reference assume vault 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>foo in vault2
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>foo in vault2</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -282,23 +235,18 @@ VFile {
 
 exports[`dendronPub note reference basic 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
-
-
-</div></div>
-
-",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -308,12 +256,10 @@ VFile {
 
 exports[`dendronPub note reference fail: ambiguous 1`] = `
 VFile {
-  "contents": "# Ref
-
-> Error rendering note reference. There are multiple notes with the name dupe. Please specify the vault prefix.
-
-
-",
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><blockquote>
+Error rendering note reference. There are multiple notes with the name dupe. Please specify the vault prefix.
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -323,12 +269,10 @@ VFile {
 
 exports[`dendronPub note reference fail: wildcard no match 1`] = `
 VFile {
-  "contents": "# Ref
-
-> Error rendering note reference. There are no matches for /\`baz./*/\`.
-
-
-",
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><blockquote>
+Error rendering note reference. There are no matches for \`baz.*\`.
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -338,12 +282,10 @@ VFile {
 
 exports[`dendronPub note reference fail: with vault prefix 1`] = `
 VFile {
-  "contents": "# Ref
-
-> No note with name bar found in vault vault2
-
-
-",
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><blockquote>
+No note with name bar found in vault vault2
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -353,12 +295,10 @@ VFile {
 
 exports[`dendronPub note reference nonexistent 1`] = `
 VFile {
-  "contents": "# Ref
-
-> No note with name bar found
-
-
-",
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><blockquote>
+No note with name bar found
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -368,23 +308,18 @@ VFile {
 
 exports[`dendronPub note reference ok: ambiguous but duplicateNoteBehavior set 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Dupe</span></div>
-<a href=\\"dupe.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"dupe\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>dupe in vault1
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>dupe in vault1</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -394,35 +329,28 @@ VFile {
 
 exports[`dendronPub note reference ok: wildcard 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
-<a href=\\"bar.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"bar.one\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>bar one
-
-
-</div></div><div class=\\"portal-container\\">
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar one</p>
+</div></div><p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
-<a href=\\"bar.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"bar.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>bar two
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar two</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -432,35 +360,28 @@ VFile {
 
 exports[`dendronPub note reference ok: wildcard 2`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
-<a href=\\"bar.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"bar.one\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>bar one
-
-
-</div></div><div class=\\"portal-container\\">
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar one</p>
+</div></div><p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
-<a href=\\"bar.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"bar.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>bar two
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar two</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -470,23 +391,18 @@ VFile {
 
 exports[`dendronPub note reference ok: with vault prefix 1`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>foo in vault2
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>foo in vault2</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -496,23 +412,18 @@ VFile {
 
 exports[`dendronPub note reference ok: with vault prefix 2`] = `
 VFile {
-  "contents": "# Ref
-
-<div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"ref\\">Ref</h1>
+<p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
+<div class=\\"portal-backlink\\">
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
-<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>foo in vault2
-
-
-</div></div>
-
-",
+<div class=\\"portal-parent-fader-bottom\\"></div><p>foo in vault2</p>
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -522,17 +433,13 @@ VFile {
 
 exports[`dendronPub prefix imagePrefix 1`] = `
 VFile {
-  "contents": "# Foo
-
-![alt-text](/bond/image-url.jpg)
-
-* * *
-
-**Children**
-
-1. [Ch1](foo.ch1.html)
-
-",
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p><img src=\\"image-url.jpg\\" alt=\\"alt-text\\"></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -542,17 +449,13 @@ VFile {
 
 exports[`dendronPub prefix imagePrefix with forward slash 1`] = `
 VFile {
-  "contents": "# Foo
-
-![alt-text](/bond/image-url.jpg)
-
-* * *
-
-**Children**
-
-1. [Ch1](foo.ch1.html)
-
-",
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

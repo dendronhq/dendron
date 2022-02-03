@@ -15,6 +15,7 @@ import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
 import type { NoteFNamesDict } from "../utils";
+import { DendronASTDest, ProcFlavor } from "./unified";
 
 export enum ResponseCode {
   OK = 200,
@@ -334,6 +335,10 @@ export type RenderNoteOpts = {
   id: string;
   /** Optionally, an entire note can be provided to be rendered. If provided, the engine won't look up the note by id and will instead render this note. */
   note?: NoteProps;
+  /** `HTML` by default. */
+  dest?: DendronASTDest;
+  /** `Preview` by default. */
+  flavor?: ProcFlavor;
 };
 
 export type RefreshNotesOpts = {

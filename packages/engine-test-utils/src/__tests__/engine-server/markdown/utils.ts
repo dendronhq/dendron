@@ -12,7 +12,6 @@ import {
 import {
   DendronASTData,
   DendronASTDest,
-  MDUtilsV4,
   MDUtilsV5,
   Processor,
   ProcFlavor,
@@ -64,7 +63,10 @@ export const createProcForTest = (opts: {
   useIdAsLink?: boolean;
 }) => {
   const { engine, dest, vault, fname } = opts;
-  const proc2 = MDUtilsV4.procFull({
+  // This was false by default for MDUtilsV4, but became true for MDUtilsV5.
+  // Using IDs for the links breaks snapshots since note ids are random.
+  if (opts.useIdAsLink === undefined) opts.useIdAsLink = false;
+  const data = {
     engine,
     dest,
     fname: fname || "root",
@@ -77,11 +79,11 @@ export const createProcForTest = (opts: {
         useId: opts.useIdAsLink,
       },
     },
-  });
+  };
   if (dest === DendronASTDest.HTML) {
-    return MDUtilsV4.procRehype({ proc: proc2 });
+    return MDUtilsV5.procRehypeFull(data);
   } else {
-    return proc2;
+    return MDUtilsV5.procRemarkFull(data);
   }
 };
 
@@ -105,18 +107,20 @@ export const cleanVerifyOpts = (opts: any): ProcVerifyOpts => {
  */
 export const createProcTests = (opts: {
   name: string;
+  skip?: boolean;
   setupFunc: TestPresetEntryV4["testFunc"];
   verifyFuncDict?: {
     [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] | DendronASTDest;
   };
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
 }): ProcTests[] => {
-  const { name, setupFunc, verifyFuncDict } = opts;
+  const { name, setupFunc, verifyFuncDict, skip } = opts;
+  if (skip) return [];
   let allTests: ProcTests[] = [];
   if (verifyFuncDict) {
     allTests = Object.values(DendronASTDest)
       .map((dest) => {
-        let funcOrKey = verifyFuncDict[dest];
+        const funcOrKey = verifyFuncDict[dest];
         let verifyFunc: TestPresetEntryV4["testFunc"];
         if (_.isUndefined(funcOrKey)) {
           return;
@@ -137,7 +141,7 @@ export const createProcTests = (opts: {
                 ...presetOpts,
                 extra: { dest },
               });
-              return await verifyFunc({ ...presetOpts, extra });
+              return verifyFunc({ ...presetOpts, extra });
             },
             { preSetupHook: opts.preSetupHook }
           ),
@@ -281,14 +285,6 @@ export const generateVerifyFunction = (opts: {
   return out;
 };
 
-export const processText = (opts: { text: string; proc: Processor }) => {
-  const { text, proc } = opts;
-  const respParse = proc.parse(text);
-  const respProcess = proc.processSync(text);
-  const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(text);
-  return { proc, respParse, respProcess, respRehype };
-};
-
 type ProcessTextV2Opts = {
   text: string;
   dest: DendronASTDest.HTML;
@@ -301,9 +297,9 @@ type ProcessTextV2Opts = {
 export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const { engine, text, fname, vault, configOverride } = opts;
   if (opts.dest !== DendronASTDest.HTML) {
-    const proc = MDUtilsV4.procDendron({
+    const proc = MDUtilsV5.procRemarkFull({
       engine,
-      configOverride,
+      config: configOverride,
       fname,
       dest: opts.dest,
       vault,
@@ -311,12 +307,20 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
     const resp = await proc.process(text);
     return { resp };
   } else {
-    const proc = MDUtilsV4.procDendronForPublish({
+    const proc = MDUtilsV5.procRehypeFull({
       engine,
-      configOverride,
+      config: configOverride,
       fname,
-      noteIndex: engine.notes["foo"],
       vault,
+      // Otherwise links generated in tests use randomly generated IDs which is unstable for snaps
+      wikiLinksOpts: {
+        useId: false,
+      },
+      publishOpts: {
+        wikiLinkOpts: {
+          useId: false,
+        },
+      },
     });
     const resp = await proc.process(text);
     return { resp };
@@ -327,5 +331,5 @@ export const processNote = async (opts: Omit<ProcessTextV2Opts, "text">) => {
   const { fname, engine, vault } = opts;
   const npath = path.join(engine.wsRoot, vault.fsPath, fname + ".md");
   const text = await fs.readFile(npath, { encoding: "utf8" });
-  return await processTextV2({ text, ...opts });
+  return processTextV2({ text, ...opts });
 };

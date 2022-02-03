@@ -10,6 +10,7 @@ import {
   NoteProps,
   DateTime,
   ConfigUtils,
+  ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -34,9 +35,9 @@ import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
 import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
-import { dendronPub } from "./remark/dendronPub";
+import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
-import { wikiLinks } from "./remark/wikiLinks";
+import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
 import { hashtags } from "./remark/hashtag";
@@ -46,6 +47,8 @@ import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
 import { WorkspaceService } from "../workspace";
 import { DateTimeFormatOptions } from "luxon";
+
+export { ProcFlavor };
 
 /**
  * What mode a processor should run in
@@ -66,27 +69,6 @@ export enum ProcMode {
   IMPORT = "IMPORT",
 }
 
-/**
- * If processor should run in an alternative flavor
- */
-export enum ProcFlavor {
-  /**
-   * No special processing
-   */
-  REGULAR = "REGULAR",
-  /**
-   * Apply publishing rules
-   */
-  PUBLISHING = "PUBLISHING",
-  /**
-   * Apply preview rules
-   */
-  PREVIEW = "PREVIEW",
-  /**
-   * Apply hover preview rules (used for the preview when hovering over a link)
-   */
-  HOVER_PREVIEW = "HOVER_PREVIEW",
-}
 /**
  * Options for how processor should function
  */
@@ -130,6 +112,8 @@ export type ProcDataFullOptsV5 = {
    * frontmatter variables exposed for substitution
    */
   fm?: any;
+  wikiLinksOpts?: WikiLinksOpts;
+  publishOpts?: DendronPubOpts;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -213,6 +197,12 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
+  static setNoteRefLvl(proc: Processor, lvl: number) {
+    // backwards compatibility
+    MDUtilsV4.setNoteRefLvl(proc, lvl);
+    return this.setProcData(proc, { noteRefLvl: lvl });
+  }
+
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
     // TODO: for backwards compatibility
@@ -276,7 +266,7 @@ export class MDUtilsV5 {
       .use(abbrPlugin)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
       .use(noteRefsV2)
-      .use(wikiLinks)
+      .use(wikiLinks, data.wikiLinksOpts)
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
@@ -360,6 +350,7 @@ export class MDUtilsV5 {
           proc = proc.use(dendronPub, {
             insertTitle,
             transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
+            ...data.publishOpts,
           });
 
           const config = data.config as IntermediateDendronConfig;

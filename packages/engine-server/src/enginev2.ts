@@ -53,6 +53,7 @@ import {
   GetDecorationsOpts,
   newRange,
   GetDecorationsPayload,
+  DendronASTDest,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -499,6 +500,8 @@ export class DendronEngineV2 implements DEngine {
   async renderNote({
     id,
     note,
+    flavor,
+    dest,
   }: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
     const ctx = "DendronEngineV2:renderNote";
 
@@ -543,7 +546,11 @@ export class DendronEngineV2 implements DEngine {
     // Either we don't have have the cached preview or the version that is
     // cached has gotten stale, hence we will re-render the note and cache
     // the new value.
-    const data = await this._renderNote(note);
+    const data = await this._renderNote({
+      note,
+      flavor: flavor || ProcFlavor.PREVIEW,
+      dest: dest || DendronASTDest.HTML,
+    });
 
     this.renderedCache.set(id, {
       updated: note.updated,
@@ -582,16 +589,37 @@ export class DendronEngineV2 implements DEngine {
     );
   }
 
-  private async _renderNote(note: NoteProps): Promise<string> {
-    const proc = MDUtilsV5.procRehypeFull(
-      {
-        engine: this,
-        fname: note.fname,
-        vault: note.vault,
-        config: this.config,
-      },
-      { flavor: ProcFlavor.PREVIEW }
-    );
+  private async _renderNote({
+    note,
+    flavor,
+    dest,
+  }: {
+    note: NoteProps;
+    flavor: ProcFlavor;
+    dest: DendronASTDest;
+  }): Promise<string> {
+    let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
+    if (dest === DendronASTDest.HTML) {
+      proc = MDUtilsV5.procRehypeFull(
+        {
+          engine: this,
+          fname: note.fname,
+          vault: note.vault,
+          config: this.config,
+        },
+        { flavor }
+      );
+    } else {
+      proc = MDUtilsV5.procRemarkFull(
+        {
+          engine: this,
+          fname: note.fname,
+          vault: note.vault,
+          dest,
+        },
+        { flavor }
+      );
+    }
     const payload = await proc.process(NoteUtils.serialize(note));
     const renderedNote = payload.toString();
     return renderedNote;

@@ -2,7 +2,7 @@
 
 exports[`wikiLinks compile "HTML: WITH_ALIAS" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">bar doesn't foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -19,7 +19,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_ALIAS_APOSTROPHE" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"kb.note.20211011124050\\">Coulomb's Constant</a></p>
 <hr>
 <strong>Children</strong>
@@ -36,7 +36,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_ALIAS_HASH" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">#bar</a></p>
 <hr>
 <strong>Children</strong>
@@ -53,7 +53,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo#one\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -70,7 +70,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_BLOCK_ANCHOR" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo#^block\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -87,7 +87,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_EXTENSION" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -104,7 +104,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_ID_AS_LINK" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo-id\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -120,7 +120,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"root#^block\\">Root</a></p>
 <hr>
 <strong>Children</strong>
@@ -137,7 +137,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo-2\\">Foo</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -148,7 +148,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
@@ -165,7 +165,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">bar</a></p>
 <hr>
 <strong>Children</strong>
@@ -182,7 +182,7 @@ VFile {
 
 exports[`wikiLinks compile "HTML: regular" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>

@@ -11,7 +11,6 @@ import {
   DendronPublishingConfig,
   GithubEditViewModeEnum,
   CleanDendronPublishingConfig,
-  configIsV4,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";

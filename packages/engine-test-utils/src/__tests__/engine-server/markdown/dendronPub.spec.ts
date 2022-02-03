@@ -756,9 +756,9 @@ describe("dendronPub", () => {
     });
   });
 
-  describe("usePrettyRefs", () => {
+  describe("enablePrettyRefs", () => {
     testWithEngine(
-      "config.site.usePrettyRef: true",
+      "config.publishing.enablePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
@@ -786,7 +786,7 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.site.usePrettyRef: false",
+      "config.publishing.enablePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
@@ -814,7 +814,7 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.usePrettyRef: true",
+      "config.enablePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
@@ -842,7 +842,7 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.usePrettyRef: false",
+      "config.enablePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
@@ -870,7 +870,7 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "usePrettyRef defaults to true in both cases",
+      "enablePrettyRef defaults to true in both cases",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         const previewResp = await MDUtilsV5.procRehypeFull(
@@ -910,7 +910,7 @@ describe("dendronPub", () => {
       { preSetupHook: ENGINE_HOOKS.setupBasic }
     );
 
-    describe("WHEN config sets usePrettyRefs true", () => {
+    describe("WHEN config sets enablePrettyRefs true", () => {
       describe("AND note overrides to false", () => {
         testWithEngine(
           "THEN renders without pretty refs",
@@ -960,7 +960,7 @@ describe("dendronPub", () => {
       });
     });
 
-    describe("WHEN config sets usePrettyRefs false", () => {
+    describe("WHEN config sets enablePrettyRefs false", () => {
       describe("AND note overrides to true", () => {
         testWithEngine(
           "THEN renders with pretty refs",

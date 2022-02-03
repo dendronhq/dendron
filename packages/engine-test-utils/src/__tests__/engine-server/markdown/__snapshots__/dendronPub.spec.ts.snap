@@ -21,6 +21,174 @@ VFile {
 }
 `;
 
+exports[`dendronPub enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
+VFile {
+  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
+VFile {
+  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
+<p></p><p></p><p>bar body</p><p></p><p></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs config.enablePrettyRef: false 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p></p><p></p><p>bar body</p><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs config.enablePrettyRef: true 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p></p><p></p><p>bar body</p><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs config.publishing.enablePrettyRef: true 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs enablePrettyRef defaults to true in both cases 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub enablePrettyRefs enablePrettyRef defaults to true in both cases 2`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+<a href=\\"/notes/bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`dendronPub frontmatter tags WHEN configured with useHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
@@ -28,8 +196,8 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">#first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">#second</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">#first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">#second</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -67,8 +235,8 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">second</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -84,8 +252,8 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second.html\\">second</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -101,7 +269,7 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -117,7 +285,7 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first.html\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -438,7 +606,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -454,175 +622,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs WHEN config sets usePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
-VFile {
-  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs WHEN config sets usePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
-VFile {
-  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs config.site.usePrettyRef: false 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs config.site.usePrettyRef: true 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs config.usePrettyRef: false 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
 <li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs config.usePrettyRef: true 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs usePrettyRef defaults to true in both cases 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub usePrettyRefs usePrettyRef defaults to true in both cases 2`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
-<a href=\\"/notes/bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

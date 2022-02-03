@@ -21,12 +21,15 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "clean": "yarn rimraf public data out",
-    "rimraf": "npx rimraf"
+    "rimraf": "npx rimraf",
+    "test": "playwright test",
+    "test:skipbuild": "SKIP_BUILD=1 playwright test"
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",
     "@dendronhq/common-all": "^0.80.0",
     "@dendronhq/common-frontend": "^0.80.0",
+    "@playwright/test": "^1.18.1",
     "antd": "^4.15.5",
     "fs-extra": "^10.0.0",
     "html-react-parser": "^1.3.0",

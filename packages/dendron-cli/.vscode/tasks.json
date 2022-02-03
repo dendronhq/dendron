@@ -67,6 +67,15 @@
         "cwd": "D:/dendron_setup/dendron/"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "publish-pod",
+      "type": "shell",
+      "command": "node --inspect dendron/packages/dendron-cli/lib/bin/dendron-cli publishPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.markdown --vault vault --query root --podSource builtin",
+      "options": {
+        "cwd": "E:/dendron-code/"
+      },
+      "problemMatcher": []
     }
   ]
 }

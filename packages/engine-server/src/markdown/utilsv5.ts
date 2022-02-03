@@ -368,9 +368,7 @@ export class MDUtilsV5 {
           }
           // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
-            const prefix = data.config?.site.assetsPrefix
-              ? data.config?.site.assetsPrefix + "/notes/"
-              : "/notes/";
+            const prefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
             proc = proc.use(dendronPub, {
               wikiLinkOpts: {
                 prefix,

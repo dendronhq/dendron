@@ -319,7 +319,7 @@ describe("dendronPub", () => {
       );
     });
 
-    describe("WHEN configured with useHashesForFMTags option", () => {
+    describe("WHEN configured with enableHashesForFMTags option", () => {
       test("THEN tags are rendered with a # symbol", async () => {
         await runEngineTestV5(
           async ({ engine, vaults }) => {

@@ -189,7 +189,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags WHEN configured with useHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
+exports[`dendronPub frontmatter tags WHEN configured with enableHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>

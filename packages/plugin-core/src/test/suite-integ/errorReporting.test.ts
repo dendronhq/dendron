@@ -1,4 +1,8 @@
-import { rewriteFilename } from "@dendronhq/common-server";
+import { error2PlainObject } from "@dendronhq/common-all";
+import {
+  isBadErrorThatShouldBeSampled,
+  rewriteFilename,
+} from "@dendronhq/common-server";
 import { expect } from "../testUtilsv2";
 
 suite("WHEN a stack trace is sent to sentry", () => {
@@ -33,5 +37,19 @@ suite("WHEN a stack trace is sent to sentry", () => {
         "/Users/user.test/.vscode-insiders/extensions/dendron.nightly-0.79.4/dist/extension.js"
       )
     ).toEqual("app:///dist/extension.js");
+  });
+
+  test("THEN isBadErrorThatShouldBeSampled() correctly detects errors we want sample", () => {
+    const error = new Error(
+      "ENOENT: no such file or directory, open '/Users/someone/some/path/to/dendron.yml'"
+    );
+    expect(isBadErrorThatShouldBeSampled(error)).toBeTruthy();
+    expect(
+      isBadErrorThatShouldBeSampled(error2PlainObject(error))
+    ).toBeTruthy();
+
+    expect(
+      isBadErrorThatShouldBeSampled(new Error("some other error"))
+    ).toBeFalsy();
   });
 });

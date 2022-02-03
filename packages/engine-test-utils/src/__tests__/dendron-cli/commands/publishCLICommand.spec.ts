@@ -38,6 +38,7 @@ export const evalPublishCmd = ({
   cli?: PublishCLICommand;
 } & PublishCLICommandCLIOpts) => {
   const cli = opts.cli ? opts.cli : new PublishCLICommand();
+  sinon.stub(cli, "validateConfig").resolves();
   return cli.eval({ cmd, ...opts });
 };
 

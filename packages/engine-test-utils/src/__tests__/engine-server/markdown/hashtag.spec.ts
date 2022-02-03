@@ -188,7 +188,7 @@ describe("hashtag", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            '<a class="color-tag" style="--tag-color: #c95efb;" href="tags.my-hash.tag0.html">#my-hash.tag0</a>'
+            '<a class="color-tag" style="--tag-color: #c95efb;" href="tags.my-hash.tag0">#my-hash.tag0</a>'
           );
         },
       },
@@ -208,7 +208,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#color`);
             await checkVFile(
               resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color">#color</a>'
             );
           },
           {
@@ -225,7 +225,7 @@ describe("hashtag", () => {
         );
       });
 
-      test("when configured with noRandomlyGeneratedColors, only uses explicit colors", async () => {
+      test("when enableRandomlyGeneratedColors is false, only uses explicit colors", async () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine }) => {
@@ -237,8 +237,8 @@ describe("hashtag", () => {
             const resp = await proc.process(`#color #uncolored`);
             await checkVFile(
               resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color.html">#color</a>',
-              '<a href="tags.uncolored.html">#uncolored</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.color">#color</a>',
+              '<a href="tags.uncolored">#uncolored</a>'
             );
           },
           {
@@ -260,7 +260,7 @@ describe("hashtag", () => {
                   ConfigUtils.setPublishProp(
                     config,
                     "enableRandomlyColoredTags",
-                    true
+                    false
                   );
                   return config;
                 },
@@ -283,7 +283,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color">#parent.color</a>'
             );
           },
           {
@@ -312,7 +312,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color.html">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #FF0033;" href="tags.parent.color">#parent.color</a>'
             );
           },
           {
@@ -346,7 +346,7 @@ describe("hashtag", () => {
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
               resp,
-              '<a class="color-tag" style="--tag-color: #00FF11;" href="tags.parent.color.html">#parent.color</a>'
+              '<a class="color-tag" style="--tag-color: #00FF11;" href="tags.parent.color">#parent.color</a>'
             );
           },
           {

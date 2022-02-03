@@ -22,8 +22,8 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"alpha.html\\">Alpha (vault1)</a></li>
-<li><a href=\\"omega.html\\">Omega (vault1)</a></li>
+<li><a href=\\"alpha\\">Alpha (vault1)</a></li>
+<li><a href=\\"omega\\">Omega (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -38,8 +38,8 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"one.html\\">One (vault1)</a></li>
-<li><a href=\\"two.html\\">Two (vault1)</a></li>
+<li><a href=\\"one\\">One (vault1)</a></li>
+<li><a href=\\"two\\">Two (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -54,7 +54,7 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"one.html\\">One (vault1)</a></li>
+<li><a href=\\"one\\">One (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -69,7 +69,7 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"one.html\\">One (vault1)</a></li>
+<li><a href=\\"one\\">One (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -84,8 +84,8 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"three.html\\">Three (vault1)</a></li>
-<li><a href=\\"two.html\\">Two (vault1)</a></li>
+<li><a href=\\"three\\">Three (vault1)</a></li>
+<li><a href=\\"two\\">Two (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

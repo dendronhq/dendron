@@ -29,8 +29,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -46,8 +46,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -58,13 +58,13 @@ VFile {
 
 exports[`user tags rendering compile "HTML: simple" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"user.Hamilton.Margaret.html\\">@Hamilton.Margaret</a></p>
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a href=\\"user.Hamilton.Margaret\\">@Hamilton.Margaret</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

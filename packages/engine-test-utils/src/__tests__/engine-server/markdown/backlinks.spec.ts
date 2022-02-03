@@ -52,7 +52,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [`<a href="alpha.html">Alpha (vault1)</a>`],
+            match: [`<a href="alpha">Alpha (vault1)</a>`],
           })
         ).toBeTruthy();
       },
@@ -87,6 +87,8 @@ describe("backlinks", () => {
           await ENGINE_HOOKS.setupLinks(opts);
           TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = {
                 siteHierarchies: ["alpha"],
                 siteNotesDir: "docs",
@@ -122,8 +124,8 @@ describe("backlinks", () => {
           await AssertUtils.assertInString({
             body: resp.contents as string,
             match: [
-              `<a href="three.html">Three (vault1)</a>`,
-              `<a href="two.html">Two (vault1)</a>`,
+              `<a href="three">Three (vault1)</a>`,
+              `<a href="two">Two (vault1)</a>`,
             ],
           })
         ).toBeTruthy();
@@ -172,10 +174,10 @@ describe("backlinks", () => {
           await AssertUtils.assertInString({
             body: resp.contents as string,
             nomatch: [
-              `<a href="secret1.html">Secret1 (vault2)</a>`,
-              `<a href="secret2.html">Secret2 (vault2)</a>`,
+              `<a href="secret1">Secret1 (vault2)</a>`,
+              `<a href="secret2">Secret2 (vault2)</a>`,
             ],
-            match: [`<a href="not-secret.html">Not Secret (vaultThree)</a>`],
+            match: [`<a href="not-secret">Not Secret (vaultThree)</a>`],
           })
         ).toBeTruthy();
       },
@@ -241,7 +243,7 @@ describe("backlinks", () => {
           expect(
             await AssertUtils.assertInString({
               body: resp.contents as string,
-              match: [`<a href="one.html">One (vault1)</a>`],
+              match: [`<a href="one">One (vault1)</a>`],
             })
           ).toBeTruthy();
         },
@@ -286,8 +288,8 @@ describe("backlinks", () => {
             await AssertUtils.assertInString({
               body: resp.contents as string,
               match: [
-                `<a href="one.html">One (vault1)</a>`,
-                `<a href="two.html">Two (vault1)</a>`,
+                `<a href="one">One (vault1)</a>`,
+                `<a href="two">Two (vault1)</a>`,
               ],
             })
           ).toBeTruthy();
@@ -341,7 +343,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [`<a href="one.html">One (vault1)</a>`],
+            match: [`<a href="one">One (vault1)</a>`],
           })
         ).toBeTruthy();
       },

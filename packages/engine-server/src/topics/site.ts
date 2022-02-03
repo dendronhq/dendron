@@ -413,23 +413,6 @@ export class SiteUtils {
     return hConfig;
   }
 
-  // TODO: deprecate
-  static getDomains(opts: {
-    notes: NotePropsDict;
-    config: DendronSiteConfig;
-  }): NoteProps[] {
-    const { notes, config } = opts;
-    if (config.siteHierarchies.length === 1) {
-      const fname = config.siteHierarchies[0];
-      const rootNotes = NoteUtils.getNotesByFname({ fname, notes });
-      return [rootNotes[0]].concat(
-        rootNotes[0].children.map((ent) => notes[ent])
-      );
-    } else {
-      return _.filter(_.values(notes), { parent: null });
-    }
-  }
-
   static getSiteOutputPath(opts: {
     config: IntermediateDendronConfig;
     wsRoot: string;

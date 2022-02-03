@@ -35,9 +35,14 @@ describe("GIVEN procHTMLv4", () => {
               TestConfigUtils.withConfig(
                 (config) => {
                   // procHTML is still in v4 config. (but never used elsewhere)
-                  config.site!.siteUrl = "https://foo.com";
-                  config.site!.assetsPrefix = "/customPrefix";
-                  config.site!.siteNotesDir = "notes";
+                  config.version = 4;
+                  config.site = {
+                    siteHierarchies: ["root"],
+                    siteRootDir: "docs",
+                  };
+                  config.site.siteUrl = "https://foo.com";
+                  config.site.assetsPrefix = "/customPrefix";
+                  config.site.siteNotesDir = "notes";
                   return config;
                 },
                 { wsRoot: opts.wsRoot }

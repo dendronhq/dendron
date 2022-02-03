@@ -1,40 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers "HTML: NOT_ENABLED" 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p>::: aside class-one class-two</p>
-<h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header-one\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header One</h1>
-<p>With container contents.
-:::</p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`containers "HTML: REGULAR_CASE" 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<aside class=\\"class-one class-two\\"><h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header-one\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header One</h1><p>With container contents. </p></aside>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
 exports[`containers "MD_DENDRON: NOT_ENABLED" 1`] = `
 VFile {
   "contents": "::: aside class-one class-two

@@ -473,8 +473,6 @@ describe("noteRefV2", () => {
     const WITH_START_ANCHOR_OFFSET = createProcTests({
       name: "WITH_START_ANCHOR_OFFSET",
       setupFunc: async (opts) => {
-        // let proc = await createProc(opts, {});
-        // return processText({ proc, text: "# Foo Bar\n![[foo#header2,1]]" });
         const { engine, vaults } = opts;
         return processTextV2({
           text: "# Foo Bar\n![[foo#header2,1]]",
@@ -709,44 +707,6 @@ describe("noteRefV2", () => {
       },
       preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
     });
-
-    // const RECURSIVE_TOO_DEEP_TEST_CASES = createProcTests({
-    //   name: "RECURSIVE_TOO_DEEP_TEST_CASES",
-    //   setupFunc: async ({ engine, extra, vaults }) => {
-    //     const resp = MDUtilsV5.procRemarkFull({
-    //       engine,
-    //       dest: extra.dest,
-    //       vault: vaults[0],
-    //     }).process(linkWithNoExtension);
-    //     return { resp };
-    //   },
-    //   verifyFuncDict: {
-    //     [DendronASTDest.HTML]: async ({ extra }) => {
-    //       const { resp } = extra;
-    //       expect(resp).toMatchSnapshot();
-    //       return [
-    //         {
-    //           actual: await AssertUtils.assertInString({
-    //             body: resp.toString(),
-    //             match: [
-    //               "# Foo",
-    //               "# Foo.One",
-    //               "# Foo.Two",
-    //               "portal",
-    //               "Regular wikilink",
-    //             ],
-    //           }),
-    //           expected: true,
-    //         },
-    //       ];
-    //     },
-    //   },
-    //   preSetupHook: async(opts) => {
-    //     const {wsRoot, vaults} = opts;
-    //     const vault = vaults[0];
-    //     await NoteTestUtilsV4.createNote({fname: "foo", wsRoot, vault, body: "# Head1\n![[foo]]"})
-    //   },
-    // });
 
     const WILDCARD_CASE = createProcTests({
       name: "wildcard",

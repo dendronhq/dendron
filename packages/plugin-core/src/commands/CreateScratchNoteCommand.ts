@@ -7,24 +7,26 @@ import {
 } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { LookupNoteTypeEnum } from "../components/lookup/types";
+import { LookupSelectionTypeEnum } from "@dendronhq/common-all";
 
 type CommandOpts = NoteLookupRunOpts;
 type CommandOutput = NoteLookupOutput | undefined;
 
-export { CommandOpts as LookupJournalNoteOpts };
+export { CommandOpts as LookupScratchNoteOpts };
 
-export class LookupJournalNoteCommand extends BasicCommand<
+export class CreateScratchNoteCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.LOOKUP_JOURNAL.key;
+  key = DENDRON_COMMANDS.CREATE_SCRATCH.key;
 
   async execute(opts: CommandOpts) {
-    const ctx = "LookupJournalNote";
+    const ctx = "CreateScratchNote";
     Logger.info({ ctx, msg: "enter", opts });
     const noteLookupRunOpts = {
       ...opts,
-      noteType: LookupNoteTypeEnum.journal,
+      noteType: LookupNoteTypeEnum.scratch,
+      selectionType: LookupSelectionTypeEnum.selection2link,
     } as NoteLookupRunOpts;
     return AutoCompletableRegistrar.getNoteLookupCmd().run(noteLookupRunOpts);
   }

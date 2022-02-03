@@ -396,9 +396,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
   },
-  LOOKUP_JOURNAL: {
-    key: "dendron.lookupJournalNote",
-    title: `${CMD_PREFIX} Lookup Journal Note`,
+  CREATE_JOURNAL: {
+    key: "dendron.createJournalNote",
+    title: `${CMD_PREFIX} Create Journal Note`,
     keybindings: {
       key: "ctrl+shift+j",
       mac: "cmd+shift+j",
@@ -409,9 +409,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  LOOKUP_SCRATCH: {
-    key: "dendron.lookupScratchNote",
-    title: `${CMD_PREFIX} Lookup Scratch Note`,
+  CREATE_SCRATCH: {
+    key: "dendron.createScratchNote",
+    title: `${CMD_PREFIX} Create Scratch Note`,
     keybindings: {
       key: "ctrl+shift+s",
       mac: "cmd+shift+s",

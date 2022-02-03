@@ -1,12 +1,12 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
-import { LookupJournalNoteCommand } from "../../commands/LookupJournalNoteCommand";
+import { CreateJournalNoteCommand } from "../../commands/CreateJournalNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 
-suite("LookupJournalNoteCommand", function () {
+suite("CreateJournalNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
   describeMultiWS(
@@ -19,7 +19,7 @@ suite("LookupJournalNoteCommand", function () {
       test("THEN journal note with correct name created.", async () => {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
-        const cmd = new LookupJournalNoteCommand();
+        const cmd = new CreateJournalNoteCommand();
         const { vaults, engine } = ext.getDWorkspace();
         const note = NoteUtils.getNoteByFnameFromEngine({
           fname: "foo",

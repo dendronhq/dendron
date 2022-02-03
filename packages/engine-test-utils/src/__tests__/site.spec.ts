@@ -103,6 +103,8 @@ describe("SiteUtils", () => {
         const noteIndex = engine.notes["alpha"];
         const config = TestConfigUtils.withConfig(
           (config) => {
+            // TODO: remove version overwrite after config.site is completely deprecated
+            config.version = 4;
             config.site = createSiteConfig({
               siteHierarchies: ["alpha", "beta"],
               siteRootDir,
@@ -157,6 +159,8 @@ describe("SiteUtils", () => {
         const noteIndex = engine.notes["alpha"];
         const config = TestConfigUtils.withConfig(
           (config) => {
+            // TODO: remove version overwrite after config.site is completely deprecated
+            config.version = 4;
             config.site = createSiteConfig({
               siteHierarchies: ["alpha"],
               siteRootDir,
@@ -204,6 +208,8 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
                 siteRootDir,
@@ -248,6 +254,8 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
                 siteRootDir,
@@ -292,6 +300,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
@@ -334,6 +344,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
@@ -382,6 +394,8 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["root"],
                 siteRootDir,
@@ -435,6 +449,8 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["root"],
                 siteRootDir,
@@ -472,6 +488,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
@@ -507,6 +525,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
@@ -560,6 +580,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
                 siteRootDir,
@@ -595,6 +617,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot, vaults }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
                 siteRootDir,
@@ -644,6 +668,8 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
+              // TODO: remove version overwrite after config.site is completely deprecated
+              config.version = 4;
               config.site = createSiteConfig({
                 siteHierarchies: ["daily"],
                 siteRootDir,
@@ -721,6 +747,8 @@ describe("SiteUtils", () => {
                 const vaults = ConfigUtils.getVaults(config);
                 const bvault = vaults.find((ent) => ent.fsPath === "vault2");
                 bvault!.visibility = DVaultVisibility.PRIVATE;
+                // TODO: remove version overwrite after config.site is completely deprecated
+                config.version = 4;
                 const sconfig: DendronSiteConfig = {
                   siteHierarchies: ["root"],
                   siteRootDir,

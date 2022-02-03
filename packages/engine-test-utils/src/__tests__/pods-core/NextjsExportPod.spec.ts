@@ -243,7 +243,7 @@ describe("nextjs export", () => {
         await checkFile(
           { fpath: path.join(dest, "data", "dendron.json") },
           `"siteUrl": "https://foo.com"`,
-          `"usePrettyLinks": true`
+          `"enablePrettyLinks": true`
         );
         // check pretty url
         await checkFile(

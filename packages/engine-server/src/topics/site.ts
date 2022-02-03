@@ -18,6 +18,7 @@ import {
   BooleanResp,
   ConfigUtils,
   DendronPublishingConfig,
+  configIsV4,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -150,7 +151,11 @@ export class SiteUtils {
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
 
-    const cleanPublishingConfig = DConfig.cleanSiteConfig(config);
+    const cleanPublishingConfig = configIsV4(config)
+      ? DConfig.cleanSiteConfig(
+          ConfigUtils.getSite(config) as DendronSiteConfig
+        )
+      : DConfig.cleanPublishingConfig(ConfigUtils.getPublishing(config));
     const { siteHierarchies } = cleanPublishingConfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];

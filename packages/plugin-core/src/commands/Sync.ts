@@ -1,10 +1,15 @@
-import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
+import {
+  DendronError,
+  ERROR_SEVERITY,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { getExtension } from "../workspace";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 const L = Logger;
@@ -22,11 +27,14 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   key = DENDRON_COMMANDS.SYNC.key;
 
   static countDone(results: SyncActionResult[]): number {
-    return results.filter((result) => result.status === SyncActionStatus.DONE)
-      .length;
+    return this.count(results, SyncActionStatus.DONE);
   }
 
-  static filteredRepoNames(
+  static count(results: SyncActionResult[], status: SyncActionStatus) {
+    return results.filter((result) => result.status === status).length;
+  }
+
+  private static filteredRepoNames(
     results: SyncActionResult[],
     status: SyncActionStatus
   ): string[] {
@@ -34,18 +42,141 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       (result) => result.status === status
     );
     if (matchingResults.length === 0) return [];
-    return matchingResults.map((result) => result.repo);
+    return matchingResults.map((result) => {
+      // Display the vault names for info/error messages
+      if (result.vaults.length === 1) {
+        return VaultUtils.getName(result.vaults[0]);
+      }
+      // But if there's more than one vault in the repo, then use the repo path which is easier to interpret
+      return result.repo;
+    });
+  }
+
+  private static generateReportMessage({
+    committed,
+    pulled,
+    pushed,
+  }: {
+    committed: SyncActionResult[];
+    pulled: SyncActionResult[];
+    pushed: SyncActionResult[];
+  }) {
+    const message = ["Finished sync."];
+    // Report anything unusual the user probably should know about
+    let maxMessageSeverity: MessageSeverity = MessageSeverity.INFO;
+
+    const makeMessage = (
+      status: SyncActionStatus,
+      results: SyncActionResult[][],
+      fn: (repos: string) => {
+        msg: string;
+        severity: MessageSeverity;
+      }
+    ) => {
+      const uniqResults = _.uniq(_.flattenDeep(results));
+      const repos = SyncCommand.filteredRepoNames(uniqResults, status);
+      if (repos.length === 0) return;
+      const { msg, severity } = fn(repos.join(", "));
+      message.push(msg);
+      if (severity > maxMessageSeverity) maxMessageSeverity = severity;
+    };
+
+    // Errors, sync is probably misconfigured or there's something wrong with git
+    makeMessage(SyncActionStatus.CANT_STASH, [pulled], (repos) => {
+      return {
+        msg: `Can't pull ${repos} because there are local changes that can't be stashed.`,
+        severity: MessageSeverity.ERROR,
+      };
+    });
+    makeMessage(SyncActionStatus.NOT_PERMITTED, [pushed], (repos) => {
+      return {
+        msg: `Can't pull ${repos} because this user is not permitted.`,
+        severity: MessageSeverity.ERROR,
+      };
+    });
+    makeMessage(SyncActionStatus.BAD_REMOTE, [pulled, pushed], (repos) => {
+      return {
+        msg: `Can't pull or push ${repos} because of a connection problem. Check your internet connection, repository permissions, and credentials.`,
+        severity: MessageSeverity.ERROR,
+      };
+    });
+    // Warnings, need user interaction to continue sync
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT,
+      [committed, pulled, pushed],
+      (repos) => {
+        return {
+          msg: `Skipped ${repos} because they have merge conflicts that must be resolved manually.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT_AFTER_PULL,
+      [pulled],
+      (repos) => {
+        return {
+          msg: `Pulled ${repos} but they have merge conflicts that must be resolved.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE,
+      [pulled],
+      (repos) => {
+        return {
+          msg: `Pulled ${repos} but encountered merge conflicts when restoring local changes.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(
+      SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES,
+      [pulled],
+      (repos) => {
+        return {
+          msg: `Can't pull ${repos} because there are local changes, and pulling will cause a merge conflict. You must commit your local changes first.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(
+      SyncActionStatus.REBASE_IN_PROGRESS,
+      [pulled, pushed, committed],
+      (repos) => {
+        return {
+          msg: `Skipped ${repos} because there's a rebase in progress that must be resolved.`,
+          severity: MessageSeverity.WARN,
+        };
+      }
+    );
+    makeMessage(SyncActionStatus.NO_UPSTREAM, [pulled, pushed], (repos) => {
+      return {
+        msg: `Skipped pulling or pushing ${repos} because they don't have upstream branches configured.`,
+        severity: MessageSeverity.WARN,
+      };
+    });
+    makeMessage(SyncActionStatus.UNPULLED_CHANGES, [pushed], (repos) => {
+      return {
+        msg: `Can't push ${repos} because there are unpulled changes.`,
+        severity: MessageSeverity.WARN,
+      };
+    });
+
+    return { message, maxMessageSeverity };
   }
 
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
-    const workspaceService = getExtension().workspaceService;
+    const workspaceService = ExtensionProvider.getExtension().workspaceService;
     if (_.isUndefined(workspaceService))
       throw new DendronError({
         message: "Workspace is not initialized",
         severity: ERROR_SEVERITY.FATAL,
       });
+    const engine = ExtensionProvider.getEngine();
 
     const { committed, pulled, pushed } = await window.withProgress(
       {
@@ -55,7 +186,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       },
       async (progress) => {
         progress.report({ increment: 0, message: "committing repos" });
-        const committed = await workspaceService.commitAndAddAll();
+        const committed = await workspaceService.commitAndAddAll({ engine });
         L.info(committed);
         progress.report({ increment: 25, message: "pulling repos" });
         const pulled = await workspaceService.pullVaults();
@@ -70,28 +201,13 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       }
     );
 
-    const message = ["Finished sync."];
-
-    // Report anything unusual the user probably should know about
-    const uncommitted = SyncCommand.filteredRepoNames(
+    const { message, maxMessageSeverity } = SyncCommand.generateReportMessage({
       committed,
-      SyncActionStatus.UNCOMMITTED_CHANGES
-    ).join(", ");
-    if (uncommitted.length > 0) {
-      message.push(
-        `Skipped pulling repos ${uncommitted} because they have uncommitted changes.`
-      );
-    }
-    const noUpstream = _.uniq([
-      ...SyncCommand.filteredRepoNames(pushed, SyncActionStatus.NO_UPSTREAM),
-      ...SyncCommand.filteredRepoNames(pulled, SyncActionStatus.NO_UPSTREAM),
-    ]).join(", ");
-    if (noUpstream.length > 0) {
-      message.push(
-        `Skipped pulling or pushing repos ${noUpstream} because they don't have upstream branches configured.`
-      );
-    }
+      pulled,
+      pushed,
+    });
 
+    // Successful operations
     const committedDone = SyncCommand.countDone(committed);
     const pulledDone = SyncCommand.countDone(pulled);
     const pushedDone = SyncCommand.countDone(pushed);
@@ -99,12 +215,15 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     message.push(`Committed ${committedDone} ${repos(committedDone)},`);
     message.push(`tried pulling ${pulledDone}`);
     message.push(`and pushing ${pushedDone} ${repos(pushedDone)}.`);
+    const finalMessage = message.join(" ");
 
-    window.showInformationMessage(message.join(" "));
+    VSCodeUtils.showMessage(maxMessageSeverity, finalMessage, {});
+
     return {
       committed,
       pulled,
       pushed,
+      finalMessage,
     };
   }
 }

@@ -15,7 +15,7 @@ export class Git {
     public opts: { localUrl: string; remoteUrl?: string; bare?: boolean }
   ) {}
 
-  async _execute(cmd: string): Promise<{ stdout: string; stderr: string }> {
+  async _execute(cmd: string) {
     const [git, ...args] = cmd.split(" ");
     return execa(git, args, { cwd: this.opts.localUrl });
   }
@@ -116,6 +116,14 @@ export class Git {
     });
   }
 
+  async rebaseAbort() {
+    await this._execute("git rebase --abort");
+  }
+
+  async fetch() {
+    return this._execute("git fetch");
+  }
+
   async push(setUpstream?: { remote: string; branch: string }) {
     const { localUrl: cwd } = this.opts;
     let setUpstremArg = "";
@@ -125,6 +133,49 @@ export class Git {
       shell: true,
       cwd,
     });
+  }
+
+  /** Creates a dangling stash commit without changing the index or working tree. */
+  async stashCreate() {
+    const { stdout } = await this._execute(`git stash create`);
+    return stdout;
+  }
+
+  /** Confirms that the commit given (output of {@link Git.stashCreate}) is a valid commit. */
+  async isValidStashCommit(commit: string): Promise<boolean> {
+    try {
+      const { localUrl: cwd } = this.opts;
+      const { exitCode } = await execa.command(`git stash show ${commit}`, {
+        cwd,
+      });
+      return exitCode === 0;
+    } catch {
+      // If we can't verify for some reason, just say it's invalid for safety. That way we won't attempt any destructive actions.
+      return false;
+    }
+  }
+
+  /** Applies a stash commit created by {@link Git.stashCreate}.
+   *
+   * @returns true if the stash applied cleanly, false if there was a merge conflict.
+   *  False doesn't mean the stash wasn't applied, just that it conflicted.
+   */
+  async stashApplyCommit(commit: string) {
+    try {
+      await this._execute(`git stash apply ${commit}`);
+      return true;
+    } catch (error) {
+      // This can return a non-0 exit code and "fail" just because of merge conflicts.
+      if (await this.hasMergeConflicts()) return false;
+      // If it's something else though, do actually fail
+      throw error;
+    }
+  }
+
+  /** Same as `git reset`. If a parameter is passed, it's `git reset --soft` or `git reset --hard`. */
+  async reset(resetType?: "soft" | "hard") {
+    const typeFlag = resetType === undefined ? "" : `--${resetType}`;
+    await this._execute(`git reset ${typeFlag}`);
   }
 
   // === extra commands
@@ -185,9 +236,108 @@ export class Git {
     return !_.isEmpty(stdout);
   }
 
+  /** Check that local has changes that upstream doesn't. */
+  async hasPushableChanges(upstream: string) {
+    return !(
+      (await this.diff({
+        nameOnly: true,
+        oldCommit: upstream,
+        newCommit: "HEAD",
+      })) === ""
+    );
+  }
+
+  /** These are the short status symbols git uses to identify files with merge conflicts.
+   *
+   * See the [git docs](https://www.git-scm.com/docs/git-status#_short_format) for details.
+   * The symbol pairs marked "unmerged" are the states that can happen when there is a merge conflict.
+   */
+  private static MERGE_CONFLICT_REGEX = /^(DD|AA|UU|AU|UA|DU|UD)/;
+
+  /** Returns true if there are merge conflicts, caused by a merge or rebase. */
+  async hasMergeConflicts() {
+    const { stdout } = await this._execute("git status --porcelain");
+    return Git.MERGE_CONFLICT_REGEX.test(stdout);
+  }
+
+  async hasAccessToRemote(): Promise<boolean> {
+    try {
+      const { exitCode } = await this._execute("git ls-remote --exit-code");
+      return exitCode === 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Gets the path of a file inside of the `.git` folder. */
+  private getWorkTreePath(...names: string[]) {
+    const gitRoot = this.opts.localUrl;
+    return path.join(gitRoot, ".git", ...names);
+  }
+
+  /** If there's a rebase in progress, returns what type of rebase that is. Otherwise returns `null` if a rebase is **not** in progress.
+   *
+   * See relevant [git code](https://github.com/git/git/blob/b23dac905bde28da47543484320db16312c87551/wt-status.c#L1666) for which files to check.
+   * Thanks to [this amazing answer](https://stackoverflow.com/a/67245016) on StackOverflow.
+   *
+   * @returns one of the following:
+   * - `null` if there is no rebase in progress.
+   * - `"interactive"` if there's an interactive rebase (`git rebase --interactive`) in progress.
+   * - `"am"` if there's a "mailbox rebase" in progress.
+   * - `"regular"` if the 2 special rebase types don't apply, but there is a rebase in progress.
+   */
+  async typeOfRebaseInProgress(): Promise<
+    "regular" | "interactive" | "am" | null
+  > {
+    if (await fs.pathExists(this.getWorkTreePath("rebase-apply"))) {
+      if (
+        await fs.pathExists(this.getWorkTreePath("rebase-apply", "applying"))
+      ) {
+        return "am";
+      } else {
+        return "regular";
+      }
+    } else if (await fs.pathExists(this.getWorkTreePath("rebase-merge"))) {
+      if (
+        await fs.pathExists(this.getWorkTreePath("rebase-merge", "interactive"))
+      ) {
+        return "interactive";
+      } else {
+        return "regular";
+      }
+    } else {
+      return null;
+    }
+  }
+
+  async hasRebaseInProgress(): Promise<boolean> {
+    return (await this.typeOfRebaseInProgress()) !== null;
+  }
+
   async hasRemote() {
     const { stdout } = await this._execute("git remote");
     return !_.isEmpty(stdout);
+  }
+
+  /** Checks if a push to remote would succeed by checking if the upstream contains commits that the local branch doesn't.  */
+  async hasPushableRemote(): Promise<boolean> {
+    try {
+      // Fetch the remote so we have an up-to-date view of what's on there
+      await this.fetch();
+      const branch = await this.getCurrentBranch();
+      const upstream = await this.getUpstream();
+      if (upstream === undefined) return false; // no upstream, no push
+      const { stdout } = await this._execute(
+        `git branch ${branch} --contains ${upstream}`
+      );
+      // If the output is empty, then upstream has something that local doesn't
+      // in which case we can't push
+      return !_.isEmpty(_.trim(stdout));
+    } catch {
+      // Erring on the side of pushing here.
+      // The worst case is that push might get rejected.
+      return true;
+    }
   }
 
   /** Gets the upstream `origin/branch` the current branch is set up to push to, or `undefined` if it is not set up to push anywhere. */

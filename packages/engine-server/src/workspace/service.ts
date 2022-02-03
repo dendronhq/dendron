@@ -3,6 +3,7 @@ import {
   CONSTANTS,
   CURRENT_CONFIG_VERSION,
   DendronError,
+  DEngineClient,
   Disposable,
   DuplicateNoteAction,
   DUser,
@@ -36,6 +37,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import os from "os";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
@@ -53,29 +55,15 @@ import {
 } from "../utils";
 import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
-import { IWorkspaceService } from "./workspaceServiceInterface";
+import {
+  IWorkspaceService,
+  SyncActionResult,
+  SyncActionStatus,
+} from "./workspaceServiceInterface";
 
 const DENDRON_WS_NAME = CONSTANTS.DENDRON_WS_NAME;
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
-
-export enum SyncActionStatus {
-  DONE = "",
-  NO_CHANGES = "it has no changes",
-  UNCOMMITTED_CHANGES = "it has uncommitted changes",
-  NO_REMOTE = "it has no remote",
-  NO_UPSTREAM = "the current branch has no upstream",
-  SKIP_CONFIG = "it is configured so",
-  NOT_PERMITTED = "user is not permitted to push to one or more vaults",
-  NEW = "newly clond repository",
-  ERROR = "error while syncing",
-}
-
-export type SyncActionResult = {
-  repo: string;
-  vaults: DVault[];
-  status: SyncActionStatus;
-};
 
 export type WorkspaceServiceCreateOpts = {
   wsRoot: string;
@@ -518,7 +506,31 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return true;
   }
 
-  async commitAndAddAll(): Promise<SyncActionResult[]> {
+  private static async generateCommitMessage({
+    vaults,
+    engine,
+  }: {
+    vaults: DVault[];
+    engine: DEngineClient;
+  }): Promise<string> {
+    const { version } = (await engine.info()).data || { version: "unknown" };
+
+    return [
+      "Dendron workspace sync",
+      "",
+      "## Synced vaults:",
+      ...vaults.map((vault) => `- ${VaultUtils.getName(vault)}`),
+      "",
+      `Dendron version: ${version}`,
+      `Hostname: ${os.hostname()}`,
+    ].join("\n");
+  }
+
+  async commitAndAddAll({
+    engine,
+  }: {
+    engine: DEngineClient;
+  }): Promise<SyncActionResult[]> {
     const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
       _.map(
@@ -528,11 +540,26 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
           const git = new Git({ localUrl: repo });
           if (!(await this.shouldVaultsSync("commit", rootVaults)))
             return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+          if (await git.hasMergeConflicts())
+            return { repo, vaults, status: SyncActionStatus.MERGE_CONFLICT };
+          if (await git.hasRebaseInProgress()) {
+            // try to resume the rebase first, since we know there are no merge conflicts
+            return {
+              repo,
+              vaults,
+              status: SyncActionStatus.REBASE_IN_PROGRESS,
+            };
+          }
           if (!(await git.hasChanges()))
             return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
           try {
             await git.addAll();
-            await git.commit({ msg: "update" });
+            await git.commit({
+              msg: await WorkspaceService.generateCommitMessage({
+                vaults,
+                engine,
+              }),
+            });
             return { repo, vaults, status: SyncActionStatus.DONE };
           } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
@@ -849,36 +876,116 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   /** Returns the list of vaults that were attempted to be pulled, even if there was nothing to pull. */
   async pullVaults(): Promise<SyncActionResult[]> {
+    const ctx = "pullVaults";
     const allReposVaults = await this.getAllReposVaults();
     const out = await Promise.all(
       _.map(
         [...allReposVaults.entries()],
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
-
-          const git = new Git({ localUrl: repo });
-          // It's impossible to pull if there is no remote, or if there are tracked files that have changes
-          if (!(await git.hasRemote()))
-            return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
-          if (_.isUndefined(await git.getUpstream()))
-            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
-          if (!(await this.shouldVaultsSync("pull", rootVaults)))
-            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
-          if (await git.hasChanges({ untrackedFiles: "no" }))
+          const makeResult = (status: SyncActionStatus) => {
             return {
               repo,
               vaults,
-              status: SyncActionStatus.UNCOMMITTED_CHANGES,
+              status,
             };
+          };
+
+          const git = new Git({ localUrl: repo });
+          // It's impossible to pull if there is no remote or upstream
+          if (!(await git.hasRemote()))
+            return makeResult(SyncActionStatus.NO_REMOTE);
+          // If there's a merge conflict, then we can't continue
+          if (await git.hasMergeConflicts())
+            return makeResult(SyncActionStatus.MERGE_CONFLICT);
+          // A rebase in progress means there's no upstream, so it needs to come first.
+          if (await git.hasRebaseInProgress()) {
+            return makeResult(SyncActionStatus.REBASE_IN_PROGRESS);
+          }
+
+          if (_.isUndefined(await git.getUpstream()))
+            return makeResult(SyncActionStatus.NO_UPSTREAM);
+          if (!(await git.hasAccessToRemote()))
+            return makeResult(SyncActionStatus.BAD_REMOTE);
+          // If the vault was configured not to pull, then skip it
+          if (!(await this.shouldVaultsSync("pull", rootVaults)))
+            return makeResult(SyncActionStatus.SKIP_CONFIG);
+
+          // If there are tracked changes, we need to stash them to pull
+          let stashed: string | undefined;
+          if (await git.hasChanges({ untrackedFiles: "no" })) {
+            try {
+              stashed = await git.stashCreate();
+              this.logger.info({ ctx, vaults, repo, stashed });
+              // this shouldn't fail, but for safety's sake
+              if (_.isEmpty(stashed) || !git.isValidStashCommit(stashed)) {
+                throw new DendronError({
+                  message: "unable to stash changes",
+                  payload: { stashed },
+                });
+              }
+              // stash create doesn't change the working directory, so we need to get rid of the tracked changes
+              await git.reset("hard");
+            } catch (err: any) {
+              this.logger.error({
+                ctx: "pullVaults",
+                vaults,
+                repo,
+                err,
+                stashed,
+              });
+              return makeResult(SyncActionStatus.CANT_STASH);
+            }
+          }
           try {
             await git.pull();
-            return { repo, vaults, status: SyncActionStatus.DONE };
+            if (stashed) {
+              const restored = await git.stashApplyCommit(stashed);
+              stashed = undefined;
+              if (!restored)
+                return makeResult(
+                  SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
+                );
+            }
+            // pull went well, everything is in order. The finally block will restore any stashed changes.
+            return makeResult(SyncActionStatus.DONE);
           } catch (err: any) {
-            const stderr = err.stderr ? `: ${err.stderr}` : "";
-            throw new DendronError({
-              message: `error pulling vault${stderr}`,
-              payload: { err, repoPath: repo },
-            });
+            // Failed to pull, let's see why:
+            if (
+              (await git.hasMergeConflicts()) ||
+              (await git.hasRebaseInProgress())
+            ) {
+              if (stashed) {
+                // There was a merge conflict during the pull, and we have stashed changes.
+                // We can't apply the stash in this state, so we'd lose the users changes.
+                // Abort the rebase.
+                await git.rebaseAbort();
+                return makeResult(
+                  SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
+                );
+              } else {
+                return makeResult(SyncActionStatus.MERGE_CONFLICT_AFTER_PULL);
+              }
+            } else {
+              const stderr = err?.stderr || "";
+              const vaultNames = vaults
+                .map((vault) => VaultUtils.getName(vault))
+                .join(",");
+              throw new DendronError({
+                message: `Failed to pull ${vaultNames}: ${stderr}`,
+                payload: {
+                  err,
+                  vaults,
+                  repo,
+                  stashed,
+                },
+              });
+            }
+          } finally {
+            // Try to restore changes if we stashed them, even if there were errors. We don't want to lose the users changes.
+            if (stashed) {
+              git.stashApplyCommit(stashed);
+            }
           }
         }
       )
@@ -895,27 +1002,39 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         async (rootVaults: [string, DVault[]]): Promise<SyncActionResult> => {
           const [repo, vaults] = rootVaults;
           const git = new Git({ localUrl: repo });
+          const makeResult = (status: SyncActionStatus) => {
+            return {
+              repo,
+              vaults,
+              status,
+            };
+          };
 
+          if (!(await this.shouldVaultsSync("push", rootVaults)))
+            return makeResult(SyncActionStatus.SKIP_CONFIG);
           if (!(await git.hasRemote()))
             return { repo, vaults, status: SyncActionStatus.NO_REMOTE };
+          // if there's a rebase in progress then there's no upstream, so it needs to come first
+          if (await git.hasMergeConflicts()) {
+            return makeResult(SyncActionStatus.MERGE_CONFLICT);
+          }
+          if (await git.hasRebaseInProgress()) {
+            return makeResult(SyncActionStatus.REBASE_IN_PROGRESS);
+          }
           const upstream = await git.getUpstream();
           if (_.isUndefined(upstream))
-            return { repo, vaults, status: SyncActionStatus.NO_UPSTREAM };
-          if (
-            (await git.diff({
-              nameOnly: true,
-              oldCommit: upstream,
-              newCommit: "HEAD",
-            })) === ""
-          )
-            return { repo, vaults, status: SyncActionStatus.NO_CHANGES };
-          if (!(await this.shouldVaultsSync("push", rootVaults)))
-            return { repo, vaults, status: SyncActionStatus.SKIP_CONFIG };
+            return makeResult(SyncActionStatus.NO_UPSTREAM);
+          if (!(await git.hasAccessToRemote()))
+            return makeResult(SyncActionStatus.BAD_REMOTE);
+          if (!(await git.hasPushableChanges(upstream)))
+            return makeResult(SyncActionStatus.NO_CHANGES);
+          if (!(await git.hasPushableRemote()))
+            return makeResult(SyncActionStatus.UNPULLED_CHANGES);
           if (!_.every(_.map(vaults, this.user.canPushVault)))
-            return { repo, vaults, status: SyncActionStatus.NOT_PERMITTED };
+            return makeResult(SyncActionStatus.NOT_PERMITTED);
           try {
             await git.push();
-            return { repo, vaults, status: SyncActionStatus.DONE };
+            return makeResult(SyncActionStatus.DONE);
           } catch (err: any) {
             const stderr = err.stderr ? `: ${err.stderr}` : "";
             throw new DendronError({

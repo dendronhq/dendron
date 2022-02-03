@@ -10,6 +10,11 @@ export class GitTestUtils {
     await git.commit({ msg: "init" });
   }
 
+  static hasChanges(wsRoot: string, opts: Parameters<Git["hasChanges"]>[0]) {
+    const git = new Git({ localUrl: wsRoot });
+    return git.hasChanges(opts);
+  }
+
   /** Creates a "bare" git repository, to be used as the remote for a workspace.
    *
    * You'll probably want to just use `createRepoForRemoteWorkspace` instead, but this is provided if you are testing something it can't handle.

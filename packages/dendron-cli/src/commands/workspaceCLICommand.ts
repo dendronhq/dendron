@@ -84,6 +84,10 @@ export class WorkspaceCLICommand extends CLICommand<
         }
         case WorkspaceCommands.ADD_AND_COMMIT: {
           const ws = new WorkspaceService({ wsRoot });
+          if (!engine) {
+            this.printError("Can't find the engine");
+            process.exit(1);
+          }
           await ws.commitAndAddAll({ engine: engine! });
           break;
         }

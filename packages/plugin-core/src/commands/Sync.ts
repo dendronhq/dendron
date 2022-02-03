@@ -27,8 +27,11 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   key = DENDRON_COMMANDS.SYNC.key;
 
   static countDone(results: SyncActionResult[]): number {
-    return results.filter((result) => result.status === SyncActionStatus.DONE)
-      .length;
+    return this.count(results, SyncActionStatus.DONE);
+  }
+
+  static count(results: SyncActionResult[], status: SyncActionStatus) {
+    return results.filter((result) => result.status === status).length;
   }
 
   private static filteredRepoNames(
@@ -49,44 +52,19 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     });
   }
 
-  async execute(opts?: CommandOpts) {
-    const ctx = "execute";
-    L.info({ ctx, opts });
-    const workspaceService = ExtensionProvider.getExtension().workspaceService;
-    if (_.isUndefined(workspaceService))
-      throw new DendronError({
-        message: "Workspace is not initialized",
-        severity: ERROR_SEVERITY.FATAL,
-      });
-    const engine = ExtensionProvider.getEngine();
-
-    const { committed, pulled, pushed } = await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: "Syncing Workspace",
-        cancellable: false,
-      },
-      async (progress) => {
-        progress.report({ increment: 0, message: "committing repos" });
-        const committed = await workspaceService.commitAndAddAll({ engine });
-        L.info(committed);
-        progress.report({ increment: 25, message: "pulling repos" });
-        const pulled = await workspaceService.pullVaults();
-        L.info(pulled);
-        progress.report({ increment: 50, message: "pushing repos" });
-
-        const pushed = await workspaceService.pushVaults();
-        progress.report({ increment: 100 });
-        L.info(pushed);
-
-        return { committed, pulled, pushed };
-      }
-    );
-
+  private static generateReportMessage({
+    committed,
+    pulled,
+    pushed,
+  }: {
+    committed: SyncActionResult[];
+    pulled: SyncActionResult[];
+    pushed: SyncActionResult[];
+  }) {
     const message = ["Finished sync."];
-
     // Report anything unusual the user probably should know about
     let maxMessageSeverity: MessageSeverity = MessageSeverity.INFO;
+
     const makeMessage = (
       status: SyncActionStatus,
       results: SyncActionResult[][],
@@ -184,6 +162,49 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
         msg: `Can't push ${repos} because there are unpulled changes.`,
         severity: MessageSeverity.WARN,
       };
+    });
+
+    return { message, maxMessageSeverity };
+  }
+
+  async execute(opts?: CommandOpts) {
+    const ctx = "execute";
+    L.info({ ctx, opts });
+    const workspaceService = ExtensionProvider.getExtension().workspaceService;
+    if (_.isUndefined(workspaceService))
+      throw new DendronError({
+        message: "Workspace is not initialized",
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    const engine = ExtensionProvider.getEngine();
+
+    const { committed, pulled, pushed } = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Syncing Workspace",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ increment: 0, message: "committing repos" });
+        const committed = await workspaceService.commitAndAddAll({ engine });
+        L.info(committed);
+        progress.report({ increment: 25, message: "pulling repos" });
+        const pulled = await workspaceService.pullVaults();
+        L.info(pulled);
+        progress.report({ increment: 50, message: "pushing repos" });
+
+        const pushed = await workspaceService.pushVaults();
+        progress.report({ increment: 100 });
+        L.info(pushed);
+
+        return { committed, pulled, pushed };
+      }
+    );
+
+    const { message, maxMessageSeverity } = SyncCommand.generateReportMessage({
+      committed,
+      pulled,
+      pushed,
     });
 
     // Successful operations

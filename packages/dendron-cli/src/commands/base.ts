@@ -247,4 +247,11 @@ export abstract class CLICommand<
       console.log(obj);
     }
   }
+
+  printError(obj: any) {
+    if (!this.opts.quiet) {
+      // eslint-disable-next-line no-console
+      console.error(obj);
+    }
+  }
 }

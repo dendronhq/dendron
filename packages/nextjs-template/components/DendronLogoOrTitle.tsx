@@ -29,11 +29,7 @@ export default function DendronLogoOrTitle() {
         }}
         className="site-title"
       >
-        {engine.config?.site.logo ? (
-          <Logo logoUrl={logoUrl} />
-        ) : (
-          <Title data={title || ""} />
-        )}
+        {logoUrl ? <Logo logoUrl={logoUrl} /> : <Title data={title || ""} />}
       </a>
     </Link>
   );

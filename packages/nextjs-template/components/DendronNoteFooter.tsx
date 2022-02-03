@@ -43,11 +43,11 @@ class GitUtils {
     }
     const githubConfig = ConfigUtils.getGithubConfig(config);
     return _.every([
-      githubConfig.gh_edit_link,
-      githubConfig.gh_edit_link_text,
-      githubConfig.gh_edit_repository,
-      githubConfig.gh_edit_branch,
-      githubConfig.gh_edit_view_mode,
+      githubConfig.enableEditLink,
+      githubConfig.editLinkText,
+      githubConfig.editRepository,
+      githubConfig.editBranch,
+      githubConfig.editViewMode,
     ]);
   };
 

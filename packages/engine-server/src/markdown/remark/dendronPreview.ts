@@ -1,5 +1,5 @@
 import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
-import { createLogger, vault2Path } from "@dendronhq/common-server";
+import { createDisposableLogger, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
 import path from "path";
@@ -28,39 +28,50 @@ function handleImage({
   node: Image;
   useFullPathUrl?: boolean;
 }) {
-  const ctx = "handleImage";
-  const logger = createLogger("handleImage");
-  // ignore web images
-  if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
-    logger.info({ ctx, url: node.url });
-    return;
+  const { logger, dispose } = createDisposableLogger("handleImage");
+  try {
+    const ctx = "handleImage";
+    // ignore web images
+    if (_.some(["http://", "https://"], (ent) => node.url.startsWith(ent))) {
+      logger.debug({ ctx, url: node.url });
+      return;
+    }
+    // assume that the path is relative to vault
+    const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
+    const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
+    if (useFullPathUrl === true) {
+      logger.debug({
+        ctx,
+        wsRoot,
+        vault,
+        url: node.url,
+        fpath,
+        useFullPathUrl,
+      });
+      node.url = fpath;
+      return;
+    }
+    const resp = EngineUtils.getEnginePort({ wsRoot });
+    if (resp.error) {
+      logger.error(resp.error);
+      return;
+    }
+    const port: number = resp.data;
+    const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
+    const params: AssetGetRequest = {
+      fpath,
+      ws: wsRoot,
+    };
+    node.url = APIUtils.genUrlWithQS({ url, params });
+    logger.debug({
+      ctx,
+      url: node.url,
+      useFullPathUrl,
+      opts: MDUtilsV5.getProcOpts(proc),
+    });
+  } finally {
+    dispose();
   }
-  // assume that the path is relative to vault
-  const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-  const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
-  if (useFullPathUrl === true) {
-    logger.info({ ctx, wsRoot, vault, url: node.url, fpath, useFullPathUrl });
-    node.url = fpath;
-    return;
-  }
-  const resp = EngineUtils.getEnginePort({ wsRoot });
-  if (resp.error) {
-    logger.error(resp.error);
-    return;
-  }
-  const port: number = resp.data;
-  const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
-  const params: AssetGetRequest = {
-    fpath,
-    ws: wsRoot,
-  };
-  node.url = APIUtils.genUrlWithQS({ url, params });
-  logger.info({
-    ctx,
-    url: node.url,
-    useFullPathUrl,
-    opts: MDUtilsV5.getProcOpts(proc),
-  });
 }
 
 function plugin(this: Unified.Processor, _opts?: PluginOpts): Transformer {

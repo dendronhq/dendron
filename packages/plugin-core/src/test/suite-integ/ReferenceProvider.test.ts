@@ -1393,7 +1393,7 @@ suite("ReferenceProvider", function () {
             );
             expect(hover).toBeTruthy();
             expect(
-              AssertUtils.assertInString({
+              await AssertUtils.assertInString({
                 body: hover!.contents.join(""),
                 match: ["test.txt"],
               })
@@ -1410,7 +1410,7 @@ suite("ReferenceProvider", function () {
               );
               expect(hover).toBeTruthy();
               expect(
-                AssertUtils.assertInString({
+                await AssertUtils.assertInString({
                   body: hover!.contents.join(""),
                   match: ["test.txt"],
                   nomatch: ["L6"],

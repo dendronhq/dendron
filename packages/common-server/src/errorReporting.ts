@@ -2,7 +2,28 @@ import { DendronError, Stage } from "@dendronhq/common-all";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
-import path from "path";
+
+// Extracted to make testing easy
+export function rewriteFilename(filename: string) {
+  // Convert backslash to forward slash; Sentry should be able to handle the rest of the formatting:
+  filename = filename.split("\\").join("/");
+
+  // Replace windows C: with nothing
+  filename = filename.replace(/^[A-Za-z]:/, "");
+
+  // Remove everything including the dendron directory, this is usually stuff like '/Users/someone/...'
+  // We have to do two regexes because doing dendron(\.[A-Za-z]*-[0-9.]*)? does not work properly
+  const prodRegex = /^\/.*dendron\.[A-Za-z_]*-[0-9.]*\//;
+  const devRegex = /^\/.*dendron\//;
+  const prefix = "app:///";
+
+  const newFilename = filename.replace(prodRegex, prefix);
+  if (newFilename !== filename) {
+    return newFilename;
+  } else {
+    return filename.replace(devRegex, prefix);
+  }
+}
 
 export function initializeSentry(environment: Stage): void {
   const dsn =
@@ -11,21 +32,24 @@ export function initializeSentry(environment: Stage): void {
   Sentry.init({
     dsn,
     defaultIntegrations: false,
-    tracesSampleRate: 1.0,
+    // Error stack trace sample rate: send all errors to sentry
+    sampleRate: 1.0,
+    // Transaction sample rate. Transactions are activities like page loads and api calls
+    // The configuration property name is a bit misleading. We don't use them right now.
+    tracesSampleRate: 0.0,
     enabled: true,
     environment,
     attachStacktrace: true,
     beforeSend: eventModifier,
     integrations: [
       new RewriteFrames({
-        prefix: "app:///dist/",
         iteratee: (frame) => {
-          if (frame.abs_path) {
-            // Convert backslash to forward slash; Sentry should be able to handle the rest of the formatting:
-            frame.abs_path = frame.abs_path
-              .split(path.sep)
-              .join(path.posix.sep);
+          if (!frame.filename) {
+            return frame;
           }
+
+          frame.filename = rewriteFilename(frame.filename);
+
           return frame;
         },
       }),

@@ -271,7 +271,7 @@ export async function setupLegacyWorkspaceMulti(
 }
 
 /**
- * Old style layout
+ * @deprecated please use {@link describeSingleWS} instead
  */
 export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
@@ -285,7 +285,7 @@ export async function runLegacySingleWorkspaceTest(
 }
 
 /**
- * Old style layout
+ * @deprecated please use {@link describeMultiWS} instead
  */
 export async function runLegacyMultiWorkspaceTest(
   opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }

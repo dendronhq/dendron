@@ -123,7 +123,7 @@ export class WindowWatcher {
       ) {
         return;
       }
-      Logger.info({ ctx, editor: uri.fsPath });
+      Logger.debug({ ctx, editor: uri.fsPath });
       // Decorations only render the visible portions of the screen, so they
       // need to be re-rendered when the user scrolls around
       this.triggerUpdateDecorations(editor);

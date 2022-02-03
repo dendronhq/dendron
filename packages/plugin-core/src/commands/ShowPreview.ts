@@ -49,32 +49,34 @@ export class ShowPreviewCommand extends InputArgCommand<
   async execute(opts?: ShowPreviewCommandOpts) {
     let note: NoteProps | undefined;
 
-    if (!_.isEmpty(opts)) {
+    if (opts !== undefined && !_.isEmpty(opts)) {
       // Used a context menu to open preview for a specific note
-      try {
-        note = ExtensionProvider.getWSUtils().getNoteFromPath(opts!.path);
-      } catch {
-        // Sometimes VSCode gives us a weird `opts` when no note was selected, so fall back to active note
-        note = ExtensionProvider.getWSUtils().getActiveNote();
-      }
+      note = ExtensionProvider.getWSUtils().getNoteFromPath(opts.fsPath);
     } else {
       // Used the command bar or keyboard shortcut to open preview for active note
-      this._panel.show();
+      note = ExtensionProvider.getWSUtils().getActiveNote();
     }
+    this._panel.show();
 
     if (note) {
       this._panel.show(note);
-    } else if (opts?.path) {
+      return { note };
+    } else if (opts?.fsPath) {
+      const fsPath = opts.fsPath;
       // We can't find the note, so this is not in the Dendron workspace.
       // Preview the file anyway if it's a markdown file.
-      await this.openFileInPreview(opts.path);
+      await this.openFileInPreview(fsPath);
+      return { fsPath };
     } else {
       // Not file selected for preview, default to open file
       const editor = VSCodeUtils.getActiveTextEditor();
       if (editor) {
-        await this.openFileInPreview(editor.document.uri.fsPath);
+        const fsPath = editor.document.uri.fsPath;
+        await this.openFileInPreview(fsPath);
+        return { fsPath };
       }
     }
+    return undefined;
   }
 
   /**

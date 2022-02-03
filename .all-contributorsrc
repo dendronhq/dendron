@@ -701,7 +701,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/39745457?v=4",
       "profile": "https://github.com/Tycholiz",
       "contributions": [
-        "bug"
+        "bug",
+        "doc"
       ]
     },
     {
@@ -1282,7 +1283,8 @@
       "profile": "https://invak.id/",
       "contributions": [
         "bug",
-        "code"
+        "code",
+        "tool"
       ]
     },
     {
@@ -1336,6 +1338,79 @@
       "name": "Binly42",
       "avatar_url": "https://avatars.githubusercontent.com/u/15514941?v=4",
       "profile": "https://github.com/Binly42",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "eleweek",
+      "name": "Alexander Putilin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1133550?v=4",
+      "profile": "https://github.com/eleweek",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pvorona",
+      "name": "Pavel Vorona",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11915087?v=4",
+      "profile": "https://github.com/pvorona",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dweisiger",
+      "name": "d1onysus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13951458?v=4",
+      "profile": "https://github.com/dweisiger",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "BillMoriarty",
+      "name": "Bill Moriarty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/463054?v=4",
+      "profile": "https://billmoriarty.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "jbilinski",
+      "name": "Jamie Bilinski",
+      "avatar_url": "https://avatars.githubusercontent.com/u/362756?v=4",
+      "profile": "https://ScriptOps.com",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "alefteris",
+      "name": "Thanos Lefteris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64284?v=4",
+      "profile": "https://thanoslefteris.com",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "hotSixRedBull",
+      "name": "Yi Seunggi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7041617?v=4",
+      "profile": "http://hotsixredbull.blogspot.kr/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "joshuajeschek",
+      "name": "Joshua Jeschek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64850647?v=4",
+      "profile": "https://github.com/joshuajeschek",
       "contributions": [
         "bug"
       ]

@@ -1141,7 +1141,7 @@ export class RemarkUtils {
           }
           const existingNote = NoteUtils.getNoteFromMultiVault({
             fname: linkNode.value,
-            notes: engine.notes,
+            engine,
             fromVault: note.vault,
             toVault: vault,
             wsRoot: engine.wsRoot,

@@ -299,8 +299,8 @@ function setupImport(src: string) {
     { path: "A1/B1.md" },
     { path: "A1/B2.md" },
     { path: "A1/B1 B2.md" },
-    { path: "Folder/something.md" },
-    { path: "Folder/assets/image.JPEG" },
+    { path: "Folder/Media/something.md" },
+    { path: "Folder/Media/image.JPEG" },
   ]);
 }
 
@@ -488,7 +488,6 @@ describe("markdown import pod", () => {
             noAddUUID: true,
           },
         });
-        console.log("wsRoot", wsRoot);
         const assetsDir = fs.readdirSync(path.join(vpath, "assets"));
         const fileBody = fs.readFileSync(path.join(vpath, "project.p4.md"), {
           encoding: "utf8",
@@ -506,19 +505,17 @@ describe("markdown import pod", () => {
           }
         );
         const fileBody3Content = fs.readFileSync(
-          path.join(vpath, "folder.something.md"),
+          path.join(vpath, "folder.media.something.md"),
           {
             encoding: "utf8",
           }
         );
         expect(fileBody.match("test.txt")).toBeTruthy();
-        const assetPath = path.join("assets", "test.txt").replace(/[\\]/g, "/");
-        const imagePath = path
-          .join("assets", "image.JPEG")
-          .replace(/[\\]/g, "/");
+        const assetPath = path.posix.join("assets", "test.txt");
+        const imagePath = path.posix.join("assets", "image.JPEG");
         expect(fileBodyContent).toContain(`[test-pdf](/${assetPath})`);
         expect(fileBody2Content).toContain(`[test-pdf](/${assetPath})`);
-        expect(fileBody3Content).toContain(`[image](/${imagePath})`);
+        expect(fileBody3Content).toContain(`![image](/${imagePath})`);
         expect(assetsDir.length).toEqual(4);
       },
       {
@@ -534,8 +531,8 @@ describe("markdown import pod", () => {
             "[test-pdf](./test.txt)"
           );
           fs.writeFileSync(
-            path.join(importSrc, "Folder", "something.md"),
-            "[image](assets/image.JPEG)"
+            path.join(importSrc, "Folder", "Media", "something.md"),
+            "![image](image.JPEG)"
           );
         },
       }

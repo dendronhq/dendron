@@ -703,7 +703,7 @@ export class DendronExtension implements IDendronExtension {
 
     windowWatcher.activate();
     for (const editor of vscode.window.visibleTextEditors) {
-      windowWatcher.triggerUpdateDecorations(editor);
+      WindowWatcher.triggerUpdateDecorations(editor);
     }
     this.windowWatcher = windowWatcher;
     const workspaceWatcher = new WorkspaceWatcher({

@@ -57,7 +57,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
-          await watcher!.triggerUpdateDecorations(editor!);
+          await WindowWatcher.triggerUpdateDecorations(editor!);
           // TODO: check for decorations
           done();
         },

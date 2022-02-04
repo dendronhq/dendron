@@ -1929,9 +1929,11 @@ export class SchemaUtils {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
         namespace = true;
-        return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
+        return minimatch(notePathClean, _.trimEnd(pattern, "/*"), {
+          nonegate: true,
+        });
       } else {
-        return minimatch(notePathClean, pattern);
+        return minimatch(notePathClean, pattern, { nonegate: true });
       }
     });
     if (match) {

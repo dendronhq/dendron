@@ -902,7 +902,8 @@ async function showWelcomeOrWhatsNew({
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  if (await shouldDisplayInactiveUserSurvey()) {
+  // TODO: there is a bug in the current logic. disabling until we fix it
+  if (false) {
     await showInactiveUserMessage();
   }
 }

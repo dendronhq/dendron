@@ -25,6 +25,7 @@ import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
 import ora from "ora";
+import { GitUtils } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -311,6 +312,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async init(opts: { wsRoot: string; spinner: ora.Ora }) {
     const { wsRoot, spinner } = opts;
+    GitUtils.addToGitignore({ addPath: ".next", root: wsRoot });
     const nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
 
     const nextPathExists = await this._nextPathExists({

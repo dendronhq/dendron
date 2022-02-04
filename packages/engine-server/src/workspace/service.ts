@@ -854,9 +854,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
    */
   isPathInWorkspace(fpath: string) {
+    try {
     const vaults = ConfigUtils.getVaults(this.config);
     const wsRoot = this.wsRoot;
     return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
+    } catch (err: any) {
+      // `this.config` throws an error if we're not in a workspace already.
+      // If that happens, the answer is just no.
+      if (err.code === "ENOENT") return false;
+      throw err;
+    }
   }
 
   async pullVault(opts: { vault: DVault }) {

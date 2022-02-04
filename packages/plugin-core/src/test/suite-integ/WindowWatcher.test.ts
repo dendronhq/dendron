@@ -165,6 +165,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           getExtension().workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension: ExtensionProvider.getExtension(),
           });
           getExtension().workspaceWatcher?.activate(ctx);
           watcher!.activate();
@@ -193,6 +194,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           getExtension().workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension: ExtensionProvider.getExtension(),
           });
           getExtension().workspaceWatcher?.activate(ctx);
 

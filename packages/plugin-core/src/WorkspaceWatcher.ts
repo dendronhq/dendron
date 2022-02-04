@@ -10,7 +10,7 @@ import {
   Wrap,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
-import { RemarkUtils } from "@dendronhq/engine-server";
+import { RemarkUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import path from "path";
@@ -29,17 +29,14 @@ import {
   window,
   workspace,
 } from "vscode";
+import { IDendronExtension } from "./dendronExtensionInterface";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
-import {
-  DendronExtension,
-  getDWorkspace,
-  getExtension,
-  getVaultFromUri,
-} from "./workspace";
+import { WindowWatcher } from "./windowWatcher";
+import { DendronExtension, getVaultFromUri } from "./workspace";
 
 const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
@@ -50,21 +47,21 @@ interface DebouncedFunc<T extends (...args: any[]) => any> {
    * If the debounced function can be run immediately, this calls it and returns its return
    * value.
    *
-   * Otherwise, it returns the return value of the last invokation, or undefined if the debounced
+   * Otherwise, it returns the return value of the last invocation, or undefined if the debounced
    * function was not invoked yet.
    */
   (...args: Parameters<T>): ReturnType<T> | undefined;
 
   /**
-   * Throw away any pending invokation of the debounced function.
+   * Throw away any pending invocation of the debounced function.
    */
   cancel(): void;
 
   /**
-   * If there is a pending invokation of the debounced function, invoke it immediately and return
+   * If there is a pending invocation of the debounced function, invoke it immediately and return
    * its return value.
    *
-   * Otherwise, return the value from the last invokation, or undefined if the debounced function
+   * Otherwise, return the value from the last invocation, or undefined if the debounced function
    * was never invoked.
    */
   flush(): ReturnType<T> | undefined;
@@ -85,12 +82,16 @@ export class WorkspaceWatcher {
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
   private _schemaSyncService: ISchemaSyncService;
+  private _extension: IDendronExtension;
 
   constructor({
     schemaSyncService,
+    extension,
   }: {
     schemaSyncService: ISchemaSyncService;
+    extension: IDendronExtension;
   }) {
+    this._extension = extension;
     this._schemaSyncService = schemaSyncService;
     this._openedDocuments = new Map();
     this._quickDebouncedOnDidChangeTextDocument = _.debounce(
@@ -100,7 +101,7 @@ export class WorkspaceWatcher {
   }
 
   activate(context: ExtensionContext) {
-    const extension = getExtension();
+    const extension = this._extension;
 
     extension.addDisposable(
       workspace.onWillSaveTextDocument(
@@ -193,14 +194,21 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "enter" });
       this._quickDebouncedOnDidChangeTextDocument.cancel();
       const uri = event.document.uri;
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      const { wsRoot, vaults } = this._extension.getDWorkspace();
+      if (
+        !WorkspaceUtils.isPathInWorkspace({
+          wsRoot,
+          vaults,
+          fpath: uri.fsPath,
+        })
+      ) {
         Logger.debug({ ...ctx, state: "uri not in workspace" });
         return;
       }
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const activeEditor = window.activeTextEditor;
       if (activeEditor?.document.uri.fsPath === event.document.uri.fsPath) {
-        getExtension().windowWatcher?.triggerUpdateDecorations(activeEditor);
+        WindowWatcher.triggerUpdateDecorations(activeEditor);
       }
       Logger.debug({ ...ctx, state: "exit" });
       return;
@@ -235,7 +243,10 @@ export class WorkspaceWatcher {
         reason: TextDocumentSaveReason[event.reason],
         msg: "enter",
       });
-      if (!getExtension().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      const { wsRoot, vaults } = this._extension.getDWorkspace();
+      if (
+        !WorkspaceUtils.isPathInWorkspace({ fpath: uri.fsPath, wsRoot, vaults })
+      ) {
         Logger.debug({
           ctx,
           uri: uri.fsPath,
@@ -263,15 +274,14 @@ export class WorkspaceWatcher {
   private onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
-    const engineClient = getDWorkspace().engine;
+    const engine = this._extension.getDWorkspace().engine;
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault: getVaultFromUri(uri),
-      notes: engineClient.notes,
-      wsRoot: getDWorkspace().wsRoot,
+      engine,
     }) as NoteProps;
 
     const content = event.document.getText();
@@ -293,7 +303,7 @@ export class WorkspaceWatcher {
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
-        await engineClient.updateNote(note);
+        await engine.updateNote(note);
         return resolve(changes);
       });
       event.waitUntil(p);
@@ -336,7 +346,7 @@ export class WorkspaceWatcher {
     }
     try {
       const files = args.files[0];
-      const { vaults, wsRoot } = getDWorkspace();
+      const { vaults, wsRoot } = this._extension.getDWorkspace();
       const { oldUri, newUri } = files;
       const oldVault = VaultUtils.getVaultByFilePath({
         vaults,
@@ -363,7 +373,7 @@ export class WorkspaceWatcher {
         isEventSourceEngine: false,
       };
       AnalyticsUtils.track(ContextualUIEvents.ContextualUIRename);
-      const engine = getExtension().getEngine();
+      const engine = this._extension.getEngine();
       const updateNoteReferences = engine.renameNote(opts);
       args.waitUntil(updateNoteReferences);
     } catch (error: any) {
@@ -385,8 +395,8 @@ export class WorkspaceWatcher {
       const files = args.files[0];
       const { newUri } = files;
       const fname = DNodeUtils.fname(newUri.fsPath);
-      const engine = getExtension().getEngine();
-      const { vaults, wsRoot } = getDWorkspace();
+      const engine = this._extension.getEngine();
+      const { vaults, wsRoot } = this._extension.getDWorkspace();
       const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
@@ -416,7 +426,7 @@ export class WorkspaceWatcher {
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
     WorkspaceWatcher.moveCursorPastFrontmatter(editor);
-    const config = getExtension().getDWorkspace().config;
+    const config = this._extension.getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
     }

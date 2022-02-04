@@ -116,8 +116,11 @@ class ImageNodeHandler extends DendronNodeHander {
       : cOpts?.assetsPrefix;
     const imageNode = node;
     if (assetsPrefix) {
-      imageNode.url =
-        "/" + _.trim(assetsPrefix, "/") + "/" + _.trim(imageNode.url, "/");
+      const imageUrl = _.trim(imageNode.url, "/");
+      // do not add assetPrefix for http/https url
+      imageNode.url = !imageUrl.match("(http(s?)://)")
+        ? "/" + _.trim(assetsPrefix, "/") + "/" + imageUrl
+        : imageUrl;
     }
     return { node: imageNode };
   }

@@ -122,26 +122,22 @@ export class Logger {
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
 
-    Sentry.withScope((scope) => {
-      scope.setExtra("ctx", payload.ctx);
-      if (payload.error) {
-        scope.setExtra("name", payload.error.name);
-        scope.setExtra("message", payload.error.message);
-        scope.setExtra("payload", payload.error.payload);
-        scope.setExtra("severity", payload.error.severity?.toString());
-        scope.setExtra("code", payload.error.code);
-        scope.setExtra("status", payload.error.status);
-      }
-      const cleanMsg =
-        (payload.error ? payload.error.message : payload.msg) ||
-        customStringify(payload);
-
-      if (payload.error) {
-        Sentry.captureException(payload.error);
-      } else {
-        Sentry.captureMessage(cleanMsg);
-      }
-    });
+    if (payload.error) {
+      Sentry.captureException(payload.error, {
+        extra: {
+          ctx: payload.ctx,
+          name: payload.error.name,
+          message: payload.error.message,
+          payload: payload.error.payload,
+          severity: payload.error.severity?.toString(),
+          code: payload.error.code,
+          status: payload.error.status,
+        },
+      });
+    } else {
+      const cleanMsg = payload.msg || customStringify(payload);
+      Sentry.captureMessage(cleanMsg, { extra: { ctx: payload.ctx } });
+    }
   }
 
   static info(payload: any, show?: boolean): void {
@@ -164,10 +160,11 @@ export class Logger {
     _opts?: { show?: boolean }
   ) => {
     if (Logger.cmpLevel(lvl)) {
-      if (payload.error) {
-        payload.error = error2PlainObject(payload.error);
-      }
-      const stringMsg = customStringify(payload);
+      const payloadWithErrorAsPlainObject = {
+        ...payload,
+        error: payload.error ? error2PlainObject(payload.error) : payload.error,
+      };
+      const stringMsg = customStringify(payloadWithErrorAsPlainObject);
       Logger.logger?.[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now

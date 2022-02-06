@@ -2,6 +2,7 @@ import {
   DendronError,
   ERROR_SEVERITY,
   isNotUndefined,
+  isWebUri,
   NoteProps,
   NoteUtils,
   StatusCodes,
@@ -118,7 +119,7 @@ class ImageNodeHandler extends DendronNodeHander {
     if (assetsPrefix) {
       const imageUrl = _.trim(imageNode.url, "/");
       // do not add assetPrefix for http/https url
-      imageNode.url = !imageUrl.match("(http(s?)://)")
+      imageNode.url = !isWebUri(imageUrl)
         ? "/" + _.trim(assetsPrefix, "/") + "/" + imageUrl
         : imageUrl;
     }

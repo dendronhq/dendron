@@ -19,7 +19,7 @@ suite("CreateScratchNoteCommand", function () {
       test("THEN scratch note with correct name created.", async () => {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
-        const cmd = new CreateScratchNoteCommand();
+        const cmd = new CreateScratchNoteCommand(ext);
         const { vaults, engine } = ext.getDWorkspace();
         const note = NoteUtils.getNoteByFnameFromEngine({
           fname: "foo",

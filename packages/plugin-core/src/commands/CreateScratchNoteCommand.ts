@@ -11,6 +11,8 @@ import {
 import { CommandRunOpts as NoteLookupRunOpts } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { ConfigUtils } from "@dendronhq/common-all";
+import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 
 type CommandOpts = NoteLookupRunOpts;
 type CommandOutput = void;
@@ -30,9 +32,17 @@ export class CreateScratchNoteCommand extends BasicCommand<
   }
 
   createLookupController(): ILookupControllerV3 {
+    const commandConfig = ConfigUtils.getCommands(
+      this.extension.getDWorkspace().config
+    );
+    const confirmVaultOnCreate = commandConfig.lookup.note.confirmVaultOnCreate;
+    const vaultButtonPressed =
+      VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
-      buttons: [
+      disableVaultSelection: !confirmVaultOnCreate,
+      vaultButtonPressed,
+      extraButtons: [
         ScratchBtn.create({ pressed: true, canToggle: false }),
         CopyNoteLinkBtn.create(false),
         HorizontalSplitBtn.create(false),

@@ -77,7 +77,7 @@
           "name": "Lookup View",
           "contextualTitle": "Lookup View",
           "type": "webview",
-          "when": "dendron:pluginActive && dendron:noteLookupActive"
+          "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
           "id": "dendron.backlinks",

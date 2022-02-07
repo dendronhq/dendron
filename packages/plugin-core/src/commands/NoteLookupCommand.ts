@@ -138,7 +138,7 @@ export class NoteLookupCommand
     super("LookupCommandV3");
   }
 
-  protected get controller(): ILookupControllerV3 {
+  public get controller(): ILookupControllerV3 {
     if (_.isUndefined(this._controller)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
@@ -146,6 +146,10 @@ export class NoteLookupCommand
       });
     }
     return this._controller;
+  }
+
+  public set controller(controller: ILookupControllerV3 | undefined) {
+    this._controller = controller;
   }
 
   protected get provider(): ILookupProviderV3 {
@@ -216,34 +220,36 @@ export class NoteLookupCommand
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     const disableVaultSelection = !confirmVaultOnCreate;
-    this._controller = extension.lookupControllerFactory.create({
-      nodeType: "note",
-      disableVaultSelection,
-      vaultButtonPressed,
-      extraButtons: [
-        MultiSelectBtn.create({ pressed: copts.multiSelect }),
-        CopyNoteLinkBtn.create(copts.copyNoteLink),
-        DirectChildFilterBtn.create(
-          copts.filterMiddleware?.includes("directChildOnly")
-        ),
-        SelectionExtractBtn.create(
-          copts.selectionType === LookupSelectionTypeEnum.selectionExtract
-        ),
-        Selection2LinkBtn.create(
-          copts.selectionType === LookupSelectionTypeEnum.selection2link
-        ),
-        Selection2ItemsBtn.create({
-          pressed:
-            copts.selectionType === LookupSelectionTypeEnum.selection2Items,
-        }),
-        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
-        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
-        TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
-        HorizontalSplitBtn.create(
-          copts.splitType === LookupSplitTypeEnum.horizontal
-        ),
-      ],
-    });
+    if (_.isUndefined(this._controller)) {
+      this._controller = extension.lookupControllerFactory.create({
+        nodeType: "note",
+        disableVaultSelection,
+        vaultButtonPressed,
+        extraButtons: [
+          MultiSelectBtn.create({ pressed: copts.multiSelect }),
+          CopyNoteLinkBtn.create(copts.copyNoteLink),
+          DirectChildFilterBtn.create(
+            copts.filterMiddleware?.includes("directChildOnly")
+          ),
+          SelectionExtractBtn.create(
+            copts.selectionType === LookupSelectionTypeEnum.selectionExtract
+          ),
+          Selection2LinkBtn.create(
+            copts.selectionType === LookupSelectionTypeEnum.selection2link
+          ),
+          Selection2ItemsBtn.create({
+            pressed:
+              copts.selectionType === LookupSelectionTypeEnum.selection2Items,
+          }),
+          JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
+          ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
+          TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
+          HorizontalSplitBtn.create(
+            copts.splitType === LookupSplitTypeEnum.horizontal
+          ),
+        ],
+      });
+    }
     this._provider = extension.noteLookupProviderFactory.create("lookup", {
       allowNewNote: true,
       noHidePickerOnAccept: false,
@@ -252,6 +258,10 @@ export class NoteLookupCommand
     const lc = this.controller;
     if (copts.fuzzThreshold) {
       lc.fuzzThreshold = copts.fuzzThreshold;
+    }
+
+    if (!_.isUndefined(this.controller.view)) {
+      VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, true);
     }
 
     VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
@@ -264,6 +274,7 @@ export class NoteLookupCommand
       alwaysShow: true,
       onDidHide: () => {
         VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
+        VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, false);
       },
     });
     this._quickPick = quickpick;
@@ -403,6 +414,7 @@ export class NoteLookupCommand
     const ctx = "NoteLookupCommand:cleanup";
     Logger.debug({ ctx, msg: "enter" });
     this.controller.onHide();
+    this.controller = undefined;
     HistoryService.instance().remove("lookup", "lookupProvider");
   }
 

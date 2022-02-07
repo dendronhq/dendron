@@ -75,6 +75,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       nodeType: opts?.nodeType as DNodeType,
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
+      disableLookupView: opts?.disableLookupView,
     });
   }
 
@@ -82,6 +83,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     nodeType: DNodeType;
     buttons: DendronBtn[];
     fuzzThreshold?: number;
+    disableLookupView?: boolean;
   }) {
     const ctx = "LookupControllerV3:new";
     Logger.info({ ctx, msg: "enter" });
@@ -97,10 +99,14 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     // wire up lookup controller to lookup view
     // TODO: swap out `getExtension` to use a static provider
     // once treeview related interface has been migrated to IDendronExtension
-    this._view = getExtension().getTreeView(
-      DendronTreeViewKey.LOOKUP_VIEW
-    ) as LookupView;
-    this._view.registerController(this);
+
+    const disableLookupView = opts.disableLookupView || false;
+    if (!disableLookupView) {
+      this._view = getExtension().getTreeView(
+        DendronTreeViewKey.LOOKUP_VIEW
+      ) as LookupView;
+      this._view.registerController(this);
+    }
   }
 
   get quickpick(): DendronQuickPickerV2 {
@@ -125,6 +131,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       throw new DendronError({ message: "no provider" });
     }
     return this._provider;
+  }
+
+  get view() {
+    return this._view;
   }
 
   createCancelSource() {

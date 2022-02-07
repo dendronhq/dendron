@@ -46,6 +46,7 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
       disableLookupView: opts?.disableLookupView,
+      title: opts?.title,
     });
   }
 }

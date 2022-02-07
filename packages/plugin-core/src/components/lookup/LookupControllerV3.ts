@@ -47,6 +47,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   public fuzzThreshold: number;
   public _provider?: ILookupProviderV3;
   public _view?: LookupView;
+  public _title?: string;
 
   static create(opts?: LookupControllerV3CreateOpts) {
     const { vaults } = ExtensionProvider.getDWorkspace();
@@ -76,6 +77,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
       disableLookupView: opts?.disableLookupView,
+      title: opts?.title,
     });
   }
 
@@ -84,6 +86,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     buttons: DendronBtn[];
     fuzzThreshold?: number;
     disableLookupView?: boolean;
+    title?: string;
   }) {
     const ctx = "LookupControllerV3:new";
     Logger.info({ ctx, msg: "enter" });
@@ -95,13 +98,13 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     };
     this.fuzzThreshold = opts.fuzzThreshold || 0.6;
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
-
-    // wire up lookup controller to lookup view
-    // TODO: swap out `getExtension` to use a static provider
-    // once treeview related interface has been migrated to IDendronExtension
+    this._title = opts.title;
 
     const disableLookupView = opts.disableLookupView;
     if (!disableLookupView) {
+      // wire up lookup controller to lookup view
+      // TODO: swap out `getExtension` to use a static provider
+      // once treeview related interface has been migrated to IDendronExtension
       this._view = getExtension().getTreeView(
         DendronTreeViewKey.LOOKUP_VIEW
       ) as LookupView;
@@ -157,10 +160,12 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     Logger.info({ ctx, msg: "enter" });
     const { provider, title, selectAll } = _.defaults(opts, {
       nonInteractive: false,
-      title: [
-        `Lookup (${this.nodeType})`,
-        `- version: ${VersionProvider.version()}`,
-      ].join(" "),
+      title:
+        this._title ||
+        [
+          `Lookup (${this.nodeType})`,
+          `- version: ${VersionProvider.version()}`,
+        ].join(" "),
       selectAll: false,
     });
     this._provider = provider;

@@ -241,8 +241,12 @@ export class NoteLookupCommand
             pressed:
               copts.selectionType === LookupSelectionTypeEnum.selection2Items,
           }),
-          JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
-          ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
+          JournalBtn.create({
+            pressed: copts.noteType === LookupNoteTypeEnum.journal,
+          }),
+          ScratchBtn.create({
+            pressed: copts.noteType === LookupNoteTypeEnum.scratch,
+          }),
           TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
           HorizontalSplitBtn.create(
             copts.splitType === LookupSplitTypeEnum.horizontal

@@ -269,7 +269,11 @@ export class Selection2ItemsBtn extends DendronBtn {
 }
 
 export class JournalBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts?: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new JournalBtn({
       title: "Create Journal Note",
       description: MODIFIER_DESCRIPTIONS["journal"],
@@ -277,6 +281,7 @@ export class JournalBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.journal,
       pressed,
+      canToggle,
     });
   }
 
@@ -305,7 +310,11 @@ export class JournalBtn extends DendronBtn {
 }
 
 export class ScratchBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new ScratchBtn({
       title: "Create Scratch Note",
       description: MODIFIER_DESCRIPTIONS["scratch"],
@@ -313,6 +322,7 @@ export class ScratchBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.scratch,
       pressed,
+      canToggle,
     });
   }
 
@@ -567,7 +577,7 @@ export function createAllButtons(
     Selection2LinkBtn.create(),
     Selection2ItemsBtn.create({}),
     JournalBtn.create(),
-    ScratchBtn.create(),
+    ScratchBtn.create({}),
     HorizontalSplitBtn.create(),
     // VerticalSplitBtn.create(),
   ];

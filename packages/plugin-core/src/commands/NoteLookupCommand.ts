@@ -96,7 +96,7 @@ type CommandGatherOutput = {
 /**
  * Passed into execute command
  */
-type CommandOpts = {
+export type CommandOpts = {
   selectedItems: readonly NoteQuickInput[];
   /** source of the command. Added for contextual UI analytics. */
   source?: string;

@@ -39,17 +39,17 @@ import {
 } from "@dendronhq/common-all";
 import {
   DendronEngineClient,
-  EngineEvents,
+  EngineEventEmitter,
   HistoryService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
 export class EngineAPIService
-  implements DEngineClient, IEngineAPIService, EngineEvents
+  implements DEngineClient, IEngineAPIService, EngineEventEmitter
 {
   private _internalEngine: DEngineClient;
-  private _engineEvents: EngineEvents;
+  private _engineEvents: EngineEventEmitter;
   private _trustedWorkspace: boolean = true;
 
   static createEngine({
@@ -95,7 +95,7 @@ export class EngineAPIService
     engineEvents,
   }: {
     engineClient: DEngineClient;
-    engineEvents: EngineEvents;
+    engineEvents: EngineEventEmitter;
   }) {
     this._internalEngine = engineClient;
     this._engineEvents = engineEvents;

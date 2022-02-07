@@ -5,7 +5,7 @@ import {
   NotePropsDict,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { EngineEvents } from "@dendronhq/engine-server";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, { ProviderResult, ThemeIcon } from "vscode";
 import { ICONS } from "../constants";
@@ -33,7 +33,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
    * @param engineEvents - specifies when note state has been changed on the
    * engine
    */
-  constructor(engineEvents: EngineEvents) {
+  constructor(engineEvents: EngineEventEmitter) {
     this._onDidChangeTreeDataEmitter = new vscode.EventEmitter<
       NoteProps | undefined | void
     >();

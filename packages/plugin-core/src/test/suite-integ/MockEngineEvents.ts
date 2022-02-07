@@ -1,11 +1,11 @@
 import { Event, NoteChangeEntry } from "@dendronhq/common-all";
-import { EngineEvents } from "@dendronhq/engine-server";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
 import { EventEmitter } from "vscode";
 
 /**
  * Convenience class for testing classes that rely on EngineEvents signaling
  */
-export class MockEngineEvents implements EngineEvents {
+export class MockEngineEvents implements EngineEventEmitter {
   _onNoteStateChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {

@@ -1,7 +1,12 @@
 import { NoteChangeEntry, NoteChangeUpdateEntry } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
-import { createEngineFromServer, ENGINE_HOOKS, runEngineTestV5 } from "../..";
+import {
+  createEngineFromServer,
+  ENGINE_HOOKS,
+  extractNoteChangeEntriesByType,
+  runEngineTestV5,
+} from "../..";
 
 /**
  * Tests that the EngineEvents interface of the client-side DendronEngineClient signals properly
@@ -23,24 +28,37 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
               try {
-                expect(noteChangeEntries.length).toEqual(2);
+                expect(createEntries.length).toEqual(1);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(0);
 
-                noteChangeEntries.forEach((entry) => {
-                  if (entry.status === "update") {
-                    const updateEntry = entry as NoteChangeUpdateEntry;
+                const updateEntry = updateEntries[0];
 
-                    // The root should have been updated to reflect the additional alpha child note:
-                    expect(updateEntry.note.fname).toEqual("root");
-                    expect(updateEntry.prevNote.children.length).toEqual(2);
-                    expect(updateEntry.note.children.length).toEqual(3);
-                    expect(
-                      updateEntry.note.children.find((name) => name === "alpha")
-                    ).toBeTruthy();
-                  } else if (entry.status === "create") {
-                    expect(entry.note.fname).toEqual("alpha");
-                  }
-                });
+                // The root should have been updated to reflect the additional alpha child note:
+                expect(updateEntry.note.fname).toEqual("root");
+                expect(updateEntry.prevNote.children.length).toEqual(2);
+                expect(updateEntry.note.children.length).toEqual(3);
+                expect(
+                  updateEntry.note.children.find((name) => name === "alpha")
+                ).toBeTruthy();
+
+                expect(createEntries[0].note.fname).toEqual("alpha");
 
                 done();
               } catch (err) {
@@ -74,25 +92,40 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
-              try {
-                expect(noteChangeEntries.length).toEqual(3);
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
 
-                noteChangeEntries.forEach((entry) => {
-                  if (entry.status === "update") {
-                    const updateEntry = entry as NoteChangeUpdateEntry;
-                    expect(updateEntry.note.fname).toEqual("bar");
-                    expect(updateEntry.prevNote.children.length).toEqual(0);
-                    expect(updateEntry.note.children.length).toEqual(1);
-                  } else if (entry.status === "create") {
-                    if (entry.note.fname === "bar.child") {
-                      expect(entry.note.stub).toBeTruthy();
-                    } else if (entry.note.fname === "bar.child.grandchild") {
-                      expect(entry.note.stub).toBeFalsy();
-                    } else {
-                      done({
-                        message: `Unexpected note created with id: ${entry.note.fname}`,
-                      });
-                    }
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
+              try {
+                expect(createEntries.length).toEqual(2);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(0);
+
+                const updateEntry = updateEntries[0];
+                expect(updateEntry.note.fname).toEqual("bar");
+                expect(updateEntry.prevNote.children.length).toEqual(0);
+                expect(updateEntry.note.children.length).toEqual(1);
+
+                createEntries.forEach((entry) => {
+                  if (entry.note.fname === "bar.child") {
+                    expect(entry.note.stub).toBeTruthy();
+                  } else if (entry.note.fname === "bar.child.grandchild") {
+                    expect(entry.note.stub).toBeFalsy();
+                  } else {
+                    done({
+                      message: `Unexpected note created with id: ${entry.note.fname}`,
+                    });
                   }
                 });
 
@@ -114,7 +147,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
     });
   });
 
-  // TODO: This scenario doesn't seem to work - parent is updated, but children appear to get orphaned.
+  // TODO: This scenario doesn't seem to work - parent is updated, but children
+  // appear to get orphaned.
   describe.skip("WHEN writing over an existing note by changing its ID", () => {
     test("THEN expect all dependent notes to be updated", async (done) => {
       await runEngineTestV5(
@@ -138,7 +172,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          await engineClient.writeNote(fooUpdated);
+          await engineClient.writeNote(fooUpdated, { updateExisting: true });
         },
         {
           expect,
@@ -172,17 +206,27 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
               try {
-                expect(noteChangeEntries.length).toEqual(2);
+                expect(createEntries.length).toEqual(2);
+                expect(updateEntries.length).toEqual(0);
+                expect(deleteEntries.length).toEqual(0);
 
-                noteChangeEntries.forEach((entry) => {
-                  if (entry.status !== "create") {
-                    done({
-                      message: `NoteChangeEntry with unexpected status: ${entry.status}`,
-                    });
-                    return;
-                  }
-
+                createEntries.forEach((entry) => {
                   if (entry.note.fname === "alpha") {
                     alphaCreateCallbackReceived = true;
                   } else if (entry.note.fname === "beta") {
@@ -231,10 +275,27 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
               try {
-                expect(noteChangeEntries.length).toEqual(1);
-                const updatedEntry =
-                  noteChangeEntries[0] as NoteChangeUpdateEntry;
+                expect(createEntries.length).toEqual(0);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(0);
+
+                const updatedEntry = updateEntries[0];
 
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.title).toEqual("updated");
@@ -269,10 +330,27 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
               try {
-                expect(noteChangeEntries.length).toEqual(1);
-                const updatedEntry =
-                  noteChangeEntries[0] as NoteChangeUpdateEntry;
+                expect(createEntries.length).toEqual(0);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(0);
+
+                const updatedEntry = updateEntries[0];
 
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.fname).toEqual("foo");
@@ -307,25 +385,33 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
               try {
-                expect(noteChangeEntries.length).toEqual(2);
+                expect(createEntries.length).toEqual(0);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(1);
 
-                noteChangeEntries.forEach((entry) => {
-                  if (entry.status === "delete") {
-                    expect(entry.status).toEqual("delete");
-                    expect(entry.note.fname).toEqual(bar.fname);
-                  } else if (entry.status === "update") {
-                    const updateEntry = entry as NoteChangeUpdateEntry;
+                expect(deleteEntries[0].note.fname).toEqual(bar.fname);
 
-                    expect(updateEntry.note.fname).toEqual("root");
-                    expect(updateEntry.note.children.length).toEqual(1);
-                    expect(updateEntry.prevNote.children.length).toEqual(2);
-                  } else {
-                    done({
-                      message: "Unexpectedly received a create NoteChangeEntry",
-                    });
-                  }
-                });
+                const updateEntry = updateEntries[0];
+
+                expect(updateEntry.note.fname).toEqual("root");
+                expect(updateEntry.note.children.length).toEqual(1);
+                expect(updateEntry.prevNote.children.length).toEqual(2);
 
                 done();
               } catch (err) {
@@ -349,12 +435,11 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
    * If test fails due to timeout, then it means at least one of the expected
    * onNoteCreated/onNoteDeleted callbacks was not received.
    *
-   * TODO: Current storeV2 behavior is to delete and then create a note during a
-   * rename (because the file system name has been changed). Instead of
-   * reporting a create + delete, should we actually just report a single
-   * update, as the ID doesn't change on the note? Furthermore, an update is
-   * reported on the Root node, even though prev/new states are identical. This
-   * bug should be fixsed.
+   * Current storeV2 behavior is to delete and then create a note during a
+   * rename (because the file system name has been changed).
+   *
+   * TODO: in this test case, an update is reported on the Root node, even
+   * though prev/new states are identical. This bug should be fixed.
    */
   describe("WHEN renaming an existing note", () => {
     test("THEN create AND delete events both get fired with the correct props", async (done) => {
@@ -365,14 +450,25 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
               try {
-                noteChangeEntries.forEach((entry) => {
-                  if (entry.status === "create") {
-                    expect(entry.note.fname).toEqual("cab");
-                  } else if (entry.status === "delete") {
-                    expect(entry.note.fname).toEqual("bar");
-                  }
-                });
+                expect(createEntries.length).toEqual(1);
+                // See TODO in test description:
+                // expect(updateEntries.length).toEqual(0);
+                expect(deleteEntries.length).toEqual(1);
+
+                expect(createEntries[0].note.fname).toEqual("cab");
+                expect(deleteEntries[0].note.fname).toEqual("bar");
+
                 done();
               } catch (err) {
                 done(err);

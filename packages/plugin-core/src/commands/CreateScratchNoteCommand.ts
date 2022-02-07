@@ -33,7 +33,7 @@ export class CreateScratchNoteCommand extends BasicCommand<
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       buttons: [
-        ScratchBtn.create(true),
+        ScratchBtn.create({ pressed: true, canToggle: false }),
         CopyNoteLinkBtn.create(false),
         HorizontalSplitBtn.create(false),
       ],

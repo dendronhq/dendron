@@ -100,7 +100,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     // TODO: swap out `getExtension` to use a static provider
     // once treeview related interface has been migrated to IDendronExtension
 
-    const disableLookupView = opts.disableLookupView || false;
+    const disableLookupView = opts.disableLookupView;
     if (!disableLookupView) {
       this._view = getExtension().getTreeView(
         DendronTreeViewKey.LOOKUP_VIEW

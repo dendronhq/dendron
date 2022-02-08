@@ -1,0 +1,64 @@
+/* eslint-disable */
+import {
+  CONSTANTS,
+  IntermediateDendronConfig,
+  DendronSiteConfig,
+  Time,
+} from "@dendronhq/common-all";
+import { readYAML, writeYAML } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
+
+export class DConfig {
+  static configPath(configRoot: string): string {
+    return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  }
+
+  /**
+   * Get without filling in defaults
+   * @param wsRoot
+   */
+  static getRaw(wsRoot: string) {
+    // ^getRaw
+    const configPath = DConfig.configPath(wsRoot);
+    const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
+    return config;
+  }
+
+  static getSiteIndex(sconfig: DendronSiteConfig) {
+    let { siteIndex, siteHierarchies } = sconfig;
+    return siteIndex || siteHierarchies[0];
+  }
+
+  static writeConfig({
+    wsRoot,
+    config,
+  }: {
+    wsRoot: string;
+    config: IntermediateDendronConfig;
+  }) {
+    const configPath = DConfig.configPath(wsRoot);
+    return writeYAML(configPath, config);
+  }
+
+  /**
+   * Create a backup of dendron.yml with an optional custom infix string.
+   * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
+   * `dendron.yyyy.MM.dd.HHmmssS.foo.yml` ^backup-file
+   *
+   * @param wsRoot workspace root
+   * @param infix custom string used in the backup name
+   */
+  static createBackup(wsRoot: string, infix: string): string {
+    const configPath = DConfig.configPath(wsRoot);
+    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+    const prefix = `dendron.${today}.`;
+    const suffix = `yml`;
+    const maybeInfix = infix ? `${infix}.` : "";
+    const backupName = `${prefix}${maybeInfix}${suffix}`;
+    const backupPath = path.join(wsRoot, backupName);
+    fs.copyFileSync(configPath, backupPath);
+    return backupPath;
+  }
+}

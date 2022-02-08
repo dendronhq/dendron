@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1641847291330
+updated: 1644356058109
 created: 1608518909864
 ---
 
@@ -151,6 +151,15 @@ const x = 1;
 [[/vault/root.schema.yml]]
 
 And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
+
+## Link to a file outside any vault
+
+To a file: [[other-files/config.ts]]
+
+To a line in that file: [[other-files/config.ts#L6]]
+
+To block anchors: [[other-files/config.ts#^getRaw]]
+[[other-files/config.ts#^backup-file]]
 
 ## Link to a file containing images
 

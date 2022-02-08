@@ -1,5 +1,8 @@
 import { NoteChangeEntry, NoteChangeUpdateEntry } from "@dendronhq/common-all";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import {
+  NoteTestUtilsV4,
+  testAssertsInsideCallback,
+} from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
 import {
   createEngineFromServer,
@@ -43,7 +46,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(1);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(0);
@@ -59,11 +62,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 ).toBeTruthy();
 
                 expect(createEntries[0].note.fname).toEqual("alpha");
-
-                done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -107,7 +106,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(2);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(0);
@@ -128,11 +127,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                     });
                   }
                 });
-
-                done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -221,7 +216,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(2);
                 expect(updateEntries.length).toEqual(0);
                 expect(deleteEntries.length).toEqual(0);
@@ -246,9 +241,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                     message: `Did not receive updates for both alpha and beta note updates.`,
                   });
                 }
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -290,7 +283,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(0);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(0);
@@ -300,11 +293,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.title).toEqual("updated");
                 expect(updatedEntry.prevNote.title).toEqual("Foo");
-
-                done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -345,7 +334,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(0);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(0);
@@ -355,11 +344,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.fname).toEqual("foo");
                 expect(updatedEntry.note.stub).toBeTruthy();
-
-                done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -400,7 +385,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(0);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(1);
@@ -412,11 +397,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 expect(updateEntry.note.fname).toEqual("root");
                 expect(updateEntry.note.children.length).toEqual(1);
                 expect(updateEntry.prevNote.children.length).toEqual(2);
-
-                done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
@@ -460,7 +441,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "delete"
               );
 
-              try {
+              testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(1);
                 // See TODO in test description:
                 // expect(updateEntries.length).toEqual(0);
@@ -470,9 +451,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 expect(deleteEntries[0].note.fname).toEqual("bar");
 
                 done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 

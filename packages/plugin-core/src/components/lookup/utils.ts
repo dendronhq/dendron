@@ -17,9 +17,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -366,15 +368,17 @@ export class PickerUtilsV2 {
    */
   static getVaultForOpenEditor(): DVault {
     const ctx = "getVaultForOpenEditor";
-    const { vaults, wsRoot } = getDWorkspace();
+    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
 
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       activeDocument &&
-      getExtension().workspaceService?.isPathInWorkspace(
-        activeDocument.uri.fsPath
-      )
+      WorkspaceUtils.isPathInWorkspace({
+        wsRoot,
+        vaults,
+        fpath: activeDocument.uri.fsPath,
+      })
     ) {
       Logger.info({ ctx, activeDocument: activeDocument.fileName });
       vault = VaultUtils.getVaultByFilePath({

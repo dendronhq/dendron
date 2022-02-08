@@ -9,6 +9,7 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -49,11 +50,14 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    if (!this._ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const { wsRoot, vaults } = this._ext.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+    ) {
       return;
     }
     if (basename.endsWith(".md")) {
-      const note = WSUtils.getNoteFromDocument(editor.document);
+      const note = this._ext.wsUtils.getNoteFromDocument(editor.document);
       if (note) {
         this.refresh(note);
       }
@@ -91,11 +95,14 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         }
         case TreeViewMessageEnum.onGetActiveEditor: {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
+          const { vaults, wsRoot } = this._ext.getDWorkspace();
           if (document) {
             if (
-              !this._ext.workspaceService?.isPathInWorkspace(
-                document.uri.fsPath
-              )
+              !WorkspaceUtils.isPathInWorkspace({
+                wsRoot,
+                vaults,
+                fpath: document.uri.fsPath,
+              })
             ) {
               Logger.info({
                 ctx,
@@ -104,7 +111,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
               });
               return;
             }
-            const note = WSUtils.getNoteFromDocument(document);
+            const note = this._ext.wsUtils.getNoteFromDocument(document);
             if (note) {
               Logger.info({
                 ctx: "onDidReceiveMessage",

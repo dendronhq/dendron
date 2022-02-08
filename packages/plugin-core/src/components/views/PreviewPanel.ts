@@ -9,6 +9,7 @@ import {
   NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -221,7 +222,14 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           }
 
           const uri = editor.document.uri;
-          if (!this._ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+          const { wsRoot, vaults } = this._ext.getDWorkspace();
+          if (
+            !WorkspaceUtils.isPathInWorkspace({
+              wsRoot,
+              vaults,
+              fpath: uri.fsPath,
+            })
+          ) {
             return;
           }
 

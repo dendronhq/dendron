@@ -7,6 +7,7 @@ import {
   NoteUtils,
   TaskNoteUtils,
 } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DendronClientUtilsV2 } from "../../clientUtils";
@@ -112,8 +113,15 @@ const selectionToNoteProps = async (opts: {
         const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();
         note.body = body;
+        const { wsRoot, vaults } = ext.getDWorkspace();
         // don't delete if original file is not in workspace
-        if (!ext.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+        if (
+          !WorkspaceUtils.isPathInWorkspace({
+            wsRoot,
+            vaults,
+            fpath: document.uri.fsPath,
+          })
+        ) {
           return note;
         }
         if (leaveTrace) {

@@ -8,7 +8,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import {
+  HistoryEvent,
+  HistoryService,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import vscode, {
@@ -21,8 +25,10 @@ import vscode, {
 } from "vscode";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { getExtension, getDWorkspace } from "../workspace";
+import { DendronExtension, getExtension } from "../workspace";
 import { GotoNoteCommandOpts } from "../commands/GoToNoteInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 function createTreeNote(note: NoteProps) {
   const collapsibleState = _.isEmpty(note.children)
@@ -60,7 +66,7 @@ export class TreeNote extends vscode.TreeItem {
     this.tooltip = this.note.title;
     const vpath = vault2Path({
       vault: this.note.vault,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
     if (DNodeUtils.isRoot(note)) {
@@ -108,7 +114,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   async getChildren(id?: string) {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
-    const { engine } = getDWorkspace();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
     if (!roots) {
       vscode.window.showInformationMessage("No notes found");
@@ -131,7 +137,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 
   async getParent(id: string) {
-    const { engine: client } = getDWorkspace();
+    const { engine: client } = ExtensionProvider.getDWorkspace();
     const maybeParent =
       client.notes[(this.tree[id] as TreeNote).note.parent || ""];
     return maybeParent ? maybeParent.id : null;
@@ -175,7 +181,6 @@ export class DendronTreeView {
       "extension",
       async (_event: HistoryEvent) => {
         if (_event.action === "initialized") {
-          const ws = getExtension();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
           const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
@@ -183,7 +188,8 @@ export class DendronTreeView {
             showCollapseAll: true,
           });
           const _class = new DendronTreeView(treeView, treeDataProvider);
-          ws.dendronTreeView = _class;
+          // Need the deprecated API to be able to set the tree view on the extension. Left this in since it's the legacy tree view and refactor didn't seem easy.
+          getExtension().dendronTreeView = _class;
         }
       }
     );
@@ -193,7 +199,7 @@ export class DendronTreeView {
     public treeView: TreeView<string>,
     public treeProvider: EngineNoteProvider
   ) {
-    getExtension().addDisposable(
+    ExtensionProvider.getExtension().addDisposable(
       window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
   }
@@ -207,9 +213,10 @@ export class DendronTreeView {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const { wsRoot, vaults, engine } = getDWorkspace();
-    const ext = getExtension();
-    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+    ) {
       return;
     }
     if (basename.endsWith(".md")) {
@@ -219,11 +226,10 @@ export class DendronTreeView {
         vaults,
       });
       const fname = NoteUtils.uri2Fname(uri);
-      const note = NoteUtils.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname,
         vault,
-        notes: engine.notes,
-        wsRoot,
+        engine,
       }) as NoteProps;
       if (note && !this.pause) {
         this.treeView.reveal(note.id);

@@ -34,7 +34,8 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3Interface";
+import { OnAcceptHook } from "./LookupProviderV3Interface";
+import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -132,40 +133,6 @@ export async function showDocAndHidePicker(
   );
   return uris;
 }
-
-export type CreateQuickPickOpts = {
-  title?: string;
-  placeholder: string;
-  /**
-   * QuickPick.ignoreFocusOut prop
-   */
-  ignoreFocusOut?: boolean;
-  /**
-   * Initial value for quickpick
-   */
-  initialValue?: string;
-  nonInteractive?: boolean;
-  /**
-   * See {@link DendronQuickPickerV2["alwaysShow"]}
-   */
-  alwaysShow?: boolean;
-  /**
-   * if canSelectMany and items from selection, select all items at creation
-   */
-  selectAll?: boolean;
-};
-
-export type PrepareQuickPickOpts = CreateQuickPickOpts & {
-  provider: ILookupProviderV3;
-  onDidHide?: () => void;
-};
-
-export type ShowQuickPickOpts = {
-  quickpick: DendronQuickPickerV2;
-  provider: ILookupProviderV3;
-  nonInteractive?: boolean;
-  fuzzThreshold?: number;
-};
 
 export type OldNewLocation = {
   oldLoc: DNoteLoc;

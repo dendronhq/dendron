@@ -17,6 +17,7 @@ type CommandOutput = CommandCommonProps;
 export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<CommandCommonProps> {
     const backfillService = new BackfillService();
-    return backfillService.updateNotes(opts);
+    await backfillService.updateNotes(opts);
+    return { exit: true };
   }
 }

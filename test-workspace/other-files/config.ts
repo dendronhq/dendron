@@ -16,11 +16,10 @@ export class DConfig {
   }
 
   /**
-   * Get without filling in defaults
+   * Get without filling in defaults ^getRaw
    * @param wsRoot
    */
   static getRaw(wsRoot: string) {
-    // ^getRaw
     const configPath = DConfig.configPath(wsRoot);
     const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
     return config;

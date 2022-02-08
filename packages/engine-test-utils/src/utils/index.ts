@@ -18,6 +18,7 @@ import path from "path";
 export * from "./git";
 export * from "./seed";
 export * from "./unified";
+export * from "./doctor";
 
 export async function checkString(body: string, ...match: string[]) {
   return expect(
@@ -63,7 +64,7 @@ export async function checkFile(
     expect(body).toMatchSnapshot();
   }
   await checkString(body, ...match);
-  return !nomatch || (await checkNotInString(body, ...nomatch));
+  return !nomatch || checkNotInString(body, ...nomatch);
 }
 
 export async function checkNotInString(body: string, ...nomatch: string[]) {

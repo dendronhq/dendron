@@ -6,12 +6,13 @@ import {
   ENGINE_WRITE_PRESETS,
   PODS_CORE,
 } from "./presets";
+import { TestDoctorUtils } from "./utils";
 
 export * from "./config";
 export * from "./engine";
-export * from "./topics";
-export { GitTestUtils, checkVaults, TestSeedUtils } from "./utils";
 export * from "./presets";
+export * from "./topics";
+export { checkVaults, GitTestUtils, TestSeedUtils } from "./utils";
 export {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -19,4 +20,8 @@ export {
   ENGINE_QUERY_PRESETS,
   ENGINE_WRITE_PRESETS,
   ENGINE_RENAME_PRESETS,
+};
+
+export const EngineTestUtilsUtils = {
+  TestDoctorUtils,
 };

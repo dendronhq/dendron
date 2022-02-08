@@ -5,6 +5,7 @@ import { afterEach, describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { EventEmitter, TextDocumentChangeEvent } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import {
   INoteSyncService,
   NoteSyncService,
@@ -63,19 +64,10 @@ suite("NoteSyncService tests without time stubbing", function testSuite() {
 
           const beforeStamp = await millisNowAndWait1Milli();
 
-          const mockExtension: any = {
-            getEngine: () => {
-              return engine;
-            },
-            workspaceService: {
-              isPathInWorkspace: (_fsPath: string) => true,
-            },
-          };
-
           const emitter = new EventEmitter<TextDocumentChangeEvent>();
 
           noteSyncSvc = new NoteSyncService(
-            mockExtension,
+            ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument,
             emitter.event
           );
@@ -160,19 +152,10 @@ suite("NoteSyncService", function testSuite() {
             builder.replace(selection, `Hello`);
           });
 
-          const mockExtension: any = {
-            getEngine: () => {
-              return engine;
-            },
-            workspaceService: {
-              isPathInWorkspace: (_fsPath: string) => true,
-            },
-          };
-
           const emitter = new EventEmitter<TextDocumentChangeEvent>();
 
           noteSyncSvc = new NoteSyncService(
-            mockExtension,
+            ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument,
             emitter.event
           );
@@ -219,19 +202,10 @@ suite("NoteSyncService", function testSuite() {
             builder.insert(pos, `tags: test\n`);
           });
 
-          const mockExtension: any = {
-            getEngine: () => {
-              return engine;
-            },
-            workspaceService: {
-              isPathInWorkspace: (_fsPath: string) => true,
-            },
-          };
-
           const emitter = new EventEmitter<TextDocumentChangeEvent>();
 
           noteSyncSvc = new NoteSyncService(
-            mockExtension,
+            ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument,
             emitter.event
           );
@@ -261,19 +235,10 @@ suite("NoteSyncService", function testSuite() {
           const foo = engine.notes["foo"];
           const editor = await WSUtils.openNote(foo);
 
-          const mockExtension: any = {
-            getEngine: () => {
-              return engine;
-            },
-            workspaceService: {
-              isPathInWorkspace: (_fsPath: string) => true,
-            },
-          };
-
           const emitter = new EventEmitter<TextDocumentChangeEvent>();
 
           noteSyncSvc = new NoteSyncService(
-            mockExtension,
+            ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument,
             emitter.event
           );

@@ -1438,6 +1438,10 @@ export class SchemaUtils {
         currentDate.toFormat("LL")
       );
       note.body = note.body.replace(
+        /<%=\s*CURRENT_WEEK\s*%>/g,
+        currentDate.toFormat("WW")
+      );
+      note.body = note.body.replace(
         /<%=\s*CURRENT_DAY\s*%>/g,
         currentDate.toFormat("dd")
       );

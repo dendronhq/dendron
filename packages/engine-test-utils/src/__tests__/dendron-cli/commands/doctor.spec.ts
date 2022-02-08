@@ -1,17 +1,43 @@
-import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
-import { file2Note, tmpDir } from "@dendronhq/common-server";
+import {
+  ConfigUtils,
+  NoteUtils,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import { file2Note, tmpDir, vault2Path } from "@dendronhq/common-server";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
 import {
   BackupService,
   DConfig,
   DoctorActionsEnum,
 } from "@dendronhq/engine-server";
-import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
-import path from "path";
 import fs from "fs-extra";
-import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import _ from "lodash";
+import path from "path";
 import { GitTestUtils, TestConfigUtils } from "../../..";
+import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import { checkFile } from "../../../utils";
+
+class TestDoctorUtils {
+  static createNotesWithNoFrontmatter = ({ wsRoot, vaults }: WorkspaceOpts) => {
+    const payload = ["hello"];
+    const vpath = vault2Path({ vault: vaults[0], wsRoot });
+    return fs.writeFile(path.join(vpath, "test.md"), payload.join("\n"));
+  };
+
+  static createNotesWithBadIds = ({ wsRoot, vaults }: WorkspaceOpts) => {
+    const notes = NoteTestUtilsV4.createNote({
+      wsRoot,
+      fname: "test",
+      vault: vaults[0],
+      props: {
+        id: "-bad-id",
+      },
+    });
+    return { notes };
+  };
+}
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -127,6 +153,60 @@ const runDoctor = (opts: Omit<DoctorCLICommandOpts, "server">) => {
     server: {} as any,
   });
 };
+describe("FIX_FRONTMATTER", () => {
+  const action = DoctorActionsEnum.FIX_FRONTMATTER;
+  describe("GIVEN note with missing frontmatter", () => {
+    test("THEN generate frontmatter ", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const fname = "test";
+          const vault = vaults[0];
+          const fpath = path.join(vault2Path({ vault, wsRoot }), `${fname}.md`);
+          await checkFile({ fpath }, "---", "id:");
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            TestDoctorUtils.createNotesWithNoFrontmatter(opts);
+          },
+        }
+      );
+    });
+  });
+
+  describe("GIVEN note with invalid frontmatter id", () => {
+    test("THEN replace frontmatter id", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const fname = "test";
+          const vault = vaults[0];
+          const note = NoteUtils.getNoteByFnameFromEngine({
+            fname,
+            vault,
+            engine,
+          })!;
+          expect(note.id === "-bad-id").toBeFalsy();
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            TestDoctorUtils.createNotesWithBadIds(opts);
+          },
+        }
+      );
+    });
+  });
+});
 
 describe("h1 to h2", () => {
   const action = DoctorActionsEnum.HI_TO_H2;

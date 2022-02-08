@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   genUUID,
+  NoteChangeEntry,
   NoteProps,
   NotePropsDict,
   NoteUtils,
@@ -21,14 +22,19 @@ export class BackfillService {
     const candidates: NotePropsDict = _.isUndefined(note)
       ? engine.notes
       : { [note.id]: note };
-    const notes = await Promise.all(
+    const changed: NoteChangeEntry[] = [];
+    await Promise.all(
       _.values(candidates)
         .filter((n) => !n.stub)
         .map(async (n) => {
+          let updated = false;
+          const prevNote = { ...n };
           overwriteFields.forEach((f) => {
             if (f === "title") {
               n.title = NoteUtils.genTitle(n.fname);
+              updated = true;
             } else if (f === "id") {
+              updated = true;
               // ids starting or ending with `-` or `_` break pages in Github publishing
               if (n.id.match(/^[-_]|[-_]$/)) {
                 n.id = genUUID();
@@ -37,10 +43,13 @@ export class BackfillService {
               throw Error(`unknown overwrite field: ${f}`);
             }
           });
+          if (updated) {
+            changed.push({ note: n, status: "update", prevNote });
+          }
           return n;
         })
     );
-    await engine.bulkAddNotes({ notes });
-    return {};
+    await engine.bulkAddNotes({ notes: changed.map((n) => n.note) });
+    return changed;
   }
 }

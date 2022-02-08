@@ -29,7 +29,6 @@
     "@chakra-ui/react": "^1.6.7",
     "@dendronhq/common-all": "^0.80.0",
     "@dendronhq/common-frontend": "^0.80.0",
-    "@playwright/test": "^1.18.1",
     "antd": "^4.15.5",
     "fs-extra": "^10.0.0",
     "html-react-parser": "^1.3.0",
@@ -47,6 +46,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^11.1.2",
+    "@playwright/test": "^1.18.1",
     "@types/fs-extra": "^9.0.12",
     "@types/react": "^17.0.21",
     "cypress": "^8.7.0",

@@ -98,7 +98,7 @@
     "template:build": "yarn --cwd packages/nextjs-template run build",
     "template:export": "yarn --cwd packages/nextjs-template run export",
     "template:start": "yarn --cwd packages/nextjs-template run start",
-    "watch": "npx lerna exec --scope $pkg -- tsc -b tsconfig.build.json --watch --verbose",
+    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch ",
     "hooks:pre-commit": "node ./hooks/pre-commit.js",
     "hooks:pre-push": "node ./hooks/pre-push.js",
     "gen:meta": "node ./bootstrap/scripts/genMeta.js",

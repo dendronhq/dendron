@@ -30,7 +30,7 @@
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
     "buildCI": "yarn compile",
-    "compile": "tsc -b tsconfig.build.json --verbose",
+    "compile": "tsc -p tsconfig.build.json ",
     "test": "echo 0",
     "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "watch": "yarn compile --watch",

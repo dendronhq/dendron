@@ -1,0 +1,148 @@
+import {
+  DendronError,
+  DNodeUtils,
+  NoteProps,
+  NotePropsDict,
+  NoteUtils,
+} from "@dendronhq/common-all";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
+import _ from "lodash";
+import vscode, { ProviderResult, ThemeIcon } from "vscode";
+import { ICONS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { Logger } from "../logger";
+import { TreeNote } from "./TreeNote";
+
+/**
+ * Provides engine event data to generate the views for the native Tree View
+ */
+export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
+  private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
+    NoteProps | undefined | void
+  >;
+  private _tree: { [key: string]: TreeNote } = {};
+  private _engineEvents;
+
+  /**
+   * Signals to vscode UI engine that the tree view needs to be refreshed.
+   */
+  readonly onDidChangeTreeData: vscode.Event<NoteProps | undefined | void>;
+
+  /**
+   *
+   * @param engineEvents - specifies when note state has been changed on the
+   * engine
+   */
+  constructor(engineEvents: EngineEventEmitter) {
+    this._onDidChangeTreeDataEmitter = new vscode.EventEmitter<
+      NoteProps | undefined | void
+    >();
+
+    this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
+    this._engineEvents = engineEvents;
+    this.setupSubscriptions();
+  }
+
+  getTreeItem(noteProps: NoteProps): vscode.TreeItem {
+    return this._tree[noteProps.id];
+  }
+
+  getChildren(noteProps?: NoteProps): ProviderResult<NoteProps[]> {
+    const ctx = "TreeView:getChildren";
+    Logger.debug({ ctx, id: noteProps });
+    const { engine } = ExtensionProvider.getDWorkspace();
+    const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
+    if (!roots) {
+      vscode.window.showInformationMessage("No notes found");
+      return Promise.resolve([]);
+    }
+    if (noteProps) {
+      const childrenIds = noteProps.children;
+
+      const childrenNoteProps = childrenIds.map((id) => {
+        return engine.notes[id];
+      });
+
+      // Sort the listing order by title:
+      _.sortBy(childrenNoteProps, (props) => props.title);
+      return Promise.resolve(childrenNoteProps);
+    } else {
+      Logger.info({ ctx, msg: "reconstructing tree: enter" });
+      const out = Promise.all(
+        roots.flatMap(async (root) => {
+          const treeNote = await this.parseTree(root, engine.notes);
+          return treeNote.note;
+        })
+      );
+      Logger.info({ ctx, msg: "reconstructing tree: exit" });
+      return out;
+    }
+  }
+
+  getParent(id: NoteProps): ProviderResult<NoteProps> {
+    const { engine: client } = ExtensionProvider.getDWorkspace();
+
+    const maybeParent = client.notes[id.parent || ""];
+    return maybeParent || null;
+  }
+
+  private setupSubscriptions(): void {
+    this._engineEvents.onEngineNoteStateChanged(() => {
+      this.refreshTreeView();
+    });
+  }
+
+  /**
+   * Tells VSCode to refresh the tree view. Debounced to fire every 250 ms
+   */
+  private refreshTreeView = _.debounce(() => {
+    this._onDidChangeTreeDataEmitter.fire();
+  }, 250);
+
+  private createTreeNote(note: NoteProps) {
+    const collapsibleState = _.isEmpty(note.children)
+      ? vscode.TreeItemCollapsibleState.None
+      : vscode.TreeItemCollapsibleState.Collapsed;
+    const tn = new TreeNote({
+      note,
+      collapsibleState,
+    });
+    if (note.stub) {
+      tn.iconPath = new ThemeIcon(ICONS.STUB);
+    } else if (note.schema) {
+      tn.iconPath = new ThemeIcon(ICONS.SCHEMA);
+    }
+    return tn;
+  }
+
+  private async parseTree(
+    note: NoteProps,
+    ndict: NotePropsDict
+  ): Promise<TreeNote> {
+    const ctx = "parseTree";
+    const tn = this.createTreeNote(note);
+    this._tree[note.id] = tn;
+    const children = note.children;
+    _.sortBy(children, (id) => ndict[id].title);
+
+    tn.children = await Promise.all(
+      children.map(async (c) => {
+        const childNote = ndict[c];
+        if (!childNote) {
+          const payload = {
+            msg: `no childNote found: ${c}, current note: ${note.id}`,
+            fullDump: _.values(ndict).map((n) => NoteUtils.toLogObj(n)),
+          };
+          const err = new DendronError({
+            message: "error updating tree view",
+            payload,
+          });
+          Logger.error({ ctx, error: err });
+          throw err;
+        }
+        return (await this.parseTree(childNote, ndict)).id;
+      })
+    );
+    return tn;
+  }
+}

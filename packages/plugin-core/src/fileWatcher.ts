@@ -16,10 +16,11 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { INoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
-import { getDWorkspace, getExtension } from "./workspace";
+import { getExtension } from "./workspace";
 
 export class FileWatcher {
   private _noteSyncService: INoteSyncService;
@@ -66,7 +67,7 @@ export class FileWatcher {
     // If a certain type of watcher has been forced, try to use that
     if (forceWatcherType !== undefined) return forceWatcherType;
 
-    const wsType = getDWorkspace().type;
+    const wsType = ExtensionProvider.getDWorkspace().type;
     // For VSCode workspaces, use the built-in VSCode watcher
     if (wsType === WorkspaceType.CODE) return "plugin";
     // Otherwise, use the engine watcher that works without VSCode
@@ -117,8 +118,8 @@ export class FileWatcher {
 
       try {
         this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-        const { vaults, engine } = getDWorkspace();
-        const { wsRoot } = getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const vault = VaultUtils.getVaultByFilePath({
           vaults,
           fsPath,
@@ -158,7 +159,7 @@ export class FileWatcher {
         throw err;
       }
     } finally {
-      FileWatcher.refreshTree();
+      FileWatcher.refreshBacklinks();
       this.L.debug({ ctx, fsPath, msg: "refreshTree" });
     }
   }
@@ -192,7 +193,7 @@ export class FileWatcher {
         return;
       }
       try {
-        const { engine } = getDWorkspace();
+        const engine = ExtensionProvider.getEngine();
         this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
         const nodeToDelete = _.find(engine.notes, { fname });
         if (_.isUndefined(nodeToDelete)) {
@@ -211,14 +212,13 @@ export class FileWatcher {
         // this.L.error({ ctx, err: JSON.stringify(err) });
       }
     } finally {
-      FileWatcher.refreshTree();
+      FileWatcher.refreshBacklinks();
     }
   }
 
-  static refreshTree = _.debounce(() => {
-    const ctx = "refreshTree";
+  static refreshBacklinks = _.debounce(() => {
+    const ctx = "refreshBacklinks";
     Logger.info({ ctx });
-    getExtension().dendronTreeView?.treeProvider.refresh();
     getExtension().backlinksDataProvider?.refresh();
   }, 100);
 }

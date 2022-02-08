@@ -26,6 +26,7 @@ import {
   DNodePropsQuickInputV2,
   DNoteLoc,
   DVault,
+  NoteChangeEntry,
   NoteLocalConfig,
   NoteOpts,
   NoteProps,
@@ -348,30 +349,34 @@ export class NoteUtils {
   }
 
   /**
-   * Add node to parent
-   * Create stubs if no direct parent exists
+   * Add node to parents up the note tree, or create stubs if no direct parents exists
    * @param opts
-   * @returns All notes that were changed including the parent
+   * @returns All notes that were changed including the parents
    */
-  static addParent(opts: {
+  static addOrUpdateParents(opts: {
     note: NoteProps;
     notesList: NoteProps[];
     createStubs: boolean;
     wsRoot: string;
-  }): NoteProps[] {
+  }): NoteChangeEntry[] {
     const { note, notesList, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    let parent =
+    const parent =
       _.find(
         notesList,
         (p) =>
           p.fname.toLowerCase() === parentPath &&
           VaultUtils.isEqual(p.vault.fsPath, note.vault.fsPath, wsRoot)
       ) || null;
-    const changed: NoteProps[] = [];
+    const changed: NoteChangeEntry[] = [];
     if (parent) {
-      changed.push(parent);
+      const prevParentState = { ...parent };
       DNodeUtils.addChild(parent, note);
+      changed.push({
+        status: "update",
+        prevNote: prevParentState,
+        note: parent,
+      });
     }
     if (!parent && !createStubs) {
       const err = {
@@ -383,14 +388,25 @@ export class NoteUtils {
       throw DendronError.createFromStatus(err);
     }
     if (!parent) {
-      parent = DNodeUtils.findClosestParent(note.fname, notesList, {
+      const ancestor = DNodeUtils.findClosestParent(note.fname, notesList, {
         vault: note.vault,
         wsRoot,
       }) as NoteProps;
-      changed.push(parent);
-      const stubNodes = NoteUtils.createStubs(parent, note);
-      stubNodes.forEach((ent2) => {
-        changed.push(ent2);
+
+      const prevAncestorState = { ...ancestor };
+
+      const stubNodes = NoteUtils.createStubs(ancestor, note);
+      stubNodes.forEach((stub) => {
+        changed.push({
+          status: "create",
+          note: stub,
+        });
+      });
+
+      changed.push({
+        status: "update",
+        prevNote: prevAncestorState,
+        note: ancestor,
       });
     }
     return changed;

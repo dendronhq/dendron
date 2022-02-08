@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import {
   DNodeUtils,
   DVault,
@@ -25,12 +26,14 @@ import _ from "lodash";
 import path from "path";
 import { PreSetupHookFunctionV4 } from "./types";
 import { AssertUtils } from "./utils";
+
 export * from "./fileUtils";
 export * from "./noteUtils";
 export * from "./presets";
 export * from "./types";
 export * from "./utils";
 export * from "./utilsv2";
+export { AssertUtils };
 
 export function filterDotFiles(filenames: string[]) {
   return filenames.filter((filename) => !/(^|\/)\.[^\/\.]/g.test(filename));
@@ -213,8 +216,8 @@ export class EngineTestUtilsV2 {
       withAssets: true,
       withGit: true,
     });
-    let wsRoot = opts.wsRoot ? opts.wsRoot : tmpDir().name;
-    let vaultDir = opts.vaultDir ? opts.vaultDir : path.join(wsRoot, "vault");
+    const wsRoot = opts.wsRoot ? opts.wsRoot : tmpDir().name;
+    const vaultDir = opts.vaultDir ? opts.vaultDir : path.join(wsRoot, "vault");
     await fs.ensureDir(vaultDir);
     await EngineTestUtilsV2.setupVault({
       vaultDir,
@@ -222,7 +225,7 @@ export class EngineTestUtilsV2 {
       withAssets,
       withGit,
     });
-    let vaults = [vaultDir];
+    const vaults = [vaultDir];
     return {
       wsRoot,
       vaults,

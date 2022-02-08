@@ -12,6 +12,7 @@ type BackfillServiceOpts = {
   engine: DEngineClient;
   note?: NoteProps;
   overwriteFields?: string[] | undefined;
+  dryRun?: boolean;
 };
 
 export class BackfillService {
@@ -49,7 +50,9 @@ export class BackfillService {
           return n;
         })
     );
-    await engine.bulkAddNotes({ notes: changed.map((n) => n.note) });
+    if (!opts.dryRun) {
+      await engine.bulkAddNotes({ notes: changed.map((n) => n.note) });
+    }
     return changed;
   }
 }

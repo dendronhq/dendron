@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.81.0 (2022-02-08)
+
+
+### Bug Fixes
+
+* **pod:** markdown import to update asset references ([#2350](https://github.com/dendronhq/dendron/issues/2350)) ([c22a322](https://github.com/dendronhq/dendron/commit/c22a322ce904da4157260e06cc14ffd07728042d))
+
+
+
+
+
 # 0.80.0 (2022-02-01)
 
 **Note:** Version bump only for package @dendronhq/nextjs-template

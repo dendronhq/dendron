@@ -87,7 +87,10 @@ export function eventModifier(
 
   // Add more information to the event extras payload:
   if (error && error instanceof DendronError) {
+    // This is a bit hacky because it overwrites the existing extra context
+    // TODO: figure out how to handle contexts in a uniform way
     event.extra = {
+      ...event.extra,
       name: error.name,
       message: error.message,
       payload: error.payload,

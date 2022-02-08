@@ -352,7 +352,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   }
 
   static cleanAssetPath(path: string): string {
-    return path.replace(/[\\|/.]/g, "");
+    return path.toLowerCase().replace(/[\\|/.]/g, "");
   }
 
   /** Gets all links to assets. */

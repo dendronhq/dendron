@@ -415,7 +415,9 @@ export class WorkspaceWatcher {
       Sentry.captureException(error);
       throw error;
     } finally {
-      FileWatcher.refreshTree();
+      // TODO: Remove this call altogether once backlinks updates via
+      // EngineEvents
+      FileWatcher.refreshBacklinks();
     }
   }
 

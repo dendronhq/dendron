@@ -88,7 +88,8 @@ import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
-import { DendronTreeView } from "./views/DendronTreeView";
+import { EngineNoteProvider } from "./views/EngineNoteProvider";
+import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import {
@@ -177,15 +178,16 @@ class ExtensionUtils {
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-    updateEngineAPI(port);
+
     wsService.writePort(port);
+
+    return port;
   }
 }
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
@@ -612,7 +614,29 @@ export async function _activate(
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
 
-      await ExtensionUtils.startServerProcess({ context, start, wsService });
+      const port = await ExtensionUtils.startServerProcess({
+        context,
+        start,
+        wsService,
+      });
+
+      // Setup the Engine API Service and the tree view
+      const engineAPIService = updateEngineAPI(port);
+
+      // TODO: This should eventually be consolidated with other view setup
+      // logic as in workspace.ts, but right now this needs an instance of
+      // EngineAPIService for init
+
+      // If the web UI dev flag is not set, then setup a native tree view:
+      if (!ws.workspaceService?.config.dev?.enableWebUI) {
+        const providerConstructor = function () {
+          return new EngineNoteProvider(engineAPIService);
+        };
+
+        const treeView = new NativeTreeView(providerConstructor);
+        treeView.show();
+        context.subscriptions.push(treeView);
+      }
 
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
@@ -902,7 +926,8 @@ async function showWelcomeOrWhatsNew({
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  if (await shouldDisplayInactiveUserSurvey()) {
+  // TODO: there is a bug in the current logic. disabling until we fix it
+  if (false) {
     await showInactiveUserMessage();
   }
 }
@@ -1273,7 +1298,7 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
-function updateEngineAPI(port: number | string): void {
+function updateEngineAPI(port: number | string): EngineAPIService {
   const ext = getExtension();
 
   const svc = EngineAPIService.createEngine({
@@ -1284,8 +1309,8 @@ function updateEngineAPI(port: number | string): void {
   });
   ext.setEngine(svc);
   ext.port = _.toInteger(port);
-  // const engine = ext.getEngine();
-  // return engine;
+
+  return svc;
 }
 
 function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {

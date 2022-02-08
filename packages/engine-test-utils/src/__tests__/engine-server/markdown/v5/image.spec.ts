@@ -41,4 +41,39 @@ describe("GIVEN image link", () => {
       })
     );
   });
+  describe("WHEN assetPrefix is set and and image url is not local ", () => {
+    runTestCases(
+      createProcCompileTests({
+        name: "REMOTE_IMAGE",
+        setup: async (opts) => {
+          const { proc } = getOpts(opts);
+          const txt = `![second-image](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)`;
+          const resp = await proc.process(txt);
+          return { resp, proc };
+        },
+        verify: {
+          [DendronASTDest.HTML]: {
+            [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+              const { resp } = extra;
+              expect(resp).toMatchSnapshot();
+              await checkString(
+                resp.contents,
+                "https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png"
+              );
+            },
+          },
+        },
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.site.assetsPrefix = "/some-prefix";
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
+        },
+      })
+    );
+  });
 });

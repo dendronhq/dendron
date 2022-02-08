@@ -33,6 +33,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
  */
 export interface INoteSyncService extends Disposable {
   /**
+   * @deprecated - use EngineEvents interface instead
    * Event that fires after a set of NoteProps has been changed AND those
    * changes have been reflected on the engine side
    */

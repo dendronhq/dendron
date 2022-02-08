@@ -964,7 +964,7 @@ export class FileStorage implements DStore {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
     if (opts?.newNode) {
-      NoteUtils.addParent({
+      NoteUtils.addOrUpdateParents({
         note,
         notesList: _.values(this.notes),
         createStubs: true,
@@ -989,8 +989,10 @@ export class FileStorage implements DStore {
 
   /**
    * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note
+   * @param param0
+   * @returns - Changed Entries
    */
-  async _writeNewNote({
+  private async _writeNewNote({
     note,
     existingNote,
     opts,
@@ -998,14 +1000,14 @@ export class FileStorage implements DStore {
     note: NoteProps;
     existingNote?: NoteProps;
     opts?: EngineWriteOptsV2;
-  }): Promise<NoteProps[]> {
+  }): Promise<NoteChangeEntry[]> {
     const ctx = "_writeNewNote";
     this.logger.info({
       ctx,
       msg: "enter",
       note: NoteUtils.toLogObj(note),
     });
-    let changed: NoteProps[] = [];
+    let changed: NoteChangeEntry[] = [];
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
@@ -1030,7 +1032,7 @@ export class FileStorage implements DStore {
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
     // this is the default behavior
     if (!opts?.noAddParent) {
-      changed = NoteUtils.addParent({
+      changed = NoteUtils.addOrUpdateParents({
         note,
         notesList: _.values(this.notes),
         createStubs: true,
@@ -1040,7 +1042,7 @@ export class FileStorage implements DStore {
     this.logger.info({
       ctx,
       msg: "exit",
-      changed: changed.map((n) => NoteUtils.toLogObj(n)),
+      changed: changed.map((n) => NoteUtils.toLogObj(n.note)),
     });
     return changed;
   }
@@ -1050,7 +1052,7 @@ export class FileStorage implements DStore {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     const ctx = `FileStore:writeNote:${note.fname}`;
-    let changed: NoteProps[] = [];
+    let changedEntries: NoteChangeEntry[] = [];
     let error: DendronError | null = null;
     this.logger.info({
       ctx,
@@ -1078,7 +1080,7 @@ export class FileStorage implements DStore {
       note = { ...maybeNote, ...note };
       noDelete = true;
     } else {
-      changed = await this._writeNewNote({
+      changedEntries = await this._writeNewNote({
         note,
         existingNote: maybeNote,
         opts,
@@ -1158,20 +1160,19 @@ export class FileStorage implements DStore {
       const { schema, schemaModule } = schemaMatch;
       NoteUtils.addSchema({ note, schema, schemaModule });
     }
-
     // if we added a new note and it overwrote an existing note
     // we now need to update the metadata of existing notes ^change
+    // TODO: Not sure the this.updateNote(ent) call is necessary, since it's already updated via _writeNewNote above.
     this.logger.info({
       ctx,
       msg: "pre:updateNotes",
     });
     await Promise.all(
-      [note].concat(changed).map((ent) => this.updateNote(ent))
+      [note]
+        .concat(changedEntries.map((entry) => entry.note))
+        .map((ent) => this.updateNote(ent))
     );
-    const changedEntries = changed.map((ent) => ({
-      note: ent,
-      status: "update" as const,
-    })) as NoteChangeEntry[];
+
     changedEntries.push({ note, status: "create" });
     if (maybeNote && !noDelete) {
       changedEntries.push({ note: maybeNote, status: "delete" });

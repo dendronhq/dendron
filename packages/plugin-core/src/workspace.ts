@@ -69,7 +69,6 @@ import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
 import { CalendarView } from "./views/CalendarView";
-import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { LookupView } from "./views/LookupView";
 import { SampleView } from "./views/SampleView";
@@ -159,7 +158,6 @@ export class DendronExtension implements IDendronExtension {
   private treeViews: { [key: string]: vscode.WebviewViewProvider };
 
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
-  public dendronTreeView: DendronTreeView | undefined;
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
@@ -215,9 +213,6 @@ export class DendronExtension implements IDendronExtension {
     if (this.fileWatcher) {
       this.fileWatcher.pause = true;
     }
-    if (this.dendronTreeView) {
-      this.dendronTreeView.pause = true;
-    }
     try {
       const out = await cb();
       return out;
@@ -227,9 +222,6 @@ export class DendronExtension implements IDendronExtension {
     } finally {
       if (this.fileWatcher) {
         this.fileWatcher.pause = false;
-      }
-      if (this.dendronTreeView) {
-        this.dendronTreeView.pause = false;
       }
     }
   }

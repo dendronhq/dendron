@@ -91,3 +91,22 @@ export class TestPresetEntryV4 {
     ];
   }
 }
+
+/**
+ * If you need to do assert/expect verification inside a callback, then use this
+ * method to wrap any assert calls. Otherwise, any assert failures will result
+ * in a failed promise instead of an exception, which will cause the test to
+ * hang until the test timeout instead of failing immediately with the right
+ * error message.
+ * @param asserts a function containing your assert/expect statements that you
+ * want to test in your test case
+ * @param doneArg a jest or mocha done argument
+ */
+export function testAssertsInsideCallback(asserts: () => void, doneArg: any) {
+  try {
+    asserts();
+    doneArg();
+  } catch (err) {
+    doneArg(err);
+  }
+}

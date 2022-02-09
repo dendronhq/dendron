@@ -8,7 +8,6 @@ import {
   DNodeUtils,
   DNoteLoc,
   DVault,
-  LookupModifierStatePayload,
   NoteProps,
   NoteUtils,
   OrderedMatcher,
@@ -25,7 +24,6 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../../workspace";
 import { getButtonCategory } from "./buttons";
 import { DendronBtn } from "./ButtonTypes";
 import {
@@ -91,7 +89,7 @@ export function createMoreResults(): DNodePropsQuickInputV2 {
 export function node2Uri(node: DNodeProps): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
-  const { wsRoot } = getDWorkspace();
+  const { wsRoot } = ExtensionProvider.getDWorkspace();
   const vault = node.vault;
   const vpath = vault2Path({ wsRoot, vault });
   return Uri.file(path.join(vpath, nodePath));
@@ -156,7 +154,7 @@ export class ProviderAcceptHooks {
     // setup vars
     const oldVault = PickerUtilsV2.getVaultForOpenEditor();
     const newVault = quickpick.vault ? quickpick.vault : oldVault;
-    const { wsRoot, engine } = getDWorkspace();
+    const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
     const notes = engine.notes;
 
     // get old note
@@ -448,7 +446,7 @@ export class PickerUtilsV2 {
     fname: string;
     vaultSelectionMode?: VaultSelectionMode;
   }): Promise<DVault | undefined> {
-    const { engine } = getDWorkspace();
+    const engine = ExtensionProvider.getEngine();
     const vaultSuggestions = await PickerUtilsV2.getVaultRecommendations({
       vault,
       vaults: engine.vaults,
@@ -484,7 +482,7 @@ export class PickerUtilsV2 {
   public static async promptVault(
     overrides?: VaultPickerItem[] | DVault[]
   ): Promise<DVault | undefined> {
-    const { vaults: wsVaults } = getDWorkspace();
+    const { vaults: wsVaults } = ExtensionProvider.getDWorkspace();
     const pickerOverrides = isDVaultArray(overrides)
       ? overrides.map((value) => {
           return { vault: value, label: VaultUtils.getName(value) };
@@ -678,26 +676,10 @@ export class PickerUtilsV2 {
       })
     );
 
-    PickerUtilsV2.refreshLookupView({ buttons: opts.quickpick.buttons });
-  }
-
-  static refreshLookupView(opts: { buttons: DendronBtn[] }) {
-    const { buttons } = opts;
-    const payload: LookupModifierStatePayload = buttons.map(
-      (button: DendronBtn) => {
-        return {
-          type: button.type,
-          pressed: button.pressed,
-        };
-      }
-    );
-
-    // TODO: swpa this out for `ExtensionProvider.getExtension()`
-    // once IDendronExtension interface has the tree view properties.
-    const lookupView = getExtension().getTreeView(
+    const lookupView = ExtensionProvider.getTreeView(
       DendronTreeViewKey.LOOKUP_VIEW
     ) as LookupView;
-    lookupView.refresh(payload);
+    lookupView.refreshLookupView({ buttons: opts.quickpick.buttons });
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

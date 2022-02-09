@@ -1,4 +1,5 @@
 import {
+  DendronTreeViewKey,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
@@ -98,4 +99,18 @@ export interface IDendronExtension {
   addDisposable(disposable: vscode.Disposable): void;
 
   getEngine(): IEngineAPIService;
+
+  /**
+   * Checks if a Dendron workspace is currently active.
+   */
+  isActive(): boolean;
+
+  /**
+   * Get Global Workspace configuration
+   */
+  getWorkspaceConfig(
+    section?: string | undefined
+  ): vscode.WorkspaceConfiguration;
+
+  getTreeView(key: DendronTreeViewKey): vscode.WebviewViewProvider;
 }

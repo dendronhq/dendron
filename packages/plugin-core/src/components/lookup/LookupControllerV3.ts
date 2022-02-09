@@ -21,15 +21,13 @@ import {
 } from "./buttons";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import {
-  CreateQuickPickOpts,
-  PickerUtilsV2,
-  PrepareQuickPickOpts,
-  ShowQuickPickOpts,
-} from "./utils";
-import {
+import { PickerUtilsV2 } from "./utils";
+import type {
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
+  PrepareQuickPickOpts,
+  ShowQuickPickOpts,
+  CreateQuickPickOpts,
 } from "./LookupControllerV3Interface";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VersionProvider } from "../../versionProvider";

@@ -3,11 +3,40 @@ import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
 import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DNodeType } from "@dendronhq/common-all";
-import {
-  CreateQuickPickOpts,
-  PrepareQuickPickOpts,
-  ShowQuickPickOpts,
-} from "./utils";
+
+export type CreateQuickPickOpts = {
+  title?: string;
+  placeholder: string;
+  /**
+   * QuickPick.ignoreFocusOut prop
+   */
+  ignoreFocusOut?: boolean;
+  /**
+   * Initial value for quickpick
+   */
+  initialValue?: string;
+  nonInteractive?: boolean;
+  /**
+   * See {@link DendronQuickPickerV2["alwaysShow"]}
+   */
+  alwaysShow?: boolean;
+  /**
+   * if canSelectMany and items from selection, select all items at creation
+   */
+  selectAll?: boolean;
+};
+
+export type PrepareQuickPickOpts = CreateQuickPickOpts & {
+  provider: ILookupProviderV3;
+  onDidHide?: () => void;
+};
+
+export type ShowQuickPickOpts = {
+  quickpick: DendronQuickPickerV2;
+  provider: ILookupProviderV3;
+  nonInteractive?: boolean;
+  fuzzThreshold?: number;
+};
 
 export interface ILookupControllerV3 {
   readonly quickpick: DendronQuickPickerV2;

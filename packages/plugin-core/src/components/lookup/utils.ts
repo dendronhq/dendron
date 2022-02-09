@@ -17,9 +17,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _, { orderBy } from "lodash";
 import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -32,7 +34,8 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3Interface";
+import { OnAcceptHook } from "./LookupProviderV3Interface";
+import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -130,40 +133,6 @@ export async function showDocAndHidePicker(
   );
   return uris;
 }
-
-export type CreateQuickPickOpts = {
-  title?: string;
-  placeholder: string;
-  /**
-   * QuickPick.ignoreFocusOut prop
-   */
-  ignoreFocusOut?: boolean;
-  /**
-   * Initial value for quickpick
-   */
-  initialValue?: string;
-  nonInteractive?: boolean;
-  /**
-   * See {@link DendronQuickPickerV2["alwaysShow"]}
-   */
-  alwaysShow?: boolean;
-  /**
-   * if canSelectMany and items from selection, select all items at creation
-   */
-  selectAll?: boolean;
-};
-
-export type PrepareQuickPickOpts = CreateQuickPickOpts & {
-  provider: ILookupProviderV3;
-  onDidHide?: () => void;
-};
-
-export type ShowQuickPickOpts = {
-  quickpick: DendronQuickPickerV2;
-  provider: ILookupProviderV3;
-  nonInteractive?: boolean;
-  fuzzThreshold?: number;
-};
 
 export type OldNewLocation = {
   oldLoc: DNoteLoc;
@@ -366,15 +335,17 @@ export class PickerUtilsV2 {
    */
   static getVaultForOpenEditor(): DVault {
     const ctx = "getVaultForOpenEditor";
-    const { vaults, wsRoot } = getDWorkspace();
+    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
 
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       activeDocument &&
-      getExtension().workspaceService?.isPathInWorkspace(
-        activeDocument.uri.fsPath
-      )
+      WorkspaceUtils.isPathInWorkspace({
+        wsRoot,
+        vaults,
+        fpath: activeDocument.uri.fsPath,
+      })
     ) {
       Logger.info({ ctx, activeDocument: activeDocument.fileName });
       vault = VaultUtils.getVaultByFilePath({

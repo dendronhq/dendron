@@ -185,7 +185,10 @@ export class NoteSyncService implements INoteSyncService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+    ) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
@@ -237,7 +240,10 @@ export class NoteSyncService implements INoteSyncService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    if (!this._extension.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+    ) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }

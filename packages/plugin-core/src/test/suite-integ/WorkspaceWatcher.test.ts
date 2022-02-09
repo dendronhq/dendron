@@ -115,6 +115,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension: ExtensionProvider.getExtension(),
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
@@ -154,6 +155,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension: ExtensionProvider.getExtension(),
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);

@@ -84,7 +84,7 @@ export class WindowWatcher {
           return;
         }
         Logger.info({ ctx, editor: uri.fsPath });
-        this.triggerUpdateDecorations(editor);
+        WindowWatcher.triggerUpdateDecorations(editor);
 
         // other components can register handlers for window watcher
         // those handlers get called here
@@ -126,14 +126,14 @@ export class WindowWatcher {
       Logger.debug({ ctx, editor: uri.fsPath });
       // Decorations only render the visible portions of the screen, so they
       // need to be re-rendered when the user scrolls around
-      this.triggerUpdateDecorations(editor);
+      WindowWatcher.triggerUpdateDecorations(editor);
     }
   );
 
   /**
    * Decorate wikilinks, user tags etc. as well as warning about some issues like missing frontmatter
    */
-  async triggerUpdateDecorations(editor: TextEditor) {
+  static async triggerUpdateDecorations(editor: TextEditor) {
     if (!editor) return;
     // This may be the active editor, but could be another editor that's open side by side without being selected.
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor

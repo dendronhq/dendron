@@ -12,6 +12,7 @@ import {
   getNoteMeta,
   getNotes,
   getNotePaths,
+  getTree,
 } from "../../utils/build";
 
 export default DendronNotePage;
@@ -33,6 +34,7 @@ export const getStaticProps: GetStaticProps = async (
   try {
     const [body, note] = await Promise.all([getNoteBody(id), getNoteMeta(id)]);
     const noteData = getNotes();
+    const tree = getTree();
     const customHeadContent: string | null = await getCustomHead();
     const { notes, noteIndex } = noteData;
     const collectionChildren = note.custom?.has_collection
@@ -45,6 +47,7 @@ export const getStaticProps: GetStaticProps = async (
       collectionChildren,
       customHeadContent,
       config: await getConfig(),
+      tree,
     };
 
     return {

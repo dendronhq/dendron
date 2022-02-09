@@ -8,6 +8,7 @@ import {
   getCustomHead,
   getNoteBody,
   getNotes,
+  getTree,
 } from "../utils/build";
 
 export default DendronNotePage;
@@ -15,6 +16,7 @@ export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
   const { noteIndex: note, notes } = getNotes();
+  const tree = getTree();
   const body = await getNoteBody(note.id);
   const config = await getConfig();
   const customHeadContent: string | null = await getCustomHead();
@@ -28,7 +30,9 @@ export const getStaticProps: GetStaticProps = async (
     customHeadContent,
     noteIndex: note,
     collectionChildren,
+    tree,
   };
+
   return {
     props,
   };

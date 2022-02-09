@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
@@ -39,6 +40,16 @@ export function getNotes() {
     ) as NoteData;
   }
   return _NOTES_CACHE;
+}
+
+let _TREE_CACHE: TreeMenu | undefined;
+
+export function getTree() {
+  if (_.isUndefined(_TREE_CACHE)) {
+    const dataDir = getDataDir();
+    _TREE_CACHE = fs.readJSONSync(path.join(dataDir, "tree.json")) as TreeMenu;
+  }
+  return _TREE_CACHE;
 }
 
 /**

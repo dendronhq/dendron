@@ -1,4 +1,5 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
+import { TreeMenu, TreeUtils } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
 import { Menu, Typography } from "antd";
 import _ from "lodash";
@@ -13,11 +14,12 @@ const { SubMenu } = Menu;
 
 export default function DendronTreeMenu(
   props: Partial<NoteData> & {
+    tree: TreeMenu;
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
   }
 ) {
-  const logger = createLogger("DendronTreeView");
+  const logger = createLogger("DendronTreeMenu");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
@@ -27,7 +29,7 @@ export default function DendronTreeMenu(
 
   // set `activeNoteIds`
   useEffect(() => {
-    if (!verifyNoteData(props) || !noteActiveId) {
+    if (!noteActiveId) {
       return undefined;
     }
 
@@ -36,41 +38,29 @@ export default function DendronTreeMenu(
     });
 
     // all parents should be in expanded position
-    const activeNoteIds = TreeViewUtils.getAllParents({
-      notes: props.notes,
+    const activeNoteIds = TreeUtils.getAllParents({
+      child2parent: props.tree.child2parent,
       noteId: noteActiveId,
     });
 
     setActiveNoteIds(activeNoteIds);
   }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
 
-  // --- Verify
-  // If no data, show spinner component
-  if (!verifyNoteData(props)) {
-    logger.info({
-      state: "exit:notes not initialized",
-    });
-    return <DendronSpinner />;
-  }
-
-  const { notes, domains, collapsed, setCollapsed } = props;
+  const { notes, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
-  // --- Calc
-  const roots: DataNode[] = domains
-    .map((note) => {
-      return TreeViewUtils.note2TreeDatanote({
-        noteId: note.id,
-        noteDict: notes,
-        showVaultName: false,
-        applyNavExclude: true,
-      });
-    })
-    .filter((ent): ent is DataNode => !_.isUndefined(ent));
+  const roots: DataNode[] = TreeViewUtils.treeMenuNode2DataNode({
+    roots: props.tree.roots,
+    showVaultName: false,
+    applyNavExclude: true,
+  });
 
   // --- Methods
   const onSelect = (noteId: string) => {
+    if (!props.noteIndex) {
+      return;
+    }
     setCollapsed(true);
     logger.info({ ctx: "onSelect", id: noteId });
     changeActiveNote(noteId, { noteIndex: props.noteIndex });

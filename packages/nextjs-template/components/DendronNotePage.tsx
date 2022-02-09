@@ -1,4 +1,8 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  NoteProps,
+  TreeMenu,
+} from "@dendronhq/common-all";
 import {
   createLogger,
   DendronNote,
@@ -27,6 +31,7 @@ export type DendronNotePageProps = {
   body: string;
   collectionChildren: NoteProps[] | null;
   config: IntermediateDendronConfig;
+  tree: TreeMenu;
 };
 
 export default function Note({

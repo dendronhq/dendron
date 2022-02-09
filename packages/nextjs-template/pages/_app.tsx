@@ -65,7 +65,12 @@ function DendronApp({ Component, pageProps }: AppProps) {
   logger.info({ ctx: "render" });
 
   return (
-    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+    <DendronLayout
+      {...noteData}
+      noteIndex={pageProps.noteIndex}
+      tree={pageProps.tree}
+      dendronRouter={dendronRouter}
+    >
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -2,6 +2,7 @@ import {
   DVault,
   NoteProps,
   NotePropsDict,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
@@ -34,6 +35,7 @@ export type NoteRouterQuery = {
 
 export type DendronCommonProps = Partial<NoteData> & {
   dendronRouter: DendronRouterProps;
+  tree: TreeMenu;
 };
 export type DendronPageWithNoteDataProps = NoteData & DendronCommonProps;
 

@@ -6,6 +6,7 @@ import {
   LookupSelectionModeEnum,
   IntermediateDendronConfig,
   LegacyDuplicateNoteAction,
+  DendronPublishingConfig,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -359,7 +360,7 @@ suite("Migration", function () {
             copyAssets: true,
             canonicalBaseUrl: "https://example.com",
             customHeaderPath: "header.html",
-            ga_tracking: "true",
+            ga_tracking: "1234567890",
             logo: "vault/assets/images/logo.png",
             siteFaviconPath: "vault/assets/images/favicon.ico",
             siteIndex: "dendron",
@@ -412,6 +413,7 @@ suite("Migration", function () {
             cognitoClientId: "azerty",
             usePrettyLinks: true,
           });
+          ConfigUtils.unsetProp(config, "publishing");
           return config;
         },
       },
@@ -531,6 +533,82 @@ suite("Migration", function () {
           expect(
             oldKeys.every((value) => postMigrationKeys.includes(value))
           ).toBeFalsy();
+
+          // and new publishing namespace should be correctly mapped from site config
+          const expectedPublishingConfig: DendronPublishingConfig = {
+            enableFMTitle: true,
+            enableKatex: true,
+            enableMermaid: true,
+            enableNoteTitleForLink: true,
+            hierarchyDisplayTitle: "foo",
+            enableHierarchyDisplay: true,
+            enablePrettyRefs: true,
+            assetsPrefix: "bar",
+            copyAssets: true,
+            canonicalBaseUrl: "https://example.com",
+            customHeaderPath: "header.html",
+            ga: {
+              tracking: "1234567890",
+            },
+            logoPath: "vault/assets/images/logo.png",
+            siteFaviconPath: "vault/assets/images/favicon.ico",
+            siteIndex: "dendron",
+            siteHierarchies: ["dendron", "lorem", "ipsum"],
+            enableSiteLastModified: true,
+            siteRootDir: "docs",
+            siteRepoDir: "https://github.com/dendronhq/dendron-site",
+            siteUrl: "https://foo.dev.dendron.so",
+            enableFrontmatterTags: true,
+            enableHashesForFMTags: true,
+            enableRandomlyColoredTags: false,
+            hierarchy: {
+              dendron: {
+                publishByDefault: true,
+              },
+              lorem: {
+                publishByDefault: {
+                  public: true,
+                  private: false,
+                },
+              },
+              ipsum: {
+                publishByDefault: false,
+              },
+            },
+            duplicateNoteBehavior: {
+              action: LegacyDuplicateNoteAction.USE_VAULT,
+              payload: ["vault", "vault2"],
+            },
+            writeStubs: true,
+            seo: {
+              title: "Dendron",
+              description: "test desc",
+              author: "dendronites",
+              twitter: "dendronhq",
+              image: {
+                url: "https://example.com/images/image.png",
+                alt: "alt for image",
+              },
+            },
+            github: {
+              cname: "foo.dev.dendron.so",
+              enableEditLink: true,
+              editLinkText: "Edit this page",
+              editRepository: "https://github.com/dendronhq/dendron-test-repo",
+              editBranch: "main",
+              editViewMode: "edit",
+            },
+            enableContainers: true,
+            generateChangelog: true,
+            segmentKey: "abcdefg",
+            cognitoUserPoolId: "qwerty",
+            cognitoClientId: "azerty",
+            enablePrettyLinks: true,
+          };
+
+          expect(postMigrationDendronConfig.publishing).toEqual(
+            expectedPublishingConfig
+          );
         });
       }
     );

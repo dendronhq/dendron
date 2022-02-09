@@ -57,21 +57,19 @@ export class MarkdownExportPodV2
     this._dendronConfig = dendronConfig;
   }
 
-  async exportNote(input: NoteProps): Promise<MarkdownExportReturnType> {
-    if (this._config.destination === "clipboard") {
-      const exportedNotes = this.renderNote(input);
+  async exportNotes(input: NoteProps[]): Promise<MarkdownExportReturnType> {
+    const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
+    const { destination, exportScope } = this._config;
+
+    if (destination === "clipboard") {
+      const exportedNotes = this.renderNote(input[0]);
       return ResponseUtil.createHappyResponse({
         data: {
           exportedNotes,
         },
       });
     }
-    return this.exportNotes([input]);
-  }
 
-  async exportNotes(input: NoteProps[]): Promise<MarkdownExportReturnType> {
-    const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
-    const { destination, exportScope } = this._config;
     try {
       fs.ensureDirSync(path.dirname(destination));
     } catch (err) {

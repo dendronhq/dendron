@@ -48,11 +48,6 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
     this._config = podConfig;
   }
 
-  async exportNote(input: NoteProps): Promise<NotionExportReturnType> {
-    const response = await this.exportNotes([input]);
-    return response;
-  }
-
   async exportNotes(notes: NoteProps[]): Promise<NotionExportReturnType> {
     const { parentPageId } = this._config;
     const blockPagesArray = this.convertMdToNotionBlock(notes, parentPageId);

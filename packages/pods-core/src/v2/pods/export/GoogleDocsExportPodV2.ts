@@ -77,11 +77,6 @@ export class GoogleDocsExportPodV2
     this._wsRoot = engine.wsRoot;
   }
 
-  async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
-    const response = await this.exportNotes([input]);
-    return response;
-  }
-
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
     const resp = await this.getPayloadForNotes(notes);
     let { accessToken, expirationTime, refreshToken } = this._config;

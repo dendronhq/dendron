@@ -15,12 +15,10 @@ export interface ExportPodFactory<T extends RunnablePodConfigV2, R> {
  * for callback operations once the export is complete
  */
 export interface ExportPodV2<R> {
-  exportNote(input: NoteProps): Promise<R>;
-
   /**
    * Bulk export of notes. Allows for external API optimizations such as call
    * batching
    * @param input
    */
-  exportNotes?(input: NoteProps[]): Promise<R>;
+  exportNotes(input: NoteProps[]): Promise<R>;
 }

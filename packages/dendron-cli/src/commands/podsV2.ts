@@ -95,7 +95,7 @@ export async function enrichPodArgs(
         return {
           error: new DendronError({
             status: "no-custom-config",
-            message: `no pod config found. Please create a service connection config at ${podConfigPath}`,
+            message: `no pod config found. Please create a pod config at ${podConfigPath}`,
           }),
         };
       }
@@ -152,6 +152,7 @@ export async function enrichPodArgs(
 
   let payload: NoteProps[];
   const { engine } = engineArgs;
+  // get payload for selected export scope
   switch (configValues.exportScope) {
     case PodExportScope.Workspace:
       payload = getWorkspaceProps(engine);

@@ -191,41 +191,18 @@ export abstract class BaseExportPodCommand<
         const pod = this.createPod(opts.config);
 
         switch (opts.config.exportScope) {
-          case PodExportScope.Note: {
-            for (const noteProp of opts.payload) {
-              if (pod.exportNote) {
-                try {
-                  const result = await pod.exportNote(noteProp);
-                  await this.onExportComplete({
-                    exportReturnValue: result,
-                    payload: noteProp,
-                    config: opts.config,
-                  });
-                } catch (err) {
-                  this.L.error(err);
-                  throw err;
-                }
-              } else {
-                throw new Error("Invalid Payload Type in Note Export");
-              }
-            }
-            break;
-          }
+          case PodExportScope.Note: 
           case PodExportScope.Vault:
           case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-            if (pod.exportNotes) {
               const result = await pod.exportNotes(opts.payload);
               await this.onExportComplete({
                 exportReturnValue: result,
                 payload: opts.payload,
                 config: opts.config,
               });
-            } else {
-              throw new Error("Multi Note Export not supported by this pod!");
-            }
 
             break;
           }
@@ -247,7 +224,7 @@ export abstract class BaseExportPodCommand<
     config,
   }: {
     exportReturnValue: R;
-    payload: NoteProps | NoteProps[];
+    payload: NoteProps[];
     config: Config;
   }): Promise<void | string>;
 

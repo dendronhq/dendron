@@ -25,8 +25,10 @@ export class JSONExportPodV2 implements ExportPodV2<JSONExportReturnType> {
     this._config = podConfig;
   }
 
-  async exportNote(input: NoteProps): Promise<JSONExportReturnType> {
-    if (this._config.destination === "clipboard") {
+  async exportNotes(input: NoteProps[]): Promise<JSONExportReturnType> {
+    const { destination } = this._config;
+
+    if (destination === "clipboard") {
       const out = JSON.stringify(input, null, 4);
       return ResponseUtil.createHappyResponse({
         data: {
@@ -34,11 +36,7 @@ export class JSONExportPodV2 implements ExportPodV2<JSONExportReturnType> {
         },
       });
     }
-    return this.exportNotes([input]);
-  }
 
-  async exportNotes(input: NoteProps[]): Promise<JSONExportReturnType> {
-    const { destination } = this._config;
     try {
       fs.ensureDirSync(path.dirname(destination));
       fs.writeJSONSync(destination, input, { encoding: "utf8" });

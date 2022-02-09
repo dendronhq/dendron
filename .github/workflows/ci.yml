@@ -114,13 +114,13 @@ jobs:
           unzip dendron-site.zip -d packages/nextjs-template
           pwd
 
-      - name: Run cypress
+      - name: Install Playwright dependencies
         if: runner.os == 'Linux'
-        uses: cypress-io/github-action@v2
-        with:
-          build: "yarn run template:export"
-          start: "yarn run template:start"
-          project: ./packages/nextjs-template
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        if: runner.os == 'Linux'
+        run: yarn ci:test:template
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}

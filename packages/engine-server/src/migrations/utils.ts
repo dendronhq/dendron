@@ -26,6 +26,13 @@ type mappedConfigPath = {
 const FLIP = (value: boolean): boolean => !value;
 
 /**
+ * Used as a function to map a string representation of a boolean value to a corresponding boolean type during migration.
+ * @param value string value
+ * @returns boolean value
+ */
+const toBoolean = (value: string): boolean => value.toLowerCase() === "true";
+
+/**
  * map of new config's path to old config's path and how it should be mapped.
  * e.g.
  *    "commands.lookup" is a new config path, that was originally at "lookup".
@@ -199,7 +206,10 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["publishing.seo.twitter", { target: "site.twitter" }],
   ["publishing.seo.image", { target: "site.image" }],
   ["publishing.github.cname", { target: "site.githubCname" }],
-  ["publishing.github.enableEditLink", { target: "site.gh_edit_link" }],
+  [
+    "publishing.github.enableEditLink",
+    { target: "site.gh_edit_link", iteratee: toBoolean },
+  ],
   ["publishing.github.editLinkText", { target: "site.gh_edit_link_text" }],
   ["publishing.github.editBranch", { target: "site.gh_edit_branch" }],
   ["publishing.github.editViewMode", { target: "site.gh_edit_view_mode" }],

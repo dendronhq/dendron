@@ -1432,6 +1432,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "Kyleskiller",
+      "name": "Sam Wagner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66365977?v=4",
+      "profile": "https://github.com/Kyleskiller",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

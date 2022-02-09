@@ -472,7 +472,8 @@ export function describeMultiWS(
       await _activate(opts.ctx);
     });
 
-    fn();
+    const result = fn();
+    assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
     after(() => {
@@ -501,13 +502,31 @@ export function describeSingleWS(
       await _activate(opts.ctx);
     });
 
-    fn();
+    const result = fn();
+    assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
     after(() => {
       cleanupVSCodeContextSubscriptions(opts.ctx);
     });
   });
+}
+
+/**
+ * Helper function for Describe*WS to do a run-time check to make sure an async
+ * test function hasn't been passed
+ * @param testFnResult
+ */
+function assertTestFnNotAsync(testFnResult: any) {
+  if (
+    testFnResult &&
+    testFnResult.then &&
+    typeof testFnResult.then === "function"
+  ) {
+    throw new Error(
+      "test fn passed to DescribeWS cannot be async! Please re-write the test"
+    );
+  }
 }
 
 export function stubCancellationToken(): CancellationToken {

@@ -131,7 +131,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
  * Migrations are sorted by version numbers, from greatest to least
  */
 export const ALL_MIGRATIONS: Migrations[] = [
-  CONFIG_MIGRATIONS,
+  // CONFIG_MIGRATIONS,
   {
     version: "0.55.2",
     changes: [

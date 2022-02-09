@@ -728,7 +728,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
       gitIgnore,
-      ["node_modules", ".dendron.*", "build", "seeds", ".next", "pods/service-connections", "\n"].join("\n"),
+      [
+        "node_modules",
+        ".dendron.*",
+        "build",
+        "seeds",
+        ".next",
+        "pods/service-connections",
+        "\n",
+      ].join("\n"),
       { encoding: "utf8" }
     );
     if (opts.createCodeWorkspace) {
@@ -1125,11 +1133,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }) {
     let changes: MigrationChangeSetStatus[] = [];
     if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-      // we are on a legacy config.
       // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationService.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.70.0", // to force apply
+        previousVersion: "0.82.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,

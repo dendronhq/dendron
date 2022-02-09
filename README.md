@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-151-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-152-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -394,6 +394,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/joshuajeschek"><img src="https://avatars.githubusercontent.com/u/64850647?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Joshua Jeschek</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajoshuajeschek" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://ko-fi.com/skepticmystic"><img src="https://avatars.githubusercontent.com/u/70717676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>SkepticMystic</b></sub></a><br /><a href="#tool-SkepticMystic" title="Tools">🔧</a></td>
     <td align="center"><a href="https://github.com/raeyulca"><img src="https://avatars.githubusercontent.com/u/56777335?v=4?s=100" width="100px;" alt=""/><br /><sub><b>raeyulca</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Araeyulca" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/Kyleskiller"><img src="https://avatars.githubusercontent.com/u/66365977?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sam Wagner</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AKyleskiller" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

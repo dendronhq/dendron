@@ -711,7 +711,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
       gitIgnore,
-      ["node_modules", ".dendron.*", "build", "seeds", "\n"].join("\n"),
+      ["node_modules", ".dendron.*", "build", "seeds", ".next", "pods/service-connections", "\n"].join("\n"),
       { encoding: "utf8" }
     );
     if (opts.createCodeWorkspace) {

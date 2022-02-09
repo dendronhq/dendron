@@ -95,11 +95,9 @@ export class DNodeUtils {
   }
 
   static basename(nodePath: string, rmExtension?: boolean) {
-    if (rmExtension) {
-      const idx = nodePath.lastIndexOf(".md");
-      if (idx > 0) {
-        nodePath = nodePath.slice(0, idx);
-      }
+    //skip for nodePath that has a sub-hierarchy starting with .md eg: learn.mdone.test, learn.md-one.new
+    if (rmExtension && nodePath.endsWith(".md")) {
+      nodePath = nodePath.slice(undefined, -3);
     }
     const [first, ...rest] = nodePath.split(".");
     return _.isEmpty(rest) ? first : rest.slice(-1)[0];

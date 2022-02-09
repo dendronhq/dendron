@@ -163,7 +163,7 @@ export class FileStorage implements DStore {
       fileName = USER_MESSAGES.UNKNOWN;
     }
 
-    let fullPath = undefined;
+    let fullPath;
     try {
       if (resp.error && resp.error.payload) {
         fullPath = JSON.parse(
@@ -458,7 +458,6 @@ export class FileStorage implements DStore {
   }
 
   _addLinkCandidates(allNotes: NoteProps[]) {
-    const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
         const maxNoteLength = ConfigUtils.getWorkspace(
@@ -470,7 +469,6 @@ export class FileStorage implements DStore {
         ) {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
-            notesMap,
             engine: this.engine,
           });
           noteFrom.links = noteFrom.links.concat(linkCandidates);
@@ -579,7 +577,6 @@ export class FileStorage implements DStore {
           try {
             const anchors = await AnchorUtils.findAnchors({
               note: n,
-              wsRoot,
             });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;

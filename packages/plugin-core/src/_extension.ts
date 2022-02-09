@@ -524,7 +524,6 @@ export async function _activate(
         // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
         let configMigrationChanges: MigrationChangeSetStatus[] = [];
         if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-          let shouldProceed = false;
           vscode.window
             .showInformationMessage(
               "We have detected a legacy configuration in dendron.yml. Would you like to run a migration?",
@@ -532,27 +531,29 @@ export async function _activate(
             )
             .then((resp) => {
               if (resp === "Migrate Configuration") {
-                vscode.window.showInformationMessage(
-                  "We are about to migrate configurations related to publishing. Please note that if you have an automated pipeline set up for publishing, you need to manually upgrade dendron-cli to avoid errors due to configuration mismatch.",
-                  { modal: true },
-                  { title: "I understand" }
-                );
-                shouldProceed = true;
+                vscode.window
+                  .showInformationMessage(
+                    "We are about to migrate configurations related to publishing. Please note that if you have an automated pipeline set up for publishing, you need to manually upgrade dendron-cli to avoid errors due to configuration mismatch.",
+                    { modal: true },
+                    { title: "I understand" }
+                  )
+                  .then(async (resp) => {
+                    if (resp?.title === "I understand") {
+                      configMigrationChanges =
+                        await wsService.runConfigMigrationIfNecessary({
+                          currentVersion,
+                          dendronConfig,
+                        });
+                    } else {
+                      vscode.window.showInformationMessage(
+                        "Migration cancelled. Note that migration will automatically be applied in the future."
+                      );
+                    }
+                  });
               }
             });
-          if (shouldProceed) {
-            configMigrationChanges =
-              await wsService.runConfigMigrationIfNecessary({
-                currentVersion,
-                dendronConfig,
-              });
-          } else {
-            vscode.window.showInformationMessage(
-              "Migration cancelled. Note that migration will automatically be applied in the future."
-            );
-          }
         }
-
+        console.log({ configMigrationChanges });
         if (configMigrationChanges.length > 0) {
           configMigrationChanges.forEach((change: MigrationChangeSetStatus) => {
             const event = _.isUndefined(change.error)

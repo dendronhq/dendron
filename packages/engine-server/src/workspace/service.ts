@@ -1136,7 +1136,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationService.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.82.0", // to force apply
+        previousVersion: "0.81.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,

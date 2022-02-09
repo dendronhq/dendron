@@ -563,23 +563,9 @@ export type ConfigVaildationResp = {
 export class ConfigUtils {
   static genDefaultConfig(): StrictConfigV5 {
     const common = {
-      useFMTitle: true,
-      useNoteTitleForLink: true,
-      mermaid: true,
-      useKatex: true,
       dev: {
         enablePreviewV2: true,
       },
-      // site: {
-      //   copyAssets: true,
-      //   siteHierarchies: ["root"],
-      //   siteRootDir: "docs",
-      //   usePrettyRefs: true,
-      //   title: "Dendron",
-      //   description: "Personal knowledge space",
-      //   siteLastModified: true,
-      //   gh_edit_branch: "main",
-      // },
     };
 
     return {

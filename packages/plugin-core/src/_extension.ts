@@ -7,7 +7,6 @@ import {
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
-  CURRENT_CONFIG_VERSION,
   DendronError,
   DWorkspaceV2,
   ExtensionEvents,
@@ -105,6 +104,7 @@ import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
 import { IDendronExtension } from "./dendronExtensionInterface";
+import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -522,52 +522,11 @@ export async function _activate(
         // no migration changes.
         // see if we need to force a config migration.
         // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
-        let configMigrationChanges: MigrationChangeSetStatus[] = [];
-        if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-          vscode.window
-            .showInformationMessage(
-              "We have detected a legacy configuration in dendron.yml. Would you like to run a migration?",
-              "Migrate Configuration"
-            )
-            .then(async (resp) => {
-              if (resp === "Migrate Configuration") {
-                await vscode.window
-                  .showInformationMessage(
-                    "We are about to migrate configurations related to publishing. Please note that if you have an automated pipeline set up for publishing, you need to manually upgrade dendron-cli to avoid errors due to configuration mismatch.",
-                    { modal: true },
-                    { title: "I understand" }
-                  )
-                  .then(async (resp) => {
-                    if (resp?.title === "I understand") {
-                      configMigrationChanges =
-                        await wsService.runConfigMigrationIfNecessary({
-                          currentVersion,
-                          dendronConfig,
-                        });
-                      if (configMigrationChanges.length > 0) {
-                        configMigrationChanges.forEach(
-                          (change: MigrationChangeSetStatus) => {
-                            const event = _.isUndefined(change.error)
-                              ? MigrationEvents.MigrationSucceeded
-                              : MigrationEvents.MigrationFailed;
-                            AnalyticsUtils.track(event, {
-                              data: change.data,
-                            });
-                          }
-                        );
-                        vscode.window.showInformationMessage(
-                          "Migrated to the newest configurations. You can find a backup of the original file in your root directory."
-                        );
-                      }
-                    } else {
-                      vscode.window.showInformationMessage(
-                        "Migration cancelled. Note that migration will automatically be applied in the future."
-                      );
-                    }
-                  });
-              }
-            });
-        }
+        ConfigMigrationUtils.maybePromptConfigMigration({
+          dendronConfig,
+          wsService,
+          currentVersion,
+        });
       }
 
       // Re-use the id for error reporting too:

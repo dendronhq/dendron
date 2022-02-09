@@ -137,18 +137,18 @@ router.post(
   })
 );
 
-router.get(
+router.post(
   "/links",
   asyncHandler(async (req: Request, res: Response) => {
     const opts = req.body as GetLinksRequest;
     const { ws } = opts;
     const engine = await getWSEngine({ ws });
-    const links = engine.getLinks(opts);
+    const links = await engine.getLinks(opts);
     ExpressUtils.setResponse(res, { data: links, error: null });
   })
 );
 
-router.get(
+router.post(
   "/anchors",
   asyncHandler(async (req: Request, res: Response) => {
     const { note } = req.body as GetAnchorsRequest;

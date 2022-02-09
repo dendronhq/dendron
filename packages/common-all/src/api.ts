@@ -528,7 +528,7 @@ export class DendronAPI extends API {
   async getLinks(req: GetLinksRequest): Promise<GetNoteLinksPayload> {
     const resp = await this._makeRequest({
       path: "note/links",
-      method: "get",
+      method: "post",
       body: req,
     });
     return resp;
@@ -537,7 +537,7 @@ export class DendronAPI extends API {
   async getAnchors(req: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     const resp = await this._makeRequest({
       path: "note/anchors",
-      method: "get",
+      method: "post",
       body: req,
     });
     return resp;

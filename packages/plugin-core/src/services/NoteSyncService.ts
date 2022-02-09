@@ -8,7 +8,6 @@ import {
 } from "@dendronhq/common-all";
 import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
-  AnchorUtils,
   DendronASTDest,
   MDUtilsV5,
   WorkspaceUtils,
@@ -166,10 +165,19 @@ export class NoteSyncService implements INoteSyncService {
 
     // if only frontmatter changed, don't bother with heavy updates
     if (!fmChangeOnly) {
-      const anchors = await AnchorUtils.findAnchors({
+      const anchors = await engine.getAnchors({
         note,
       });
-      note.anchors = anchors;
+      if (!anchors.data) {
+        throw new DendronError({
+          message: "Unable to calculate backlinks in note",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            error: anchors.error,
+          },
+        });
+      }
+      note.anchors = anchors.data;
 
       if (this._extension.workspaceService?.config.dev?.enableLinkCandidates) {
         const linkCandidates = await engine.getLinks({

@@ -160,6 +160,7 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["preview.enableKatex", { target: "useKatex", preserve: true }],
 
   // publishing namespace
+  ["publishing", { target: "site", iteratee: "skip" }],
   ["publishing.enableFMTitle", { target: "useFMTitle" }],
   ["publishing.enableHierarchyDisplay", { target: "hierarchyDisplay" }],
   ["publishing.hierarchyDisplayTitle", { target: "hierarchyDisplayTitle" }],

@@ -9,7 +9,7 @@ import {
   Time,
   ConfigUtils,
 } from "@dendronhq/common-all";
-import { readYAML, writeYAML } from "@dendronhq/common-server";
+import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -50,7 +50,7 @@ export class DConfig {
   }
 
   static getSiteIndex(sconfig: DendronSiteConfig) {
-    let { siteIndex, siteHierarchies } = sconfig;
+    const { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
 
@@ -58,7 +58,7 @@ export class DConfig {
    * fill in defaults
    */
   static cleanSiteConfig(config: DendronSiteConfig): CleanDendronSiteConfig {
-    let out: DendronSiteConfig = _.defaults(config, {
+    const out: DendronSiteConfig = _.defaults(config, {
       copyAssets: true,
       usePrettyRefs: true,
       siteNotesDir: "notes",
@@ -71,12 +71,13 @@ export class DConfig {
       writeStubs: true,
       description: "Personal knowledge space",
     });
-    let { siteRootDir, siteHierarchies, siteIndex, siteUrl } = out;
+    const { siteRootDir, siteHierarchies } = out;
+    let { siteIndex, siteUrl } = out;
     if (process.env["SITE_URL"]) {
       siteUrl = process.env["SITE_URL"];
     }
     if (!siteRootDir) {
-      throw `siteRootDir is undefined`;
+      throw new DendronError({ message: "siteRootDir is undefined" });
     }
     if (!siteUrl && getStage() === "dev") {
       // this gets overridden in dev so doesn't matter
@@ -103,7 +104,7 @@ export class DConfig {
     };
   }
 
-  static writeConfig({
+  static async writeConfig({
     wsRoot,
     config,
   }: {
@@ -111,7 +112,7 @@ export class DConfig {
     config: IntermediateDendronConfig;
   }) {
     const configPath = DConfig.configPath(wsRoot);
-    return writeYAML(configPath, config);
+    return writeYAMLAsync(configPath, config);
   }
 
   /**

@@ -529,9 +529,9 @@ export async function _activate(
               "We have detected a legacy configuration in dendron.yml. Would you like to run a migration?",
               "Migrate Configuration"
             )
-            .then((resp) => {
+            .then(async (resp) => {
               if (resp === "Migrate Configuration") {
-                vscode.window
+                await vscode.window
                   .showInformationMessage(
                     "We are about to migrate configurations related to publishing. Please note that if you have an automated pipeline set up for publishing, you need to manually upgrade dendron-cli to avoid errors due to configuration mismatch.",
                     { modal: true },
@@ -544,6 +544,21 @@ export async function _activate(
                           currentVersion,
                           dendronConfig,
                         });
+                      if (configMigrationChanges.length > 0) {
+                        configMigrationChanges.forEach(
+                          (change: MigrationChangeSetStatus) => {
+                            const event = _.isUndefined(change.error)
+                              ? MigrationEvents.MigrationSucceeded
+                              : MigrationEvents.MigrationFailed;
+                            AnalyticsUtils.track(event, {
+                              data: change.data,
+                            });
+                          }
+                        );
+                        vscode.window.showInformationMessage(
+                          "Migrated to the newest configurations. You can find a backup of the original file in your root directory."
+                        );
+                      }
                     } else {
                       vscode.window.showInformationMessage(
                         "Migration cancelled. Note that migration will automatically be applied in the future."
@@ -552,20 +567,6 @@ export async function _activate(
                   });
               }
             });
-        }
-        console.log({ configMigrationChanges });
-        if (configMigrationChanges.length > 0) {
-          configMigrationChanges.forEach((change: MigrationChangeSetStatus) => {
-            const event = _.isUndefined(change.error)
-              ? MigrationEvents.MigrationSucceeded
-              : MigrationEvents.MigrationFailed;
-            AnalyticsUtils.track(event, {
-              data: change.data,
-            });
-          });
-          vscode.window.showInformationMessage(
-            "Migrated to the newest configurations. You can find a backup of the original file in your root directory."
-          );
         }
       }
 

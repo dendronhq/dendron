@@ -44,28 +44,25 @@
     {
       "label": "export-pod",
       "type": "shell",
-      "command": "node --inspect /usr/local/bin/dendron-cli exportPod --wsRoot ~/Dendron --podId dendron.airtable --podPkg @dendronhq/airtable-pod --podSource remote --showConfig",
-      "options": {
-        "cwd": "/Users/kevinlin/Dendron"
-      },
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.airtable --podPkg @dendronhq/airtable-pod --showConfig",
       "problemMatcher": []
     },
     {
       "label": "gdoc-import-pod",
       "type": "shell",
-      "command": "node --inspect dendron_setup/dendron/packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ~/Dendron --podId dendron.gdoc --podSource builtin",
-      "options": {
-        "cwd": "D:/"
-      },
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli importPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.gdoc --podSource builtin",
       "problemMatcher": []
     },
     {
       "label": "orbit-import-pod",
       "type": "shell",
-      "command": "node --inspect packages/dendron-cli/lib/bin/dendron-cli importPod --wsRoot ${workspaceFolder}/../test-workspace --podId dendron.orbit --podSource builtin",
-      "options": {
-        "cwd": "D:/dendron_setup/dendron/"
-      },
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli importPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.orbit --podSource builtin",
+      "problemMatcher": []
+    },
+    {
+      "label": "publish-pod",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli publishPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.markdown --vault vault --query root --podSource builtin",
       "problemMatcher": []
     }
   ]

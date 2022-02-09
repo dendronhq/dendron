@@ -6,10 +6,6 @@ exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds v
 
 exports[`add ok: exists 3`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -153,10 +149,6 @@ exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks
 
 exports[`add ok: seed with site 3`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -301,10 +293,6 @@ exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace 
 
 exports[`init convert workspace error: no vaults 2`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -403,10 +391,6 @@ exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspac
 
 exports[`init convert workspace ok: diff root name 2`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -524,10 +508,6 @@ exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace d
 
 exports[`init create workspace basic 2`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -647,10 +627,6 @@ exports[`remove ok: remove initialized seed 2`] = `"dendron.foo"`;
 
 exports[`remove ok: remove initialized seed 3`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:
@@ -762,10 +738,6 @@ publishing:
 
 exports[`remove ok: remove non-initialized seed 1`] = `
 "version: 5
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
 dev:
     enablePreviewV2: true
 commands:

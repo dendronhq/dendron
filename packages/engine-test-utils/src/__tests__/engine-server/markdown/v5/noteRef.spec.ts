@@ -108,7 +108,7 @@ describe("GIVEN noteRef plugin", () => {
                 resp.contents,
                 // should have id for link
                 `<a href="/notes/alpha-id"`,
-                `<a href="/notes/bar">Bar</a>`
+                `<a href="/notes/bar">bar</a>`
               );
             },
           },

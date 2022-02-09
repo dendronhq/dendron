@@ -248,7 +248,9 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
   const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
   let { vault } = procData;
-  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+  const shouldApplyPublishRules =
+    MDUtilsV5.shouldApplyPublishingRules(proc) ||
+    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
 
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({

@@ -72,7 +72,11 @@ describe("GIVEN image link", () => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.assetsPrefix = "/some-prefix";
+              ConfigUtils.setPublishProp(
+                config,
+                "assetsPrefix",
+                "/some-prefix"
+              );
               return config;
             },
             { wsRoot: opts.wsRoot }

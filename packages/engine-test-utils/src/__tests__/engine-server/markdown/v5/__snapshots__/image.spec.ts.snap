@@ -7,7 +7,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/some-prefix/notes/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"/some-prefix/notes/foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

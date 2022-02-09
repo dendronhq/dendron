@@ -436,9 +436,9 @@ export function runSuiteButSkipForWindows() {
   return runTest;
 }
 
-/** Use to run tests with a multi-vault workspace. Used in the same way as regular `describe`.
- *
- * For example:
+/**
+ * Use to run tests with a multi-vault workspace. Used in the same way as
+ * regular `describe`. For example:
  * ```ts
  * describeMultiWS(
  *   "WHEN workspace type is not specified",
@@ -455,11 +455,16 @@ export function runSuiteButSkipForWindows() {
  *   }
  * );
  * ```
+ * @param title
+ * @param opts
+ * @param fn - the test() functions to execute. NOTE: This function CANNOT be
+ * async, or else the test may not fail reliably when your expect or assert
+ * conditions are not met.
  */
 export function describeMultiWS(
   title: string,
   opts: SetupLegacyWorkspaceMultiOpts,
-  fn: () => any
+  fn: () => void
 ) {
   describe(title, () => {
     before(async () => {
@@ -476,10 +481,19 @@ export function describeMultiWS(
   });
 }
 
+/**
+ * Use to run tests with a single-vault workspace. Used in the same way as
+ * regular `describe`.
+ * @param title
+ * @param opts
+ * @param fn - the test() functions to execute. NOTE: This function CANNOT be
+ * async, or else the test may not fail reliably when your expect or assert
+ * conditions are not met.
+ */
 export function describeSingleWS(
   title: string,
   opts: SetupLegacyWorkspaceOpts,
-  fn: () => any
+  fn: () => void
 ) {
   describe(title, () => {
     before(async () => {

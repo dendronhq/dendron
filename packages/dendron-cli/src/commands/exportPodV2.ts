@@ -13,10 +13,13 @@ import {
   GoogleDocsExportReturnType,
   GoogleDocsUtils,
   JSONExportPodV2,
+  JSONExportReturnType,
   MarkdownExportPodV2,
+  MarkdownExportReturnType,
   NotionExportPodV2,
   NotionExportReturnType,
   NotionUtils,
+  PodExportScope,
   PodV2Types,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
@@ -24,6 +27,7 @@ import { CLICommand, CommandCommonProps } from "./base";
 import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./podsV2";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import Airtable from "@dendronhq/airtable";
+import _ from "lodash";
 
 export { CommandCLIOpts as ExportPodV2CLIOpts };
 
@@ -100,6 +104,7 @@ export class ExportPodV2CLICommand extends CLICommand<
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "execute";
     const { server, serverSockets, engine, config, payload } = opts;
+    this.multiNoteExportCheck({destination: config.destination, exportScope: config.exportScope})
     const pod = this.createPod(config, engine);
     this.L.info({ ctx, msg: "running pod..." });
     const exportReturnValue = await pod.exportNotes(payload);
@@ -107,6 +112,7 @@ export class ExportPodV2CLICommand extends CLICommand<
       exportReturnValue,
       podType: config.podType,
       engine,
+      config
     });
     this.L.info({ ctx, msg: "done execute" });
     return new Promise((resolve) => {
@@ -128,8 +134,9 @@ export class ExportPodV2CLICommand extends CLICommand<
     exportReturnValue: any;
     podType: PodV2Types;
     engine: DEngineClient;
+    config: any
   }) {
-    const { exportReturnValue, podType, engine } = opts;
+    const { exportReturnValue, podType, engine, config } = opts;
     switch (podType) {
       case PodV2Types.AirtableExportV2:
         return this.onAirtableExportComplete({ exportReturnValue, engine });
@@ -137,6 +144,8 @@ export class ExportPodV2CLICommand extends CLICommand<
         return this.onGoogleDocsExportComplete({ exportReturnValue, engine });
       case PodV2Types.NotionExportV2:
         return this.onNotionExportComplete({ exportReturnValue, engine });
+      case PodV2Types.MarkdownExportV2:
+        return this.onMarkdownExportComplete({exportReturnValue, config})
     }
   }
 
@@ -147,7 +156,7 @@ export class ExportPodV2CLICommand extends CLICommand<
     const { exportReturnValue, engine } = opts;
     const records = exportReturnValue.data;
     if (ResponseUtil.hasError(exportReturnValue)) {
-      console.log(ErrorFactory.safeStringify(exportReturnValue.error));
+      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
     }
     if (records?.created) {
       await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
@@ -164,7 +173,7 @@ export class ExportPodV2CLICommand extends CLICommand<
   }) {
     const { exportReturnValue, engine } = opts;
     if (ResponseUtil.hasError(exportReturnValue)) {
-      console.log(ErrorFactory.safeStringify(exportReturnValue.error?.message));
+      this.print(ErrorFactory.safeStringify(exportReturnValue.error?.message));
     }
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
@@ -189,13 +198,50 @@ export class ExportPodV2CLICommand extends CLICommand<
     const { exportReturnValue, engine } = opts;
     const { data, error } = exportReturnValue;
     if (ResponseUtil.hasError(exportReturnValue)) {
-      console.log(ErrorFactory.safeStringify(error));
+      this.print(ErrorFactory.safeStringify(error));
     }
     if (data?.created) {
       await NotionUtils.updateNotionIdForNewlyCreatedNotes(
         data.created,
         engine
       );
+    }
+  }
+
+  async onMarkdownExportComplete(opts: {exportReturnValue: MarkdownExportReturnType, config: any}){
+    const { exportReturnValue, config } = opts;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
+    }
+    const content = exportReturnValue.data?.exportedNotes;
+    if(config.destination === "clipboard" && _.isString(content)){
+      this.print(content)
+    }
+  }
+
+  async onJSONExportComplete(opts: {exportReturnValue: JSONExportReturnType, config: any}){
+    const { exportReturnValue, config } = opts;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
+    }
+    const content = exportReturnValue.data?.exportedNotes;
+    if(config.destination === "clipboard" && _.isString(content)){
+      this.print(content)
+    }
+  }
+
+  multiNoteExportCheck(opts: {
+    destination: string;
+    exportScope: PodExportScope;
+  }) {
+    if (
+      opts.destination === "clipboard" &&
+      opts.exportScope !== PodExportScope.Note
+    ) {
+      throw new DendronError({
+        message:
+          "Multi Note Export cannot have clipboard as destination. Please configure your destination by using Dendron: Configure Export Pod V2 command",
+      });
     }
   }
 }

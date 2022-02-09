@@ -158,6 +158,58 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["preview.enableMermaid", { target: "mermaid", preserve: true }],
   ["preview.enablePrettyRefs", { target: "usePrettyRefs" }],
   ["preview.enableKatex", { target: "useKatex", preserve: true }],
+
+  // publishing namespace
+  ["publishing.enableFMTitle", { target: "useFMTitle" }],
+  ["publishing.enableHierarchyDisplay", { target: "hierarchyDisplay" }],
+  ["publishing.hierarchyDisplayTitle", { target: "hierarchyDisplayTitle" }],
+  ["publishing.enableNoteTitleForLink", { target: "useNoteTitleForLink" }],
+  ["publishing.enableMermaid", { target: "mermaid" }],
+  ["publishing.enablePrettyRefs", { target: "site.usePrettyRefs" }],
+  ["publishing.enableKatex", { target: "useKatex" }],
+  ["publishing.assetsPrefix", { target: "site.assetsPrefix" }],
+  ["publishing.copyAssets", { target: "site.copyAssets" }],
+  ["publishing.canonicalBaseUrl", { target: "site.canonicalBaseUrl" }],
+  ["publishing.customHeaderPath", { target: "site.customHeaderPath" }],
+  ["publishing.ga.tracking", { target: "site.ga_tracking" }],
+  ["publishing.logoPath", { target: "site.logo" }],
+  ["publishing.siteFaviconPath", { target: "site.siteFaviconPath" }],
+  ["publishing.siteIndex", { target: "site.siteIndex" }],
+  ["publishing.siteHierarchies", { target: "site.siteHierarchies" }],
+  ["publishing.enableSiteLastModified", { target: "site.siteLastModified" }],
+  ["publishing.siteRootDir", { target: "site.siteRootDir" }],
+  ["publishing.siteRepoDir", { target: "site.siteRepoDir" }],
+  ["publishing.siteUrl", { target: "site.siteUrl" }],
+  ["publishing.enableFrontmatterTags", { target: "site.showFrontMatterTags" }],
+  ["publishing.enableHashesForFMTags", { target: "site.useHashesForFMTags" }],
+  [
+    "publishing.enableRandomlyColoredTags",
+    { target: "site.noRandomlyColoredTags", iteratee: FLIP },
+  ],
+  ["publishing.hierarchy", { target: "site.config" }],
+  [
+    "publishing.duplicateNoteBehavior",
+    { target: "site.duplicateNoteBehavior" },
+  ],
+  ["publishing.writeStubs", { target: "site.writeStubs" }],
+  ["publishing.seo.title", { target: "site.title" }],
+  ["publishing.seo.description", { target: "site.description" }],
+  ["publishing.seo.author", { target: "site.author" }],
+  ["publishing.seo.twitter", { target: "site.twitter" }],
+  ["publishing.seo.image", { target: "site.image" }],
+  ["publishing.github.cname", { target: "site.githubCname" }],
+  ["publishing.github.enableEditLink", { target: "site.gh_edit_link" }],
+  ["publishing.github.editLinkText", { target: "site.gh_edit_link_text" }],
+  ["publishing.github.editBranch", { target: "site.gh_edit_branch" }],
+  ["publishing.github.editViewMode", { target: "site.gh_edit_view_mode" }],
+  ["publishing.github.editRepository", { target: "site.gh_edit_repository" }],
+  ["publishing.enableContainers", { target: "site.useContainers" }],
+  ["publishing.generateChangelog", { target: "site.generateChangelog" }],
+  ["publishing.previewPort", { target: "site.previewPort" }],
+  ["publishing.segmentKey", { target: "site.segmentKey" }],
+  ["publishing.cognitoUserPoolId", { target: "site.cognitoUserPoolId" }],
+  ["publishing.cognitoClientId", { target: "site.cognitoClientId" }],
+  ["publishing.enablePrettyLinks", { target: "site.usePrettyLinks" }],
 ]);
 
 /**
@@ -165,7 +217,11 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
  * and should be checked for existence
  * and deleted from `dendron.yml`
  */
-export const DEPRECATED_PATHS = ["useNunjucks", "noLegacyNoteRef"];
+export const DEPRECATED_PATHS = [
+  "useNunjucks",
+  "noLegacyNoteRef",
+  "site.siteNotesDir",
+];
 
 export class MigrationUtils {
   /**

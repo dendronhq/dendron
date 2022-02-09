@@ -4,6 +4,8 @@ import {
   WorkspaceType,
   ConfigUtils,
   LookupSelectionModeEnum,
+  IntermediateDendronConfig,
+  LegacyDuplicateNoteAction,
 } from "@dendronhq/common-all";
 import {
   ALL_MIGRATIONS,
@@ -13,6 +15,7 @@ import {
   WorkspaceService,
   DConfig,
   MigrationUtils,
+  CONFIG_MIGRATIONS,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { describe, test } from "mocha";
@@ -21,7 +24,7 @@ import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension, getDWorkspace } from "../../workspace";
+import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import {
@@ -30,6 +33,10 @@ import {
   setupBeforeAfter,
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { readYAML } from "@dendronhq/common-server";
+import path from "path";
+import fs from "fs-extra";
 
 const getMigration = ({
   exact,
@@ -334,94 +341,199 @@ suite("Migration", function () {
       });
     });
 
-    // test("migrate to 0.70.0 (preview namespace migration)", (done) => {
-    //   DendronExtension.version = () => "0.70.0";
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     modConfigCb: (config) => {
-    //       config["useFMTitle"] = false;
-    //       config["useNoteTitleForLink"] = false;
-    //       config["mermaid"] = false;
-    //       config["usePrettyRefs"] = false;
-    //       config["useKatex"] = false;
-    //       config["lookupDontBubbleUpCreateNew"] = true;
+    describeMultiWS(
+      "GIVEN migration to 0.81.0 (publishing namespace migration)",
+      {
+        ctx,
+        modConfigCb: (config) => {
+          // add everything to site config.
+          ConfigUtils.setProp(config, "useFMTitle", true);
+          ConfigUtils.setProp(config, "hierarchyDisplay", true);
+          ConfigUtils.setProp(config, "hierarchyDisplayTitle", "foo");
+          ConfigUtils.setProp(config, "useNoteTitleForLink", true);
+          ConfigUtils.setProp(config, "mermaid", true);
+          ConfigUtils.setProp(config, "useKatex", true);
+          ConfigUtils.setProp(config, "site", {
+            usePrettyRefs: true,
+            assetsPrefix: "bar",
+            copyAssets: true,
+            canonicalBaseUrl: "https://example.com",
+            customHeaderPath: "header.html",
+            ga_tracking: "true",
+            logo: "vault/assets/images/logo.png",
+            siteFaviconPath: "vault/assets/images/favicon.ico",
+            siteIndex: "dendron",
+            siteHierarchies: ["dendron", "lorem", "ipsum"],
+            siteLastModified: true,
+            siteRootDir: "docs",
+            siteRepoDir: "https://github.com/dendronhq/dendron-site",
+            siteUrl: "https://foo.dev.dendron.so",
+            showFrontMatterTags: true,
+            useHashesForFMTags: true,
+            noRandomlyColoredTags: true,
+            config: {
+              dendron: {
+                publishByDefault: true,
+              },
+              lorem: {
+                publishByDefault: {
+                  public: true,
+                  private: false,
+                },
+              },
+              ipsum: {
+                publishByDefault: false,
+              },
+            },
+            duplicateNoteBehavior: {
+              action: LegacyDuplicateNoteAction.USE_VAULT,
+              payload: ["vault", "vault2"],
+            },
+            writeStubs: true,
+            title: "Dendron",
+            description: "test desc",
+            author: "dendronites",
+            twitter: "dendronhq",
+            image: {
+              url: "https://example.com/images/image.png",
+              alt: "alt for image",
+            },
+            githubCname: "foo.dev.dendron.so",
+            gh_edit_link: "true",
+            gh_edit_link_text: "Edit this page",
+            gh_edit_repository:
+              "https://github.com/dendronhq/dendron-test-repo",
+            gh_edit_branch: "main",
+            gh_edit_view_mode: "edit",
+            useContainers: true,
+            generateChangelog: true,
+            segmentKey: "abcdefg",
+            cognitoUserPoolId: "qwerty",
+            cognitoClientId: "azerty",
+            usePrettyLinks: true,
+          });
+          return config;
+        },
+      },
+      () => {
+        DendronExtension.version = () => "0.81.0";
+        test("publishing config correctly migrates to new namespace", async () => {
+          const engine = ExtensionProvider.getEngine();
+          const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
+          const dendronConfig = DConfig.getRaw(
+            wsRoot
+          ) as IntermediateDendronConfig;
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
+          const wsService = new WorkspaceService({ wsRoot });
 
-    //       delete config.preview;
+          const oldKeys: string[] = [
+            "site",
+            "useFMTitle",
+            "hierarchyDisplay",
+            "hierarchyDisplayTitle",
+            "useNoteTitleForLink",
+            "mermaid",
+            "site.usePrettyRefs",
+            "useKatex",
+            "site.assetsPrefix",
+            "site.copyAssets",
+            "site.canonicalBaseUrl",
+            "site.customHeaderPath",
+            "site.ga_tracking",
+            "site.logo",
+            "site.siteFaviconPath",
+            "site.siteIndex",
+            "site.siteHierarchies",
+            "site.siteLastModified",
+            "site.siteRootDir",
+            "site.siteRepoDir",
+            "site.siteUrl",
+            "site.showFrontMatterTags",
+            "site.useHashesForFMTags",
+            "site.noRandomlyColoredTags",
+            "site.config",
+            "site.duplicateNoteBehavior",
+            "site.writeStubs",
+            "site.title",
+            "site.description",
+            "site.author",
+            "site.twitter",
+            "site.image",
+            "site.githubCname",
+            "site.gh_edit_link",
+            "site.gh_edit_link_text",
+            "site.gh_edit_branch",
+            "site.gh_edit_repository",
+            "site.useContainers",
+            "site.generateChangelog",
+            "site.segmentKey",
+            "site.cognitoUserPoolId",
+            "site.cognitoClientId",
+            "site.usePrettyLinks",
+          ];
 
-    //       return config;
-    //     },
-    //     onInit: async ({ engine, wsRoot }) => {
-    //       const dendronConfig = DConfig.getRaw(
-    //         wsRoot
-    //       ) as IntermediateDendronConfig;
+          dendronConfig["version"] = 4;
+          delete dendronConfig["publishing"];
+          const originalDeepCopy = _.cloneDeep(dendronConfig);
 
-    //       const wsConfig = await getExtension().getWorkspaceSettings();
-    //       const wsService = new WorkspaceService({ wsRoot });
+          // all old configs should exist prior to migration
+          const preMigrationCheckItems = [
+            _.isUndefined(dendronConfig["publishing"]),
+            oldKeys.every((value) => {
+              return !_.isUndefined(_.get(dendronConfig, value));
+            }),
+          ];
 
-    //       const oldKeys = [
-    //         "useFMTitle",
-    //         "useNoteTitleForLink",
-    //         "mermaid",
-    //         "usePrettyRefs",
-    //         "useKatex",
-    //         "lookupDontBubbleUpCreateNew",
-    //       ];
+          preMigrationCheckItems.forEach((item) => {
+            expect(item).toBeTruthy();
+          });
 
-    //       const originalDeepCopy = _.cloneDeep(dendronConfig);
+          await MigrationService.applyMigrationRules({
+            currentVersion: "0.81.0",
+            previousVersion: "0.81.0",
+            dendronConfig,
+            wsConfig,
+            wsService,
+            logger: Logger,
+            migrations: [CONFIG_MIGRATIONS],
+          });
 
-    //       // deleting here because it's populated during init.
-    //       dendronConfig["version"] = 3;
-    //       delete dendronConfig["preview"];
+          // backup of the original should exist.
+          const allWSRootFiles = fs.readdirSync(wsRoot, {
+            withFileTypes: true,
+          });
+          const maybeBackupFileName = allWSRootFiles
+            .filter((ent) => ent.isFile())
+            .filter((fileEnt) =>
+              fileEnt.name.includes("migrate-config")
+            )[0].name;
+          expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
 
-    //       // all old configs should exist prior to migration
-    //       const preMigrationCheckItems = [
-    //         _.isUndefined(dendronConfig["preview"]),
-    //         oldKeys.every(
-    //           (value) => !_.isUndefined(_.get(dendronConfig, value))
-    //         ),
-    //       ];
+          // backup content should be identical to original deep copy.
+          const backupContent = readYAML(
+            path.join(wsRoot, maybeBackupFileName)
+          ) as IntermediateDendronConfig;
 
-    //       preMigrationCheckItems.forEach((item) => {
-    //         expect(item).toBeTruthy();
-    //       });
-    //       await MigrationService.applyMigrationRules({
-    //         currentVersion: "0.70.0",
-    //         previousVersion: "0.70.0",
-    //         dendronConfig,
-    //         wsConfig,
-    //         wsService,
-    //         logger: Logger,
-    //         migrations: getMigration({ from: "0.69.0", to: "0.70.0" }),
-    //       });
+          // need to omit these because they are set by default during ws init.
+          expect(
+            _.isEqual(
+              _.omit(backupContent, ["version", "publishing"]),
+              _.omit(originalDeepCopy, ["version"])
+            )
+          ).toBeTruthy();
 
-    //       // backup of the original should exist.
-    //       const allWSRootFiles = fs.readdirSync(wsRoot, {
-    //         withFileTypes: true,
-    //       });
-    //       const maybeBackupFileName = allWSRootFiles
-    //         .filter((ent) => ent.isFile())
-    //         .filter((fileEnt) =>
-    //           fileEnt.name.includes("migrate-config")
-    //         )[0].name;
-    //       expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
-
-    //       const backupContent = readYAML(
-    //         path.join(wsRoot, maybeBackupFileName)
-    //       ) as IntermediateDendronConfig;
-    //       delete backupContent["preview"];
-    //       expect(_.isEqual(backupContent, originalDeepCopy)).toBeTruthy();
-
-    //       const postMigrationDendronConfig = (await engine.getConfig()).data!;
-    //       const postMigrationKeys = Object.keys(postMigrationDendronConfig);
-    //       expect(postMigrationKeys.includes("preview")).toBeTruthy();
-    //       expect(
-    //         oldKeys.every((value) => postMigrationKeys.includes(value))
-    //       ).toBeFalsy();
-
-    //       done();
-    //     },
-    //   });
-    // });
+          // post migration, publishing namespace should exist
+          const postMigrationDendronConfig = (await engine.getConfig()).data!;
+          const postMigrationKeys = Object.keys(postMigrationDendronConfig);
+          expect(postMigrationKeys.includes("publishing")).toBeTruthy();
+          // and all old keys should not exist
+          expect(
+            oldKeys.every((value) => postMigrationKeys.includes(value))
+          ).toBeFalsy();
+        });
+      }
+    );
   });
 });
 

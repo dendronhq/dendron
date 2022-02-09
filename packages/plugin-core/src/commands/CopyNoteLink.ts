@@ -3,6 +3,7 @@ import {
   ConfigUtils,
   genUUIDInsecure,
   isBlockAnchor,
+  isLineAnchor,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -25,6 +26,7 @@ type CommandOpts = {};
 type CommandOutput = {
   link: string;
   type: string;
+  anchorType?: string;
 };
 
 export class CopyNoteLinkCommand extends BasicCommand<
@@ -138,7 +140,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
         } else assertUnreachable(anchorType);
       }
     }
-    return `[[${fsPath}${anchor}]]`;
+    return { link: `[[${fsPath}${anchor}]]`, anchor };
   }
 
   private async createNoteLink(editor: TextEditor, note: NoteProps) {
@@ -151,21 +153,31 @@ export class CopyNoteLinkCommand extends BasicCommand<
       doEndAnchor: false,
     });
 
-    return NoteUtils.createWikiLink({
-      note,
-      anchor: _.isUndefined(anchor)
-        ? undefined
-        : {
-            value: anchor,
-            type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
-          },
-      useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(engine),
-      alias: { mode: "title" },
-    });
+    return {
+      link: NoteUtils.createWikiLink({
+        note,
+        anchor: _.isUndefined(anchor)
+          ? undefined
+          : {
+              value: anchor,
+              type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
+            },
+        useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(engine),
+        alias: { mode: "title" },
+      }),
+      anchor,
+    };
   }
 
   addAnalyticsPayload(_opts: CommandOpts, resp: CommandOutput) {
-    return { type: resp.type };
+    return { type: resp?.type, anchorType: resp?.anchorType };
+  }
+
+  private anchorType(anchor?: string) {
+    if (!anchor) return undefined;
+    if (isBlockAnchor(anchor)) return "block";
+    if (isLineAnchor(anchor)) return "line";
+    else return "header";
   }
 
   async execute(_opts: CommandOpts) {
@@ -180,12 +192,17 @@ export class CopyNoteLinkCommand extends BasicCommand<
       engine,
     }) as NoteProps;
     let link: string;
-    let type: string;
+    let type;
+    let anchor;
     if (note) {
-      link = await this.createNoteLink(editor, note);
+      const out = await this.createNoteLink(editor, note);
+      link = out.link;
+      anchor = out.anchor;
       type = "note";
     } else {
-      link = await this.createNonNoteFileLink(editor);
+      const out = await this.createNonNoteFileLink(editor);
+      link = out.link;
+      anchor = out.anchor;
       type = "non-note";
     }
 
@@ -196,6 +213,6 @@ export class CopyNoteLinkCommand extends BasicCommand<
       throw err;
     }
     this.showFeedback(link);
-    return { link, type };
+    return { link, type, anchorType: this.anchorType(anchor) };
   }
 }

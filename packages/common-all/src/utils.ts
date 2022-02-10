@@ -661,8 +661,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useFMTitle")
+      : ConfigUtils.getPublishing(config).enableFMTitle;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableFMTitle;
   }
 
@@ -670,8 +674,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useNoteTitleForLink")
+      : ConfigUtils.getPublishing(config).enableNoteTitleForLink;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableNoteTitleForLink;
   }
 
@@ -679,8 +687,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "mermaid")
+      : ConfigUtils.getPublishing(config).enableMermaid;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableMermaid;
   }
 
@@ -688,8 +700,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPublishing(config).enableKatex;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableKatex;
   }
 

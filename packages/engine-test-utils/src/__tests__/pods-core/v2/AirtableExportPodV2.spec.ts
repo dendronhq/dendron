@@ -141,7 +141,7 @@ const setupTestFactoryForNote = (opts: {
     ...opts,
     cb: async ({ engine, pod }) => {
       const note = TestEngineUtils.getNoteByFname(engine, opts.fname);
-      return pod.exportNote(note!);
+      return pod.exportNotes([note!]);
     },
   });
 };

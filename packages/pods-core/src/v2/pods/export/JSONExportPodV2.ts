@@ -29,7 +29,7 @@ export class JSONExportPodV2 implements ExportPodV2<JSONExportReturnType> {
     const { destination } = this._config;
 
     if (destination === "clipboard") {
-      const out = JSON.stringify(input, null, 4);
+      const out = JSON.stringify(input[0], null, 4);
       return ResponseUtil.createHappyResponse({
         data: {
           exportedNotes: out,

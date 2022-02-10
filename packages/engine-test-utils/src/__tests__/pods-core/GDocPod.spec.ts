@@ -1,6 +1,6 @@
 import { ENGINE_HOOKS } from "../../presets";
 import { runEngineTestV5 } from "../../engine";
-import { GDocImportPod, PodUtils, PROMPT } from "@dendronhq/pods-core";
+import { GDocImportPod, PodUtils, PROMPT, Source } from "@dendronhq/pods-core";
 import { Time, VaultUtils } from "@dendronhq/common-all";
 import { response, comments, existingNote } from "../../utils/GDocMockResult";
 import axios from "axios";
@@ -36,6 +36,7 @@ describe("GDoc import pod", () => {
     updateGlobalState: jest.fn().mockResolvedValue(undefined),
     openFileInEditor: jest.fn().mockResolvedValue(undefined),
     showDocumentQuickPick: jest.fn().mockResolvedValue({ label: "foo" }),
+    getSource: () => Source.PLUGIN
   };
 
   afterEach(() => {

@@ -23,6 +23,7 @@ import {
   RunnableGoogleDocsV2PodConfig,
   RunnableNotionV2PodConfig,
   RunnableJSONV2PodConfig,
+  Source,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -330,8 +331,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            vaults: opts.vaults,
-            wsRoot: opts.wsRoot,
+            source: Source.PLUGIN
           });
           const response = {
             data: [
@@ -350,7 +350,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             engine: opts.engine,
           }) as NoteProps;
 
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           const entUpdate = result.data?.updated!;
           expect(entCreate.length).toEqual(1);
@@ -389,8 +389,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            vaults: opts.vaults,
-            wsRoot: opts.wsRoot,
+            source: Source.PLUGIN
           });
           const response = {
             data: [],
@@ -408,7 +407,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             engine: opts.engine,
           }) as NoteProps;
 
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(0);
           expect(ResponseUtil.hasError(result)).toBeTruthy();
@@ -461,7 +460,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
           };
           pod.convertMdToNotionBlock = jest.fn();
           pod.createPagesInNotion = jest.fn().mockResolvedValue(response);
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(1);
           expect(entCreate[0]?.notionId).toEqual("test");
@@ -499,7 +498,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
             vault: opts.vaults[0],
             engine: opts.engine,
           }) as NoteProps;
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const data = result.data?.exportedNotes!;
           expect(_.isString(data)).toBeTruthy();
           if (_.isString(data)) {
@@ -539,7 +538,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
               engine: opts.engine,
             }) as NoteProps;
 
-            await pod.exportNote(props);
+            await pod.exportNotes([props]);
             const content = fs.readFileSync(path.join(exportDest), {
               encoding: "utf8",
             });

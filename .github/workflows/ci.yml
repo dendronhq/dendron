@@ -103,23 +103,22 @@ jobs:
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Download notes.zip
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         uses: wei/curl@master
         with:
           args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
 
       - name: Unzip notes.zip
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         run: |
-          unzip dendron-site.zip -d packages/nextjs-template
-          pwd
+          unzip -o dendron-site.zip -d packages/nextjs-template
 
       - name: Install Playwright dependencies
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         run: yarn ci:test:template
 
       - name: Run tests

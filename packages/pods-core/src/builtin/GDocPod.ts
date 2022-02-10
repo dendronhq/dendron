@@ -5,7 +5,7 @@ import {
   PROMPT,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
-import { GDocUtilMethods, PodUtils } from "../utils";
+import { GDocUtilMethods, PodUtils, Source } from "../utils";
 import axios from "axios";
 import _ from "lodash";
 import {
@@ -395,7 +395,6 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
       getGlobalState,
       updateGlobalState,
       showInputBox,
-      getSource
     } = utilityMethods as GDocUtilMethods;
 
     const {
@@ -410,14 +409,13 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
     const assetDirName = "assets";
     const vpath = vault2Path({ vault, wsRoot });
     const assetDir = path.join(vpath, assetDirName);
-    const source = getSource();
 
     /** refreshes token if token has already expired */
     if (Time.now().toSeconds() > expirationTime) {
       accessToken = await PodUtils.refreshGoogleAccessToken(
         wsRoot,
         refreshToken,
-        source
+        Source.PLUGIN
       );
     }
 

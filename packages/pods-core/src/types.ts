@@ -33,7 +33,6 @@ export type GDocUtilMethods = {
   ) => Promise<{ label: string } | undefined>;
   getGlobalState: (arg0: any) => Promise<string | undefined> | undefined;
   updateGlobalState: (arg0: any) => Promise<void>;
-  getSource: () => string;
 };
 
 export type NotionUtilMethods = {

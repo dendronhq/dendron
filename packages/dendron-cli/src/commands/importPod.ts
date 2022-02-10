@@ -1,7 +1,7 @@
 import { getAllImportPods, PROMPT } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
-import { enrichPodArgs, getSource, handleConflict, PodCLIOpts, setupPodArgs } from "./pod";
+import { enrichPodArgs, handleConflict, PodCLIOpts, setupPodArgs } from "./pod";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import prompts from "prompts";
 import { DendronError } from "@dendronhq/common-all";
@@ -49,7 +49,6 @@ export class ImportPodCLICommand extends CLICommand<
     const pod = new PodClass();
     const utilityMethods = {
       handleConflict,
-      getSource
     };
     await pod.execute({
       wsRoot,

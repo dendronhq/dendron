@@ -43,7 +43,7 @@ function getNode(node: UnistNode): UnistNode {
   return node.children[0].children[0];
 }
 
-describe("wikiLinks", () => {
+describe.skip("wikiLinks", () => {
   describe("parse", () => {
     let engine: any;
     const dendronData = {

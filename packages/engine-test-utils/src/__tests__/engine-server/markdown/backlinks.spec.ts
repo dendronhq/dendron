@@ -95,6 +95,7 @@ describe("backlinks", () => {
                 siteUrl: "https://foo.com",
                 siteRootDir,
               };
+              config.useFMTitle = true;
               return config;
             },
             {

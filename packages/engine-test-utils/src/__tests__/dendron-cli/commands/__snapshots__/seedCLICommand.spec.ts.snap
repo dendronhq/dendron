@@ -95,8 +95,12 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
-    copyAssets: true
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
     enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
     siteHierarchies:
         - root
     writeStubs: false
@@ -241,8 +245,12 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
-    copyAssets: true
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
     enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
     siteHierarchies:
         - root
     writeStubs: false
@@ -369,8 +377,12 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
-    copyAssets: true
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
     enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
     siteHierarchies:
         - root
     writeStubs: false
@@ -469,8 +481,12 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
-    copyAssets: true
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
     enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
     siteHierarchies:
         - root
     writeStubs: false
@@ -586,8 +602,12 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
-    copyAssets: true
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
     enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
     siteHierarchies:
         - root
     writeStubs: false

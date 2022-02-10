@@ -561,6 +561,40 @@ export type ConfigVaildationResp = {
 };
 
 export class ConfigUtils {
+  /**
+   * generates backwards compatible (v4) default config
+   * marking as @deprecated since this shouldn't be used anywhere
+   * other than legacy test codes
+   */
+  static genDefaultV4Config(): StrictConfigV4 {
+    const common = {
+      useFMTitle: true,
+      useNoteTitleForLink: true,
+      mermaid: true,
+      useKatex: true,
+      dev: {
+        enablePreviewV2: true,
+      },
+      site: {
+        copyAssets: true,
+        siteHierarchies: ["root"],
+        siteRootDir: "docs",
+        usePrettyRefs: true,
+        title: "Dendron",
+        description: "Personal knowledge space",
+        siteLastModified: true,
+        gh_edit_branch: "main",
+      },
+    };
+    return {
+      version: 4,
+      ...common,
+      commands: genDefaultCommandConfig(),
+      workspace: genDefaultWorkspaceConfig(),
+      preview: genDefaultPreviewConfig(),
+    } as StrictConfigV4;
+  }
+
   static genDefaultConfig(): StrictConfigV5 {
     const common = {
       dev: {
@@ -613,6 +647,10 @@ export class ConfigUtils {
     return ConfigUtils.getProp(config, "publishing");
   }
 
+  /**
+   * @deprecated This will be phased out once we fully migrate to v5 config.
+   * Use {@link ConfigUtils.getPublishing} to access publishing related configs
+   */
   static getSite(
     config: IntermediateDendronConfig
   ): DendronSiteConfig | undefined {
@@ -912,6 +950,9 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
+  /**
+   * Set properties under the publishing.github namaspace (v5+ config)
+   */
   static setGithubProp<K extends keyof GithubConfig>(
     config: IntermediateDendronConfig,
     key: K,

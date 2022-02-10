@@ -1,5 +1,4 @@
 import {
-  DendronSiteConfig,
   DendronSiteFM,
   DuplicateNoteActionEnum,
   DVault,

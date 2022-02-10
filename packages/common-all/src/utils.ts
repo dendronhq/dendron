@@ -18,7 +18,6 @@ import {
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
-  CopyNoteLinkConfig,
   DendronCommandConfig,
   DendronPreviewConfig,
   DendronWorkspaceConfig,

@@ -87,8 +87,12 @@ export type GoogleAnalyticsConfig = {
  */
 export function genDefaultPublishingConfig(): DendronPublishingConfig {
   return {
-    copyAssets: true,
+    enableFMTitle: true,
+    enableNoteTitleForLink: true,
+    enableMermaid: true,
     enablePrettyRefs: true,
+    enableKatex: true,
+    copyAssets: true,
     siteHierarchies: ["root"],
     writeStubs: false,
     enableContainers: false,

@@ -351,6 +351,12 @@ suite("Extension", function () {
             automaticallyShowPreview: false,
           },
           publishing: {
+            enableFMTitle: true,
+            enableFrontmatterTags: true,
+            enableHashesForFMTags: false,
+            enableKatex: true,
+            enableMermaid: true,
+            enableNoteTitleForLink: true,
             copyAssets: true,
             enablePrettyRefs: true,
             siteHierarchies: ["root"],

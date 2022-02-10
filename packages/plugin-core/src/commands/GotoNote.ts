@@ -241,7 +241,7 @@ export class GotoNoteCommand extends BasicCommand<
     switch (anchor.type) {
       case "line":
         // Line anchors are direct line numbers from the start
-        position = new Position(anchor.line, 0);
+        position = new Position(anchor.line - 1 /* line 1 is index 0 */, 0);
         break;
       case "block":
         // We don't parse non note files for anchors, so read the document and find where the anchor is

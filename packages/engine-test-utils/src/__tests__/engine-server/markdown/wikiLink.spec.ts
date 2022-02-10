@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
@@ -43,13 +44,14 @@ function getNode(node: UnistNode): UnistNode {
   return node.children[0].children[0];
 }
 
-describe.skip("wikiLinks", () => {
+describe("wikiLinks", () => {
   describe("parse", () => {
     let engine: any;
     const dendronData = {
       fname: "placeholder.md",
       dest: DendronASTDest.MD_REGULAR,
-    };
+      config: ConfigUtils.genDefaultV4Config(),
+    } as Partial<DendronASTData>;
 
     test("basic", () => {
       const resp = proc(engine, genDendronData(dendronData)).parse(

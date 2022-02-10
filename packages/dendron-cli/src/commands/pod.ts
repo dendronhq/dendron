@@ -251,3 +251,5 @@ export const handleConflict = async (
   });
   return options[resp.choice];
 };
+
+export const getSource = () => Source.CLI;

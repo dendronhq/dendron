@@ -20,6 +20,11 @@ export type PodItemV4 = {
 
 export type PodKind = "import" | "export" | "publish";
 
+export enum Source {
+  PLUGIN = "plugin",
+  CLI = "cli"
+}
+
 export type GDocUtilMethods = {
   showInputBox: (arg0: any, arg1?: string) => Promise<string | undefined>;
   openFileInEditor: (arg0: NoteProps) => Promise<void>;
@@ -28,6 +33,7 @@ export type GDocUtilMethods = {
   ) => Promise<{ label: string } | undefined>;
   getGlobalState: (arg0: any) => Promise<string | undefined> | undefined;
   updateGlobalState: (arg0: any) => Promise<void>;
+  getSource: () => string;
 };
 
 export type NotionUtilMethods = {

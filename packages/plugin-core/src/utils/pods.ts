@@ -4,7 +4,7 @@ import {
   NoteUtils,
   PodConflictResolveOpts,
 } from "@dendronhq/common-all";
-import { PodItemV4 } from "@dendronhq/pods-core";
+import { PodItemV4, Source } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -156,3 +156,5 @@ export const handleConflict = async (
     canPickMany: false,
   });
 };
+
+export const getSource = () => Source.PLUGIN;

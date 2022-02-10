@@ -21,6 +21,7 @@ import {
   NotionUtils,
   PodExportScope,
   PodV2Types,
+  Source,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
@@ -93,6 +94,7 @@ export class ExportPodV2CLICommand extends CLICommand<
         return new GoogleDocsExportPodV2({
           podConfig: config,
           engine,
+          source: Source.CLI
         });
       default:
         throw new DendronError({
@@ -145,7 +147,9 @@ export class ExportPodV2CLICommand extends CLICommand<
       case PodV2Types.NotionExportV2:
         return this.onNotionExportComplete({ exportReturnValue, engine });
       case PodV2Types.MarkdownExportV2:
-        return this.onMarkdownExportComplete({exportReturnValue, config})
+        return this.onMarkdownExportComplete({exportReturnValue, config});
+      case PodV2Types.JSONExportV2:
+        return this.onJSONExportComplete({exportReturnValue, config})
     }
   }
 

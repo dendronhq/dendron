@@ -19,8 +19,8 @@ import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
 export type PodCLIOpts = {
   podConfig: URI;
-  config?: string[];
-  configValues?: any;
+  inlineConfig?: string[];
+  configValues?: {[key: string]: any};
   vault?: string;
   fname?: string;
   hierarchy?: string;
@@ -36,7 +36,7 @@ export type PodCommandOpts<T = any> = PodCLIOpts & {
   SetupEngineCLIOpts;
 
 export function setupPodArgs(args: yargs.Argv) {
-  args.option("config", {
+  args.option("inlineConfig", {
     describe:
       "pass in config instead of reading from file. format is Key={key},Value={value}. If provided, this will override the value saved in the config file",
     array: true,
@@ -74,8 +74,8 @@ export function setupPodArgs(args: yargs.Argv) {
 export async function enrichPodArgs(
   args: PodCommandCLIOpts
 ): Promise<RespV3<PodCommandOpts>> {
-  const { config } = args;
-  let { configValues } = args;
+  const { inlineConfig } = args;
+  let { configValues = {} } = args;
   const engineArgs = await setupEngine(args);
   const wsRoot = engineArgs.wsRoot;
   const podsDir = PodUtils.getPodDir({ wsRoot });
@@ -110,8 +110,8 @@ export async function enrichPodArgs(
   }
 
   // if provided, overwrite the configValues
-  if (config) {
-    config.map((conf) => {
+  if (inlineConfig) {
+    inlineConfig.map((conf) => {
       const [k, v] = conf.split(",");
       const key = k.split("=")[1];
       const value = v.split("=")[1];
@@ -149,7 +149,7 @@ export async function enrichPodArgs(
       };
     }
   }
-
+console.log('configValues', configValues)
   let payload: NoteProps[];
   const { engine } = engineArgs;
   // get payload for selected export scope

@@ -14,6 +14,7 @@ import {
   JSONSchemaType,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
+  Source,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -48,6 +49,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     return new GoogleDocsExportPodV2({
       podConfig: config,
       engine: ExtensionProvider.getEngine(),
+      source: Source.PLUGIN
     });
   }
 

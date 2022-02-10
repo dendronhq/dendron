@@ -19,6 +19,7 @@ import {
   showPodQuickPickItemsV4,
   updateGlobalState,
   handleConflict,
+  getSource,
 } from "../utils/pods";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
@@ -116,6 +117,7 @@ export class ImportPodCommand extends BaseCommand<
       showInputBox,
       openFileInEditor,
       handleConflict,
+      getSource
     };
     if (!wsRoot) {
       throw Error("ws root not defined");

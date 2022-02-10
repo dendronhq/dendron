@@ -63,18 +63,23 @@ export class GoogleDocsExportPodV2
   private _engine: DEngineClient;
   private _wsRoot: string;
   private _vaults: DVault[];
+  private _source: string;
 
   constructor({
     podConfig,
     engine,
+    source
   }: {
     podConfig: RunnableGoogleDocsV2PodConfig;
     engine: DEngineClient;
+    source: string;
   }) {
     this._config = podConfig;
     this._engine = engine;
     this._vaults = engine.vaults;
     this._wsRoot = engine.wsRoot;
+    this._source = source;
+
   }
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
@@ -143,7 +148,8 @@ export class GoogleDocsExportPodV2
       accessToken = await PodUtils.refreshGoogleAccessToken(
         this._wsRoot,
         refreshToken,
-        this._config.connectionId
+        this._source,
+        this._config.connectionId,
       );
     }
     return accessToken;

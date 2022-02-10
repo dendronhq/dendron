@@ -21,7 +21,10 @@ describe("GIVEN procHTMLv4", () => {
               vault,
               fname,
               config,
-              mermaid: ConfigUtils.getProp(config, "mermaid"),
+              mermaid: ConfigUtils.getProp(
+                ConfigUtils.genDefaultV4Config(),
+                "mermaid"
+              ),
               noteIndex,
             }).process(`[[an alias|bar]]`);
             await checkString(
@@ -35,15 +38,35 @@ describe("GIVEN procHTMLv4", () => {
               TestConfigUtils.withConfig(
                 (config) => {
                   // procHTML is still in v4 config. (but never used elsewhere)
-                  config.version = 4;
-                  config.site = {
-                    siteHierarchies: ["root"],
-                    siteRootDir: "docs",
-                  };
-                  config.site.siteUrl = "https://foo.com";
-                  config.site.assetsPrefix = "/customPrefix";
-                  config.site.siteNotesDir = "notes";
-                  return config;
+                  const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                  ConfigUtils.setSiteProp(v4DefaultConfig, "siteHierarchies", [
+                    "root",
+                  ]);
+                  ConfigUtils.setSiteProp(
+                    v4DefaultConfig,
+                    "siteRootDir",
+                    "docs"
+                  );
+                  ConfigUtils.setSiteProp(
+                    v4DefaultConfig,
+                    "siteUrl",
+                    "https://foo.com"
+                  );
+                  ConfigUtils.setSiteProp(
+                    v4DefaultConfig,
+                    "assetsPrefix",
+                    "/customPrefix"
+                  );
+                  ConfigUtils.setSiteProp(
+                    v4DefaultConfig,
+                    "siteNotesDir",
+                    "notes"
+                  );
+                  ConfigUtils.setVaults(
+                    v4DefaultConfig,
+                    ConfigUtils.getVaults(config)
+                  );
+                  return v4DefaultConfig;
                 },
                 { wsRoot: opts.wsRoot }
               );

@@ -159,13 +159,20 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            // TODO: remove version overwrite after config.site is completely deprecated
-            config.version = 4;
-            config.site = createSiteConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,
@@ -201,14 +208,25 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            // TODO: remove version overwrite after config.site is completely deprecated
-            config.version = 4;
-            ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
-            config.site = createSiteConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setWorkspaceProp(
+              v4DefaultConfig,
+              "enableXVaultWikiLink",
+              true
+            );
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,

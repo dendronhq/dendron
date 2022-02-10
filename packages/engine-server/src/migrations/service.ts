@@ -76,7 +76,7 @@ export class MigrationService {
         currentVersion
       );
 
-      wsService.setConfig(data.dendronConfig);
+      await wsService.setConfig(data.dendronConfig);
       // wsConfig is undefined for native workspaces
       if (data.wsConfig) wsService.setWorkspaceConfig(data.wsConfig);
     }

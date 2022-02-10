@@ -214,7 +214,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       Promise.resolve([] as DVault[])
     );
     ConfigUtils.setWorkspaceProp(config, "workspaces", allWorkspaces);
-    this.setConfig(config);
+    await this.setConfig(config);
     return { vaults: newVaults };
   }
 
@@ -710,7 +710,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
       gitIgnore,
-      ["node_modules", ".dendron.*", "build", "seeds", ".next", "pods/service-connections", "\n"].join("\n"),
+      [
+        "node_modules",
+        ".dendron.*",
+        "build",
+        "seeds",
+        ".next",
+        "pods/service-connections",
+        "\n",
+      ].join("\n"),
       { encoding: "utf8" }
     );
     if (opts.createCodeWorkspace) {
@@ -1217,7 +1225,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       );
     // if we added a workspace, we also add new vaults
     if (!_.isEmpty(workspacePaths)) {
-      this.setConfig(config);
+      await this.setConfig(config);
     }
     if (progressIndicator && didClone) {
       progressIndicator();

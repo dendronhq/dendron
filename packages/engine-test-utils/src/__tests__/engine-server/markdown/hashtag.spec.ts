@@ -12,7 +12,7 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
@@ -414,7 +414,7 @@ describe("hashtag", () => {
             preSetupHook: async ({ wsRoot }) => {
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.workspace!.enableHashTags = false;
+                  ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
                   return config;
                 },
                 { wsRoot }

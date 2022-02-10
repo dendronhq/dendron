@@ -1,7 +1,9 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
 import { TreeMenu, TreeUtils } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
-import { Menu, Typography } from "antd";
+import { Typography } from "antd";
+
+import dynamic from "next/dynamic";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useState } from "react";
@@ -10,7 +12,17 @@ import { useDendronRouter } from "../utils/hooks";
 import { NoteData, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
 
-const { SubMenu } = Menu;
+const Menu = dynamic(() => import("./AntdMenuWrapper"), {
+  ssr: false,
+});
+
+const SubMenu = dynamic(() => import("./AntdSubMenuWrapper"), {
+  ssr: false,
+});
+
+const MenuItem = dynamic(() => import("./AntdMenuItemWrapper"), {
+  ssr: false,
+});
 
 export default function DendronTreeMenu(
   props: Partial<NoteData> & {
@@ -161,14 +173,14 @@ function MenuView({
       );
     }
     return (
-      <Menu.Item key={menu.key} icon={menu.icon}>
+      <MenuItem key={menu.key} icon={menu.icon}>
         <Typography.Text
           style={{ width: "100%" }}
           ellipsis={{ tooltip: menu.title }}
         >
           {menu.title}
         </Typography.Text>
-      </Menu.Item>
+      </MenuItem>
     );
   };
 

@@ -1,4 +1,4 @@
 import DendronNotePage from "../components/DendronNotePage";
 
 export default DendronNotePage;
-export { getStaticProps } from "./util";
+export { getStaticProps } from "../utils/getStaticPropsUtil";

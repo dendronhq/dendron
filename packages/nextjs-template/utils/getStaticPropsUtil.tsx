@@ -7,7 +7,7 @@ import {
   getNoteBody,
   getNotes,
   getTree,
-} from "../utils/build";
+} from "./build";
 
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext

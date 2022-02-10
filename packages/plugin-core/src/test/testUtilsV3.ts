@@ -436,9 +436,9 @@ export function runSuiteButSkipForWindows() {
   return runTest;
 }
 
-/** Use to run tests with a multi-vault workspace. Used in the same way as regular `describe`.
- *
- * For example:
+/**
+ * Use to run tests with a multi-vault workspace. Used in the same way as
+ * regular `describe`. For example:
  * ```ts
  * describeMultiWS(
  *   "WHEN workspace type is not specified",
@@ -455,11 +455,16 @@ export function runSuiteButSkipForWindows() {
  *   }
  * );
  * ```
+ * @param title
+ * @param opts
+ * @param fn - the test() functions to execute. NOTE: This function CANNOT be
+ * async, or else the test may not fail reliably when your expect or assert
+ * conditions are not met.
  */
 export function describeMultiWS(
   title: string,
   opts: SetupLegacyWorkspaceMultiOpts,
-  fn: () => any
+  fn: () => void
 ) {
   describe(title, () => {
     before(async () => {
@@ -467,7 +472,8 @@ export function describeMultiWS(
       await _activate(opts.ctx);
     });
 
-    fn();
+    const result = fn();
+    assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
     after(() => {
@@ -476,10 +482,19 @@ export function describeMultiWS(
   });
 }
 
+/**
+ * Use to run tests with a single-vault workspace. Used in the same way as
+ * regular `describe`.
+ * @param title
+ * @param opts
+ * @param fn - the test() functions to execute. NOTE: This function CANNOT be
+ * async, or else the test may not fail reliably when your expect or assert
+ * conditions are not met.
+ */
 export function describeSingleWS(
   title: string,
   opts: SetupLegacyWorkspaceOpts,
-  fn: () => any
+  fn: () => void
 ) {
   describe(title, () => {
     before(async () => {
@@ -487,13 +502,31 @@ export function describeSingleWS(
       await _activate(opts.ctx);
     });
 
-    fn();
+    const result = fn();
+    assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
     after(() => {
       cleanupVSCodeContextSubscriptions(opts.ctx);
     });
   });
+}
+
+/**
+ * Helper function for Describe*WS to do a run-time check to make sure an async
+ * test function hasn't been passed
+ * @param testFnResult
+ */
+function assertTestFnNotAsync(testFnResult: any) {
+  if (
+    testFnResult &&
+    testFnResult.then &&
+    typeof testFnResult.then === "function"
+  ) {
+    throw new Error(
+      "test fn passed to DescribeWS cannot be async! Please re-write the test"
+    );
+  }
 }
 
 export function stubCancellationToken(): CancellationToken {

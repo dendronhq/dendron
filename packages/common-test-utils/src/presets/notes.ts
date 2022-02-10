@@ -131,6 +131,7 @@ export const NOTE_PRESETS_V4 = {
     fname: "date-variables",
     body: [
       "Today is <%= CURRENT_YEAR %>.<%=CURRENT_MONTH %>.<%=CURRENT_DAY%>",
+      "It is week <%= CURRENT_WEEK %> of the year",
       "This link goes to [[daily.journal.<%=CURRENT_YEAR%>.<%= CURRENT_MONTH%>.<%= CURRENT_DAY %>]]",
       "{{ 1 + 1 }} should not be evalated to 2",
     ].join("\n"),

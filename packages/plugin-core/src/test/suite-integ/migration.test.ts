@@ -456,7 +456,7 @@ suite("MigrationService", function () {
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
-    async () => {
+    () => {
       const dummyFunc: MigrateFunction = async ({
         dendronConfig,
         wsConfig,

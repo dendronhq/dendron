@@ -50,8 +50,7 @@ export class PublishPodCLICommand extends CLICommand<
     const pod = new PodClass() as PublishPod;
     const resp = await pod.execute({ wsRoot, config, engine, vaults });
     if (config.dest === "stdout") {
-      // eslint-disable-next-line no-console
-      console.log(resp);
+      this.print(resp);
     }
     return new Promise((resolve) => {
       server.close((err: any) => {

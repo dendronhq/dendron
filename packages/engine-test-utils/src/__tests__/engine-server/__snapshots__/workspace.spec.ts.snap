@@ -5,6 +5,8 @@ exports[`WorkspaceService create basic 1`] = `
 .dendron.*
 build
 seeds
+.next
+pods/service-connections
 
 "
 `;

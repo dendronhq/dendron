@@ -1,32 +1,46 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
   NoteTestUtilsV4,
   toPlainObject,
 } from "@dendronhq/common-test-utils";
-import { TestConfigUtils } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
+import { afterEach, beforeEach } from "mocha";
 import path from "path";
+import sinon from "sinon";
+
 import * as vscode from "vscode";
 import { ProviderResult, Uri } from "vscode";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
-import BacklinksTreeDataProvider, {
-  Backlink,
-  secondLevelRefsToBacklinks,
-} from "../../features/BacklinksTreeDataProvider";
+import BacklinksTreeDataProvider from "../../features/BacklinksTreeDataProvider";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { Backlink } from "../../features/Backlink";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
 import { BacklinkSortOrder } from "../../types";
+import { MockEngineEvents } from "./MockEngineEvents";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
 /** Asking for root children (asking for children without an input) from backlinks tree
  *  data provider will us the backlinks. */
 const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
+  const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+    mockEvents,
     getDWorkspace().config.dev?.enableLinkCandidates
   );
 
@@ -121,9 +135,7 @@ function assertAreEqual(actual: ProviderResult<Backlink>, expected: Backlink) {
 }
 
 suite("BacklinksTreeDataProvider", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {
       VSCodeUtils.closeAllEditors();
     },
@@ -131,6 +143,8 @@ suite("BacklinksTreeDataProvider", function () {
       VSCodeUtils.closeAllEditors();
     },
   });
+  // Set test timeout to 3 seconds
+  this.timeout(3000);
 
   test("basics", (done) => {
     let noteWithTarget: NoteProps;
@@ -197,9 +211,8 @@ suite("BacklinksTreeDataProvider", function () {
 
         // Validate backlinks created out of refs can getParent()
         expect(parentBacklink.refs).toBeTruthy();
-        const childbacklinksFromRefs = secondLevelRefsToBacklinks(
-          parentBacklink.refs!,
-          provider.isLinkCandidateEnabled
+        const childbacklinksFromRefs = provider.getSecondLevelRefsToBacklinks(
+          parentBacklink.refs!
         );
         expect(childbacklinksFromRefs).toBeTruthy();
         childbacklinksFromRefs?.forEach((backlink) => {
@@ -749,6 +762,90 @@ suite("BacklinksTreeDataProvider", function () {
       },
     });
   });
+
+  describeMultiWS(
+    "WHEN a workspace exists",
+    {
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      let updateSortOrder: sinon.SinonStub;
+
+      beforeEach(() => {
+        updateSortOrder = sinon
+          .stub(BacklinksTreeDataProvider.prototype, "updateSortOrder")
+          .returns(undefined);
+      });
+      afterEach(() => {
+        updateSortOrder.restore();
+      });
+
+      test("AND a note gets created, THEN the data provider refresh event gets invoked", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const testNoteProps = engine.notes["foo"];
+        const entry: NoteChangeEntry = {
+          note: testNoteProps,
+          status: "create",
+        };
+
+        const mockEvents = new MockEngineEvents();
+        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+          mockEvents,
+          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
+        );
+
+        backlinksTreeDataProvider.onDidChangeTreeData(() => {
+          done();
+        });
+
+        mockEvents.testFireOnNoteChanged([entry]);
+      });
+
+      test("AND a note gets updated, THEN the data provider refresh event gets invoked", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const testNoteProps = engine.notes["foo"];
+        const entry: NoteChangeEntry = {
+          prevNote: testNoteProps,
+          note: testNoteProps,
+          status: "update",
+        };
+
+        const mockEvents = new MockEngineEvents();
+        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+          mockEvents,
+          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
+        );
+
+        backlinksTreeDataProvider.onDidChangeTreeData(() => {
+          done();
+        });
+
+        mockEvents.testFireOnNoteChanged([entry]);
+      });
+
+      test("AND a note gets deleted, THEN the data provider refresh event gets invoked", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const testNoteProps = engine.notes["foo"];
+        const entry: NoteChangeEntry = {
+          note: testNoteProps,
+          status: "delete",
+        };
+
+        const mockEvents = new MockEngineEvents();
+        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+          mockEvents,
+          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
+        );
+
+        backlinksTreeDataProvider.onDidChangeTreeData(() => {
+          done();
+        });
+
+        mockEvents.testFireOnNoteChanged([entry]);
+      });
+    }
+  );
 });
 
 // suite('BacklinksTreeDataProvider', () => {

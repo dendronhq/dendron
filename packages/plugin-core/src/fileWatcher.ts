@@ -20,7 +20,6 @@ import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { INoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
-import { getExtension } from "./workspace";
 
 export class FileWatcher {
   private _noteSyncService: INoteSyncService;
@@ -102,65 +101,60 @@ export class FileWatcher {
     const recentEvents = HistoryService.instance().lookBack();
     this.L.debug({ ctx, recentEvents, fname });
     let note: NoteProps | undefined;
+    if (
+      _.find(recentEvents, (event) => {
+        return _.every([
+          event?.uri?.fsPath === fsPath,
+          event.source === "engine",
+          event.action === "create",
+        ]);
+      })
+    ) {
+      this.L.debug({ ctx, fsPath, msg: "create by engine, ignoring" });
+      return;
+    }
+
     try {
-      if (
-        _.find(recentEvents, (event) => {
-          return _.every([
-            event?.uri?.fsPath === fsPath,
-            event.source === "engine",
-            event.action === "create",
-          ]);
-        })
-      ) {
-        this.L.debug({ ctx, fsPath, msg: "create by engine, ignoring" });
-        return;
+      this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
+      const { vaults, engine } = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const vault = VaultUtils.getVaultByFilePath({
+        vaults,
+        fsPath,
+        wsRoot,
+      });
+      note = file2Note(fsPath, vault);
+
+      // check if note exist as
+      const maybeNote = NoteUtils.getNoteByFnameV5({
+        fname,
+        vault,
+        notes: engine.notes,
+        wsRoot,
+      }) as NoteProps;
+      if (maybeNote) {
+        note = {
+          ...note,
+          ..._.pick(maybeNote, ["children", "parent"]),
+        } as NoteProps;
+        delete note["stub"];
+        delete note["schemaStub"];
+        //TODO recognise vscode's create new file menu option to create a note.
       }
 
-      try {
-        this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vault = VaultUtils.getVaultByFilePath({
-          vaults,
-          fsPath,
-          wsRoot,
-        });
-        note = file2Note(fsPath, vault);
-
-        // check if note exist as
-        const maybeNote = NoteUtils.getNoteByFnameV5({
-          fname,
-          vault,
-          notes: engine.notes,
-          wsRoot,
-        }) as NoteProps;
-        if (maybeNote) {
-          note = {
-            ...note,
-            ..._.pick(maybeNote, ["children", "parent"]),
-          } as NoteProps;
-          delete note["stub"];
-          delete note["schemaStub"];
-          //TODO recognise vscode's create new file menu option to create a note.
-        }
-
-        // add note
-        //TODO: After refactoring fileWatcher to an eventing pattern,
-        //make noteSyncService depend on fileWatcher, not the other way around
-        note = await this._noteSyncService.syncNoteMetadata({
-          note,
-          fmChangeOnly: false,
-        });
-        await engine.updateNote(note as NoteProps, {
-          newNode: true,
-        });
-      } catch (err: any) {
-        this.L.error({ ctx, error: err });
-        throw err;
-      }
-    } finally {
-      FileWatcher.refreshBacklinks();
-      this.L.debug({ ctx, fsPath, msg: "refreshTree" });
+      // add note
+      //TODO: After refactoring fileWatcher to an eventing pattern,
+      //make noteSyncService depend on fileWatcher, not the other way around
+      note = await this._noteSyncService.syncNoteMetadata({
+        note,
+        fmChangeOnly: false,
+      });
+      await engine.updateNote(note as NoteProps, {
+        newNode: true,
+      });
+    } catch (err: any) {
+      this.L.error({ ctx, error: err });
+      throw err;
     }
   }
 
@@ -169,58 +163,48 @@ export class FileWatcher {
     if (this.pause) {
       return;
     }
-    try {
-      this.L.info({ ctx, fsPath });
-      const fname = path.basename(fsPath, ".md");
+    this.L.info({ ctx, fsPath });
+    const fname = path.basename(fsPath, ".md");
 
-      // check if we should ignore
-      const recentEvents = HistoryService.instance().lookBack(5);
-      this.L.debug({ ctx, recentEvents, fname });
-      if (
-        _.find(recentEvents, (event) => {
-          return _.every([
-            event?.uri?.fsPath === fsPath,
-            event.source === "engine",
-            _.includes(["delete", "rename"], event.action),
-          ]);
-        })
-      ) {
-        this.L.debug({
-          ctx,
-          fsPath,
-          msg: "recent action by engine, ignoring",
-        });
-        return;
+    // check if we should ignore
+    const recentEvents = HistoryService.instance().lookBack(5);
+    this.L.debug({ ctx, recentEvents, fname });
+    if (
+      _.find(recentEvents, (event) => {
+        return _.every([
+          event?.uri?.fsPath === fsPath,
+          event.source === "engine",
+          _.includes(["delete", "rename"], event.action),
+        ]);
+      })
+    ) {
+      this.L.debug({
+        ctx,
+        fsPath,
+        msg: "recent action by engine, ignoring",
+      });
+      return;
+    }
+    try {
+      const engine = ExtensionProvider.getEngine();
+      this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
+      const nodeToDelete = _.find(engine.notes, { fname });
+      if (_.isUndefined(nodeToDelete)) {
+        throw new Error(`${fname} not found`);
       }
-      try {
-        const engine = ExtensionProvider.getEngine();
-        this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-        const nodeToDelete = _.find(engine.notes, { fname });
-        if (_.isUndefined(nodeToDelete)) {
-          throw new Error(`${fname} not found`);
-        }
-        await engine.deleteNote(nodeToDelete.id, { metaOnly: true });
-        HistoryService.instance().add({
-          action: "delete",
-          source: "watcher",
-          uri: vscode.Uri.parse(fsPath),
-        });
-        AnalyticsUtils.track(ContextualUIEvents.ContextualUIDelete);
-      } catch (err) {
-        this.L.info({ ctx, fsPath, err });
-        // NOTE: ignore, many legitimate reasons why this might happen
-        // this.L.error({ ctx, err: JSON.stringify(err) });
-      }
-    } finally {
-      FileWatcher.refreshBacklinks();
+      await engine.deleteNote(nodeToDelete.id, { metaOnly: true });
+      HistoryService.instance().add({
+        action: "delete",
+        source: "watcher",
+        uri: vscode.Uri.parse(fsPath),
+      });
+      AnalyticsUtils.track(ContextualUIEvents.ContextualUIDelete);
+    } catch (err) {
+      this.L.info({ ctx, fsPath, err });
+      // NOTE: ignore, many legitimate reasons why this might happen
+      // this.L.error({ ctx, err: JSON.stringify(err) });
     }
   }
-
-  static refreshBacklinks = _.debounce(() => {
-    const ctx = "refreshBacklinks";
-    Logger.info({ ctx });
-    getExtension().backlinksDataProvider?.refresh();
-  }, 100);
 }
 
 export class PluginFileWatcher implements FileWatcherAdapter {

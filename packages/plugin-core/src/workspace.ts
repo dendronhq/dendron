@@ -48,10 +48,8 @@ import {
   IDendronExtension,
 } from "./dendronExtensionInterface";
 import { ExtensionProvider } from "./ExtensionProvider";
-import BacklinksTreeDataProvider, {
-  Backlink,
-  secondLevelRefsToBacklinks,
-} from "./features/BacklinksTreeDataProvider";
+import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import { Backlink } from "./features/Backlink";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
@@ -603,15 +601,12 @@ export class DendronExtension implements IDendronExtension {
     Logger.info({ ctx, msg: "init:backlinks" });
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-      getDWorkspace().config.dev?.enableLinkCandidates
+      this.getEngine(),
+      this.getDWorkspace().config.dev?.enableLinkCandidates
     );
 
     vscode.window.onDidChangeActiveTextEditor(() =>
-      backlinksTreeDataProvider.refresh()
-    );
-
-    this.noteSyncService.onNoteChange(() =>
-      backlinksTreeDataProvider.refresh()
+      backlinksTreeDataProvider.refreshBacklinks()
     );
 
     const backlinkTreeView = vscode.window.createTreeView(
@@ -621,7 +616,7 @@ export class DendronExtension implements IDendronExtension {
         showCollapseAll: true,
       }
     );
-    getExtension().backlinksDataProvider = backlinksTreeDataProvider;
+    this.backlinksDataProvider = backlinksTreeDataProvider;
 
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.BACKLINK_SORT_BY_LAST_UPDATED.key,
@@ -655,10 +650,10 @@ export class DendronExtension implements IDendronExtension {
           expand(backlink);
 
           if (backlink.refs) {
-            const childBacklinks = secondLevelRefsToBacklinks(
-              backlink.refs,
-              backlinksTreeDataProvider.isLinkCandidateEnabled
-            );
+            const childBacklinks =
+              backlinksTreeDataProvider.getSecondLevelRefsToBacklinks(
+                backlink.refs
+              );
 
             if (childBacklinks) {
               childBacklinks.forEach((b) => {

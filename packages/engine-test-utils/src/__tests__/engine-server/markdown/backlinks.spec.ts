@@ -13,6 +13,7 @@ import {
   MDUtilsV4,
 } from "@dendronhq/engine-server";
 import { TestConfigUtils, runEngineTestV5 } from "../../..";
+import _ from "lodash";
 
 // runs all the processes
 function proc(
@@ -52,11 +53,30 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [`<a href="alpha">Alpha (vault1)</a>`],
+            match: [`<a href="alpha.html">Alpha (vault1)</a>`],
           })
         ).toBeTruthy();
       },
-      { expect, preSetupHook: ENGINE_HOOKS.setupLinks }
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const { wsRoot } = opts;
+          await ENGINE_HOOKS.setupLinks(opts);
+          TestConfigUtils.withConfig(
+            (config) => {
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
+            },
+            {
+              wsRoot,
+            }
+          );
+        },
+      }
     );
   });
 
@@ -87,16 +107,26 @@ describe("backlinks", () => {
           await ENGINE_HOOKS.setupLinks(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              // TODO: remove version overwrite after config.site is completely deprecated
-              config.version = 4;
-              config.site = {
-                siteHierarchies: ["alpha"],
-                siteNotesDir: "docs",
-                siteUrl: "https://foo.com",
-                siteRootDir,
-              };
-              config.useFMTitle = true;
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setSiteProp(v4DefaultConfig, "siteHierarchies", [
+                "alpha",
+              ]);
+              ConfigUtils.setSiteProp(v4DefaultConfig, "siteNotesDir", "docs");
+              ConfigUtils.setSiteProp(
+                v4DefaultConfig,
+                "siteUrl",
+                "https://foo.com"
+              );
+              ConfigUtils.setSiteProp(
+                v4DefaultConfig,
+                "siteRootDir",
+                siteRootDir
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -125,8 +155,8 @@ describe("backlinks", () => {
           await AssertUtils.assertInString({
             body: resp.contents as string,
             match: [
-              `<a href="three">Three (vault1)</a>`,
-              `<a href="two">Two (vault1)</a>`,
+              `<a href="three.html">Three (vault1)</a>`,
+              `<a href="two.html">Two (vault1)</a>`,
             ],
           })
         ).toBeTruthy();
@@ -154,6 +184,19 @@ describe("backlinks", () => {
             wsRoot,
             body: "[[one]]",
           });
+          TestConfigUtils.withConfig(
+            (config) => {
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
+            },
+            {
+              wsRoot,
+            }
+          );
         },
       }
     );
@@ -178,7 +221,7 @@ describe("backlinks", () => {
               `<a href="secret1">Secret1 (vault2)</a>`,
               `<a href="secret2">Secret2 (vault2)</a>`,
             ],
-            match: [`<a href="not-secret">Not Secret (vaultThree)</a>`],
+            match: [`<a href="not-secret.html">Not Secret (vaultThree)</a>`],
           })
         ).toBeTruthy();
       },
@@ -191,7 +234,9 @@ describe("backlinks", () => {
               const vaults = ConfigUtils.getVaults(config);
               const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
               bvault!.visibility = DVaultVisibility.PRIVATE;
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(v4DefaultConfig, vaults);
+              return v4DefaultConfig;
             },
             { wsRoot: opts.wsRoot }
           );
@@ -244,7 +289,7 @@ describe("backlinks", () => {
           expect(
             await AssertUtils.assertInString({
               body: resp.contents as string,
-              match: [`<a href="one">One (vault1)</a>`],
+              match: [`<a href="one.html">One (vault1)</a>`],
             })
           ).toBeTruthy();
         },
@@ -266,6 +311,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
+            TestConfigUtils.withConfig(
+              (config) => {
+                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                ConfigUtils.setVaults(
+                  v4DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return v4DefaultConfig;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -289,8 +345,8 @@ describe("backlinks", () => {
             await AssertUtils.assertInString({
               body: resp.contents as string,
               match: [
-                `<a href="one">One (vault1)</a>`,
-                `<a href="two">Two (vault1)</a>`,
+                `<a href="one.html">One (vault1)</a>`,
+                `<a href="two.html">Two (vault1)</a>`,
               ],
             })
           ).toBeTruthy();
@@ -321,6 +377,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
+            TestConfigUtils.withConfig(
+              (config) => {
+                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                ConfigUtils.setVaults(
+                  v4DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return v4DefaultConfig;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );

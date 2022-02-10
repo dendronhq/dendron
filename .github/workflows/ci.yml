@@ -111,8 +111,7 @@ jobs:
       - name: Unzip notes.zip
         if: runner.os == 'Linux'
         run: |
-          unzip dendron-site.zip -d packages/nextjs-template
-          pwd
+          unzip -o dendron-site.zip -d packages/nextjs-template
 
       - name: Install Playwright dependencies
         if: runner.os == 'Linux'

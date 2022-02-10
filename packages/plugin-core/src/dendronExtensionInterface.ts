@@ -112,5 +112,9 @@ export interface IDendronExtension {
     section?: string | undefined
   ): vscode.WorkspaceConfiguration;
 
+  /**
+   * @deprecated Temporarily exposed to resolve circular dependencies
+   * Moving forward with the eventing pattern, we shouldn't need to expose any tree views anymore
+   */
   getTreeView(key: DendronTreeViewKey): vscode.WebviewViewProvider;
 }

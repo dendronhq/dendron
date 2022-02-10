@@ -120,7 +120,7 @@ export class LookupView implements vscode.WebviewViewProvider {
       }
       case LookupViewMessageEnum.onRequestControllerState: {
         const quickpick = this._controller?.quickpick as DendronQuickPickerV2;
-        this.refreshLookupView({ buttons: quickpick.buttons });
+        this.refresh({ buttons: quickpick.buttons });
         break;
       }
       case LookupViewMessageEnum.onUpdate:
@@ -129,7 +129,7 @@ export class LookupView implements vscode.WebviewViewProvider {
     }
   }
 
-  public refreshLookupView(opts: { buttons: DendronBtn[] }) {
+  public refresh(opts: { buttons: DendronBtn[] }) {
     const { buttons } = opts;
     const payload: LookupModifierStatePayload = buttons.map(
       (button: DendronBtn) => {
@@ -140,13 +140,6 @@ export class LookupView implements vscode.WebviewViewProvider {
       }
     );
 
-    const lookupView = this._extension.getTreeView(
-      DendronTreeViewKey.LOOKUP_VIEW
-    ) as LookupView;
-    lookupView.refresh(payload);
-  }
-
-  public refresh(payload: LookupModifierStatePayload) {
     if (this._view) {
       this._view.webview.postMessage({
         type: LookupViewMessageEnum.onUpdate,

@@ -679,7 +679,7 @@ export class PickerUtilsV2 {
     const lookupView = ExtensionProvider.getTreeView(
       DendronTreeViewKey.LOOKUP_VIEW
     ) as LookupView;
-    lookupView.refreshLookupView({ buttons: opts.quickpick.buttons });
+    lookupView.refresh({ buttons: opts.quickpick.buttons });
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

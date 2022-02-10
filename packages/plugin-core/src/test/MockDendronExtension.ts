@@ -172,7 +172,7 @@ export class MockDendronExtension implements IDendronExtension {
   }
 
   isActive(): boolean {
-    throw new Error("Method not implemented in MockDendronExtension.");
+    return true;
   }
 
   getWorkspaceConfig(): WorkspaceConfiguration {

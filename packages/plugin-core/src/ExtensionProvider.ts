@@ -44,6 +44,9 @@ export class ExtensionProvider {
     return ExtensionProvider.getExtension().getWorkspaceConfig();
   }
 
+  /**
+   * @deprecated. See {@link IDendronExtension.getTreeView}
+   */
   static getTreeView(key: DendronTreeViewKey) {
     return ExtensionProvider.getExtension().getTreeView(key);
   }

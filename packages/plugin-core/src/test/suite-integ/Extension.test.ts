@@ -375,8 +375,6 @@ suite("Extension", function () {
               editViewMode: "tree",
             },
             enableSiteLastModified: true,
-            enableFrontmatterTags: true,
-            enableHashesForFMTags: false,
             enableRandomlyColoredTags: true,
             enablePrettyLinks: true,
             duplicateNoteBehavior: {

@@ -654,7 +654,9 @@ export class ConfigUtils {
   static getSite(
     config: IntermediateDendronConfig
   ): DendronSiteConfig | undefined {
-    return ConfigUtils.getProp(config, "site");
+    const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+    const configWithDefaults = _.defaultsDeep(config, v4DefaultConfig);
+    return configWithDefaults.site;
   }
 
   // This is only used temporarily until we make migration mandatory.

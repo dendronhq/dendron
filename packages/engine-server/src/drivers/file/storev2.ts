@@ -131,6 +131,15 @@ export class FileStorage implements DStore {
         this.notes[ent.id] = ent;
         this.noteFnames.add(ent);
       });
+      // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
+      if (this.engine.config.dev?.enableLinkCandidates) {
+        const ctx = "_addLinkCandidates";
+        const start = process.hrtime();
+        // this mutates existing note objects so we don't need to reset the notes
+        this._addLinkCandidates(_.values(this.notes));
+        const duration = getDurationMilliseconds(start);
+        this.logger.info({ ctx, duration });
+      }
 
       const { notes, schemas } = this;
       let error: IDendronError | null = errors[0] || null;
@@ -401,13 +410,6 @@ export class FileStorage implements DStore {
 
     this._addBacklinks({ notesWithLinks, allNotes });
 
-    if (this.engine.config.dev?.enableLinkCandidates) {
-      const ctx = "_addLinkCandidates";
-      const start = process.hrtime();
-      this._addLinkCandidates(allNotes);
-      const duration = getDurationMilliseconds(start);
-      this.logger.info({ ctx, duration });
-    }
     return { notes: allNotes, errors };
   }
 

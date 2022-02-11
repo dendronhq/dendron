@@ -316,7 +316,7 @@ const getLinkCandidates = ({
         column: 1,
       };
     }
-    value.split(/\s+/).filter((word) => {
+    value.split(/\s+/).forEach((word) => {
       const maybeNote = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
         engine,
@@ -334,7 +334,6 @@ const getLinkCandidates = ({
         } as DLink;
         linkCandidates.push(candidate);
       }
-      return maybeNote !== undefined;
     });
   });
   return linkCandidates;

@@ -41,6 +41,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
     for (const parent of parents) {
       parentsWithChildren.push({
         ...parent,
+        // eslint-disable-next-line no-await-in-loop
         children: await backlinksTreeDataProvider.getChildren(parent),
       });
     }
@@ -121,9 +122,7 @@ function assertAreEqual(actual: ProviderResult<Backlink>, expected: Backlink) {
 }
 
 suite("BacklinksTreeDataProvider", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       VSCodeUtils.closeAllEditors();
     },

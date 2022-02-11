@@ -4,11 +4,15 @@ import {
   DVault,
   SchemaOpts,
   NoteProps,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
+import _ from "lodash";
+import fs from "fs-extra";
+import path from "path";
 
 describe(`NoteUtils tests:`, () => {
   describe(`genSchemaDesc tests`, () => {
@@ -216,7 +220,7 @@ describe(`SchemaUtil tests:`, () => {
       });
     });
 
-    describe("GIVEN template type is not a note", async () => {
+    describe("GIVEN template type is not a note", () => {
       beforeEach(async () => {
         note = await noteFactory.createForFName("new note");
       });
@@ -241,4 +245,203 @@ describe(`SchemaUtil tests:`, () => {
       });
     });
   });
+
+  describe("Schema match tests", () => {
+    testSchemaMatches({
+      name: "GIVEN schema anatomy example from the wiki",
+      schema: `version: 1
+schemas:
+# this will match "cli.*" notes
+- id: cli 
+  # human readable description of hierarchy
+  desc: command line interface reference
+  # add this to the domain of your schema hierarchy
+  parent: root
+  # when a schema is a namespace, it can have arbitrary children. equivalent to cli.* glob pattern
+  namespace: true 
+  children:
+    - cmd
+    - env
+# will match cli.*.env
+- id: env
+  desc: cli specific env variables
+# will match cli.*.cmd.*
+- id: cmd
+  desc: subcommands 
+  namespace: true`,
+      checks: {
+        "cli.fd": "cli",
+        "cli.fd.bar.usage": false,
+        "cli.fd.cmd.usage": "cmd",
+        "cli.fd.env": "env",
+        "foo.bar": false,
+      },
+    });
+
+    testSchemaMatches({
+      name: "GIVEN inline schema anatomy example from the wiki",
+      schema: `version: 1
+schemas:
+  # Daily is the top most schema since its parent is 'root' it must have an identifier
+  # this identifier 'daily' will be used when using 'Lookup (schema)' command.
+  - id: daily
+    parent: root
+    # Children of the top most schema do not need to contain identifier and just 
+    # require a 'pattern' to be set to match the hierarchy of notes.
+    children:
+      - pattern: journal
+        children:
+          - pattern: "[0-2][0-9][0-9][0-9]"
+            children:
+              - pattern: "[0-1][0-9]"
+                children:
+                  - pattern: "[0-3][0-9]"
+                    # As with regular schema we can set the template to be used with
+                    # the match of our notes. Below is an example usage of shorthand template
+                    # definition (which defaults to type: note). 
+                    template: templates.daily`,
+      checks: {
+        "daily.journal.2021.10.24": true,
+        "journal.2021.10.24": false,
+        "daily.journal.5000.10.24": false,
+        "daily.journal.2021.10.foo": false,
+        "daily.journal.2021.10.24.foo": false,
+      },
+    });
+
+    testSchemaMatches({
+      name: "GIVEN daily journal pattern from the wiki",
+      schema: `version: 1
+schemas:
+- id: journal
+  title: journal
+  desc: ""
+  parent: root
+  children:
+    - year
+- id: year
+  title: year
+  pattern: "[0-2][0-9][0-9][0-9]"
+  children: 
+    - month
+- id: month
+  title: month
+  pattern: "[0-9][0-9]"
+  children: 
+    - day
+- id: day
+  title: day
+  pattern: "[0-9][0-9]"
+  namespace: true
+`,
+      checks: {
+        journal: "journal",
+        "journal.2020": "year",
+        "journal.2020.09": "month",
+        "journal.2020.09.12": "day",
+        "journal.2020.09.12.foo": true,
+        "daily.journal.2021.10.24": false,
+        "journal.5000.10.24": false,
+        "journal.2021.10.foo": false,
+      },
+    });
+
+    testSchemaMatches({
+      name: "GIVEN negated pattern in the middle",
+      schema: `version: 1
+schemas:
+- id: projects
+  parent: root
+  children:
+    - name
+- id: name
+  pattern: "!(scratch)"`,
+      checks: {
+        "projects.web-app": "name",
+        "web-app": false,
+        "projects.scratch": false,
+      },
+    });
+
+    testSchemaMatches({
+      name: "GIVEN dendron-docs RFC schema",
+      schema: `version: 1
+schemas:
+  - id: rfc
+    title: RFC
+    parent: root
+    children:
+      - pattern: "+([0-9])-+([!])" # starts with 1 or more digits, a dash, then one or more characters
+        template: dendron://dendron.docs/templates.rfc`,
+      checks: {
+        "rfc.41-test": true,
+        "rfc.41": false,
+        "rfc.test": false,
+        "rfc.41-": false,
+        "rfc.-test": false,
+        "rfc.123123-foo-bar-baz": true,
+      },
+    });
+  });
 });
+
+/** Tests if given fnames should match the schema.
+ *
+ * How to use this:
+ * - Give a name for the group of tests. This should look like "GIVEN journal
+ *   schema"
+ * - Write the schema to be tested. This is the contents of a schema file that
+ *   you would normally write.
+ * - Write the checks. The checks are a map: the keys are note fnames, and the
+ *   values are whether the schema should match this fname or not. If the value
+ *   is a boolean, it will just check if it matches or not. You can also use a
+ *   string for the value to check which schema id matches this fname.
+ */
+function testSchemaMatches({
+  name,
+  schema,
+  checks,
+}: {
+  name: string;
+  schema: string;
+  checks: { [name: string]: string | boolean };
+}) {
+  describe(name, () => {
+    for (const [notePath, expected] of Object.entries(checks)) {
+      let testOutcome: string;
+      if (!expected) testOutcome = "NOT match";
+      else if (_.isString(expected)) testOutcome = `match ${expected}`;
+      else testOutcome = "match";
+      test(`THEN ${notePath} should ${testOutcome}`, async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            debugger;
+            const { schema } =
+              SchemaUtils.matchPath({
+                notePath,
+                schemaModDict: engine.schemas,
+              }) || {};
+            if (!expected) {
+              expect(schema).toBeUndefined();
+            } else if (_.isString(expected)) {
+              expect(schema?.id).toEqual(expected);
+            } else {
+              expect(schema).toBeTruthy();
+            }
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              const schemaPath = path.join(
+                wsRoot,
+                VaultUtils.getRelPath(vaults[0]),
+                "root.schema.yml"
+              );
+              await fs.writeFile(schemaPath, schema);
+            },
+          }
+        );
+      });
+    }
+  });
+}

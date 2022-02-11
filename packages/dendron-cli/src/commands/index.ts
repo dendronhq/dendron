@@ -13,3 +13,4 @@ export * from "./seedCLICommand";
 export * from "./devCLICommand";
 export * from "./publishCLICommand";
 export * from "./base";
+export { ExportPodV2CLICommand } from "./exportPodV2";

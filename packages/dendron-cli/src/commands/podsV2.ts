@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
   RespV3,
@@ -18,7 +19,7 @@ import yargs from "yargs";
 import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
 export type PodCLIOpts = {
-  podConfig: URI;
+  podConfig?: URI;
   inlineConfig?: string[];
   configValues?: {[key: string]: any};
   vault?: string;
@@ -80,6 +81,16 @@ export async function enrichPodArgs(
   const wsRoot = engineArgs.wsRoot;
   const podsDir = PodUtils.getPodDir({ wsRoot });
 
+  // return if no config is given
+  if(!args.podId && !args.podConfig && !args.inlineConfig){
+    return {
+      error: new DendronError({
+        severity: ERROR_SEVERITY.FATAL,
+        message: `no pod config found. Please provide a pod config or inline config`,
+      }),
+    };
+  }
+
   // if podId is provided, get configValues from the config.{podId}.yml
   if (args.podId) {
     const podConfigPath = path.join(
@@ -94,8 +105,9 @@ export async function enrichPodArgs(
       if (_.isUndefined(resp)) {
         return {
           error: new DendronError({
+            severity: ERROR_SEVERITY.FATAL,
             status: "no-custom-config",
-            message: `no pod config found. Please create a pod config at ${podConfigPath}`,
+            message: `no pod config found for this podId. Please create a pod config at ${podConfigPath}`,
           }),
         };
       }
@@ -118,7 +130,6 @@ export async function enrichPodArgs(
       configValues[key] = value;
     });
   }
-  console.log("args", configValues);
 
   // If the config has a connectionId, read the sevice connection config file.
   if (configValues.connectionId) {
@@ -135,7 +146,7 @@ export async function enrichPodArgs(
         return {
           error: new DendronError({
             status: "no-service-config",
-            message: `no service config found. Please create a service connection config at ${serviceConnectionPath}`,
+            message: `no service config found for this connectionId. Please create a service connection config at ${serviceConnectionPath}`,
           }),
         };
       }
@@ -149,7 +160,6 @@ export async function enrichPodArgs(
       };
     }
   }
-console.log('configValues', configValues)
   let payload: NoteProps[];
   const { engine } = engineArgs;
   // get payload for selected export scope
@@ -191,7 +201,7 @@ const getVaultProps = (
   vaultName?: string
 ): NoteProps[] => {
   if (!vaultName) {
-    throw new DendronError({ message: "Please provide vault name" });
+    throw new DendronError({ message: "Please provide vault name in --vault arg" });
   }
   const vault = VaultUtils.getVaultByNameOrThrow({
     vaults: engine.vaults,
@@ -208,17 +218,17 @@ const getNoteProps = (
   fname?: string
 ): NoteProps[] => {
   if (!vaultName) {
-    throw new DendronError({ message: "Please provide vault name" });
+    throw new DendronError({ message: "Please provide vault name in --vault arg" });
   }
   if (!fname) {
-    throw new DendronError({ message: "Please provide fname of note" });
+    throw new DendronError({ message: "Please provide fname of note in --fname arg" });
   }
   const vault = VaultUtils.getVaultByNameOrThrow({
     vaults: engine.vaults,
     vname: vaultName,
   });
   const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
-  if (!note) throw new DendronError({ message: "Did not find Note" });
+  if (!note) throw new DendronError({ message: `Cannot find note with fname ${fname} in vault ${vault}` });
   return [note];
 };
 
@@ -227,7 +237,7 @@ const getHierarchyProps = (
   hierarchy?: string
 ): NoteProps[] => {
   if (!hierarchy) {
-    throw new DendronError({ message: "Please provide hierarchy" });
+    throw new DendronError({ message: "Please provide hierarchy in --hierarchy arg" });
   }
   return Object.values(engine.notes).filter(
     (value) => value.fname.startsWith(hierarchy) && value.stub !== true

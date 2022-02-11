@@ -64,6 +64,36 @@
       "type": "shell",
       "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli publishPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.markdown --vault vault --query root --podSource builtin",
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "markdown-export-v2",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=destination,Value=clipboard Key=wikiLinkToURL,Value=true --vault vault --fname=dendron.alternatives --podId test-md --wsRoot ${workspaceFolder}/../../test-workspace",
+      "problemMatcher": []
+    },
+    {
+      "label": "json-export-v2",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --podConfig ${workspaceFolder}/../../test-workspace/pods/custom/config.json-exp.yml --vault vault --wsRoot ${workspaceFolder}/../../test-workspace",
+      "problemMatcher": [],
+    },
+    {
+      "label": "airtable-export-v2",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --podId novels-airtable --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives --wsRoot ${workspaceFolder}/../../test-workspace",
+      "problemMatcher": [],
+    },
+    {
+      "label": "notion-export-v2",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --podId notion-export --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives --wsRoot ${workspaceFolder}/../../test-workspace",
+      "problemMatcher": [],
+    },
+    {
+      "label": "gdoc-export-v2",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives.one --podId testing-gdoc --wsRoot ${workspaceFolder}/../../test-workspace ",
+      "problemMatcher": [],
+    },
   ]
 }

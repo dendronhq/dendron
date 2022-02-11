@@ -38,7 +38,7 @@ import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension, getDWorkspace, DendronExtension } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import {
@@ -113,7 +113,8 @@ suite("Migration", function () {
         ctx,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           const out = await MigrationService.applyMigrationRules({
             currentVersion: "0.46.0",
@@ -147,7 +148,8 @@ suite("Migration", function () {
           },
           onInit: async ({ engine, wsRoot }) => {
             const dendronConfig = engine.config;
-            const wsConfig = await getExtension().getWorkspaceSettings();
+            const wsConfig =
+              await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
             const out = await MigrationService.applyMigrationRules({
               currentVersion: "0.47.1",
@@ -159,7 +161,7 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            const config = getDWorkspace().config;
+            const config = ExtensionProvider.getDWorkspace().config;
             const journalConfig = ConfigUtils.getJournal(config);
             const defaultJournalConfig = ConfigUtils.getJournal(
               ConfigUtils.genDefaultConfig()
@@ -181,7 +183,8 @@ suite("Migration", function () {
           },
           onInit: async ({ engine, wsRoot }) => {
             const dendronConfig = engine.config;
-            const wsConfig = await getExtension().getWorkspaceSettings();
+            const wsConfig =
+              await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
             const out = await MigrationService.applyMigrationRules({
               currentVersion: "0.47.1",
@@ -193,7 +196,7 @@ suite("Migration", function () {
               migrations: getMigration({ from: "0.46.0", to: "0.47.1" }),
             });
             expect(out.length).toEqual(1);
-            const config = getDWorkspace().config;
+            const config = ExtensionProvider.getDWorkspace().config;
             const journalConfig = ConfigUtils.getJournal(config);
             const expectedJournalConfig = {
               ...ConfigUtils.getJournal(ConfigUtils.genDefaultConfig()),
@@ -217,7 +220,8 @@ suite("Migration", function () {
         ctx,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationService.applyMigrationRules({
             currentVersion: "0.52.0",
@@ -228,7 +232,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.51.0", to: "0.52.0" }),
           });
-          const config = getDWorkspace().config;
+          const config = ExtensionProvider.getDWorkspace().config;
           const scratchConfig = ConfigUtils.getScratch(config);
           const expectedScratchConfig = {
             ...ConfigUtils.getScratch(ConfigUtils.genDefaultConfig()),
@@ -251,7 +255,8 @@ suite("Migration", function () {
         ctx,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           await MigrationService.applyMigrationRules({
             currentVersion: "0.51.4",
@@ -277,7 +282,8 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             wsConfig?.settings[CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]
@@ -296,7 +302,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          const config = getDWorkspace().config;
+          const config = ExtensionProvider.getDWorkspace().config;
           const lookupConfig = ConfigUtils.getLookup(config);
           expect(lookupConfig.note.selectionMode).toEqual(
             LookupSelectionModeEnum.link
@@ -323,7 +329,8 @@ suite("Migration", function () {
         },
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
-          const wsConfig = await getExtension().getWorkspaceSettings();
+          const wsConfig =
+            await ExtensionProvider.getExtension().getWorkspaceSettings();
           const wsService = new WorkspaceService({ wsRoot });
           expect(
             _.isUndefined(
@@ -344,7 +351,7 @@ suite("Migration", function () {
             logger: Logger,
             migrations: getMigration({ from: "0.55.0", to: "0.55.2" }),
           });
-          const config = getDWorkspace().config;
+          const config = ExtensionProvider.getDWorkspace().config;
           const lookupConfig = ConfigUtils.getLookup(config);
           expect(lookupConfig.note.selectionMode).toEqual(
             ConfigUtils.genDefaultConfig().commands!.lookup.note.selectionMode
@@ -1114,7 +1121,7 @@ suite("MigrationService", function () {
     currentVersion: string,
     migrations: Migrations[]
   ) {
-    const { wsRoot, config } = getDWorkspace();
+    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
     const wsService = new WorkspaceService({ wsRoot });
     const out = await MigrationService.applyMigrationRules({
       currentVersion,
@@ -1122,7 +1129,7 @@ suite("MigrationService", function () {
       migrations,
       dendronConfig: config,
       wsService,
-      wsConfig: await getExtension().getWorkspaceSettings(),
+      wsConfig: await ExtensionProvider.getExtension().getWorkspaceSettings(),
       logger: Logger,
     });
     return out.length !== 0;

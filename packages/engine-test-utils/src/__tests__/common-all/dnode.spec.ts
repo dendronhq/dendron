@@ -415,7 +415,6 @@ function testSchemaMatches({
       test(`THEN ${notePath} should ${testOutcome}`, async () => {
         await runEngineTestV5(
           async ({ engine }) => {
-            debugger;
             const { schema } =
               SchemaUtils.matchPath({
                 notePath,

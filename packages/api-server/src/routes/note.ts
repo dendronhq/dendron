@@ -144,7 +144,7 @@ router.post(
     const { ws } = opts;
     const engine = await getWSEngine({ ws });
     const links = await engine.getLinks(opts);
-    ExpressUtils.setResponse(res, { data: links, error: null });
+    ExpressUtils.setResponse(res, links);
   })
 );
 

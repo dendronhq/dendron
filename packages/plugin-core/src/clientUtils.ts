@@ -16,7 +16,7 @@ import * as vscode from "vscode";
 import { LookupNoteTypeEnum } from "./components/lookup/types";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import { _noteAddBehaviorEnum } from "./constants";
-import { getDWorkspace, getExtension } from "./workspace";
+import { ExtensionProvider } from "./ExtensionProvider";
 
 type CreateFnameOverrides = {
   domain?: string;
@@ -53,7 +53,7 @@ export class DendronClientUtilsV2 {
           fname,
           notes: opts.engine.notes,
           vault,
-          wsRoot: getDWorkspace().wsRoot,
+          wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
         });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];
@@ -94,7 +94,7 @@ export class DendronClientUtilsV2 {
     prefix: string;
   } {
     // gather inputs
-    const config = getDWorkspace().config;
+    const config = ExtensionProvider.getDWorkspace().config;
 
     let dateFormat: string;
     let addBehavior: NoteAddBehavior;
@@ -102,15 +102,17 @@ export class DendronClientUtilsV2 {
 
     switch (type) {
       case "SCRATCH": {
-        dateFormat = getExtension().getWorkspaceSettingOrDefault({
-          wsConfigKey: "dendron.defaultScratchDateFormat",
-          dendronConfigKey: "workspace.scratch.dateFormat",
-        });
-        addBehavior = getExtension().getWorkspaceSettingOrDefault({
-          wsConfigKey: "dendron.defaultScratchAddBehavior",
-          dendronConfigKey: "workspace.scratch.addBehavior",
-        });
-        name = getExtension().getWorkspaceSettingOrDefault({
+        dateFormat =
+          ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchDateFormat",
+            dendronConfigKey: "workspace.scratch.dateFormat",
+          });
+        addBehavior =
+          ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
+            wsConfigKey: "dendron.defaultScratchAddBehavior",
+            dendronConfigKey: "workspace.scratch.addBehavior",
+          });
+        name = ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
           wsConfigKey: "dendron.defaultScratchName",
           dendronConfigKey: "workspace.scratch.name",
         });
@@ -148,7 +150,7 @@ export class DendronClientUtilsV2 {
       throw Error("Must be run from within a note");
     }
 
-    const engine = getDWorkspace().engine;
+    const engine = ExtensionProvider.getEngine();
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
       addBehavior as AddBehavior,
@@ -179,7 +181,7 @@ export class DendronClientUtilsV2 {
   };
 
   static shouldUseVaultPrefix(engine: DEngineClient) {
-    const config = getDWorkspace().config;
+    const config = ExtensionProvider.getDWorkspace().config;
     const enableXVaultWikiLink =
       ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
     const useVaultPrefix =

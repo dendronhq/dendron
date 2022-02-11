@@ -57,7 +57,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
-          await WindowWatcher.triggerUpdateDecorations(editor!);
+          await watcher.triggerUpdateDecorations(editor!);
           // TODO: check for decorations
           done();
         },
@@ -161,11 +161,19 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
 
           getExtension().workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
-            extension: ExtensionProvider.getExtension(),
+            extension,
+            windowWatcher,
           });
           getExtension().workspaceWatcher?.activate(ctx);
           watcher!.activate();
@@ -191,10 +199,19 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         onInit: async ({ vaults, wsRoot, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
+
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
           getExtension().workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
-            extension: ExtensionProvider.getExtension(),
+            extension,
+            windowWatcher,
           });
           getExtension().workspaceWatcher?.activate(ctx);
 

@@ -14,7 +14,6 @@ import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { WSUtils } from "../../WSUtils";
 import { DendronBtn } from "./ButtonTypes";
 import { NotePickerUtils } from "./NotePickerUtils";
 import {
@@ -377,7 +376,7 @@ export class TaskBtn extends DendronBtn {
     // If the lookup value ends up being identical to the current note, this will be confusing for the user because
     // they won't be able to create a new note. This can happen with the default settings of Task notes.
     // In that case, we add a trailing dot to suggest that they need to type something more.
-    const activeName = WSUtils.getActiveNote()?.fname;
+    const activeName = ExtensionProvider.getWSUtils().getActiveNote()?.fname;
     if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {

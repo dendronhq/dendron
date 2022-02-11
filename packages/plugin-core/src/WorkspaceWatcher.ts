@@ -36,7 +36,6 @@ import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
-import { DendronExtension, getVaultFromUri } from "./workspace";
 
 const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
@@ -83,13 +82,16 @@ export class WorkspaceWatcher {
   >;
   private _schemaSyncService: ISchemaSyncService;
   private _extension: IDendronExtension;
+  private _windowWatcher: WindowWatcher;
 
   constructor({
     schemaSyncService,
     extension,
+    windowWatcher,
   }: {
     schemaSyncService: ISchemaSyncService;
     extension: IDendronExtension;
+    windowWatcher: WindowWatcher;
   }) {
     this._extension = extension;
     this._schemaSyncService = schemaSyncService;
@@ -98,12 +100,12 @@ export class WorkspaceWatcher {
       this.quickOnDidChangeTextDocument,
       50
     );
+    this._extension = extension;
+    this._windowWatcher = windowWatcher;
   }
 
   activate(context: ExtensionContext) {
-    const extension = this._extension;
-
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onWillSaveTextDocument(
         this.onWillSaveTextDocument,
         this,
@@ -111,7 +113,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidChangeTextDocument(
         this._quickDebouncedOnDidChangeTextDocument,
         this,
@@ -119,7 +121,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidSaveTextDocument(
         this.onDidSaveTextDocument,
         this,
@@ -129,7 +131,7 @@ export class WorkspaceWatcher {
 
     // NOTE: currently, this is only used for logging purposes
     if (Logger.isDebug()) {
-      extension.addDisposable(
+      this._extension.addDisposable(
         workspace.onDidOpenTextDocument(
           this.onDidOpenTextDocument,
           this,
@@ -138,7 +140,7 @@ export class WorkspaceWatcher {
       );
     }
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onWillRenameFiles(
         this.onWillRenameFiles,
         this,
@@ -146,7 +148,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidRenameFiles(
         this.onDidRenameFiles,
         this,
@@ -154,7 +156,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       window.onDidChangeActiveTextEditor(
         sentryReportingCallback((editor: TextEditor | undefined) => {
           if (
@@ -208,7 +210,7 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const activeEditor = window.activeTextEditor;
       if (activeEditor?.document.uri.fsPath === event.document.uri.fsPath) {
-        WindowWatcher.triggerUpdateDecorations(activeEditor);
+        this._windowWatcher.triggerUpdateDecorations(activeEditor);
       }
       Logger.debug({ ...ctx, state: "exit" });
       return;
@@ -274,13 +276,13 @@ export class WorkspaceWatcher {
   private onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
-    const engine = this._extension.getDWorkspace().engine;
+    const engine = this._extension.getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
     const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      vault: getVaultFromUri(uri),
+      vault: this._extension.wsUtils.getVaultFromUri(uri),
       engine,
     }) as NoteProps;
 
@@ -341,7 +343,7 @@ export class WorkspaceWatcher {
    */
   onWillRenameFiles(args: FileWillRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this._extension.isActive()) {
       return;
     }
     try {
@@ -388,7 +390,7 @@ export class WorkspaceWatcher {
    */
   async onDidRenameFiles(args: FileRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this._extension.isActive()) {
       return;
     }
     try {

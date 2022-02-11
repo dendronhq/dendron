@@ -1,5 +1,5 @@
 import { IDendronExtension } from "./dendronExtensionInterface";
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, DendronTreeViewKey } from "@dendronhq/common-all";
 import _ from "lodash";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
@@ -34,6 +34,21 @@ export class ExtensionProvider {
 
   static getWSUtils(): IWSUtilsV2 {
     return ExtensionProvider.getExtension().wsUtils;
+  }
+
+  static isActive() {
+    return ExtensionProvider.getExtension().isActive();
+  }
+
+  static getWorkspaceConfig() {
+    return ExtensionProvider.getExtension().getWorkspaceConfig();
+  }
+
+  /**
+   * @deprecated. See {@link IDendronExtension.getTreeView}
+   */
+  static getTreeView(key: DendronTreeViewKey) {
+    return ExtensionProvider.getExtension().getTreeView(key);
   }
 
   static register(extension: IDendronExtension) {

@@ -30,7 +30,8 @@ const FLIP = (value: boolean): boolean => !value;
  * @param value string value
  * @returns boolean value
  */
-const toBoolean = (value: string): boolean => value.toLowerCase() === "true";
+const toBoolean = (value: string): boolean =>
+  value.toString().toLowerCase() === "true";
 
 /**
  * map of new config's path to old config's path and how it should be mapped.

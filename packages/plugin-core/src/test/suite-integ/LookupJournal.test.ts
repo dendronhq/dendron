@@ -15,9 +15,7 @@ import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("Scratch Notes", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("multi", () => {
     test("basic, multi", (done) => {
@@ -46,6 +44,14 @@ suite("Scratch Notes", function () {
           });
           const newNote = getNoteFromTextEditor();
           expect(newNote.fname.startsWith(`${fname}.journal`)).toBeTruthy();
+          // The note title should be in the format yyyy-MM-dd
+          expect(/\d{4}-\d{2}-\d{2}$/g.test(newNote.title)).toBeTruthy();
+
+          // @ts-ignore
+          const traits = newNote.traitIds;
+          expect(
+            traits.length === 1 && traits[0] === "journalNote"
+          ).toBeTruthy();
           done();
         },
       });

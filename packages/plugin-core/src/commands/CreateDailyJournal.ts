@@ -10,8 +10,12 @@ import {
 
 export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   constructor(ext: IDendronExtension) {
-    super(ext, "dendron.journal", new JournalNote());
-
+    super(
+      ext,
+      "dendron.journal",
+      new JournalNote(ext.workspaceService!.config)
+    );
+    ext.getWorkspaceConfig();
     // override the key to maintain compatibility
     this.key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   }

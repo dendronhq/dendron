@@ -36,7 +36,7 @@ export class ConfigMigrationUtils {
   }) {
     vscode.window
       .showInformationMessage(
-        "We have detected a legacy configuration in dendron.yml. Would you like to run a migration?",
+        "We notice that your dendron.yml is not up to date. Would you like to migrate to the latest configuration? (A backup of your current configuration will be made before the migration)",
         "Migrate Configuration"
       )
       .then(async (resp) => {
@@ -78,13 +78,11 @@ export class ConfigMigrationUtils {
               }
             );
             vscode.window.showInformationMessage(
-              "Migrated to the newest configurations. You can find a backup of the original file in your root directory."
+              "Migrated to the newest configurations. You can find a backup of the original file in your workspace root."
             );
           }
         } else {
-          vscode.window.showInformationMessage(
-            "Migration cancelled. Note that migration will automatically be applied in the future."
-          );
+          vscode.window.showInformationMessage("Migration cancelled.");
         }
       });
 

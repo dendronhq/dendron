@@ -18,6 +18,7 @@ import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { ExportPodCommand } from "../commands/ExportPod";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 
@@ -140,14 +141,17 @@ export const checkPreReq = async () => {
 };
 
 export const getSiteRootDirPath = () => {
-  const wsRoot = getDWorkspace().wsRoot;
-  const sitePath = path.join(wsRoot, getDWorkspace().config.site.siteRootDir);
+  const ws = ExtensionProvider.getDWorkspace();
+  const wsRoot = ws.wsRoot;
+  const config = ws.config;
+  const siteRootDir = ConfigUtils.getPublishingConfig(config).siteRootDir;
+  const sitePath = path.join(wsRoot, siteRootDir);
   return sitePath;
 };
 
 export class NextJSPublishUtils {
   static async prepareNextJSExportPod() {
-    const ws = getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
     const wsRoot = ws.wsRoot;
     const engine = ws.engine;
     const cmd = new ExportPodCommand();
@@ -180,7 +184,7 @@ export class NextJSPublishUtils {
     }
     if (getStage() !== "prod") {
       const config = engine.config;
-      const siteConfig = ConfigUtils.getProp(config, "site");
+      const siteConfig = ConfigUtils.getPublishingConfig(config);
       if (enrichedOpts?.config && !siteConfig.siteUrl) {
         _.set(
           enrichedOpts.config.overrides as Partial<DendronSiteConfig>,

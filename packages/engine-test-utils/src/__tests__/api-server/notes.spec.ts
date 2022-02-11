@@ -56,7 +56,7 @@ describe("api/note/render tests", () => {
 
   describe(`WHEN calling /render on valid file`, () => {
     const EXPECTED_FOO_RENDERED =
-      '<h1 id="foo">Foo</h1>\n<p>foo body</p>\n<hr>\n<strong>Children</strong>\n<ol>\n<li><a href="foo.ch1.html">Ch1</a></li>\n</ol>';
+      '<h1 id="foo">Foo</h1>\n<p>foo body</p>\n<hr>\n<strong>Children</strong>\n<ol>\n<li><a href="foo.ch1">Ch1</a></li>\n</ol>';
 
     let renderFoo: () => Promise<{
       data: RenderNotePayload;

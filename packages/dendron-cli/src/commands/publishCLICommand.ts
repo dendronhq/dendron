@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigUtils,
   DendronError,
   DendronSiteConfig,
   error2PlainObject,
@@ -250,9 +251,12 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     }
     const opts = resp.data;
     opts.config.overrides = overrides || {};
+
     // if no siteUrl set, override with localhost
+    const config = opts.engine.config;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (stage !== "prod") {
-      if (!opts.engine.config.site.siteUrl && !overrides?.siteUrl) {
+      if (!publishingConfig.siteUrl && !overrides?.siteUrl) {
         _.set(
           opts.config.overrides as Partial<DendronSiteConfig>,
           "siteUrl",
@@ -260,7 +264,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         );
       }
     }
-    const { error } = SiteUtils.validateConfig(opts.engine.config.site);
+    const { error } = SiteUtils.validateConfig(publishingConfig);
     if (error) {
       return { error };
     }

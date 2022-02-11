@@ -10,9 +10,7 @@ export class TestConfigUtils {
   };
 
   static withConfig = (
-    func: (
-      config: IntermediateDendronConfig
-    ) => IntermediateDendronConfig,
+    func: (config: IntermediateDendronConfig) => IntermediateDendronConfig,
     opts: { wsRoot: string }
   ) => {
     const config = TestConfigUtils.getConfig(opts);
@@ -24,7 +22,7 @@ export class TestConfigUtils {
 
   static writeConfig = (opts: {
     config: IntermediateDendronConfig;
-    wsRoot: string
+    wsRoot: string;
   }) => {
     const configPath = DConfig.configPath(opts.wsRoot);
     return writeYAML(configPath, opts.config);

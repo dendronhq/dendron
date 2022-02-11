@@ -1,10 +1,12 @@
 import {
   DendronSiteConfig,
+  DendronPublishingConfig,
   IntermediateDendronConfig,
   NoteProps,
   PublishUtils,
   SEOProps,
   Time,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NextSeo, NextSeoProps } from "next-seo";
@@ -18,7 +20,7 @@ const getCanonicalUrl = ({
 }: {
   sitePath: string;
   seoProps: SEOProps;
-  siteConfig: DendronSiteConfig;
+  siteConfig: DendronSiteConfig | DendronPublishingConfig;
 }): string => {
   // check for note specific overrides
   if (seoProps.canonicalBaseUrl) {
@@ -69,10 +71,11 @@ export default function DendronSEO({
   const title = cleanSeoProps.title;
   const description = cleanSeoProps.excerpt;
   const images = cleanSeoProps?.image ? [cleanSeoProps.image] : [];
+  const publishingConfig = ConfigUtils.getPublishingConfig(config);
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps: cleanSeoProps,
-    siteConfig: config.site,
+    siteConfig: publishingConfig,
   });
   const maybeTwitter: NextSeoProps["twitter"] = cleanSeoProps.twitter
     ? {

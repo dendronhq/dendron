@@ -83,23 +83,6 @@ export function genTutorialWSFiles() {
   ].sort();
 }
 
-export function genDefaultConfig() {
-  return {
-    version: 1,
-    vaults: [
-      {
-        fsPath: "vault",
-      },
-    ],
-    site: DConfig.cleanSiteConfig({
-      copyAssets: true,
-      siteHierarchies: ["root"],
-      siteRootDir: "docs",
-      usePrettyRefs: true,
-    }),
-  };
-}
-
 export function genDefaultSettings() {
   return {
     extensions: {

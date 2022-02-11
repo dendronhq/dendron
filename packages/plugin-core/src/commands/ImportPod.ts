@@ -18,7 +18,7 @@ import {
   showInputBox,
   showPodQuickPickItemsV4,
   updateGlobalState,
-  handleConflict
+  handleConflict,
 } from "../utils/pods";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";

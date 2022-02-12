@@ -104,10 +104,9 @@ export class WorkspaceWatcher {
     this._windowWatcher = windowWatcher;
   }
 
-  /**
-   * Used for testing. DO NOT USE IN PRODUCTION OR YOU WILL BE FIRED
-   */
-  __exposePropsForTesting() {
+  // eslint-disable-next-line camelcase
+  __exposePropsForTesting_DO_NOT_USE_IN_PROD() {
+    // or you will be fired :)
     return {
       onFirstOpen: _.bind(this.onFirstOpen, this),
     };

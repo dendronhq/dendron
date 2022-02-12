@@ -429,6 +429,15 @@ export class WorkspaceWatcher {
       msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
+    const { vaults, wsRoot } = this._extension.getDWorkspace();
+    const fpath = editor.document.uri.fsPath;
+
+    // don't apply actions to non-dendron notes
+    // NOTE: in the future if we add `onFirstOpen` actions to non-dendron notes, this logic will need to be updated
+    if (!WorkspaceUtils.isDendronNote({ wsRoot, vaults, fpath })) {
+      return;
+    }
+
     WorkspaceWatcher.moveCursorPastFrontmatter(editor);
     const config = this._extension.getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {

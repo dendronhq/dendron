@@ -50,7 +50,7 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 
 // eslint-disable-next-line camelcase
 const UNSAFE_getWorkspaceWatcherPropsForTesting = (ext: IDendronExtension) => {
-  return ext.workspaceWatcher!.__exposePropsForTesting();
+  return ext.workspaceWatcher!.__exposePropsForTesting_DO_NOT_USE_IN_PROD();
 };
 
 const doesSchemaExist = (schemaId: string) => {
@@ -219,11 +219,11 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
     beforeEach(async () => {
       ext = ExtensionProvider.getExtension();
-      return ext.activateWatchers();
+      await ext.activateWatchers();
     });
-    afterEach(() => {
+    afterEach(async () => {
       // imporant since we activate workspace watchers
-      return ext.deactivate();
+      await ext.deactivate();
     });
     describeSingleWS(
       "AND WHEN user opens non dendron file for the first time",

@@ -286,7 +286,6 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
           const stubTimeout = sinon.stub(Wrap, "setTimeout");
           expect(await onFirstOpen(editor)).toBeTruthy();
-          // WorkspaceWatcher.moveCursorPastFrontmatter(editor);
           stubTimeout.callArg(0);
           // the selection should have been moved past the frontmatter
           const { line, character } = editor.selection.active;

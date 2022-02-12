@@ -16,6 +16,7 @@ import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 export type DendronWorkspaceSettings = Partial<{
@@ -57,6 +58,7 @@ export type DendronWorkspaceSettings = Partial<{
 export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;
+  workspaceWatcher?: WorkspaceWatcher;
   serverWatcher?: vscode.FileSystemWatcher;
   fileWatcher?: FileWatcher;
   type: WorkspaceType;
@@ -70,6 +72,7 @@ export interface IDendronExtension {
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
+  activateWatchers(): Promise<void>;
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;

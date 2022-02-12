@@ -73,6 +73,7 @@ export interface IDendronExtension {
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   activateWatchers(): Promise<void>;
+  deactivate(): Promise<void>;
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;

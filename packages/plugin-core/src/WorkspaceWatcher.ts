@@ -104,6 +104,15 @@ export class WorkspaceWatcher {
     this._windowWatcher = windowWatcher;
   }
 
+  /**
+   * Used for testing. DO NOT USE IN PRODUCTION OR YOU WILL BE FIRED
+   */
+  __exposePropsForTesting() {
+    return {
+      onFirstOpen: _.bind(this.onFirstOpen, this),
+    };
+  }
+
   activate(context: ExtensionContext) {
     this._extension.addDisposable(
       workspace.onWillSaveTextDocument(
@@ -450,7 +459,7 @@ export class WorkspaceWatcher {
     // don't apply actions to non-dendron notes
     // NOTE: in the future if we add `onFirstOpen` actions to non-dendron notes, this logic will need to be updated
     if (!WorkspaceUtils.isDendronNote({ wsRoot, vaults, fpath })) {
-      return;
+      return false;
     }
 
     WorkspaceWatcher.moveCursorPastFrontmatter(editor);
@@ -463,6 +472,7 @@ export class WorkspaceWatcher {
       msg: "exit",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
+    return true;
   }
 
   static moveCursorPastFrontmatter(editor: TextEditor) {

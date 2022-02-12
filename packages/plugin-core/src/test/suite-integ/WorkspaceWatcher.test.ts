@@ -214,7 +214,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
     });
   });
 
-  describe.only("GIVEN the user opening a file", () => {
+  describe("GIVEN the user opening a file", () => {
     let ext: IDendronExtension;
 
     beforeEach(async () => {

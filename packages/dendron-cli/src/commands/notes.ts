@@ -18,6 +18,8 @@ type CommandCLIOpts = {
   query?: string;
   cmd: NoteCommands;
   output?: NoteCLIOutput;
+  newName?: string;
+  newVault?: string;
 };
 
 export enum NoteCLIOutput {
@@ -33,6 +35,8 @@ type CommandOutput = { data: any; error?: DendronError };
 export enum NoteCommands {
   LOOKUP = "lookup",
   DELETE = "delete",
+  MOVE = "move",
+  RENAME = "rename",
 }
 
 export { CommandOpts as NoteCLICommandOpts };
@@ -76,6 +80,14 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       choices: Object.values(NoteCLIOutput),
       default: NoteCLIOutput.JSON,
     });
+    args.option("newName", {
+      describe: "name to change to (for rename/move)",
+      type: "string",
+    });
+    args.option("newVault", {
+      describe: "vault to move to (for rename/move)",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {
@@ -85,7 +97,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, wsRoot, output } = opts;
+    const { cmd, engine, wsRoot, output, newName, newVault } = opts;
 
     try {
       switch (cmd) {
@@ -143,6 +155,23 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           });
           const resp = await engine.deleteNote(note.id);
           this.print(`deleted ${note.fname}`);
+          return { data: { payload: note.fname, rawData: resp } };
+        }
+        case NoteCommands.MOVE:
+        case NoteCommands.RENAME: {
+          const { query, vault } = checkQueryAndVault(opts);
+          const note = NoteUtils.getNoteOrThrow({
+            fname: query,
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          const oldLoc = NoteUtils.toNoteLoc(note);
+          const newLoc = {
+            fname: newName || oldLoc.fname,
+            vaultName: newVault || oldLoc.vaultName,
+          };
+          const resp = await engine.renameNote({ oldLoc, newLoc });
           return { data: { payload: note.fname, rawData: resp } };
         }
         default: {

@@ -192,3 +192,105 @@ describe("WHEN run 'dendron note delete", () => {
     });
   });
 });
+
+describe("WHEN run 'dendron note rename'", () => {
+  const cmd = NoteCommands.RENAME;
+
+  describe("WHEN lookup note with no vault specified and no new vault specified", () => {
+    test("THEN rename note within first available vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "foo",
+            newName: "renamed-note",
+          });
+          //                    expect(engine.notes["foo"]).toBeUndefined();
+          expect(
+            NoteUtils.getNoteOrThrow({
+              fname: "renamed-note",
+              vault,
+              notes: engine.notes,
+              wsRoot,
+            })
+          ).toBeTruthy();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("WHEN specify vault and no new vault specified", () => {
+    test("THEN rename note within specific vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[1];
+          await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "bar",
+            newName: "renamed-note",
+          });
+          //                    expect(engine.notes["bar"]).toBeUndefined();
+          expect(
+            NoteUtils.getNoteOrThrow({
+              fname: "renamed-note",
+              vault,
+              notes: engine.notes,
+              wsRoot,
+            })
+          ).toBeTruthy();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+
+  describe("WHEN specify vault and new vault", () => {
+    test("THEN move note within specific vault to new vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const otherVault = vaults[2];
+          await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "bar",
+            newName: "car",
+            newVault: VaultUtils.getName(otherVault),
+          });
+          //                    expect(engine.notes["bar"]).toBeUndefined();
+          expect(
+            NoteUtils.getNoteOrThrow({
+              fname: "car",
+              vault: otherVault,
+              notes: engine.notes,
+              wsRoot,
+            })
+          ).toBeTruthy();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+});

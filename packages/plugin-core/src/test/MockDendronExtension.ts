@@ -1,4 +1,5 @@
 import {
+  DendronTreeViewKey,
   DEngineClient,
   DVault,
   DWorkspaceV2,
@@ -6,7 +7,13 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { IWorkspaceService, WorkspaceService } from "@dendronhq/engine-server";
-import { Disposable, ExtensionContext, FileSystemWatcher } from "vscode";
+import {
+  Disposable,
+  ExtensionContext,
+  FileSystemWatcher,
+  WebviewViewProvider,
+  WorkspaceConfiguration,
+} from "vscode";
 import { ICommandFactory } from "../commandFactoryInterface";
 import { ILookupControllerV3Factory } from "../components/lookup/LookupControllerV3Interface";
 import {
@@ -162,5 +169,17 @@ export class MockDendronExtension implements IDendronExtension {
       throw new Error("Engine not initialized in MockDendronExtension");
     }
     return this._engine as IEngineAPIService;
+  }
+
+  isActive(): boolean {
+    return true;
+  }
+
+  getWorkspaceConfig(): WorkspaceConfiguration {
+    throw new Error("Method not implemented in MockDendronExtension.");
+  }
+
+  getTreeView(_key: DendronTreeViewKey): WebviewViewProvider {
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
 }

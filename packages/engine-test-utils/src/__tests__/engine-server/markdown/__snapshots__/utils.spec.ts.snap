@@ -33,14 +33,14 @@ exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 1`] = `
 <div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"footwo\\">Foo.Two</h1>
 <p>blah</p>
 </div></div><p></p>
-Regular wikilink: <a href=\\"foo.two.html\\">Two</a><p></p>
+Regular wikilink: <a href=\\"foo.two\\">Two</a><p></p>
 </div></div><p></p><p></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.one-id.html\\">One</a></li>
-<li><a href=\\"foo.two.html\\">Two</a></li>
+<li><a href=\\"foo.one-id\\">One</a></li>
+<li><a href=\\"foo.two\\">Two</a></li>
 </ol>"
 `;
 
@@ -55,12 +55,12 @@ exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE": respProcess 1`] = `
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar.html\\">Bar</a></p>
+<div class=\\"portal-parent-fader-bottom\\"></div><p><a href=\\"bar\\">Bar</a></p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>"
 `;
 
@@ -70,7 +70,7 @@ exports[`MDUtils.proc "HTML: WITH_FOOTNOTES" 1`] = `
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
@@ -80,11 +80,11 @@ exports[`MDUtils.proc "HTML: WITH_FOOTNOTES" 1`] = `
 
 exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK" 1`] = `
 "<h1 id=\\"foo\\">Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"foo.ch1\\">Ch1</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>"
 `;
 

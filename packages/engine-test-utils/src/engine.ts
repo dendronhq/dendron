@@ -10,6 +10,7 @@ import {
   WorkspaceSettings,
   ConfigUtils,
   NoteUtils,
+  NoteChangeEntry,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -163,10 +164,14 @@ export async function setupWS(opts: {
   const vaultsConfig = ConfigUtils.getVaults(config);
   const sortedVaultsConfig = _.sortBy(vaultsConfig, "fsPath");
   ConfigUtils.setVaults(config, sortedVaultsConfig);
-  if (config.site.duplicateNoteBehavior) {
-    config.site.duplicateNoteBehavior.payload = (
-      config.site.duplicateNoteBehavior.payload as string[]
+  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  if (publishingConfig.duplicateNoteBehavior) {
+    const sortedPayload = (
+      publishingConfig.duplicateNoteBehavior.payload as string[]
     ).sort();
+    const updatedDuplicateNoteBehavior = publishingConfig.duplicateNoteBehavior;
+    updatedDuplicateNoteBehavior.payload = sortedPayload;
+    ConfigUtils.setDuplicateNoteBehavior(config, updatedDuplicateNoteBehavior);
   }
   if (opts.modConfigCb) config = opts.modConfigCb(config);
   ws.setConfig(config);
@@ -438,4 +443,18 @@ export class TestEngineUtils {
     const vault = vaults[0];
     return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
+}
+
+/**
+ * Test helper function to get a subset of NoteChangeEntry's matching a
+ * particular status from an array
+ * @param entries
+ * @param status
+ * @returns
+ */
+export function extractNoteChangeEntriesByType(
+  entries: NoteChangeEntry[],
+  status: "create" | "delete" | "update"
+): NoteChangeEntry[] {
+  return entries.filter((entry) => entry.status === status);
 }

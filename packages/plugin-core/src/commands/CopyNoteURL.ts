@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -33,8 +34,9 @@ export class CopyNoteURLCommand extends BasicCommand<
 
   async execute() {
     const config = getDWorkspace().config;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     const urlRoot =
-      config?.site?.siteUrl ||
+      publishingConfig.siteUrl ||
       DendronExtension.configuration().get<string>(
         CONFIG.COPY_NOTE_URL_ROOT.key
       );

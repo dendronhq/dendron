@@ -35,8 +35,6 @@ import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { findReferences, FoundRefT } from "../utils/md";
-import { getVaultFromUri } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import {
@@ -117,7 +115,9 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!selection) throw this.headerNotSelectedError;
 
     const line = editor.document.lineAt(selection.start.line).text;
-    const maybeNote = WSUtils.getNoteFromDocument(editor.document);
+    const maybeNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+      editor.document
+    );
     if (!maybeNote) {
       throw this.noActiveNoteError;
     }
@@ -325,7 +325,7 @@ export class MoveHeaderCommand extends BasicCommand<
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
 
-    const vault = getVaultFromUri(location.uri);
+    const vault = ExtensionProvider.getWSUtils().getVaultFromUri(location.uri);
     const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
       engine,

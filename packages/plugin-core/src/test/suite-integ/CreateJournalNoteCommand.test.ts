@@ -1,12 +1,12 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
-import { LookupScratchNoteCommand } from "../../commands/LookupScratchNoteCommand";
+import { CreateJournalNoteCommand } from "../../commands/CreateJournalNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 
-suite("LookupScratchNoteCommand", function () {
+suite("CreateJournalNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
   describeMultiWS(
@@ -16,10 +16,10 @@ suite("LookupScratchNoteCommand", function () {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
-      test("THEN scratch note with correct name created.", async () => {
+      test("THEN journal note with correct name created.", async () => {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
-        const cmd = new LookupScratchNoteCommand();
+        const cmd = new CreateJournalNoteCommand(ext);
         const { vaults, engine } = ext.getDWorkspace();
         const note = NoteUtils.getNoteByFnameFromEngine({
           fname: "foo",
@@ -29,8 +29,7 @@ suite("LookupScratchNoteCommand", function () {
         await wsUtils.openNote(note);
         await cmd.run({ noConfirm: true });
         const activeNote = getNoteFromTextEditor();
-
-        expect(activeNote.fname.startsWith("scratch.")).toBeTruthy();
+        expect(activeNote.fname.startsWith("foo.journal.")).toBeTruthy();
       });
     }
   );

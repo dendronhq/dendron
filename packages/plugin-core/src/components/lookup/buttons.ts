@@ -7,13 +7,13 @@ import {
   NoteUtils,
   TaskNoteUtils,
 } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { WSUtils } from "../../WSUtils";
 import { DendronBtn } from "./ButtonTypes";
 import { NotePickerUtils } from "./NotePickerUtils";
 import {
@@ -112,8 +112,15 @@ const selectionToNoteProps = async (opts: {
         const leaveTrace = noteLookupConfig.leaveTrace || false;
         const body = "\n" + document.getText(range).trim();
         note.body = body;
+        const { wsRoot, vaults } = ext.getDWorkspace();
         // don't delete if original file is not in workspace
-        if (!ext.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
+        if (
+          !WorkspaceUtils.isPathInWorkspace({
+            wsRoot,
+            vaults,
+            fpath: document.uri.fsPath,
+          })
+        ) {
           return note;
         }
         if (leaveTrace) {
@@ -261,7 +268,11 @@ export class Selection2ItemsBtn extends DendronBtn {
 }
 
 export class JournalBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts?: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new JournalBtn({
       title: "Create Journal Note",
       description: MODIFIER_DESCRIPTIONS["journal"],
@@ -269,6 +280,7 @@ export class JournalBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.journal,
       pressed,
+      canToggle,
     });
   }
 
@@ -297,7 +309,11 @@ export class JournalBtn extends DendronBtn {
 }
 
 export class ScratchBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new ScratchBtn({
       title: "Create Scratch Note",
       description: MODIFIER_DESCRIPTIONS["scratch"],
@@ -305,6 +321,7 @@ export class ScratchBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: LookupNoteTypeEnum.scratch,
       pressed,
+      canToggle,
     });
   }
 
@@ -359,7 +376,7 @@ export class TaskBtn extends DendronBtn {
     // If the lookup value ends up being identical to the current note, this will be confusing for the user because
     // they won't be able to create a new note. This can happen with the default settings of Task notes.
     // In that case, we add a trailing dot to suggest that they need to type something more.
-    const activeName = WSUtils.getActiveNote()?.fname;
+    const activeName = ExtensionProvider.getWSUtils().getActiveNote()?.fname;
     if (quickPick.value === activeName) quickPick.value = `${quickPick.value}.`;
     // Add default task note props to the created note
     quickPick.onCreate = async (note) => {
@@ -559,7 +576,7 @@ export function createAllButtons(
     Selection2LinkBtn.create(),
     Selection2ItemsBtn.create({}),
     JournalBtn.create(),
-    ScratchBtn.create(),
+    ScratchBtn.create({}),
     HorizontalSplitBtn.create(),
     // VerticalSplitBtn.create(),
   ];

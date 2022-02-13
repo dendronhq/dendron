@@ -9,23 +9,27 @@ import {
 import { Logger } from "../logger";
 import * as vscode from "vscode";
 import { WebViewUtils } from "./utils";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { getButtonCategory } from "../components/lookup/buttons";
-import { getExtension } from "../workspace";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { DendronBtn } from "../components/lookup/ButtonTypes";
 
 export class LookupView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.LOOKUP_VIEW;
   private _view?: vscode.WebviewView;
-  private _controller?: LookupControllerV3;
+  private _controller?: ILookupControllerV3;
+  private _extension: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    this._extension = extension;
+  }
 
   public postMessage(msg: DMessage) {
     this._view?.webview.postMessage(msg);
   }
 
-  public registerController(controller: LookupControllerV3) {
+  public registerController(controller: ILookupControllerV3) {
     this._controller = controller;
   }
 
@@ -40,10 +44,8 @@ export class LookupView implements vscode.WebviewViewProvider {
   ) {
     this._view = webviewView;
 
-    // TODO: swap `getExtension()` out for `ExtensionProvider.getExtension()`
-    // once IDendronExtension gets properties for tree views.
     WebViewUtils.prepareTreeView({
-      ext: getExtension(),
+      ext: this._extension,
       key: DendronTreeViewKey.LOOKUP_VIEW,
       webviewView,
     });
@@ -118,7 +120,7 @@ export class LookupView implements vscode.WebviewViewProvider {
       }
       case LookupViewMessageEnum.onRequestControllerState: {
         const quickpick = this._controller?.quickpick as DendronQuickPickerV2;
-        PickerUtilsV2.refreshLookupView({ buttons: quickpick.buttons });
+        this.refresh({ buttons: quickpick.buttons });
         break;
       }
       case LookupViewMessageEnum.onUpdate:
@@ -127,7 +129,17 @@ export class LookupView implements vscode.WebviewViewProvider {
     }
   }
 
-  public refresh(payload: LookupModifierStatePayload) {
+  public refresh(opts: { buttons: DendronBtn[] }) {
+    const { buttons } = opts;
+    const payload: LookupModifierStatePayload = buttons.map(
+      (button: DendronBtn) => {
+        return {
+          type: button.type,
+          pressed: button.pressed,
+        };
+      }
+    );
+
     if (this._view) {
       this._view.webview.postMessage({
         type: LookupViewMessageEnum.onUpdate,

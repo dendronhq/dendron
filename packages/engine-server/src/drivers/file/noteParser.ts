@@ -241,7 +241,6 @@ export class NoteParser extends ParserBase {
 
     // get note props
     try {
-      // noteProps = file2Note(path.join(vpath, fileMeta.fpath), vault);
       ({
         note: noteProps,
         noteHash,
@@ -265,13 +264,13 @@ export class NoteParser extends ParserBase {
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addParent({
+      const stubs = NoteUtils.addOrUpdateParents({
         note: noteProps,
         notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
         createStubs: cleanOpts.createStubs,
         wsRoot: this.opts.store.wsRoot,
       });
-      out = out.concat(stubs);
+      out = out.concat(stubs.map((noteChangeEntry) => noteChangeEntry.note));
     }
     return { propsList: out, noteHash, matchHash };
   }

@@ -643,6 +643,36 @@ suite("NoteLookupCommand", function () {
       });
     });
 
+    describeMultiWS(
+      "WHEN a new note with .md in its name is created",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+      },
+      () => {
+        test("THEN its title generation should not break", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const opts = (await cmd.run({
+            noConfirm: true,
+            initialValue: "learn.mdone.test",
+          }))!;
+          expect(opts.quickpick.selectedItems.length).toEqual(1);
+          const lastItem = _.last(opts.quickpick.selectedItems);
+          expect(_.pick(lastItem, ["id", "fname"])).toEqual({
+            id: "Create New",
+            fname: "learn.mdone.test",
+          });
+          const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+            VSCodeUtils.getActiveTextEditorOrThrow().document
+          );
+          expect(note?.fname).toEqual("learn.mdone.test");
+          expect(note?.title).toEqual("Test");
+        });
+      }
+    );
+
     test("new node, stub", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

@@ -21,7 +21,7 @@ import {
   MetadataService,
   openWSMetaFile,
 } from "@dendronhq/engine-server";
-import { TestEngineUtils, ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, beforeEach, it, afterEach } from "mocha";
@@ -42,7 +42,7 @@ import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../../workspace";
+import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
 import {
@@ -67,6 +67,8 @@ import {
 import semver from "semver";
 import * as vscode from "vscode";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -257,28 +259,11 @@ suite("Extension", function () {
           workspaceInitializer: new BlankInitializer(),
         });
         const resp = readYAML(path.join(wsRoot, "dendron.yml"));
+
         expect(resp).toEqual({
-          version: 4,
-          useFMTitle: true,
-          useNoteTitleForLink: true,
-          mermaid: true,
-          useKatex: true,
+          version: 5,
           dev: {
             enablePreviewV2: true,
-          },
-          site: {
-            copyAssets: true,
-            siteHierarchies: ["root"],
-            siteRootDir: "docs",
-            usePrettyRefs: true,
-            title: "Dendron",
-            description: "Personal knowledge space",
-            siteLastModified: true,
-            gh_edit_branch: "main",
-            duplicateNoteBehavior: {
-              action: "useVault",
-              payload: ["vault"],
-            },
           },
           commands: {
             lookup: {
@@ -304,7 +289,11 @@ suite("Extension", function () {
             },
           },
           workspace: {
-            vaults: [{ fsPath: "vault" }],
+            vaults: [
+              {
+                fsPath: "vault",
+              },
+            ],
             journal: {
               dailyDomain: "daily",
               name: "journal",
@@ -317,27 +306,27 @@ suite("Extension", function () {
               addBehavior: "asOwnDomain",
             },
             task: {
-              addBehavior: "childOfCurrent",
-              dateFormat: "",
               name: "",
-              prioritySymbols: {
-                H: "high",
-                L: "low",
-                M: "medium",
-              },
+              dateFormat: "",
+              addBehavior: "childOfCurrent",
               statusSymbols: {
                 "": " ",
+                wip: "w",
+                done: "x",
                 assigned: "a",
+                moved: "m",
                 blocked: "b",
                 delegated: "l",
-                done: "x",
                 dropped: "d",
-                moved: "m",
                 pending: "y",
-                wip: "w",
               },
-              createTaskSelectionType: "selection2link",
+              prioritySymbols: {
+                H: "high",
+                M: "medium",
+                L: "low",
+              },
               todoIntegration: false,
+              createTaskSelectionType: "selection2link",
             },
             graph: {
               zoomSpeed: 1,
@@ -345,11 +334,11 @@ suite("Extension", function () {
             enableAutoCreateOnDefinition: false,
             enableXVaultWikiLink: false,
             enableRemoteVaultInit: true,
+            enableUserTags: true,
+            enableHashTags: true,
             workspaceVaultSyncMode: "noCommit",
             enableAutoFoldFrontmatter: false,
             enableEditorDecorations: true,
-            enableHashTags: true,
-            enableUserTags: true,
             maxPreviewsCached: 10,
             maxNoteLength: 204800,
           },
@@ -360,6 +349,38 @@ suite("Extension", function () {
             enablePrettyRefs: true,
             enableKatex: true,
             automaticallyShowPreview: false,
+          },
+          publishing: {
+            enableFMTitle: true,
+            enableFrontmatterTags: true,
+            enableHashesForFMTags: false,
+            enableKatex: true,
+            enableMermaid: true,
+            enableNoteTitleForLink: true,
+            copyAssets: true,
+            enablePrettyRefs: true,
+            siteHierarchies: ["root"],
+            writeStubs: false,
+            enableContainers: false,
+            generateChangelog: false,
+            siteRootDir: "docs",
+            seo: {
+              title: "Dendron",
+              description: "Personal Knowledge Space",
+            },
+            github: {
+              enableEditLink: true,
+              editLinkText: "Edit this page on GitHub",
+              editBranch: "main",
+              editViewMode: "tree",
+            },
+            enableSiteLastModified: true,
+            enableRandomlyColoredTags: true,
+            enablePrettyLinks: true,
+            duplicateNoteBehavior: {
+              action: "useVault",
+              payload: ["vault"],
+            },
           },
         });
 
@@ -1135,6 +1156,8 @@ suite(
 
 suite("per-init config migration logic", function () {
   let homeDirStub: SinonStub;
+  let promptSpy: sinon.SinonSpy;
+  let confirmationSpy: sinon.SinonSpy;
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     beforeHook: async (ctx) => {
@@ -1145,74 +1168,14 @@ suite("per-init config migration logic", function () {
     },
     afterHook: async () => {
       homeDirStub.restore();
+      promptSpy.resetHistory();
+      confirmationSpy.resetHistory();
     },
     noSetInstallStatus: true,
   });
 
   describeMultiWS(
-    "GIVEN: current version is less than 0.70.0 and config is legacy",
-    {
-      ctx,
-      modConfigCb: (config) => {
-        config.version = 3;
-        return config;
-      },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.69.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-    },
-    () => {
-      test("THEN: config migration is not forced on init", (done) => {
-        const ws = getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(3);
-
-        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
-          withFileTypes: true,
-        });
-        const maybeBackupFile = allWSRootFiles
-          .filter((ent) => ent.isFile())
-          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
-        expect(maybeBackupFile.length === 0).toBeTruthy();
-        done();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.70.0 and config is legacy",
-    {
-      ctx,
-      modConfigCb: (config) => {
-        config.version = 3;
-        return config;
-      },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.70.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-    },
-    () => {
-      test("THEN: config migration is forced on init", (done) => {
-        const ws = getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(4);
-
-        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
-          withFileTypes: true,
-        });
-        const maybeBackupFileName = allWSRootFiles
-          .filter((ent) => ent.isFile())
-          .filter((fileEnt) => fileEnt.name.includes("migrate-config"))[0].name;
-        expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
-        done();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.70.0 and config is not legacy",
+    "GIVEN: current version is 0.81.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1220,62 +1183,69 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.70.0";
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+        DendronExtension.version = () => "0.81.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
     () => {
-      test("THEN: config migration is not forced on init", (done) => {
-        const ws = getDWorkspace();
+      test("THEN: config migration is prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(4);
 
-        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
-          withFileTypes: true,
-        });
-        const maybeBackupFiles = allWSRootFiles
-          .filter((ent) => ent.isFile())
-          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
+        expect(promptSpy.returnValues[0]).toEqual(true);
+        expect(confirmationSpy.called).toBeTruthy();
 
-        expect(maybeBackupFiles.length === 0).toBeTruthy();
         done();
       });
     }
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.70.0 and config is legacy",
+    "GIVEN: current version is 0.81.0 and config is up to date",
     {
       ctx,
       modConfigCb: (config) => {
-        config.version = 3;
+        config.version = 5;
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.70.1";
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+        DendronExtension.version = () => "0.81.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
     () => {
-      test("THEN: config migration is forced on init", (done) => {
-        const ws = getDWorkspace();
+      test("THEN: config migration is not prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
-        expect(config.version).toEqual(4);
+        expect(config.version).toEqual(5);
 
-        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
-          withFileTypes: true,
-        });
-        const maybeBackupFileName = allWSRootFiles
-          .filter((ent) => ent.isFile())
-          .filter((fileEnt) => fileEnt.name.includes("migrate-config"))[0].name;
-        expect(!_.isUndefined(maybeBackupFileName)).toBeTruthy();
+        expect(promptSpy.returnValues[0]).toEqual(false);
+        expect(confirmationSpy.called).toBeFalsy();
+
         done();
       });
     }
   );
 
   describeMultiWS(
-    "GIVEN: current version is larger than 0.70.0 and config is not legacy",
+    "GIVEN: current version is 0.82.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1283,24 +1253,64 @@ suite("per-init config migration logic", function () {
         return config;
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
-        DendronExtension.version = () => "0.70.1";
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+
+        DendronExtension.version = () => "0.82.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
     () => {
-      test("THEN: config migration is not forced on init", (done) => {
-        const ws = getDWorkspace();
+      test("THEN: config migration is prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(4);
 
-        const allWSRootFiles = fs.readdirSync(ws.wsRoot, {
-          withFileTypes: true,
-        });
-        const maybeBackupFiles = allWSRootFiles
-          .filter((ent) => ent.isFile())
-          .filter((fileEnt) => fileEnt.name.includes("migrate-config"));
+        expect(promptSpy.returnValues[0]).toEqual(true);
+        expect(confirmationSpy.called).toBeTruthy();
 
-        expect(maybeBackupFiles.length === 0).toBeTruthy();
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is 0.82.0 and config is up to date",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 5;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+
+        DendronExtension.version = () => "0.82.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is not prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(5);
+
+        expect(promptSpy.returnValues[0]).toEqual(false);
+        expect(confirmationSpy.called).toBeFalsy();
+
         done();
       });
     }

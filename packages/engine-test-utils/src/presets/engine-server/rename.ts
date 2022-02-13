@@ -580,8 +580,8 @@ const NOTES = {
             ["root", "update"],
             ["baz", "delete"],
             // from creation
-            ["baz", "update"],
-            ["baz.one", "update"],
+            ["baz", "create"],
+            ["baz.one", "create"],
             ["baz.one.three", "create"],
           ],
         },

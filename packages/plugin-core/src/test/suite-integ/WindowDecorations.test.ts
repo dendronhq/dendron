@@ -605,7 +605,7 @@ suite("windowDecorations", function () {
       });
     });
 
-    describeSingleWS("AND frontmatter is not visible", { ctx }, async () => {
+    describeSingleWS("AND frontmatter is not visible", { ctx }, () => {
       before(async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const note = await NoteTestUtilsV4.createNoteWithEngine({

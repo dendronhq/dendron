@@ -226,7 +226,6 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       return { changed };
     } finally {
-      getExtension().dendronTreeView?.treeProvider.refresh();
       if (ext.fileWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
           if (ext.fileWatcher) {

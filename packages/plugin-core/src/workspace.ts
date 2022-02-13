@@ -64,12 +64,11 @@ import {
 import { SchemaSyncService } from "./services/SchemaSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
-import { BacklinkSortOrder, CodeConfigKeys } from "./types";
+import { BacklinkSortOrder } from "./types";
 import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
 import { CalendarView } from "./views/CalendarView";
-import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { LookupView } from "./views/LookupView";
 import { SampleView } from "./views/SampleView";
@@ -97,20 +96,6 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
     return cb();
   }
   return false;
-}
-
-/**
- * Get VSCode config or Dendron Config
- */
-export function getConfigValue(key: CodeConfigKeys) {
-  return DendronExtension.configuration().get(key);
-}
-
-/**
- @deprecated: use `getConfigValue`
- */
-export function getCodeConfig<T>(key: string): T | undefined {
-  return DendronExtension.configuration().get<T>(key);
 }
 
 /**
@@ -159,7 +144,6 @@ export class DendronExtension implements IDendronExtension {
   private treeViews: { [key: string]: vscode.WebviewViewProvider };
 
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
-  public dendronTreeView: DendronTreeView | undefined;
   public fileWatcher?: FileWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
@@ -197,6 +181,9 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
+   * @deprecated: For static access, use ExtensionProvider.getWorkspaceConfig().
+   * Or preferably pass IDendronExtension to constructors of your classes.
+   *
    * Global Workspace configuration
    */
   static configuration(
@@ -215,9 +202,6 @@ export class DendronExtension implements IDendronExtension {
     if (this.fileWatcher) {
       this.fileWatcher.pause = true;
     }
-    if (this.dendronTreeView) {
-      this.dendronTreeView.pause = true;
-    }
     try {
       const out = await cb();
       return out;
@@ -227,9 +211,6 @@ export class DendronExtension implements IDendronExtension {
     } finally {
       if (this.fileWatcher) {
         this.fileWatcher.pause = false;
-      }
-      if (this.dendronTreeView) {
-        this.dendronTreeView.pause = false;
       }
     }
   }
@@ -300,6 +281,9 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
+   * @deprecated: For static access, use ExtensionProvider.isActive().
+   * Or preferably pass IDendronExtension to constructors of your classes.
+   *
    * Checks if a Dendron workspace is currently active.
    */
   static isActive(_context?: vscode.ExtensionContext): boolean {
@@ -414,6 +398,19 @@ export class DendronExtension implements IDendronExtension {
       });
     }
     return this.workspaceImpl;
+  }
+
+  /**
+   * See {@link IDendronExtension.getWorkspaceConfig()}
+   */
+  getWorkspaceConfig(
+    section?: string | undefined
+  ): vscode.WorkspaceConfiguration {
+    return vscode.workspace.getConfiguration(section);
+  }
+
+  isActive(): boolean {
+    return DendronExtension.isActive();
   }
 
   /** For Native workspaces (without .code-workspace file) this will return undefined. */
@@ -535,8 +532,7 @@ export class DendronExtension implements IDendronExtension {
             calendarView
           )
         );
-
-        const lookupView = new LookupView();
+        const lookupView = new LookupView(this);
         this.treeViews[DendronTreeViewKey.LOOKUP_VIEW] = lookupView;
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
@@ -708,6 +704,8 @@ export class DendronExtension implements IDendronExtension {
     this.windowWatcher = windowWatcher;
     const workspaceWatcher = new WorkspaceWatcher({
       schemaSyncService: this.schemaSyncService,
+      extension: this,
+      windowWatcher,
     });
     workspaceWatcher.activate(this.context);
     this.workspaceWatcher = workspaceWatcher;

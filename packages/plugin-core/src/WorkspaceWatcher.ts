@@ -105,8 +105,7 @@ export class WorkspaceWatcher {
   }
 
   // eslint-disable-next-line camelcase
-  __exposePropsForTesting_DO_NOT_USE_IN_PROD() {
-    // or you will be fired :)
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
     return {
       onFirstOpen: _.bind(this.onFirstOpen, this),
     };

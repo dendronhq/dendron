@@ -50,7 +50,7 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 
 // eslint-disable-next-line camelcase
 const UNSAFE_getWorkspaceWatcherPropsForTesting = (ext: IDendronExtension) => {
-  return ext.workspaceWatcher!.__exposePropsForTesting_DO_NOT_USE_IN_PROD();
+  return ext.workspaceWatcher!.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
 };
 
 const doesSchemaExist = (schemaId: string) => {

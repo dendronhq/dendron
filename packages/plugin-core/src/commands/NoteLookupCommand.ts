@@ -13,6 +13,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   SchemaTemplate,
+  getJournalTitle,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -389,11 +390,25 @@ export class NoteLookupCommand
     try {
       const { quickpick, selectedItems } = opts;
       const selected = this.getSelected({ quickpick, selectedItems });
+
+      const extension = ExtensionProvider.getExtension();
+      const ws = extension.getDWorkspace();
+
+      const journalDateFormat = ConfigUtils.getJournal(ws.config).dateFormat;
+
       const out = await Promise.all(
         selected.map((item) => {
           // If we're in journal mode, then apply title and trait overrides
           if (this.isJournalButtonPressed()) {
-            const journalModifiedTitle = this.journalTitleOverride(item.fname);
+            /**
+             * this is a hacky title override for journal notes.
+             * TODO: remove this once we implement a more general way to override note titles.
+             * this is a hacky title override for journal notes.
+             */
+            const journalModifiedTitle = getJournalTitle(
+              item.fname,
+              journalDateFormat
+            );
 
             if (journalModifiedTitle) {
               item.title = journalModifiedTitle;
@@ -661,30 +676,6 @@ export class NoteLookupCommand
     }
 
     return vault;
-  }
-
-  /**
-   * this is a hacky title override for journal notes.
-   * TODO: remove this once we implement a more general way to override note titles.
-   * this is a hacky title override for journal notes.
-   * This only works when the journal note modifier was explicitly pressed
-   * and when the date portion is the last bit of the hierarchy.
-   * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
-   */
-
-  journalTitleOverride(input: string): string | undefined {
-    if (/.*\d{4}\.\d{2}\.\d{2}$/g.test(input)) {
-      const [...maybeDatePortion] = input.split(".").slice(-3);
-      // we only override y.MM.dd
-      if (maybeDatePortion.length === 3) {
-        const maybeTitleOverride = maybeDatePortion.join("-");
-        if (maybeTitleOverride.match(/\d\d\d\d-\d\d-\d\d$/)) {
-          return maybeTitleOverride;
-        }
-      }
-    }
-
-    return;
   }
 
   private isJournalButtonPressed() {

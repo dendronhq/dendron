@@ -47,8 +47,12 @@ suite("Scratch Notes", function () {
           // The note title should be in the format yyyy-MM-dd
           expect(/\d{4}-\d{2}-\d{2}$/g.test(newNote.title)).toBeTruthy();
 
-          // @ts-ignore
-          const traits = newNote.traitIds;
+          // TODO: traits isn't exposed in newNote props here because in the test
+          //we extract noteProps via `getNoteFromTextEditor` instead of the
+          //engine. So for now, test via the raw traitIds that should have been
+          //added to the note.
+          const traits = (newNote as any).traitIds;
+
           expect(
             traits.length === 1 && traits[0] === "journalNote"
           ).toBeTruthy();

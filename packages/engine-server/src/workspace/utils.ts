@@ -105,7 +105,7 @@ export class WorkspaceUtils {
   /**
    * Check if a file is a dendron note (vs a regular file or something else entirely)
    */
-  static isDendronNote({
+  static async isDendronNote({
     wsRoot,
     vaults,
     fpath,
@@ -121,7 +121,7 @@ export class WorkspaceUtils {
 
     // if markdown file, does it have frontmatter?
     // this is a rough heuristic
-    return fs.readFileSync(fpath, { encoding: "utf8" }).startsWith("---");
+    return (await fs.readFile(fpath, { encoding: "utf8" })).startsWith("---");
   }
 
   static isNativeWorkspace(workspace: DWorkspaceV2) {

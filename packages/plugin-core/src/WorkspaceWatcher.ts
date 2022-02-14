@@ -445,6 +445,10 @@ export class WorkspaceWatcher {
     }
   }
 
+  /**
+   * Dendron will perform changes like moving the cursor when first opening a Dendron note
+   * @returns boolean : returns `true` if Dendron made changes during `onFirstOpen` and `false` otherwise
+   */
   private async onFirstOpen(editor: TextEditor) {
     Logger.info({
       ctx: context("onFirstOpen"),
@@ -456,7 +460,7 @@ export class WorkspaceWatcher {
 
     // don't apply actions to non-dendron notes
     // NOTE: in the future if we add `onFirstOpen` actions to non-dendron notes, this logic will need to be updated
-    if (!WorkspaceUtils.isDendronNote({ wsRoot, vaults, fpath })) {
+    if (!(await WorkspaceUtils.isDendronNote({ wsRoot, vaults, fpath }))) {
       return false;
     }
 

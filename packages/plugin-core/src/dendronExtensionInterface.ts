@@ -73,6 +73,9 @@ export interface IDendronExtension {
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   activateWatchers(): Promise<void>;
+  /**
+   * This will deactivate the entire Dendron Extension. Takes care of disposing of all resources that Dendron has created
+   */
   deactivate(): Promise<void>;
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 

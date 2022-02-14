@@ -49,7 +49,11 @@ suite("CopyNoteUrl", function () {
       onInit: async ({ wsRoot, engine }) => {
         withConfig(
           (config) => {
-            config.site.siteUrl = "https://example.com";
+            ConfigUtils.setPublishProp(
+              config,
+              "siteUrl",
+              "https://example.com"
+            );
             return config;
           },
           { wsRoot }

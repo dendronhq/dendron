@@ -14,7 +14,7 @@ import fs from "fs-extra";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getExtension, getDWorkspace } from "../workspace";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { BasicCommand } from "./base";
 
 type ReloadIndexCommandOpts = {
@@ -36,7 +36,7 @@ export class ReloadIndexCommand extends BasicCommand<
   ): Promise<DEngineClient | undefined> {
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
-    const ws = getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
     const { wsRoot, engine } = ws;
 
     const reloadIndex = async () => {
@@ -92,7 +92,6 @@ export class ReloadIndexCommand extends BasicCommand<
     }
 
     this.L.info({ ctx, msg: "exit" });
-    getExtension().dendronTreeView?.treeProvider.refresh();
     return engine;
   }
 }

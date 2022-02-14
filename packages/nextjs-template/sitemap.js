@@ -44,6 +44,9 @@ var common_all_1 = require("@dendronhq/common-all");
 var fs_extra_1 = __importDefault(require("fs-extra"));
 var lodash_1 = __importDefault(require("lodash"));
 var path_1 = __importDefault(require("path"));
+/**
+ * INLINE all typescript dependencies
+ */
 process.env.DATA_DIR = "data";
 var _NOTES_CACHE;
 function getDataDir() {
@@ -69,8 +72,9 @@ function getNoteUrl(opts) {
 exports.getNoteUrl = getNoteUrl;
 function getRootUrlStatic() {
     var config = fs_extra_1["default"].readJSONSync(path_1["default"].join("data", "dendron.json"));
-    var url = config.site.siteUrl;
-    var assetsPrefix = config.site.assetsPrefix;
+    var publishingConfig = common_all_1.ConfigUtils.getPublishingConfig(config);
+    var url = publishingConfig.siteUrl;
+    var assetsPrefix = publishingConfig.assetsPrefix;
     if (assetsPrefix) {
         url += assetsPrefix;
     }

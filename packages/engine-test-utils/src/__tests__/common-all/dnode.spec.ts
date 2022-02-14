@@ -158,6 +158,8 @@ describe(`SchemaUtil tests:`, () => {
             expect(note.body.trim()).toEqual(
               `Today is 2022.01.10` +
                 "\n" +
+                "It is week 02 of the year" +
+                "\n" +
                 `This link goes to [[daily.journal.2022.01.10]]` +
                 "\n" +
                 `{{ 1 + 1 }} should not be evalated to 2`

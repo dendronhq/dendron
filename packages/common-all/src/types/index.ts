@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { DNodeType, NoteProps } from "./foundation";
 
 export * from "./compat";
@@ -15,6 +16,7 @@ export * from "./compat";
 export * from "./editor";
 export * from "./lookup";
 export * from "./unified";
+export * from "./events";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {

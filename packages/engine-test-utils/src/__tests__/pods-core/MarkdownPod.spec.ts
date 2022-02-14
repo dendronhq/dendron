@@ -112,7 +112,6 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        console.log("wsRoot", wsRoot);
         const resp = await pod.execute({
           engine,
           vaults,
@@ -160,11 +159,20 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            config.site = createSiteConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,
@@ -200,12 +208,25 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
-            config.site = createSiteConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setWorkspaceProp(
+              v4DefaultConfig,
+              "enableXVaultWikiLink",
+              true
+            );
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,
@@ -300,6 +321,8 @@ function setupImport(src: string) {
     { path: "A1/B1.md" },
     { path: "A1/B2.md" },
     { path: "A1/B1 B2.md" },
+    { path: "Folder/Media/something.md" },
+    { path: "Folder/Media/image.JPEG" },
   ]);
 }
 
@@ -453,7 +476,7 @@ describe("markdown import pod", () => {
         const vault = vaults[0];
         vpath = vault2Path({ wsRoot, vault });
         const assetsDir = fs.readdirSync(path.join(vpath, "assets"));
-        expect(assetsDir.length).toEqual(3);
+        expect(assetsDir.length).toEqual(4);
         const fileBody = fs.readFileSync(path.join(vpath, "project.p1.md"), {
           encoding: "utf8",
         });
@@ -503,11 +526,19 @@ describe("markdown import pod", () => {
             encoding: "utf8",
           }
         );
+        const fileBody3Content = fs.readFileSync(
+          path.join(vpath, "folder.media.something.md"),
+          {
+            encoding: "utf8",
+          }
+        );
         expect(fileBody.match("test.txt")).toBeTruthy();
-        const assetPath = path.join("assets", "test.txt").replace(/[\\]/g, "/");
+        const assetPath = path.posix.join("assets", "test.txt");
+        const imagePath = path.posix.join("assets", "image.JPEG");
         expect(fileBodyContent).toContain(`[test-pdf](/${assetPath})`);
         expect(fileBody2Content).toContain(`[test-pdf](/${assetPath})`);
-        expect(assetsDir.length).toEqual(3);
+        expect(fileBody3Content).toContain(`![image](/${imagePath})`);
+        expect(assetsDir.length).toEqual(4);
       },
       {
         expect,
@@ -520,6 +551,10 @@ describe("markdown import pod", () => {
           fs.writeFileSync(
             path.join(importSrc, "project", "p4", "n1.md"),
             "[test-pdf](./test.txt)"
+          );
+          fs.writeFileSync(
+            path.join(importSrc, "Folder", "Media", "something.md"),
+            "![image](image.JPEG)"
           );
         },
       }

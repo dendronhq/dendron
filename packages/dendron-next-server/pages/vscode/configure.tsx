@@ -1,3 +1,4 @@
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { List, Typography } from "antd";
 import { FieldArray, Formik } from "formik";
@@ -79,10 +80,16 @@ export default function Config({
 
           <Form.Item name="siteHierarchies" label="Site Hierarchies">
             <FieldArray
-              name="site.siteHierarchies"
-              render={(arrayHelpers) =>
-                renderArray(values.site.siteHierarchies, arrayHelpers)
-              }
+              name="siteHierarchies"
+              render={(arrayHelpers) => {
+                const publishingConfig = ConfigUtils.getPublishingConfig(
+                  values as IntermediateDendronConfig
+                );
+                return renderArray(
+                  publishingConfig.siteHierarchies,
+                  arrayHelpers
+                );
+              }}
             />
           </Form.Item>
           {createFormItem({ name: "site.siteRootDir", label: "Site Root Dir" })}

@@ -14,7 +14,6 @@ import path from "path";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { WSUtils } from "../../WSUtils";
 import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2, TransformedQueryString } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
@@ -38,7 +37,8 @@ export class NotePickerUtils {
     // dedupe wikilinks by value
     const uniqueWikiLinks = _.uniqBy(wikiLinks, "value");
 
-    const activeNote = WSUtils.getActiveNote() as DNodeProps;
+    const activeNote =
+      ExtensionProvider.getWSUtils().getActiveNote() as DNodeProps;
 
     // make a list of picker items from wikilinks
     const notesFromWikiLinks = LinkUtils.getNotesFromWikiLinks({

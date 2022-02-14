@@ -5,7 +5,7 @@ import {
   DendronError,
   DEngineClient,
   Disposable,
-  DuplicateNoteAction,
+  DuplicateNoteActionEnum,
   DUser,
   DUtils,
   DVault,
@@ -53,7 +53,6 @@ import {
   removeCache,
   writeWSMetaFile,
 } from "../utils";
-import { WorkspaceUtils } from "./utils";
 import { WorkspaceConfig } from "./vscode";
 import {
   IWorkspaceService,
@@ -245,14 +244,27 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     ConfigUtils.setVaults(config, vaults);
 
     // update dup note behavior
-    if (!config.site.duplicateNoteBehavior) {
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    if (!publishingConfig.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getVaults(config);
-      config.site.duplicateNoteBehavior = {
-        action: DuplicateNoteAction.USE_VAULT,
+      const updatedDuplicateNoteBehavior = {
+        action: DuplicateNoteActionEnum.useVault,
         payload: vaults.map((v) => VaultUtils.getName(v)),
       };
-    } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
-      config.site.duplicateNoteBehavior.payload.push(VaultUtils.getName(vault));
+      ConfigUtils.setDuplicateNoteBehavior(
+        config,
+        updatedDuplicateNoteBehavior
+      );
+    } else if (_.isArray(publishingConfig.duplicateNoteBehavior.payload)) {
+      const updatedDuplicateNoteBehavior =
+        publishingConfig.duplicateNoteBehavior;
+      (updatedDuplicateNoteBehavior.payload as string[]).push(
+        VaultUtils.getName(vault)
+      );
+      ConfigUtils.setDuplicateNoteBehavior(
+        config,
+        updatedDuplicateNoteBehavior
+      );
     }
     if (updateConfig) {
       await this.setConfig(config);
@@ -633,20 +645,25 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         ConfigUtils.setWorkspaceProp(config, "workspaces", workspaces);
       }
     }
-
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (
-      config.site.duplicateNoteBehavior &&
-      _.isArray(config.site.duplicateNoteBehavior.payload)
+      publishingConfig.duplicateNoteBehavior &&
+      _.isArray(publishingConfig.duplicateNoteBehavior.payload)
     ) {
       const vaults = ConfigUtils.getVaults(config);
       if (vaults.length === 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
-        config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
+        ConfigUtils.unsetDuplicateNoteBehavior(config);
       } else {
         // otherwise pull the removed vault from payload
-        config.site.duplicateNoteBehavior.payload = _.pull(
-          config.site.duplicateNoteBehavior.payload,
-          vault.fsPath
+        const updatedDuplicateNoteBehavior =
+          publishingConfig.duplicateNoteBehavior;
+
+        _.pull(updatedDuplicateNoteBehavior.payload as string[], vault.fsPath);
+
+        ConfigUtils.setDuplicateNoteBehavior(
+          config,
+          updatedDuplicateNoteBehavior
         );
       }
     }
@@ -711,7 +728,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
       gitIgnore,
-      ["node_modules", ".dendron.*", "build", "seeds", "\n"].join("\n"),
+      [
+        "node_modules",
+        ".dendron.*",
+        "build",
+        "seeds",
+        ".next",
+        "pods/service-connections",
+        "\n",
+      ].join("\n"),
       { encoding: "utf8" }
     );
     if (opts.createCodeWorkspace) {
@@ -847,16 +872,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   async getAllRepos() {
     return [...(await this.getAllReposVaults()).keys()];
-  }
-
-  /**
-   * Check if a path belongs to a workspace
-   @deprecated - use {@link WorkspaceUtils.isPathInWorkspace}
-   */
-  isPathInWorkspace(fpath: string) {
-    const vaults = ConfigUtils.getVaults(this.config);
-    const wsRoot = this.wsRoot;
-    return WorkspaceUtils.isPathInWorkspace({ fpath, vaults, wsRoot });
   }
 
   async pullVault(opts: { vault: DVault }) {
@@ -1118,11 +1133,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }) {
     let changes: MigrationChangeSetStatus[] = [];
     if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-      // we are on a legacy config.
       // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationService.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.70.0", // to force apply
+        previousVersion: "0.81.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,

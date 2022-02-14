@@ -1,15 +1,16 @@
 import { DendronError, ERROR_STATUS, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { clipboard } from "../utils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandInput = {
@@ -59,9 +60,11 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const uri = editor.document.uri;
-    const ext = getExtension();
-    const { vaults, wsRoot } = getDWorkspace();
-    if (!ext.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+    const ext = ExtensionProvider.getExtension();
+    const { vaults, wsRoot } = ext.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ vaults, wsRoot, fpath: uri.fsPath })
+    ) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
         message: "not in a vault",

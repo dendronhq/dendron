@@ -12,6 +12,7 @@ import sinon from "sinon";
 import path from "path";
 import * as vscode from "vscode";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
+import { WindowWatcher } from "../../windowWatcher";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -27,6 +28,7 @@ import * as _ from "lodash";
 import { WSUtils } from "../../WSUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { MockPreviewProxy } from "../MockPreviewProxy";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -112,9 +114,19 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
+
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension,
+            windowWatcher,
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
@@ -151,9 +163,18 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            extension,
+            windowWatcher,
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);

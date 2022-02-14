@@ -5,7 +5,14 @@ import {
   PodConflictResolveOpts,
   RespV3,
 } from "@dendronhq/common-all";
-import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
+import {
+  HTMLPublishPod,
+  JSONPublishPod,
+  MarkdownPublishPod,
+  PodClassEntryV4,
+  PodKind,
+  PodUtils,
+} from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
 import prompts from "prompts";
@@ -21,6 +28,7 @@ export type PodCLIOpts = {
   config?: string;
   configPath?: string;
   query?: string;
+  vault?: string;
 };
 
 export type PodCommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
@@ -151,7 +159,7 @@ export function enrichPodArgs(opts: {
           podsDir,
           podClass,
         });
-    if (resp.error && !config) {
+    if (resp.error && !config && PodUtils.hasRequiredOpts(podClass)) {
       return {
         error: resp.error,
       };
@@ -169,16 +177,25 @@ export function enrichPodArgs(opts: {
       });
     }
 
-    // if query is specified, then override config to pass in query
-    if (args.query) {
-      if (podType === "publish") {
-        cleanConfig["fname"] = args.query;
-      } else {
-        // eslint-disable-next-line no-console
-        console.log(
-          `WARN: --query parameter not implemented for podType ${podType}`
-        );
+    if (podType === "publish") {
+      switch (podId) {
+        case MarkdownPublishPod.id:
+        case JSONPublishPod.id:
+        case HTMLPublishPod.id:
+          cleanConfig["dest"] = "stdout";
       }
+      // if vault is specified, then override config to pass in
+      if (args.vault) {
+        cleanConfig["vaultName"] = args.vault;
+      }
+      if (args.query) {
+        cleanConfig["fname"] = args.query;
+      }
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(
+        `WARN: --query and --vault parameter not implemented for podType ${podType}`
+      );
     }
 
     // error checking, config shouldn't be empty

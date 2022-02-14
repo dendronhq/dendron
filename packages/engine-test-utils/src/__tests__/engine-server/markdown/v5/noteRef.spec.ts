@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../..";
@@ -57,7 +58,11 @@ describe("GIVEN noteRef plugin", () => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.assetsPrefix = "/some-prefix";
+              ConfigUtils.setPublishProp(
+                config,
+                "assetsPrefix",
+                "/some-prefix"
+              );
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -119,7 +124,7 @@ describe("GIVEN noteRef plugin", () => {
           });
           TestConfigUtils.withConfig(
             (config) => {
-              config.site.usePrettyLinks = true;
+              ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
               return config;
             },
             { wsRoot: opts.wsRoot }

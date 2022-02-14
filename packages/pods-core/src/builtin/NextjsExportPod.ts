@@ -9,6 +9,8 @@ import {
   ConfigUtils,
   isWebUri,
   getStage,
+  configIsV4,
+  DendronPublishingConfig,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -55,17 +57,29 @@ export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
   mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
 
 function getSiteConfig({
-  siteConfig,
+  config,
   overrides,
 }: {
-  siteConfig: DendronSiteConfig;
-  overrides?: Partial<DendronSiteConfig>;
-}): DendronSiteConfig {
-  return {
-    ...siteConfig,
-    ...overrides,
-    usePrettyLinks: true,
-  };
+  config: IntermediateDendronConfig;
+  overrides?: Partial<DendronSiteConfig> | Partial<DendronPublishingConfig>;
+}): DendronSiteConfig | DendronPublishingConfig {
+  if (configIsV4(config)) {
+    const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
+    return {
+      ...siteConfig,
+      ...overrides,
+      usePrettyLinks: true,
+    } as DendronSiteConfig;
+  } else {
+    const publishingConfig = ConfigUtils.getPublishing(
+      config
+    ) as DendronPublishingConfig;
+    return {
+      ...publishingConfig,
+      ...overrides,
+      enablePrettyLinks: true,
+    } as DendronPublishingConfig;
+  }
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
@@ -236,7 +250,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     siteConfig,
     dest,
   }: {
-    siteConfig: DendronSiteConfig;
+    siteConfig: DendronSiteConfig | DendronPublishingConfig;
     dest: URI;
   }) {
     // add .env.production, next will use this to replace `process.env` vars when building
@@ -265,10 +279,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
-    const siteConfig = config.site;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
 
     // if copyAssets not set, skip it
-    if (!config.site.copyAssets) {
+    if (!publishingConfig.copyAssets) {
       this.L.info({ ctx, msg: "skip copying" });
       return;
     }
@@ -299,31 +313,34 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     this.L.info({ ctx, msg: "finish copying assets" });
 
     // custom headers
-    if (siteConfig.customHeaderPath) {
-      const headerPath = path.join(wsRoot, siteConfig.customHeaderPath);
+    const customHeaderPath = publishingConfig.customHeaderPath;
+    if (customHeaderPath) {
+      const headerPath = path.join(wsRoot, customHeaderPath);
       if (fs.existsSync(headerPath)) {
         fs.copySync(headerPath, path.join(destPublicPath, "header.html"));
       }
     }
     // get favicon
-    if (siteConfig.siteFaviconPath) {
-      const faviconPath = path.join(wsRoot, siteConfig.siteFaviconPath);
+    const siteFaviconPath = publishingConfig.siteFaviconPath;
+    if (siteFaviconPath) {
+      const faviconPath = path.join(wsRoot, siteFaviconPath);
       if (fs.existsSync(faviconPath)) {
         fs.copySync(faviconPath, path.join(destPublicPath, "favicon.ico"));
       }
     }
     // get logo
-    if (siteConfig.logo && !isWebUri(siteConfig.logo)) {
-      const logoPath = path.join(wsRoot, siteConfig.logo);
+    const logo = ConfigUtils.getLogo(config);
+    if (logo && !isWebUri(logo)) {
+      const logoPath = path.join(wsRoot, logo);
       fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
     // /get cname
-    if (siteConfig.githubCname) {
-      fs.writeFileSync(
-        path.join(destPublicPath, "CNAME"),
-        siteConfig.githubCname,
-        { encoding: "utf8" }
-      );
+    const githubConfig = ConfigUtils.getGithubConfig(config);
+    const githubCname = githubConfig.cname;
+    if (githubCname) {
+      fs.writeFileSync(path.join(destPublicPath, "CNAME"), githubCname, {
+        encoding: "utf8",
+      });
     }
   }
 
@@ -381,18 +398,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
+
     const siteConfig = getSiteConfig({
-      siteConfig: engine.config.site,
+      config: engine.config,
       overrides: podConfig.overrides,
     });
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const engineConfig: IntermediateDendronConfig = {
-      ...engine.config,
-      site: siteConfig,
-    };
+    const engineConfig: IntermediateDendronConfig =
+      ConfigUtils.overridePublishingConfig(engine.config, siteConfig);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,

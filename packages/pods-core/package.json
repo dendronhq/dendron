@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.80.0",
+  "version": "0.81.0",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -29,7 +29,7 @@
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
     "buildCI": "yarn compile",
-    "compile": "tsc -b tsconfig.build.json --verbose",
+    "compile": "tsc -p tsconfig.build.json ",
     "test": "echo stub",
     "watch": "yarn compile --watch",
     "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand"
@@ -52,9 +52,9 @@
   },
   "dependencies": {
     "@dendronhq/airtable": "^0.11.1",
-    "@dendronhq/common-all": "^0.80.0",
-    "@dendronhq/common-server": "^0.80.0",
-    "@dendronhq/engine-server": "^0.80.0",
+    "@dendronhq/common-all": "^0.81.0",
+    "@dendronhq/common-server": "^0.81.0",
+    "@dendronhq/engine-server": "^0.81.0",
     "@instantish/martian": "1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",

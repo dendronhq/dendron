@@ -9,6 +9,7 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../commands/CreateDailyJournal";
@@ -50,8 +51,13 @@ export class CalendarView implements vscode.WebviewViewProvider {
       return;
     }
     const ctx = "CalendarView:openTextDocument";
+    const { wsRoot, vaults } = this._extension.getDWorkspace();
     if (
-      !this._extension.workspaceService?.isPathInWorkspace(document.uri.fsPath)
+      !WorkspaceUtils.isPathInWorkspace({
+        wsRoot,
+        vaults,
+        fpath: document.uri.fsPath,
+      })
     ) {
       Logger.info({
         ctx,

@@ -7,7 +7,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -23,7 +23,7 @@ VFile {
 <hr>
 <strong>Better Children</strong>
 <ol>
-<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -61,8 +61,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"daily.journal.2020.07.01.one.html\\">One</a></li>
-<li><a href=\\"daily.journal.2020.07.05.two.html\\">Two</a></li>
+<li><a href=\\"daily.journal.2020.07.01.one\\">One</a></li>
+<li><a href=\\"daily.journal.2020.07.05.two\\">Two</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

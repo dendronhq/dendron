@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.80.0",
+  "version": "0.81.0",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -29,7 +29,7 @@
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
     "buildCI": "yarn compile",
-    "compile": "tsc -b tsconfig.build.json --verbose",
+    "compile": "tsc -p tsconfig.build.json ",
     "test": "echo 0",
     "watch": "yarn compile --watch",
     "test:unit": "echo 0",

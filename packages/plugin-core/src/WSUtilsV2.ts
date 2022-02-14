@@ -15,6 +15,7 @@ import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { isInsidePath, vault2Path } from "@dendronhq/common-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 
@@ -174,8 +175,13 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   }
 
   tryGetNoteFromDocument(document: vscode.TextDocument): NoteProps | undefined {
+    const { wsRoot, vaults } = this.extension.getDWorkspace();
     if (
-      !this.extension.workspaceService?.isPathInWorkspace(document.uri.fsPath)
+      !WorkspaceUtils.isPathInWorkspace({
+        wsRoot,
+        vaults,
+        fpath: document.uri.fsPath,
+      })
     ) {
       Logger.info({
         uri: document.uri.fsPath,

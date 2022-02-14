@@ -263,12 +263,13 @@ export abstract class BaseExportPodCommand<
         if (!selection) {
           return resolve(undefined);
         }
-
+        const { hierarchy, vault } = selection
         const notes = ExtensionProvider.getEngine().notes;
 
         resolve(
           Object.values(notes).filter(
-            (value) => value.fname.startsWith(selection) && value.stub !== true
+            (value) => value.fname.startsWith(hierarchy) && value.stub !== true &&
+             VaultUtils.isEqualV2(value.vault, vault)
           )
         );
       });

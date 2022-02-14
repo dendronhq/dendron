@@ -1,15 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/StrictConfigV4",
+  "$ref": "#/definitions/StrictConfigV5",
   "definitions": {
-    "StrictConfigV4": {
+    "StrictConfigV5": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "version": {
           "type": "number",
           "description": "Dendron version. Setup by plugin",
-          "const": 4
+          "const": 5
         },
         "commands": {
           "$ref": "#/definitions/DendronCommandConfig"
@@ -20,9 +20,8 @@
         "preview": {
           "$ref": "#/definitions/DendronPreviewConfig"
         },
-        "site": {
-          "$ref": "#/definitions/DendronSiteConfig",
-          "description": "Configuration related to publishing notes"
+        "publishing": {
+          "$ref": "#/definitions/DendronPublishingConfig"
         },
         "noCaching": {
           "type": "boolean",
@@ -39,6 +38,10 @@
         "dendronVersion": {
           "type": "string",
           "description": "Dendron version"
+        },
+        "site": {
+          "$ref": "#/definitions/DendronSiteConfig",
+          "description": "Configuration related to publishing notes"
         },
         "lookup": {
           "$ref": "#/definitions/LegacyLookupConfig",
@@ -193,8 +196,7 @@
       },
       "required": [
         "version"
-      ],
-      "description": "Strict v4 intermediate config."
+      ]
     },
     "DendronCommandConfig": {
       "type": "object",
@@ -808,6 +810,310 @@
       "additionalProperties": false,
       "description": "Namespace for all preview related configurations"
     },
+    "DendronPublishingConfig": {
+      "type": "object",
+      "properties": {
+        "enableFMTitle": {
+          "type": "boolean"
+        },
+        "enableHierarchyDisplay": {
+          "type": "boolean"
+        },
+        "hierarchyDisplayTitle": {
+          "type": "string"
+        },
+        "enableNoteTitleForLink": {
+          "type": "boolean"
+        },
+        "enableMermaid": {
+          "type": "boolean"
+        },
+        "enablePrettyRefs": {
+          "type": "boolean"
+        },
+        "enableKatex": {
+          "type": "boolean"
+        },
+        "assetsPrefix": {
+          "type": "string"
+        },
+        "copyAssets": {
+          "type": "boolean"
+        },
+        "canonicalBaseUrl": {
+          "type": "string"
+        },
+        "customHeaderPath": {
+          "type": "string"
+        },
+        "ga": {
+          "$ref": "#/definitions/GoogleAnalyticsConfig"
+        },
+        "logoPath": {
+          "type": "string"
+        },
+        "siteFaviconPath": {
+          "type": "string"
+        },
+        "siteIndex": {
+          "type": "string"
+        },
+        "siteHierarchies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "enableSiteLastModified": {
+          "type": "boolean"
+        },
+        "siteRootDir": {
+          "type": "string"
+        },
+        "siteRepoDir": {
+          "type": "string"
+        },
+        "siteUrl": {
+          "type": "string"
+        },
+        "enableFrontmatterTags": {
+          "type": "boolean"
+        },
+        "enableHashesForFMTags": {
+          "type": "boolean"
+        },
+        "enableRandomlyColoredTags": {
+          "type": "boolean"
+        },
+        "hierarchy": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HierarchyConfig"
+          }
+        },
+        "duplicateNoteBehavior": {
+          "$ref": "#/definitions/DuplicateNoteBehavior"
+        },
+        "writeStubs": {
+          "type": "boolean"
+        },
+        "seo": {
+          "$ref": "#/definitions/SEOConfig"
+        },
+        "github": {
+          "$ref": "#/definitions/GithubConfig"
+        },
+        "enableContainers": {
+          "type": "boolean"
+        },
+        "generateChangelog": {
+          "type": "boolean"
+        },
+        "previewPort": {
+          "type": "number"
+        },
+        "segmentKey": {
+          "type": "string"
+        },
+        "cognitoUserPoolId": {
+          "type": "string"
+        },
+        "cognitoClientId": {
+          "type": "string"
+        },
+        "enablePrettyLinks": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "copyAssets",
+        "siteHierarchies",
+        "enableSiteLastModified",
+        "siteRootDir",
+        "enableFrontmatterTags",
+        "enableHashesForFMTags",
+        "writeStubs",
+        "seo",
+        "github",
+        "enableContainers",
+        "generateChangelog",
+        "enablePrettyLinks"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for all publishing related configurations"
+    },
+    "GoogleAnalyticsConfig": {
+      "type": "object",
+      "properties": {
+        "tracking": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "HierarchyConfig": {
+      "type": "object",
+      "properties": {
+        "publishByDefault": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            }
+          ]
+        },
+        "noindexByDefault": {
+          "type": "boolean"
+        },
+        "customFrontmatter": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CustomFMEntry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CustomFMEntry": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "DuplicateNoteBehavior": {
+      "$ref": "#/definitions/UseVaultBehavior"
+    },
+    "UseVaultBehavior": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/DuplicateNoteAction"
+        },
+        "payload": {
+          "$ref": "#/definitions/DuplicateNoteActionPayload"
+        }
+      },
+      "required": [
+        "action",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "DuplicateNoteAction": {
+      "type": "string",
+      "const": "useVault"
+    },
+    "DuplicateNoteActionPayload": {
+      "$ref": "#/definitions/UseVaultBehaviorPayload"
+    },
+    "UseVaultBehaviorPayload": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "vault": {
+              "$ref": "#/definitions/DVault"
+            }
+          },
+          "required": [
+            "vault"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "SEOConfig": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/SEOImage"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Namespace for SEO related site configurations."
+    },
+    "SEOImage": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "alt"
+      ],
+      "additionalProperties": false
+    },
+    "GithubConfig": {
+      "type": "object",
+      "properties": {
+        "cname": {
+          "type": "string"
+        },
+        "enableEditLink": {
+          "type": "boolean"
+        },
+        "editLinkText": {
+          "type": "string"
+        },
+        "editBranch": {
+          "type": "string"
+        },
+        "editViewMode": {
+          "$ref": "#/definitions/GithubEditViewMode"
+        },
+        "editRepository": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enableEditLink"
+      ],
+      "additionalProperties": false,
+      "description": "Namespace for publishing related github configs"
+    },
+    "GithubEditViewMode": {
+      "type": "string",
+      "enum": [
+        "tree",
+        "edit"
+      ]
+    },
     "DendronSiteConfig": {
       "type": "object",
       "properties": {
@@ -912,12 +1218,12 @@
         "config": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/HierarchyConfig"
+            "$ref": "#/definitions/LegacyHierarchyConfig"
           },
           "description": "Control publication on a per hierarchy basis"
         },
         "duplicateNoteBehavior": {
-          "$ref": "#/definitions/DuplicateNoteBehavior",
+          "$ref": "#/definitions/LegacyDuplicateNoteBehavior",
           "description": "When publishing in multi-vault scenario, how to handle duplicate notes"
         },
         "writeStubs": {
@@ -992,7 +1298,7 @@
       ],
       "additionalProperties": false
     },
-    "HierarchyConfig": {
+    "LegacyHierarchyConfig": {
       "type": "object",
       "properties": {
         "publishByDefault": {
@@ -1014,13 +1320,13 @@
         "customFrontmatter": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CustomFMEntry"
+            "$ref": "#/definitions/LegacyCustomFMEntry"
           }
         }
       },
       "additionalProperties": false
     },
-    "CustomFMEntry": {
+    "LegacyCustomFMEntry": {
       "type": "object",
       "properties": {
         "key": {
@@ -1034,17 +1340,17 @@
       ],
       "additionalProperties": false
     },
-    "DuplicateNoteBehavior": {
-      "$ref": "#/definitions/UseVaultBehavior"
+    "LegacyDuplicateNoteBehavior": {
+      "$ref": "#/definitions/LegacyUseVaultBehavior"
     },
-    "UseVaultBehavior": {
+    "LegacyUseVaultBehavior": {
       "type": "object",
       "properties": {
         "action": {
-          "$ref": "#/definitions/DuplicateNoteAction"
+          "$ref": "#/definitions/LegacyDuplicateNoteAction"
         },
         "payload": {
-          "$ref": "#/definitions/UseVaultBehaviorPayload"
+          "$ref": "#/definitions/LegacyUseVaultBehaviorPayload"
         }
       },
       "required": [
@@ -1053,11 +1359,11 @@
       ],
       "additionalProperties": false
     },
-    "DuplicateNoteAction": {
+    "LegacyDuplicateNoteAction": {
       "type": "string",
       "const": "useVault"
     },
-    "UseVaultBehaviorPayload": {
+    "LegacyUseVaultBehaviorPayload": {
       "anyOf": [
         {
           "type": "object",
@@ -1270,7 +1576,7 @@
         },
         "enableExportPodV2": {
           "type": "boolean",
-          "description": "Enable experimental Export v2 commands"
+          "description": "Enable export pod v2"
         }
       },
       "additionalProperties": false

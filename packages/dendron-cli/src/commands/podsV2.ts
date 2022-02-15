@@ -21,7 +21,7 @@ import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 export type PodCLIOpts = {
   podConfig?: URI;
   inlineConfig?: string[];
-  configValues?: {[key: string]: any};
+  configValues?: { [key: string]: any };
   vault?: string;
   fname?: string;
   hierarchy?: string;
@@ -82,7 +82,7 @@ export async function enrichPodArgs(
   const podsDir = PodUtils.getPodDir({ wsRoot });
 
   // return if no config is given
-  if(!args.podId && !args.podConfig && !args.inlineConfig){
+  if (!args.podId && !args.podConfig && !args.inlineConfig) {
     return {
       error: new DendronError({
         severity: ERROR_SEVERITY.FATAL,
@@ -168,18 +168,25 @@ export async function enrichPodArgs(
       payload = getWorkspaceProps(engine);
       break;
     case PodExportScope.Vault:
-      payload = getVaultProps(engine, args.vault);
+      payload = getVaultProps({ engine, vaultName: args.vault });
       break;
     case PodExportScope.Note:
-      payload = getNoteProps(engine, args.vault, args.fname);
+      payload = getNoteProps({
+        engine,
+        vaultName: args.vault,
+        fname: args.fname,
+      });
       break;
     case PodExportScope.Hierarchy:
-      payload = getHierarchyProps(engine, args.hierarchy);
+      payload = getHierarchyProps({
+        engine,
+        hierarchy: args.hierarchy,
+        vaultName: args.vault,
+      });
       break;
     default:
       throw new DendronError({
-        message:
-          "the CLI doesn't support the provided export scope. please run this export pod using the Dendon plugin",
+        message: `the CLI doesn't support the provided export scope: ${configValues.exportScope}. please run this export pod using the Dendon plugin`,
       });
   }
   return {
@@ -196,50 +203,77 @@ const getWorkspaceProps = (engine: DEngineClient): NoteProps[] => {
   return Object.values(engine.notes).filter((notes) => notes.stub !== true);
 };
 
-const getVaultProps = (
-  engine: DEngineClient,
-  vaultName?: string
-): NoteProps[] => {
-  if (!vaultName) {
-    throw new DendronError({ message: "Please provide vault name in --vault arg" });
-  }
-  const vault = VaultUtils.getVaultByNameOrThrow({
-    vaults: engine.vaults,
-    vname: vaultName,
-  });
+const getVaultProps = (opts: {
+  engine: DEngineClient;
+  vaultName?: string;
+}): NoteProps[] => {
+  const { engine, vaultName } = opts;
+  const vault = checkVaultArgs({ engine, vaultName });
   return Object.values(engine.notes).filter(
     (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)
   );
 };
 
-const getNoteProps = (
-  engine: DEngineClient,
-  vaultName?: string,
-  fname?: string
-): NoteProps[] => {
-  if (!vaultName) {
-    throw new DendronError({ message: "Please provide vault name in --vault arg" });
-  }
+const getNoteProps = (opts: {
+  engine: DEngineClient;
+  vaultName?: string;
+  fname?: string;
+}): NoteProps[] => {
+  const { engine, fname, vaultName } = opts;
+  const vault = checkVaultArgs({ engine, vaultName });
+
   if (!fname) {
-    throw new DendronError({ message: "Please provide fname of note in --fname arg" });
+    throw new DendronError({
+      message: "Please provide fname of note in --fname arg",
+    });
   }
-  const vault = VaultUtils.getVaultByNameOrThrow({
-    vaults: engine.vaults,
-    vname: vaultName,
-  });
   const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
-  if (!note) throw new DendronError({ message: `Cannot find note with fname ${fname} in vault ${vault}` });
+  if (!note)
+    throw new DendronError({
+      message: `Cannot find note with fname ${fname} in vault ${vault}`,
+    });
   return [note];
 };
 
-const getHierarchyProps = (
-  engine: DEngineClient,
-  hierarchy?: string
-): NoteProps[] => {
+// returns notes within a hierarchy (for a specefic vault)
+const getHierarchyProps = (opts: {
+  engine: DEngineClient;
+  hierarchy?: string;
+  vaultName?: string;
+}): NoteProps[] => {
+  const { engine, hierarchy, vaultName } = opts;
   if (!hierarchy) {
-    throw new DendronError({ message: "Please provide hierarchy in --hierarchy arg" });
+    throw new DendronError({
+      message: "Please provide hierarchy in --hierarchy arg",
+    });
   }
+  const vault = checkVaultArgs({ engine, vaultName });
   return Object.values(engine.notes).filter(
-    (value) => value.fname.startsWith(hierarchy) && value.stub !== true
+    (value) =>
+      value.fname.startsWith(hierarchy) &&
+      value.stub !== true &&
+      VaultUtils.isEqualV2(value.vault, vault)
   );
+};
+
+/**
+ * This method check --vault argument. For a single vault workspace, if --vault not provided,
+ * returns the vault from workspace.
+ * For multi-vault workspace, if no --vault is given, returns an error, else returns selected vault
+ */
+const checkVaultArgs = (opts: {
+  engine: DEngineClient;
+  vaultName?: string;
+}) => {
+  const { engine, vaultName } = opts;
+  const { vaults } = engine;
+  if (_.size(vaults) > 1 && !vaultName) {
+    throw new DendronError({
+      message: "Please provide vault name in --vault arg",
+    });
+  } else {
+    return vaultName
+      ? VaultUtils.getVaultByNameOrThrow({ vaults: vaults, vname: vaultName })
+      : vaults[0];
+  }
 };

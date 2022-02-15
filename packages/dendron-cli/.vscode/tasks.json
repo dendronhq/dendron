@@ -68,7 +68,7 @@
     {
       "label": "markdown-export-v2",
       "type": "shell",
-      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=destination,Value=clipboard Key=wikiLinkToURL,Value=true --vault vault --fname=dendron.alternatives --podId test-md --wsRoot ${workspaceFolder}/../../test-workspace",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=destination,Value=clipboard Key=wikiLinkToURL,Value=true --vault vault --fname dendron.alternatives --podId test-md --wsRoot ${workspaceFolder}/../../test-workspace",
       "problemMatcher": []
     },
     {

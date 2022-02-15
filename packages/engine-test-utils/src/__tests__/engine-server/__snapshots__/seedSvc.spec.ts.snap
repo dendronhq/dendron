@@ -5,30 +5,9 @@ exports[`add ok: exists 1`] = `".git .gitignore dendron.code-workspace dendron.y
 exports[`add ok: exists 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: exists 3`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault1
-            - vault2
-            - vaultThree
-            - dendron.foo
 commands:
     lookup:
         note:
@@ -110,6 +89,39 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
 "
 `;
 
@@ -141,30 +153,9 @@ exports[`add ok: seed with site 1`] = `".git .gitignore dendron.code-workspace d
 exports[`add ok: seed with site 2`] = `"dendron.code-workspace dendron.yml hooks seeds vault1 vault2 vault3"`;
 
 exports[`add ok: seed with site 3`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault1
-            - vault2
-            - vaultThree
-            - dendron.foo
 commands:
     lookup:
         note:
@@ -249,6 +240,39 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
 "
 `;
 
@@ -278,23 +302,9 @@ exports[`add ok: seed with site 4`] = `
 exports[`init convert workspace error: no vaults 1`] = `"dendron.code-workspace dendron.yml hooks"`;
 
 exports[`init convert workspace error: no vaults 2`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
 commands:
     lookup:
         note:
@@ -363,33 +373,41 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
 "
 `;
 
 exports[`init convert workspace ok: diff root name 1`] = `"dendron.code-workspace dendron.yml fooVault hooks seed.yml"`;
 
 exports[`init convert workspace ok: diff root name 2`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - fooVault
 commands:
     lookup:
         note:
@@ -460,6 +478,36 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - fooVault
 "
 `;
 
@@ -479,27 +527,9 @@ repository:
 exports[`init create workspace basic 1`] = `".gitignore dendron.code-workspace dendron.yml hooks seed.yml vault"`;
 
 exports[`init create workspace basic 2`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault
 commands:
     lookup:
         note:
@@ -570,6 +600,36 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault
 "
 `;
 
@@ -591,30 +651,9 @@ exports[`remove ok: remove initialized seed 1`] = `""`;
 exports[`remove ok: remove initialized seed 2`] = `"dendron.foo"`;
 
 exports[`remove ok: remove initialized seed 3`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault1
-            - vault2
-            - vaultThree
-            - dendron.foo
 commands:
     lookup:
         note:
@@ -691,34 +730,46 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
 "
 `;
 
 exports[`remove ok: remove non-initialized seed 1`] = `
-"version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: true
+"version: 5
 dev:
     enablePreviewV2: true
-site:
-    copyAssets: true
-    siteHierarchies:
-        - root
-    siteRootDir: docs
-    usePrettyRefs: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
-    duplicateNoteBehavior:
-        action: useVault
-        payload:
-            - vault1
-            - vault2
-            - vaultThree
-            - dendron.foo
 commands:
     lookup:
         note:
@@ -795,5 +846,38 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: true
+    copyAssets: true
+    siteHierarchies:
+        - root
+    writeStubs: false
+    enableContainers: false
+    generateChangelog: false
+    siteRootDir: docs
+    seo:
+        title: Dendron
+        description: Personal Knowledge Space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enableSiteLastModified: true
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    enablePrettyLinks: true
+    duplicateNoteBehavior:
+        action: useVault
+        payload:
+            - vault1
+            - vault2
+            - vaultThree
+            - dendron.foo
 "
 `;

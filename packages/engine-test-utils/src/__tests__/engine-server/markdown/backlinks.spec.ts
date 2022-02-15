@@ -13,6 +13,7 @@ import {
   MDUtilsV4,
 } from "@dendronhq/engine-server";
 import { TestConfigUtils, runEngineTestV5 } from "../../..";
+import _ from "lodash";
 
 // runs all the processes
 function proc(
@@ -56,7 +57,26 @@ describe("backlinks", () => {
           })
         ).toBeTruthy();
       },
-      { expect, preSetupHook: ENGINE_HOOKS.setupLinks }
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const { wsRoot } = opts;
+          await ENGINE_HOOKS.setupLinks(opts);
+          TestConfigUtils.withConfig(
+            (config) => {
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
+            },
+            {
+              wsRoot,
+            }
+          );
+        },
+      }
     );
   });
 
@@ -87,13 +107,26 @@ describe("backlinks", () => {
           await ENGINE_HOOKS.setupLinks(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              config.site = {
-                siteHierarchies: ["alpha"],
-                siteNotesDir: "docs",
-                siteUrl: "https://foo.com",
-                siteRootDir,
-              };
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setSiteProp(v4DefaultConfig, "siteHierarchies", [
+                "alpha",
+              ]);
+              ConfigUtils.setSiteProp(v4DefaultConfig, "siteNotesDir", "docs");
+              ConfigUtils.setSiteProp(
+                v4DefaultConfig,
+                "siteUrl",
+                "https://foo.com"
+              );
+              ConfigUtils.setSiteProp(
+                v4DefaultConfig,
+                "siteRootDir",
+                siteRootDir
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -151,6 +184,19 @@ describe("backlinks", () => {
             wsRoot,
             body: "[[one]]",
           });
+          TestConfigUtils.withConfig(
+            (config) => {
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
+            },
+            {
+              wsRoot,
+            }
+          );
         },
       }
     );
@@ -172,8 +218,8 @@ describe("backlinks", () => {
           await AssertUtils.assertInString({
             body: resp.contents as string,
             nomatch: [
-              `<a href="secret1.html">Secret1 (vault2)</a>`,
-              `<a href="secret2.html">Secret2 (vault2)</a>`,
+              `<a href="secret1">Secret1 (vault2)</a>`,
+              `<a href="secret2">Secret2 (vault2)</a>`,
             ],
             match: [`<a href="not-secret.html">Not Secret (vaultThree)</a>`],
           })
@@ -188,7 +234,9 @@ describe("backlinks", () => {
               const vaults = ConfigUtils.getVaults(config);
               const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
               bvault!.visibility = DVaultVisibility.PRIVATE;
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(v4DefaultConfig, vaults);
+              return v4DefaultConfig;
             },
             { wsRoot: opts.wsRoot }
           );
@@ -263,6 +311,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
+            TestConfigUtils.withConfig(
+              (config) => {
+                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                ConfigUtils.setVaults(
+                  v4DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return v4DefaultConfig;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -318,6 +377,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
+            TestConfigUtils.withConfig(
+              (config) => {
+                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                ConfigUtils.setVaults(
+                  v4DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return v4DefaultConfig;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -341,7 +411,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [`<a href="one.html">One (vault1)</a>`],
+            match: [`<a href="one">One (vault1)</a>`],
           })
         ).toBeTruthy();
       },

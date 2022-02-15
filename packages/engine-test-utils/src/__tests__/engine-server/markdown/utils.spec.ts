@@ -254,7 +254,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
             // link by id
             `<a href="foo-id"`,
             // html quoted
-            `<p><a href="bar.html">Bar</a></p>`,
+            `<p><a href="bar">Bar</a></p>`,
           ],
         })
       ).toBeTruthy();
@@ -283,7 +283,7 @@ const NOTE_W_LINK_AND_SPACE = createProcTests({
       expect(
         await AssertUtils.assertInString({
           body: respProcess,
-          match: [`<a href="foo bar.html"`],
+          match: [`<a href="foo bar"`],
         })
       ).toBeTruthy();
     },
@@ -350,7 +350,7 @@ const WITH_TITLE_FOR_LINK = createProcTests({
     },
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkVFile(respProcess, `<p><a href="foo.ch1.html">Ch1</a></p>`);
+      await checkVFile(respProcess, `<p><a href="foo.ch1">Ch1</a></p>`);
     },
   },
   preSetupHook: async (opts) => {

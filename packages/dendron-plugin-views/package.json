@@ -63,7 +63,7 @@
     "lodash": "^4.17.21",
     "mermaid": "^8.13.3",
     "mini-css-extract-plugin": "0.11.3",
-    "node-sass": "^6.0.1",
+    "node-sass": "^7.0.0",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "pnp-webpack-plugin": "1.6.4",
     "postcss-flexbugs-fixes": "4.2.1",

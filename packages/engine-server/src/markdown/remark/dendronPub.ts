@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
   isNotUndefined,
@@ -112,8 +113,9 @@ class ImageNodeHandler extends DendronNodeHander {
   ): { node: Image; nextAction?: DendronUnifiedHandlerNextAction } {
     const { config } = MDUtilsV5.getProcData(proc);
     //handle assetPrefix
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
     const assetsPrefix = MDUtilsV5.isV5Active(proc)
-      ? config?.site.assetsPrefix
+      ? publishingConfig.assetsPrefix
       : cOpts?.assetsPrefix;
     const imageNode = node;
     if (assetsPrefix) {
@@ -233,9 +235,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             vault,
             engine,
           });
+          const enableRandomlyColoredTagsConfig =
+            ConfigUtils.getEnableRandomlyColoredTags(config);
           if (
             colorType === "configured" ||
-            (!config.site.noRandomlyColoredTags && !opts?.noRandomlyColoredTags)
+            (enableRandomlyColoredTagsConfig && !opts?.noRandomlyColoredTags)
           ) {
             color = maybeColor;
           }
@@ -297,7 +301,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = config.site.usePrettyLinks;
+        const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
         const maybeFileExtension =
           _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
         // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";

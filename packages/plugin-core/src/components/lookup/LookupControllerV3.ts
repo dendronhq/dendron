@@ -13,7 +13,6 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import {
   ButtonCategory,
   getButtonCategory,
@@ -47,6 +46,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   public fuzzThreshold: number;
   public _provider?: ILookupProviderV3;
   public _view?: LookupView;
+  public _title?: string;
 
   static create(opts?: LookupControllerV3CreateOpts) {
     const { vaults } = ExtensionProvider.getDWorkspace();
@@ -75,6 +75,8 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       nodeType: opts?.nodeType as DNodeType,
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
+      disableLookupView: opts?.disableLookupView,
+      title: opts?.title,
     });
   }
 
@@ -82,6 +84,8 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     nodeType: DNodeType;
     buttons: DendronBtn[];
     fuzzThreshold?: number;
+    disableLookupView?: boolean;
+    title?: string;
   }) {
     const ctx = "LookupControllerV3:new";
     Logger.info({ ctx, msg: "enter" });
@@ -93,14 +97,18 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     };
     this.fuzzThreshold = opts.fuzzThreshold || 0.6;
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
+    this._title = opts.title;
 
-    // wire up lookup controller to lookup view
-    // TODO: swap out `getExtension` to use a static provider
-    // once treeview related interface has been migrated to IDendronExtension
-    this._view = getExtension().getTreeView(
-      DendronTreeViewKey.LOOKUP_VIEW
-    ) as LookupView;
-    this._view.registerController(this);
+    const disableLookupView = opts.disableLookupView;
+    if (!disableLookupView) {
+      // wire up lookup controller to lookup view
+      // TODO: swap out `getExtension` to use a static provider
+      // once treeview related interface has been migrated to IDendronExtension
+      this._view = ExtensionProvider.getTreeView(
+        DendronTreeViewKey.LOOKUP_VIEW
+      ) as LookupView;
+      this._view.registerController(this);
+    }
   }
 
   get quickpick(): DendronQuickPickerV2 {
@@ -127,6 +135,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     return this._provider;
   }
 
+  get view() {
+    return this._view;
+  }
+
   createCancelSource() {
     const tokenSource = new CancellationTokenSource();
     if (this._cancelTokenSource) {
@@ -147,10 +159,12 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     Logger.info({ ctx, msg: "enter" });
     const { provider, title, selectAll } = _.defaults(opts, {
       nonInteractive: false,
-      title: [
-        `Lookup (${this.nodeType})`,
-        `- version: ${VersionProvider.version()}`,
-      ].join(" "),
+      title:
+        this._title ||
+        [
+          `Lookup (${this.nodeType})`,
+          `- version: ${VersionProvider.version()}`,
+        ].join(" "),
       selectAll: false,
     });
     this._provider = provider;
@@ -199,11 +213,18 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     });
     Logger.info({ ctx, msg: "onUpdatePickerItems:post" });
     if (!nonInteractive) {
-      provider.provide(this);
+      provider.provide({
+        quickpick,
+        token: cancelToken,
+        fuzzThreshold: this.fuzzThreshold,
+      });
       quickpick.show();
     } else {
       quickpick.selectedItems = quickpick.items;
-      await provider.onDidAccept({ quickpick, lc: this })();
+      await provider.onDidAccept({
+        quickpick,
+        cancellationToken: cancelToken,
+      })();
     }
     Logger.info({ ctx, msg: "exit" });
     return quickpick;

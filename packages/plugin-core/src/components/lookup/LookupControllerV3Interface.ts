@@ -3,6 +3,7 @@ import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
 import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DNodeType } from "@dendronhq/common-all";
+import { LookupView } from "../../views/LookupView";
 
 export type CreateQuickPickOpts = {
   title?: string;
@@ -50,6 +51,8 @@ export interface ILookupControllerV3 {
   nodeType: DNodeType;
 
   readonly provider: ILookupProviderV3;
+
+  readonly view: LookupView | undefined;
 
   /**
    * Wire up quickpick and initialize buttons
@@ -115,4 +118,12 @@ export type LookupControllerV3CreateOpts = {
    * 1.0 = match anything
    */
   fuzzThreshold?: number;
+  /**
+   * disable lookup view
+   */
+  disableLookupView?: boolean;
+  /**
+   * optional custom title of quickpic
+   */
+  title?: string;
 };

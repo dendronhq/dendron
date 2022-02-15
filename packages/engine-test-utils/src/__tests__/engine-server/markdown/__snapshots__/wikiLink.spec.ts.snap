@@ -3,12 +3,12 @@
 exports[`wikiLinks compile "HTML: WITH_ALIAS" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">bar doesn't foo</a></p>
+<p><a href=\\"foo\\">bar doesn't foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -20,12 +20,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ALIAS_APOSTROPHE" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"kb.note.20211011124050.html\\">Coulomb's Constant</a></p>
+<p><a href=\\"kb.note.20211011124050\\">Coulomb's Constant</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -37,12 +37,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ALIAS_HASH" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">#bar</a></p>
+<p><a href=\\"foo\\">#bar</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -54,12 +54,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html#one\\">Foo</a></p>
+<p><a href=\\"foo#one\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -71,12 +71,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_BLOCK_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html#^block\\">Foo</a></p>
+<p><a href=\\"foo#^block\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -88,12 +88,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">Foo</a></p>
+<p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -105,11 +105,11 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ID_AS_LINK" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo-id.html\\">Foo</a></p>
+<p><a href=\\"foo-id\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"foo-id.html\\">Foo</a></li>
+<li><a href=\\"foo-id\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -121,12 +121,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"root.html#^block\\">Root</a></p>
+<p><a href=\\"root#^block\\">Root</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -138,7 +138,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo-2.html\\">Foo</a></p>",
+<p><a href=\\"foo-2\\">Foo</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -149,12 +149,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">Foo</a></p>
+<p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -166,12 +166,12 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">bar</a></p>
+<p><a href=\\"foo\\">bar</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -183,12 +183,12 @@ VFile {
 exports[`wikiLinks compile "HTML: regular" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"foo.html\\">Foo</a></p>
+<p><a href=\\"foo\\">Foo</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

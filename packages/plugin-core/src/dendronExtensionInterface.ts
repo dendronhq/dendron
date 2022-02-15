@@ -1,4 +1,5 @@
 import {
+  DendronTreeViewKey,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
@@ -15,6 +16,7 @@ import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 export type DendronWorkspaceSettings = Partial<{
@@ -56,6 +58,7 @@ export type DendronWorkspaceSettings = Partial<{
 export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;
+  workspaceWatcher?: WorkspaceWatcher;
   serverWatcher?: vscode.FileSystemWatcher;
   fileWatcher?: FileWatcher;
   type: WorkspaceType;
@@ -69,6 +72,11 @@ export interface IDendronExtension {
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
+  activateWatchers(): Promise<void>;
+  /**
+   * This will deactivate the entire Dendron Extension. Takes care of disposing of all resources that Dendron has created
+   */
+  deactivate(): Promise<void>;
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;
@@ -98,4 +106,22 @@ export interface IDendronExtension {
   addDisposable(disposable: vscode.Disposable): void;
 
   getEngine(): IEngineAPIService;
+
+  /**
+   * Checks if a Dendron workspace is currently active.
+   */
+  isActive(): boolean;
+
+  /**
+   * Get Global Workspace configuration
+   */
+  getWorkspaceConfig(
+    section?: string | undefined
+  ): vscode.WorkspaceConfiguration;
+
+  /**
+   * @deprecated Temporarily exposed to resolve circular dependencies
+   * Moving forward with the eventing pattern, we shouldn't need to expose any tree views anymore
+   */
+  getTreeView(key: DendronTreeViewKey): vscode.WebviewViewProvider;
 }

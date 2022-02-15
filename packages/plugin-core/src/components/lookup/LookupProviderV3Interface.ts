@@ -1,21 +1,20 @@
 import { DendronQuickPickerV2 } from "./types";
-import { CancellationToken } from "vscode";
+import { CancellationToken, CancellationTokenSource } from "vscode";
 import {
   DNodePropsQuickInputV2,
   NoteQuickInput,
   RespV2,
   SchemaQuickInput,
 } from "@dendronhq/common-all";
-import { ILookupControllerV3 } from "./LookupControllerV3Interface";
 
 export type ILookupProviderV3 = {
   id: string;
-  provide: (lc: ILookupControllerV3) => Promise<void>;
+  provide: (opts: ProvideOpts) => Promise<void>;
   onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
   registerOnAcceptHook: (hook: OnAcceptHook) => void;
   onDidAccept(opts: {
     quickpick: DendronQuickPickerV2;
-    lc: ILookupControllerV3;
+    cancellationToken: CancellationTokenSource;
   }): any;
 };
 
@@ -26,6 +25,12 @@ export interface INoteLookupProviderFactory {
 export interface ISchemaLookupProviderFactory {
   create(id: string, opts: ILookupProviderOptsV3): ILookupProviderV3;
 }
+
+export type ProvideOpts = {
+  quickpick: DendronQuickPickerV2;
+  token: CancellationTokenSource;
+  fuzzThreshold: number;
+};
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;

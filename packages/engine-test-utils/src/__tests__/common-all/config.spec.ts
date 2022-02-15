@@ -4,7 +4,6 @@ import {
   genDefaultJournalConfig,
   IntermediateDendronConfig,
   NoteUtils,
-  StrictConfigV4,
 } from "@dendronhq/common-all";
 
 describe("WHEN getConfig from note", () => {
@@ -113,9 +112,25 @@ describe("ConfigUtils", () => {
 
   describe("getProps", () => {
     describe("GIVEN v4 config", () => {
-      let config: Partial<StrictConfigV4>;
+      let config: Partial<IntermediateDendronConfig>;
       beforeEach(() => {
-        config = ConfigUtils.genDefaultConfig() as Partial<StrictConfigV4>;
+        config = ConfigUtils.genDefaultConfig();
+        const site = {
+          copyAssets: true,
+          siteHierarchies: ["root"],
+          siteRootDir: "docs",
+          usePrettyRefs: true,
+          title: "Dendron",
+          description: "Personal knowledge space",
+          siteLastModified: true,
+          gh_edit_branch: "main",
+        };
+        ConfigUtils.setProp(config as IntermediateDendronConfig, "version", 4);
+        ConfigUtils.setProp(config as IntermediateDendronConfig, "site", site);
+        ConfigUtils.unsetProp(
+          config as IntermediateDendronConfig,
+          "publishing"
+        );
       });
 
       test("WHEN given a v4 path AND value exists, THEN it returns the correct value", () => {

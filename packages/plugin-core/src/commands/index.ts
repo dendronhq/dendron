@@ -39,8 +39,8 @@ import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
-import { LookupJournalNoteCommand } from "./LookupJournalNoteCommand";
-import { LookupScratchNoteCommand } from "./LookupScratchNoteCommand";
+import { CreateJournalNoteCommand } from "./CreateJournalNoteCommand";
+import { CreateScratchNoteCommand } from "./CreateScratchNoteCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteFileCommand } from "./PasteFile";
@@ -111,8 +111,8 @@ const ALL_COMMANDS = [
   InsertNoteIndexCommand,
   NoteLookupCommand,
   NoteLookupAutoCompleteCommand,
-  LookupJournalNoteCommand,
-  LookupScratchNoteCommand,
+  CreateJournalNoteCommand,
+  CreateScratchNoteCommand,
   SchemaLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,

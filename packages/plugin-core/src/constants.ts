@@ -15,6 +15,7 @@ export enum DendronContext {
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
+  SHOULD_SHOW_LOOKUP_VIEW = "dendron:shouldShowLookupView",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
 }
@@ -62,7 +63,7 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE}`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
     where: "explorer",
   },
   {
@@ -396,9 +397,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
   },
-  LOOKUP_JOURNAL: {
-    key: "dendron.lookupJournalNote",
-    title: `${CMD_PREFIX} Lookup Journal Note`,
+  CREATE_JOURNAL: {
+    key: "dendron.createJournalNote",
+    title: `${CMD_PREFIX} Create Journal Note`,
     keybindings: {
       key: "ctrl+shift+j",
       mac: "cmd+shift+j",
@@ -409,9 +410,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  LOOKUP_SCRATCH: {
-    key: "dendron.lookupScratchNote",
-    title: `${CMD_PREFIX} Lookup Scratch Note`,
+  CREATE_SCRATCH: {
+    key: "dendron.createScratchNote",
+    title: `${CMD_PREFIX} Create Scratch Note`,
     keybindings: {
       key: "ctrl+shift+s",
       mac: "cmd+shift+s",

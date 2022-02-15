@@ -20,12 +20,12 @@ describe("ConfigUtils", () => {
 
     describe("WHEN logo is a URL", () => {
       test("THEN logo is returned identically.", () => {
-        const logo = "https://example.com/image.png";
+        const logoPath = "https://example.com/image.png";
         const config = getConfig({
-          site: { logo },
+          publishing: { logoPath },
         });
         const siteUrl = ConfigUtils.getSiteLogoUrl(config);
-        expect(siteUrl).toEqual(logo);
+        expect(siteUrl).toEqual(logoPath);
       });
     });
 
@@ -33,7 +33,7 @@ describe("ConfigUtils", () => {
       describe("AND assetsPrefix is undefined", () => {
         test("THEN logo is a path to the asset", () => {
           const config = getConfig({
-            site: { logo: "vault/assets/images/logo.png" },
+            publishing: { logoPath: "vault/assets/images/logo.png" },
           });
           const siteUrl = ConfigUtils.getSiteLogoUrl(config);
           expect(siteUrl).toEqual("/assets/logo.png");
@@ -43,8 +43,8 @@ describe("ConfigUtils", () => {
       describe("AND assetsPrefix is defined", () => {
         test("THEN logo respects the prefix", () => {
           const config = getConfig({
-            site: {
-              logo: "vault/assets/images/logo.png",
+            publishing: {
+              logoPath: "vault/assets/images/logo.png",
               assetsPrefix: "/site",
             },
           });

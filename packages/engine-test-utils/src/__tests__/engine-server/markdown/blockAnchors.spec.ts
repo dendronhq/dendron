@@ -1,3 +1,4 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   BlockAnchor,
@@ -10,6 +11,7 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { TestConfigUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { TestUnifiedUtils } from "../../../utils";
@@ -32,7 +34,22 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
       await runEngineTestV5(testCase.testFunc, {
         expect,
-        preSetupHook: testCase.preSetupHook,
+        preSetupHook: async (opts) => {
+          await testCase.preSetupHook(opts);
+          TestConfigUtils.withConfig(
+            (config) => {
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
+            },
+            {
+              wsRoot: opts.wsRoot,
+            }
+          );
+        },
       });
     });
   });

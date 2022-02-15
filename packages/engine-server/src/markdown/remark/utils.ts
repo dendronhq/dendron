@@ -1,6 +1,7 @@
 import {
   ALIAS_NAME,
   assertUnreachable,
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -1147,7 +1148,9 @@ export class RemarkUtils {
             wsRoot: engine.wsRoot,
           });
           if (existingNote) {
-            const urlRoot = dendronConfig.site?.siteUrl || "";
+            const publishingConfig =
+              ConfigUtils.getPublishingConfig(dendronConfig);
+            const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
             wikiLinks[i]["value"] = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,

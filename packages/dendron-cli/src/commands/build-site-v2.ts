@@ -1,4 +1,4 @@
-import { DEngineClient, Stage } from "@dendronhq/common-all";
+import { ConfigUtils, DEngineClient, Stage } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
 import { generateChangelog, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -149,13 +149,15 @@ export class BuildSiteV2CLICommand extends CLICommand<
     }
     this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);
-    if (engine.config.site.generateChangelog) {
+    const config = engine.config;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    if (publishingConfig.generateChangelog) {
       await generateChangelog(opts.engine);
     }
     this.L.info("running compile");
     await compile(
       { cwd },
-      { serve: opts.serve, port: engine.config.site.previewPort || 8080 }
+      { serve: opts.serve, port: publishingConfig.previewPort || 8080 }
     );
     this.L.info("running post-compile");
     await Promise.all([buildStyles(), buildSearch()]);

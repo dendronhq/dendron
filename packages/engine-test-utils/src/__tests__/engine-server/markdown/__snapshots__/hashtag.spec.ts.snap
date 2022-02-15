@@ -25,11 +25,11 @@ VFile {
 exports[`hashtag rendering colors overrides color cascading from parent 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #00FF11;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #00FF11;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"tags\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -38,14 +38,14 @@ VFile {
 }
 `;
 
-exports[`hashtag rendering colors when configured with noRandomlyGeneratedColors, only uses explicit colors 1`] = `
+exports[`hashtag rendering colors when enableRandomlyGeneratedColors is false, only uses explicit colors 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color.html\\">#color</a> <a href=\\"tags.uncolored.html\\">#uncolored</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color\\">#color</a> <a href=\\"tags.uncolored\\">#uncolored</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"tags\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -57,11 +57,11 @@ VFile {
 exports[`hashtag rendering colors with color 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color.html\\">#color</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color\\">#color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"tags\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -73,11 +73,11 @@ VFile {
 exports[`hashtag rendering colors with color cascading from parent, self exists 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"tags\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -89,11 +89,11 @@ VFile {
 exports[`hashtag rendering colors with color cascading from parent, self missing 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color.html\\">#parent.color</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"tags.html\\">Tags</a></li>
+<li><a href=\\"tags\\">Tags</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -109,8 +109,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -126,8 +126,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -139,12 +139,12 @@ VFile {
 exports[`hashtag rendering compile "HTML: simple" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"tags.my-hash.tag0.html\\">#my-hash.tag0</a></p>
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"tags.my-hash.tag0\\">#my-hash.tag0</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

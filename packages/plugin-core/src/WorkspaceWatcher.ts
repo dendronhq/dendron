@@ -36,7 +36,6 @@ import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
-import { DendronExtension, getVaultFromUri } from "./workspace";
 
 const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
@@ -83,13 +82,16 @@ export class WorkspaceWatcher {
   >;
   private _schemaSyncService: ISchemaSyncService;
   private _extension: IDendronExtension;
+  private _windowWatcher: WindowWatcher;
 
   constructor({
     schemaSyncService,
     extension,
+    windowWatcher,
   }: {
     schemaSyncService: ISchemaSyncService;
     extension: IDendronExtension;
+    windowWatcher: WindowWatcher;
   }) {
     this._extension = extension;
     this._schemaSyncService = schemaSyncService;
@@ -98,12 +100,19 @@ export class WorkspaceWatcher {
       this.quickOnDidChangeTextDocument,
       50
     );
+    this._extension = extension;
+    this._windowWatcher = windowWatcher;
+  }
+
+  // eslint-disable-next-line camelcase
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
+    return {
+      onFirstOpen: _.bind(this.onFirstOpen, this),
+    };
   }
 
   activate(context: ExtensionContext) {
-    const extension = this._extension;
-
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onWillSaveTextDocument(
         this.onWillSaveTextDocument,
         this,
@@ -111,7 +120,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidChangeTextDocument(
         this._quickDebouncedOnDidChangeTextDocument,
         this,
@@ -119,7 +128,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidSaveTextDocument(
         this.onDidSaveTextDocument,
         this,
@@ -129,7 +138,7 @@ export class WorkspaceWatcher {
 
     // NOTE: currently, this is only used for logging purposes
     if (Logger.isDebug()) {
-      extension.addDisposable(
+      this._extension.addDisposable(
         workspace.onDidOpenTextDocument(
           this.onDidOpenTextDocument,
           this,
@@ -138,7 +147,7 @@ export class WorkspaceWatcher {
       );
     }
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onWillRenameFiles(
         this.onWillRenameFiles,
         this,
@@ -146,7 +155,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       workspace.onDidRenameFiles(
         this.onDidRenameFiles,
         this,
@@ -154,7 +163,7 @@ export class WorkspaceWatcher {
       )
     );
 
-    extension.addDisposable(
+    this._extension.addDisposable(
       window.onDidChangeActiveTextEditor(
         sentryReportingCallback((editor: TextEditor | undefined) => {
           if (
@@ -208,7 +217,7 @@ export class WorkspaceWatcher {
       Logger.debug({ ...ctx, state: "trigger change handlers" });
       const activeEditor = window.activeTextEditor;
       if (activeEditor?.document.uri.fsPath === event.document.uri.fsPath) {
-        WindowWatcher.triggerUpdateDecorations(activeEditor);
+        this._windowWatcher.triggerUpdateDecorations(activeEditor);
       }
       Logger.debug({ ...ctx, state: "exit" });
       return;
@@ -231,6 +240,11 @@ export class WorkspaceWatcher {
     }
   }
 
+  /**
+   * If note is in workspace, execute {@link onWillSaveNote}
+   * @param event
+   * @returns
+   */
   async onWillSaveTextDocument(
     event: TextDocumentWillSaveEvent
   ): Promise<{ changes: TextEdit[] }> {
@@ -271,16 +285,23 @@ export class WorkspaceWatcher {
     }
   }
 
+  /**
+   * When saving a note, do some book keeping
+   * - update the `updated` time in frontmatter
+   * - update the note metadata in the engine
+   * @param event
+   * @returns
+   */
   private onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
-    const engine = this._extension.getDWorkspace().engine;
+    const engine = this._extension.getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
     const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      vault: getVaultFromUri(uri),
+      vault: this._extension.wsUtils.getVaultFromUri(uri),
       engine,
     }) as NoteProps;
 
@@ -293,6 +314,7 @@ export class WorkspaceWatcher {
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
 
+    // update the `updated` time in frontmatter
     if (match && parseInt(match[1], 10) !== note.updated) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = event.document.positionAt(match.index);
@@ -300,6 +322,8 @@ export class WorkspaceWatcher {
       changes = [
         TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
       ];
+
+      // update the note in engine
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
@@ -341,7 +365,7 @@ export class WorkspaceWatcher {
    */
   onWillRenameFiles(args: FileWillRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this._extension.isActive()) {
       return;
     }
     try {
@@ -388,7 +412,7 @@ export class WorkspaceWatcher {
    */
   async onDidRenameFiles(args: FileRenameEvent) {
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!this._extension.isActive()) {
       return;
     }
     try {
@@ -421,12 +445,25 @@ export class WorkspaceWatcher {
     }
   }
 
+  /**
+   * Dendron will perform changes like moving the cursor when first opening a Dendron note
+   * @returns boolean : returns `true` if Dendron made changes during `onFirstOpen` and `false` otherwise
+   */
   private async onFirstOpen(editor: TextEditor) {
     Logger.info({
       ctx: context("onFirstOpen"),
       msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
+    const { vaults, wsRoot } = this._extension.getDWorkspace();
+    const fpath = editor.document.uri.fsPath;
+
+    // don't apply actions to non-dendron notes
+    // NOTE: in the future if we add `onFirstOpen` actions to non-dendron notes, this logic will need to be updated
+    if (!(await WorkspaceUtils.isDendronNote({ wsRoot, vaults, fpath }))) {
+      return false;
+    }
+
     WorkspaceWatcher.moveCursorPastFrontmatter(editor);
     const config = this._extension.getDWorkspace().config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
@@ -437,6 +474,7 @@ export class WorkspaceWatcher {
       msg: "exit",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
+    return true;
   }
 
   static moveCursorPastFrontmatter(editor: TextEditor) {

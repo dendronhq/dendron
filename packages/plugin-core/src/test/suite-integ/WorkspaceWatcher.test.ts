@@ -6,12 +6,13 @@ import {
   WorkspaceOpts,
   Wrap,
 } from "@dendronhq/common-all";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, FileTestUtils } from "@dendronhq/common-test-utils";
 import { describe, before, beforeEach, afterEach } from "mocha";
 import sinon from "sinon";
 import path from "path";
 import * as vscode from "vscode";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
+import { WindowWatcher } from "../../windowWatcher";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -25,8 +26,11 @@ import { getDWorkspace } from "../../workspace";
 import { Position } from "vscode";
 import * as _ from "lodash";
 import { WSUtils } from "../../WSUtils";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { MockPreviewProxy } from "../MockPreviewProxy";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -42,6 +46,11 @@ const setupBasic = async (opts: WorkspaceOpts) => {
     fname: "foo.one",
     body: `[[oldfile]]`,
   });
+};
+
+// eslint-disable-next-line camelcase
+const UNSAFE_getWorkspaceWatcherPropsForTesting = (ext: IDendronExtension) => {
+  return ext.workspaceWatcher!.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
 };
 
 const doesSchemaExist = (schemaId: string) => {
@@ -112,10 +121,19 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
+
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
-            extension: ExtensionProvider.getExtension(),
+            extension,
+            windowWatcher,
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
@@ -152,10 +170,18 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         ctx,
         postSetupHook: setupBasic,
         onInit: async ({ vaults, wsRoot, engine }) => {
+          const previewProxy = new MockPreviewProxy();
+          const extension = ExtensionProvider.getExtension();
+
+          const windowWatcher = new WindowWatcher({
+            extension,
+            previewProxy,
+          });
           watcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
-            extension: ExtensionProvider.getExtension(),
+            extension,
+            windowWatcher,
           });
           const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
           const oldUri = vscode.Uri.file(oldPath);
@@ -189,8 +215,55 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
   });
 
   describe("GIVEN the user opening a file", () => {
+    let ext: IDendronExtension;
+
+    beforeEach(async () => {
+      ext = ExtensionProvider.getExtension();
+      await ext.activateWatchers();
+    });
+    afterEach(async () => {
+      // imporant since we activate workspace watchers
+      await ext.deactivate();
+    });
     describeSingleWS(
-      "WHEN user opens the file for the first time",
+      "AND WHEN user opens non dendron file for the first time",
+      { ctx },
+      () => {
+        test("THEN do not affect frontmatter", async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          await FileTestUtils.createFiles(wsRoot, [{ path: "sample" }]);
+          const wsutils = new WSUtilsV2(ext);
+          const notePath = path.join(wsRoot, "sample");
+          const editor = await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(notePath)
+          );
+          const { onFirstOpen } =
+            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+          expect(await onFirstOpen(editor)).toBeFalsy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "AND WHEN user opens non dendron markdown file for the first time",
+      { ctx },
+      () => {
+        test("THEN do not affect frontmatter", async () => {
+          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          await FileTestUtils.createFiles(wsRoot, [{ path: "sample.md" }]);
+          const notePath = path.join(wsRoot, "sample.md");
+          const editor = await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(notePath)
+          );
+          const { onFirstOpen } =
+            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+          expect(await onFirstOpen(editor)).toBeFalsy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "WHEN user opens dendron note for the first time",
       { ctx },
       () => {
         let note: NoteProps;
@@ -205,9 +278,14 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
         });
         test("THEN the cursor moves past the frontmatter", async () => {
           const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const ext = ExtensionProvider.getExtension();
+          const wsutils = new WSUtilsV2(ext);
+          const editor = await wsutils.openNote(note);
+          const { onFirstOpen } =
+            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+
           const stubTimeout = sinon.stub(Wrap, "setTimeout");
-          const editor = await WSUtils.openNote(note);
-          WorkspaceWatcher.moveCursorPastFrontmatter(editor);
+          expect(await onFirstOpen(editor)).toBeTruthy();
           stubTimeout.callArg(0);
           // the selection should have been moved past the frontmatter
           const { line, character } = editor.selection.active;

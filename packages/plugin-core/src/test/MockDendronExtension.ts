@@ -1,12 +1,22 @@
 import {
+  CONSTANTS,
+  DendronTreeViewKey,
   DEngineClient,
   DVault,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
+import { readJSONWithCommentsSync } from "@dendronhq/common-server";
 import { IWorkspaceService, WorkspaceService } from "@dendronhq/engine-server";
-import { Disposable, ExtensionContext, FileSystemWatcher } from "vscode";
+import path from "path";
+import {
+  Disposable,
+  ExtensionContext,
+  FileSystemWatcher,
+  WebviewViewProvider,
+  WorkspaceConfiguration,
+} from "vscode";
 import { ICommandFactory } from "../commandFactoryInterface";
 import { ILookupControllerV3Factory } from "../components/lookup/LookupControllerV3Interface";
 import {
@@ -92,6 +102,14 @@ export class MockDendronExtension implements IDendronExtension {
     throw new Error("Method not implemented in MockDendronExtension.");
   }
 
+  async activateWatchers(): Promise<void> {
+    return;
+  }
+
+  async deactivate(): Promise<void> {
+    return;
+  }
+
   /**
    * Note: No-Op
    * @param _cb
@@ -162,5 +180,23 @@ export class MockDendronExtension implements IDendronExtension {
       throw new Error("Engine not initialized in MockDendronExtension");
     }
     return this._engine as IEngineAPIService;
+  }
+
+  isActive(): boolean {
+    return true;
+  }
+
+  getWorkspaceConfig(): WorkspaceConfiguration {
+    if (!this._wsRoot) {
+      throw new Error("wsRoot not configured in MockDendronExtension.");
+    }
+    const wsConfig = readJSONWithCommentsSync(
+      path.join(this._wsRoot, CONSTANTS.DENDRON_WS_NAME)
+    );
+    return wsConfig;
+  }
+
+  getTreeView(_key: DendronTreeViewKey): WebviewViewProvider {
+    throw new Error("Method not implemented in MockDendronExtension.");
   }
 }

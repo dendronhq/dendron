@@ -1289,7 +1289,10 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
             initialValue: "foo",
           });
-          await provider.onDidAccept({ quickpick, lc: controller })();
+          await provider.onDidAccept({
+            quickpick,
+            cancellationToken: controller.cancelToken,
+          })();
           expect(spyFetchPickerResultsNoInput.calledOnce).toBeTruthy();
           done();
         },

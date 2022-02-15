@@ -1,3 +1,5 @@
+// TODO: remove this disable once we deprecate old site config.
+/* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
@@ -15,9 +17,11 @@ import {
   NoteProps,
   SEOProps,
   NotePropsDict,
+  LegacyDuplicateNoteBehavior,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
+  configIsV4,
   DendronCommandConfig,
   DendronPreviewConfig,
   DendronWorkspaceConfig,
@@ -31,8 +35,17 @@ import {
   NoteLookupConfig,
   ScratchConfig,
   StrictConfigV4,
+  StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
+import { DateTime } from ".";
+import {
+  DendronPublishingConfig,
+  DuplicateNoteBehavior,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
+import { GithubConfig } from "./types/configs/publishing/github";
 
 /**
  * Dendron utilities
@@ -488,14 +501,25 @@ export class PublishUtils {
   static getSEOPropsFromConfig(
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
-    const { title, twitter, description: excerpt, image } = config.site;
-    return {
-      title,
-      twitter,
-      excerpt,
-      image,
-    };
+    if (configIsV4(config)) {
+      const {
+        title,
+        twitter,
+        description: excerpt,
+        image,
+      } = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return { title, twitter, excerpt, image };
+    } else {
+      const {
+        title,
+        twitter,
+        description: excerpt,
+        image,
+      } = ConfigUtils.getPublishing(config).seo;
+      return { title, twitter, excerpt, image };
+    }
   }
+
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
     const { title, created, updated, image } = note;
     const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
@@ -539,7 +563,12 @@ export type ConfigVaildationResp = {
 };
 
 export class ConfigUtils {
-  static genDefaultConfig(): StrictConfigV4 {
+  /**
+   * generates backwards compatible (v4) default config
+   * marking as @deprecated since this shouldn't be used anywhere
+   * other than legacy test codes
+   */
+  static genDefaultV4Config(): StrictConfigV4 {
     const common = {
       useFMTitle: true,
       useNoteTitleForLink: true,
@@ -559,7 +588,6 @@ export class ConfigUtils {
         gh_edit_branch: "main",
       },
     };
-
     return {
       version: 4,
       ...common,
@@ -569,11 +597,28 @@ export class ConfigUtils {
     } as StrictConfigV4;
   }
 
+  static genDefaultConfig(): StrictConfigV5 {
+    const common = {
+      dev: {
+        enablePreviewV2: true,
+      },
+    };
+
+    return {
+      version: 5,
+      ...common,
+      commands: genDefaultCommandConfig(),
+      workspace: genDefaultWorkspaceConfig(),
+      preview: genDefaultPreviewConfig(),
+      publishing: genDefaultPublishingConfig(),
+    } as StrictConfigV5;
+  }
+
   // get
-  static getProp<K extends keyof StrictConfigV4>(
+  static getProp<K extends keyof StrictConfigV5>(
     config: IntermediateDendronConfig,
     key: K
-  ): StrictConfigV4[K] {
+  ): StrictConfigV5[K] {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
@@ -598,8 +643,36 @@ export class ConfigUtils {
     return out;
   }
 
-  static getSite(config: IntermediateDendronConfig): DendronSiteConfig {
-    return ConfigUtils.getProp(config, "site");
+  static getPublishing(
+    config: IntermediateDendronConfig
+  ): DendronPublishingConfig {
+    return ConfigUtils.getProp(config, "publishing");
+  }
+
+  /**
+   * @deprecated This will be phased out once we fully migrate to v5 config.
+   * Use {@link ConfigUtils.getPublishing} to access publishing related configs
+   */
+  static getSite(
+    config: IntermediateDendronConfig
+  ): DendronSiteConfig | undefined {
+    const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+    const configWithDefaults = _.defaultsDeep(config, v4DefaultConfig);
+    return configWithDefaults.site;
+  }
+
+  // This is only used temporarily until we make migration mandatory.
+  // Grabs the appropriate util for retrieving publishing configs.
+  // if config is v4, grabs from site
+  // if config is v5, grabs from publishing
+  // if neither, v5 default is assumed by `.getPublising`
+  // Use this only when both namespace refers to the property with the same name.
+  static getPublishingConfig(
+    config: IntermediateDendronConfig
+  ): DendronPublishingConfig | DendronSiteConfig {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)!
+      : ConfigUtils.getPublishing(config);
   }
 
   static getVaults(config: IntermediateDendronConfig): DVault[] {
@@ -630,8 +703,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useFMTitle")
+      : ConfigUtils.getPublishing(config).enableFMTitle;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableFMTitle;
   }
 
@@ -639,8 +716,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useNoteTitleForLink")
+      : ConfigUtils.getPublishing(config).enableNoteTitleForLink;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableNoteTitleForLink;
   }
 
@@ -648,8 +729,12 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "mermaid")
+      : ConfigUtils.getPublishing(config).enableMermaid;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableMermaid;
   }
 
@@ -657,13 +742,120 @@ export class ConfigUtils {
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    return shouldApplyPublishRules
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getProp(config, "useKatex")
+      : ConfigUtils.getPublishing(config).enableKatex;
+
+    return shouldApplyPublishRules
+      ? publishRule
       : ConfigUtils.getPreview(config).enableKatex;
   }
 
+  static getHierarchyConfig(
+    config: IntermediateDendronConfig
+  ): { [key: string]: HierarchyConfig } | undefined {
+    if (configIsV4(config)) {
+      const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return siteConfig.config as { [key: string]: HierarchyConfig };
+    } else {
+      return ConfigUtils.getPublishing(config).hierarchy;
+    }
+  }
+
+  static getGithubConfig(config: IntermediateDendronConfig): GithubConfig {
+    if (configIsV4(config)) {
+      const {
+        gh_edit_link,
+        gh_edit_link_text,
+        gh_edit_repository,
+        gh_edit_branch,
+        gh_edit_view_mode,
+        githubCname,
+      } = ConfigUtils.getSite(config) as DendronSiteConfig;
+      return {
+        cname: githubCname,
+        // gh_edit_link is wrongly a string in old config
+        enableEditLink: gh_edit_link === "true",
+        editLinkText: gh_edit_link_text,
+        editBranch: gh_edit_branch,
+        editViewMode: gh_edit_view_mode,
+        editRepository: gh_edit_repository,
+      };
+    } else {
+      return ConfigUtils.getPublishing(config).github;
+    }
+  }
+
+  static getLogo(config: IntermediateDendronConfig): string | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)!.logo
+      : ConfigUtils.getPublishing(config).logoPath;
+  }
+
+  static getAssetsPrefix(
+    config: IntermediateDendronConfig
+  ): string | undefined {
+    return ConfigUtils.getPublishingConfig(config).assetsPrefix;
+  }
+
+  static getEnableContainers(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.useContainers
+      : ConfigUtils.getPublishing(config).enableContainers;
+  }
+
+  static getEnableRandomlyColoredTags(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? !ConfigUtils.getSite(config)?.noRandomlyColoredTags
+      : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
+  }
+
+  static getEnableFrontmatterTags(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.showFrontMatterTags
+      : ConfigUtils.getPublishing(config).enableFrontmatterTags;
+  }
+
+  static getEnableHashesForFMTags(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.useHashesForFMTags
+      : ConfigUtils.getPublishing(config).enableHashesForFMTags;
+  }
+
+  static getEnablePrettlyLinks(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.usePrettyLinks
+      : ConfigUtils.getPublishing(config).enablePrettyLinks;
+  }
+
+  static getGATracking(config: IntermediateDendronConfig): string | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.ga_tracking
+      : ConfigUtils.getPublishing(config).ga?.tracking;
+  }
+
+  static getSiteLastModified(
+    config: IntermediateDendronConfig
+  ): boolean | undefined {
+    return configIsV4(config)
+      ? ConfigUtils.getSite(config)?.siteLastModified
+      : ConfigUtils.getPublishing(config).enableSiteLastModified;
+  }
+
   static getSiteLogoUrl(config: IntermediateDendronConfig): string | undefined {
-    const { assetsPrefix, logo } = ConfigUtils.getSite(config);
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+    const logo = ConfigUtils.getLogo(config);
+
     if (logo === undefined) return undefined;
 
     // Let's allow logos that are hosted off-site/in subdomains by passing in a full URL
@@ -688,8 +880,12 @@ export class ConfigUtils {
     const override = opts?.note?.config?.global?.enablePrettyRefs;
     if (override !== undefined) return override;
 
+    const publishRule = configIsV4(config)
+      ? ConfigUtils.getSite(config)?.usePrettyRefs
+      : ConfigUtils.getPublishing(config).enablePrettyRefs;
+
     return opts?.shouldApplyPublishRules
-      ? ConfigUtils.getSite(config).usePrettyRefs
+      ? publishRule
       : ConfigUtils.getPreview(config).enablePrettyRefs;
   }
 
@@ -744,6 +940,103 @@ export class ConfigUtils {
   ) {
     const path = `workspace.${key}`;
     _.set(config, path, value);
+  }
+
+  static setSiteProp<K extends keyof DendronSiteConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronSiteConfig[K]
+  ) {
+    const path = `site.${key}`;
+    _.set(config, path, value);
+  }
+
+  static setPublishProp<K extends keyof DendronPublishingConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: DendronPublishingConfig[K]
+  ) {
+    const path = `publishing.${key}`;
+    _.set(config, path, value);
+  }
+
+  /**
+   * Set properties under the publishing.github namaspace (v5+ config)
+   */
+  static setGithubProp<K extends keyof GithubConfig>(
+    config: IntermediateDendronConfig,
+    key: K,
+    value: GithubConfig[K]
+  ) {
+    const path = `publishing.github.${key}`;
+    _.set(config, path, value);
+  }
+
+  static overridePublishingConfig(
+    config: IntermediateDendronConfig,
+    value: DendronSiteConfig | DendronPublishingConfig
+  ) {
+    if (configIsV4(config)) {
+      return {
+        ...config,
+        site: value,
+      } as StrictConfigV4;
+    } else {
+      return {
+        ...config,
+        publishing: value,
+      } as StrictConfigV5;
+    }
+  }
+
+  static unsetProp<K extends keyof IntermediateDendronConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    _.unset(config, key);
+  }
+
+  static unsetSiteProp<K extends keyof DendronSiteConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    const path = `site.${key}`;
+    _.unset(config, path);
+  }
+
+  static unsetPublishProp<K extends keyof DendronPublishingConfig>(
+    config: IntermediateDendronConfig,
+    key: K
+  ) {
+    const path = `publishing.${key}`;
+    _.unset(config, path);
+  }
+
+  static setDuplicateNoteBehavior(
+    config: IntermediateDendronConfig,
+    value: DuplicateNoteBehavior | LegacyDuplicateNoteBehavior
+  ): void {
+    if (configIsV4(config)) {
+      ConfigUtils.setSiteProp(
+        config,
+        "duplicateNoteBehavior",
+        value as LegacyDuplicateNoteBehavior
+      );
+    } else {
+      ConfigUtils.setPublishProp(
+        config,
+        "duplicateNoteBehavior",
+        value as DuplicateNoteBehavior
+      );
+    }
+  }
+
+  static unsetDuplicateNoteBehavior(config: IntermediateDendronConfig): void {
+    if (configIsV4(config)) {
+      ConfigUtils.unsetSiteProp(config, "duplicateNoteBehavior");
+    } else {
+      ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
+    }
   }
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
@@ -894,4 +1187,29 @@ export class Wrap {
   ) {
     return setTimeout(callback, ms, ...args);
   }
+}
+
+/**
+ * Gets the appropriately formatted title for a journal note, given the full
+ * note name and the configured date format.
+ * @param noteName note name like 'daily.journal.2021.01.01'
+ * @param dateFormat - should be gotten from Journal Config's 'dateFormat'
+ * @returns formatted title, or undefined if the journal title could not be parsed.
+ */
+export function getJournalTitle(
+  noteName: string,
+  dateFormat: string
+): string | undefined {
+  let title = noteName.split(".");
+
+  while (title.length > 0) {
+    const attemptedParse = DateTime.fromFormat(title.join("."), dateFormat);
+    if (attemptedParse.isValid) {
+      return title.join("-");
+    }
+
+    title = title.length > 1 ? title.slice(1) : [];
+  }
+
+  return undefined;
 }

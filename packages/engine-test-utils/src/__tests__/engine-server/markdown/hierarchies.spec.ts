@@ -182,10 +182,6 @@ describe("hierarchies", () => {
       }
     },
     verifyFuncDict: {
-      // [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-      //   const { resp } = extra;
-      //   await checkVFile(resp, BASIC_TEXT);
-      // },
       [DendronASTDest.HTML]: async ({ extra }) => {
         const { resp } = extra;
         await checkVFile(resp, "Better Children");

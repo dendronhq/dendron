@@ -13,6 +13,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   SchemaTemplate,
+  getJournalTitle,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -65,6 +66,7 @@ import { AutoCompleter } from "../utils/autoCompleter";
 import { parseRef } from "../utils/md";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
+import { JournalNote } from "../traits/journal";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -96,7 +98,7 @@ type CommandGatherOutput = {
 /**
  * Passed into execute command
  */
-type CommandOpts = {
+export type CommandOpts = {
   selectedItems: readonly NoteQuickInput[];
   /** source of the command. Added for contextual UI analytics. */
   source?: string;
@@ -138,7 +140,7 @@ export class NoteLookupCommand
     super("LookupCommandV3");
   }
 
-  protected get controller(): ILookupControllerV3 {
+  public get controller(): ILookupControllerV3 {
     if (_.isUndefined(this._controller)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
@@ -146,6 +148,10 @@ export class NoteLookupCommand
       });
     }
     return this._controller;
+  }
+
+  public set controller(controller: ILookupControllerV3 | undefined) {
+    this._controller = controller;
   }
 
   protected get provider(): ILookupProviderV3 {
@@ -216,34 +222,40 @@ export class NoteLookupCommand
     Logger.info({ ctx, opts, msg: "enter" });
     // initialize controller and provider
     const disableVaultSelection = !confirmVaultOnCreate;
-    this._controller = extension.lookupControllerFactory.create({
-      nodeType: "note",
-      disableVaultSelection,
-      vaultButtonPressed,
-      extraButtons: [
-        MultiSelectBtn.create({ pressed: copts.multiSelect }),
-        CopyNoteLinkBtn.create(copts.copyNoteLink),
-        DirectChildFilterBtn.create(
-          copts.filterMiddleware?.includes("directChildOnly")
-        ),
-        SelectionExtractBtn.create(
-          copts.selectionType === LookupSelectionTypeEnum.selectionExtract
-        ),
-        Selection2LinkBtn.create(
-          copts.selectionType === LookupSelectionTypeEnum.selection2link
-        ),
-        Selection2ItemsBtn.create({
-          pressed:
-            copts.selectionType === LookupSelectionTypeEnum.selection2Items,
-        }),
-        JournalBtn.create(copts.noteType === LookupNoteTypeEnum.journal),
-        ScratchBtn.create(copts.noteType === LookupNoteTypeEnum.scratch),
-        TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
-        HorizontalSplitBtn.create(
-          copts.splitType === LookupSplitTypeEnum.horizontal
-        ),
-      ],
-    });
+    if (_.isUndefined(this._controller)) {
+      this._controller = extension.lookupControllerFactory.create({
+        nodeType: "note",
+        disableVaultSelection,
+        vaultButtonPressed,
+        extraButtons: [
+          MultiSelectBtn.create({ pressed: copts.multiSelect }),
+          CopyNoteLinkBtn.create(copts.copyNoteLink),
+          DirectChildFilterBtn.create(
+            copts.filterMiddleware?.includes("directChildOnly")
+          ),
+          SelectionExtractBtn.create(
+            copts.selectionType === LookupSelectionTypeEnum.selectionExtract
+          ),
+          Selection2LinkBtn.create(
+            copts.selectionType === LookupSelectionTypeEnum.selection2link
+          ),
+          Selection2ItemsBtn.create({
+            pressed:
+              copts.selectionType === LookupSelectionTypeEnum.selection2Items,
+          }),
+          JournalBtn.create({
+            pressed: copts.noteType === LookupNoteTypeEnum.journal,
+          }),
+          ScratchBtn.create({
+            pressed: copts.noteType === LookupNoteTypeEnum.scratch,
+          }),
+          TaskBtn.create(copts.noteType === LookupNoteTypeEnum.task),
+          HorizontalSplitBtn.create(
+            copts.splitType === LookupSplitTypeEnum.horizontal
+          ),
+        ],
+      });
+    }
     this._provider = extension.noteLookupProviderFactory.create("lookup", {
       allowNewNote: true,
       noHidePickerOnAccept: false,
@@ -252,6 +264,10 @@ export class NoteLookupCommand
     const lc = this.controller;
     if (copts.fuzzThreshold) {
       lc.fuzzThreshold = copts.fuzzThreshold;
+    }
+
+    if (!_.isUndefined(this.controller.view)) {
+      VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, true);
     }
 
     VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
@@ -264,6 +280,7 @@ export class NoteLookupCommand
       alwaysShow: true,
       onDidHide: () => {
         VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
+        VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, false);
       },
     });
     this._quickPick = quickpick;
@@ -373,8 +390,39 @@ export class NoteLookupCommand
     try {
       const { quickpick, selectedItems } = opts;
       const selected = this.getSelected({ quickpick, selectedItems });
+
+      const extension = ExtensionProvider.getExtension();
+      const ws = extension.getDWorkspace();
+
+      const journalDateFormat = ConfigUtils.getJournal(ws.config).dateFormat;
+
       const out = await Promise.all(
         selected.map((item) => {
+          // If we're in journal mode, then apply title and trait overrides
+          if (this.isJournalButtonPressed()) {
+            /**
+             * this is a hacky title override for journal notes.
+             * TODO: remove this once we implement a more general way to override note titles.
+             * this is a hacky title override for journal notes.
+             */
+            const journalModifiedTitle = getJournalTitle(
+              item.fname,
+              journalDateFormat
+            );
+
+            if (journalModifiedTitle) {
+              item.title = journalModifiedTitle;
+
+              const journalTrait = new JournalNote(
+                ExtensionProvider.getDWorkspace().config
+              );
+              if (item.traits) {
+                item.traits.push(journalTrait);
+              } else {
+                item.traits = [journalTrait];
+              }
+            }
+          }
           return this.acceptItem(item);
         })
       );
@@ -403,6 +451,7 @@ export class NoteLookupCommand
     const ctx = "NoteLookupCommand:cleanup";
     Logger.debug({ ctx, msg: "enter" });
     this.controller.onHide();
+    this.controller = undefined;
     HistoryService.instance().remove("lookup", "lookupProvider");
   }
 
@@ -456,7 +505,12 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-      nodeNew = NoteUtils.create({ fname, vault });
+      nodeNew = NoteUtils.create({
+        fname,
+        vault,
+        title: item.title,
+        traits: item.traits,
+      });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
@@ -495,10 +549,6 @@ export class NoteLookupCommand
         });
       }
     }
-
-    const maybeJournalTitleOverride = this.journalTitleOverride();
-    if (!_.isUndefined(maybeJournalTitleOverride))
-      nodeNew.title = maybeJournalTitleOverride;
 
     if (picker.onCreate) {
       const nodeModified = await picker.onCreate(nodeNew);
@@ -626,36 +676,6 @@ export class NoteLookupCommand
     }
 
     return vault;
-  }
-
-  /**
-   * this is a hacky title override for journal notes.
-   * TODO: remove this once we implement a more general way to override note titles.
-   * this is a hacky title override for journal notes.
-   * This only works when the journal note modifier was explicitly pressed
-   * and when the date portion is the last bit of the hierarchy.
-   * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
-   */
-  journalTitleOverride(): string | undefined {
-    if (this.isJournalButtonPressed()) {
-      const quickpick = this.controller.quickpick;
-
-      // note modifier value exists, and nothing else after that.
-      if (
-        quickpick.noteModifierValue &&
-        quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === ""
-      ) {
-        const [, ...maybeDatePortion] = quickpick.noteModifierValue.split(".");
-        // we only override y.MM.dd
-        if (maybeDatePortion.length === 3) {
-          const maybeTitleOverride = maybeDatePortion.join("-");
-          if (maybeTitleOverride.match(/\d\d\d\d-\d\d-\d\d$/)) {
-            return maybeTitleOverride;
-          }
-        }
-      }
-    }
-    return;
   }
 
   private isJournalButtonPressed() {

@@ -1,4 +1,8 @@
-import { DendronSiteConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  DendronSiteConfig,
+  DendronPublishingConfig,
+  NoteProps,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 
 export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
@@ -20,7 +24,9 @@ export function getAssetUrl(url: string) {
  * @param url
  * @returns
  */
-export function getRootUrl(siteConfig: DendronSiteConfig) {
+export function getRootUrl(
+  siteConfig: DendronSiteConfig | DendronPublishingConfig
+) {
   const url = siteConfig.siteUrl!;
   const out =
     process.env.NODE_ENV === "production" &&

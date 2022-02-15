@@ -20,8 +20,9 @@ import { WorkspaceUtils } from "@dendronhq/engine-server";
 let WS_UTILS: IWSUtilsV2 | undefined;
 
 /**
- *  Non static WSUtils to allow unwinding of our circular dependencies.
- *   */
+ *
+ *  Utilities to work with workspace related functions
+ **/
 export class WSUtilsV2 implements IWSUtilsV2 {
   private extension: IDendronExtension;
 

@@ -1,11 +1,11 @@
+import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import _ from "lodash";
-import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { checkPreReq, NextJSPublishUtils } from "../utils/site";
-import { BasicCommand } from "./base";
+import { NextJSPublishUtils } from "../utils/site";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { BasicCommand } from "./base";
 
 type CommandOpts = void;
 
@@ -21,10 +21,6 @@ export class PublishExportCommand extends BasicCommand<
 
   async gatherInputs(): Promise<any> {
     return {};
-  }
-
-  async sanityCheck() {
-    return checkPreReq();
   }
 
   async execute() {

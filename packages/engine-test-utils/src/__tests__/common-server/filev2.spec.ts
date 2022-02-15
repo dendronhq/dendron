@@ -30,7 +30,6 @@ describe("goUpTo", () => {
     expect(goUpTo({ base: cwd, fname: "foo" })).toEqual(path.join(root));
   });
 
-  // used in dendron-cli/src/commands/build-site-v2.ts
   test("double", () => {
     const cwd2 = path.join(cwd, "foo", "bar");
     fs.ensureDirSync(cwd2);

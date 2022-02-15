@@ -151,7 +151,6 @@ async function main() {
   const blacklist = [
     ".DS_Store",
     "plugin-core",
-    "dendron-11ty",
     "dendron-next-server",
     "lsp-client",
     "lsp-server",

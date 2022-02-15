@@ -22,7 +22,7 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
     if (!fs.existsSync(sitePath)) {
       fs.ensureDirSync(sitePath);
     }
-    return;
+    return undefined;
   }
 
   async execute() {

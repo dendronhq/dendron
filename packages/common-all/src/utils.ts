@@ -37,6 +37,7 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
+import { DateTime } from ".";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
@@ -1172,4 +1173,29 @@ export class Wrap {
   ) {
     return setTimeout(callback, ms, ...args);
   }
+}
+
+/**
+ * Gets the appropriately formatted title for a journal note, given the full
+ * note name and the configured date format.
+ * @param noteName note name like 'daily.journal.2021.01.01'
+ * @param dateFormat - should be gotten from Journal Config's 'dateFormat'
+ * @returns formatted title, or undefined if the journal title could not be parsed.
+ */
+export function getJournalTitle(
+  noteName: string,
+  dateFormat: string
+): string | undefined {
+  let title = noteName.split(".");
+
+  while (title.length > 0) {
+    const attemptedParse = DateTime.fromFormat(title.join("."), dateFormat);
+    if (attemptedParse.isValid) {
+      return title.join("-");
+    }
+
+    title = title.length > 1 ? title.slice(1) : [];
+  }
+
+  return undefined;
 }

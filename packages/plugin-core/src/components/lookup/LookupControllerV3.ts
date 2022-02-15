@@ -13,7 +13,6 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import {
   ButtonCategory,
   getButtonCategory,
@@ -105,7 +104,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       // wire up lookup controller to lookup view
       // TODO: swap out `getExtension` to use a static provider
       // once treeview related interface has been migrated to IDendronExtension
-      this._view = getExtension().getTreeView(
+      this._view = ExtensionProvider.getTreeView(
         DendronTreeViewKey.LOOKUP_VIEW
       ) as LookupView;
       this._view.registerController(this);
@@ -214,11 +213,18 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     });
     Logger.info({ ctx, msg: "onUpdatePickerItems:post" });
     if (!nonInteractive) {
-      provider.provide(this);
+      provider.provide({
+        quickpick,
+        token: cancelToken,
+        fuzzThreshold: this.fuzzThreshold,
+      });
       quickpick.show();
     } else {
       quickpick.selectedItems = quickpick.items;
-      await provider.onDidAccept({ quickpick, lc: this })();
+      await provider.onDidAccept({
+        quickpick,
+        cancellationToken: cancelToken,
+      })();
     }
     Logger.info({ ctx, msg: "exit" });
     return quickpick;

@@ -16,9 +16,6 @@
       "path": "packages/common-all"
     },
     {
-      "path": "packages/dendron-11ty"
-    },
-    {
       "path": "packages/common-server"
     },
     {
@@ -109,6 +106,8 @@
     "editor.tabCompletion": "on"
   },
   "extensions": {
-    "recommendations": ["esbenp.prettier-vscode"]
+    "recommendations": [
+      "esbenp.prettier-vscode"
+    ]
   }
 }

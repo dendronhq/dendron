@@ -605,11 +605,31 @@ suite("CopyNoteLink", function () {
       }
     );
 
-    describe("AND config is not set", () => {
+    describeSingleWS(
+      "AND config is set unset",
+      {
+        ctx,
+      },
+      () => {
+        test("THEN creates a link to that file with a block anchor", async () => {
+          await prepFileAndSelection();
+          const link = (await new CopyNoteLinkCommand().run())?.link;
+          expect(
+            await linkHasAnchor("block", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
+
+    describe("AND config is set to prompt", () => {
       describeSingleWS(
         "AND user picks line in the prompt",
         {
           ctx,
+          modConfigCb: (config) => {
+            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+            return config;
+          },
         },
         () => {
           test("THEN generates a link anchor ", async () => {
@@ -622,7 +642,6 @@ suite("CopyNoteLink", function () {
             expect(
               await linkHasAnchor("line", ["src", "test.hs"], link)
             ).toBeTruthy();
-            expect(getAnchorTypeConfig("line")).toBeTruthy();
           });
         }
       );
@@ -631,6 +650,10 @@ suite("CopyNoteLink", function () {
         "AND user picks block in the prompt",
         {
           ctx,
+          modConfigCb: (config) => {
+            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+            return config;
+          },
         },
         () => {
           test("THEN generates a block anchor ", async () => {
@@ -643,7 +666,6 @@ suite("CopyNoteLink", function () {
             expect(
               await linkHasAnchor("block", ["src", "test.hs"], link)
             ).toBeTruthy();
-            expect(getAnchorTypeConfig("block")).toBeTruthy();
           });
         }
       );
@@ -652,6 +674,10 @@ suite("CopyNoteLink", function () {
         "AND user cancels the prompt",
         {
           ctx,
+          modConfigCb: (config) => {
+            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+            return config;
+          },
         },
         () => {
           test("THEN generates a line anchor ", async () => {
@@ -664,7 +690,6 @@ suite("CopyNoteLink", function () {
             expect(
               await linkHasAnchor("line", ["src", "test.hs"], link)
             ).toBeTruthy();
-            expect(getAnchorTypeConfig(undefined)).toBeTruthy();
           });
         }
       );
@@ -721,13 +746,5 @@ async function linkHasAnchor(
         match: [anchor],
       })
     ).toBeTruthy();
-  return true;
-}
-
-function getAnchorTypeConfig(expected: "line" | "block" | undefined) {
-  const { wsRoot } = ExtensionProvider.getDWorkspace();
-  const readConfig = TestConfigUtils.getConfig({ wsRoot });
-  const found = ConfigUtils.getNonNoteLinkAnchorType(readConfig);
-  expect(found).toEqual(expected);
   return true;
 }

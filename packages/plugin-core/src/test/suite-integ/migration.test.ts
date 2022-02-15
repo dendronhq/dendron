@@ -516,6 +516,7 @@ suite("Migration", function () {
               insertNoteIndex: {
                 enableMarker: true,
               },
+              copyNoteLink: {},
             };
 
             expect(postMigrationDendronConfig.commands).toEqual(

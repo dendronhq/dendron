@@ -13,6 +13,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   SchemaTemplate,
+  getJournalTitle,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -65,6 +66,7 @@ import { AutoCompleter } from "../utils/autoCompleter";
 import { parseRef } from "../utils/md";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
+import { JournalNote } from "../traits/journal";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -388,8 +390,39 @@ export class NoteLookupCommand
     try {
       const { quickpick, selectedItems } = opts;
       const selected = this.getSelected({ quickpick, selectedItems });
+
+      const extension = ExtensionProvider.getExtension();
+      const ws = extension.getDWorkspace();
+
+      const journalDateFormat = ConfigUtils.getJournal(ws.config).dateFormat;
+
       const out = await Promise.all(
         selected.map((item) => {
+          // If we're in journal mode, then apply title and trait overrides
+          if (this.isJournalButtonPressed()) {
+            /**
+             * this is a hacky title override for journal notes.
+             * TODO: remove this once we implement a more general way to override note titles.
+             * this is a hacky title override for journal notes.
+             */
+            const journalModifiedTitle = getJournalTitle(
+              item.fname,
+              journalDateFormat
+            );
+
+            if (journalModifiedTitle) {
+              item.title = journalModifiedTitle;
+
+              const journalTrait = new JournalNote(
+                ExtensionProvider.getDWorkspace().config
+              );
+              if (item.traits) {
+                item.traits.push(journalTrait);
+              } else {
+                item.traits = [journalTrait];
+              }
+            }
+          }
           return this.acceptItem(item);
         })
       );
@@ -472,7 +505,12 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-      nodeNew = NoteUtils.create({ fname, vault });
+      nodeNew = NoteUtils.create({
+        fname,
+        vault,
+        title: item.title,
+        traits: item.traits,
+      });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
@@ -511,10 +549,6 @@ export class NoteLookupCommand
         });
       }
     }
-
-    const maybeJournalTitleOverride = this.journalTitleOverride();
-    if (!_.isUndefined(maybeJournalTitleOverride))
-      nodeNew.title = maybeJournalTitleOverride;
 
     if (picker.onCreate) {
       const nodeModified = await picker.onCreate(nodeNew);
@@ -642,36 +676,6 @@ export class NoteLookupCommand
     }
 
     return vault;
-  }
-
-  /**
-   * this is a hacky title override for journal notes.
-   * TODO: remove this once we implement a more general way to override note titles.
-   * this is a hacky title override for journal notes.
-   * This only works when the journal note modifier was explicitly pressed
-   * and when the date portion is the last bit of the hierarchy.
-   * e.g.) if the picker value is journal.2021.08.13.some-stuff, we don't override (title is some-stuff)
-   */
-  journalTitleOverride(): string | undefined {
-    if (this.isJournalButtonPressed()) {
-      const quickpick = this.controller.quickpick;
-
-      // note modifier value exists, and nothing else after that.
-      if (
-        quickpick.noteModifierValue &&
-        quickpick.value.split(quickpick.noteModifierValue).slice(-1)[0] === ""
-      ) {
-        const [, ...maybeDatePortion] = quickpick.noteModifierValue.split(".");
-        // we only override y.MM.dd
-        if (maybeDatePortion.length === 3) {
-          const maybeTitleOverride = maybeDatePortion.join("-");
-          if (maybeTitleOverride.match(/\d\d\d\d-\d\d-\d\d$/)) {
-            return maybeTitleOverride;
-          }
-        }
-      }
-    }
-    return;
   }
 
   private isJournalButtonPressed() {

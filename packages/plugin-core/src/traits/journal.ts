@@ -1,42 +1,57 @@
 import {
   ConfigUtils,
-  OnCreateContext,
+  IntermediateDendronConfig,
   NoteTrait,
   NoteUtils,
+  OnCreateContext,
   onCreateProps,
   SetNameModifierResp,
 } from "@dendronhq/common-all";
 import { DendronClientUtilsV2 } from "../clientUtils";
-import { getDWorkspace } from "../workspace";
 
 export class JournalNote implements NoteTrait {
   id: string = "journalNote";
   getTemplateType: any;
 
-  OnWillCreate = {
-    setNameModifier(_opts: OnCreateContext): SetNameModifierResp {
-      const config = getDWorkspace().config;
-      const journalConfig = ConfigUtils.getJournal(config);
-      const dailyJournalDomain = journalConfig.dailyDomain;
-      const { noteName: fname } = DendronClientUtilsV2.genNoteName("JOURNAL", {
-        overrides: { domain: dailyJournalDomain },
-      });
+  _config: IntermediateDendronConfig;
 
-      return { name: fname, promptUserForModification: false };
-    },
-  };
+  constructor(config: IntermediateDendronConfig) {
+    this._config = config;
+  }
 
-  OnCreate: onCreateProps = {
-    setTitle(opts: OnCreateContext): string {
-      const config = getDWorkspace().config;
-      const journalConfig = ConfigUtils.getJournal(config);
-      const journalName = journalConfig.name;
-      const title = NoteUtils.genJournalNoteTitle({
-        fname: opts.currentNoteName!,
-        journalName,
-      });
+  get OnWillCreate() {
+    const config = this._config;
 
-      return title;
-    },
-  };
+    return {
+      setNameModifier(this, _opts: OnCreateContext): SetNameModifierResp {
+        const journalConfig = ConfigUtils.getJournal(config);
+        const dailyJournalDomain = journalConfig.dailyDomain;
+        const { noteName: fname } = DendronClientUtilsV2.genNoteName(
+          "JOURNAL",
+          {
+            overrides: { domain: dailyJournalDomain },
+          }
+        );
+
+        return { name: fname, promptUserForModification: false };
+      },
+    };
+  }
+
+  get OnCreate(): onCreateProps {
+    const config = this._config;
+
+    return {
+      setTitle(opts: OnCreateContext): string {
+        const journalConfig = ConfigUtils.getJournal(config);
+        const journalName = journalConfig.name;
+        const title = NoteUtils.genJournalNoteTitle({
+          fname: opts.currentNoteName!,
+          journalName,
+        });
+
+        return title;
+      },
+    };
+  }
 }

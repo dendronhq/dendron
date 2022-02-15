@@ -189,7 +189,7 @@ describe("user tags", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            '<a href="user.Hamilton.Margaret.html">@Hamilton.Margaret</a>'
+            '<a href="user.Hamilton.Margaret">@Hamilton.Margaret</a>'
           );
         },
       },

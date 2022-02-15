@@ -1,4 +1,9 @@
-import { ConfigUtils, RESERVED_KEYS, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  RESERVED_KEYS,
+  VaultUtils,
+  GithubEditViewModeEnum,
+} from "@dendronhq/common-all";
 import { GitUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
@@ -11,9 +16,13 @@ describe("GitUtils", () => {
 
     testWithEngine("basic", async ({ engine, wsRoot }) => {
       const config = ConfigUtils.genDefaultConfig();
-      config.site.gh_edit_view_mode = "edit";
-      config.site.gh_edit_branch = "main";
-      config.site.gh_edit_repository = gitUrl;
+      ConfigUtils.setGithubProp(
+        config,
+        "editViewMode",
+        GithubEditViewModeEnum.edit
+      );
+      ConfigUtils.setGithubProp(config, "editBranch", "main");
+      ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
       const note = engine.notes["foo"];
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/vault1/foo.md"
@@ -22,9 +31,13 @@ describe("GitUtils", () => {
 
     testWithEngine("vault override", async ({ engine, wsRoot }) => {
       const config = ConfigUtils.genDefaultConfig();
-      config.site.gh_edit_view_mode = "edit";
-      config.site.gh_edit_branch = "main";
-      config.site.gh_edit_repository = gitUrl;
+      ConfigUtils.setGithubProp(
+        config,
+        "editViewMode",
+        GithubEditViewModeEnum.edit
+      );
+      ConfigUtils.setGithubProp(config, "editBranch", "main");
+      ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
       const note = engine.notes["foo"];
       const vault = _.find(
         engine.vaults,
@@ -39,9 +52,13 @@ describe("GitUtils", () => {
 
     testWithEngine("note override", async ({ engine, wsRoot }) => {
       const config = ConfigUtils.genDefaultConfig();
-      config.site.gh_edit_view_mode = "edit";
-      config.site.gh_edit_branch = "main";
-      config.site.gh_edit_repository = gitUrl;
+      ConfigUtils.setGithubProp(
+        config,
+        "editViewMode",
+        GithubEditViewModeEnum.edit
+      );
+      ConfigUtils.setGithubProp(config, "editBranch", "main");
+      ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
       const note = engine.notes["foo.ch1"];
       note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHiearchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(

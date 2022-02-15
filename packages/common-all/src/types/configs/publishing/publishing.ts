@@ -29,6 +29,7 @@ export type DendronPublishingConfig = {
   siteRepoDir?: string;
   siteUrl?: string;
   enableFrontmatterTags: boolean;
+  enableHashesForFMTags: boolean;
   enableRandomlyColoredTags?: boolean;
   hierarchy?: { [key: string]: HierarchyConfig };
   duplicateNoteBehavior?: DuplicateNoteBehavior;
@@ -45,6 +46,9 @@ export type DendronPublishingConfig = {
   enablePrettyLinks: boolean;
 };
 
+export type CleanDendronPublishingConfig = DendronPublishingConfig &
+  Required<Pick<DendronPublishingConfig, "siteIndex" | "siteUrl">>;
+
 export enum DuplicateNoteActionEnum {
   useVault = "useVault",
 }
@@ -55,10 +59,12 @@ export type UseVaultBehaviorPayload = { vault: DVault } | string[];
 
 export type DuplicateNoteActionPayload = UseVaultBehaviorPayload;
 
-export type DuplicateNoteBehavior = {
+export type UseVaultBehavior = {
   action: DuplicateNoteAction;
   payload: DuplicateNoteActionPayload;
 };
+
+export type DuplicateNoteBehavior = UseVaultBehavior;
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };
@@ -81,6 +87,11 @@ export type GoogleAnalyticsConfig = {
  */
 export function genDefaultPublishingConfig(): DendronPublishingConfig {
   return {
+    enableFMTitle: true,
+    enableNoteTitleForLink: true,
+    enableMermaid: true,
+    enablePrettyRefs: true,
+    enableKatex: true,
     copyAssets: true,
     siteHierarchies: ["root"],
     writeStubs: false,
@@ -91,6 +102,7 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     github: genDefaultGithubConfig(),
     enableSiteLastModified: true,
     enableFrontmatterTags: true,
+    enableHashesForFMTags: false,
     enableRandomlyColoredTags: true,
     enablePrettyLinks: true,
   };

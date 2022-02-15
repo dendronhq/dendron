@@ -3,6 +3,8 @@ import { ENGINE_HOOKS } from "../../../presets";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
+import { ConfigUtils } from "@dendronhq/common-all";
+import { TestConfigUtils } from "../../..";
 
 describe("containers", () => {
   const containerText = [
@@ -15,8 +17,8 @@ describe("containers", () => {
     name: "REGULAR_CASE",
     setupFunc: async ({ engine, vaults, extra }) => {
       // create copy of engine config
-      let config = { ...engine.config };
-      config.site.useContainers = true;
+      const config = { ...engine.config };
+      ConfigUtils.setSiteProp(config, "useContainers", true);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV4.procFull({
           engine,
@@ -58,7 +60,17 @@ describe("containers", () => {
         );
       },
     },
-    preSetupHook: ENGINE_HOOKS.setupBasic,
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      TestConfigUtils.withConfig(
+        (config) => {
+          const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+          ConfigUtils.setVaults(v4DefaultConfig, ConfigUtils.getVaults(config));
+          return v4DefaultConfig;
+        },
+        { wsRoot: opts.wsRoot }
+      );
+    },
   });
   const NOT_ENABLED = createProcTests({
     name: "NOT_ENABLED",
@@ -106,7 +118,17 @@ describe("containers", () => {
         );
       },
     },
-    preSetupHook: ENGINE_HOOKS.setupBasic,
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      TestConfigUtils.withConfig(
+        (config) => {
+          const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+          ConfigUtils.setVaults(v4DefaultConfig, ConfigUtils.getVaults(config));
+          return v4DefaultConfig;
+        },
+        { wsRoot: opts.wsRoot }
+      );
+    },
   });
 
   const ALL_TEST_CASES = [...REGULAR_CASE, ...NOT_ENABLED];

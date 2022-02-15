@@ -6,7 +6,12 @@ export type SEOConfig = {
   description?: string;
   author?: string;
   twitter?: string;
-  image?: string;
+  image?: SEOImage;
+};
+
+export type SEOImage = {
+  url: string;
+  alt: string;
 };
 
 /**

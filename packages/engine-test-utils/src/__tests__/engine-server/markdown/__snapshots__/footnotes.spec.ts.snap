@@ -9,8 +9,8 @@ Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
@@ -33,8 +33,8 @@ Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
@@ -75,9 +75,9 @@ Ipsum iusto impedit provident. <a id=\\"fnref-vel\\" class=\\"fnref\\" href=\\"#
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
-<li><a href=\\"target.html\\">Target</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+<li><a href=\\"target\\">Target</a></li>
 </ol>
 <h2 id=\\"footnotes-1\\">Footnotes</h2>
 <ol>
@@ -100,8 +100,8 @@ Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>

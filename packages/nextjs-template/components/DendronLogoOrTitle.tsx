@@ -1,4 +1,4 @@
-import { ConfigUtils } from "@dendronhq/common-all";
+import { ConfigUtils, PublishUtils } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { Col } from "antd";
 import Link from "next/link";
@@ -13,11 +13,12 @@ export default function DendronLogoOrTitle() {
   if (!verifyEngineSliceState(engine)) {
     return null;
   }
-  const { title } = ConfigUtils.getSite(engine.config);
+  const { title } = PublishUtils.getSEOPropsFromConfig(engine.config);
   const logoUrl = ConfigUtils.getSiteLogoUrl(engine.config) || "";
+  const publishingConfig = ConfigUtils.getPublishingConfig(engine.config);
 
   return (
-    <Link href={getRootUrl(engine.config.site)}>
+    <Link href={getRootUrl(publishingConfig)}>
       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid -- `href` will be provided by `Link` */}
       <a
         style={{
@@ -28,11 +29,7 @@ export default function DendronLogoOrTitle() {
         }}
         className="site-title"
       >
-        {engine.config?.site.logo ? (
-          <Logo logoUrl={logoUrl} />
-        ) : (
-          <Title data={title || ""} />
-        )}
+        {logoUrl ? <Logo logoUrl={logoUrl} /> : <Title data={title || ""} />}
       </a>
     </Link>
   );

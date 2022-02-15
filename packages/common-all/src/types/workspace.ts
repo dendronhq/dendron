@@ -533,13 +533,13 @@ export type DendronSiteConfig = {
   /**
    * Control publication on a per hierarchy basis
    */
-  config?: { [key: string]: HierarchyConfig };
+  config?: { [key: string]: LegacyHierarchyConfig };
 
   /**
    * When publishing in multi-vault scenario,
    * how to handle duplicate notes
    */
-  duplicateNoteBehavior?: DuplicateNoteBehavior;
+  duplicateNoteBehavior?: LegacyDuplicateNoteBehavior;
 
   /**
    * When publishing, should stubs be written to disk?
@@ -602,13 +602,13 @@ export type LegacyDendronGraphConfig = {
   zoomSpeed: number;
 };
 
-export type HierarchyConfig = {
+export type LegacyHierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };
   noindexByDefault?: boolean;
-  customFrontmatter?: CustomFMEntry[];
+  customFrontmatter?: LegacyCustomFMEntry[];
 };
 
-export type CustomFMEntry = {
+export type LegacyCustomFMEntry = {
   key: string;
   value: any;
 };
@@ -616,15 +616,15 @@ export type CustomFMEntry = {
 export type CleanDendronSiteConfig = DendronSiteConfig &
   Required<Pick<DendronSiteConfig, "siteIndex" | "siteUrl">>;
 
-export enum DuplicateNoteAction {
+export enum LegacyDuplicateNoteAction {
   USE_VAULT = "useVault",
 }
 
-export type UseVaultBehaviorPayload = { vault: DVault } | string[];
+export type LegacyUseVaultBehaviorPayload = { vault: DVault } | string[];
 
-export type UseVaultBehavior = {
-  action: DuplicateNoteAction;
-  payload: UseVaultBehaviorPayload;
+export type LegacyUseVaultBehavior = {
+  action: LegacyDuplicateNoteAction;
+  payload: LegacyUseVaultBehaviorPayload;
 };
 
-export type DuplicateNoteBehavior = UseVaultBehavior;
+export type LegacyDuplicateNoteBehavior = LegacyUseVaultBehavior;

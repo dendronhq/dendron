@@ -50,10 +50,8 @@ describe("GIVEN dendronPub", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const config = ConfigUtils.genDefaultConfig();
-          config.site = {
-            siteHierarchies: ["foo"],
-            siteRootDir: "foo",
-          };
+          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
           const resp = await MDUtilsV4.procRehype({
             proc: proc(
               engine,
@@ -84,10 +82,8 @@ describe("GIVEN dendronPub", () => {
         async ({ engine, vaults }) => {
           const vault = vaults[0];
           const config = ConfigUtils.genDefaultConfig();
-          config.site = {
-            siteHierarchies: ["foo"],
-            siteRootDir: "foo",
-          };
+          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
           const resp = await MDUtilsV4.procRehype({
             proc: proc(
               engine,
@@ -126,11 +122,9 @@ describe("GIVEN dendronPub", () => {
           async ({ engine, vaults }) => {
             const vault = vaults[0];
             const config = ConfigUtils.genDefaultConfig();
-            config.site = {
-              siteHierarchies: ["foo"],
-              siteRootDir: "foo",
-              usePrettyRefs: true,
-            };
+            ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+            ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+            ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
             const resp = await MDUtilsV4.procRehype({
               proc: proc(
                 engine,
@@ -308,7 +302,7 @@ describe("dendronPub", () => {
           preSetupHook: async ({ wsRoot, vaults }) => {
             TestConfigUtils.withConfig(
               (c) => {
-                c.site.showFrontMatterTags = false;
+                ConfigUtils.setPublishProp(c, "enableFrontmatterTags", false);
                 return c;
               },
               { wsRoot }
@@ -325,7 +319,7 @@ describe("dendronPub", () => {
       );
     });
 
-    describe("WHEN configured with useHashesForFMTags option", () => {
+    describe("WHEN configured with enableHashesForFMTags option", () => {
       test("THEN tags are rendered with a # symbol", async () => {
         await runEngineTestV5(
           async ({ engine, vaults }) => {
@@ -347,7 +341,11 @@ describe("dendronPub", () => {
               });
               TestConfigUtils.withConfig(
                 (config) => {
-                  config.site.useHashesForFMTags = true;
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "enableHashesForFMTags",
+                    true
+                  );
                   return config;
                 },
                 { wsRoot }
@@ -680,7 +678,10 @@ describe("dendronPub", () => {
             vault: vaults[0],
             config: engine.config,
           }).process("![[dupe]]");
-          const dupNoteVaultPayload = engine.config.site.duplicateNoteBehavior
+          const publishingConfig = ConfigUtils.getPublishingConfig(
+            engine.config
+          );
+          const dupNoteVaultPayload = publishingConfig.duplicateNoteBehavior
             ?.payload as string[];
           await checkVFile(out as any, `dupe in ${dupNoteVaultPayload[0]}`);
         },
@@ -714,7 +715,7 @@ describe("dendronPub", () => {
     test("fail: ambiguous", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
-          delete engine.config.site["duplicateNoteBehavior"];
+          ConfigUtils.unsetPublishProp(engine.config, "duplicateNoteBehavior");
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
@@ -755,17 +756,15 @@ describe("dendronPub", () => {
     });
   });
 
-  describe("usePrettyRefs", () => {
+  describe("enablePrettyRefs", () => {
     testWithEngine(
-      "config.site.usePrettyRef: true",
+      "config.publishing.enablePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-          usePrettyRefs: true,
-        };
+        ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+        ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+        ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
@@ -787,15 +786,13 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.site.usePrettyRef: false",
+      "config.publishing.enablePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-          usePrettyRefs: false,
-        };
+        ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+        ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+        ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
@@ -817,15 +814,13 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.usePrettyRef: true",
+      "config.enablePrettyRef: true",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-          usePrettyRefs: false,
-        };
+        ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+        ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+        ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
@@ -847,15 +842,13 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "config.usePrettyRef: false",
+      "config.enablePrettyRef: false",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-          usePrettyRefs: false,
-        };
+        ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+        ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+        ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
             engine,
@@ -877,7 +870,7 @@ describe("dendronPub", () => {
     );
 
     testWithEngine(
-      "usePrettyRef defaults to true in both cases",
+      "enablePrettyRef defaults to true in both cases",
       async ({ engine, vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         const previewResp = await MDUtilsV5.procRehypeFull(
@@ -917,18 +910,18 @@ describe("dendronPub", () => {
       { preSetupHook: ENGINE_HOOKS.setupBasic }
     );
 
-    describe("WHEN config sets usePrettyRefs true", () => {
+    describe("WHEN config sets enablePrettyRefs true", () => {
       describe("AND note overrides to false", () => {
         testWithEngine(
           "THEN renders without pretty refs",
           async ({ engine, vaults }) => {
             const config = ConfigUtils.genDefaultConfig();
             ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
-            config.site = {
-              siteHierarchies: ["with-override"],
-              siteRootDir: "with-override",
-              usePrettyRefs: true,
-            };
+            ConfigUtils.setPublishProp(config, "siteHierarchies", [
+              "with-override",
+            ]);
+            ConfigUtils.setPublishProp(config, "siteRootDir", "with-override");
+            ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
             const resp = await MDUtilsV5.procRehypeFull(
               {
                 engine,
@@ -967,18 +960,18 @@ describe("dendronPub", () => {
       });
     });
 
-    describe("WHEN config sets usePrettyRefs false", () => {
+    describe("WHEN config sets enablePrettyRefs false", () => {
       describe("AND note overrides to true", () => {
         testWithEngine(
           "THEN renders with pretty refs",
           async ({ engine, vaults }) => {
             const config = ConfigUtils.genDefaultConfig();
             ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
-            config.site = {
-              siteHierarchies: ["with-override"],
-              siteRootDir: "with-override",
-              usePrettyRefs: false,
-            };
+            ConfigUtils.setPublishProp(config, "siteHierarchies", [
+              "with-override",
+            ]);
+            ConfigUtils.setPublishProp(config, "siteRootDir", "with-override");
+            ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
             const resp = await MDUtilsV5.procRehypeFull(
               {
                 engine,

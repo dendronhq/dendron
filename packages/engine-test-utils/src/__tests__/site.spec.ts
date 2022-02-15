@@ -1,7 +1,6 @@
 import {
-  DendronSiteConfig,
   DendronSiteFM,
-  DuplicateNoteAction,
+  DuplicateNoteActionEnum,
   DVault,
   DVaultVisibility,
   NotePropsDict,
@@ -49,7 +48,7 @@ const basicSetup = (preSetupHook?: SetupHookFunction) => ({
 const dupNote = (payload: DVault | string[]) => {
   const out: any = {
     duplicateNoteBehavior: {
-      action: DuplicateNoteAction.USE_VAULT,
+      action: DuplicateNoteActionEnum.useVault,
     },
   };
   if (_.isArray(payload)) {
@@ -103,13 +102,22 @@ describe("SiteUtils", () => {
         const noteIndex = engine.notes["alpha"];
         const config = TestConfigUtils.withConfig(
           (config) => {
-            config.site = createSiteConfig({
-              siteHierarchies: ["alpha", "beta"],
-              siteRootDir,
-              siteNotesDir: "docs",
-              ...dupNote(vaults[1]),
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["alpha", "beta"],
+                siteRootDir,
+                siteNotesDir: "docs",
+                ...dupNote(vaults[1]),
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,
@@ -157,12 +165,21 @@ describe("SiteUtils", () => {
         const noteIndex = engine.notes["alpha"];
         const config = TestConfigUtils.withConfig(
           (config) => {
-            config.site = createSiteConfig({
-              siteHierarchies: ["alpha"],
-              siteRootDir,
-              ...dupNote(vaults[1]),
-            });
-            return config;
+            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            ConfigUtils.setProp(
+              v4DefaultConfig,
+              "site",
+              createSiteConfig({
+                siteHierarchies: ["alpha"],
+                siteRootDir,
+                ...dupNote(vaults[1]),
+              })
+            );
+            ConfigUtils.setVaults(
+              v4DefaultConfig,
+              ConfigUtils.getVaults(config)
+            );
+            return v4DefaultConfig;
           },
           {
             wsRoot,
@@ -204,11 +221,20 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo", "foobar"],
-                siteRootDir,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo", "foobar"],
+                  siteRootDir,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -248,12 +274,21 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo", "foobar"],
-                siteRootDir,
-                writeStubs: false,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo", "foobar"],
+                  siteRootDir,
+                  writeStubs: false,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -292,12 +327,21 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                usePrettyRefs: true,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  usePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -334,12 +378,21 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                usePrettyRefs: true,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  usePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -382,17 +435,26 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["root"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  root: {
-                    publishByDefault: true,
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["root"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  config: {
+                    root: {
+                      publishByDefault: true,
+                    },
                   },
-                },
-              });
-              return config;
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -435,17 +497,26 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["root"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  root: {
-                    publishByDefault: false,
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["root"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  config: {
+                    root: {
+                      publishByDefault: false,
+                    },
                   },
-                },
-              });
-              return config;
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -472,12 +543,21 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                usePrettyRefs: true,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  usePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -507,17 +587,26 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                ...dupNote(["vault2", "fooVault", "vault3"]),
-                config: {
-                  root: {
-                    publishByDefault: true,
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  ...dupNote(["vault2", "fooVault", "vault3"]),
+                  config: {
+                    root: {
+                      publishByDefault: true,
+                    },
                   },
-                },
-              });
-              return config;
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -560,12 +649,21 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo", "bar"],
-                siteRootDir,
-                usePrettyRefs: true,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo", "bar"],
+                  siteRootDir,
+                  usePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -595,20 +693,29 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot, vaults }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["foo", "bar"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  foo: {
-                    publishByDefault: {
-                      vault1: true,
-                      vault2: false,
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["foo", "bar"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  config: {
+                    foo: {
+                      publishByDefault: {
+                        vault1: true,
+                        vault2: false,
+                      },
                     },
                   },
-                },
-              });
-              return config;
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -644,11 +751,20 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
             (config) => {
-              config.site = createSiteConfig({
-                siteHierarchies: ["daily"],
-                siteRootDir,
-              });
-              return config;
+              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              ConfigUtils.setProp(
+                v4DefaultConfig,
+                "site",
+                createSiteConfig({
+                  siteHierarchies: ["daily"],
+                  siteRootDir,
+                })
+              );
+              ConfigUtils.setVaults(
+                v4DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return v4DefaultConfig;
             },
             {
               wsRoot,
@@ -721,18 +837,26 @@ describe("SiteUtils", () => {
                 const vaults = ConfigUtils.getVaults(config);
                 const bvault = vaults.find((ent) => ent.fsPath === "vault2");
                 bvault!.visibility = DVaultVisibility.PRIVATE;
-                const sconfig: DendronSiteConfig = {
-                  siteHierarchies: ["root"],
-                  siteRootDir,
-                  ...dupNote(opts.vaults[0]),
-                  config: {
-                    root: {
-                      publishByDefault: true,
+                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+                ConfigUtils.setProp(
+                  v4DefaultConfig,
+                  "site",
+                  createSiteConfig({
+                    siteHierarchies: ["root"],
+                    siteRootDir,
+                    ...dupNote(opts.vaults[0]),
+                    config: {
+                      root: {
+                        publishByDefault: true,
+                      },
                     },
-                  },
-                };
-                config.site = createSiteConfig(sconfig);
-                return config;
+                  })
+                );
+                ConfigUtils.setVaults(
+                  v4DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return v4DefaultConfig;
               },
               { wsRoot: opts.wsRoot }
             );

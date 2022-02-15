@@ -7,8 +7,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -24,8 +24,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -41,8 +41,8 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar.html\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

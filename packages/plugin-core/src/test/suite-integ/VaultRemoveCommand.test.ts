@@ -162,7 +162,8 @@ suite("VaultRemoveCommand", function () {
 
           const config = readYAML(configPath) as IntermediateDendronConfig;
           // confirm that duplicateNoteBehavior option exists
-          expect(config.site.duplicateNoteBehavior).toBeTruthy();
+          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          expect(publishingConfig.duplicateNoteBehavior).toBeTruthy();
 
           const { vaults } = getDWorkspace();
 
@@ -174,7 +175,9 @@ suite("VaultRemoveCommand", function () {
 
           const configNew = readYAML(configPath) as IntermediateDendronConfig;
           // confirm that duplicateNoteBehavior setting is gone
-          expect(configNew.site.duplicateNoteBehavior).toBeFalsy();
+          const publishingConfigNew =
+            ConfigUtils.getPublishingConfig(configNew);
+          expect(publishingConfigNew.duplicateNoteBehavior).toBeFalsy();
 
           done();
         },
@@ -224,7 +227,8 @@ suite("VaultRemoveCommand", function () {
           const config = readYAML(configPath) as IntermediateDendronConfig;
 
           // check that "vault2" is gone from payload
-          expect(config.site.duplicateNoteBehavior!.payload).toEqual([
+          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          expect(publishingConfig.duplicateNoteBehavior!.payload).toEqual([
             path.parse(vault.fsPath).base,
             "vault3",
           ]);

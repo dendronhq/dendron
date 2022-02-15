@@ -1,15 +1,49 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/StrictConfigV5",
+  "$ref": "#/definitions/ConfigForSchemaGenerator",
   "definitions": {
-    "StrictConfigV5": {
+    "ConfigForSchemaGenerator": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "version": {
           "type": "number",
-          "description": "Dendron version. Setup by plugin",
-          "const": 5
+          "enum": [
+            4,
+            5
+          ]
+        },
+        "dev": {
+          "$ref": "#/definitions/DendronDevConfig",
+          "description": "Development related options"
+        },
+        "site": {
+          "$ref": "#/definitions/DendronSiteConfig",
+          "description": "Configuration related to publishing notes"
+        },
+        "useFMTitle": {
+          "type": "boolean",
+          "description": "Use the title from frontmatter"
+        },
+        "useKatex": {
+          "type": "boolean",
+          "description": "Use katex for rendering math default: true"
+        },
+        "mermaid": {
+          "type": "boolean",
+          "description": "Enable mermaid diagram sytnax"
+        },
+        "useNoteTitleForLink": {
+          "type": "boolean",
+          "description": "If true, use the note title when displaying naked links"
+        },
+        "hierarchyDisplay": {
+          "type": "boolean",
+          "description": "Shoud show hiearchy"
+        },
+        "hierarchyDisplayTitle": {
+          "type": "string",
+          "description": "Title used for hiearchies Default: Children"
         },
         "commands": {
           "$ref": "#/definitions/DendronCommandConfig"
@@ -22,180 +56,417 @@
         },
         "publishing": {
           "$ref": "#/definitions/DendronPublishingConfig"
-        },
-        "noCaching": {
-          "type": "boolean",
-          "description": "Disable caching behavior"
-        },
-        "maxPreviewsCached": {
-          "type": "number",
-          "description": "Maximum number of rendered previews to cache in Dendron Engine. Note: this value is ignored when  {@link  DendronConfig.noCaching }  is set to true. When set this value must be greater than 0."
-        },
-        "noTelemetry": {
-          "type": "boolean",
-          "description": "Disable telemetry"
-        },
-        "dendronVersion": {
-          "type": "string",
-          "description": "Dendron version"
-        },
-        "site": {
-          "$ref": "#/definitions/DendronSiteConfig",
-          "description": "Configuration related to publishing notes"
-        },
-        "lookup": {
-          "$ref": "#/definitions/LegacyLookupConfig",
-          "description": "Configuration related to lookup v3."
-        },
-        "journal": {
-          "$ref": "#/definitions/LegacyJournalConfig"
-        },
-        "scratch": {
-          "$ref": "#/definitions/LegacyScratchConfig"
-        },
-        "insertNoteLink": {
-          "$ref": "#/definitions/LegacyInsertNoteLinkConfig"
-        },
-        "workspaces": {
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/DWorkspaceEntry"
-              },
-              {
-                "not": {}
-              }
-            ]
-          },
-          "description": "Workspaces"
-        },
-        "seeds": {
-          "type": "object",
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/SeedEntry"
-              },
-              {
-                "not": {}
-              }
-            ]
-          }
-        },
-        "vaults": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DVault"
-          },
-          "description": "Dendron vaults in workspace. Setup by plugin."
-        },
-        "hooks": {
-          "$ref": "#/definitions/DHookDict"
-        },
-        "lookupDontBubbleUpCreateNew": {
-          "type": "boolean",
-          "description": "When set to true `Create New` will not bubble up to the top of lookup results.\n\ndefault: false."
-        },
-        "lookupConfirmVaultOnCreate": {
-          "type": "boolean",
-          "description": "Pick vault when creating new note. [Docs](https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note)"
-        },
-        "useFMTitle": {
-          "type": "boolean",
-          "description": "Use the title from frontmatter"
-        },
-        "useNoteTitleForLink": {
-          "type": "boolean",
-          "description": "If true, use the note title when displaying naked links"
-        },
-        "mermaid": {
-          "type": "boolean",
-          "description": "Enable mermaid diagram sytnax"
-        },
-        "useNunjucks": {
-          "type": "boolean",
-          "description": "Use nunjucks templating"
-        },
-        "usePrettyRefs": {
-          "type": "boolean",
-          "description": "Use pretty refs for preview"
-        },
-        "useKatex": {
-          "type": "boolean",
-          "description": "Use katex for rendering math default: true"
-        },
-        "hierarchyDisplay": {
-          "type": "boolean",
-          "description": "Shoud show hiearchy"
-        },
-        "hierarchyDisplayTitle": {
-          "type": "string",
-          "description": "Title used for hiearchies Default: Children"
-        },
-        "graph": {
-          "$ref": "#/definitions/LegacyDendronGraphConfig",
-          "description": "Configuration for note and schema graphs"
-        },
-        "noAutoCreateOnDefinition": {
-          "type": "boolean",
-          "description": "Don't automatically create note when looking up definition"
-        },
-        "noLegacyNoteRef": {
-          "type": "boolean",
-          "description": "Turn off legacy note refs;"
-        },
-        "noXVaultWikiLink": {
-          "type": "boolean",
-          "description": "Disable xvault wiki links"
-        },
-        "initializeRemoteVaults": {
-          "type": "boolean",
-          "description": "Initialize remote vaults on startup Default: true"
-        },
-        "feedback": {
-          "type": "boolean",
-          "description": "If true, enable feedback widget"
-        },
-        "apiEndpoint": {
-          "type": "string",
-          "description": "If using backend API functionality"
-        },
-        "defaultInsertHierarchy": {
-          "type": "string",
-          "description": "Default is templates"
-        },
-        "dev": {
-          "$ref": "#/definitions/DendronDevConfig",
-          "description": "Development related options"
-        },
-        "workspaceVaultSync": {
-          "$ref": "#/definitions/DVaultSync",
-          "description": "How workspace vaults should be handled when using workspace \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nDefaults to `noCommit`."
-        },
-        "randomNote": {
-          "$ref": "#/definitions/LegacyRandomNoteConfig",
-          "description": "Configuration for Random Note Lookup Command"
-        },
-        "autoFoldFrontmatter": {
-          "type": "boolean",
-          "description": "Automatically fold frontmatter when opening a new note. False by default."
-        },
-        "insertNoteIndex": {
-          "$ref": "#/definitions/LegacyInsertNoteIndexConfig",
-          "description": "Configuration for Insert Note Index Command"
-        },
-        "maxNoteLength": {
-          "type": "number",
-          "description": "Notes that are too large can cause serious slowdowns for Dendron. For notes longer than this many characters, some features like backlinks will be disabled to avoid slowdowns. Other functionality like note lookups will continue to function.\n\nDefaults to 204800 characters, which is about 200 KiB."
-        },
-        "noRandomlyColoredTags": {
-          "type": "boolean",
-          "description": "Do not display the randomly generated colors for tags in the **editor**. Only color tag links if it has been configured in the frontmatter. False by default."
         }
       },
       "required": [
         "version"
+      ]
+    },
+    "DendronDevConfig": {
+      "type": "object",
+      "properties": {
+        "nextServerUrl": {
+          "type": "string",
+          "description": "Custom next server"
+        },
+        "nextStaticRoot": {
+          "type": "string",
+          "description": "Static assets for next"
+        },
+        "engineServerPort": {
+          "type": "number",
+          "description": "What port to use for engine server. Default behavior is to create at startup"
+        },
+        "enableWebUI": {
+          "type": "boolean",
+          "description": "Enable experimental web ui. Default is false"
+        },
+        "enableLinkCandidates": {
+          "type": "boolean",
+          "description": "Enable displaying and indexing link candidates. Default is false"
+        },
+        "enablePreviewV2": {
+          "type": "boolean",
+          "description": "Enable new preview as default"
+        },
+        "forceWatcherType": {
+          "type": "string",
+          "enum": [
+            "plugin",
+            "engine"
+          ],
+          "description": "Force the use of a specific type of watcher.\n\n- plugin: Uses VSCode's builtin watcher\n- engine: Uses the engine watcher, watching the files directly without VSCode"
+        },
+        "enableExportPodV2": {
+          "type": "boolean",
+          "description": "Enable export pod v2"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DendronSiteConfig": {
+      "type": "object",
+      "properties": {
+        "assetsPrefix": {
+          "type": "string",
+          "description": "If set, add prefix to all asset links"
+        },
+        "canonicalBaseUrl": {
+          "type": "string",
+          "description": "Use this as root for creating canonical url for sites"
+        },
+        "copyAssets": {
+          "type": "boolean",
+          "description": "Copy assets from vault to site. Default: true"
+        },
+        "customHeaderPath": {
+          "type": "string",
+          "description": "If set, path to a custom header to include in published sites"
+        },
+        "ga_tracking": {
+          "type": "string",
+          "description": "If set, use google analytics to track users"
+        },
+        "siteFaviconPath": {
+          "type": "string",
+          "description": "Path to favicon. Relative to workspace. Default: \"favicon.ico\""
+        },
+        "logo": {
+          "type": "string",
+          "description": "Path to site logo"
+        },
+        "siteIndex": {
+          "type": "string",
+          "description": "By default, the domain of your `siteHierarchies` page"
+        },
+        "siteHierarchies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Hierarchies to publish"
+        },
+        "siteLastModified": {
+          "type": "boolean",
+          "description": "If true, show a last modified on the site"
+        },
+        "siteRootDir": {
+          "type": "string",
+          "description": "Where your site will be published. Relative to Dendron workspace"
+        },
+        "siteRepoDir": {
+          "type": "string",
+          "description": "Location of the github repo where your site notes are located. By default, this is assumed to be your `workspaceRoot` if not set."
+        },
+        "siteNotesDir": {
+          "type": "string",
+          "description": "Folder where your notes will be kept. By default, \"notes\""
+        },
+        "siteUrl": {
+          "type": "string",
+          "description": "Url of site without trailing slash eg. dendron.so"
+        },
+        "githubCname": {
+          "type": "string",
+          "description": "Cname used for github pages\n- default: none"
+        },
+        "gh_edit_link": {
+          "type": "string",
+          "description": "If set, add edit on github to this site\""
+        },
+        "gh_edit_link_text": {
+          "type": "string"
+        },
+        "gh_edit_branch": {
+          "type": "string"
+        },
+        "gh_edit_view_mode": {
+          "type": "string",
+          "enum": [
+            "tree",
+            "edit"
+          ]
+        },
+        "gh_edit_repository": {
+          "type": "string"
+        },
+        "usePrettyRefs": {
+          "type": "boolean",
+          "description": "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source"
+        },
+        "hideBlockAnchors": {
+          "type": "boolean"
+        },
+        "showFrontMatterTags": {
+          "type": "boolean",
+          "description": "Whether frontmatter tags should be rendered in published websites. Defaults to true."
+        },
+        "noRandomlyColoredTags": {
+          "type": "boolean",
+          "description": "Do not display the randomly generated colors for tags. Only color tag links if it has been configured in the frontmatter. False by default."
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/LegacyHierarchyConfig"
+          },
+          "description": "Control publication on a per hierarchy basis"
+        },
+        "duplicateNoteBehavior": {
+          "$ref": "#/definitions/LegacyDuplicateNoteBehavior",
+          "description": "When publishing in multi-vault scenario, how to handle duplicate notes"
+        },
+        "writeStubs": {
+          "type": "boolean",
+          "description": "When publishing, should stubs be written to disk? Default: true NOTE: if this isn't set to true, will cause stub notes to be published with different ids each time"
+        },
+        "title": {
+          "type": "string",
+          "description": "SEO related values"
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "alt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url",
+            "alt"
+          ],
+          "additionalProperties": false,
+          "description": "Default SEO image for published pages"
+        },
+        "useContainers": {
+          "type": "boolean",
+          "description": "Use  {@link  https://github.com/Nevenall/remark-containers }  in published site"
+        },
+        "generateChangelog": {
+          "type": "boolean",
+          "description": "Generate changelog for published site Default: false"
+        },
+        "previewPort": {
+          "type": "boolean",
+          "description": "Set alternate port for preview Default: 8080"
+        },
+        "segmentKey": {
+          "type": "string",
+          "description": "If set, value of your segment key"
+        },
+        "cognitoUserPoolId": {
+          "type": "string",
+          "description": "Required for auth"
+        },
+        "cognitoClientId": {
+          "type": "string"
+        },
+        "usePrettyLinks": {
+          "type": "boolean",
+          "description": "notes are published without the .html file extension"
+        },
+        "useHashesForFMTags": {
+          "type": "boolean",
+          "description": "Display a `#` symbol in front of frontmatter tags in the tags listing. False by default."
+        }
+      },
+      "required": [
+        "siteHierarchies",
+        "siteRootDir"
+      ],
+      "additionalProperties": false
+    },
+    "LegacyHierarchyConfig": {
+      "type": "object",
+      "properties": {
+        "publishByDefault": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            }
+          ]
+        },
+        "noindexByDefault": {
+          "type": "boolean"
+        },
+        "customFrontmatter": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegacyCustomFMEntry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "LegacyCustomFMEntry": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "LegacyDuplicateNoteBehavior": {
+      "$ref": "#/definitions/LegacyUseVaultBehavior"
+    },
+    "LegacyUseVaultBehavior": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/LegacyDuplicateNoteAction"
+        },
+        "payload": {
+          "$ref": "#/definitions/LegacyUseVaultBehaviorPayload"
+        }
+      },
+      "required": [
+        "action",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "LegacyDuplicateNoteAction": {
+      "type": "string",
+      "const": "useVault"
+    },
+    "LegacyUseVaultBehaviorPayload": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "vault": {
+              "$ref": "#/definitions/DVault"
+            }
+          },
+          "required": [
+            "vault"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "DVault": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of vault"
+        },
+        "visibility": {
+          "$ref": "#/definitions/DVaultVisibility"
+        },
+        "fsPath": {
+          "type": "string",
+          "description": "Filesystem path to fault"
+        },
+        "workspace": {
+          "type": "string",
+          "description": "Indicate the workspace that this vault is part of"
+        },
+        "remote": {
+          "$ref": "#/definitions/RemoteEndpoint"
+        },
+        "userPermission": {
+          "$ref": "#/definitions/DPermission"
+        },
+        "noAutoPush": {
+          "type": "boolean",
+          "description": "If this is enabled, don't apply workspace push commands"
+        },
+        "sync": {
+          "$ref": "#/definitions/DVaultSync",
+          "description": "How the vault should be handled when using \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nThis setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.\n\nDefaults to `sync`."
+        },
+        "seed": {
+          "type": "string",
+          "description": "Id of a seed this vault belongs to"
+        }
+      },
+      "required": [
+        "fsPath"
+      ],
+      "additionalProperties": false
+    },
+    "DVaultVisibility": {
+      "type": "string",
+      "const": "private"
+    },
+    "RemoteEndpoint": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "git"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "DPermission": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "write": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "read",
+        "write"
+      ],
+      "additionalProperties": false
+    },
+    "DVaultSync": {
+      "type": "string",
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
       ]
     },
     "DendronCommandConfig": {
@@ -484,23 +755,6 @@
       ],
       "additionalProperties": false
     },
-    "RemoteEndpoint": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "const": "git"
-        },
-        "url": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "type",
-        "url"
-      ],
-      "additionalProperties": false
-    },
     "DendronSeedEntry": {
       "type": "object",
       "properties": {
@@ -527,83 +781,6 @@
         "url"
       ],
       "additionalProperties": false
-    },
-    "DVault": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of vault"
-        },
-        "visibility": {
-          "$ref": "#/definitions/DVaultVisibility"
-        },
-        "fsPath": {
-          "type": "string",
-          "description": "Filesystem path to fault"
-        },
-        "workspace": {
-          "type": "string",
-          "description": "Indicate the workspace that this vault is part of"
-        },
-        "remote": {
-          "$ref": "#/definitions/RemoteEndpoint"
-        },
-        "userPermission": {
-          "$ref": "#/definitions/DPermission"
-        },
-        "noAutoPush": {
-          "type": "boolean",
-          "description": "If this is enabled, don't apply workspace push commands"
-        },
-        "sync": {
-          "$ref": "#/definitions/DVaultSync",
-          "description": "How the vault should be handled when using \"add and commit\" and \"sync\" commands.\n\nOptions are:\n* skip: Skip them entirely. You must manage the repository manually.\n* noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.\n* noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.\n* sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.\n\nThis setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.\n\nDefaults to `sync`."
-        },
-        "seed": {
-          "type": "string",
-          "description": "Id of a seed this vault belongs to"
-        }
-      },
-      "required": [
-        "fsPath"
-      ],
-      "additionalProperties": false
-    },
-    "DVaultVisibility": {
-      "type": "string",
-      "const": "private"
-    },
-    "DPermission": {
-      "type": "object",
-      "properties": {
-        "read": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "write": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "read",
-        "write"
-      ],
-      "additionalProperties": false
-    },
-    "DVaultSync": {
-      "type": "string",
-      "enum": [
-        "skip",
-        "noPush",
-        "noCommit",
-        "sync"
-      ]
     },
     "DHookDict": {
       "type": "object",
@@ -1113,503 +1290,6 @@
         "tree",
         "edit"
       ]
-    },
-    "DendronSiteConfig": {
-      "type": "object",
-      "properties": {
-        "assetsPrefix": {
-          "type": "string",
-          "description": "If set, add prefix to all asset links"
-        },
-        "canonicalBaseUrl": {
-          "type": "string",
-          "description": "Use this as root for creating canonical url for sites"
-        },
-        "copyAssets": {
-          "type": "boolean",
-          "description": "Copy assets from vault to site. Default: true"
-        },
-        "customHeaderPath": {
-          "type": "string",
-          "description": "If set, path to a custom header to include in published sites"
-        },
-        "ga_tracking": {
-          "type": "string",
-          "description": "If set, use google analytics to track users"
-        },
-        "siteFaviconPath": {
-          "type": "string",
-          "description": "Path to favicon. Relative to workspace. Default: \"favicon.ico\""
-        },
-        "logo": {
-          "type": "string",
-          "description": "Path to site logo"
-        },
-        "siteIndex": {
-          "type": "string",
-          "description": "By default, the domain of your `siteHierarchies` page"
-        },
-        "siteHierarchies": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Hierarchies to publish"
-        },
-        "siteLastModified": {
-          "type": "boolean",
-          "description": "If true, show a last modified on the site"
-        },
-        "siteRootDir": {
-          "type": "string",
-          "description": "Where your site will be published. Relative to Dendron workspace"
-        },
-        "siteRepoDir": {
-          "type": "string",
-          "description": "Location of the github repo where your site notes are located. By default, this is assumed to be your `workspaceRoot` if not set."
-        },
-        "siteNotesDir": {
-          "type": "string",
-          "description": "Folder where your notes will be kept. By default, \"notes\""
-        },
-        "siteUrl": {
-          "type": "string",
-          "description": "Url of site without trailing slash eg. dendron.so"
-        },
-        "githubCname": {
-          "type": "string",
-          "description": "Cname used for github pages\n- default: none"
-        },
-        "gh_edit_link": {
-          "type": "string",
-          "description": "If set, add edit on github to this site\""
-        },
-        "gh_edit_link_text": {
-          "type": "string"
-        },
-        "gh_edit_branch": {
-          "type": "string"
-        },
-        "gh_edit_view_mode": {
-          "type": "string",
-          "enum": [
-            "tree",
-            "edit"
-          ]
-        },
-        "gh_edit_repository": {
-          "type": "string"
-        },
-        "usePrettyRefs": {
-          "type": "boolean",
-          "description": "Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source"
-        },
-        "hideBlockAnchors": {
-          "type": "boolean"
-        },
-        "showFrontMatterTags": {
-          "type": "boolean",
-          "description": "Whether frontmatter tags should be rendered in published websites. Defaults to true."
-        },
-        "noRandomlyColoredTags": {
-          "type": "boolean",
-          "description": "Do not display the randomly generated colors for tags. Only color tag links if it has been configured in the frontmatter. False by default."
-        },
-        "config": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/LegacyHierarchyConfig"
-          },
-          "description": "Control publication on a per hierarchy basis"
-        },
-        "duplicateNoteBehavior": {
-          "$ref": "#/definitions/LegacyDuplicateNoteBehavior",
-          "description": "When publishing in multi-vault scenario, how to handle duplicate notes"
-        },
-        "writeStubs": {
-          "type": "boolean",
-          "description": "When publishing, should stubs be written to disk? Default: true NOTE: if this isn't set to true, will cause stub notes to be published with different ids each time"
-        },
-        "title": {
-          "type": "string",
-          "description": "SEO related values"
-        },
-        "description": {
-          "type": "string"
-        },
-        "author": {
-          "type": "string"
-        },
-        "twitter": {
-          "type": "string"
-        },
-        "image": {
-          "type": "object",
-          "properties": {
-            "url": {
-              "type": "string"
-            },
-            "alt": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "url",
-            "alt"
-          ],
-          "additionalProperties": false,
-          "description": "Default SEO image for published pages"
-        },
-        "useContainers": {
-          "type": "boolean",
-          "description": "Use  {@link  https://github.com/Nevenall/remark-containers }  in published site"
-        },
-        "generateChangelog": {
-          "type": "boolean",
-          "description": "Generate changelog for published site Default: false"
-        },
-        "previewPort": {
-          "type": "boolean",
-          "description": "Set alternate port for preview Default: 8080"
-        },
-        "segmentKey": {
-          "type": "string",
-          "description": "If set, value of your segment key"
-        },
-        "cognitoUserPoolId": {
-          "type": "string",
-          "description": "Required for auth"
-        },
-        "cognitoClientId": {
-          "type": "string"
-        },
-        "usePrettyLinks": {
-          "type": "boolean",
-          "description": "notes are published without the .html file extension"
-        },
-        "useHashesForFMTags": {
-          "type": "boolean",
-          "description": "Display a `#` symbol in front of frontmatter tags in the tags listing. False by default."
-        }
-      },
-      "required": [
-        "siteHierarchies",
-        "siteRootDir"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyHierarchyConfig": {
-      "type": "object",
-      "properties": {
-        "publishByDefault": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "type": "boolean"
-              }
-            }
-          ]
-        },
-        "noindexByDefault": {
-          "type": "boolean"
-        },
-        "customFrontmatter": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LegacyCustomFMEntry"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "LegacyCustomFMEntry": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {}
-      },
-      "required": [
-        "key",
-        "value"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyDuplicateNoteBehavior": {
-      "$ref": "#/definitions/LegacyUseVaultBehavior"
-    },
-    "LegacyUseVaultBehavior": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "$ref": "#/definitions/LegacyDuplicateNoteAction"
-        },
-        "payload": {
-          "$ref": "#/definitions/LegacyUseVaultBehaviorPayload"
-        }
-      },
-      "required": [
-        "action",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyDuplicateNoteAction": {
-      "type": "string",
-      "const": "useVault"
-    },
-    "LegacyUseVaultBehaviorPayload": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "vault": {
-              "$ref": "#/definitions/DVault"
-            }
-          },
-          "required": [
-            "vault"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "LegacyLookupConfig": {
-      "type": "object",
-      "properties": {
-        "note": {
-          "$ref": "#/definitions/LegacyNoteLookupConfig"
-        }
-      },
-      "required": [
-        "note"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyNoteLookupConfig": {
-      "type": "object",
-      "properties": {
-        "selectionType": {
-          "$ref": "#/definitions/LegacyLookupSelectionType"
-        },
-        "leaveTrace": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "selectionType",
-        "leaveTrace"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyJournalConfig": {
-      "type": "object",
-      "properties": {
-        "dailyDomain": {
-          "type": "string"
-        },
-        "dailyVault": {
-          "type": "string",
-          "description": "If set, add all daily journals to specified vault"
-        },
-        "name": {
-          "type": "string"
-        },
-        "dateFormat": {
-          "type": "string"
-        },
-        "addBehavior": {
-          "$ref": "#/definitions/LegacyNoteAddBehavior"
-        },
-        "firstDayOfWeek": {
-          "type": "number",
-          "description": "0 is Sunday, 1 is Monday, ..."
-        }
-      },
-      "required": [
-        "dailyDomain",
-        "name",
-        "dateFormat",
-        "addBehavior",
-        "firstDayOfWeek"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyNoteAddBehavior": {
-      "type": "string",
-      "enum": [
-        "childOfDomain",
-        "childOfDomainNamespace",
-        "childOfCurrent",
-        "asOwnDomain"
-      ]
-    },
-    "LegacyScratchConfig": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "dateFormat": {
-          "type": "string"
-        },
-        "addBehavior": {
-          "$ref": "#/definitions/LegacyNoteAddBehavior"
-        }
-      },
-      "required": [
-        "name",
-        "dateFormat",
-        "addBehavior"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyInsertNoteLinkConfig": {
-      "type": "object",
-      "properties": {
-        "aliasMode": {
-          "$ref": "#/definitions/LegacyInsertNoteLinkAliasMode"
-        },
-        "multiSelect": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "aliasMode",
-        "multiSelect"
-      ],
-      "additionalProperties": false
-    },
-    "LegacyInsertNoteLinkAliasMode": {
-      "type": "string",
-      "enum": [
-        "snippet",
-        "selection",
-        "title",
-        "prompt",
-        "none"
-      ]
-    },
-    "DWorkspaceEntry": {
-      "type": "object",
-      "properties": {
-        "remote": {
-          "$ref": "#/definitions/RemoteEndpoint"
-        }
-      },
-      "required": [
-        "remote"
-      ],
-      "additionalProperties": false
-    },
-    "SeedEntry": {
-      "type": "object",
-      "properties": {
-        "branch": {
-          "type": "string",
-          "description": "Specific branch to pull from"
-        },
-        "site": {
-          "$ref": "#/definitions/SeedSite",
-          "description": "When in this seed, what url to use"
-        }
-      },
-      "additionalProperties": false
-    },
-    "LegacyDendronGraphConfig": {
-      "type": "object",
-      "properties": {
-        "zoomSpeed": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "zoomSpeed"
-      ],
-      "additionalProperties": false
-    },
-    "DendronDevConfig": {
-      "type": "object",
-      "properties": {
-        "nextServerUrl": {
-          "type": "string",
-          "description": "Custom next server"
-        },
-        "nextStaticRoot": {
-          "type": "string",
-          "description": "Static assets for next"
-        },
-        "engineServerPort": {
-          "type": "number",
-          "description": "What port to use for engine server. Default behavior is to create at startup"
-        },
-        "enableWebUI": {
-          "type": "boolean",
-          "description": "Enable experimental web ui. Default is false"
-        },
-        "enableLinkCandidates": {
-          "type": "boolean",
-          "description": "Enable displaying and indexing link candidates. Default is false"
-        },
-        "enablePreviewV2": {
-          "type": "boolean",
-          "description": "Enable new preview as default"
-        },
-        "forceWatcherType": {
-          "type": "string",
-          "enum": [
-            "plugin",
-            "engine"
-          ],
-          "description": "Force the use of a specific type of watcher.\n\n- plugin: Uses VSCode's builtin watcher\n- engine: Uses the engine watcher, watching the files directly without VSCode"
-        },
-        "enableExportPodV2": {
-          "type": "boolean",
-          "description": "Enable export pod v2"
-        }
-      },
-      "additionalProperties": false
-    },
-    "LegacyRandomNoteConfig": {
-      "type": "object",
-      "properties": {
-        "include": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Hiearchies to include"
-        },
-        "exclude": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Hiearchies to exclude"
-        }
-      },
-      "additionalProperties": false
-    },
-    "LegacyInsertNoteIndexConfig": {
-      "type": "object",
-      "properties": {
-        "marker": {
-          "type": "boolean",
-          "description": "Include marker when inserting note index."
-        }
-      },
-      "additionalProperties": false
     }
   }
 }

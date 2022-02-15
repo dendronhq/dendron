@@ -429,7 +429,7 @@ export class EngineUtils {
         });
         if (!linkCandidates.data)
           throw new DendronError({
-            message: "Failed to calculate note anchors",
+            message: "Failed to calculate link candidates",
             payload: {
               note: NoteUtils.toLogObj(note),
               anchorsError: anchors.error,

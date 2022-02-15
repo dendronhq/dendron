@@ -317,23 +317,24 @@ const getLinkCandidates = ({
       };
     }
     value.split(/\s+/).forEach((word) => {
-      const maybeNote = NoteUtils.getNotesByFnameFromEngine({
+      const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
         engine,
       }).filter((note) => note.stub !== true);
-      if (!_.isEmpty(maybeNote)) {
-        const candidate = {
-          type: "linkCandidate",
-          from: NoteUtils.toNoteLoc(note),
-          value: value.trim(),
-          position: textNode.position as Position,
-          to: {
-            fname: word,
-            vaultName: VaultUtils.getName(maybeNote[0].vault),
-          },
-        } as DLink;
-        linkCandidates.push(candidate);
-      }
+      linkCandidates.push(
+        ...possibleCandidates.map((candidate): DLink => {
+          return {
+            type: "linkCandidate",
+            from: NoteUtils.toNoteLoc(note),
+            value: value.trim(),
+            position: textNode.position as Position,
+            to: {
+              fname: word,
+              vaultName: VaultUtils.getName(candidate.vault),
+            },
+          };
+        })
+      );
     });
   });
   return linkCandidates;

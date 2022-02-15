@@ -1,3 +1,4 @@
+import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
 import vscode, { ProviderResult } from "vscode";
 import path from "path";
 import {
@@ -12,15 +13,16 @@ import { DendronContext, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BacklinkSortOrder } from "../types";
-import { DateFormatUtil } from "@dendronhq/common-all";
 import { Backlink, BacklinkFoundRef } from "./Backlink";
+import { Disposable } from "vscode-languageclient";
 
 export default class BacklinksTreeDataProvider
-  implements vscode.TreeDataProvider<Backlink>
+  implements vscode.TreeDataProvider<Backlink>, Disposable
 {
   private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
     Backlink | undefined | void
   >;
+  private _onEngineNoteStateChangedDisposable: Disposable;
   private _engineEvents;
   private _sortOrder: BacklinkSortOrder = BacklinkSortOrder.PathNames;
   readonly _isLinkCandidateEnabled: boolean | undefined;
@@ -48,11 +50,20 @@ export default class BacklinksTreeDataProvider
 
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
-    this.setupSubscriptions();
+    this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
   }
 
-  private setupSubscriptions(): void {
-    this._engineEvents.onEngineNoteStateChanged(() => {
+  dispose(): void {
+    if (this._onDidChangeTreeDataEmitter) {
+      this._onDidChangeTreeDataEmitter.dispose();
+    }
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+    }
+  }
+
+  private setupSubscriptions(): Disposable {
+    return this._engineEvents.onEngineNoteStateChanged(() => {
       const ctx = "refreshBacklinks";
       Logger.info({ ctx });
       this.refreshBacklinks();
@@ -64,7 +75,7 @@ export default class BacklinksTreeDataProvider
    */
   public refreshBacklinks = _.debounce(() => {
     this._onDidChangeTreeDataEmitter.fire();
-  }, 100);
+  }, 250);
 
   public getTreeItem(element: Backlink) {
     return element;
@@ -259,12 +270,7 @@ export default class BacklinksTreeDataProvider
         // We want to sort in descending order by last updated
         return ref2Updated - ref1Updated;
       });
-    } else {
-      Logger.error({
-        msg: `Unsupported sort order: '${sortOrder}' falling back to path sort order.`,
-      });
-      pathsSorted = this.shallowFirstPathSort(referencesByPath);
-    }
+    } else assertUnreachable(sortOrder);
 
     if (!pathsSorted.length) {
       return [];

@@ -617,6 +617,7 @@ export class DendronExtension implements IDendronExtension {
       }
     );
     this.backlinksDataProvider = backlinksTreeDataProvider;
+    this.context.subscriptions.push(backlinksTreeDataProvider);
 
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.BACKLINK_SORT_BY_LAST_UPDATED.key,

@@ -9,7 +9,9 @@ import {
   goUpTo,
   schemaModuleProps2File,
   tmpDir,
+  FileUtils,
 } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -156,5 +158,68 @@ describe("file2Schema", () => {
     );
     const schema = await file2Schema(fpath, root);
     expect(_.values(schema.schemas).length).toEqual(8);
+  });
+});
+
+describe("GIVEN matchFilePrefix", () => {
+  let fpath: string;
+  const prefix = "---";
+
+  beforeEach(() => {
+    const root = FileTestUtils.tmpDir().name;
+    fpath = path.join(root, "test-file.md");
+  });
+
+  describe("WHEN file starts with prefix", () => {
+    test("THEN return true", async () => {
+      fs.writeFileSync(fpath, "---\nfoo");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: true,
+      });
+    });
+  });
+
+  describe("WHEN file matches prefix exactly", () => {
+    test("THEN return true", async () => {
+      fs.writeFileSync(fpath, "---");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: true,
+      });
+    });
+  });
+
+  describe("WHEN file does not start with prefix", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "--!");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+
+  describe("WHEN file is empty", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+
+  describe("WHEN file is shorter than prefix", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "--");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+  describe("WHEN file match is not at start of file", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, " ---");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
   });
 });

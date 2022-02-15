@@ -6,6 +6,7 @@ import {
   NoteProps,
   NotesCache,
   NoteUtils,
+  RespV3,
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaUtils,
@@ -516,4 +517,47 @@ export async function findNonNoteFile(opts: {
   return undefined;
 }
 
-export { tmp, DirResult };
+class FileUtils {
+  /**
+   * Check if a file starts with a prefix string
+   * @param fpath: full path to the file
+   * @param prefix: string prefix to check for
+   */
+  static matchFilePrefix = async ({
+    fpath,
+    prefix,
+  }: {
+    fpath: string;
+    prefix: string;
+  }): Promise<RespV3<boolean>> => {
+    // solution adapted from https://stackoverflow.com/questions/70707646/reading-part-of-file-in-node
+    return new Promise((resolve) => {
+      const fileStream = fs.createReadStream(fpath, { highWaterMark: 60 });
+      const prefixLength = prefix.length;
+      fileStream
+        .on("error", (err) =>
+          resolve({
+            error: new DendronError({ innerError: err, message: "error" }),
+          })
+        )
+        // we got to the end without a match
+        .on("end", () => resolve({ data: false }))
+        .on("data", (chunk: Buffer) => {
+          // eslint-disable-next-line no-plusplus
+          for (let i = 0; i < chunk.length; i++) {
+            const a = String.fromCharCode(chunk[i]);
+            // not a match, return
+            if (a !== prefix[i]) {
+              resolve({ data: false });
+            }
+            // all matches
+            if (i === prefixLength - 1) {
+              resolve({ data: true });
+            }
+          }
+        });
+    });
+  };
+}
+
+export { tmp, DirResult, FileUtils };

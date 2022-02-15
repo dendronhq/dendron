@@ -16,6 +16,7 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
+  FileUtils,
   findDownTo,
   findUpTo,
   genHash,
@@ -109,7 +110,7 @@ export class WorkspaceUtils {
     wsRoot,
     vaults,
     fpath,
-  }: { fpath: string } & WorkspaceOpts) {
+  }: { fpath: string } & WorkspaceOpts): Promise<boolean> {
     // check if we have markdown file
     if (!fpath.endsWith(".md")) {
       return false;
@@ -119,9 +120,10 @@ export class WorkspaceUtils {
       return false;
     }
 
-    // if markdown file, does it have frontmatter?
-    // this is a rough heuristic
-    return (await fs.readFile(fpath, { encoding: "utf8" })).startsWith("---");
+    // if markdown file, does it have frontmatter? check for `---` at beginning of file
+    return (
+      (await FileUtils.matchFilePrefix({ fpath, prefix: "---" })).data || false
+    );
   }
 
   static isNativeWorkspace(workspace: DWorkspaceV2) {

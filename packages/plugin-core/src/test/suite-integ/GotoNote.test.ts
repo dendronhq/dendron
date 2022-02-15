@@ -131,6 +131,29 @@ suite("GotoNote", function () {
       });
     });
 
+    test("go to new note with template in a different vault", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults }) => {
+          // Note is in different vault from template
+          const vault = vaults[1];
+          await createGoToNoteCmd().run({
+            qs: "bar.ch1",
+            vault,
+          });
+          expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
+          const content =
+            VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+          expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
+          done();
+        },
+      });
+    });
+
     test("go to note with anchor", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

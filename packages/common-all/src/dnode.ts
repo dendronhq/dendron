@@ -444,11 +444,12 @@ export class NoteUtils {
       const maybeTemplate = schema.data.template;
       if (maybeTemplate) {
         // TODO: Support xvault with user prompting for this flow
-        const tempNote = NoteUtils.getNoteByFnameFromEngine({
+        // Get first valid template note. If there are multiple template matches, apply first one.
+        // This is temp until we get xvault support
+        const tempNote = NoteUtils.getNotesByFnameFromEngine({
           fname: maybeTemplate.id,
-          vault: note.vault,
           engine,
-        });
+        })[0];
 
         if (tempNote) {
           SchemaUtils.applyTemplate({

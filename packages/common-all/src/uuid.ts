@@ -7,7 +7,7 @@ import { customAlphabet as nanoidInsecure } from "nanoid/non-secure";
  */
 const SHORT_ID_LENGTH = 12;
 /** Default length for nanoids. */
-const LONG_ID_LENGTH = 32;
+const LONG_ID_LENGTH = 23;
 
 const alphanumericLowercase = "0123456789abcdefghijklmnopqrstuvwxyz";
 

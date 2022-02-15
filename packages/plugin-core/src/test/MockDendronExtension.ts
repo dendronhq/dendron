@@ -102,6 +102,14 @@ export class MockDendronExtension implements IDendronExtension {
     throw new Error("Method not implemented in MockDendronExtension.");
   }
 
+  async activateWatchers(): Promise<void> {
+    return;
+  }
+
+  async deactivate(): Promise<void> {
+    return;
+  }
+
   /**
    * Note: No-Op
    * @param _cb

@@ -1,21 +1,22 @@
 import {
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
   DendronError,
   DNodeUtils,
   DVault,
   DWorkspaceV2,
   getSlugger,
+  IntermediateDendronConfig,
   isBlockAnchor,
+  isNotUndefined,
   NoteProps,
   VaultUtils,
   WorkspaceFolderCode,
   WorkspaceOpts,
   WorkspaceType,
-  ConfigUtils,
-  isNotUndefined,
 } from "@dendronhq/common-all";
 import {
+  FileUtils,
   findDownTo,
   findUpTo,
   genHash,
@@ -100,6 +101,29 @@ export class WorkspaceUtils {
       )
     );
     return dendronWorkspaceFolders.filter(isNotUndefined);
+  }
+
+  /**
+   * Check if a file is a dendron note (vs a regular file or something else entirely)
+   */
+  static async isDendronNote({
+    wsRoot,
+    vaults,
+    fpath,
+  }: { fpath: string } & WorkspaceOpts): Promise<boolean> {
+    // check if we have markdown file
+    if (!fpath.endsWith(".md")) {
+      return false;
+    }
+    // if markdown file, check if it is in a dendron vault
+    if (!WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath })) {
+      return false;
+    }
+
+    // if markdown file, does it have frontmatter? check for `---` at beginning of file
+    return (
+      (await FileUtils.matchFilePrefix({ fpath, prefix: "---" })).data || false
+    );
   }
 
   static isNativeWorkspace(workspace: DWorkspaceV2) {

@@ -1,4 +1,5 @@
 import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import {
   ConfigFileUtils,
   createRunnableGoogleDocsV2PodConfigSchema,
@@ -14,7 +15,6 @@ import {
   JSONSchemaType,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
-  Source,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -46,10 +46,13 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   public createPod(
     config: RunnableGoogleDocsV2PodConfig
   ): ExportPodV2<GoogleDocsExportReturnType> {
+    const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+    const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
+    const port = openPortFile({ fpath });
     return new GoogleDocsExportPodV2({
       podConfig: config,
-      engine: ExtensionProvider.getEngine(),
-      source: Source.PLUGIN
+      engine,
+      port,
     });
   }
 
@@ -184,13 +187,13 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     const createdCount = createdDocs?.length ?? 0;
     const updatedCount = updatedDocs?.length ?? 0;
     if (createdDocs && createdCount > 0) {
-      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         createdDocs,
         engine
       );
     }
     if (updatedDocs && updatedCount > 0) {
-      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         updatedDocs,
         engine
       );

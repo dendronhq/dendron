@@ -63,23 +63,22 @@ export class GoogleDocsExportPodV2
   private _engine: DEngineClient;
   private _wsRoot: string;
   private _vaults: DVault[];
-  private _source: string;
+  private _port: number;
 
   constructor({
     podConfig,
     engine,
-    source
+    port,
   }: {
     podConfig: RunnableGoogleDocsV2PodConfig;
     engine: DEngineClient;
-    source: string;
+    port: number;
   }) {
     this._config = podConfig;
     this._engine = engine;
     this._vaults = engine.vaults;
     this._wsRoot = engine.wsRoot;
-    this._source = source;
-
+    this._port = port;
   }
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
@@ -146,10 +145,9 @@ export class GoogleDocsExportPodV2
   ) {
     if (Time.now().toSeconds() > expirationTime) {
       accessToken = await PodUtils.refreshGoogleAccessToken(
-        this._wsRoot,
         refreshToken,
-        this._source,
-        this._config.connectionId,
+        this._port,
+        this._config.connectionId
       );
     }
     return accessToken;
@@ -332,7 +330,7 @@ export class GoogleDocsExportPodV2
 }
 
 export class GoogleDocsUtils {
-  static async updateNoteWithCustomFrontmatter(
+  static async updateNotesWithCustomFrontmatter(
     records: GoogleDocsFields[],
     engine: DEngineClient
   ) {

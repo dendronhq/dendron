@@ -92,7 +92,7 @@
     {
       "label": "gdoc-export-v2",
       "type": "shell",
-      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives.one --podId testing-gdoc --wsRoot ${workspaceFolder}/../../test-workspace ",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives --podId testing-gdoc --wsRoot ${workspaceFolder}/../../test-workspace ",
       "problemMatcher": [],
     },
   ]

@@ -16,7 +16,7 @@ export interface ExportPodFactory<T extends RunnablePodConfigV2, R> {
  */
 export interface ExportPodV2<R> {
   /**
-   * Bulk export of notes. Allows for external API optimizations such as call
+   * Export of one or more notes. Bulk export of notes. Allows for external API optimizations such as call
    * batching
    * @param input
    */

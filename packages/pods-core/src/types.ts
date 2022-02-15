@@ -20,11 +20,6 @@ export type PodItemV4 = {
 
 export type PodKind = "import" | "export" | "publish";
 
-export enum Source {
-  PLUGIN = "plugin",
-  CLI = "cli"
-}
-
 export type GDocUtilMethods = {
   showInputBox: (arg0: any, arg1?: string) => Promise<string | undefined>;
   openFileInEditor: (arg0: NoteProps) => Promise<void>;

@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import {
   AirtableExportPodV2,
   ConfigFileUtils,
@@ -23,7 +24,6 @@ import {
   RunnableGoogleDocsV2PodConfig,
   RunnableNotionV2PodConfig,
   RunnableJSONV2PodConfig,
-  Source,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -327,11 +327,13 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             expirationTime: Time.now().toSeconds() + 5000,
             connectionId: "foo",
           };
-
+          const { wsRoot } = opts;
+          const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+          const port = openPortFile({ fpath });
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            source: Source.PLUGIN
+            port,
           });
           const response = {
             data: [
@@ -368,6 +370,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               wsRoot,
               vault: vaults[0],
             });
+            await fs.writeFileSync(
+              path.join(wsRoot, ".dendron.port.cli"),
+              "300"
+            );
           },
         }
       );
@@ -385,11 +391,13 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             expirationTime: Time.now().toSeconds() + 5000,
             connectionId: "foo",
           };
-
+          const { wsRoot } = opts;
+          const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+          const port = openPortFile({ fpath });
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            source: Source.PLUGIN
+            port,
           });
           const response = {
             data: [],
@@ -419,6 +427,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               wsRoot,
               vault: vaults[0],
             });
+            await fs.writeFileSync(
+              path.join(wsRoot, ".dendron.port.cli"),
+              "300"
+            );
           },
         }
       );
@@ -472,16 +484,13 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
       );
     });
   });
-
-
 });
-
 
 /**
  * JSONExportPod
  */
 
- describe("GIVEN a JSON Export Pod with a particular config", () => {
+describe("GIVEN a JSON Export Pod with a particular config", () => {
   describe("WHEN exporting a note and destination is clipboard", () => {
     test("THEN expect note to be exported", async () => {
       await runEngineTestV5(

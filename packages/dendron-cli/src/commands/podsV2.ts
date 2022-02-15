@@ -44,7 +44,7 @@ export function setupPodArgs(args: yargs.Argv) {
   });
   args.config(
     "podConfig",
-    "*.yaml configuration file for pod",
+    "*.yml configuration file for pod",
     function (configPath) {
       const path = URI.parse(configPath);
       const configValues = ConfigFileUtils.getConfigByFPath({
@@ -52,7 +52,7 @@ export function setupPodArgs(args: yargs.Argv) {
       });
       if (_.isUndefined(configValues)) {
         throw new DendronError({
-          message: `unable to find configuratin file at ${path.fsPath}`,
+          message: `unable to find configuration file at ${path.fsPath}`,
         });
       }
       return { configValues };

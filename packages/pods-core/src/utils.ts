@@ -13,7 +13,7 @@ import addFormats from "ajv-formats";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { PodClassEntryV4, PodItemV4, Source } from "./types";
+import { PodClassEntryV4, PodItemV4 } from "./types";
 import { docs_v1 as docsV1 } from "googleapis";
 import download from "image-downloader";
 import axios from "axios";
@@ -519,15 +519,10 @@ export class PodUtils {
   };
 
   static async refreshGoogleAccessToken(
-    wsRoot: string,
     refreshToken: string,
-    source: string,
-    connectionId?: string,
+    port: number,
+    connectionId?: string
   ) {
-    const portFileName = source === Source.PLUGIN ? ".dendron.port" : ".dendron.port.cli";
-    const port = fs.readFileSync(path.join(wsRoot, portFileName), {
-      encoding: "utf8",
-    });
     try {
       const result = await axios.get(
         `http://localhost:${port}/api/oauth/refreshToken`,

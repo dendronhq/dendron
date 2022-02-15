@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   DendronError,
   DEngineClient,
   ErrorFactory,
@@ -21,7 +22,6 @@ import {
   NotionUtils,
   PodExportScope,
   PodV2Types,
-  Source,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
@@ -29,6 +29,7 @@ import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./podsV2";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import Airtable from "@dendronhq/airtable";
 import _ from "lodash";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 
 export { CommandCLIOpts as ExportPodV2CLIOpts };
 
@@ -90,15 +91,21 @@ export class ExportPodV2CLICommand extends CLICommand<
         return new NotionExportPodV2({
           podConfig: config,
         });
-      case PodV2Types.GoogleDocsExportV2:
+      case PodV2Types.GoogleDocsExportV2: {
+        const { wsRoot } = engine;
+        const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+        const port = openPortFile({ fpath });
+
         return new GoogleDocsExportPodV2({
           podConfig: config,
           engine,
-          source: Source.CLI
+          port,
         });
+      }
+
       default:
         throw new DendronError({
-          message: "the requested pod type is not implemented yet",
+          message: `the requested pod type :${config.podType} is not implemented yet`,
         });
     }
   }
@@ -106,7 +113,10 @@ export class ExportPodV2CLICommand extends CLICommand<
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "execute";
     const { server, serverSockets, engine, config, payload } = opts;
-    this.multiNoteExportCheck({destination: config.destination, exportScope: config.exportScope})
+    this.multiNoteExportCheck({
+      destination: config.destination,
+      exportScope: config.exportScope,
+    });
     const pod = this.createPod(config, engine);
     this.L.info({ ctx, msg: "running pod..." });
     const exportReturnValue = await pod.exportNotes(payload);
@@ -114,7 +124,7 @@ export class ExportPodV2CLICommand extends CLICommand<
       exportReturnValue,
       podType: config.podType,
       engine,
-      config
+      config,
     });
     this.L.info({ ctx, msg: "done execute" });
     return new Promise((resolve) => {
@@ -136,7 +146,7 @@ export class ExportPodV2CLICommand extends CLICommand<
     exportReturnValue: any;
     podType: PodV2Types;
     engine: DEngineClient;
-    config: any
+    config: any;
   }) {
     const { exportReturnValue, podType, engine, config } = opts;
     switch (podType) {
@@ -147,9 +157,11 @@ export class ExportPodV2CLICommand extends CLICommand<
       case PodV2Types.NotionExportV2:
         return this.onNotionExportComplete({ exportReturnValue, engine });
       case PodV2Types.MarkdownExportV2:
-        return this.onMarkdownExportComplete({exportReturnValue, config});
+        return this.onMarkdownExportComplete({ exportReturnValue, config });
       case PodV2Types.JSONExportV2:
-        return this.onJSONExportComplete({exportReturnValue, config})
+        return this.onJSONExportComplete({ exportReturnValue, config });
+      default:
+        assertUnreachable(podType);
     }
   }
 
@@ -182,13 +194,13 @@ export class ExportPodV2CLICommand extends CLICommand<
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
     if (createdDocs) {
-      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         createdDocs,
         engine
       );
     }
     if (updatedDocs) {
-      await GoogleDocsUtils.updateNoteWithCustomFrontmatter(
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         updatedDocs,
         engine
       );
@@ -212,25 +224,31 @@ export class ExportPodV2CLICommand extends CLICommand<
     }
   }
 
-  async onMarkdownExportComplete(opts: {exportReturnValue: MarkdownExportReturnType, config: any}){
+  async onMarkdownExportComplete(opts: {
+    exportReturnValue: MarkdownExportReturnType;
+    config: any;
+  }) {
     const { exportReturnValue, config } = opts;
     if (ResponseUtil.hasError(exportReturnValue)) {
       this.print(ErrorFactory.safeStringify(exportReturnValue.error));
     }
     const content = exportReturnValue.data?.exportedNotes;
-    if(config.destination === "clipboard" && _.isString(content)){
-      this.print(content)
+    if (config.destination === "clipboard" && _.isString(content)) {
+      this.print(content);
     }
   }
 
-  async onJSONExportComplete(opts: {exportReturnValue: JSONExportReturnType, config: any}){
+  async onJSONExportComplete(opts: {
+    exportReturnValue: JSONExportReturnType;
+    config: any;
+  }) {
     const { exportReturnValue, config } = opts;
     if (ResponseUtil.hasError(exportReturnValue)) {
       this.print(ErrorFactory.safeStringify(exportReturnValue.error));
     }
     const content = exportReturnValue.data?.exportedNotes;
-    if(config.destination === "clipboard" && _.isString(content)){
-      this.print(content)
+    if (config.destination === "clipboard" && _.isString(content)) {
+      this.print(content);
     }
   }
 

@@ -5,7 +5,7 @@ import {
   PROMPT,
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
-import { GDocUtilMethods, PodUtils, Source } from "../utils";
+import { GDocUtilMethods, PodUtils } from "../utils";
 import axios from "axios";
 import _ from "lodash";
 import {
@@ -19,6 +19,7 @@ import {
 } from "@dendronhq/common-all";
 import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 
 const ID = "dendron.gdoc";
 
@@ -412,11 +413,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
 
     /** refreshes token if token has already expired */
     if (Time.now().toSeconds() > expirationTime) {
-      accessToken = await PodUtils.refreshGoogleAccessToken(
-        wsRoot,
-        refreshToken,
-        Source.PLUGIN
-      );
+      const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
+      const port = openPortFile({ fpath });
+      accessToken = await PodUtils.refreshGoogleAccessToken(refreshToken, port);
     }
 
     const hierarchyDestOptions = {

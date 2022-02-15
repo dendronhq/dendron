@@ -1175,76 +1175,6 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is legacy",
-    {
-      ctx,
-      modConfigCb: (config) => {
-        config.version = 4;
-        return config;
-      },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-        DendronExtension.version = () => "0.81.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-    },
-    () => {
-      test("THEN: config migration is prompted on init", (done) => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(4);
-
-        expect(promptSpy.returnValues[0]).toEqual(true);
-        expect(confirmationSpy.called).toBeTruthy();
-
-        done();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is up to date",
-    {
-      ctx,
-      modConfigCb: (config) => {
-        config.version = 5;
-        return config;
-      },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-        DendronExtension.version = () => "0.81.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-    },
-    () => {
-      test("THEN: config migration is not prompted on init", (done) => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(5);
-
-        expect(promptSpy.returnValues[0]).toEqual(false);
-        expect(confirmationSpy.called).toBeFalsy();
-
-        done();
-      });
-    }
-  );
-
-  describeMultiWS(
     "GIVEN: current version is 0.82.0 and config is legacy",
     {
       ctx,
@@ -1261,7 +1191,6 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-
         DendronExtension.version = () => "0.82.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
@@ -1297,8 +1226,79 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-
         DendronExtension.version = () => "0.82.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is not prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(5);
+
+        expect(promptSpy.returnValues[0]).toEqual(false);
+        expect(confirmationSpy.called).toBeFalsy();
+
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is 0.83.0 and config is legacy",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 4;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+
+        DendronExtension.version = () => "0.83.0";
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN: config migration is prompted on init", (done) => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const config = ws.config;
+        expect(config.version).toEqual(4);
+
+        expect(promptSpy.returnValues[0]).toEqual(true);
+        expect(confirmationSpy.called).toBeTruthy();
+
+        done();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN: current version is 0.83.0 and config is up to date",
+    {
+      ctx,
+      modConfigCb: (config) => {
+        config.version = 5;
+        return config;
+      },
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        promptSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "maybePromptConfigMigration"
+        );
+        confirmationSpy = sinon.spy(
+          ConfigMigrationUtils,
+          "showConfigMigrationConfirmationMessage"
+        );
+
+        DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },

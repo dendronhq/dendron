@@ -436,7 +436,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.82.0",
               previousVersion: "0.62.0",
               dendronConfig,
               wsConfig,
@@ -626,7 +626,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.82.0",
               previousVersion: "0.64.0",
               dendronConfig,
               wsConfig,
@@ -675,7 +675,7 @@ suite("Migration", function () {
 
             // and new workspace namespace should be correctly mapped
             const expectedWorkspaceConfig: DendronWorkspaceConfig = {
-              dendronVersion: "0.81.0",
+              dendronVersion: "0.82.0",
               vaults: [
                 {
                   fsPath: "vault1",
@@ -781,7 +781,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.82.0",
               previousVersion: "0.69.0",
               dendronConfig,
               wsConfig,
@@ -915,7 +915,7 @@ suite("Migration", function () {
           },
         },
         () => {
-          DendronExtension.version = () => "0.80.0";
+          DendronExtension.version = () => "0.82.0";
           test("publishing config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
@@ -989,7 +989,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.82.0",
               previousVersion: "0.81.0",
               dendronConfig,
               wsConfig,

@@ -74,7 +74,7 @@ suite("BaseExportPodCommand", function () {
       () => {
         const cmd = new TestExportPodCommand();
 
-        test("THEN hierarchy note props should be in the export payload", async () => {
+        test("THEN hierarchy note props should be in the export payload AND a note with a hierarchy match but in a different vault should not appear", async () => {
           const payload = await cmd.enrichInputs({
             exportScope: PodExportScope.Hierarchy,
           });

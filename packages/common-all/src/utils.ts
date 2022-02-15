@@ -714,7 +714,9 @@ export class ConfigUtils {
   }
 
   static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
-    return this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType;
+    return (
+      this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"
+    );
   }
 
   // set

@@ -9,7 +9,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { isInsidePath } from "@dendronhq/common-server";
-import { AnchorUtils, DConfig } from "@dendronhq/engine-server";
+import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, window } from "vscode";
@@ -45,12 +45,10 @@ export class CopyNoteLinkCommand extends BasicCommand<
     window.showInformationMessage(`${link} copied`);
   }
 
-  private async getUserLinkAnchorPreference(): Promise<
-    "line" | "block" | null
-  > {
-    const { config, wsRoot } = ExtensionProvider.getDWorkspace();
+  private async getUserLinkAnchorPreference(): Promise<"line" | "block"> {
+    const { config } = ExtensionProvider.getDWorkspace();
     let anchorType = ConfigUtils.getNonNoteLinkAnchorType(config);
-    if (anchorType === undefined) {
+    if (anchorType === "prompt") {
       // The preferred anchor type is not set, so ask the user if they want line numbers or block anchors
       const preference = await window.showQuickPick(
         [
@@ -58,7 +56,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
             label: "block",
             description: "Use block anchors like `^fx2d`",
             detail:
-              "Links will always point to the right place, but Dendron must insert a short comment into the file.",
+              "Always links to the right place. A short text is inserted into the file.",
           },
           {
             label: "line",
@@ -75,16 +73,9 @@ export class CopyNoteLinkCommand extends BasicCommand<
       );
       // User cancelled the prompt
       if (preference?.label !== "line" && preference?.label !== "block") {
-        return null;
+        return "line";
       }
       anchorType = preference.label;
-      // Otherwise, apply the selection and save the config
-      ConfigUtils.setNonNoteLinkAnchorType(config, anchorType);
-      await DConfig.writeConfig({ wsRoot, config });
-      // Inform the user that this is the default now
-      window.showInformationMessage(
-        `Dendron will use ${anchorType} anchors in files that are not notes. If you would like to change this later, you can use the ${DENDRON_COMMANDS.CONFIGURE_RAW.title}.`
-      );
     }
     return anchorType;
   }
@@ -116,7 +107,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
       } else {
         // Otherwise, we need to create the correct link based on user preference.
         const anchorType = await this.getUserLinkAnchorPreference();
-        if (anchorType === "line" || anchorType === null) {
+        if (anchorType === "line") {
           // If the user prefers line anchors (or they cancelled the prompt), generate a line number anchor.
           // This is used for cancelled prompts too since it's a safe operation, it won't modify the file.
           const line = editor.selection.start.line + 1; // line anchors are 1-indexed, vscode is 0

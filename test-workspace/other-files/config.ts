@@ -43,7 +43,7 @@ export class DConfig {
 
   /**
    * Create a backup of dendron.yml with an optional custom infix string. ^iRXV8AFm3hSJ
-   * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
+   * e.g.) createBackup(wsRoot, "foo") will result in a backup file name ^VwEHhuhP4bbK
    * `dendron.yyyy.MM.dd.HHmmssS.foo.yml` ^backup-file
    *
    * @param wsRoot workspace root

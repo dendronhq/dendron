@@ -4,7 +4,6 @@ import { env } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
 import { PublishCLICommand } from "../src/commands";
-import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DevCLICommand } from "../src/commands/devCLICommand";
 import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
@@ -23,8 +22,6 @@ if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {
 
 const buildYargs = yargs;
 
-new BuildSiteV2CLICommand().buildCmd(buildYargs);
-new BuildSiteV2CLICommand("buildSite").buildCmd(buildYargs);
 new ExportPodCLICommand().buildCmd(buildYargs);
 new LaunchEngineServerCommand().buildCmd(buildYargs);
 new ImportPodCLICommand().buildCmd(buildYargs);

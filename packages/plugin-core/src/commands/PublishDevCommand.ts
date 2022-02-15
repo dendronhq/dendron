@@ -1,14 +1,10 @@
-import { DENDRON_COMMANDS } from "../constants";
-import {
-  getSiteRootDirPath,
-  checkPreReq,
-  NextJSPublishUtils,
-} from "../utils/site";
-import { BasicCommand } from "./base";
+import { DENDRON_EMOJIS } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import { window } from "vscode";
-import { DENDRON_EMOJIS } from "@dendronhq/common-all";
+import { DENDRON_COMMANDS } from "../constants";
+import { getSiteRootDirPath, NextJSPublishUtils } from "../utils/site";
+import { BasicCommand } from "./base";
 
 type CommandOutput = {
   pid: number;
@@ -26,7 +22,7 @@ export class PublishDevCommand extends BasicCommand<CommandOutput> {
     if (!fs.existsSync(sitePath)) {
       fs.ensureDirSync(sitePath);
     }
-    return checkPreReq();
+    return;
   }
 
   async execute() {

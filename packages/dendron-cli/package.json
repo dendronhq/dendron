@@ -57,9 +57,6 @@
     "ts-json-schema-generator": "^0.95.0",
     "yargs": "^15.4.1"
   },
-  "peerDependencies": {
-    "@dendronhq/dendron-11ty-legacy": "^0.64.0"
-  },
   "devDependencies": {
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",

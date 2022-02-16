@@ -22,7 +22,8 @@ export default class BacklinksTreeDataProvider
   private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
     Backlink | undefined | void
   >;
-  private _onEngineNoteStateChangedDisposable: Disposable;
+  private _onEngineNoteStateChangedDisposable: Disposable | undefined;
+  private _onDidChangeActiveTextEditorDisposable: Disposable | undefined;
   private _engineEvents;
   private _sortOrder: BacklinkSortOrder = BacklinkSortOrder.PathNames;
   readonly _isLinkCandidateEnabled: boolean | undefined;
@@ -50,7 +51,7 @@ export default class BacklinksTreeDataProvider
 
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
-    this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
+    this.setupSubscriptions();
   }
 
   dispose(): void {
@@ -60,20 +61,31 @@ export default class BacklinksTreeDataProvider
     if (this._onEngineNoteStateChangedDisposable) {
       this._onEngineNoteStateChangedDisposable.dispose();
     }
+    if (this._onDidChangeActiveTextEditorDisposable) {
+      this._onDidChangeActiveTextEditorDisposable.dispose();
+    }
   }
 
-  private setupSubscriptions(): Disposable {
-    return this._engineEvents.onEngineNoteStateChanged(() => {
-      const ctx = "refreshBacklinks";
-      Logger.info({ ctx });
-      this.refreshBacklinks();
-    });
+  private setupSubscriptions(): void {
+    this._onDidChangeActiveTextEditorDisposable =
+      vscode.window.onDidChangeActiveTextEditor(() => {
+        const ctx = "refreshBacklinksChangeActiveTextEditor";
+        Logger.info({ ctx });
+        this.refreshBacklinks();
+      });
+
+    this._onEngineNoteStateChangedDisposable =
+      this._engineEvents.onEngineNoteStateChanged(() => {
+        const ctx = "refreshBacklinksEngineNoteStateChanged";
+        Logger.info({ ctx });
+        this.refreshBacklinks();
+      });
   }
 
   /**
    * Tells VSCode to refresh the backlinks view. Debounced to fire every 100 ms
    */
-  public refreshBacklinks = _.debounce(() => {
+  private refreshBacklinks = _.debounce(() => {
     this._onDidChangeTreeDataEmitter.fire();
   }, 250);
 

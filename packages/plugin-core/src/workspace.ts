@@ -605,10 +605,6 @@ export class DendronExtension implements IDendronExtension {
       this.getDWorkspace().config.dev?.enableLinkCandidates
     );
 
-    vscode.window.onDidChangeActiveTextEditor(() =>
-      backlinksTreeDataProvider.refreshBacklinks()
-    );
-
     const backlinkTreeView = vscode.window.createTreeView(
       DendronTreeViewKey.BACKLINKS,
       {

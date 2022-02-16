@@ -14,6 +14,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
@@ -131,15 +132,19 @@ suite("GotoNote", function () {
       });
     });
 
-    test("go to new note with template in a different vault", (done) => {
-      runLegacyMultiWorkspaceTest({
+    describeMultiWS(
+      "GIVEN a new note and a template in different vaults",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
         },
-        onInit: async ({ vaults }) => {
-          // Note is in different vault from template
+      },
+      () => {
+        test("THEN new note uses that template", async () => {
+          // Template is in vault 1. Note is in vault 2
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[1];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -149,10 +154,45 @@ suite("GotoNote", function () {
           const content =
             VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
           expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
-          done();
+        });
+      }
+    );
+
+    describeMultiWS(
+      "GIVEN a new note and multiple templates in different vaults with the same name",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Template is in vault 1 and 3
+          await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            genRandomId: true,
+            body: "food ch2 template in vaultThree",
+            fname: "bar.template.ch1",
+            vault: vaults[2],
+          });
         },
-      });
-    });
+      },
+      () => {
+        test("THEN new note uses the template that's in the same vault", async () => {
+          // Try to create note in vault 3
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[2];
+          await createGoToNoteCmd().run({
+            qs: "bar.ch1",
+            vault,
+          });
+          expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
+          const content =
+            VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+          expect(
+            content.indexOf("food ch2 template in vaultThree") >= 0
+          ).toBeTruthy();
+        });
+      }
+    );
 
     test("go to note with anchor", (done) => {
       runLegacyMultiWorkspaceTest({

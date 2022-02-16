@@ -386,9 +386,6 @@ export class SiteUtils {
       const { key, value } = fm;
       _.set(note, `custom.${key}`, value);
     });
-    if (hConfig.noindexByDefault && !_.has(note, "custom.noindex")) {
-      _.set(note, "custom.noindex", true);
-    }
     return {
       ...note,
       body: stripLocalOnlyTags(note.body),
@@ -407,7 +404,6 @@ export class SiteUtils {
     const rConfig: HierarchyConfig = _.defaults(
       _.get(hierarchyConfig, "root", {
         publishByDefault: true,
-        noindexByDefault: false,
         customFrontmatter: [],
       })
     );

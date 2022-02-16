@@ -878,6 +878,17 @@ suite("Migration", function () {
                     public: true,
                     private: false,
                   },
+                  noindexByDefault: true,
+                  customFrontmatter: [
+                    {
+                      key: "foo",
+                      value: 1,
+                    },
+                    {
+                      key: "bar",
+                      value: 2,
+                    },
+                  ],
                 },
                 ipsum: {
                   publishByDefault: false,
@@ -1053,7 +1064,6 @@ suite("Migration", function () {
               siteHierarchies: ["dendron", "lorem", "ipsum"],
               enableSiteLastModified: true,
               siteRootDir: "docs",
-              siteRepoDir: "https://github.com/dendronhq/dendron-site",
               siteUrl: "https://foo.dev.dendron.so",
               enableFrontmatterTags: true,
               enableHashesForFMTags: true,
@@ -1067,6 +1077,16 @@ suite("Migration", function () {
                     public: true,
                     private: false,
                   },
+                  customFrontmatter: [
+                    {
+                      key: "foo",
+                      value: 1,
+                    },
+                    {
+                      key: "bar",
+                      value: 2,
+                    },
+                  ],
                 },
                 ipsum: {
                   publishByDefault: false,

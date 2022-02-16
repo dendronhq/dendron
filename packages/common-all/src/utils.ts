@@ -18,6 +18,7 @@ import {
   SEOProps,
   NotePropsDict,
   LegacyDuplicateNoteBehavior,
+  LegacyHierarchyConfig,
 } from "./types";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
@@ -752,10 +753,13 @@ export class ConfigUtils {
 
   static getHierarchyConfig(
     config: IntermediateDendronConfig
-  ): { [key: string]: HierarchyConfig } | undefined {
+  ):
+    | { [key: string]: HierarchyConfig }
+    | { [key: string]: LegacyHierarchyConfig }
+    | undefined {
     if (configIsV4(config)) {
       const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return siteConfig.config as { [key: string]: HierarchyConfig };
+      return siteConfig.config as { [key: string]: LegacyHierarchyConfig };
     } else {
       return ConfigUtils.getPublishing(config).hierarchy;
     }

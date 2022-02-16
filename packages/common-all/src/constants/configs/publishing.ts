@@ -153,10 +153,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site Root Dir",
       desc: "Where your site will be published, relative to the Dendron workspace.",
     },
-    siteRepoDir: {
-      label: "Site Repo Dir",
-      desc: "Location of the Github repository where your site notes are located. By default this is assumed to be your workspace root.",
-    },
     siteUrl: {
       label: "Site URL",
       desc: "URL of the site without trailing slash.",
@@ -194,10 +190,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
     generateChangelog: {
       label: "Generate Changelog",
       desc: "Generate changelog for published site.",
-    },
-    previewPort: {
-      label: "Preview Port",
-      desc: "Set an alternative port to be used for previewing published site.",
     },
     segmentKey: {
       label: "Segment Key",

@@ -14,7 +14,7 @@ import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { TestExportPodCommand } from "./TestExportCommand";
 import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import sinon from "sinon";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { PodUIControls } from "../../../../components/pods/PodControls";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ExtensionProvider } from "../../../../ExtensionProvider";
@@ -62,17 +62,24 @@ suite("BaseExportPodCommand", function () {
       "WHEN exporting a hierarchy scope",
       {
         ctx,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[1],
+            fname: "foo.test",
+          });
+        }
       },
       () => {
         const cmd = new TestExportPodCommand();
 
-        test("THEN hierarchy note props should be in the export payload", async () => {
+        test("THEN hierarchy note props should be in the export payload AND a note with a hierarchy match but in a different vault should not appear", async () => {
           const payload = await cmd.enrichInputs({
             exportScope: PodExportScope.Hierarchy,
           });
 
-          // 'foo' note and its child:
+          // 'foo' note and its child: foo.test should not appear
           expect(payload?.payload.length).toEqual(2);
         });
 

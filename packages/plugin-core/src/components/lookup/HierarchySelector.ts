@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, DVault } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import * as vscode from "vscode";
@@ -15,9 +15,10 @@ import { NoteLookupProviderUtils } from "./NoteLookupProviderUtils";
 export interface HierarchySelector {
   /**
    * A method for getting the hierarchy in an async manner. Returning undefined
-   * should be interpreted that no hierarchy was selected.
+   * should be interpreted that no hierarchy was selected. It also returns the 
+   * vault of selected hierarchy.
    */
-  getHierarchy(): Promise<string | undefined>;
+  getHierarchy(): Promise<{hierarchy: string, vault: DVault} | undefined>;
 }
 
 /**
@@ -25,8 +26,8 @@ export interface HierarchySelector {
  * controller V3.
  */
 export class QuickPickHierarchySelector implements HierarchySelector {
-  getHierarchy(): Promise<string | undefined> {
-    return new Promise<string | undefined>((resolve) => {
+  getHierarchy(): Promise<{hierarchy: string, vault: DVault} | undefined> {
+    return new Promise<{hierarchy: string, vault: DVault} | undefined>((resolve) => {
       const lookupCreateOpts: LookupControllerV3CreateOpts = {
         nodeType: "note",
         disableVaultSelection: true,
@@ -63,7 +64,8 @@ export class QuickPickHierarchySelector implements HierarchySelector {
             resolve(undefined);
           } else {
             const hierarchy = data.selectedItems[0].fname;
-            resolve(hierarchy);
+            const vault = data.selectedItems[0].vault;
+            resolve({hierarchy, vault});
           }
           NoteLookupProviderUtils.cleanup({
             id: PROVIDER_ID,

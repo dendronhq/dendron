@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-154-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-155-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -397,6 +397,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/Kyleskiller"><img src="https://avatars.githubusercontent.com/u/66365977?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sam Wagner</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AKyleskiller" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/fatman-"><img src="https://avatars.githubusercontent.com/u/1256084?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sai Kishore Komanduri</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=fatman-" title="Documentation">📖</a></td>
     <td align="center"><a href="http://sheinlinphyo.com"><img src="https://avatars.githubusercontent.com/u/13214144?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shein Lin Phyo</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Penguinlay" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://www.patrickyates.me/"><img src="https://avatars.githubusercontent.com/u/2180488?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Yates</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=opcon" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/commits?author=opcon" title="Code">💻</a></td>
   </tr>
 </table>
 

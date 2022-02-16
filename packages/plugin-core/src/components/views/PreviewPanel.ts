@@ -1,15 +1,24 @@
 import {
   assertUnreachable,
+  DendronASTDest,
   DendronEditorViewKey,
   DMessageEnum,
   getWebEditorViewEntry,
+  isWebUri,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
   NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  DendronASTTypes,
+  handleImage,
+  Image,
+  MDUtilsV5,
+  visit,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -70,6 +79,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     } else {
       const viewColumn = vscode.ViewColumn.Beside; // Editor column to show the new webview panel in.
       const preserveFocus = true;
+      const port = this._ext.port!;
+      const engine = this._ext.getEngine();
+      const { wsRoot } = engine;
 
       const { bundleName: name, label } = getWebEditorViewEntry(
         DendronEditorViewKey.NOTE_PREVIEW
@@ -88,13 +100,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           enableFindWidget: true,
           localResourceRoots: WebViewUtils.getLocalResourceRoots(
             this._ext.context
-          ),
+          ).concat(vscode.Uri.file(wsRoot)),
         }
       );
-
-      const port = this._ext.port!;
-      const engine = this._ext.getEngine();
-      const { wsRoot } = engine;
 
       const webViewAssets = WebViewUtils.getJsAndCss(name);
 
@@ -212,44 +220,46 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     // shown in the preview
     this._onDidChangeActiveTextEditor =
       vscode.window.onDidChangeActiveTextEditor(
-        sentryReportingCallback((editor: vscode.TextEditor | undefined) => {
-          if (
-            !editor ||
-            editor.document.uri.fsPath !==
-              vscode.window.activeTextEditor?.document.uri.fsPath
-          ) {
-            return;
+        sentryReportingCallback(
+          async (editor: vscode.TextEditor | undefined) => {
+            if (
+              !editor ||
+              editor.document.uri.fsPath !==
+                vscode.window.activeTextEditor?.document.uri.fsPath
+            ) {
+              return;
+            }
+
+            const uri = editor.document.uri;
+            const { wsRoot, vaults } = this._ext.getDWorkspace();
+            if (
+              !WorkspaceUtils.isPathInWorkspace({
+                wsRoot,
+                vaults,
+                fpath: uri.fsPath,
+              })
+            ) {
+              return;
+            }
+
+            const maybeNote = this._ext.wsUtils.tryGetNoteFromDocument(
+              editor.document
+            );
+
+            if (!maybeNote) {
+              return;
+            }
+
+            this._panel!.webview.postMessage({
+              type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+              data: {
+                note: maybeNote,
+                syncChangedNote: true,
+              },
+              source: "vscode",
+            } as OnDidChangeActiveTextEditorMsg);
           }
-
-          const uri = editor.document.uri;
-          const { wsRoot, vaults } = this._ext.getDWorkspace();
-          if (
-            !WorkspaceUtils.isPathInWorkspace({
-              wsRoot,
-              vaults,
-              fpath: uri.fsPath,
-            })
-          ) {
-            return;
-          }
-
-          const maybeNote = this._ext.wsUtils.tryGetNoteFromDocument(
-            editor.document
-          );
-
-          if (!maybeNote) {
-            return;
-          }
-
-          this._panel!.webview.postMessage({
-            type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-            data: {
-              note: maybeNote,
-              syncChangedNote: true,
-            },
-            source: "vscode",
-          } as OnDidChangeActiveTextEditorMsg);
-        })
+        )
       );
 
     // If the note contents have changed, update the preview with the new
@@ -266,6 +276,28 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
 
   private sendRefreshMessage(panel: vscode.WebviewPanel, note: NoteProps) {
     const syncChangedNote = true;
+
+    const parser = MDUtilsV5.procRemarkFull({
+      dest: DendronASTDest.MD_DENDRON,
+      engine: this._ext.getEngine(),
+      fname: note.fname,
+      vault: note.vault,
+    });
+    const tree = parser.parse(note.body);
+    visit(
+      tree,
+      [DendronASTTypes.IMAGE, DendronASTTypes.EXTENDED_IMAGE],
+      (image: Image) => {
+        if (!isWebUri(image.url)) {
+          handleImage({ node: image, proc: parser });
+          image.url = panel.webview
+            .asWebviewUri(vscode.Uri.file(image.url))
+            .toString();
+        }
+      }
+    );
+    note.body = parser.stringify(tree);
+
     return panel.webview.postMessage({
       type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
       data: {

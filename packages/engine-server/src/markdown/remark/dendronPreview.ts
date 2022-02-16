@@ -1,4 +1,3 @@
-import { APIUtils, AssetGetRequest } from "@dendronhq/common-all";
 import { createDisposableLogger, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Image } from "mdast";
@@ -8,7 +7,6 @@ import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { RemarkUtils } from ".";
-import { EngineUtils } from "../../utils";
 import { MDUtilsV5 } from "../utilsv5";
 
 type PluginOpts = {};
@@ -19,14 +17,12 @@ type PluginOpts = {};
  *   When `true`, the image URL will be a full path to the image on disk instead.
  * @returns
  */
-function handleImage({
+export function handleImage({
   proc,
   node,
-  useFullPathUrl = false,
 }: {
   proc: Unified.Processor;
   node: Image;
-  useFullPathUrl?: boolean;
 }) {
   const { logger, dispose } = createDisposableLogger("handleImage");
   try {
@@ -38,37 +34,9 @@ function handleImage({
     }
     // assume that the path is relative to vault
     const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-    const fpath = path.join(vault2Path({ vault, wsRoot }), node.url);
-    if (useFullPathUrl === true) {
-      logger.debug({
-        ctx,
-        wsRoot,
-        vault,
-        url: node.url,
-        fpath,
-        useFullPathUrl,
-      });
-      node.url = fpath;
-      return;
-    }
-    const resp = EngineUtils.getEnginePort({ wsRoot });
-    if (resp.error) {
-      logger.error(resp.error);
-      return;
-    }
-    const port: number = resp.data;
-    const url = EngineUtils.getLocalEngineUrl({ port }) + "/api/assets";
-    const params: AssetGetRequest = {
-      fpath,
-      ws: wsRoot,
-    };
-    node.url = APIUtils.genUrlWithQS({ url, params });
-    logger.debug({
-      ctx,
-      url: node.url,
-      useFullPathUrl,
-      opts: MDUtilsV5.getProcOpts(proc),
-    });
+    const fpath = path.join(vault2Path({ wsRoot, vault }), node.url);
+    node.url = fpath;
+    return;
   } finally {
     dispose();
   }
@@ -95,7 +63,7 @@ export function dendronHoverPreview(
     visit(tree, (node, index, parent) => {
       if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
         // Hover preview can't use API URL's because they are http not https, so we instead have to get the image from disk.
-        return handleImage({ proc, node, useFullPathUrl: true });
+        return handleImage({ proc, node });
       }
       // Remove the frontmatter because it will break the output
       if (RemarkUtils.isFrontmatter(node) && parent) {

@@ -54,6 +54,12 @@ import {
   newRange,
   GetDecorationsPayload,
   DendronASTDest,
+  GetAnchorsRequest,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
+  GetNoteLinksPayload,
+  Optional,
+  assertUnreachable,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -66,7 +72,7 @@ import _ from "lodash";
 import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { MDUtilsV5, ProcFlavor } from "./markdown";
+import { AnchorUtils, LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
 import { runAllDecorators } from "./markdown/decorations";
 import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
@@ -160,6 +166,39 @@ export class DendronEngineV2 implements DEngine {
     };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(this.config, this.logger);
+  }
+
+  async getLinks(
+    opts: Optional<GetLinksRequest, "ws">
+  ): Promise<GetNoteLinksPayload> {
+    const { type, note } = opts;
+    let links;
+    switch (type) {
+      case "regular":
+        links = LinkUtils.findLinks({
+          note,
+          engine: this,
+        });
+        break;
+      case "candidate":
+        links = LinkUtils.findLinkCandidates({
+          note,
+          engine: this,
+        });
+        break;
+      default:
+        assertUnreachable(type);
+    }
+    return { data: links, error: null };
+  }
+
+  async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
+    return {
+      data: await AnchorUtils.findAnchors({
+        note: opts.note,
+      }),
+      error: null,
+    };
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -635,7 +674,6 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    const notesMap = NoteUtils.createFnameNoteMap(_.values(this.notes), true);
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
@@ -645,7 +683,6 @@ export class DendronEngineV2 implements DEngine {
           const note = await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
-            notesMap,
           });
           this.notes[id] = note;
         }

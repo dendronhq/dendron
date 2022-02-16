@@ -27,6 +27,27 @@ type IntermediateNewConfig = Partial<
 
 export type IntermediateDendronConfig = StrictConfigV4 | StrictConfigV5;
 
+// note: this is _only_ used to generate the JSON schema for validation.
+// ts-json-schema-generator doesn't handle intersecting properties in union types very well,
+// so this type is hand picked to pass it to the generator.
+// do not use it in codebase other than schema generation.
+export type ConfigForSchemaGenerator = Partial<IntermediateNewConfig> &
+  Partial<
+    Pick<
+      IntermediateOldConfig,
+      | "dev"
+      | "site"
+      | "useFMTitle"
+      | "useKatex"
+      | "mermaid"
+      | "useNoteTitleForLink"
+      | "hierarchyDisplay"
+      | "hierarchyDisplayTitle"
+    >
+  > & {
+    version: 4 | 5;
+  };
+
 /**
  * Strict intermediate config types.
  */

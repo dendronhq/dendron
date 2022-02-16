@@ -5,7 +5,9 @@ import {
   EngineRenameNoteRequest,
   EngineUpdateNoteRequest,
   EngineWriteRequest,
+  GetAnchorsRequest,
   GetDecorationsRequest,
+  GetLinksRequest,
   GetNoteBlocksPayload,
   GetNoteBlocksRequest,
   NoteQueryRequest,
@@ -13,6 +15,7 @@ import {
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
+import { AnchorUtils } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
 import asyncHandler from "express-async-handler";
 import { getLogger } from "../core";
@@ -131,6 +134,28 @@ router.post(
     const { ws } = opts;
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(res, await engine.getDecorations(opts));
+  })
+);
+
+router.post(
+  "/links",
+  asyncHandler(async (req: Request, res: Response) => {
+    const opts = req.body as GetLinksRequest;
+    const { ws } = opts;
+    const engine = await getWSEngine({ ws });
+    const links = await engine.getLinks(opts);
+    ExpressUtils.setResponse(res, links);
+  })
+);
+
+router.post(
+  "/anchors",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { note } = req.body as GetAnchorsRequest;
+    const anchors = AnchorUtils.findAnchors({
+      note,
+    });
+    ExpressUtils.setResponse(res, { data: anchors, error: null });
   })
 );
 

@@ -29,7 +29,9 @@ import { DendronError } from "./error";
 import {
   DEngineInitPayload,
   GetDecorationsPayload,
+  GetNoteAnchorsPayload,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
@@ -163,6 +165,12 @@ export type GetDecorationsRequest = {
   }[];
   text: string;
 } & Partial<WorkspaceRequest>;
+export type GetAnchorsRequest = { note: NoteProps };
+export type GetLinksRequest = {
+  note: NoteProps;
+  /** regular is backlinks for wikilinks, hashtags, user tags etc., candidate is for backlink candidates */
+  type: "regular" | "candidate";
+} & WorkspaceRequest;
 
 export type SchemaDeleteRequest = {
   id: string;
@@ -511,6 +519,24 @@ export class DendronAPI extends API {
   ): Promise<GetDecorationsPayload> {
     const resp = await this._makeRequest({
       path: "note/decorations",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async getLinks(req: GetLinksRequest): Promise<GetNoteLinksPayload> {
+    const resp = await this._makeRequest({
+      path: "note/links",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async getAnchors(req: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
+    const resp = await this._makeRequest({
+      path: "note/anchors",
       method: "post",
       body: req,
     });

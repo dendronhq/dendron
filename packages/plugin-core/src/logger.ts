@@ -13,6 +13,7 @@ import {
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
 import * as vscode from "vscode";
 import { FileItem } from "./external/fileutils/FileItem";
+import _ from "lodash";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -160,11 +161,18 @@ export class Logger {
     _opts?: { show?: boolean }
   ) => {
     if (Logger.cmpLevel(lvl)) {
-      const payloadWithErrorAsPlainObject = {
-        ...payload,
-        error: payload.error ? error2PlainObject(payload.error) : payload.error,
-      };
-      const stringMsg = customStringify(payloadWithErrorAsPlainObject);
+      let stringMsg: string;
+      if (_.isString(payload)) {
+        stringMsg = payload;
+      } else {
+        const payloadWithErrorAsPlainObject = {
+          ...payload,
+          error: payload.error
+            ? error2PlainObject(payload.error)
+            : payload.error,
+        };
+        stringMsg = customStringify(payloadWithErrorAsPlainObject);
+      }
       Logger.logger?.[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now

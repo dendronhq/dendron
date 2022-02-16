@@ -1,6 +1,5 @@
 import { customAlphabet as nanoid } from "nanoid";
 import { customAlphabet as nanoidInsecure } from "nanoid/non-secure";
-import { alphanumeric } from "nanoid-dictionary";
 
 /** Using this length, according to [nanoid collision calculator](https://zelark.github.io/nano-id-cc/),
  * generating 1000 IDs per hour, it would take around 919 years to have 1 percent chance of a single collision.
@@ -8,7 +7,9 @@ import { alphanumeric } from "nanoid-dictionary";
  */
 const SHORT_ID_LENGTH = 12;
 /** Default length for nanoids. */
-const LONG_ID_LENGTH = 21;
+const LONG_ID_LENGTH = 23;
+
+const alphanumericLowercase = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /**
  * Generates a random identifier.
@@ -25,7 +26,7 @@ const LONG_ID_LENGTH = 21;
  *
  * @returns A url-safe, random identifier.
  */
-export const genUUID = nanoid(alphanumeric, LONG_ID_LENGTH);
+export const genUUID = nanoid(alphanumericLowercase, LONG_ID_LENGTH);
 
 /** Generates a shorter random identifier, faster but with potential cryptographic risks.
  *
@@ -36,4 +37,7 @@ export const genUUID = nanoid(alphanumeric, LONG_ID_LENGTH);
  *
  * @returns A url-safe, random identifier.
  */
-export const genUUIDInsecure = nanoidInsecure(alphanumeric, SHORT_ID_LENGTH);
+export const genUUIDInsecure = nanoidInsecure(
+  alphanumericLowercase,
+  SHORT_ID_LENGTH
+);

@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-155-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-156-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -400,6 +400,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
   </tr>
   <tr>
     <td align="center"><a href="http://www.patrickyates.me/"><img src="https://avatars.githubusercontent.com/u/2180488?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Yates</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=opcon" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/commits?author=opcon" title="Code">💻</a></td>
+    <td align="center"><a href="https://trevorsullivan.net"><img src="https://avatars.githubusercontent.com/u/466713?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Trevor Sullivan</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Apcgeek86" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

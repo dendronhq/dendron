@@ -1471,6 +1471,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "pcgeek86",
+      "name": "Trevor Sullivan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/466713?v=4",
+      "profile": "https://trevorsullivan.net",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

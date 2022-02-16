@@ -1,6 +1,6 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
-import title from "@dendronhq/title";
+import title from "title";
 import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";

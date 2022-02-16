@@ -103,6 +103,10 @@ img {
 
 hr {
   height: 1px;
+  // `border-width` is already this by default (browser default style), but Ant
+  // design's stylesheet overrides the height and hr depends on `border-width` to
+  // set its height instead. Setting explicitly so we don't depend on the default.
+  border-width: 1px;
   padding: 0;
   margin: $sp-6 0;
   background-color: $border-color;

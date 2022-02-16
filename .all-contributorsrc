@@ -1460,6 +1460,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "opcon",
+      "name": "Patrick Yates",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2180488?v=4",
+      "profile": "http://www.patrickyates.me/",
+      "contributions": [
+        "doc",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -771,14 +771,23 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       let updateSortOrder: sinon.SinonStub;
+      let backlinksTreeDataProvider: BacklinksTreeDataProvider;
+      let mockEvents: MockEngineEvents;
 
       beforeEach(() => {
+        mockEvents = new MockEngineEvents();
+        backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+          mockEvents,
+          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
+        );
+
         updateSortOrder = sinon
           .stub(BacklinksTreeDataProvider.prototype, "updateSortOrder")
           .returns(undefined);
       });
       afterEach(() => {
         updateSortOrder.restore();
+        backlinksTreeDataProvider.dispose();
       });
 
       test("AND a note gets created, THEN the data provider refresh event gets invoked", (done) => {
@@ -788,12 +797,6 @@ suite("BacklinksTreeDataProvider", function () {
           note: testNoteProps,
           status: "create",
         };
-
-        const mockEvents = new MockEngineEvents();
-        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-          mockEvents,
-          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
-        );
 
         backlinksTreeDataProvider.onDidChangeTreeData(() => {
           done();
@@ -811,12 +814,6 @@ suite("BacklinksTreeDataProvider", function () {
           status: "update",
         };
 
-        const mockEvents = new MockEngineEvents();
-        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-          mockEvents,
-          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
-        );
-
         backlinksTreeDataProvider.onDidChangeTreeData(() => {
           done();
         });
@@ -831,12 +828,6 @@ suite("BacklinksTreeDataProvider", function () {
           note: testNoteProps,
           status: "delete",
         };
-
-        const mockEvents = new MockEngineEvents();
-        const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-          mockEvents,
-          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
-        );
 
         backlinksTreeDataProvider.onDidChangeTreeData(() => {
           done();

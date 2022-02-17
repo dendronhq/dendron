@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  DendronError,
   DVault,
   NoteProps,
   NoteUtils,
@@ -7,9 +8,7 @@ import {
 } from "@dendronhq/common-all";
 import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
-  AnchorUtils,
   DendronASTDest,
-  LinkUtils,
   MDUtilsV5,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -152,28 +151,49 @@ export class NoteSyncService implements INoteSyncService {
     }
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links
-    const links = LinkUtils.findLinks({ note, engine });
-    note.links = links;
+    const links = await engine.getLinks({ note, type: "regular" });
+    if (!links.data) {
+      throw new DendronError({
+        message: "Unable to calculate the backlinks in note",
+        payload: {
+          note: NoteUtils.toLogObj(note),
+          error: links.error,
+        },
+      });
+    }
+    note.links = links.data;
 
     // if only frontmatter changed, don't bother with heavy updates
     if (!fmChangeOnly) {
-      const notesMap = NoteUtils.createFnameNoteMap(
-        _.values(engine.notes),
-        true
-      );
-      const anchors = await AnchorUtils.findAnchors({
+      const anchors = await engine.getAnchors({
         note,
-        wsRoot: engine.wsRoot,
       });
-      note.anchors = anchors;
+      if (!anchors.data) {
+        throw new DendronError({
+          message: "Unable to calculate backlinks in note",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            error: anchors.error,
+          },
+        });
+      }
+      note.anchors = anchors.data;
 
       if (this._extension.workspaceService?.config.dev?.enableLinkCandidates) {
-        const linkCandidates = LinkUtils.findLinkCandidates({
+        const linkCandidates = await engine.getLinks({
           note,
-          notesMap,
-          engine,
+          type: "candidate",
         });
-        note.links = links.concat(linkCandidates);
+        if (!linkCandidates.data) {
+          throw new DendronError({
+            message: "Unable to calculate the backlink candidates in note",
+            payload: {
+              note: NoteUtils.toLogObj(note),
+              error: linkCandidates.error,
+            },
+          });
+        }
+        note.links = note.links.concat(linkCandidates.data);
       }
     }
 

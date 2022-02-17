@@ -22,10 +22,14 @@ import {
   Event,
   EventEmitter,
   FuseEngine,
+  GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IntermediateDendronConfig,
@@ -34,6 +38,7 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
   RenameNoteOpts,
@@ -525,5 +530,18 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       ws: this.ws,
     });
     return out;
+  }
+
+  getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
+    return this.api.getAnchors(opts);
+  }
+
+  getLinks(
+    opts: Optional<GetLinksRequest, "ws">
+  ): Promise<GetNoteLinksPayload> {
+    return this.api.getLinks({
+      ws: this.ws,
+      ...opts,
+    });
   }
 }

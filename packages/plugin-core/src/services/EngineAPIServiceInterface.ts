@@ -11,10 +11,14 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IntermediateDendronConfig,
@@ -22,6 +26,7 @@ import {
   NoteFNamesDict,
   NoteProps,
   NotePropsDict,
+  Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
   RenameNoteOpts,
@@ -111,4 +116,8 @@ export interface IEngineAPIService {
   getConfig(): Promise<RespV2<IntermediateDendronConfig>>;
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload>;
+  getLinks: (
+    opts: Optional<GetLinksRequest, "ws">
+  ) => Promise<GetNoteLinksPayload>;
+  getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
 }

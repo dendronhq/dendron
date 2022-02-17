@@ -14,8 +14,9 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
-import type { NoteFNamesDict } from "../utils";
+import type { NoteFNamesDict, Optional } from "../utils";
 import { DendronASTDest, ProcFlavor } from "./unified";
+import { GetAnchorsRequest, GetLinksRequest } from "..";
 
 export enum ResponseCode {
   OK = 200,
@@ -511,6 +512,9 @@ export type GetDecorationsPayload = RespV2<{
   decorations?: Decoration[];
   diagnostics?: Diagnostic[];
 }>;
+export type GetNoteLinksPayload = RespV2<DLink[]>;
+export type GetAnchorsResp = { [index: string]: DNoteAnchorPositioned };
+export type GetNoteAnchorsPayload = RespV2<GetAnchorsResp>;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -588,6 +592,10 @@ export type DEngine = DCommonProps &
     getDecorations: (
       opts: GetDecorationsOpts
     ) => Promise<GetDecorationsPayload>;
+    getLinks: (
+      opts: Optional<GetLinksRequest, "ws">
+    ) => Promise<GetNoteLinksPayload>;
+    getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
   };
 
 /**

@@ -15,10 +15,14 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   Event,
+  GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IntermediateDendronConfig,
@@ -26,6 +30,7 @@ import {
   NoteFNamesDict,
   NoteProps,
   NotePropsDict,
+  Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
   RenameNoteOpts,
@@ -293,5 +298,14 @@ export class EngineAPIService
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {
     return this._internalEngine.getDecorations(opts);
+  }
+
+  getLinks(
+    opts: Optional<GetLinksRequest, "ws">
+  ): Promise<GetNoteLinksPayload> {
+    return this._internalEngine.getLinks(opts);
+  }
+  getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
+    return this._internalEngine.getAnchors(opts);
   }
 }

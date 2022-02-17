@@ -131,6 +131,15 @@ export class FileStorage implements DStore {
         this.notes[ent.id] = ent;
         this.noteFnames.add(ent);
       });
+      // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
+      if (this.engine.config.dev?.enableLinkCandidates) {
+        const ctx = "_addLinkCandidates";
+        const start = process.hrtime();
+        // this mutates existing note objects so we don't need to reset the notes
+        this._addLinkCandidates(_.values(this.notes));
+        const duration = getDurationMilliseconds(start);
+        this.logger.info({ ctx, duration });
+      }
 
       const { notes, schemas } = this;
       let error: IDendronError | null = errors[0] || null;
@@ -163,7 +172,7 @@ export class FileStorage implements DStore {
       fileName = USER_MESSAGES.UNKNOWN;
     }
 
-    let fullPath = undefined;
+    let fullPath;
     try {
       if (resp.error && resp.error.payload) {
         fullPath = JSON.parse(
@@ -401,13 +410,6 @@ export class FileStorage implements DStore {
 
     this._addBacklinks({ notesWithLinks, allNotes });
 
-    if (this.engine.config.dev?.enableLinkCandidates) {
-      const ctx = "_addLinkCandidates";
-      const start = process.hrtime();
-      this._addLinkCandidates(allNotes);
-      const duration = getDurationMilliseconds(start);
-      this.logger.info({ ctx, duration });
-    }
     return { notes: allNotes, errors };
   }
 
@@ -458,7 +460,6 @@ export class FileStorage implements DStore {
   }
 
   _addLinkCandidates(allNotes: NoteProps[]) {
-    const notesMap = NoteUtils.createFnameNoteMap(allNotes, true);
     return _.map(allNotes, (noteFrom: NoteProps) => {
       try {
         const maxNoteLength = ConfigUtils.getWorkspace(
@@ -470,7 +471,6 @@ export class FileStorage implements DStore {
         ) {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
-            notesMap,
             engine: this.engine,
           });
           noteFrom.links = noteFrom.links.concat(linkCandidates);
@@ -579,7 +579,6 @@ export class FileStorage implements DStore {
           try {
             const anchors = await AnchorUtils.findAnchors({
               note: n,
-              wsRoot,
             });
             cacheUpdates[n.fname].data.anchors = anchors;
             n.anchors = anchors;

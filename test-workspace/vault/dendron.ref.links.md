@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1644356058109
+updated: 1644608035769
 created: 1608518909864
 ---
 
@@ -166,3 +166,7 @@ To block anchors: [[other-files/config.ts#^getRaw]]
 We should be able to see these images in preview and when hovering over the link.
 
 ![[dendron.ref.image]]
+
+## Candidate links
+
+This dendron.ref.image will be a candidate link if the feature is enabled.

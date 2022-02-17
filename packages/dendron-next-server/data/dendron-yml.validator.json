@@ -8,7 +8,10 @@
       "properties": {
         "version": {
           "type": "number",
-          "enum": [4, 5]
+          "enum": [
+            4,
+            5
+          ]
         },
         "dev": {
           "$ref": "#/definitions/DendronDevConfig",
@@ -55,7 +58,9 @@
           "$ref": "#/definitions/DendronPublishingConfig"
         }
       },
-      "required": ["version"]
+      "required": [
+        "version"
+      ]
     },
     "DendronDevConfig": {
       "type": "object",
@@ -86,7 +91,10 @@
         },
         "forceWatcherType": {
           "type": "string",
-          "enum": ["plugin", "engine"],
+          "enum": [
+            "plugin",
+            "engine"
+          ],
           "description": "Force the use of a specific type of watcher.\n\n- plugin: Uses VSCode's builtin watcher\n- engine: Uses the engine watcher, watching the files directly without VSCode"
         },
         "enableExportPodV2": {
@@ -174,7 +182,10 @@
         },
         "gh_edit_view_mode": {
           "type": "string",
-          "enum": ["tree", "edit"]
+          "enum": [
+            "tree",
+            "edit"
+          ]
         },
         "gh_edit_repository": {
           "type": "string"
@@ -232,7 +243,10 @@
               "type": "string"
             }
           },
-          "required": ["url", "alt"],
+          "required": [
+            "url",
+            "alt"
+          ],
           "additionalProperties": false,
           "description": "Default SEO image for published pages"
         },
@@ -268,7 +282,10 @@
           "description": "Display a `#` symbol in front of frontmatter tags in the tags listing. False by default."
         }
       },
-      "required": ["siteHierarchies", "siteRootDir"],
+      "required": [
+        "siteHierarchies",
+        "siteRootDir"
+      ],
       "additionalProperties": false
     },
     "LegacyHierarchyConfig": {
@@ -307,7 +324,10 @@
         },
         "value": {}
       },
-      "required": ["key", "value"],
+      "required": [
+        "key",
+        "value"
+      ],
       "additionalProperties": false
     },
     "LegacyDuplicateNoteBehavior": {
@@ -323,7 +343,10 @@
           "$ref": "#/definitions/LegacyUseVaultBehaviorPayload"
         }
       },
-      "required": ["action", "payload"],
+      "required": [
+        "action",
+        "payload"
+      ],
       "additionalProperties": false
     },
     "LegacyDuplicateNoteAction": {
@@ -339,7 +362,9 @@
               "$ref": "#/definitions/DVault"
             }
           },
-          "required": ["vault"],
+          "required": [
+            "vault"
+          ],
           "additionalProperties": false
         },
         {
@@ -387,7 +412,9 @@
           "description": "Id of a seed this vault belongs to"
         }
       },
-      "required": ["fsPath"],
+      "required": [
+        "fsPath"
+      ],
       "additionalProperties": false
     },
     "DVaultVisibility": {
@@ -405,7 +432,10 @@
           "type": "string"
         }
       },
-      "required": ["type", "url"],
+      "required": [
+        "type",
+        "url"
+      ],
       "additionalProperties": false
     },
     "DPermission": {
@@ -424,12 +454,20 @@
           }
         }
       },
-      "required": ["read", "write"],
+      "required": [
+        "read",
+        "write"
+      ],
       "additionalProperties": false
     },
     "DVaultSync": {
       "type": "string",
-      "enum": ["skip", "noPush", "noCommit", "sync"]
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
+      ]
     },
     "DendronCommandConfig": {
       "type": "object",
@@ -467,7 +505,9 @@
           "$ref": "#/definitions/NoteLookupConfig"
         }
       },
-      "required": ["note"],
+      "required": [
+        "note"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring lookup commands"
     },
@@ -506,12 +546,19 @@
     },
     "LookupSelectionMode": {
       "type": "string",
-      "enum": ["extract", "link", "none"],
+      "enum": [
+        "extract",
+        "link",
+        "none"
+      ],
       "description": "String literal type generated from  {@link  NoteLookupSelectionBehaviorEnum }"
     },
     "LookupSelectVaultModeOnCreate": {
       "type": "string",
-      "enum": ["smart", "alwaysPrompt"]
+      "enum": [
+        "smart",
+        "alwaysPrompt"
+      ]
     },
     "RandomNoteConfig": {
       "type": "object",
@@ -552,13 +599,22 @@
           "type": "boolean"
         }
       },
-      "required": ["aliasMode", "enableMultiSelect"],
+      "required": [
+        "aliasMode",
+        "enableMultiSelect"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  InsertNoteLinkCommand }"
     },
     "InsertNoteLinkAliasModeEnum": {
       "type": "string",
-      "enum": ["snippet", "selection", "title", "prompt", "none"],
+      "enum": [
+        "snippet",
+        "selection",
+        "title",
+        "prompt",
+        "none"
+      ],
       "description": "Enum definitions of possible alias mode values"
     },
     "InsertNoteIndexConfig": {
@@ -568,7 +624,9 @@
           "type": "boolean"
         }
       },
-      "required": ["enableMarker"],
+      "required": [
+        "enableMarker"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  InsertNoteIndexCommand }"
     },
@@ -692,7 +750,9 @@
           "$ref": "#/definitions/RemoteEndpoint"
         }
       },
-      "required": ["remote"],
+      "required": [
+        "remote"
+      ],
       "additionalProperties": false
     },
     "DendronSeedEntry": {
@@ -717,7 +777,9 @@
           "type": "string"
         }
       },
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "additionalProperties": false
     },
     "DHookDict": {
@@ -730,7 +792,9 @@
           }
         }
       },
-      "required": ["onCreate"],
+      "required": [
+        "onCreate"
+      ],
       "additionalProperties": false
     },
     "DHookEntry": {
@@ -747,7 +811,11 @@
           "const": "js"
         }
       },
-      "required": ["id", "pattern", "type"],
+      "required": [
+        "id",
+        "pattern",
+        "type"
+      ],
       "additionalProperties": false
     },
     "JournalConfig": {
@@ -769,7 +837,12 @@
           "$ref": "#/definitions/NoteAddBehaviorEnum"
         }
       },
-      "required": ["dailyDomain", "name", "dateFormat", "addBehavior"],
+      "required": [
+        "dailyDomain",
+        "name",
+        "dateFormat",
+        "addBehavior"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring journal note behavior"
     },
@@ -796,7 +869,11 @@
           "$ref": "#/definitions/NoteAddBehaviorEnum"
         }
       },
-      "required": ["name", "dateFormat", "addBehavior"],
+      "required": [
+        "name",
+        "dateFormat",
+        "addBehavior"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring scratch note behavior"
     },
@@ -849,7 +926,11 @@
     },
     "LegacyLookupSelectionType": {
       "type": "string",
-      "enum": ["selection2link", "selectionExtract", "none"]
+      "enum": [
+        "selection2link",
+        "selectionExtract",
+        "none"
+      ]
     },
     "DendronGraphConfig": {
       "type": "object",
@@ -858,13 +939,20 @@
           "type": "number"
         }
       },
-      "required": ["zoomSpeed"],
+      "required": [
+        "zoomSpeed"
+      ],
       "additionalProperties": false,
       "description": "Namespace for all graph related configurations."
     },
     "VaultSyncMode": {
       "type": "string",
-      "enum": ["skip", "noPush", "noCommit", "sync"]
+      "enum": [
+        "skip",
+        "noPush",
+        "noCommit",
+        "sync"
+      ]
     },
     "DendronPreviewConfig": {
       "type": "object",
@@ -1067,7 +1155,10 @@
         },
         "value": {}
       },
-      "required": ["key", "value"],
+      "required": [
+        "key",
+        "value"
+      ],
       "additionalProperties": false
     },
     "DuplicateNoteBehavior": {
@@ -1083,7 +1174,10 @@
           "$ref": "#/definitions/DuplicateNoteActionPayload"
         }
       },
-      "required": ["action", "payload"],
+      "required": [
+        "action",
+        "payload"
+      ],
       "additionalProperties": false
     },
     "DuplicateNoteAction": {
@@ -1102,7 +1196,9 @@
               "$ref": "#/definitions/DVault"
             }
           },
-          "required": ["vault"],
+          "required": [
+            "vault"
+          ],
           "additionalProperties": false
         },
         {
@@ -1145,7 +1241,10 @@
           "type": "string"
         }
       },
-      "required": ["url", "alt"],
+      "required": [
+        "url",
+        "alt"
+      ],
       "additionalProperties": false
     },
     "GithubConfig": {
@@ -1170,13 +1269,18 @@
           "type": "string"
         }
       },
-      "required": ["enableEditLink"],
+      "required": [
+        "enableEditLink"
+      ],
       "additionalProperties": false,
       "description": "Namespace for publishing related github configs"
     },
     "GithubEditViewMode": {
       "type": "string",
-      "enum": ["tree", "edit"]
+      "enum": [
+        "tree",
+        "edit"
+      ]
     }
   }
 }

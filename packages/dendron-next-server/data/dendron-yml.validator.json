@@ -959,9 +959,6 @@
         "siteRootDir": {
           "type": "string"
         },
-        "siteRepoDir": {
-          "type": "string"
-        },
         "siteUrl": {
           "type": "string"
         },
@@ -997,9 +994,6 @@
         },
         "generateChangelog": {
           "type": "boolean"
-        },
-        "previewPort": {
-          "type": "number"
         },
         "segmentKey": {
           "type": "string"
@@ -1055,9 +1049,6 @@
               }
             }
           ]
-        },
-        "noindexByDefault": {
-          "type": "boolean"
         },
         "customFrontmatter": {
           "type": "array",

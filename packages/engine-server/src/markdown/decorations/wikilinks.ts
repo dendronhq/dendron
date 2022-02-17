@@ -174,6 +174,19 @@ export async function linkedNoteType({
   if (fname && (containsNonDendronUri(fname) || fname.endsWith("*")))
     return { type: DECORATION_TYPES.wikiLink, errors: [] };
 
+  // It's hard to check the anchors for non-note files because we don't parse
+  // them ahead of time. If we can find the file, just say the link is good
+  // without checking anchors.
+  if (fname && matchingNotes.length === 0) {
+    const nonNoteFile = await findNonNoteFile({
+      fpath: fname,
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
+    });
+    if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  }
+
+  // For regular notes, we can efficiently check the anchors.
   if (anchorStart || anchorEnd) {
     const allAnchors = _.flatMap(matchingNotes, (note) =>
       Object.values(note.anchors)
@@ -187,17 +200,9 @@ export async function linkedNoteType({
   }
 
   if (matchingNotes.length > 0) {
+    // There are no anchors specified in the link, but we did find matching notes
     return { type: DECORATION_TYPES.wikiLink, errors: [] };
   }
-  // Could be a non-note file too
-  if (fname) {
-    const nonNoteFile = await findNonNoteFile({
-      fpath: fname,
-      vaults: engine.vaults,
-      wsRoot: engine.wsRoot,
-    });
-    if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
-  }
-  //
+  // No matching notes, and not a non-note file or web URL. This is just a broken link then.
   return { type: DECORATION_TYPES.brokenWikilink, errors: [] };
 }

@@ -152,6 +152,15 @@ const x = 1;
 
 And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
 
+## Link to a file outside any vault
+
+To a file: [[other-files/config.ts]]
+
+To a line in that file: [[other-files/config.ts#L6]]
+
+To block anchors: [[other-files/config.ts#^getRaw]]
+[[other-files/config.ts#^backup-file]]
+
 ## Link to a file containing images
 
 We should be able to see these images in preview and when hovering over the link.

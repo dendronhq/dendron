@@ -15,6 +15,7 @@ import {
   InsertNoteLinkAliasModeEnum,
 } from "../../types/configs/commands/insertNoteLink";
 import { InsertNoteIndexConfig } from "../../types/configs/commands/insertNoteIndex";
+import { CopyNoteLinkConfig } from "../../types";
 
 /**
  * Lookup
@@ -174,6 +175,13 @@ export const INSERT_NOTE_INDEX: DendronConfigEntryCollection<InsertNoteIndexConf
     },
   };
 
+const COPY_NOTE_LINK: DendronConfigEntryCollection<CopyNoteLinkConfig> = {
+  nonNoteFile: {
+    label: "Non-note file",
+    desc: "Copy note link settings for non-note files.",
+  },
+};
+
 /**
  * Command entry collection
  */
@@ -183,4 +191,5 @@ export const COMMANDS: DendronConfigEntryCollection<DendronCommandConfig> = {
   insertNote: INSERT_NOTE,
   insertNoteLink: INSERT_NOTE_LINK,
   insertNoteIndex: INSERT_NOTE_INDEX,
+  copyNoteLink: COPY_NOTE_LINK,
 };

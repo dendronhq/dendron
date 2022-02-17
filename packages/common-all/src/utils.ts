@@ -31,6 +31,7 @@ import {
   IntermediateDendronConfig,
   JournalConfig,
   LookupConfig,
+  NonNoteFileLinkAnchorType,
   NoteLookupConfig,
   ScratchConfig,
   StrictConfigV4,
@@ -908,6 +909,12 @@ export class ConfigUtils {
     return true;
   }
 
+  static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
+    return (
+      this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"
+    );
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
@@ -1074,6 +1081,13 @@ export class ConfigUtils {
   ) {
     const path = `preview.${key}`;
     _.set(config, path, value);
+  }
+
+  static setNonNoteLinkAnchorType(
+    config: IntermediateDendronConfig,
+    value: NonNoteFileLinkAnchorType
+  ) {
+    _.set(config, "commands.copyNoteLink.nonNoteFile.anchorType", value);
   }
 
   static configIsValid(opts: {

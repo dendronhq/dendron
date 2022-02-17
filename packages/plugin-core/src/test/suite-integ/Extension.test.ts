@@ -277,6 +277,7 @@ suite("Extension", function () {
               },
             },
             randomNote: {},
+            copyNoteLink: {},
             insertNote: {
               initialValue: "templates",
             },

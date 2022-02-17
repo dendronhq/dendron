@@ -74,7 +74,7 @@ export class CreateHookCommand extends BasicCommand<
       },
       hookType: DHookType.onCreate,
     });
-    DConfig.writeConfig({ wsRoot, config });
+    await DConfig.writeConfig({ wsRoot, config });
     await VSCodeUtils.openFileInEditor(Uri.file(scriptPath));
     return;
   }

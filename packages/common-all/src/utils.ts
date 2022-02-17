@@ -37,7 +37,7 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { DateTime } from ".";
+import { DateTime, LruCache } from ".";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
@@ -256,6 +256,43 @@ export class ListMap<K, V> {
     if (values === undefined) return false;
     return values.includes(value);
   }
+}
+
+/** Memoizes function results, but allows a custom function to decide if the
+ * value needs to be recalculated.
+ *
+ * This function pretty closely reproduces the memoize function of Lodash,
+ * except that it allows a custom function to override whether a cached value
+ * should be updated.
+ *
+ * @param shouldUpdate If this function returns true, the wrapped function will
+ * run again and the cached value will update. By default, it will only update
+ * if there is a cache miss.
+ * @param maxCache The maximum number of items to cache.
+ */
+export function memoize<I extends any[], O, K>({
+  fn,
+  keyFn = (...args) => args[0].toString(),
+  shouldUpdate = () => false,
+  maxCache = 64,
+}: {
+  fn: (...args: I) => O;
+  keyFn?: (...args: I) => K;
+  shouldUpdate?: (previous: O, ...args: I) => boolean;
+  maxCache?: number;
+}): (...args: I) => O {
+  const wrapped = function memoize(...args: I) {
+    const key = keyFn(...args);
+    let value: O | undefined = wrapped.cache.get(key);
+    if (value === undefined || shouldUpdate(value, ...args)) {
+      wrapped.cache.drop(key);
+      value = fn(...args);
+      wrapped.cache.set(key, value);
+    }
+    return value;
+  };
+  wrapped.cache = new LruCache<K, O>({ maxItems: maxCache });
+  return wrapped;
 }
 
 export class NoteFNamesDict {

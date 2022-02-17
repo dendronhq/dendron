@@ -42,4 +42,4 @@ export {
   extendedImage2htmlRaw,
 } from "./extendedImage";
 export type { Image, Link } from "mdast";
-export { handleImage } from "./dendronPreview";
+export { makeImageUrlFullPath } from "./dendronPreview";

@@ -10,10 +10,11 @@ import {
   NoteViewMessage,
   NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
+  memoize,
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
-  handleImage,
+  makeImageUrlFullPath,
   Image,
   MDUtilsV5,
   visit,
@@ -274,29 +275,47 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     this._ext.addDisposable(this._onNoteChanged);
   }
 
+  /** Rewrites the image URLs to use VSCode's webview URIs, which is required to
+   * access files from the preview.
+   *
+   * The results of this is cached based on the note content hash, so repeated
+   * calls should not be excessively expensive.
+   */
+  private rewriteImageUrls = memoize({
+    fn: (note: NoteProps, panel: vscode.WebviewPanel) => {
+      const parser = MDUtilsV5.procRemarkFull({
+        dest: DendronASTDest.MD_DENDRON,
+        engine: this._ext.getEngine(),
+        fname: note.fname,
+        vault: note.vault,
+      });
+      const tree = parser.parse(note.body);
+      // ^preview-rewrites-images
+      visit(
+        tree,
+        [DendronASTTypes.IMAGE, DendronASTTypes.EXTENDED_IMAGE],
+        (image: Image) => {
+          if (!isWebUri(image.url)) {
+            makeImageUrlFullPath({ node: image, proc: parser });
+            image.url = panel.webview
+              .asWebviewUri(vscode.Uri.file(image.url))
+              .toString();
+          }
+        }
+      );
+      return {
+        ...note,
+        body: parser.stringify(tree),
+      };
+    },
+    keyFn: (note) => note.id,
+    shouldUpdate: (previous, current) =>
+      previous.contentHash !== current.contentHash,
+  });
+
   private sendRefreshMessage(panel: vscode.WebviewPanel, note: NoteProps) {
     const syncChangedNote = true;
-
-    const parser = MDUtilsV5.procRemarkFull({
-      dest: DendronASTDest.MD_DENDRON,
-      engine: this._ext.getEngine(),
-      fname: note.fname,
-      vault: note.vault,
-    });
-    const tree = parser.parse(note.body);
-    visit(
-      tree,
-      [DendronASTTypes.IMAGE, DendronASTTypes.EXTENDED_IMAGE],
-      (image: Image) => {
-        if (!isWebUri(image.url)) {
-          handleImage({ node: image, proc: parser });
-          image.url = panel.webview
-            .asWebviewUri(vscode.Uri.file(image.url))
-            .toString();
-        }
-      }
-    );
-    note.body = parser.stringify(tree);
+    note = this.rewriteImageUrls(note, panel);
 
     return panel.webview.postMessage({
       type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,

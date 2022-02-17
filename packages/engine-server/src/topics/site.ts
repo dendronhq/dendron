@@ -156,6 +156,12 @@ export class SiteUtils {
           ConfigUtils.getSite(config) as DendronSiteConfig
         )
       : DConfig.cleanPublishingConfig(ConfigUtils.getPublishing(config));
+
+    DConfig.setCleanPublishingConfig({
+      config,
+      cleanConfig: cleanPublishingConfig,
+    });
+
     const { siteHierarchies } = cleanPublishingConfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];

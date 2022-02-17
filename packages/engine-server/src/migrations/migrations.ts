@@ -18,7 +18,7 @@ import { MigrationUtils, PATH_MAP } from "./utils";
 import { DEPRECATED_PATHS } from ".";
 
 export const CONFIG_MIGRATIONS: Migrations = {
-  version: "0.82.0",
+  version: "0.83.0",
   changes: [
     {
       name: "migrate config",

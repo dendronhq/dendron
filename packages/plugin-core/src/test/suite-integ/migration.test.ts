@@ -436,7 +436,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.82.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.62.0",
               dendronConfig,
               wsConfig,
@@ -626,7 +626,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.82.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.64.0",
               dendronConfig,
               wsConfig,
@@ -675,7 +675,7 @@ suite("Migration", function () {
 
             // and new workspace namespace should be correctly mapped
             const expectedWorkspaceConfig: DendronWorkspaceConfig = {
-              dendronVersion: "0.82.0",
+              dendronVersion: "0.83.0",
               vaults: [
                 {
                   fsPath: "vault1",
@@ -781,7 +781,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.82.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.69.0",
               dendronConfig,
               wsConfig,
@@ -841,7 +841,7 @@ suite("Migration", function () {
       );
 
       describeMultiWS(
-        "GIVEN v4 config",
+        "GIVEN v4 config (pre 0.83)",
         {
           ctx,
           modConfigCb: (config) => {
@@ -1000,8 +1000,8 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.82.0",
-              previousVersion: "0.81.0",
+              currentVersion: "0.83.0",
+              previousVersion: "0.82.0",
               dendronConfig,
               wsConfig,
               wsService,

@@ -18284,10 +18284,10 @@ next-seo@^4.27.0:
   resolved "https://registry.npmjs.org/next-seo/-/next-seo-4.29.0.tgz#d281e95ba47914117cc99e9e468599f0547d9b9b"
   integrity sha512-xmwzcz4uHaYJ8glbuhs6FSBQ7z3irmdPYdJJ5saWm72Uy3o+mPKGaPCXQetTCE6/xxVnpoDV4yFtFlEjUcljSg==
 
-next-sitemap@^1.6.168:
-  version "1.9.12"
-  resolved "https://registry.npmjs.org/next-sitemap/-/next-sitemap-1.9.12.tgz#288c2dfc907039892e21eb1b0c7a94d288f323d9"
-  integrity sha512-kHXf4ZNAGLJyK16HbjzE5X9JlKwXtxW+9J4dh3oT7LSbU/+3bN+VqWjNw/776Otbanf7EJsvl51oQ78qQW5XBQ==
+next-sitemap@1.8.11:
+  version "1.8.11"
+  resolved "https://registry.npmjs.org/next-sitemap/-/next-sitemap-1.8.11.tgz#91ddfe3e5ad3673a2416bba0161cbe491c4f356a"
+  integrity sha512-Cd3sjWS8OsXpw1ols4pesqqUNHjuid1tVTfF5iU8XMsoaMpYpGZG0waI8eltQ3sTLwm2cn7G8bJ0MpCPUSr0Kg==
   dependencies:
     "@corex/deepmerge" "^2.6.148"
     minimist "^1.2.5"

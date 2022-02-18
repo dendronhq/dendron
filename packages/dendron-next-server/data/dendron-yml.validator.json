@@ -1077,12 +1077,6 @@
         "github": {
           "$ref": "#/definitions/GithubConfig"
         },
-        "enableContainers": {
-          "type": "boolean"
-        },
-        "generateChangelog": {
-          "type": "boolean"
-        },
         "segmentKey": {
           "type": "string"
         },
@@ -1106,8 +1100,6 @@
         "writeStubs",
         "seo",
         "github",
-        "enableContainers",
-        "generateChangelog",
         "enablePrettyLinks"
       ],
       "additionalProperties": false,

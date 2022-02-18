@@ -362,8 +362,6 @@ suite("Extension", function () {
             enablePrettyRefs: true,
             siteHierarchies: ["root"],
             writeStubs: false,
-            enableContainers: false,
-            generateChangelog: false,
             siteRootDir: "docs",
             seo: {
               title: "Dendron",
@@ -1176,7 +1174,7 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is legacy",
+    "GIVEN: current version is 0.83.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1192,7 +1190,7 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-        DendronExtension.version = () => "0.81.0";
+        DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1211,7 +1209,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is up to date",
+    "GIVEN: current version is 0.83.0 and config is up to date",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1227,7 +1225,7 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-        DendronExtension.version = () => "0.81.0";
+        DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1246,7 +1244,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.82.0 and config is legacy",
+    "GIVEN: current version is 0.84.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1263,7 +1261,7 @@ suite("per-init config migration logic", function () {
           "showConfigMigrationConfirmationMessage"
         );
 
-        DendronExtension.version = () => "0.82.0";
+        DendronExtension.version = () => "0.84.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1282,7 +1280,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.82.0 and config is up to date",
+    "GIVEN: current version is 0.84.0 and config is up to date",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1299,7 +1297,7 @@ suite("per-init config migration logic", function () {
           "showConfigMigrationConfirmationMessage"
         );
 
-        DendronExtension.version = () => "0.82.0";
+        DendronExtension.version = () => "0.84.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },

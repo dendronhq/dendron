@@ -99,8 +99,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -250,8 +248,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -383,8 +379,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -488,8 +482,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -610,8 +602,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -740,8 +730,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron
@@ -856,8 +844,6 @@ publishing:
     siteHierarchies:
         - root
     writeStubs: false
-    enableContainers: false
-    generateChangelog: false
     siteRootDir: docs
     seo:
         title: Dendron

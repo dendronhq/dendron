@@ -27,6 +27,7 @@ import {
   DConfig,
   DendronEngineV2,
   HistoryService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import {
   ModConfigCb,
@@ -220,6 +221,7 @@ export async function setupLegacyWorkspaceMulti(
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
   let workspaceFile: Uri | undefined;
+  // check where the keyboard shortcut is configured
   let workspaceFolders: readonly WorkspaceFolder[] | undefined;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
@@ -245,7 +247,8 @@ export async function setupLegacyWorkspaceMulti(
   });
   // update vscode settings
   if (copts.workspaceType === WorkspaceType.CODE) {
-    await DendronExtension.updateWorkspaceFile({
+    await WorkspaceUtils.updateCodeWorkspaceSettings({
+      wsRoot,
       updateCb: (settings) => {
         const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
           path: ent.fsPath,

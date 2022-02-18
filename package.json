@@ -22,7 +22,8 @@
       "packages/dendron-plugin-views"
     ],
     "nohoist": [
-      "**/@types/mocha"
+      "**/@types/mocha",
+      "**/@types/eslint"
     ]
   },
   "devDependencies": {

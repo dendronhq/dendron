@@ -5,14 +5,17 @@ import {
   DNodeUtils,
   DVault,
   DWorkspaceV2,
+  ERROR_STATUS,
   getSlugger,
   IntermediateDendronConfig,
   isBlockAnchor,
   isNotUndefined,
   NoteProps,
+  RespV3,
   VaultUtils,
   WorkspaceFolderCode,
   WorkspaceOpts,
+  WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
@@ -20,7 +23,10 @@ import {
   findDownTo,
   findUpTo,
   genHash,
+  readJSONWithComments,
+  readJSONWithCommentsSync,
   uniqueOutermostFolders,
+  writeJSONWithComments,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -28,6 +34,62 @@ import path from "path";
 import { URI } from "vscode-uri";
 
 export class WorkspaceUtils {
+  static isWorkspaceConfig(val: any): val is WorkspaceSettings {
+    if (_.isNull(val)) {
+      return false;
+    }
+    return true;
+  }
+
+  static async getCodeWorkspaceSettings(
+    wsRoot: string
+  ): Promise<RespV3<WorkspaceSettings>> {
+    const wsConfig = await readJSONWithComments(
+      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
+    );
+    if (!this.isWorkspaceConfig(wsConfig)) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_CONFIG,
+          message: "bad workspace config",
+        }),
+      };
+    } else {
+      return {
+        data: wsConfig,
+      };
+    }
+  }
+
+  static getCodeWorkspaceSettingsSync(
+    wsRoot: string
+  ): RespV3<WorkspaceSettings> {
+    try {
+      const wsConfig = readJSONWithCommentsSync(
+        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
+      );
+      if (!this.isWorkspaceConfig(wsConfig)) {
+        return {
+          error: DendronError.createFromStatus({
+            status: ERROR_STATUS.INVALID_CONFIG,
+            message: "bad workspace config",
+          }),
+        };
+      } else {
+        return {
+          data: wsConfig,
+        };
+      }
+    } catch (err) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.INVALID_CONFIG,
+          message: "bad workspace config",
+        }),
+      };
+    }
+  }
+
   /** Finds the workspace type using the VSCode plugin workspace variables. */
   static async getWorkspaceType({
     workspaceFolders,
@@ -68,6 +130,38 @@ export class WorkspaceUtils {
       return WorkspaceType.NATIVE;
     }
     return WorkspaceType.NONE;
+  }
+
+  static async updateCodeWorkspaceSettings({
+    wsRoot,
+    updateCb,
+  }: {
+    wsRoot: string;
+    updateCb: (settings: WorkspaceSettings) => WorkspaceSettings;
+  }) {
+    const maybeSettings = WorkspaceUtils.getCodeWorkspaceSettingsSync(wsRoot);
+    if (maybeSettings.error) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "no workspace file found",
+      });
+    }
+    const settings = updateCb(maybeSettings.data);
+    await this.writeCodeWorkspaceSettings({ wsRoot, settings });
+    return settings;
+  }
+
+  static async writeCodeWorkspaceSettings({
+    settings,
+    wsRoot,
+  }: {
+    settings: WorkspaceSettings;
+    wsRoot: string;
+  }) {
+    writeJSONWithComments(
+      path.join(wsRoot, "dendron.code-workspace"),
+      settings
+    );
   }
 
   /**

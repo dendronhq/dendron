@@ -55,7 +55,7 @@
     "ajv-errors": "^3.0.0",
     "analytics-node": "^5.1.0",
     "anymatch": "^3.1.2",
-    "comment-json": "^4.1.0",
+    "comment-json": "4.2.0",
     "execa": "^5.0.0",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",

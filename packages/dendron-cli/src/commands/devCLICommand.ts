@@ -1,17 +1,24 @@
 import {
   assertUnreachable,
+  CLIEvents,
   DendronError,
   error2PlainObject,
-  CLIEvents,
-  CONSTANTS,
+  ERROR_STATUS,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import {
+  readYAML,
   SegmentClient,
   TelemetryStatus,
-  readYAML,
-  readJSONWithCommentsSync,
 } from "@dendronhq/common-server";
+import {
+  ALL_MIGRATIONS,
+  DConfig,
+  MigrationChangeSetStatus,
+  MigrationService,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
+import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
@@ -23,14 +30,6 @@ import {
   SemverVersion,
 } from "../utils/build";
 import { CLICommand, CommandCommonProps } from "./base";
-import {
-  ALL_MIGRATIONS,
-  DConfig,
-  MigrationChangeSetStatus,
-  MigrationService,
-  WorkspaceService,
-} from "@dendronhq/engine-server";
-import _ from "lodash";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -491,9 +490,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const currentVersion = migrationsToRun[0].version;
     const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });
     const configPath = DConfig.configPath(opts.wsRoot!);
-    const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
     const dendronConfig = readYAML(configPath);
-    const wsConfig = readJSONWithCommentsSync(wsConfigPath);
+    const wsConfig = wsService.getCodeWorkspaceSettingsSync();
+    if (_.isUndefined(wsConfig)) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "no workspace config found",
+      });
+    }
     const changes = await MigrationService.applyMigrationRules({
       currentVersion,
       previousVersion: "0.0.0",

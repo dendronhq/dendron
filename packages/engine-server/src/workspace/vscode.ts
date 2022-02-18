@@ -215,7 +215,7 @@ export class Snippets {
     if (!fs.existsSync(snippetPath)) {
       return false;
     } else {
-      return readJSONWithComments(snippetPath);
+      return readJSONWithComments(snippetPath) as unknown as any;
     }
   };
 

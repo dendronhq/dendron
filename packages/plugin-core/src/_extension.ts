@@ -38,7 +38,6 @@ import {
 import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
-import _md from "markdown-it";
 import _ from "lodash";
 import { Duration } from "luxon";
 import os from "os";
@@ -46,6 +45,7 @@ import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
+import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
@@ -63,11 +63,12 @@ import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import {
   CONFIG,
-  INCOMPATIBLE_EXTENSIONS,
   DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
+  INCOMPATIBLE_EXTENSIONS,
 } from "./constants";
+import { IDendronExtension } from "./dendronExtensionInterface";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
@@ -86,6 +87,7 @@ import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
+import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
@@ -102,9 +104,6 @@ import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
-import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
-import { IDendronExtension } from "./dendronExtensionInterface";
-import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -419,7 +418,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands(ws, context);
+    _setupCommands({ ws, context, requireActiveWorkspace: false });
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -495,6 +494,7 @@ export async function _activate(
       });
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
+      const maybeWsSettings = wsService.getCodeWorkspaceSettingsSync();
 
       // // initialize Segment client
       ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
@@ -505,7 +505,7 @@ export async function _activate(
         previousVersion: previousWorkspaceVersion,
         dendronConfig,
         workspaceInstallStatus,
-        wsConfig: await DendronExtension.instanceV2().getWorkspaceSettings(),
+        wsConfig: maybeWsSettings,
       });
 
       if (changes.length > 0) {
@@ -665,6 +665,7 @@ export async function _activate(
       }
 
       MetadataService.instance().setDendronWorkspaceActivated();
+      _setupCommands({ ws, context, requireActiveWorkspace: true });
 
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
@@ -735,39 +736,47 @@ export async function _activate(
           msg: "checkAndApplyVimKeybindingOverrideIfExists:pre",
         });
         AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-        const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
+        const keybindingPayload =
           KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-        keybindingPath = keybindingConfigPath;
-        if (!_.isUndefined(resolvedKeybindings)) {
-          const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-          const maybeBackupPath = `${keybindingConfigPath}.${today}.vim.old`;
-          if (!fs.existsSync(keybindingConfigPath)) {
-            fs.ensureFileSync(keybindingConfigPath);
-            fs.writeFileSync(keybindingConfigPath, "[]");
-          } else {
-            fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
-            backupPaths.push(maybeBackupPath);
+        if (keybindingPayload.data) {
+          const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
+            keybindingPayload.data;
+          keybindingPath = keybindingConfigPath;
+          if (!_.isUndefined(resolvedKeybindings)) {
+            const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+            const maybeBackupPath = `${keybindingConfigPath}.${today}.vim.old`;
+            if (!fs.existsSync(keybindingConfigPath)) {
+              fs.ensureFileSync(keybindingConfigPath);
+              fs.writeFileSync(keybindingConfigPath, "[]");
+            } else {
+              fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
+              backupPaths.push(maybeBackupPath);
+            }
+            writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+            AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
+              fixApplied: true,
+            });
           }
-          writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
-          AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
-            fixApplied: true,
-          });
+        } else {
+          Logger.info({ ctx, msg: "unable to apply keybinding fix" });
+          // TODO: report error
         }
       }
     }
 
-    if (extensionInstallStatus === InstallStatus.UPGRADED) {
-      const { keybindingConfigPath, migratedKeybindings } =
-        KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-      keybindingPath = keybindingConfigPath;
-      if (!_.isUndefined(migratedKeybindings)) {
-        const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-        const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`;
-        fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
-        backupPaths.push(maybeBackupPath);
-        writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-      }
-    }
+    // TODO: remove, we are not tracking this today
+    // if (extensionInstallStatus === InstallStatus.UPGRADED) {
+    //   const { keybindingConfigPath, migratedKeybindings } =
+    //     KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
+    //   keybindingPath = keybindingConfigPath;
+    //   if (!_.isUndefined(migratedKeybindings)) {
+    //     const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+    //     const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`;
+    //     fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
+    //     backupPaths.push(maybeBackupPath);
+    //     writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
+    //   }
+    // }
 
     if (backupPaths.length > 0) {
       vscode.window
@@ -1065,15 +1074,23 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     refreshMsg
   );
 }
-
-async function _setupCommands(
-  ws: DendronExtension,
-  context: vscode.ExtensionContext
-) {
+async function _setupCommands({
+  ws,
+  context,
+  requireActiveWorkspace,
+}: {
+  ws: DendronExtension;
+  context: vscode.ExtensionContext;
+  requireActiveWorkspace: boolean;
+}) {
   const existingCommands = await vscode.commands.getCommands();
 
   // add all commands
   ALL_COMMANDS.map((Cmd) => {
+    // only process commands that match the filter
+    if (Cmd.requireActiveWorkspace !== requireActiveWorkspace) {
+      return;
+    }
     const cmd = new Cmd(ws);
 
     // Register commands that implement on `onAutoComplete` with AutoCompletableRegister

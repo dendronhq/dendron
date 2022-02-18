@@ -4,7 +4,6 @@ import {
   Processor,
   ProcFlavor,
 } from "@dendronhq/engine-server";
-import os from "os";
 import path from "path";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -36,19 +35,7 @@ describe("MDUtils.proc", () => {
             `<img src="/assets/foo.jpg" alt="foo alt txt">`
           );
         },
-        [ProcFlavor.PREVIEW]: async (opts) => {
-          const {
-            extra: { resp },
-          } = cleanVerifyOpts(opts);
-
-          // For platform test compat: b/c of fwd/backslash differences, on
-          // Windows the path separators show up with %5C whereas linux/mac have
-          // %2F.
-          const fileNameToCheck =
-            os.platform() === "win32" ? `assets%5Cfoo.jpg` : `assets%2Ffoo.jpg`;
-
-          await checkString(resp.contents, fileNameToCheck, "localhost");
-        },
+        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
       },
       [DendronASTDest.MD_REGULAR]: {
@@ -90,16 +77,7 @@ describe("MDUtils.proc", () => {
             `<img src="assets/foo.jpg" alt="foo alt txt">`
           );
         },
-        [ProcFlavor.PREVIEW]: async (opts) => {
-          const {
-            extra: { resp },
-          } = cleanVerifyOpts(opts);
-
-          const fileNameToCheck =
-            os.platform() === "win32" ? `assets%5Cfoo.jpg` : `assets%2Ffoo.jpg`;
-
-          await checkString(resp.contents, fileNameToCheck, "localhost");
-        },
+        [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,
         [ProcFlavor.PUBLISHING]: ProcFlavor.REGULAR,
       },
       [DendronASTDest.MD_REGULAR]: {

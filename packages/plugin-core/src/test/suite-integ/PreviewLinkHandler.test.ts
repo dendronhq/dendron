@@ -1,4 +1,8 @@
-import { AssertUtils, TestNoteFactory } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  createMockEngine,
+  TestNoteFactory,
+} from "@dendronhq/common-test-utils";
 import { afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
 import sinon from "sinon";
@@ -139,18 +143,22 @@ suite("PreviewLinkHandler", () => {
     const factory = TestNoteFactory.defaultUnitTestFactory();
 
     it("WHEN href is missing THEN throw", async () => {
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
+      const engine = createMockEngine({ wsRoot: "/tmp", vaults: [] });
+      const linkHandler = new PreviewLinkHandler(
+        new MockDendronExtension({ engine })
+      );
 
       await expect(() =>
         linkHandler.getNavigationTargetNoteForWikiLink({
           data: {},
-          notes: factory.toNotePropsDict([]),
+          engine,
         })
       ).toThrow("href is missing");
     });
 
     it("WHEN note can be found by id THEN grab note by id", async () => {
       const note = await factory.createForFName("foo");
+      const engine = createMockEngine({ wsRoot: "/tmp", vaults: [] });
       note.id = "id-val-1";
       const dict = factory.toNotePropsDict([note]);
 

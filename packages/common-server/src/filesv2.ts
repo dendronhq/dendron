@@ -501,14 +501,30 @@ export async function findNonNoteFile(opts: {
   fpath: string;
   wsRoot: string;
   vaults: DVault[];
+  currentVault?: DVault;
 }): Promise<{ vault?: DVault; fullPath: string } | undefined> {
   let { fpath } = opts;
-  // Especially for assets, `/assets` and `assets` refers to the same place.
+  if (path.isAbsolute(fpath)) {
+    // The path could be an absolute path. If it is and the file exists, then directly use that.
+    if (await fileExists(fpath)) return { fullPath: fpath };
+  }
+  // Not an absolute path. Then the leading slash is meaningless:
+  // `/assets` and `assets` refers to the same place.
   fpath = _.trim(fpath, "/\\");
   // Check if this is an asset first
   if (fpath.startsWith("assets")) {
     const out = await findFileInVault(opts);
     if (out !== undefined) return out;
+  }
+  // If not an asset, this also might be relative to the current note
+  if (opts.currentVault) {
+    const fullPath = path.join(
+      opts.wsRoot,
+      VaultUtils.getRelPath(opts.currentVault),
+      fpath
+    );
+    if (await fileExists(fullPath))
+      return { fullPath, vault: opts.currentVault };
   }
   // If not an asset, or if we couldn't find it in assets, then check from wsRoot for out-of-vault files
   const fullPath = path.join(opts.wsRoot, fpath);

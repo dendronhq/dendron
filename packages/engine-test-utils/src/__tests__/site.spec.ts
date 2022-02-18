@@ -430,6 +430,48 @@ describe("SiteUtils", () => {
       siteRootDir = tmpDir().name;
     });
 
+    test("implicit siteIndex", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                "foo",
+                "bar",
+              ]);
+              ConfigUtils.unsetPublishProp(config, "siteIndex");
+              ConfigUtils.setPublishProp(
+                config,
+                "siteUrl",
+                "https://localhost:8080"
+              );
+
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
+
+          const { domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
+
+          const noteIndex = _.find(
+            domains,
+            (ent) => ent.custom.permalink === "/"
+          );
+          expect(_.isUndefined(noteIndex)).toBeFalsy();
+          expect(noteIndex?.fname).toEqual("foo");
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+
     test("root, publish all with dup", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {

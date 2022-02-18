@@ -11,6 +11,7 @@ import {
   DendronPublishingConfig,
   GithubEditViewModeEnum,
   CleanDendronPublishingConfig,
+  configIsV4,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -159,6 +160,15 @@ export class DConfig {
       siteIndex,
       siteUrl,
     };
+  }
+
+  static setCleanPublishingConfig(opts: {
+    config: IntermediateDendronConfig;
+    cleanConfig: DendronSiteConfig | DendronPublishingConfig;
+  }) {
+    const { config, cleanConfig } = opts;
+    const key = configIsV4(config) ? "site" : "publishing";
+    ConfigUtils.setProp(config, key, cleanConfig);
   }
 
   static writeConfig({

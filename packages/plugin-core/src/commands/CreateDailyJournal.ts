@@ -9,6 +9,7 @@ import {
 } from "./CreateNoteWithTraitCommand";
 
 export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
+  static requireActiveWorkspace: boolean = true;
   constructor(ext: IDendronExtension) {
     const workspaceService = ext.workspaceService;
 

@@ -1,22 +1,7 @@
-version: 4
-useFMTitle: true
-useNoteTitleForLink: true
-mermaid: true
-useKatex: false
+version: 5
 dev:
     enablePreviewV2: true
     enableWebUI: true
-site:
-    siteHierarchies:
-        - handbook
-    siteRootDir: docs
-    usePrettyRefs: true
-    siteUrl: 'https://wiki.dendron.so'
-    copyAssets: true
-    title: Dendron
-    description: Personal knowledge space
-    siteLastModified: true
-    gh_edit_branch: main
 commands:
     lookup:
         note:
@@ -25,6 +10,7 @@ commands:
             leaveTrace: false
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
+            vaultSelectionModeOnCreate: smart
     randomNote: {}
     insertNote:
         initialValue: templates
@@ -33,8 +19,9 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
+    copyNoteLink: {}
 workspace:
-    dendronVersion: 0.69.3-alpha.1
+    dendronVersion: 0.83.0
     workspaces:
         dendron-docs:
             remote:
@@ -103,5 +90,29 @@ preview:
     enableMermaid: true
     enablePrettyRefs: false
     enableKatex: false
-usePrettyRefs: false
-noLegacyNoteRef: true
+    automaticallyShowPreview: false
+publishing:
+    enableFMTitle: true
+    enableNoteTitleForLink: true
+    enableMermaid: true
+    enablePrettyRefs: true
+    enableKatex: false
+    copyAssets: true
+    siteHierarchies:
+        - handbook
+    enableSiteLastModified: true
+    siteRootDir: docs
+    siteUrl: 'https://wiki.dendron.so'
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
+    enableRandomlyColoredTags: true
+    writeStubs: false
+    seo:
+        title: Dendron
+        description: Personal knowledge space
+    github:
+        enableEditLink: true
+        editLinkText: Edit this page on GitHub
+        editBranch: main
+        editViewMode: tree
+    enablePrettyLinks: true

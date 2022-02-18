@@ -418,7 +418,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands(ws, context);
+    _setupCommands({ ws, context, requireActiveWorkspace: false });
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -665,6 +665,7 @@ export async function _activate(
       }
 
       MetadataService.instance().setDendronWorkspaceActivated();
+      _setupCommands({ ws, context, requireActiveWorkspace: true });
 
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
@@ -1073,15 +1074,23 @@ export function shouldDisplayLapsedUserMsg(): boolean {
     refreshMsg
   );
 }
-
-async function _setupCommands(
-  ws: DendronExtension,
-  context: vscode.ExtensionContext
-) {
+async function _setupCommands({
+  ws,
+  context,
+  requireActiveWorkspace,
+}: {
+  ws: DendronExtension;
+  context: vscode.ExtensionContext;
+  requireActiveWorkspace: boolean;
+}) {
   const existingCommands = await vscode.commands.getCommands();
 
   // add all commands
   ALL_COMMANDS.map((Cmd) => {
+    // only process commands that match the filter
+    if (Cmd.requireActiveWorkspace !== requireActiveWorkspace) {
+      return;
+    }
     const cmd = new Cmd(ws);
 
     // Register commands that implement on `onAutoComplete` with AutoCompletableRegister

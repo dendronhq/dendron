@@ -183,14 +183,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
     },
     seo: SEO,
     github: GITHUB,
-    enableContainers: {
-      label: "Enable Containers",
-      desc: "Use remark-containers in published site.",
-    },
-    generateChangelog: {
-      label: "Generate Changelog",
-      desc: "Generate changelog for published site.",
-    },
     segmentKey: {
       label: "Segment Key",
       desc: "Value of the Segment API key.",

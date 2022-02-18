@@ -465,8 +465,8 @@ export class MDUtilsV4 {
       config,
     });
     proc = proc.use(publishSite, { noteIndex });
-    const enableContainers = ConfigUtils.getEnableContainers(config);
-    if (enableContainers) {
+    const useContainers = ConfigUtils.getUseContainers(config);
+    if (useContainers) {
       proc = proc.use(containers);
     }
     return MDUtilsV4.procRehype({

@@ -361,8 +361,6 @@ suite("Extension", function () {
             enablePrettyRefs: true,
             siteHierarchies: ["root"],
             writeStubs: false,
-            enableContainers: false,
-            generateChangelog: false,
             siteRootDir: "docs",
             seo: {
               title: "Dendron",

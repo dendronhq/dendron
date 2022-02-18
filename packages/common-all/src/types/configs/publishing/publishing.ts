@@ -35,8 +35,6 @@ export type DendronPublishingConfig = {
   writeStubs: boolean;
   seo: SEOConfig;
   github: GithubConfig;
-  enableContainers: boolean;
-  generateChangelog: boolean;
 
   segmentKey?: string;
   cognitoUserPoolId?: string;
@@ -92,8 +90,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     copyAssets: true,
     siteHierarchies: ["root"],
     writeStubs: false,
-    enableContainers: false,
-    generateChangelog: false,
     siteRootDir: "docs",
     seo: genDefaultSEOConfig(),
     github: genDefaultGithubConfig(),

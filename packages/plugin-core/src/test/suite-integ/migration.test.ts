@@ -1116,8 +1116,6 @@ suite("Migration", function () {
                 editBranch: "main",
                 editViewMode: "edit",
               },
-              enableContainers: true,
-              generateChangelog: true,
               segmentKey: "abcdefg",
               cognitoUserPoolId: "qwerty",
               cognitoClientId: "azerty",

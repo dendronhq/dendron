@@ -227,8 +227,6 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["publishing.github.editBranch", { target: "site.gh_edit_branch" }],
   ["publishing.github.editViewMode", { target: "site.gh_edit_view_mode" }],
   ["publishing.github.editRepository", { target: "site.gh_edit_repository" }],
-  ["publishing.enableContainers", { target: "site.useContainers" }],
-  ["publishing.generateChangelog", { target: "site.generateChangelog" }],
   ["publishing.segmentKey", { target: "site.segmentKey" }],
   ["publishing.cognitoUserPoolId", { target: "site.cognitoUserPoolId" }],
   ["publishing.cognitoClientId", { target: "site.cognitoClientId" }],
@@ -246,6 +244,8 @@ export const DEPRECATED_PATHS = [
   "site.siteNotesDir",
   "site.siteRepoDir",
   "site.previewPort",
+  "site.useContainers",
+  "site.generateChangelog",
 ];
 
 export class MigrationUtils {

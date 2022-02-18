@@ -801,12 +801,10 @@ export class ConfigUtils {
     return ConfigUtils.getPublishingConfig(config).assetsPrefix;
   }
 
-  static getEnableContainers(
+  static getUseContainers(
     config: IntermediateDendronConfig
   ): boolean | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)?.useContainers
-      : ConfigUtils.getPublishing(config).enableContainers;
+    return ConfigUtils.getSite(config)?.useContainers;
   }
 
   static getEnableRandomlyColoredTags(

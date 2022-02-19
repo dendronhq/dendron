@@ -11,12 +11,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import {
-  readJSONWithComments,
-  readJSONWithCommentsSync,
-  resolvePath,
-  writeJSONWithComments,
-} from "@dendronhq/common-server";
+import { resolvePath } from "@dendronhq/common-server";
 import {
   HistoryService,
   WorkspaceService,
@@ -343,17 +338,6 @@ export class DendronExtension implements IDendronExtension {
     return _DendronWorkspace;
   }
 
-  static async updateWorkspaceFile(opts: {
-    updateCb: (settings: WorkspaceSettings) => WorkspaceSettings;
-  }) {
-    const { updateCb } = opts;
-    const wsPath = DendronExtension.workspaceFile().fsPath;
-    let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
-    settings = updateCb(settings);
-    await writeJSONWithComments(wsPath, settings);
-    return settings;
-  }
-
   constructor(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
@@ -415,28 +399,27 @@ export class DendronExtension implements IDendronExtension {
 
   /** For Native workspaces (without .code-workspace file) this will return undefined. */
   async getWorkspaceSettings(): Promise<WorkspaceSettings | undefined> {
-    let workspaceFile: vscode.Uri;
-    try {
-      workspaceFile = DendronExtension.workspaceFile();
-      if (workspaceFile === undefined) return undefined;
-    } catch {
-      // No workspace file exists (or some other disk issue)
+    const workspaceFile = DendronExtension.workspaceFile();
+    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(
+      path.dirname(workspaceFile.fsPath)
+    );
+    if (resp.error) {
       return undefined;
+    } else {
+      return resp.data;
     }
-    return (await readJSONWithComments(
-      workspaceFile.fsPath
-    )) as WorkspaceSettings;
   }
 
   getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
-    let workspaceFile: vscode.Uri;
-    try {
-      workspaceFile = DendronExtension.workspaceFile();
-    } catch {
-      // No workspace file exists (or some other disk issue)
+    const workspaceFile = DendronExtension.workspaceFile();
+    const resp = WorkspaceUtils.getCodeWorkspaceSettingsSync(
+      path.dirname(workspaceFile.fsPath)
+    );
+    if (resp.error) {
       return undefined;
+    } else {
+      return resp.data;
     }
-    return readJSONWithCommentsSync(workspaceFile.fsPath) as WorkspaceSettings;
   }
 
   getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings | undefined {

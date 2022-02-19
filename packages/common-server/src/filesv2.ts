@@ -12,19 +12,19 @@ import {
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { assign, parse, stringify } from "comment-json";
+import anymatch from "anymatch";
+import { assign, CommentJSONValue, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
 import fs from "fs-extra";
 import matter from "gray-matter";
-import YAML from "yamljs";
 import _ from "lodash";
 import path from "path";
+import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
+import YAML from "yamljs";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
-import SparkMD5 from "spark-md5";
-import anymatch from "anymatch";
 
 /** Dendron should ignore any of these folders when watching or searching folders.
  *
@@ -422,13 +422,15 @@ export function assignJSONWithComment(jsonObj: any, dataToAdd: any) {
   );
 }
 
-export async function readJSONWithComments(fpath: string) {
+export async function readJSONWithComments(
+  fpath: string
+): Promise<CommentJSONValue | null> {
   const content = await fs.readFile(fpath);
   const obj = parse(content.toString());
   return obj;
 }
 
-export function readJSONWithCommentsSync(fpath: string) {
+export function readJSONWithCommentsSync(fpath: string): CommentJSONValue {
   const content = fs.readFileSync(fpath);
   const obj = parse(content.toString());
   return obj;

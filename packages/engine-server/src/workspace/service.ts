@@ -28,7 +28,6 @@ import {
   GitUtils,
   note2File,
   readJSONWithComments,
-  readJSONWithCommentsSync,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
@@ -36,8 +35,9 @@ import {
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import os from "os";
+import path from "path";
+import { WorkspaceUtils } from ".";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
@@ -169,23 +169,20 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
-  setWorkspaceConfig(config: WorkspaceSettings) {
+  setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {
     writeJSONWithComments(
       path.join(this.wsRoot, "dendron.code-workspace"),
       config
     );
   }
 
-  getWorkspaceConfig(): WorkspaceSettings | undefined {
-    try {
-      const wsConfig = readJSONWithCommentsSync(
-        path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
-      return wsConfig;
-    } catch (err) {
-      this.logger.error(err);
+  getCodeWorkspaceSettingsSync(): WorkspaceSettings | undefined {
+    const resp = WorkspaceUtils.getCodeWorkspaceSettingsSync(this.wsRoot);
+    if (resp.error) {
+      this.logger.error(resp.error);
       return undefined;
     }
+    return resp.data;
   }
 
   /**
@@ -271,7 +268,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
-      let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      let out = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
       if (
         !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
       ) {
@@ -672,7 +671,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
-      let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      let settings = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
       const folders = _.reject(
         settings.folders,
         (ent) => ent.path === VaultUtils.getRelPath(vault)
@@ -777,7 +778,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     // workspace file
     const wsPath = WorkspaceConfig.workspaceFile(wsRoot);
-    let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+    let out = (await readJSONWithComments(
+      wsPath
+    )) as unknown as WorkspaceSettings;
     if (
       !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
     ) {

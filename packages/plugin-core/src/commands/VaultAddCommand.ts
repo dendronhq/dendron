@@ -1,19 +1,19 @@
 import {
+  DendronError,
   DVault,
   DWorkspace,
+  ERROR_STATUS,
   VaultRemoteSource,
   VaultUtils,
-  WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   GitUtils,
-  readJSONWithComments,
   simpleGit,
-  writeJSONWithComments,
 } from "@dendronhq/common-server";
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
@@ -21,9 +21,8 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import fs from "fs-extra";
 
 type CommandOpts = {
   type: VaultRemoteSource;
@@ -211,15 +210,28 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const { wsRoot } = getDWorkspace();
 
     // workspace file
-    const wsPath = DendronExtension.workspaceFile().fsPath;
-    let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(wsRoot);
+    if (resp.error) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "no dendron.code-workspace found",
+      });
+    }
+    let wsSettings = resp.data;
+
     if (
-      !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
+      !_.find(
+        wsSettings.folders,
+        (ent) => ent.path === VaultUtils.getRelPath(vault)
+      )
     ) {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
-      const folders = [vault2Folder].concat(out.folders);
-      out = assignJSONWithComment({ folders }, out);
-      writeJSONWithComments(wsPath, out);
+      const folders = [vault2Folder].concat(wsSettings.folders);
+      wsSettings = assignJSONWithComment({ folders }, wsSettings);
+      WorkspaceUtils.writeCodeWorkspaceSettings({
+        settings: wsSettings,
+        wsRoot,
+      });
     }
 
     // check for .gitignore

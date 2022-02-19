@@ -1,21 +1,23 @@
-import {
-  AssertUtils,
-  createMockEngine,
-  TestNoteFactory,
-} from "@dendronhq/common-test-utils";
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { before, beforeEach, describe, it } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import {
+  LinkType,
   PreviewLinkHandler,
   ShowPreviewAssetOpener,
 } from "../../components/views/PreviewLinkHandler";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { QuickPickUtil } from "../../utils/quickPick";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import fs from "fs-extra";
+import { tmpDir } from "@dendronhq/common-server";
+import _ from "lodash";
 
 suite("PreviewLinkHandler", () => {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
@@ -23,233 +25,391 @@ suite("PreviewLinkHandler", () => {
     beforeHook: () => {},
   });
 
-  describe("vaultlessAssetPath", () => {
-    describe("GIVEN valid href", () => {
-      beforeEach(async () => {
-        const factory = TestNoteFactory.defaultUnitTestFactory();
-
-        await factory.createForFName("foo");
-      });
-
-      afterEach(() => {
-        sinon.restore();
-      });
-      it("THEN correct asset path is corectly decoded", (done) => {
-        runSingleVaultTest({
-          ctx,
-          onInit: async ({ wsRoot, vault }) => {
-            const handler = new PreviewLinkHandler(
-              new MockDendronExtension({
-                engine: ExtensionProvider.getEngine(),
-                wsRoot,
-                vaults: [vault],
-              })
-            );
-
-            // without urlencoded parts
-            const withoutURLEncode = handler.vaultlessAssetPath({
-              data: {
-                href: "vscode-webview://e380a62c-2dea-46a8-ae1e-a34868c9719e/assets/dummy-pdf.pdf",
-                id: "foo",
-              },
-              wsRoot,
-            });
-            expect(withoutURLEncode !== undefined).toBeTruthy();
-            expect(
-              await AssertUtils.assertInString({
-                body: withoutURLEncode as string,
-                match: [path.join("assets", "dummy-pdf.pdf")],
-              })
-            ).toBeTruthy();
-
-            // with urlencoded parts (space as %20)
-            const withURLEncode = handler.vaultlessAssetPath({
-              data: {
-                href: "vscode-webview://e380a62c-2dea-46a8-ae1e-a34868c9719e/assets/file%20with%20space.pdf",
-                id: "foo",
-              },
-              wsRoot,
-            });
-            expect(withURLEncode !== undefined).toBeTruthy();
-            expect(
-              await AssertUtils.assertInString({
-                body: withURLEncode as string,
-                match: [path.join("assets", "file with space.pdf")],
-              })
-            ).toBeTruthy();
-
-            done();
+  describeMultiWS(
+    "GIVEN onLinkClicked",
+    {
+      ctx,
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "target",
+          vault: vaults[0],
+          wsRoot,
+          body: [
+            "Qui dicta nulla at atque qui voluptatem.",
+            "Harum qui quasi sint.",
+            "",
+            "## Nostrum",
+            "",
+            "Ut recusandae fuga recusandae nihil.",
+            "Illum nostrum id animi. ^nihil",
+          ].join("\n"),
+          props: {
+            id: "test-id",
           },
         });
+        await NoteTestUtilsV4.createNote({
+          fname: "lorem",
+          vault: vaults[0],
+          wsRoot,
+          body: "Est saepe ut et accusamus soluta id",
+          props: {
+            id: "est",
+          },
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "lorem",
+          vault: vaults[1],
+          wsRoot,
+          body: "Reprehenderit dolores pariatur",
+          props: {
+            id: "reprehenderit",
+          },
+        });
+      },
+    },
+    () => {
+      let note: NoteProps;
+      beforeEach(async () => {
+        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        note = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          engine,
+          vault: vaults[0],
+        })!;
+        expect(note).toBeTruthy();
+        await ExtensionProvider.getWSUtils().openNote(note);
       });
-    });
-  });
 
-  // this test block passes because it doesn't wait for the actual test to run.
-  // the actual test does not pass.
-  describe.skip(`handleLink`, () => {
-    describe(`LinkType.ASSET`, () => {
-      describe(`WHEN valid href`, () => {
-        let assetOpenerStub: any;
-
-        beforeEach(async () => {
-          const factory = TestNoteFactory.defaultUnitTestFactory();
-
-          await factory.createForFName("foo");
-
-          assetOpenerStub = sinon.stub(
-            ShowPreviewAssetOpener,
-            "openWithDefaultApp"
+      describe("WHEN clicking on an wikilink", () => {
+        test("THEN the clicked note is opened", async () => {
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
           );
-        });
-
-        afterEach(() => {
-          sinon.restore();
-        });
-
-        it(`WHEN called with valid href THEN open asset with default app.`, async () => {
-          runSingleVaultTest({
-            ctx,
-            onInit: async ({ wsRoot, vault }) => {
-              const handler = new PreviewLinkHandler(
-                new MockDendronExtension({
-                  engine: ExtensionProvider.getEngine(),
-                  wsRoot,
-                  vaults: [vault],
-                })
-              );
-
-              await handler.onLinkClicked({
-                data: {
-                  href: "vscode-webview://e380a62c-2dea-46a8-ae1e-a34868c9719e/assets/dummy-pdf.pdf",
-                  id: "foo-id",
-                },
-              });
-
-              const expected = path.join(
-                TestNoteFactory.DEFAULT_VAULT.fsPath,
-                "assets/dummy-pdf.pdf"
-              );
-
-              expect(assetOpenerStub.calledWith(expected)).toBeTruthy();
+          const out = await handler.onLinkClicked({
+            data: {
+              href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test-id#nostrum",
+              id: note.id,
             },
+          });
+          expect(out).toEqual(LinkType.WIKI);
+          expect(
+            VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+              "target.md"
+            )
+          ).toBeTruthy();
+        });
+
+        describe("AND the link is to a header", () => {
+          test("THEN the note is opened at that header", async () => {
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test-id#nostrum",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.WIKI);
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+                "target.md"
+              )
+            ).toBeTruthy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.selection.active.line
+            ).toEqual(10);
+          });
+        });
+
+        describe("AND the link is to a block anchor", () => {
+          test("THEN the note is opened at that block", async () => {
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test-id#^nihil",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.WIKI);
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+                "target.md"
+              )
+            ).toBeTruthy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.selection.active.line
+            ).toEqual(13);
+          });
+        });
+
+        describe("AND if the link is to a missing note", () => {
+          test("THEN nothing happens", async () => {
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const openWithDefaultApp = sinon.stub(
+              ShowPreviewAssetOpener,
+              "openWithDefaultApp"
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/does-not-exist",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.UNKNOWN);
+            expect(openWithDefaultApp.called).toBeFalsy();
+          });
+        });
+
+        describe("AND the link is ambiguous", () => {
+          test("THEN it prompts for a note", async () => {
+            const { engine } = ExtensionProvider.getDWorkspace();
+            const showChooseNote = sinon
+              .stub(QuickPickUtil, "showChooseNote")
+              .returns(Promise.resolve(engine.notes["reprehenderit"]));
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/lorem",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.WIKI);
+            expect(
+              VSCodeUtils.getActiveTextEditor()
+                ?.document.getText()
+                .includes("Reprehenderit dolores pariatur")
+            ).toBeTruthy();
+            expect(showChooseNote.called).toBeTruthy();
           });
         });
       });
-    });
-  });
 
-  describe(`getNavigationTargetNoteForWikiLink tests:`, () => {
-    const factory = TestNoteFactory.defaultUnitTestFactory();
-
-    it("WHEN href is missing THEN throw", async () => {
-      const engine = createMockEngine({ wsRoot: "/tmp", vaults: [] });
-      const linkHandler = new PreviewLinkHandler(
-        new MockDendronExtension({ engine })
-      );
-
-      await expect(() =>
-        linkHandler.getNavigationTargetNoteForWikiLink({
-          data: {},
-          engine,
-        })
-      ).toThrow("href is missing");
-    });
-
-    it("WHEN note can be found by id THEN grab note by id", async () => {
-      const note = await factory.createForFName("foo");
-      const engine = createMockEngine({ wsRoot: "/tmp", vaults: [] });
-      note.id = "id-val-1";
-      const dict = factory.toNotePropsDict([note]);
-
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
-
-      const actual = await linkHandler.getNavigationTargetNoteForWikiLink({
-        data: {
-          href: `vscode-webview://25d7783e-df29-479c-9838-386c17dbf9b6/id-val-1`,
-        },
-        notes: dict,
+      describe("WHEN clicking on a web URL", () => {
+        test("THEN opening is left to VSCode", async () => {
+          const openWithDefaultApp = sinon.stub(
+            ShowPreviewAssetOpener,
+            "openWithDefaultApp"
+          );
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
+          );
+          const out = await handler.onLinkClicked({
+            data: {
+              href: "https://wiki.dendron.so/#getting-started",
+              id: note.id,
+            },
+          });
+          expect(out).toEqual(LinkType.WEBSITE);
+          expect(openWithDefaultApp.called).toBeFalsy();
+        });
       });
 
-      expect(actual.note).toEqual(note);
-      expect(actual.anchor).toEqual(undefined);
-    });
+      describe("WHEN clicking on an asset inside a vault", () => {
+        before(async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const assetsPath = path.join(
+            wsRoot,
+            VaultUtils.getRelPath(vaults[0]),
+            "assets"
+          );
+          await fs.mkdir(assetsPath);
+          await fs.writeFile(path.join(assetsPath, "test.pdf"), "");
+        });
 
-    it("WHEN note can be found by id with anchor THEN grab note by id and specify anchor", async () => {
-      const note = await factory.createForFName("foo");
-      note.id = "id-val-1";
-      const dict = factory.toNotePropsDict([note]);
-
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
-
-      const actual = await linkHandler.getNavigationTargetNoteForWikiLink({
-        data: {
-          href: `vscode-webview://25d7783e-df29-479c-9838-386c17dbf9b6/id-val-1#anch-val-1`,
-        },
-        notes: dict,
+        test("THEN it is opened with the default app", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const openWithDefaultApp = sinon.stub(
+            ShowPreviewAssetOpener,
+            "openWithDefaultApp"
+          );
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
+          );
+          const out = await handler.onLinkClicked({
+            data: {
+              href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/assets/test.pdf",
+              id: note.id,
+            },
+          });
+          expect(out).toEqual(LinkType.ASSET);
+          expect(openWithDefaultApp.called).toBeTruthy();
+          expect(
+            openWithDefaultApp.calledWith(
+              path.join(
+                wsRoot,
+                VaultUtils.getRelPath(vaults[0]),
+                "assets",
+                "test.pdf"
+              )
+            )
+          ).toBeTruthy();
+        });
       });
 
-      expect(actual.note).toEqual(note);
-      expect(actual.anchor).toEqual({
-        type: "header",
-        value: "anch-val-1",
-        depth: 1,
-      });
-    });
+      describe("WHEN clicking on an asset with path relative to wsRoot", () => {
+        before(async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          await fs.writeFile(path.join(wsRoot, "test.pdf"), "");
+        });
 
-    it("WHEN note in different vault without vault specified THEN prompt user to choose a note", async () => {
-      const note1 = await factory.createForFName("other-vault-foo");
-      note1.vault = { fsPath: `/tmp/note1vault` };
-      note1.created = 2;
-      const notes = [];
-      notes.push(note1);
-
-      const note2 = await factory.createForFName("other-vault-foo");
-      note2.vault = { fsPath: `/tmp/note2Vault` };
-      note2.created = 1;
-      notes.push(note2);
-
-      sinon
-        .stub(QuickPickUtil, "showChooseNote")
-        .returns(Promise.resolve(note2));
-
-      const dict = factory.toNotePropsDict(notes);
-
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
-
-      const noteData = await linkHandler.getNavigationTargetNoteForWikiLink({
-        data: {
-          href: `vscode-webview://25d7783e-df29-479c-9838-386c17dbf9b6/other-vault-foo`,
-        },
-        notes: dict,
+        test("THEN it is opened with the default app", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const openWithDefaultApp = sinon.stub(
+            ShowPreviewAssetOpener,
+            "openWithDefaultApp"
+          );
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
+          );
+          const out = await handler.onLinkClicked({
+            data: {
+              href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test.pdf",
+              id: note.id,
+            },
+          });
+          expect(out).toEqual(LinkType.ASSET);
+          expect(openWithDefaultApp.called).toBeTruthy();
+          expect(
+            openWithDefaultApp.calledWith(path.join(wsRoot, "test.pdf"))
+          ).toBeTruthy();
+        });
       });
 
-      expect(noteData.note).toEqual(note2);
-      expect(noteData.anchor).toEqual(undefined);
-    });
-  });
+      describe("WHEN clicking on an asset with an absolute path", () => {
+        let testDir: string;
+        before(async () => {
+          testDir = tmpDir().name;
+          await fs.writeFile(path.join(testDir, "test.pdf"), "");
+        });
 
-  describe(`extractHeaderAnchorIfExists`, () => {
-    it("WHEN anchor exists THEN return it", () => {
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
+        test("THEN it is opened with the default app", async () => {
+          const openWithDefaultApp = sinon.stub(
+            ShowPreviewAssetOpener,
+            "openWithDefaultApp"
+          );
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
+          );
+          const out = await handler.onLinkClicked({
+            data: {
+              href: [
+                "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce",
+                testDir,
+                "test.pdf",
+              ].join(path.sep), // not using path.join because it normalizes the ://
+              id: note.id,
+            },
+          });
+          expect(out).toEqual(LinkType.ASSET);
+          expect(openWithDefaultApp.called).toBeTruthy();
+          expect(
+            openWithDefaultApp.calledWith(path.join(testDir, "test.pdf"))
+          ).toBeTruthy();
+        });
+      });
 
-      const anchor = linkHandler.extractHeaderAnchorIfExists(
-        "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo#heading-2"
-      );
-      expect(anchor?.value).toEqual("heading-2");
-      expect(anchor?.type).toEqual("header");
-    });
+      describe("WHEN opening a non-note text file", () => {
+        before(async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          await fs.writeFile(
+            path.join(wsRoot, "test.py"),
+            [
+              "print('hello world!')",
+              "print('hello from a test')",
+              "print('hi!') # ^target",
+              "print('hey!!!')",
+            ].join("\n")
+          );
+        });
 
-    it(`WHEN anchor does NOT exist THEN return undefined`, () => {
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
+        test("THEN it is opened in the editor", async () => {
+          const openWithDefaultApp = sinon.stub(
+            ShowPreviewAssetOpener,
+            "openWithDefaultApp"
+          );
+          const handler = new PreviewLinkHandler(
+            ExtensionProvider.getExtension()
+          );
+          const out = await handler.onLinkClicked({
+            data: {
+              href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test.py",
+              id: note.id,
+            },
+          });
+          expect(out).toEqual(LinkType.TEXT);
+          expect(openWithDefaultApp.called).toBeFalsy();
+          expect(
+            VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+              "test.py"
+            )
+          ).toBeTruthy();
+        });
 
-      expect(
-        linkHandler.extractHeaderAnchorIfExists(
-          "vscode-webview://4e98b9cf-41d8-49eb-b458-fcfda32c6c01/foo"
-        )
-      ).toEqual(undefined);
-    });
-  });
+        describe("AND the file link is to a line", () => {
+          test("THEN it is opened at that line", async () => {
+            const openWithDefaultApp = sinon.stub(
+              ShowPreviewAssetOpener,
+              "openWithDefaultApp"
+            );
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test.py#L2",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.TEXT);
+            expect(openWithDefaultApp.called).toBeFalsy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+                "test.py"
+              )
+            ).toBeTruthy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.selection.start.line
+            ).toEqual(1);
+          });
+        });
+
+        describe("AND the file link is to an anchor", () => {
+          test("THEN it is opened at that anchor", async () => {
+            const openWithDefaultApp = sinon.stub(
+              ShowPreviewAssetOpener,
+              "openWithDefaultApp"
+            );
+            const handler = new PreviewLinkHandler(
+              ExtensionProvider.getExtension()
+            );
+            const out = await handler.onLinkClicked({
+              data: {
+                href: "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/test.py#^target",
+                id: note.id,
+              },
+            });
+            expect(out).toEqual(LinkType.TEXT);
+            expect(openWithDefaultApp.called).toBeFalsy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+                "test.py"
+              )
+            ).toBeTruthy();
+            expect(
+              VSCodeUtils.getActiveTextEditor()?.selection.start.line
+            ).toEqual(2);
+          });
+        });
+      });
+    }
+  );
 
   describe(`extractNoteIdFromHref`, () => {
     describe(`WHEN id is present`, () => {

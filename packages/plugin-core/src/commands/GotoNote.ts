@@ -233,7 +233,7 @@ export class GotoNoteCommand extends BasicCommand<
     return opts;
   }
 
-  private async trySelectRevealNonNoteAnchor(
+  public static async trySelectRevealNonNoteAnchor(
     editor: TextEditor,
     anchor: DNoteAnchorBasic
   ) {
@@ -292,7 +292,7 @@ export class GotoNoteCommand extends BasicCommand<
         }
       );
       if (editor && opts.anchor)
-        this.trySelectRevealNonNoteAnchor(editor, opts.anchor);
+        await GotoNoteCommand.trySelectRevealNonNoteAnchor(editor, opts.anchor);
 
       return {
         kind: TargetKind.NON_NOTE,

@@ -35,7 +35,11 @@ import {
   USERS_HIERARCHY_BASE,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { createDisposableLogger } from "@dendronhq/common-server";
+import {
+  createDisposableLogger,
+  getFrontmatterTags,
+  parseFrontmatter,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
   FootnoteDefinition,
@@ -51,6 +55,7 @@ import type {
   TableCell,
   TableRow,
   Text,
+  YAML,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -1416,5 +1421,27 @@ export class RemarkUtils {
     return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
       RemarkUtils.isFootnoteDefinition
     );
+  }
+
+  /**
+   * Extract frontmatter tags from note
+   * @param body
+   * @returns
+   */
+  static extractFMTags(body: string) {
+    let parsed: ReturnType<typeof parseFrontmatter> | undefined;
+    const noteAST = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.NO_DATA },
+      {}
+    ).parse(body);
+    visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
+      parsed = parseFrontmatter(frontmatter);
+      return false; // stop traversing, there is only one frontmatter
+    });
+    if (parsed) {
+      return getFrontmatterTags(parsed);
+    } else {
+      return [];
+    }
   }
 }

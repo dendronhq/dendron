@@ -3,6 +3,7 @@ import {
   DLink,
   DLinkType,
   DNoteAnchorBasic,
+  DVault,
   isBlockAnchor,
   isLineAnchor,
   NoteProps,
@@ -10,21 +11,17 @@ import {
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
 } from "@dendronhq/common-all";
-import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 import {
-  DendronASTTypes,
   HASHTAG_REGEX_BASIC,
   HASHTAG_REGEX_LOOSE,
   LinkUtils,
-  MDUtilsV5,
-  ProcMode,
+  RemarkUtils,
   USERTAG_REGEX_LOOSE,
-  visit,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
-import type { YAML } from "mdast";
 import path from "path";
 import vscode, {
   commands,
@@ -35,6 +32,7 @@ import vscode, {
   Selection,
   TextDocument,
 } from "vscode";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 
@@ -237,11 +235,22 @@ export type getReferenceAtPositionResp = {
   refText: string;
 };
 
-export const getReferenceAtPosition = (
-  document: vscode.TextDocument,
-  position: vscode.Position,
-  opts?: { partial?: boolean; allowInCodeBlocks: boolean }
-): getReferenceAtPositionResp | null => {
+export const getReferenceAtPosition = async ({
+  document,
+  position,
+  wsRoot,
+  vaults,
+  opts,
+}: {
+  document: vscode.TextDocument;
+  position: vscode.Position;
+  wsRoot: string;
+  vaults: DVault[];
+  opts?: {
+    partial?: boolean;
+    allowInCodeBlocks: boolean;
+  };
+}): Promise<getReferenceAtPositionResp | null> => {
   let refType: DLinkType | undefined;
   if (
     opts?.allowInCodeBlocks !== true &&
@@ -270,9 +279,12 @@ export const getReferenceAtPosition = (
     position,
     new RegExp(re)
   );
+
+  // didn't find a ref
+  // check if it is a user tag, a regular tag, or a frontmatter tag
   if (!rangeWithLink) {
     const { enableUserTags, enableHashTags } = ConfigUtils.getWorkspace(
-      getDWorkspace().config
+      ExtensionProvider.getDWorkspace().config
     );
     if (enableHashTags) {
       // if not, it could be a hashtag
@@ -313,18 +325,19 @@ export const getReferenceAtPosition = (
       }
     }
     // if not, it could be a frontmatter tag
-    let parsed: ReturnType<typeof parseFrontmatter> | undefined;
-    const noteAST = MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.NO_DATA },
-      {}
-    ).parse(document.getText());
-    visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
-      parsed = parseFrontmatter(frontmatter);
-      return false; // stop traversing, there is only one frontmatter
-    });
-    if (parsed) {
-      const tags = getFrontmatterTags(parsed);
-      for (const tag of tags) {
+    // only parse if this is a dendron note
+    if (
+      !(await WorkspaceUtils.isDendronNote({
+        wsRoot,
+        vaults,
+        fpath: document.uri.fsPath,
+      }))
+    ) {
+      return null;
+    }
+    const maybeTags = RemarkUtils.extractFMTags(document.getText());
+    if (!_.isEmpty(maybeTags)) {
+      for (const tag of maybeTags) {
         // Offset 1 for the starting `---` line of frontmatter
         const tagPos = VSCodeUtils.position2VSCodeRange(tag.position, {
           line: 1,

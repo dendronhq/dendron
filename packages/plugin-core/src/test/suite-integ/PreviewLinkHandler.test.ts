@@ -299,19 +299,20 @@ suite("PreviewLinkHandler", () => {
           );
           const out = await handler.onLinkClicked({
             data: {
-              href: [
-                "vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce",
+              href: `vscode-webview://76b3da02-f902-4652-b6a8-746551d032ce/${path.join(
                 testDir,
-                "test.pdf",
-              ].join(path.sep), // not using path.join because it normalizes the ://
+                "test.pdf"
+              )}`,
               id: note.id,
             },
           });
           expect(out).toEqual(LinkType.ASSET);
           expect(openWithDefaultApp.called).toBeTruthy();
-          expect(
-            openWithDefaultApp.calledWith(path.join(testDir, "test.pdf"))
-          ).toBeTruthy();
+          // Added the "toLowerCase"s here because on Windows link handler
+          // gets called with C:\ while testDir is c:\
+          expect(openWithDefaultApp.args[0][0].toLowerCase()).toEqual(
+            path.join(testDir, "test.pdf").toLowerCase()
+          );
         });
       });
 

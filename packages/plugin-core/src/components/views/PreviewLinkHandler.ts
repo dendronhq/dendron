@@ -98,7 +98,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       : undefined;
     const { fullPath } =
       (await findNonNoteFile({
-        fpath: uri.fsPath,
+        fpath: path.normalize(uri.fsPath),
         vaults,
         wsRoot,
         currentVault: currentNote?.vault,

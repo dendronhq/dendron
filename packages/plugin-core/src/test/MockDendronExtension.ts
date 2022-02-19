@@ -1,5 +1,4 @@
 import {
-  CONSTANTS,
   DendronTreeViewKey,
   DEngineClient,
   DVault,
@@ -7,9 +6,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { readJSONWithCommentsSync } from "@dendronhq/common-server";
 import { IWorkspaceService, WorkspaceService } from "@dendronhq/engine-server";
-import path from "path";
 import {
   Disposable,
   ExtensionContext,
@@ -187,13 +184,9 @@ export class MockDendronExtension implements IDendronExtension {
   }
 
   getWorkspaceConfig(): WorkspaceConfiguration {
-    if (!this._wsRoot) {
-      throw new Error("wsRoot not configured in MockDendronExtension.");
-    }
-    const wsConfig = readJSONWithCommentsSync(
-      path.join(this._wsRoot, CONSTANTS.DENDRON_WS_NAME)
-    );
-    return wsConfig;
+    // TODO: the old implementation of this was wrong - it did not return WorkspaceConfiguration but a WorkspaceSettings object
+    // since this doesn't seem to be used, just adding an exception here for future work
+    throw Error("not implemented");
   }
 
   getTreeView(_key: DendronTreeViewKey): WebviewViewProvider {

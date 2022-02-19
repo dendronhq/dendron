@@ -26,7 +26,6 @@ export type DendronPublishingConfig = {
   siteHierarchies: string[];
   enableSiteLastModified: boolean;
   siteRootDir: string;
-  siteRepoDir?: string;
   siteUrl?: string;
   enableFrontmatterTags: boolean;
   enableHashesForFMTags: boolean;
@@ -36,10 +35,7 @@ export type DendronPublishingConfig = {
   writeStubs: boolean;
   seo: SEOConfig;
   github: GithubConfig;
-  enableContainers: boolean;
-  generateChangelog: boolean;
 
-  previewPort?: number;
   segmentKey?: string;
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
@@ -68,7 +64,6 @@ export type DuplicateNoteBehavior = UseVaultBehavior;
 
 export type HierarchyConfig = {
   publishByDefault?: boolean | { [key: string]: boolean };
-  noindexByDefault?: boolean;
   customFrontmatter?: CustomFMEntry[];
 };
 
@@ -95,8 +90,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     copyAssets: true,
     siteHierarchies: ["root"],
     writeStubs: false,
-    enableContainers: false,
-    generateChangelog: false,
     siteRootDir: "docs",
     seo: genDefaultSEOConfig(),
     github: genDefaultGithubConfig(),

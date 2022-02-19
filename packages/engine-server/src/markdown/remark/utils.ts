@@ -17,6 +17,7 @@ import {
   DNoteRefLinkRaw,
   DVault,
   ERROR_STATUS,
+  GetAnchorsResp,
   getSlugger,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -289,11 +290,11 @@ const getLinks = ({
 const getLinkCandidates = ({
   ast,
   note,
-  notesMap,
+  engine,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  notesMap: Map<string, NoteProps>;
+  engine: DEngineClient;
 }) => {
   const textNodes: Text[] = [];
   visit(
@@ -316,22 +317,25 @@ const getLinkCandidates = ({
         column: 1,
       };
     }
-    value.split(/\s+/).filter((word) => {
-      const maybeNote = notesMap.get(word);
-      if (maybeNote !== undefined) {
-        const candidate = {
-          type: "linkCandidate",
-          from: NoteUtils.toNoteLoc(note),
-          value: value.trim(),
-          position: textNode.position as Position,
-          to: {
-            fname: word,
-            vaultName: VaultUtils.getName(maybeNote.vault),
-          },
-        } as DLink;
-        linkCandidates.push(candidate);
-      }
-      return maybeNote !== undefined;
+    value.split(/\s+/).forEach((word) => {
+      const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
+        fname: word,
+        engine,
+      }).filter((note) => note.stub !== true);
+      linkCandidates.push(
+        ...possibleCandidates.map((candidate): DLink => {
+          return {
+            type: "linkCandidate",
+            from: NoteUtils.toNoteLoc(note),
+            value: value.trim(),
+            position: textNode.position as Position,
+            to: {
+              fname: word,
+              vaultName: VaultUtils.getName(candidate.vault),
+            },
+          };
+        })
+      );
     });
   });
   return linkCandidates;
@@ -718,13 +722,9 @@ export class LinkUtils {
 
   static findLinkCandidates({
     note,
-    // notes,
-    notesMap,
     engine,
   }: {
     note: NoteProps;
-    // notes: NoteProps[];
-    notesMap: Map<string, NoteProps>;
     engine: DEngineClient;
   }) {
     const content = note.body;
@@ -741,7 +741,7 @@ export class LinkUtils {
     const linkCandidates: DLink[] = getLinkCandidates({
       ast: tree,
       note,
-      notesMap,
+      engine,
     });
     return linkCandidates;
   }
@@ -865,10 +865,7 @@ export class AnchorUtils {
     }
   }
 
-  static async findAnchors(opts: {
-    note: NoteProps;
-    wsRoot: string;
-  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+  static findAnchors(opts: { note: NoteProps }): GetAnchorsResp {
     if (opts.note.stub) return {};
     try {
       const noteContents = NoteUtils.serialize(opts.note);
@@ -883,7 +880,7 @@ export class AnchorUtils {
     } catch (err) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
-        payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
+        payload: { note: NoteUtils.toLogObj(opts.note) },
         innerError: err as Error,
       });
       const { logger, dispose } = createDisposableLogger("AnchorUtils");

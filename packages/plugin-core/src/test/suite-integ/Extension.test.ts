@@ -1,20 +1,12 @@
 import {
   ConfigUtils,
   CONSTANTS,
-  InstallStatus,
   isNotUndefined,
   Time,
   VaultUtils,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import {
-  readJSONWithCommentsSync,
-  readYAML,
-  tmpDir,
-  writeJSONWithComments,
-  writeYAML,
-} from "@dendronhq/common-server";
-import { toPlainObject } from "@dendronhq/common-test-utils";
+import { readYAML, tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
   EngineUtils,
   getWSMetaFilePath,
@@ -24,10 +16,12 @@ import {
 import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, beforeEach, it, afterEach } from "mocha";
-import os from "os";
+import * as mocha from "mocha";
+import { afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
+import semver from "semver";
 import sinon, { SinonStub } from "sinon";
+import * as vscode from "vscode";
 import { ExtensionContext, window } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
@@ -38,9 +32,12 @@ import {
   DEFAULT_LEGACY_VAULT_NAME,
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import * as telemetry from "../../telemetry";
-import { KeybindingUtils } from "../../KeybindingUtils";
+import { AnalyticsUtils } from "../../utils/analytics";
+import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
@@ -64,11 +61,6 @@ import {
   setupBeforeAfter,
   stubSetupWorkspace,
 } from "../testUtilsV3";
-import semver from "semver";
-import * as vscode from "vscode";
-import { AnalyticsUtils } from "../../utils/analytics";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
 
 function mockUserConfigDir() {
   const dir = tmpDir().name;
@@ -96,7 +88,7 @@ function lapsedMessageTest({
   shouldDisplayMessage,
   workspaceActivated = false,
 }: {
-  done: Mocha.Done;
+  done: mocha.Done;
   firstInstall?: number;
   firstWsInitialize?: number;
   lapsedUserMsgSendTime?: number;
@@ -113,7 +105,7 @@ function lapsedMessageTest({
 }
 
 async function inactiveMessageTest(opts: {
-  done: Mocha.Done;
+  done: mocha.Done;
   firstInstall?: number;
   firstWsInitialize?: number;
   inactiveUserMsgSendTime?: number;
@@ -277,6 +269,7 @@ suite("Extension", function () {
               },
             },
             randomNote: {},
+            copyNoteLink: {},
             insertNote: {
               initialValue: "templates",
             },
@@ -361,8 +354,6 @@ suite("Extension", function () {
             enablePrettyRefs: true,
             siteHierarchies: ["root"],
             writeStubs: false,
-            enableContainers: false,
-            generateChangelog: false,
             siteRootDir: "docs",
             seo: {
               title: "Dendron",
@@ -784,8 +775,9 @@ suite("keybindings", function () {
   let homeDirStub: SinonStub;
   let userConfigDirStub: SinonStub;
 
-  const ctx: ExtensionContext = setupBeforeAfter(this, {
+  setupBeforeAfter(this, {
     beforeHook: async (ctx) => {
+      // eslint-disable-next-line no-new
       new StateService(ctx);
       await resetCodeWorkspace();
       await new ResetConfigCommand().execute({ scope: "all" });
@@ -815,13 +807,16 @@ suite("keybindings", function () {
         }
       ]`;
       fs.writeFileSync(keybindingConfigPath, config);
-      const existingConfig = readJSONWithCommentsSync(keybindingConfigPath);
+      const resp = KeybindingUtils.getKeybindingConfig({
+        createIfMissing: false,
+      });
+      const existingConfig = resp.data!;
       const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
       const beforeKeySymbol = Object.getOwnPropertySymbols(
         existingConfig[0]
       )[0];
       const { newKeybindings } =
-        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
+        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists().data!;
       const override = newKeybindings[1];
       expect(_.isArray(newKeybindings)).toBeTruthy();
       // override config exists after migration
@@ -838,281 +833,6 @@ suite("keybindings", function () {
         beforeKeySymbol
       );
       done();
-    });
-
-    // this test only works if you don't pass --disable-extensions when testing.
-    test.skip("with vim extension installed, resolve keyboard shortcut conflict.", (done) => {
-      const wsRoot = tmpDir().name;
-      StateService.instance().setActivationContext(
-        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-      );
-
-      _activate(ctx).then(async () => {
-        stubSetupWorkspace({
-          wsRoot,
-        });
-        sinon
-          .stub(VSCodeUtils, "getInstallStatusForExtension")
-          .returns(InstallStatus.INITIAL_INSTALL);
-        // somehow stub is ignored if --disable-extensions is passed during the test.
-        sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
-        const cmd = new SetupWorkspaceCommand();
-        await cmd.execute({
-          rootDirRaw: wsRoot,
-          skipOpenWs: true,
-          skipConfirmation: true,
-          workspaceInitializer: new BlankInitializer(),
-        });
-
-        _activate(ctx).then(async () => {
-          stubSetupWorkspace({
-            wsRoot,
-          });
-          sinon
-            .stub(VSCodeUtils, "getInstallStatusForExtension")
-            .returns(InstallStatus.INITIAL_INSTALL);
-          // somehow stub is ignored if --disable-extensions is passed during the test.
-          sinon.stub(VSCodeUtils, "isExtensionInstalled").returns(true);
-          const cmd = new SetupWorkspaceCommand();
-          await cmd.execute({
-            rootDirRaw: wsRoot,
-            skipOpenWs: true,
-            skipConfirmation: true,
-            workspaceInitializer: new BlankInitializer(),
-          });
-
-          const dendronState = MetadataService.instance().getMeta();
-          expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-          expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
-
-          const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-          const keybindingConfigPath = [userConfigDir, "keybindings.json"].join(
-            ""
-          );
-
-          const newKeybindings = readJSONWithCommentsSync(keybindingConfigPath);
-          const override = newKeybindings[newKeybindings.length - 1];
-          const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-          expect(override.key).toEqual(`${metaKey}+l`);
-          expect(override.command).toEqual("-expandLineSelection");
-
-          done();
-        });
-      });
-
-      describe("keyboard shortcut migration", () => {
-        test("lookup v2 to v3 migration, nothing happens", (done) => {
-          const { migratedKeybindings } =
-            KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-          expect(_.isUndefined(migratedKeybindings)).toBeTruthy();
-          done();
-        });
-
-        test("lookup v2 to v3 migration", (done) => {
-          const { keybindingConfigPath } =
-            KeybindingUtils.getKeybindingConfigPath();
-          const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-          fs.ensureFileSync(keybindingConfigPath);
-          const startingConfig = `// My awesome Dendron Config
-      [
-        { // disable delete node keybinding
-          "key": "shift+${metaKey}+d",
-          "command": "-dendron.deleteNode",
-          "when": "dendron:pluginActive"
-        },
-        { // super specific lookup
-          "key": "${metaKey}+k l",
-          "command": "dendron.lookup",
-          "args": {
-            /* arg-comment-0 */ 
-            // arg-comment-1
-            "flavor": "note", // arg-comment-2
-            // arg-comment-3
-            "noteExistBehavior": "open", // arg-comment-4
-            // arg-comment-5
-            "filterType": "directChildOnly", // arg-comment-6
-            // arg-comment-7
-            "value": "foo", // arg-comment-8
-            // arg-comment-9
-            "effectType": "multiSelect" // arg-comment-10
-            // arg-comment-11
-          }
-        },
-        {
-          "key": "${metaKey}+k shift+l",
-          "command": "dendron.lookup",
-          "args": {
-            // arg-comment-12
-            "effectType": "copyNoteLink", // arg-comment-13
-            // arg-comment-14
-          }
-        },
-        {
-          "key": "${metaKey}+l",
-          "command": "-dendron.lookup",
-        },
-        {
-          "key": "${metaKey}+l",
-          "command": "dendron.lookup",
-          "args": {
-            "splitType": "horizontal",
-            "selectionType": "selectionExtract",
-            "noConfirm": true,
-            "vaultSelectionMode": 2,
-          }
-        }
-      ]`;
-          fs.writeFileSync(keybindingConfigPath, startingConfig);
-          const { migratedKeybindings } =
-            KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-          expect(toPlainObject(migratedKeybindings)).toEqual([
-            // leaves non-lookup keybinding as is
-            {
-              key: `shift+${metaKey}+d`,
-              command: "-dendron.deleteNode",
-              when: "dendron:pluginActive",
-            },
-            // migrate to new args
-            {
-              key: `${metaKey}+k l`,
-              command: "dendron.lookupNote",
-              args: {
-                filterMiddleware: ["directChildOnly"],
-                initialValue: "foo",
-                multiSelect: true,
-              },
-            },
-            {
-              key: `${metaKey}+k shift+l`,
-              command: "dendron.lookupNote",
-              args: {
-                copyNoteLink: true,
-              },
-            },
-            // migrates keybinding overrides
-            {
-              key: `${metaKey}+l`,
-              command: "-dendron.lookupNote",
-            },
-            // leaves keys that don't change as is
-            {
-              key: `${metaKey}+l`,
-              command: "dendron.lookupNote",
-              args: {
-                splitType: "horizontal",
-                selectionType: "selectionExtract",
-                noConfirm: true,
-                vaultSelectionMode: 2,
-              },
-            },
-          ]);
-          writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-          done();
-        });
-
-        test("does nothing on extension activate if not necessary", (done) => {
-          const wsRoot = tmpDir().name;
-          const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-          const keybindingConfigPath = [userConfigDir, "keybindings.json"].join(
-            ""
-          );
-          expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
-
-          StateService.instance().setActivationContext(
-            WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-          );
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
-            });
-            const cmd = new SetupWorkspaceCommand();
-            await cmd.execute({
-              rootDirRaw: wsRoot,
-              skipOpenWs: true,
-              skipConfirmation: true,
-              workspaceInitializer: new BlankInitializer(),
-            });
-            expect(fs.existsSync(keybindingConfigPath)).toBeFalsy();
-
-            done();
-          });
-        });
-
-        test("v2 to v3 migration happens on extension activation only on upgrade", (done) => {
-          const wsRoot = tmpDir().name;
-          const metaKey = os.type() === "Darwin" ? "cmd" : "ctrl";
-          const { userConfigDir } = VSCodeUtils.getCodeUserConfigDir();
-          const keybindingConfigPath = [userConfigDir, "keybindings.json"].join(
-            ""
-          );
-          fs.ensureFileSync(keybindingConfigPath);
-          const config = `// This is my awesome Dendron keybinding
-      [
-        { // lookup disable
-          "key": "${metaKey}+l",
-          "command": "-dendron.lookup",
-        },
-        { // lookup with args
-          "key": "${metaKey}+l",
-          "command": "dendron.lookup",
-          "args": {
-            "effectType": "copyNoteLink"
-          }
-        }
-      ]`;
-          fs.writeFileSync(keybindingConfigPath, config);
-          sinon
-            .stub(VSCodeUtils, "getInstallStatusForExtension")
-            .returns(InstallStatus.UPGRADED);
-          StateService.instance().setActivationContext(
-            WORKSPACE_ACTIVATION_CONTEXT.NORMAL
-          );
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
-            });
-            const cmd = new SetupWorkspaceCommand();
-            await cmd.execute({
-              rootDirRaw: wsRoot,
-              skipOpenWs: true,
-              skipConfirmation: true,
-              workspaceInitializer: new BlankInitializer(),
-            });
-
-            const migratedKeybindings =
-              readJSONWithCommentsSync(keybindingConfigPath);
-            expect(toPlainObject(migratedKeybindings)).toEqual([
-              {
-                key: `${metaKey}+l`,
-                command: "-dendron.lookupNote",
-              },
-              {
-                key: `${metaKey}+l`,
-                command: "dendron.lookupNote",
-                args: {
-                  // copy note link by default!
-                  copyNoteLink: true,
-                },
-              },
-            ]);
-            // simple comments are preserved
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings).length
-            ).toEqual(1);
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings[0]).length
-            ).toEqual(1);
-            expect(
-              Object.getOwnPropertySymbols(migratedKeybindings[1]).length
-            ).toEqual(1);
-
-            // old file is backed up
-            expect(fs.existsSync(`${keybindingConfigPath}.old`)).toBeTruthy();
-
-            done();
-          });
-        });
-      });
     });
   });
 });
@@ -1175,7 +895,7 @@ suite("per-init config migration logic", function () {
   });
 
   describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is legacy",
+    "GIVEN: current version is 0.83.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1191,7 +911,7 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-        DendronExtension.version = () => "0.81.0";
+        DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1210,7 +930,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.81.0 and config is up to date",
+    "GIVEN: current version is 0.83.0 and config is up to date",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1226,7 +946,7 @@ suite("per-init config migration logic", function () {
           ConfigMigrationUtils,
           "showConfigMigrationConfirmationMessage"
         );
-        DendronExtension.version = () => "0.81.0";
+        DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1245,7 +965,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.82.0 and config is legacy",
+    "GIVEN: current version is 0.84.0 and config is legacy",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1262,7 +982,7 @@ suite("per-init config migration logic", function () {
           "showConfigMigrationConfirmationMessage"
         );
 
-        DendronExtension.version = () => "0.82.0";
+        DendronExtension.version = () => "0.84.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },
@@ -1281,7 +1001,7 @@ suite("per-init config migration logic", function () {
   );
 
   describeMultiWS(
-    "GIVEN: current version is 0.82.0 and config is up to date",
+    "GIVEN: current version is 0.84.0 and config is up to date",
     {
       ctx,
       modConfigCb: (config) => {
@@ -1298,7 +1018,7 @@ suite("per-init config migration logic", function () {
           "showConfigMigrationConfirmationMessage"
         );
 
-        DendronExtension.version = () => "0.82.0";
+        DendronExtension.version = () => "0.84.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
     },

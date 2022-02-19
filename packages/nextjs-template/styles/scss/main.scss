@@ -26,7 +26,10 @@ $text-color: #111 !default;
 }
 
 hr {
-  height: "1px";
+  // the height below is overridden by Ant design theme, we instead set
+  // `border-width` to set the height (along with `box-sizing: border-box`)
+  border-width: 1px;
+  height: 1px;
 }
 
 // Components

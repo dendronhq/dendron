@@ -1,4 +1,4 @@
-import fs, { Dirent } from "fs";
+import fs, { Dirent } from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
 import _ from "lodash";
@@ -68,6 +68,11 @@ export function readYAML(fpath: string): any {
 export function writeYAML(fpath: string, data: any) {
   const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);
+}
+
+export function writeYAMLAsync(fpath: string, data: any) {
+  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  return fs.writeFile(fpath, out);
 }
 
 export function deleteFile(fpath: string) {

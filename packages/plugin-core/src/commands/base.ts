@@ -9,6 +9,7 @@ import { IBaseCommand } from "../types";
 
 export type CodeCommandConstructor = {
   new (extension: IDendronExtension): CodeCommandInstance;
+  requireActiveWorkspace: boolean;
 };
 export type CodeCommandInstance = {
   key: string;
@@ -49,6 +50,11 @@ export abstract class BaseCommand<
   addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
 
   static showInput = window.showInputBox;
+
+  /**
+   * Does this command require an active workspace in order to function
+   */
+  static requireActiveWorkspace = false;
 
   abstract key: string;
 

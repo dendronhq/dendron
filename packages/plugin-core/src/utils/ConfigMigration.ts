@@ -55,7 +55,7 @@ export class ConfigMigrationUtils {
     let configMigrationChanges: MigrationChangeSetStatus[] = [];
     await vscode.window
       .showInformationMessage(
-        "We are about to migrate configurations related to publishing. Please note that if you have an automated pipeline set up for publishing, you need to manually upgrade dendron-cli to avoid errors due to configuration mismatch.",
+        "We are about to migrate configurations related to publishing. Please read the provided link for instructions to migrate your publishing related setup: https://wiki.dendron.so/notes/rYbs1qLh9VJBXCJlSzMt4.html",
         { modal: true },
         { title: "I Understand" }
       )

@@ -101,6 +101,21 @@ export class VSCodeUtils {
     await editor.edit((edit) => edit.delete(range));
   };
 
+  /** Wraps the selected range with comment symbols using builtin VSCode command. */
+  static async makeBlockComment(
+    editor: vscode.TextEditor,
+    range?: vscode.Range
+  ) {
+    // The command doesn't accept any arguments, it uses the current selection.
+    // So save then restore the selection.
+    const selectionsBefore = editor.selections;
+    if (range) {
+      editor.selection = new vscode.Selection(range?.start, range?.end);
+    }
+    await vscode.commands.executeCommand("editor.action.blockComment");
+    editor.selections = selectionsBefore;
+  }
+
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }

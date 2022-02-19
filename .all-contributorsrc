@@ -513,7 +513,8 @@
       "profile": "https://github.com/namjul",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "tool"
       ]
     },
     {
@@ -1312,7 +1313,8 @@
       "profile": "http://www.callum-macdonald.com/",
       "contributions": [
         "code",
-        "bug"
+        "bug",
+        "doc"
       ]
     },
     {
@@ -1458,6 +1460,25 @@
       "profile": "http://sheinlinphyo.com",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "opcon",
+      "name": "Patrick Yates",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2180488?v=4",
+      "profile": "http://www.patrickyates.me/",
+      "contributions": [
+        "doc",
+        "code"
+      ]
+    },
+    {
+      "login": "pcgeek86",
+      "name": "Trevor Sullivan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/466713?v=4",
+      "profile": "https://trevorsullivan.net",
+      "contributions": [
+        "bug"
       ]
     }
   ],

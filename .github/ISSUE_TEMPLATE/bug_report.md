@@ -11,7 +11,7 @@ assignees: ''
  Do not Remove this block!
 
  Select something by placing an 'x' or 'X' inside the brackets.
- Look here -> [triage](https://dendron.so/notes/1e6c8b49-ef88-4e79-b2df-e9d614c38a53.html)
+ Look here -> [triage](https://docs.dendron.so/notes/1e6c8b49-ef88-4e79-b2df-e9d614c38a53/)
  for help with choosing.
  Needed for Auto labeling:
  issue_labeler_regex_version=4
@@ -54,8 +54,11 @@ If applicable, add screenshots to help explain your problem.
 ## Desktop (please complete the following information)
 
 - OS: [e.g. iOS]
-- Browser: [e.g. chrome, safari]
-- Version: [e.g. 22]
+- Browser (if with published websites; include version): [e.g. chrome, safari]
+- Versions (all that apply to bug):
+  - Dendron Extension:
+  - VS Code version:
+  - Dendron CLI:
 
 ## Additional context
 

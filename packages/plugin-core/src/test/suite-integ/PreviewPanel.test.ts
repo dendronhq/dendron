@@ -174,7 +174,7 @@ suite("GIVEN PreviewPanel", function () {
               match: [
                 "https://file",
                 "vscode",
-                path.join(
+                path.posix.join(
                   VaultUtils.getRelPath(vaults[0]),
                   "assets",
                   "image.png"

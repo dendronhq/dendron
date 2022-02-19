@@ -62,7 +62,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND image starts with a forward slash", () => {
         test("THEN URL is correctly rewritten", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const note = await makeTestNote({
             previewPanel,
             body: "![](/assets/image.png)",
@@ -73,8 +73,7 @@ suite("GIVEN PreviewPanel", function () {
               match: [
                 "https://file",
                 "vscode",
-                path.join(
-                  wsRoot,
+                path.posix.join(
                   VaultUtils.getRelPath(vaults[0]),
                   "assets",
                   "image.png"
@@ -87,7 +86,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND image starts without a forward slash", () => {
         test("THEN URL is correctly rewritten", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const note = await makeTestNote({
             previewPanel,
             body: "![](assets/image.png)",
@@ -98,8 +97,7 @@ suite("GIVEN PreviewPanel", function () {
               match: [
                 "https://file",
                 "vscode",
-                path.join(
-                  wsRoot,
+                path.posix.join(
                   VaultUtils.getRelPath(vaults[0]),
                   "assets",
                   "image.png"
@@ -120,7 +118,7 @@ suite("GIVEN PreviewPanel", function () {
           expect(
             await AssertUtils.assertInString({
               body: note.body,
-              match: ["https://file", "vscode", path.join(wsRoot, "image.png")],
+              match: ["https://file", "vscode", "image.png"],
             })
           ).toBeTruthy();
         });
@@ -146,7 +144,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND the note is updated", () => {
         test("THEN the output also updates", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const { vaults } = ExtensionProvider.getDWorkspace();
           let note = await makeTestNote({
             previewPanel,
             body: `![](https://org-dendron-public-assets.s3.amazonaws.com/images/rfc-35-template-1.png)`,
@@ -177,7 +175,6 @@ suite("GIVEN PreviewPanel", function () {
                 "https://file",
                 "vscode",
                 path.join(
-                  wsRoot,
                   VaultUtils.getRelPath(vaults[0]),
                   "assets",
                   "image.png"

@@ -836,5 +836,5 @@ export type SeedBrowserMessage = DMessage<
 export type LookupViewMessage = DMessage<LookupViewMessageEnum, any>;
 
 // from https://stackoverflow.com/questions/48011353/how-to-unwrap-the-type-of-a-promise
-// use to unwrap promise of return time
+// use to unwrap promise of return type. can be removed once we upgrade to typescript 4.5 (will be included in typescript library)
 export type Awaited<T> = T extends PromiseLike<infer U> ? U : T;

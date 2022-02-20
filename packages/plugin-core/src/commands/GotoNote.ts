@@ -5,6 +5,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  Awaited,
 } from "@dendronhq/common-all";
 import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -25,6 +26,7 @@ import {
   TargetKind,
 } from "./GoToNoteInterface";
 import { AnchorUtils } from "@dendronhq/engine-server";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;
@@ -52,7 +54,7 @@ export const findAnchorPos = (opts: {
 };
 
 type FoundLinkSelection = NonNullable<
-  ReturnType<GotoNoteCommand["getLinkFromSelection"]>
+  Awaited<ReturnType<GotoNoteCommand["getLinkFromSelection"]>>
 >;
 
 /**
@@ -72,21 +74,25 @@ export class GotoNoteCommand extends BasicCommand<
     this.wsUtils = extension.wsUtils;
   }
 
-  getLinkFromSelection() {
+  async getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
     if (
       _.isEmpty(selection) ||
       _.isUndefined(selection) ||
-      _.isUndefined(selection.start)
+      _.isUndefined(selection.start) ||
+      !editor
     )
       return;
-    const currentLine = editor?.document.lineAt(selection.start.line).text;
+    const currentLine = editor.document.lineAt(selection.start.line).text;
     if (!currentLine) return;
-    const reference = getReferenceAtPosition(
-      editor!.document,
-      selection.start,
-      { allowInCodeBlocks: true }
-    );
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const reference = await getReferenceAtPosition({
+      document: editor.document,
+      position: selection.start,
+      opts: { allowInCodeBlocks: true },
+      wsRoot,
+      vaults,
+    });
     if (!reference) return;
     return {
       alias: reference?.label,
@@ -197,7 +203,7 @@ export class GotoNoteCommand extends BasicCommand<
       return opts;
     }
 
-    const link = this.getLinkFromSelection();
+    const link = await this.getLinkFromSelection();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
       return null;

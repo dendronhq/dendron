@@ -868,20 +868,34 @@ export class ConfigUtils {
       : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
   }
 
-  static getEnableFrontmatterTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableFrontmatterTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.showFrontMatterTags
       : ConfigUtils.getPublishing(config).enableFrontmatterTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableFrontmatterTags;
   }
 
-  static getEnableHashesForFMTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableHashesForFMTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.useHashesForFMTags
       : ConfigUtils.getPublishing(config).enableHashesForFMTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableHashesForFMTags;
   }
 
   static getEnablePrettlyLinks(

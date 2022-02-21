@@ -174,7 +174,7 @@ export async function enrichPodArgs(
       });
       break;
     case PodExportScope.Hierarchy:
-      payload = getHierarchyProps({
+      payload = getPropsForHierarchyScope({
         engine,
         hierarchy: args.hierarchy,
         vaultName: args.vault,
@@ -240,7 +240,7 @@ const getPropsForNoteScope = (opts: {
 };
 
 // returns notes within a hierarchy (for a specefic vault)
-const getHierarchyProps = (opts: {
+const getPropsForHierarchyScope = (opts: {
   engine: DEngineClient;
   hierarchy?: string;
   vaultName?: string;

@@ -130,7 +130,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Hierarchy: {
-        payload = await this.getHierarchyProps();
+        payload = await this.getPropsForHierarchyScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get hierarchy payload.");
@@ -229,10 +229,10 @@ export abstract class BaseExportPodCommand<
   }): Promise<void | string>;
 
   /**
-   * Gets notes matching the selected hierarchy
+   * Gets notes matching the selected hierarchy(for a specefic vault)
    * @returns
    */
-  private async getHierarchyProps(): Promise<
+  private async getPropsForHierarchyScope(): Promise<
     DNodeProps<any, any>[] | undefined
   > {
     return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {

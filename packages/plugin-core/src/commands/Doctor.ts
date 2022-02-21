@@ -288,6 +288,14 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
+  async reload(opts: CommandOpts) {
+    const engine =
+      opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS
+        ? ((await new ReloadIndexCommand().execute()) as DEngineClient)
+        : (undefined as unknown as DEngineClient);
+    return engine;
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
@@ -313,10 +321,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine =
-      opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS
-        ? ((await new ReloadIndexCommand().execute()) as DEngineClient)
-        : (undefined as unknown as DEngineClient);
+    const engine = await this.reload(opts);
 
     let note;
     if (opts.scope === "file") {
@@ -429,14 +434,16 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (this.extension.fileWatcher) {
       this.extension.fileWatcher.pause = false;
     }
+    await this.reload(opts);
+
+    // Decorations don't auto-update here, I think because the contents of the
+    // note haven't updated within VSCode yet. Regenerate the decorations, but
+    // do so after a delay so that VSCode can update the file contents. Not a
+    // perfect solution, but the simplest.
     if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
-      await new ReloadIndexCommand().execute();
-      // Decorations don't auto-update here, I think because the contents of the
-      // note haven't updated within VSCode yet. Regenerate the decorations, but
-      // do so after a delay so that VSCode can update the file contents. Not a
-      // perfect solution, but the simplest.
       delayedUpdateDecorations();
     }
+
     return { data: findings };
   }
   async showResponse(findings: CommandOutput) {

@@ -12,14 +12,18 @@ import { ICONS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { TreeNote } from "./TreeNote";
+import { Disposable } from "vscode-languageclient";
 
 /**
  * Provides engine event data to generate the views for the native Tree View
  */
-export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
+export class EngineNoteProvider
+  implements vscode.TreeDataProvider<NoteProps>, Disposable
+{
   private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
     NoteProps | undefined | void
   >;
+  private _onEngineNoteStateChangedDisposable: Disposable;
   private _tree: { [key: string]: TreeNote } = {};
   private _engineEvents;
 
@@ -40,7 +44,16 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
 
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
-    this.setupSubscriptions();
+    this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
+  }
+
+  dispose(): void {
+    if (this._onDidChangeTreeDataEmitter) {
+      this._onDidChangeTreeDataEmitter.dispose();
+    }
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+    }
   }
 
   getTreeItem(noteProps: NoteProps): vscode.TreeItem {
@@ -86,8 +99,8 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
     return maybeParent || null;
   }
 
-  private setupSubscriptions(): void {
-    this._engineEvents.onEngineNoteStateChanged(() => {
+  private setupSubscriptions(): Disposable {
+    return this._engineEvents.onEngineNoteStateChanged(() => {
       this.refreshTreeView();
     });
   }

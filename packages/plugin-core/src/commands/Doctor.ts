@@ -313,8 +313,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine: DEngineClient =
-      (await new ReloadIndexCommand().execute()) as DEngineClient;
+    const engine =
+      opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS
+        ? ((await new ReloadIndexCommand().execute()) as DEngineClient)
+        : (undefined as unknown as DEngineClient);
 
     let note;
     if (opts.scope === "file") {
@@ -427,12 +429,14 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (this.extension.fileWatcher) {
       this.extension.fileWatcher.pause = false;
     }
-    await new ReloadIndexCommand().execute();
-    // Decorations don't auto-update here, I think because the contents of the
-    // note haven't updated within VSCode yet. Regenerate the decorations, but
-    // do so after a delay so that VSCode can update the file contents. Not a
-    // perfect solution, but the simplest.
-    delayedUpdateDecorations();
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await new ReloadIndexCommand().execute();
+      // Decorations don't auto-update here, I think because the contents of the
+      // note haven't updated within VSCode yet. Regenerate the decorations, but
+      // do so after a delay so that VSCode can update the file contents. Not a
+      // perfect solution, but the simplest.
+      delayedUpdateDecorations();
+    }
     return { data: findings };
   }
   async showResponse(findings: CommandOutput) {

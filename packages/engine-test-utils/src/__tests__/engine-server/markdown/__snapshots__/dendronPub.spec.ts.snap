@@ -196,8 +196,8 @@ VFile {
 <hr>
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">#first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">#second</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -209,7 +209,13 @@ VFile {
 exports[`dendronPub frontmatter tags are not rendered when disabled 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
-<p>has fm tags</p>",
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

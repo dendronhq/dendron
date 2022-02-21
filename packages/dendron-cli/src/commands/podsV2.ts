@@ -42,22 +42,18 @@ export function setupPodArgs(args: yargs.Argv) {
       "pass in config instead of reading from file. format is Key={key},Value={value}. If provided, this will override the value saved in the config file",
     array: true,
   });
-  args.config(
-    "podConfig",
-    "*.yml configuration file for pod",
-    function (configPath) {
-      const path = URI.parse(configPath);
-      const configValues = ConfigFileUtils.getConfigByFPath({
-        fPath: path.fsPath,
+  args.config("podConfig", "*.yml configuration file for pod", (configPath) => {
+    const path = URI.parse(configPath);
+    const configValues = ConfigFileUtils.getConfigByFPath({
+      fPath: path.fsPath,
+    });
+    if (_.isUndefined(configValues)) {
+      throw new DendronError({
+        message: `unable to find configuration file at ${path.fsPath}`,
       });
-      if (_.isUndefined(configValues)) {
-        throw new DendronError({
-          message: `unable to find configuration file at ${path.fsPath}`,
-        });
-      }
-      return { configValues };
     }
-  );
+    return { configValues };
+  });
   args.option("fname", {
     describe: "full name of the note you want to export",
     type: "string",
@@ -165,13 +161,13 @@ export async function enrichPodArgs(
   // get payload for selected export scope
   switch (configValues.exportScope) {
     case PodExportScope.Workspace:
-      payload = getWorkspaceProps(engine);
+      payload = getPropsForWorkspaceScope(engine);
       break;
     case PodExportScope.Vault:
-      payload = getVaultProps({ engine, vaultName: args.vault });
+      payload = getPropsForVaultScope({ engine, vaultName: args.vault });
       break;
     case PodExportScope.Note:
-      payload = getNoteProps({
+      payload = getPropsForNoteScope({
         engine,
         vaultName: args.vault,
         fname: args.fname,
@@ -198,12 +194,20 @@ export async function enrichPodArgs(
     },
   };
 }
-
-const getWorkspaceProps = (engine: DEngineClient): NoteProps[] => {
+/**
+ *
+ * @param engine
+ * @returns all notes in workspace
+ */
+const getPropsForWorkspaceScope = (engine: DEngineClient): NoteProps[] => {
   return Object.values(engine.notes).filter((notes) => notes.stub !== true);
 };
 
-const getVaultProps = (opts: {
+/**
+ *
+ * @returns all notes in the vault
+ */
+const getPropsForVaultScope = (opts: {
   engine: DEngineClient;
   vaultName?: string;
 }): NoteProps[] => {
@@ -214,7 +218,7 @@ const getVaultProps = (opts: {
   );
 };
 
-const getNoteProps = (opts: {
+const getPropsForNoteScope = (opts: {
   engine: DEngineClient;
   vaultName?: string;
   fname?: string;
@@ -273,7 +277,7 @@ const checkVaultArgs = (opts: {
     });
   } else {
     return vaultName
-      ? VaultUtils.getVaultByNameOrThrow({ vaults: vaults, vname: vaultName })
+      ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: vaultName })
       : vaults[0];
   }
 };

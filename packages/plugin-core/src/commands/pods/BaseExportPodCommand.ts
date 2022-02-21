@@ -121,7 +121,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Note: {
-        payload = this.getNoteProps();
+        payload = this.getPropsForNoteScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get note payload.");
@@ -144,7 +144,7 @@ export abstract class BaseExportPodCommand<
           vscode.window.showErrorMessage("Unable to get vault payload.");
           return;
         }
-        payload = this.getVaultProps(vault);
+        payload = this.getPropsForVaultScope(vault);
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get vault payload.");
@@ -153,7 +153,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Workspace: {
-        payload = this.getWorkspaceProps();
+        payload = this.getPropsForWorkspaceScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get workspace payload.");
@@ -191,18 +191,18 @@ export abstract class BaseExportPodCommand<
         const pod = this.createPod(opts.config);
 
         switch (opts.config.exportScope) {
-          case PodExportScope.Note: 
+          case PodExportScope.Note:
           case PodExportScope.Vault:
           case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-              const result = await pod.exportNotes(opts.payload);
-              await this.onExportComplete({
-                exportReturnValue: result,
-                payload: opts.payload,
-                config: opts.config,
-              });
+            const result = await pod.exportNotes(opts.payload);
+            await this.onExportComplete({
+              exportReturnValue: result,
+              payload: opts.payload,
+              config: opts.config,
+            });
 
             break;
           }
@@ -253,7 +253,7 @@ export abstract class BaseExportPodCommand<
     });
   }
 
-  private getNoteProps(): DNodeProps[] | undefined {
+  private getPropsForNoteScope(): DNodeProps[] | undefined {
     //TODO: Switch this to a lookup controller, allow multiselect
     const fsPath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!fsPath) {
@@ -290,7 +290,7 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the workspace
    */
-  private getWorkspaceProps(): DNodeProps[] | undefined {
+  private getPropsForWorkspaceScope(): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
     return Object.values(engine.notes).filter((notes) => notes.stub !== true);
   }
@@ -299,7 +299,7 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the vault
    */
-  private getVaultProps(vault: DVault): DNodeProps[] | undefined {
+  private getPropsForVaultScope(vault: DVault): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
     return Object.values(engine.notes).filter(
       (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)

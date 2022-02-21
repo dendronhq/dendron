@@ -30,6 +30,7 @@ import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import Airtable from "@dendronhq/airtable";
 import _ from "lodash";
 import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
+import clipboard from "clipboardy";
 
 export { CommandCLIOpts as ExportPodV2CLIOpts };
 
@@ -50,7 +51,7 @@ export class ExportPodV2CLICommand extends CLICommand<
   constructor() {
     super({
       name: "exportPodV2",
-      desc: "use a pod to export notes",
+      desc: "use a pod v2 to export notes",
     });
   }
 
@@ -94,6 +95,10 @@ export class ExportPodV2CLICommand extends CLICommand<
       case PodV2Types.GoogleDocsExportV2: {
         const { wsRoot } = engine;
         const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+        /**
+         * The GDoc Export/Import pod requires engine port to refresh google access token.
+         * refreshGoogleAccessToken: [[..\packages\pods-core\src\utils.ts]]
+         */
         const port = openPortFile({ fpath });
 
         return new GoogleDocsExportPodV2({
@@ -171,15 +176,26 @@ export class ExportPodV2CLICommand extends CLICommand<
   }) {
     const { exportReturnValue, engine } = opts;
     const records = exportReturnValue.data;
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
-    }
     if (records?.created) {
       await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
         records: records.created,
         engine,
         logger: this.L,
       });
+    }
+    const createdCount = exportReturnValue.data?.created?.length ?? 0;
+    const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
+
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      this.print(
+        `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
+      );
     }
   }
 
@@ -188,21 +204,31 @@ export class ExportPodV2CLICommand extends CLICommand<
     engine: DEngineClient;
   }) {
     const { exportReturnValue, engine } = opts;
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      this.print(ErrorFactory.safeStringify(exportReturnValue.error?.message));
-    }
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
-    if (createdDocs) {
+    const createdCount = createdDocs?.length ?? 0;
+    const updatedCount = updatedDocs?.length ?? 0;
+    if (createdDocs && createdCount > 0) {
       await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         createdDocs,
         engine
       );
     }
-    if (updatedDocs) {
+    if (updatedDocs && updatedCount > 0) {
       await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         updatedDocs,
         engine
+      );
+    }
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error?.message
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      this.print(
+        `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated.`
       );
     }
   }
@@ -212,14 +238,23 @@ export class ExportPodV2CLICommand extends CLICommand<
     engine: DEngineClient;
   }) {
     const { exportReturnValue, engine } = opts;
-    const { data, error } = exportReturnValue;
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      this.print(ErrorFactory.safeStringify(error));
-    }
+    const { data } = exportReturnValue;
     if (data?.created) {
       await NotionUtils.updateNotionIdForNewlyCreatedNotes(
         data.created,
         engine
+      );
+    }
+    const createdCount = data?.created?.length ?? 0;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Notion Export. ${createdCount} notes created in Notion; Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+
+      this.L.error(errorMsg);
+    } else {
+      this.print(
+        `Finished Notion Export. ${createdCount} notes created in Notion`
       );
     }
   }
@@ -229,12 +264,18 @@ export class ExportPodV2CLICommand extends CLICommand<
     config: any;
   }) {
     const { exportReturnValue, config } = opts;
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
-    }
     const content = exportReturnValue.data?.exportedNotes;
     if (config.destination === "clipboard" && _.isString(content)) {
-      this.print(content);
+      clipboard.writeSync(content);
+    }
+    const count = content?.length ?? 0;
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished Markdown Export. ${count} notes exported; Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+      this.L.error(errorMsg);
+    } else {
+      this.print("Finished running Markdown export pod.");
     }
   }
 
@@ -243,12 +284,17 @@ export class ExportPodV2CLICommand extends CLICommand<
     config: any;
   }) {
     const { exportReturnValue, config } = opts;
-    if (ResponseUtil.hasError(exportReturnValue)) {
-      this.print(ErrorFactory.safeStringify(exportReturnValue.error));
-    }
     const content = exportReturnValue.data?.exportedNotes;
     if (config.destination === "clipboard" && _.isString(content)) {
-      this.print(content);
+      clipboard.writeSync(content);
+    }
+    if (ResponseUtil.hasError(exportReturnValue)) {
+      const errorMsg = `Finished JSON Export. Error encountered: ${ErrorFactory.safeStringify(
+        exportReturnValue.error
+      )}`;
+      this.L.error(errorMsg);
+    } else {
+      this.print("Finished running JSON export pod.");
     }
   }
 

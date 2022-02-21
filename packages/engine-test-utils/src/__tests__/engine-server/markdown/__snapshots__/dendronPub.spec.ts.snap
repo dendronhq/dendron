@@ -189,16 +189,10 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags WHEN configured with enableHashesForFMTags option THEN tags are rendered with a # symbol 1`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
-<p>has fm tags</p>
-<hr>
-<h2 id=\\"tags\\">Tags</h2>
-<ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
-</ol>",
+<p>has fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -206,16 +200,10 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are not rendered when disabled 1`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
-<p>has fm tags</p>
-<hr>
-<h2 id=\\"tags\\">Tags</h2>
-<ol>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
-<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">second</a></li>
-</ol>",
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -223,7 +211,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are not rendered when missing 1`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has no fm tags</p>",
@@ -234,7 +222,18 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are rendered when available multiple tags 1`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PUBLISHING 1`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has no fm tags</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -251,7 +250,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are rendered when available multiple tags 2`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -268,7 +267,41 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are rendered when available single tag 1`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 1`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<ol>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">first (Private)</a></li>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">second (Private)</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 2`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<ol>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">first (Private)</a></li>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">second (Private)</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -284,7 +317,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags are rendered when available single tag 2`] = `
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -292,6 +325,72 @@ VFile {
 <h2 id=\\"tags\\">Tags</h2>
 <ol>
 <li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">first</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 1`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<ol>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">first (Private)</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 2`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<ol>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">first (Private)</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PREVIEW 1`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\">Tags</h2>
+<ol>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #9e3623;\\" href=\\"tags.first\\">#first</a></li>
+<li><a class=\\"color-tag\\" style=\\"--tag-color: #b1d1fc;\\" href=\\"tags.second\\">#second</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PUBLISHING 1`] = `
+VFile {
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+<p>has fm tags</p>
+<hr>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<ol>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">#first (Private)</a></li>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">#second (Private)</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

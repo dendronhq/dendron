@@ -338,6 +338,8 @@ suite("Extension", function () {
           preview: {
             enableFMTitle: true,
             enableNoteTitleForLink: true,
+            enableFrontmatterTags: true,
+            enableHashesForFMTags: false,
             enableMermaid: true,
             enablePrettyRefs: true,
             enableKatex: true,

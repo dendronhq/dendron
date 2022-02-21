@@ -828,6 +828,8 @@ suite("Migration", function () {
             const expectedPreviewConfig: DendronPreviewConfig = {
               enableFMTitle: false,
               enableNoteTitleForLink: false,
+              enableFrontmatterTags: true,
+              enableHashesForFMTags: false,
               enableMermaid: false,
               enablePrettyRefs: false,
               enableKatex: false,

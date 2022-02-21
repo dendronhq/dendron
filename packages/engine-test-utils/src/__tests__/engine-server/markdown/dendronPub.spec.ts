@@ -260,6 +260,8 @@ describe("dendronPub", () => {
           await runEngineTestV5(
             async ({ engine, vaults }) => {
               const out = await runProcForHasFMTags({ engine, vaults, flavor });
+
+              // `Tags` section and a link to `first` with no hashtag should be present
               await checkVFile(out, "Tags", "first");
               await checkNotInVFile(out, "#first");
             },
@@ -281,6 +283,9 @@ describe("dendronPub", () => {
           await runEngineTestV5(
             async ({ engine, vaults }) => {
               const out = await runProcForHasFMTags({ engine, vaults, flavor });
+
+              // `Tags` section and links to `first` and `second`,
+              // both without hashtags should be present
               await checkVFile(out, "Tags", "first", "second");
               await checkNotInVFile(out, "#first", "#second");
             },
@@ -304,6 +309,8 @@ describe("dendronPub", () => {
           await runEngineTestV5(
             async ({ engine, vaults }) => {
               const out = await runProcForNoFMTags({ engine, vaults, flavor });
+
+              // `Tags` section should not be present
               await checkNotInVFile(out, "Tags");
             },
             {
@@ -330,6 +337,9 @@ describe("dendronPub", () => {
                   vaults,
                   flavor,
                 });
+
+                // `Tags` section with links to `first` and `second`, both with hashtags
+                // should be present
                 await checkVFile(out, "Tags", "#first", "#second");
               },
               {
@@ -374,6 +384,7 @@ describe("dendronPub", () => {
           await runEngineTestV5(
             async ({ engine, vaults }) => {
               const out = await runProcForHasFMTags({ engine, vaults, flavor });
+              // `Tags` section should not be present
               await checkNotInVFile(out, "Tags");
             },
             {

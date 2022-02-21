@@ -55,8 +55,10 @@ const checkRefs = ({
     new vscode.Position(8, 0)
   );
   expect(links!.map((l) => l.range)).toEqual([firstLineRange, firstLineRange]);
-  expect(links!.map((l) => l.uri.fsPath)).toEqual(
-    refs.map((note) => NoteUtils.getFullPath({ note, wsRoot }))
+  expect(links!.map((l) => l.uri.fsPath.toLocaleLowerCase())).toEqual(
+    refs.map((note) =>
+      NoteUtils.getFullPath({ note, wsRoot }).toLocaleLowerCase()
+    )
   );
 };
 

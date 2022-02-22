@@ -505,6 +505,11 @@ export class DendronEngineV2 implements DEngine {
       onlyDirectChildren,
       originalQS,
     });
+
+    //if (items.length === 0) {
+    //  return { error: null, data: [] };
+    //}
+
     const item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NoteProps;

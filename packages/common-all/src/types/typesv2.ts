@@ -801,6 +801,10 @@ export type OnDidChangeActiveTextEditorData = {
    * Sync the changed note
    */
   syncChangedNote?: boolean;
+  /**
+   * Current active note
+   */
+  activeNote?: NoteProps;
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;

@@ -173,3 +173,20 @@ describe("engine, config/", () => {
     });
   });
 });
+
+test("WHEN querying for a note that doesn't exist, return empty array in data", async () => {
+  await runEngineTestV5(
+    async ({ engine, vaults }) => {
+      const resp = await engine.queryNotes({
+        qs: "bar",
+        originalQS: "bar",
+        vault: vaults[0],
+      });
+      expect(resp.data.length === 0).toBeTruthy();
+    },
+    {
+      expect,
+      preSetupHook: ENGINE_HOOKS.setupEmpty,
+    }
+  );
+});

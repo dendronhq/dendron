@@ -66,7 +66,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     switch (msg.type) {
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
-        const { sync, note, syncChangedNote } = cmsg.data;
+        const { sync, note, syncChangedNote, activeNote } = cmsg.data;
         if (sync) {
           // skip the initial ?
           logger.info({
@@ -87,7 +87,9 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           await ideDispatch(engineSlice.syncNote({ ...workspace, note }));
         }
         logger.info({ ctx, msg: "setNoteActive:pre" });
-        ideDispatch(ideSlice.actions.setNoteActive(note));
+        // If activeNote is in the data payload, set that as active note. Otherwise default to changed note
+        const noteToSetActive = activeNote ? activeNote : note;
+        ideDispatch(ideSlice.actions.setNoteActive(noteToSetActive));
         logger.info({ ctx, msg: "setNoteActive:post" });
         break;
       case LookupViewMessageEnum.onUpdate:

@@ -63,7 +63,9 @@ export const syncNote = createAsyncThunk(
     }
     const data = resp.data!;
     logger.info({ state: "pre:setNotes" });
-    dispatch(updateNote(data[0]));
+    if (data?.length) {
+      dispatch(updateNote(data[0]));
+    }
     logger.info({ state: "post:setNotes" });
     return resp;
   }

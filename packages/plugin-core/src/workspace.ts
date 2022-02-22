@@ -304,8 +304,16 @@ export class DendronExtension implements IDendronExtension {
     return false;
   }
 
-  isActiveAndIsDendronNote(_fpath: string): boolean {
-    throw new Error("not implemented");
+  async isActiveAndIsDendronNote(fpath: string): Promise<boolean> {
+    if (!this.isActive()) {
+      return false;
+    }
+    const { wsRoot, vaults } = this.getDWorkspace();
+    return WorkspaceUtils.isDendronNote({
+      wsRoot,
+      vaults,
+      fpath,
+    });
   }
 
   /**

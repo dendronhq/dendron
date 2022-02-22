@@ -1,8 +1,7 @@
-import { IDendronExtension } from "./dendronExtensionInterface";
 import { DendronError, DendronTreeViewKey } from "@dendronhq/common-all";
 import _ from "lodash";
+import { IDendronExtension } from "./dendronExtensionInterface";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
 
 /**
  * Use this to statically get implementation of IDendronExtension without having to
@@ -42,15 +41,7 @@ export class ExtensionProvider {
   }
 
   static isActiveAndIsDendronNote(fpath: string) {
-    if (!this.isActive()) {
-      return false;
-    }
-    const { wsRoot, vaults } = this.getDWorkspace();
-    return WorkspaceUtils.isDendronNote({
-      wsRoot,
-      vaults,
-      fpath,
-    });
+    return ExtensionProvider.getExtension().isActiveAndIsDendronNote(fpath);
   }
 
   static getWorkspaceConfig() {

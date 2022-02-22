@@ -183,7 +183,7 @@ export class MockDendronExtension implements IDendronExtension {
     return true;
   }
 
-  isActiveAndIsDendronNote(_fpath: string): boolean {
+  async isActiveAndIsDendronNote(_fpath: string): Promise<boolean> {
     throw new Error("not implemented");
   }
 

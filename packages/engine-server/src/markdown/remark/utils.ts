@@ -42,6 +42,7 @@ import type {
   FrontmatterContent,
   Heading,
   Image,
+  InlineCode,
   Link,
   List,
   ListItem,
@@ -785,6 +786,12 @@ export class AnchorUtils {
           break;
         case DendronASTTypes.HASHTAG:
           headerText.push((node as HashTag).value);
+          break;
+        case DendronASTTypes.USERTAG:
+          headerText.push((node as UserTag).value);
+          break;
+        case DendronASTTypes.INLINE_CODE:
+          headerText.push((node as InlineCode).value);
           break;
         default:
         /* nothing */

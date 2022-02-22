@@ -26,10 +26,9 @@ async function makeTestNote({
     fname: "preview-test-image",
     body,
   });
-  const { rewriteImageUrls, panel } =
+  const { rewriteImageUrls } =
     previewPanel.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
-  expect(panel).toBeTruthy();
-  const newNote = rewriteImageUrls(note, panel!);
+  const newNote = rewriteImageUrls(note);
   // The function shouldn't modify the existing note
   expect(newNote !== note).toBeTruthy();
   return newNote;
@@ -47,7 +46,7 @@ suite("GIVEN PreviewPanel", function () {
       let previewPanel: PreviewPanel;
       before(async () => {
         const { engine, vaults } = ExtensionProvider.getDWorkspace();
-        const note = await NoteUtils.getNoteByFnameFromEngine({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname: "root",
           vault: vaults[0],
           engine,
@@ -57,7 +56,7 @@ suite("GIVEN PreviewPanel", function () {
         previewPanel = PreviewPanelFactory.create(
           ExtensionProvider.getExtension()
         ) as PreviewPanel; // overriding the type here to get the function to expose internals
-        await previewPanel.show(note);
+        previewPanel.show(note);
       });
 
       describe("AND image starts with a forward slash", () => {

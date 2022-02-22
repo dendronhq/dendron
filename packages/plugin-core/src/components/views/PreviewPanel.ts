@@ -11,6 +11,7 @@ import {
   NoteViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
   memoize,
+  DendronError,
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
@@ -339,8 +340,13 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   // eslint-disable-next-line camelcase
   __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
     return {
-      rewriteImageUrls: this.rewriteImageUrls.bind(this),
-      panel: this._panel,
+      rewriteImageUrls: (note: NoteProps) => {
+        if (!this._panel)
+          throw new DendronError({
+            message: "Panel used before being initalized",
+          });
+        return this.rewriteImageUrls(note, this._panel);
+      },
     };
   }
 }

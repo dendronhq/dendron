@@ -267,25 +267,36 @@ export class ListMap<K, V> {
  * except that it allows a custom function to override whether a cached value
  * should be updated.
  *
+ * Similar to the lodash memoize, the backing cache is exposed with the
+ * `memoizedFunction.cache`. You can use this
+ *
+ * @param fn The function that is being memoized. This function will run when
+ * the cache needs to be updated.
+ * @param keyFn A function that given the inputs to `fn`, returns a key. Two
+ * inputs that will have the same output should resolve to the same key. The key
+ * may be anything, but it's recommended to use something simple like a string
+ * or integer. By default, the first argument to `fn` is stringified and used as
+ * the key (similar to lodash memoize)
  * @param shouldUpdate If this function returns true, the wrapped function will
- * run again and the cached value will update. By default, it will only update
- * if there is a cache miss.
+ * run again and the cached value will update. `shouldUpdate` is passed the
+ * cached result, and the new inputs. By default, it will only update if there
+ * is a cache miss.
  * @param maxCache The maximum number of items to cache.
  */
-export function memoize<I extends any[], O, K>({
+export function memoize<Inputs extends any[], Key, Output>({
   fn,
   keyFn = (...args) => args[0].toString(),
   shouldUpdate = () => false,
   maxCache = 64,
 }: {
-  fn: (...args: I) => O;
-  keyFn?: (...args: I) => K;
-  shouldUpdate?: (previous: O, ...args: I) => boolean;
+  fn: (...args: Inputs) => Output;
+  keyFn?: (...args: Inputs) => Key;
+  shouldUpdate?: (previous: Output, ...args: Inputs) => boolean;
   maxCache?: number;
-}): (...args: I) => O {
-  const wrapped = function memoize(...args: I) {
+}): (...args: Inputs) => Output {
+  const wrapped = function memoize(...args: Inputs) {
     const key = keyFn(...args);
-    let value: O | undefined = wrapped.cache.get(key);
+    let value: Output | undefined = wrapped.cache.get(key);
     if (value === undefined || shouldUpdate(value, ...args)) {
       wrapped.cache.drop(key);
       value = fn(...args);
@@ -293,7 +304,7 @@ export function memoize<I extends any[], O, K>({
     }
     return value;
   };
-  wrapped.cache = new LruCache<K, O>({ maxItems: maxCache });
+  wrapped.cache = new LruCache<Key, Output>({ maxItems: maxCache });
   return wrapped;
 }
 

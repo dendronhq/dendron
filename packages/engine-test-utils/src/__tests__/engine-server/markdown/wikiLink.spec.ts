@@ -1,18 +1,14 @@
-import { ConfigUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import {
-  DendronASTData,
   DendronASTDest,
   DendronASTTypes,
-  DEngineClient,
-  MDUtilsV4,
+  MDUtilsV5,
+  RemarkUtils,
   UnistNode,
   WikiLinkNoteV4,
-  wikiLinks,
-  WikiLinksOpts,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -20,50 +16,37 @@ import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkVFile, createProcForTest, createProcTests } from "./utils";
 
-function proc(
-  engine: DEngineClient,
-  dendron: DendronASTData,
-  opts?: WikiLinksOpts
-) {
-  return MDUtilsV4.proc({ engine })
-    .data("dendron", dendron)
-    .use(wikiLinks, opts);
+function proc() {
+  return MDUtilsV5.procRemarkParseNoData(
+    {},
+    { dest: DendronASTDest.MD_REGULAR, fname: "placeholder" }
+  );
 }
 
-function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
-  return { ...opts } as any;
+function getNode(node: UnistNode): UnistNode | undefined {
+  if (RemarkUtils.isParent(node) && RemarkUtils.isParent(node.children[0])) {
+    return node?.children[0].children[0];
+  }
+  return undefined;
 }
 
-function getWikiLink(node: UnistNode): WikiLinkNoteV4 {
-  // @ts-ignore
-  return node.children[0].children[0];
-}
-
-function getNode(node: UnistNode): UnistNode {
-  // @ts-ignore
-  return node.children[0].children[0];
+function getWikiLink(node: UnistNode): WikiLinkNoteV4 | undefined {
+  const wikilinkNode = getNode(node);
+  if (wikilinkNode && RemarkUtils.isWikiLink(wikilinkNode)) {
+    return wikilinkNode;
+  }
+  return undefined;
 }
 
 describe("wikiLinks", () => {
   describe("parse", () => {
-    let engine: any;
-    const dendronData = {
-      fname: "placeholder.md",
-      dest: DendronASTDest.MD_REGULAR,
-      config: ConfigUtils.genDefaultV4Config(),
-    } as Partial<DendronASTData>;
-
     test("basic", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        `[[foo.md]]`
-      );
-      expect(getWikiLink(resp).type).toEqual("wikiLink");
+      const resp = proc().parse(`[[foo.md]]`);
+      expect(getWikiLink(resp)?.type).toEqual("wikiLink");
     });
 
     test("link with space", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        `[[foo bar]]`
-      );
+      const resp = proc().parse(`[[foo bar]]`);
       expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
         type: DendronASTTypes.WIKI_LINK,
         value: "foo bar",
@@ -71,49 +54,38 @@ describe("wikiLinks", () => {
     });
 
     test("fail: bad format", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        `[[[foo bar]]]`
-      );
+      const resp = proc().parse(`[[[foo bar]]]`);
       expect(resp).toMatchSnapshot();
-      expect(getNode(resp).type).toEqual("text");
+      expect(getNode(resp)?.type).toEqual("text");
     });
 
     test("doesn't parse inline code block", () => {
-      const resp = proc(engine, genDendronData(dendronData)).parse(
-        "`[[foo.md]]`"
-      );
-      expect(getWikiLink(resp).type).toEqual("inlineCode");
+      const resp = proc().parse("`[[foo.md]]`");
+      expect(getNode(resp)?.type).toEqual("inlineCode");
     });
 
     describe("block references", () => {
       test("block reference to different file", () => {
-        const resp = proc(engine, genDendronData(dendronData)).parse(
-          `[[lorem-ipsum#^block-id]]`
-        );
+        const resp = proc().parse(`[[lorem-ipsum#^block-id]]`);
         const wikiLink = getWikiLink(resp);
         expect(_.pick(wikiLink, ["type", "value"])).toEqual({
           type: DendronASTTypes.WIKI_LINK,
           value: "lorem-ipsum",
         });
-        expect(wikiLink.data.anchorHeader).toEqual("^block-id");
+        expect(wikiLink?.data.anchorHeader).toEqual("^block-id");
       });
 
       test("block reference to same file", () => {
-        const resp = proc(engine, genDendronData(dendronData)).parse(
-          `[[#^block-id]]`
-        );
+        const resp = proc().parse(`[[#^block-id]]`);
         const wikiLink = getWikiLink(resp);
-        expect(_.pick(wikiLink, ["type", "value"])).toEqual({
-          type: DendronASTTypes.WIKI_LINK,
-          value: "placeholder",
-        });
-        expect(wikiLink.data.anchorHeader).toEqual("^block-id");
+        expect(wikiLink?.type).toEqual(DendronASTTypes.WIKI_LINK);
+        expect(wikiLink?.data.anchorHeader).toEqual("^block-id");
       });
 
       test("avoids parsing broken links", () => {
-        const resp = proc(engine, genDendronData(dendronData)).parse(`[[#]]`);
-        const wikiLink = getWikiLink(resp);
-        expect(wikiLink.type).not.toEqual(DendronASTTypes.WIKI_LINK);
+        const resp = proc().parse(`[[#]]`);
+        const wikiLink = getNode(resp);
+        expect(wikiLink?.type).not.toEqual(DendronASTTypes.WIKI_LINK);
       });
     });
   });

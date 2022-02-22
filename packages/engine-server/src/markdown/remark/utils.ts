@@ -1042,6 +1042,10 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.LINK;
   }
 
+  static isWikiLink(node: Node): node is WikiLinkNoteV4 {
+    return node.type === DendronASTTypes.WIKI_LINK;
+  }
+
   static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
     return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
   }

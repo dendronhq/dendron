@@ -10,10 +10,7 @@ import sinon from "sinon";
 import vscode, { TextEditor } from "vscode";
 import { ConvertLinkCommand } from "../../commands/ConvertLink";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import {
-  getReferenceAtPosition,
-  getReferenceAtPositionResp,
-} from "../../utils/md";
+import { getReferenceAtPosition } from "../../utils/md";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
@@ -33,7 +30,10 @@ const getReference = async ({
     wsRoot,
     vaults,
   });
-  return out as getReferenceAtPositionResp;
+  if (!out) {
+    throw new Error("ref should be truthy");
+  }
+  return out;
 };
 
 suite("ConvertLink", function () {

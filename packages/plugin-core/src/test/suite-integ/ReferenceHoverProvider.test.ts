@@ -45,20 +45,20 @@ async function provideForNonNote(editor: vscode.TextEditor) {
 suite("GIVEN ReferenceHoverProvider", function () {
   const ctx = setupBeforeAfter(this);
 
-  describe("AND GIVEN non-dendron file", () => {
-    describeMultiWS(
-      "AND WHEN try to find references",
-      {
-        ctx,
-        preSetupHook: async (opts) => {
-          return FileTestUtils.createFiles(opts.wsRoot, [
-            { path: "sample.with-header", body: "## Foo" },
-            { path: "sample.empty", body: "" },
-          ]);
-        },
+  describeMultiWS(
+    "AND WHEN used in non-dendron file",
+    {
+      ctx,
+      preSetupHook: async (opts) => {
+        return FileTestUtils.createFiles(opts.wsRoot, [
+          { path: "sample.with-header", body: "## Foo" },
+          { path: "sample.empty", body: "" },
+        ]);
       },
-      () => {
-        test("THEN empty file return null", async () => {
+    },
+    () => {
+      describe("AND the file is empty", () => {
+        test("THEN return null", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
           const notePath = path.join(wsRoot, "sample.empty");
           const editor = await VSCodeUtils.openFileInEditor(
@@ -67,8 +67,10 @@ suite("GIVEN ReferenceHoverProvider", function () {
           const hover = await provideForNonNote(editor!);
           expect(hover).toEqual(null);
         });
+      });
 
-        test("THEN file with header returns null", async () => {
+      describe("AND file has a header", () => {
+        test("THEN return null", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
           const notePath = path.join(wsRoot, "sample.with-header");
           const editor = await VSCodeUtils.openFileInEditor(
@@ -77,9 +79,9 @@ suite("GIVEN ReferenceHoverProvider", function () {
           const hover = await provideForNonNote(editor!);
           expect(hover).toEqual(null);
         });
-      }
-    );
-  });
+      });
+    }
+  );
 
   describe("has correct hover contents", () => {
     describe("wikilink", () => {

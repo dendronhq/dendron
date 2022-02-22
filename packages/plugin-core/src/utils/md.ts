@@ -235,7 +235,7 @@ export type getReferenceAtPositionResp = {
   refText: string;
 };
 
-export const getReferenceAtPosition = async ({
+export async function getReferenceAtPosition({
   document,
   position,
   wsRoot,
@@ -250,7 +250,7 @@ export const getReferenceAtPosition = async ({
     partial?: boolean;
     allowInCodeBlocks: boolean;
   };
-}): Promise<getReferenceAtPositionResp | null> => {
+}): Promise<getReferenceAtPositionResp | null> {
   let refType: DLinkType | undefined;
   if (
     opts?.allowInCodeBlocks !== true &&
@@ -397,7 +397,7 @@ export const getReferenceAtPosition = async ({
     vaultName,
     refText,
   };
-};
+}
 
 export const parseRef = (rawRef: string): RefT => {
   const parsed = LinkUtils.parseNoteRef(rawRef);

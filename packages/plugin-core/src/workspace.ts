@@ -304,6 +304,10 @@ export class DendronExtension implements IDendronExtension {
     return false;
   }
 
+  isActiveAndIsDendronNote(_fpath: string): boolean {
+    throw new Error("not implemented");
+  }
+
   /**
    * When in dev mode, version is equivalent to `package.json` that is checked out locally
    * Otherwise, get from published extension `package.json`

@@ -1669,12 +1669,11 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@dendronhq/common-all@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.81.0.tgz#6622f1566fef1b38810987e6d4f121f7a6322a57"
-  integrity sha512-nkAlsjI09CXfxeWhFMR4uFYgsLPx8DZ/ByF59vEf4INrfaj28rZr33CySUeH8qOihBqoM+V9kJw84y1s/dJQPQ==
+"@dendronhq/common-all@^0.83.0":
+  version "0.83.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.83.0.tgz#242c54dbc861402074ff98b4d7ad3dcd9003f0d7"
+  integrity sha512-bzwOvqP5BpAZxxB12DoPXdZaE8/K3Wx4l9uNboukUOHju5V1TRuayFD88NF3krjyrMxcxoLReuFjIVnPWDUuFg==
   dependencies:
-    "@dendronhq/title" "^3.4.3"
     "@types/github-slugger" "^1.3.0"
     "@types/lodash" "^4.14.152"
     "@types/luxon" "^1.25.0"
@@ -1697,19 +1696,19 @@
     luxon "^1.25.0"
     minimatch "^3.0.4"
     nanoid "^3.1.23"
-    nanoid-dictionary "^4.3.0"
     qs "^6.10.1"
     semver "^7.3.2"
+    title "^3.4.4"
     vscode-uri "^2.1.2"
     yamljs "^0.3.0"
 
-"@dendronhq/common-frontend@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.81.0.tgz#9c9bfbd2ae0a1deb81a2ffacc2e03f9ceb7587dc"
-  integrity sha512-b8RqcxQADBUG78ZnRK86QFcNBqVLcf2sW2Rx0E2hRCJJ8gH36eAjSObVBsubHUZNgSllPLSuCdTYG3Dse2dV0g==
+"@dendronhq/common-frontend@^0.83.0":
+  version "0.83.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.83.0.tgz#c4bf7dc9dc37774495289302db25af493a0e1b87"
+  integrity sha512-xtn+ZPHneVlYI1WVLUTEi3i8eY8HdwO52Abf4F29/Oo8c3patsxo0Ybndw6EAtBEscmdTpllyWb2IQOkmrkDog==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.81.0"
+    "@dendronhq/common-all" "^0.83.0"
     "@reduxjs/toolkit" "^1.5.1"
     "@types/lodash" "^4.14.161"
     "@types/node" "^14.11.2"
@@ -1722,16 +1721,6 @@
     react-dom "^17.0.2"
     react-redux "^7.2.3"
     redux-logger "^3.0.6"
-
-"@dendronhq/title@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.npmjs.org/@dendronhq/title/-/title-3.4.3.tgz#6b800942df4e74519f675fd8a81d8bbbd9e6a97c"
-  integrity sha512-DgaHbLkpYToSZsAHKCujG3BytGYP289UBqH5oI3C8vHU19rRaCL9eHb+hrNPbW5k51mwyj6CTevBJdS6GsxvCw==
-  dependencies:
-    arg "1.0.0"
-    chalk "2.3.0"
-    clipboardy "1.2.2"
-    titleize "1.0.0"
 
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
@@ -4560,11 +4549,6 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-nanoid-dictionary@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.npmjs.org/nanoid-dictionary/-/nanoid-dictionary-4.3.0.tgz#d4cefa1e4c06b1f576789eeb2646101f8c5419e8"
-  integrity sha512-Xw1+/QnRGWO1KJ0rLfU1xR85qXmAHyLbE3TUkklu9gOIDburP6CsUnLmTaNECGpBh5SHb2uPFmx0VT8UPyoeyw==
-
 nanoid@^3.1.23, nanoid@^3.1.30:
   version "3.2.0"
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.2.0.tgz#62667522da6673971cca916a6d3eff3f415ff80c"
@@ -4580,10 +4564,10 @@ next-seo@^4.27.0:
   resolved "https://registry.npmjs.org/next-seo/-/next-seo-4.29.0.tgz#d281e95ba47914117cc99e9e468599f0547d9b9b"
   integrity sha512-xmwzcz4uHaYJ8glbuhs6FSBQ7z3irmdPYdJJ5saWm72Uy3o+mPKGaPCXQetTCE6/xxVnpoDV4yFtFlEjUcljSg==
 
-next-sitemap@^1.6.168:
-  version "1.9.12"
-  resolved "https://registry.npmjs.org/next-sitemap/-/next-sitemap-1.9.12.tgz#288c2dfc907039892e21eb1b0c7a94d288f323d9"
-  integrity sha512-kHXf4ZNAGLJyK16HbjzE5X9JlKwXtxW+9J4dh3oT7LSbU/+3bN+VqWjNw/776Otbanf7EJsvl51oQ78qQW5XBQ==
+next-sitemap@1.8.11:
+  version "1.8.11"
+  resolved "https://registry.npmjs.org/next-sitemap/-/next-sitemap-1.8.11.tgz#91ddfe3e5ad3673a2416bba0161cbe491c4f356a"
+  integrity sha512-Cd3sjWS8OsXpw1ols4pesqqUNHjuid1tVTfF5iU8XMsoaMpYpGZG0waI8eltQ3sTLwm2cn7G8bJ0MpCPUSr0Kg==
   dependencies:
     "@corex/deepmerge" "^2.6.148"
     minimist "^1.2.5"
@@ -6105,6 +6089,16 @@ tiny-invariant@^1.0.6:
   version "1.2.0"
   resolved "https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.2.0.tgz#a1141f86b672a9148c72e978a19a73b9b94a15a9"
   integrity sha512-1Uhn/aqw5C6RI4KejVeTg6mIS7IqxnLJ8Mv2tV5rTc0qWobay7pDUz6Wi392Cnc8ak1H0F2cjoRzb2/AW4+Fvg==
+
+title@^3.4.4:
+  version "3.4.4"
+  resolved "https://registry.npmjs.org/title/-/title-3.4.4.tgz#5c0ab11fd69643bc05dc006bba52aaf5c1630f5e"
+  integrity sha512-ViLJMyg5TFwWQ7Aqrs3e0IPINA99++cOLzQFIuBw6rKPhn8Cz7J7sdsag0BQPCf4ip7bHY1/docykbQe2R4N6Q==
+  dependencies:
+    arg "1.0.0"
+    chalk "2.3.0"
+    clipboardy "1.2.2"
+    titleize "1.0.0"
 
 titleize@1.0.0:
   version "1.0.0"

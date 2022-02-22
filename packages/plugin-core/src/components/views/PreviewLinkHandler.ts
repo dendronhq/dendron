@@ -137,7 +137,12 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     return LinkType.UNKNOWN;
   }
 
-  /** Returns a note if one was found, undefined if no notes were found, and null if the link was ambiguous and user cancelled the prompt to pick a note. */
+  /** Try to find the note to navigate to if the given path references a note.
+   *
+   * @returns a note if one was found, `undefined` if no notes were found, and
+   * `null` if the link was ambiguous and user cancelled the prompt to pick a
+   * note.
+   */
   public async getNavigationTargetNoteForWikiLink({
     data,
     engine,

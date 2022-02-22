@@ -53,6 +53,7 @@ export enum DendronASTTypes {
   IMAGE = "image",
   FRONTMATTER = "yaml",
   LINK = "link",
+  INLINE_CODE = "inlineCode",
   FOOTNOTE_DEFINITION = "footnoteDefinition",
   FOOTNOTE_REFERENCE = "footnoteReference",
 }

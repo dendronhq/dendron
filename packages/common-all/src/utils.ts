@@ -9,7 +9,10 @@ import semver from "semver";
 import { ERROR_SEVERITY } from "./constants";
 import { DendronError, ErrorMessages } from "./error";
 import { COLORS_LIST } from "./colors";
-import { CONFIG_TO_MINIMUM_COMPAT_MAPPING } from "./constants/configs/compat";
+import {
+  CompatUtils,
+  CONFIG_TO_MINIMUM_COMPAT_MAPPING,
+} from "./constants/configs/compat";
 import {
   DendronSiteConfig,
   DHookDict,
@@ -559,6 +562,7 @@ export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";
+  isSoftMapping?: boolean;
   minCompatClientVersion?: string;
   minCompatConfigVersion?: string;
 };
@@ -1107,7 +1111,7 @@ export class ConfigUtils {
     }
 
     const minCompatClientVersion =
-      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion];
+      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion].clientVersion;
 
     if (_.isUndefined(minCompatClientVersion)) {
       throw new DendronError({
@@ -1121,7 +1125,7 @@ export class ConfigUtils {
     const minCompatConfigVersion = _.findLastKey(
       CONFIG_TO_MINIMUM_COMPAT_MAPPING,
       (ent) => {
-        return semver.lte(ent, clientVersion);
+        return semver.lte(ent.clientVersion, clientVersion);
       }
     );
 
@@ -1139,6 +1143,10 @@ export class ConfigUtils {
       clientVersion
     );
 
+    const isSoftMapping = CompatUtils.isSoftMapping({
+      configVersion: Number(minCompatConfigVersion),
+    });
+
     const configVersionCompatible =
       Number(minCompatConfigVersion) <= configVersion;
 
@@ -1148,6 +1156,7 @@ export class ConfigUtils {
       return {
         isValid,
         reason,
+        isSoftMapping,
         minCompatClientVersion,
         minCompatConfigVersion,
       };

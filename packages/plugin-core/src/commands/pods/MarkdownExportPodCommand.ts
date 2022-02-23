@@ -70,7 +70,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
 
     //use FM Title as h1 header
     const addFrontmatterTitle =
-      opts && opts.addFrontmatterTitle
+      opts && !(_.isUndefined(opts.addFrontmatterTitle))
         ? opts.addFrontmatterTitle
         : await this.promptUserForaddFMTitleSetting();
     if (addFrontmatterTitle === undefined) return;

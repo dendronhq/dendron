@@ -7,6 +7,7 @@ import { PublishCLICommand } from "../src/commands";
 import { DevCLICommand } from "../src/commands/devCLICommand";
 import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
+import { ExportPodV2CLICommand } from "../src/commands/exportPodV2";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
@@ -33,5 +34,7 @@ new WorkspaceCLICommand().buildCmd(buildYargs);
 new SeedCLICommand().buildCmd(buildYargs);
 new DevCLICommand().buildCmd(buildYargs);
 new PublishCLICommand().buildCmd(buildYargs);
+new ExportPodV2CLICommand().buildCmd(buildYargs);
+
 // eslint-disable-next-line no-unused-expressions
 buildYargs.demandCommand(1).help().argv;

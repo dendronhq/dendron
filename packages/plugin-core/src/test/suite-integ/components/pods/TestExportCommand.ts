@@ -43,7 +43,7 @@ export class TestExportPodCommand extends BaseExportPodCommand<
    */
   public createPod(_config: RunnablePodConfigV2): ExportPodV2<string> {
     return {
-      exportNote() {
+      exportNotes() {
         return new Promise<string>((resolve) => resolve("note"));
       },
     };

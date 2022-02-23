@@ -44,7 +44,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
         await runEngineTestV5(
           async (opts) => {
             const { pod, props } = setupPod(opts, "simple-wikilink");
-            const result = await pod.exportNote(props);
+            const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
@@ -74,7 +74,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
         await runEngineTestV5(
           async (opts) => {
             const { pod, props } = setupPod(opts, "usertag");
-            const result = await pod.exportNote(props);
+            const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
@@ -117,7 +117,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               engine: opts.engine,
             }) as NoteProps;
 
-            const result = await pod.exportNote(props);
+            const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
@@ -142,7 +142,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
         await runEngineTestV5(
           async (opts) => {
             const { pod, props } = setupPod(opts, "footag");
-            const result = await pod.exportNote(props);
+            const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
@@ -168,7 +168,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
     let exportDest: string;
     beforeAll(() => {
       exportDest = tmpDir().name;
-      console.log("exportDest", exportDest);
     });
 
     afterEach(() => {
@@ -183,7 +182,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               exportScope: PodExportScope.Note,
               destination: exportDest,
             };
-            console.log("exportDest", exportDest);
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
@@ -195,10 +193,8 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               vault: opts.vaults[0],
               engine: opts.engine,
             }) as NoteProps;
-            console.log("props", props);
-            console.log("vault", opts.vaults[0]);
 
-            await pod.exportNote(props);
+            await pod.exportNotes([props]);
             const [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
               path.join(exportDest, "vault1"),
               ["bar.md"]

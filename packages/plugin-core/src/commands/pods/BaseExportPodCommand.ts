@@ -121,7 +121,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Note: {
-        payload = this.getNoteProps();
+        payload = this.getPropsForNoteScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get note payload.");
@@ -130,7 +130,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Hierarchy: {
-        payload = await this.getHierarchyProps();
+        payload = await this.getPropsForHierarchyScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get hierarchy payload.");
@@ -144,7 +144,7 @@ export abstract class BaseExportPodCommand<
           vscode.window.showErrorMessage("Unable to get vault payload.");
           return;
         }
-        payload = this.getVaultProps(vault);
+        payload = this.getPropsForVaultScope(vault);
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get vault payload.");
@@ -153,7 +153,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Workspace: {
-        payload = this.getWorkspaceProps();
+        payload = this.getPropsForWorkspaceScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get workspace payload.");
@@ -191,41 +191,18 @@ export abstract class BaseExportPodCommand<
         const pod = this.createPod(opts.config);
 
         switch (opts.config.exportScope) {
-          case PodExportScope.Note: {
-            for (const noteProp of opts.payload) {
-              if (pod.exportNote) {
-                try {
-                  const result = await pod.exportNote(noteProp);
-                  await this.onExportComplete({
-                    exportReturnValue: result,
-                    payload: noteProp,
-                    config: opts.config,
-                  });
-                } catch (err) {
-                  this.L.error(err);
-                  throw err;
-                }
-              } else {
-                throw new Error("Invalid Payload Type in Note Export");
-              }
-            }
-            break;
-          }
+          case PodExportScope.Note:
           case PodExportScope.Vault:
           case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-            if (pod.exportNotes) {
-              const result = await pod.exportNotes(opts.payload);
-              await this.onExportComplete({
-                exportReturnValue: result,
-                payload: opts.payload,
-                config: opts.config,
-              });
-            } else {
-              throw new Error("Multi Note Export not supported by this pod!");
-            }
+            const result = await pod.exportNotes(opts.payload);
+            await this.onExportComplete({
+              exportReturnValue: result,
+              payload: opts.payload,
+              config: opts.config,
+            });
 
             break;
           }
@@ -247,15 +224,15 @@ export abstract class BaseExportPodCommand<
     config,
   }: {
     exportReturnValue: R;
-    payload: NoteProps | NoteProps[];
+    payload: NoteProps[];
     config: Config;
   }): Promise<void | string>;
 
   /**
-   * Gets notes matching the selected hierarchy
+   * Gets notes matching the selected hierarchy(for a specefic vault)
    * @returns
    */
-  private async getHierarchyProps(): Promise<
+  private async getPropsForHierarchyScope(): Promise<
     DNodeProps<any, any>[] | undefined
   > {
     return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {
@@ -276,7 +253,7 @@ export abstract class BaseExportPodCommand<
     });
   }
 
-  private getNoteProps(): DNodeProps[] | undefined {
+  private getPropsForNoteScope(): DNodeProps[] | undefined {
     //TODO: Switch this to a lookup controller, allow multiselect
     const fsPath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!fsPath) {
@@ -313,7 +290,7 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the workspace
    */
-  private getWorkspaceProps(): DNodeProps[] | undefined {
+  private getPropsForWorkspaceScope(): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
     return Object.values(engine.notes).filter((notes) => notes.stub !== true);
   }
@@ -322,7 +299,7 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the vault
    */
-  private getVaultProps(vault: DVault): DNodeProps[] | undefined {
+  private getPropsForVaultScope(vault: DVault): DNodeProps[] | undefined {
     const engine = ExtensionProvider.getEngine();
     return Object.values(engine.notes).filter(
       (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)

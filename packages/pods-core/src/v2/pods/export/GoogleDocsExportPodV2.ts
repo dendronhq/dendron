@@ -63,27 +63,22 @@ export class GoogleDocsExportPodV2
   private _engine: DEngineClient;
   private _wsRoot: string;
   private _vaults: DVault[];
+  private _port: number;
 
   constructor({
     podConfig,
     engine,
-    vaults,
-    wsRoot,
+    port,
   }: {
     podConfig: RunnableGoogleDocsV2PodConfig;
     engine: DEngineClient;
-    vaults: DVault[];
-    wsRoot: string;
+    port: number;
   }) {
     this._config = podConfig;
     this._engine = engine;
-    this._vaults = vaults;
-    this._wsRoot = wsRoot;
-  }
-
-  async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
-    const response = await this.exportNotes([input]);
-    return response;
+    this._vaults = engine.vaults;
+    this._wsRoot = engine.wsRoot;
+    this._port = port;
   }
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
@@ -150,8 +145,8 @@ export class GoogleDocsExportPodV2
   ) {
     if (Time.now().toSeconds() > expirationTime) {
       accessToken = await PodUtils.refreshGoogleAccessToken(
-        this._wsRoot,
         refreshToken,
+        this._port,
         this._config.connectionId
       );
     }
@@ -331,5 +326,27 @@ export class GoogleDocsExportPodV2
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;
+  }
+}
+
+export class GoogleDocsUtils {
+  static async updateNotesWithCustomFrontmatter(
+    records: GoogleDocsFields[],
+    engine: DEngineClient
+  ) {
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { documentId, revisionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          documentId,
+          revisionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
   }
 }

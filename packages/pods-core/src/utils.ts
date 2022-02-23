@@ -519,13 +519,10 @@ export class PodUtils {
   };
 
   static async refreshGoogleAccessToken(
-    wsRoot: string,
     refreshToken: string,
+    port: number,
     connectionId?: string
   ) {
-    const port = fs.readFileSync(path.join(wsRoot, ".dendron.port"), {
-      encoding: "utf8",
-    });
     try {
       const result = await axios.get(
         `http://localhost:${port}/api/oauth/refreshToken`,

@@ -11,7 +11,7 @@ import {
   NotionConnection,
   NotionExportPodV2,
   NotionExportReturnType,
-  NotionFields,
+  NotionUtils,
   NotionV2PodConfig,
   Page,
   PodV2Types,
@@ -163,9 +163,13 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     config: RunnableNotionV2PodConfig;
     payload: NoteProps[];
   }) {
+    const engine = ExtensionProvider.getEngine();
     const { data } = exportReturnValue;
     if (data?.created) {
-      await this.updateNotionIdForNewlyCreatedNotes(data.created);
+      await NotionUtils.updateNotionIdForNewlyCreatedNotes(
+        data.created,
+        engine
+      );
     }
     const createdCount = data?.created?.length ?? 0;
     if (ResponseUtil.hasError(exportReturnValue)) {
@@ -244,22 +248,5 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
       return;
     }
     return selected.label;
-  };
-
-  updateNotionIdForNewlyCreatedNotes = async (records: NotionFields[]) => {
-    const engine = ExtensionProvider.getEngine();
-    await Promise.all(
-      records.map(async (record) => {
-        if (_.isUndefined(record)) return;
-        const { notionId, dendronId } = record;
-        if (!dendronId) return;
-        const note = engine.notes[dendronId];
-        note.custom = {
-          ...note.custom,
-          notionId,
-        };
-        await engine.writeNote(note, { updateExisting: true });
-      })
-    );
   };
 }

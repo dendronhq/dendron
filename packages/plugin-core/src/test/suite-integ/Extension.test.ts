@@ -35,7 +35,6 @@ import {
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
-import * as telemetry from "../../telemetry";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -471,17 +470,6 @@ suite("Extension", function () {
             const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
             fs.removeSync(path.join(vault, "root.schema.yml"));
           },
-        });
-      });
-
-      describe("telemetry", () => {
-        test("can get VSCode telemetry settings", (done) => {
-          // Just checking that we get some expected result, and that it doesn't just crash.
-          const result = telemetry.isVSCodeTelemetryEnabled();
-          expect(
-            result === true || result === false || result === undefined
-          ).toBeTruthy();
-          done();
         });
       });
 

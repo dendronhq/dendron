@@ -68,6 +68,10 @@ export type SegmentClientOpts = {
   key?: string;
   forceNew?: boolean;
   cachePath?: string;
+  /**
+   * Workspace configuration disable analytics
+   */
+  disabledByWorkspace?: boolean;
 };
 
 export const SEGMENT_EVENTS = {
@@ -186,8 +190,12 @@ export class SegmentClient {
     return !this.isDisabled(status);
   }
 
-  static setByConfig(status?: TelemetryStatus) {
-    if (_.isUndefined(status)) status = this.getStatus();
+  /**
+   * Teleemtry has been set by user changing Dendron related configuration
+   * (vs vscode telemetry settings)
+   * @returns
+   */
+  static setByConfig(status: TelemetryStatus) {
     switch (status) {
       case TelemetryStatus.DISABLED_BY_WS_CONFIG:
       case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
@@ -226,7 +234,11 @@ export class SegmentClient {
   }
 
   constructor(_opts?: SegmentClientOpts) {
-    const key = _opts?.key || env("SEGMENT_VSCODE_KEY");
+    // const key = _opts?.key || ;
+    const { key, disabledByWorkspace } = _.defaults(_opts, {
+      key: env("SEGMENT_VSCODE_KEY"),
+      disabledByWorkspace: false,
+    });
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
     this._cachePath = _opts?.cachePath;
@@ -239,7 +251,7 @@ export class SegmentClient {
 
     const status = SegmentClient.getStatus();
     this.logger.info({ msg: `user telemetry setting: ${status}` });
-    this._hasOptedOut = SegmentClient.isDisabled();
+    this._hasOptedOut = SegmentClient.isDisabled() || disabledByWorkspace;
 
     if (this.hasOptedOut) {
       this._anonymousId = "";

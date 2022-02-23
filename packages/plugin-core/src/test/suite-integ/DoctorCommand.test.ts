@@ -657,7 +657,7 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
       test("THEN reload resolved to undefined", async () => {
         const extension = ExtensionProvider.getExtension();
         const cmd = new DoctorCommand(extension);
-        const reloadSpy = sinon.spy(cmd, "reload");
+        const reloadSpy = sinon.spy(cmd, "reload" as keyof DoctorCommand);
         await cmd.execute({
           action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
           scope: "workspace",

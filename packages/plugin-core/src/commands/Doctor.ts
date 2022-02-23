@@ -288,7 +288,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
-  async reload(opts: CommandOpts) {
+  private async reload(opts: CommandOpts) {
     const engine =
       opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS
         ? ((await new ReloadIndexCommand().execute()) as DEngineClient)

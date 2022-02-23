@@ -193,11 +193,11 @@ describe("WHEN run 'dendron note delete", () => {
   });
 });
 
-describe("WHEN run 'dendron note rename'", () => {
-  const cmd = NoteCommands.RENAME;
+describe("WHEN run 'dendron note move'", () => {
+  const cmd = NoteCommands.MOVE;
 
   describe("WHEN lookup note with no vault specified and no new vault specified", () => {
-    test("THEN rename note within first available vault", async () => {
+    test("THEN move note within first available vault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -207,12 +207,11 @@ describe("WHEN run 'dendron note rename'", () => {
             engine,
             cmd,
             query: "foo",
-            newName: "renamed-note",
+            destFname: "moved-note",
           });
-          //                    expect(engine.notes["foo"]).toBeUndefined();
           expect(
             NoteUtils.getNoteOrThrow({
-              fname: "renamed-note",
+              fname: "moved-note",
               vault,
               notes: engine.notes,
               wsRoot,
@@ -229,7 +228,7 @@ describe("WHEN run 'dendron note rename'", () => {
   });
 
   describe("WHEN specify vault and no new vault specified", () => {
-    test("THEN rename note within specific vault", async () => {
+    test("THEN move note within specific vault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[1];
@@ -239,12 +238,11 @@ describe("WHEN run 'dendron note rename'", () => {
             engine,
             cmd,
             query: "bar",
-            newName: "renamed-note",
+            destFname: "moved-note",
           });
-          //                    expect(engine.notes["bar"]).toBeUndefined();
           expect(
             NoteUtils.getNoteOrThrow({
-              fname: "renamed-note",
+              fname: "moved-note",
               vault,
               notes: engine.notes,
               wsRoot,
@@ -272,10 +270,9 @@ describe("WHEN run 'dendron note rename'", () => {
             engine,
             cmd,
             query: "bar",
-            newName: "car",
-            newVault: VaultUtils.getName(otherVault),
+            destFname: "car",
+            destVaultName: VaultUtils.getName(otherVault),
           });
-          //                    expect(engine.notes["bar"]).toBeUndefined();
           expect(
             NoteUtils.getNoteOrThrow({
               fname: "car",

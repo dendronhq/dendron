@@ -307,8 +307,14 @@ export class ConvertLinkCommand extends BasicCommand<
     const { vaults, wsRoot, notes } = engine;
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const { document, selection } = editor;
-    const reference = getReferenceAtPosition(document, selection.start, {
-      allowInCodeBlocks: true,
+    const reference = await getReferenceAtPosition({
+      document,
+      position: selection.start,
+      vaults,
+      wsRoot,
+      opts: {
+        allowInCodeBlocks: true,
+      },
     });
 
     if (reference === null) {

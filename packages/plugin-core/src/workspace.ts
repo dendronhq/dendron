@@ -302,6 +302,18 @@ export class DendronExtension implements IDendronExtension {
     return false;
   }
 
+  async isActiveAndIsDendronNote(fpath: string): Promise<boolean> {
+    if (!this.isActive()) {
+      return false;
+    }
+    const { wsRoot, vaults } = this.getDWorkspace();
+    return WorkspaceUtils.isDendronNote({
+      wsRoot,
+      vaults,
+      fpath,
+    });
+  }
+
   /**
    * When in dev mode, version is equivalent to `package.json` that is checked out locally
    * Otherwise, get from published extension `package.json`

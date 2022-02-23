@@ -1,17 +1,19 @@
 import {
+  Awaited,
   ConfigUtils,
   DVault,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { findNonNoteFile } from "@dendronhq/common-server";
+import * as Sentry from "@sentry/node";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
+import { TargetKind } from "../commands/GoToNoteInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
-import * as Sentry from "@sentry/node";
-import { findNonNoteFile } from "@dendronhq/common-server";
-import { TargetKind } from "../commands/GoToNoteInterface";
+import { getExtension } from "../workspace";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   private async maybeNonNoteFileDefinition({
@@ -21,7 +23,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     fpath: string;
     vault?: DVault;
   }) {
-    const { wsRoot, vaults } = getDWorkspace();
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const file = await findNonNoteFile({
       fpath,
       vaults: vault ? [vault] : vaults,
@@ -41,15 +43,18 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   }
 
   private async provideForNewNote(
-    refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>
+    refAtPos: NonNullable<Awaited<ReturnType<typeof getReferenceAtPosition>>>
   ) {
-    const config = getDWorkspace().config;
+    const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
+    const config = ExtensionProvider.getEngine().config;
     const noAutoCreateOnDefinition =
       !ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
     if (noAutoCreateOnDefinition) {
       return;
     }
-    const out = await new GotoNoteCommand(getExtension()).execute({
+    const out = await new GotoNoteCommand(
+      ExtensionProvider.getExtension()
+    ).execute({
       qs: refAtPos.ref,
       anchor: refAtPos.anchorStart,
     });
@@ -59,7 +64,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     }
     const { note, pos } = out;
     return new Location(
-      Uri.file(NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })),
+      Uri.file(NoteUtils.getFullPath({ note, wsRoot })),
       pos || new Position(0, 0)
     );
   }
@@ -71,15 +76,23 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   ): Promise<vscode.Location | vscode.Location[] | undefined> {
     try {
       // No-op if we're not in a Dendron Workspace
-      if (!DendronExtension.isActive()) {
+      if (
+        !(await ExtensionProvider.isActiveAndIsDendronNote(document.uri.fsPath))
+      ) {
         return;
       }
-      const refAtPos = getReferenceAtPosition(document, position);
+
+      const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      const refAtPos = await getReferenceAtPosition({
+        document,
+        position,
+        wsRoot,
+        vaults,
+      });
       if (!refAtPos) {
         return;
       }
       let vault;
-      const { engine } = getDWorkspace();
       if (refAtPos.vaultName) {
         try {
           vault = VaultUtils.getVaultByName({
@@ -90,15 +103,13 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
           Logger.error({ msg: `${refAtPos.vaultName} is not defined` });
         }
       }
-      const notes = NoteUtils.getNotesByFname({
+      const notes = NoteUtils.getNotesByFnameFromEngine({
         fname: refAtPos.ref,
-        notes: engine.notes,
+        engine,
         vault,
       });
       const uris = notes.map((note) =>
-        Uri.file(
-          NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
-        )
+        Uri.file(NoteUtils.getFullPath({ note, wsRoot }))
       );
       const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
       if (out.length > 1) {

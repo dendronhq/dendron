@@ -183,6 +183,10 @@ export class MockDendronExtension implements IDendronExtension {
     return true;
   }
 
+  async isActiveAndIsDendronNote(_fpath: string): Promise<boolean> {
+    throw new Error("not implemented");
+  }
+
   getWorkspaceConfig(): WorkspaceConfiguration {
     // TODO: the old implementation of this was wrong - it did not return WorkspaceConfiguration but a WorkspaceSettings object
     // since this doesn't seem to be used, just adding an exception here for future work

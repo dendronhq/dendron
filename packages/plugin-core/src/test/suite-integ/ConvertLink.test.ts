@@ -5,18 +5,36 @@ import {
 } from "@dendronhq/common-test-utils";
 import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { beforeEach, afterEach } from "mocha";
+import { afterEach, beforeEach } from "mocha";
 import sinon from "sinon";
-import vscode from "vscode";
+import vscode, { TextEditor } from "vscode";
 import { ConvertLinkCommand } from "../../commands/ConvertLink";
-import {
-  getReferenceAtPosition,
-  getReferenceAtPositionResp,
-} from "../../utils/md";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { getReferenceAtPosition } from "../../utils/md";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+
+const getReference = async ({
+  editor,
+  position,
+}: {
+  editor: TextEditor;
+  position: vscode.Position;
+}) => {
+  const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  const out = await getReferenceAtPosition({
+    document: editor.document,
+    position,
+    wsRoot,
+    vaults,
+  });
+  if (!out) {
+    throw new Error("ref should be truthy");
+  }
+  return out;
+};
 
 suite("ConvertLink", function () {
   const ctx = setupBeforeAfter(this, {
@@ -71,10 +89,10 @@ suite("ConvertLink", function () {
       test("WHEN broken link with no alias, THEN doesn't show option to use alias text.", async () => {
         const editor = vscode.window.activeTextEditor as vscode.TextEditor;
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          noAliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: noAliasBrokenLinkPosition,
+        });
         const { options, parsedLink } =
           cmd.prepareBrokenLinkConvertOptions(reference);
         expect(parsedLink.alias).toBeFalsy();
@@ -92,10 +110,10 @@ suite("ConvertLink", function () {
           aliasBrokenLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          aliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: aliasBrokenLinkPosition,
+        });
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Alias",
@@ -116,10 +134,10 @@ suite("ConvertLink", function () {
           aliasBrokenLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          aliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: aliasBrokenLinkPosition,
+        });
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Note name",
@@ -140,10 +158,10 @@ suite("ConvertLink", function () {
           aliasBrokenLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          aliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: aliasBrokenLinkPosition,
+        });
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Hierarchy",
@@ -164,10 +182,10 @@ suite("ConvertLink", function () {
           aliasBrokenLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          aliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: aliasBrokenLinkPosition,
+        });
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Prompt",
@@ -189,10 +207,10 @@ suite("ConvertLink", function () {
           aliasBrokenLinkPosition
         );
         const cmd = new ConvertLinkCommand();
-        const reference = getReferenceAtPosition(
-          editor.document,
-          aliasBrokenLinkPosition
-        ) as getReferenceAtPositionResp;
+        const reference = await getReference({
+          editor,
+          position: aliasBrokenLinkPosition,
+        });
         sandbox.stub(cmd, "promptBrokenLinkConvertOptions").resolves({
           option: {
             label: "Change destination",

@@ -42,7 +42,7 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { DateTime } from ".";
+import { DateTime, LruCache } from ".";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
@@ -261,6 +261,54 @@ export class ListMap<K, V> {
     if (values === undefined) return false;
     return values.includes(value);
   }
+}
+
+/** Memoizes function results, but allows a custom function to decide if the
+ * value needs to be recalculated.
+ *
+ * This function pretty closely reproduces the memoize function of Lodash,
+ * except that it allows a custom function to override whether a cached value
+ * should be updated.
+ *
+ * Similar to the lodash memoize, the backing cache is exposed with the
+ * `memoizedFunction.cache`. You can use this
+ *
+ * @param fn The function that is being memoized. This function will run when
+ * the cache needs to be updated.
+ * @param keyFn A function that given the inputs to `fn`, returns a key. Two
+ * inputs that will have the same output should resolve to the same key. The key
+ * may be anything, but it's recommended to use something simple like a string
+ * or integer. By default, the first argument to `fn` is stringified and used as
+ * the key (similar to lodash memoize)
+ * @param shouldUpdate If this function returns true, the wrapped function will
+ * run again and the cached value will update. `shouldUpdate` is passed the
+ * cached result, and the new inputs. By default, it will only update if there
+ * is a cache miss.
+ * @param maxCache The maximum number of items to cache.
+ */
+export function memoize<Inputs extends any[], Key, Output>({
+  fn,
+  keyFn = (...args) => args[0].toString(),
+  shouldUpdate = () => false,
+  maxCache = 64,
+}: {
+  fn: (...args: Inputs) => Output;
+  keyFn?: (...args: Inputs) => Key;
+  shouldUpdate?: (previous: Output, ...args: Inputs) => boolean;
+  maxCache?: number;
+}): (...args: Inputs) => Output {
+  const wrapped = function memoize(...args: Inputs) {
+    const key = keyFn(...args);
+    let value: Output | undefined = wrapped.cache.get(key);
+    if (value === undefined || shouldUpdate(value, ...args)) {
+      wrapped.cache.drop(key);
+      value = fn(...args);
+      wrapped.cache.set(key, value);
+    }
+    return value;
+  };
+  wrapped.cache = new LruCache<Key, Output>({ maxItems: maxCache });
+  return wrapped;
 }
 
 export class NoteFNamesDict {

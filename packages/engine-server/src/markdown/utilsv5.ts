@@ -34,7 +34,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
-import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
+import { dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
@@ -327,7 +327,10 @@ export class MDUtilsV5 {
           // Add flavor specific plugins. These need to come before `dendronPub`
           // to fix extended image URLs before they get converted to HTML
           if (opts.flavor === ProcFlavor.PREVIEW) {
-            proc = proc.use(dendronPreview);
+            // No extra plugins needed for the preview right now. We used to
+            // need a plugin to rewrite URLs to get the engine to proxy images,
+            // but now that's done by the
+            // [[PreviewPanel|../packages/plugin-core/src/components/views/PreviewPanel.ts#^preview-rewrites-images]]
           }
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
             proc = proc.use(dendronHoverPreview);

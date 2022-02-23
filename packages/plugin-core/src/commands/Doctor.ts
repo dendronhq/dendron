@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   ExtensionEvents,
@@ -288,11 +289,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
-  private async reload(opts: CommandOpts) {
-    const engine =
-      opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS
-        ? ((await new ReloadIndexCommand().execute()) as DEngineClient)
-        : (undefined as unknown as DEngineClient);
+  private async reload() {
+    const engine = await new ReloadIndexCommand().execute();
+    if (_.isUndefined(engine)) {
+      throw new DendronError({ message: "no engine found." });
+    }
     return engine;
   }
 
@@ -302,10 +303,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const { wsRoot, config } = this.extension.getDWorkspace();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
-      throw Error("rootDir undefined");
+      throw new DendronError({ message: "rootDir undefined" });
     }
     if (_.isUndefined(config)) {
-      throw Error("no config found");
+      throw new DendronError({ message: "no config found" });
     }
 
     if (this.extension.fileWatcher) {
@@ -321,17 +322,17 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine = await this.reload(opts);
 
     let note;
     if (opts.scope === "file") {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (_.isUndefined(document)) {
-        throw Error("No note open");
+        throw new DendronError({ message: "No note open." });
       }
       note = WSUtils.getNoteFromDocument(document);
     }
 
+    let engine;
     switch (opts.action) {
       case PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS: {
         const installStatus =
@@ -346,6 +347,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
+        engine = await this.reload();
         await new BackfillService().updateNotes({
           engine,
           note,
@@ -356,6 +358,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         let notes;
+        engine = await this.reload();
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
           notes = notes.filter((note) => !note.stub);
@@ -396,6 +399,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         let notes;
+        engine = await this.reload();
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
           notes = notes.filter((note) => !note.stub);
@@ -418,6 +422,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       default: {
+        engine = await this.reload();
         const candidates: NoteProps[] | undefined = _.isUndefined(note)
           ? undefined
           : [note];
@@ -434,7 +439,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (this.extension.fileWatcher) {
       this.extension.fileWatcher.pause = false;
     }
-    await this.reload(opts);
+
+    await this.reload();
 
     // Decorations don't auto-update here, I think because the contents of the
     // note haven't updated within VSCode yet. Regenerate the decorations, but

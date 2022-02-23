@@ -4,11 +4,20 @@ import {
   FOOTNOTE_REF_CLASS,
   NoteViewMessageEnum,
 } from "@dendronhq/common-all";
-import { createLogger, DendronNote } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  DendronNote,
+  engineHooks,
+} from "@dendronhq/common-frontend";
 import _ from "lodash";
 import mermaid from "mermaid";
 import React from "react";
-import { useCurrentTheme, useMermaid, useRenderedNoteBody } from "../hooks";
+import {
+  useCurrentTheme,
+  useMermaid,
+  useRenderedNoteBody,
+  useWorkspaceProps,
+} from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 
@@ -80,6 +89,9 @@ const DendronNotePage: DendronComponent = (props) => {
   const logger = createLogger("DendronNotePage");
   const noteProps = props.ide.noteActive;
   const config = props.engine.config;
+  const [workspace] = useWorkspaceProps();
+  const { useConfig } = engineHooks;
+  useConfig({ opts: workspace });
 
   logger.info({
     ctx,
@@ -99,7 +111,7 @@ const DendronNotePage: DendronComponent = (props) => {
   useMermaid({ config, themeType, mermaid, noteRenderedBody });
 
   if (!noteRenderedBody || !config) {
-    return null;
+    return <div>Loading...</div>;
   }
   return <DendronNote noteContent={noteRenderedBody} config={config} />;
 };

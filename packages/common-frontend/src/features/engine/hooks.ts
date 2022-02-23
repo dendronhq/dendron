@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { engineSliceUtils } from ".";
 import { createLogger } from "../../utils";
-import { EngineState, InitNoteOpts, initNotes } from "./slice";
+import { EngineState, InitNoteOpts, initNotes, syncConfig } from "./slice";
 import { AppDispatch, RootState } from "./store";
 
 export const useEngineAppDispatch = () => useDispatch<AppDispatch>();
@@ -48,4 +48,32 @@ export const useEngine = ({
     logger.info({ ctx: "useEffect", state: "exit", engineState });
     return;
   }, [engineState.loading, opts.port, opts.ws]);
+};
+
+/**
+ * Reloads the Dendron Config
+ * @param opts.port?: workspace pot
+ * @param opts.ws?: workspace root
+ */
+export const useConfig = ({
+  opts,
+}: {
+  opts: Partial<InitNoteOpts> & { force?: boolean };
+}) => {
+  const dispatch = useEngineAppDispatch();
+  const logger = createLogger("syncConfig");
+  useEffect(() => {
+    logger.info({ ctx: "useEffect", state: "enter" });
+
+    if (_.isUndefined(opts.port)) {
+      return;
+    }
+    if (!opts.ws) {
+      return;
+    }
+    logger.info({ ctx: "useEffect", state: "syncConfig" });
+    dispatch(syncConfig({ port: parseInt(opts.port as any, 10), ws: opts.ws }));
+    logger.info({ ctx: "useEffect", state: "exit" });
+    return;
+  }, []);
 };

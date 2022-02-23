@@ -6,6 +6,7 @@ import {
   stringifyError,
   APIUtils,
   NoteUtils,
+  ConfigGetPayload,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -41,8 +42,36 @@ export const initNotes = createAsyncThunk(
   }
 );
 
+/**
+ * Syncs the Dendron config from the engine
+ */
+export const syncConfig = createAsyncThunk(
+  "engine/syncConfig",
+  async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
+    const logger = createLogger("syncConfigThunk");
+    const endpoint = APIUtils.getLocalEndpoint(port);
+    const api = new DendronApiV2({
+      endpoint,
+      apiPath: "api",
+      logger,
+    });
+    logger.info({ state: "pre:initConfig" });
+    const resp = await api.configGet({ ws });
+    logger.info({ state: "post:initConfig" });
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
+      return resp;
+    }
+    const data = resp.data!;
+    logger.info({ state: "pre:setConfig" });
+    dispatch(setConfig(data));
+    logger.info({ state: "post:setConfig" });
+    return resp;
+  }
+);
+
 export const syncNote = createAsyncThunk(
-  "engine/init",
+  "engine/sync",
   async (
     { port, ws, note }: { port: number; ws: string; note: NoteProps },
     { dispatch }
@@ -127,6 +156,9 @@ export const engineSlice = createSlice({
       state.vaults = vaults;
       state.config = config;
     },
+    setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
+      state.config = action.payload;
+    },
     setNotes: (state, action: PayloadAction<NotePropsDict>) => {
       state.notes = action.payload;
     },
@@ -178,8 +210,7 @@ export const engineSlice = createSlice({
         state.currentRequestId = meta.requestId;
       }
     });
-    // @ts-ignore
-    builder.addCase(initNotes.fulfilled, (state, { payload, meta }) => {
+    builder.addCase(initNotes.fulfilled, (state, { meta }) => {
       const { requestId } = meta;
       logger.info({
         state: "fin:initNotes",
@@ -197,6 +228,7 @@ export const {
   setNotes,
   setError,
   setFromInit,
+  setConfig,
   setRenderNote,
   updateNote,
   tearDown,

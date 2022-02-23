@@ -1,8 +1,9 @@
 import { IDendronExtension } from "./dendronExtensionInterface";
-import vscode from "vscode";
+import vscode, { Position, Selection, TextEditor } from "vscode";
 import path from "path";
 import {
   DendronError,
+  DNoteAnchorBasic,
   DVault,
   NoteProps,
   NoteUtils,
@@ -15,7 +16,7 @@ import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { isInsidePath, vault2Path } from "@dendronhq/common-server";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { AnchorUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 
@@ -200,6 +201,33 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       });
     }
     return;
+  }
+
+  async trySelectRevealNonNoteAnchor(
+    editor: TextEditor,
+    anchor: DNoteAnchorBasic
+  ): Promise<void> {
+    let position: Position | undefined;
+    switch (anchor.type) {
+      case "line":
+        // Line anchors are direct line numbers from the start
+        position = new Position(anchor.line - 1 /* line 1 is index 0 */, 0);
+        break;
+      case "block":
+        // We don't parse non note files for anchors, so read the document and find where the anchor is
+        position = editor?.document.positionAt(
+          editor?.document.getText().indexOf(AnchorUtils.anchor2string(anchor))
+        );
+        break;
+      default:
+        // not supported for non-note files
+        position = undefined;
+    }
+    if (position) {
+      // if we did find the anchor, then select and scroll to it
+      editor.selection = new Selection(position, position);
+      editor.revealRange(editor.selection);
+    }
   }
 
   getActiveNote() {

@@ -20,6 +20,8 @@ import {
   GetAnchorsResp,
   getSlugger,
   IntermediateDendronConfig,
+  isBlockAnchor,
+  isLineAnchor,
   isNotUndefined,
   LINK_CONTENTS,
   LINK_NAME,
@@ -907,6 +909,26 @@ export class AnchorUtils {
     if (anchor.type === "header") return anchor.value;
     if (anchor.type === "line") return `L${anchor.line}`;
     assertUnreachable(anchor);
+  }
+
+  static string2anchor(anchor: string): DNoteAnchorBasic {
+    if (isBlockAnchor(anchor))
+      return {
+        type: "block",
+        value: anchor.slice(1, undefined),
+        text: anchor,
+      };
+    else if (isLineAnchor(anchor))
+      return {
+        type: "line",
+        line: Number.parseInt(anchor.slice(1, undefined), 10),
+        value: anchor,
+      };
+    return {
+      type: "header",
+      value: anchor,
+      text: anchor,
+    };
   }
 }
 

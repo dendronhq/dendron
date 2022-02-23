@@ -1,15 +1,15 @@
 import {
   DendronError,
-  DNoteAnchor,
+  DEngineClient,
+  DNoteAnchorBasic,
   ErrorFactory,
   ERROR_STATUS,
+  isWebUri,
   NoteProps,
-  NotePropsDict,
   NoteUtils,
   NoteViewMessage,
-  VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -17,12 +17,19 @@ import { Logger } from "../../logger";
 import { QuickPickUtil } from "../../utils/quickPick";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import open from "open";
+import textextensionslist from "textextensions";
+import { AnchorUtils } from "@dendronhq/engine-server";
+import _ from "lodash";
+
+const TEXT_EXTENSIONS: ReadonlySet<string> = new Set(
+  textextensionslist.map((s) => s.toLowerCase())
+);
 
 export enum LinkType {
   WIKI = "WIKI",
   ASSET = "ASSET",
   WEBSITE = "WEBSITE",
-  MARKDOWN = "MARKDOWN",
+  TEXT = "TEXT",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -34,7 +41,7 @@ export interface IPreviewLinkHandler {
    * Handle the event of a user clicking on a link in the preview webview pane
    * @param param0
    */
-  onLinkClicked({ data }: { data: NoteViewMessage["data"] }): Promise<void>;
+  onLinkClicked({ data }: { data: NoteViewMessage["data"] }): Promise<LinkType>;
 }
 
 /**
@@ -50,103 +57,101 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     data,
   }: {
     data: { id?: string | undefined; href?: string | undefined };
-  }): Promise<void> {
-    const linkType = this.classifyLink(data);
-
-    switch (linkType) {
-      case LinkType.ASSET: {
-        await this.handleAssetLink({
-          data,
-          wsRoot: this._ext.getDWorkspace().wsRoot,
-        });
-        break;
-      }
-      case LinkType.WIKI: {
-        try {
-          const noteData = await this.getNavigationTargetNoteForWikiLink({
-            data,
-            notes: this._ext.getEngine().notes,
-          });
-
-          if (noteData.note === undefined) {
-            // One valid case for note being undefined if user clicked on target note in
-            // different vault which had ambiguous vault and upon being prompted
-            // to select a note in quick user cancelled.
-            return;
-          }
-
-          this._ext.commandFactory.goToNoteCmd().execute({
-            qs: noteData.note.fname,
-            vault: noteData.note.vault,
-            column: vscode.ViewColumn.One,
-            anchor: noteData.anchor,
-          });
-
-          return;
-        } catch (err) {
-          Logger.error({ error: ErrorFactory.wrapIfNeeded(err) });
-          return;
-        }
-      }
-      case LinkType.WEBSITE: {
-        // Updated preview appears to already open the external links in the browser by itself
-        // Hence running `VSCodeUtils.openLink(data.href!);` causes double opening
-        // of the link within the browser.
-        return;
-      }
-      case LinkType.MARKDOWN: {
-        // assume local note - open relative to current vault
-        const note = this._ext.getEngine().notes[data.id!];
-        if (!note) return;
-
-        // noteId in this case is name of file
-        const fullPath = path.join(
-          this._ext.getEngine().wsRoot,
-          VaultUtils.getRelPath(note.vault),
-          note.id
-        );
-        return VSCodeUtils.openLink(fullPath);
-      }
-      default: {
-        // default, do nothing. let vscode link handler handle it
-        return;
-      }
-    }
-  }
-
-  public classifyLink({ href }: NoteViewMessage["data"]): LinkType {
-    if (
-      href &&
-      href.startsWith("vscode-webview") &&
-      href.includes("/assets/")
-    ) {
-      // Note: currently even when the wiki link is fully vault qualified as example
-      // of [[dendron://assets/note-in-asset-vault]] When it is clicked within the preview
-      // the href will look along the lines of:
-      // `vscode-webview://72db5b4c-61f8-400b-808c-771184cb3d7f/r68Zw7OChUZWvbD10qqmY`
-      // href will contain the id of the note but it will NOT contain the vault
-      // hence we should avoid the issue of parsing 'assets' vault name even if someone names their
-      // vault 'assets'.
-      return LinkType.ASSET;
-    } else if (href && href.startsWith("vscode-webview")) {
-      return LinkType.WIKI;
-    } else if (
-      href &&
-      (href.startsWith("http://") || href.startsWith("https://"))
-    ) {
+  }) {
+    const ctx = "PreviewLinkHandler.onLinkClicked";
+    // If href is missing, something is wrong with our link handler. Just let the VSCode's default handle it.
+    if (!data.href) return LinkType.UNKNOWN;
+    // First check if it's a web URL.
+    if (isWebUri(data.href)) {
+      // There's nothing to do then, the default handler opens them automatically.
+      // If we try to open it too, it will open twice.
       return LinkType.WEBSITE;
-    } else {
-      return LinkType.UNKNOWN;
     }
+
+    const uri = vscode.Uri.parse(data.href);
+    // First, check if the URL matches any note
+    try {
+      const noteData = await this.getNavigationTargetNoteForWikiLink({
+        data,
+        engine: this._ext.getEngine(),
+      });
+
+      if (noteData.note) {
+        // Found a note, open that
+        await this._ext.commandFactory.goToNoteCmd().execute({
+          qs: noteData.note.fname,
+          vault: noteData.note.vault,
+          // Avoid replacing the preview
+          column: vscode.ViewColumn.One,
+          anchor: noteData.anchor,
+        });
+        return LinkType.WIKI;
+      }
+    } catch (err) {
+      Logger.debug({ ctx, error: ErrorFactory.wrapIfNeeded(err) });
+    }
+    // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
+    const { wsRoot, vaults } = this._ext.getDWorkspace();
+    const currentNote = data?.id
+      ? this._ext.getEngine().notes[data.id]
+      : undefined;
+    const { fullPath } =
+      (await findNonNoteFile({
+        fpath: path.normalize(uri.fsPath),
+        vaults,
+        wsRoot,
+        currentVault: currentNote?.vault,
+      })) || {};
+    if (fullPath) {
+      // Found a matching non-note file.
+      // get the extension, or if there is no extension try the file name in case it's Makefile or something well known
+      const extension = (
+        path.extname(fullPath).slice(1, undefined) || path.basename(fullPath)
+      ).toLowerCase();
+      if (TEXT_EXTENSIONS.has(extension)) {
+        // If it's a text file, open it inside VSCode.
+        const editor = await VSCodeUtils.openFileInEditor(
+          vscode.Uri.file(fullPath),
+          {
+            // Avoid replacing the preview
+            column: vscode.ViewColumn.One,
+          }
+        );
+        if (!_.isEmpty(uri.fragment) && editor) {
+          const anchor = AnchorUtils.string2anchor(uri.fragment);
+          await this._ext.wsUtils.trySelectRevealNonNoteAnchor(editor, anchor);
+        }
+        return LinkType.TEXT;
+      } else {
+        // Otherwise it's a binary file, try to open it with the default program
+        ShowPreviewAssetOpener.openWithDefaultApp(path.normalize(fullPath));
+        return LinkType.ASSET;
+      }
+    }
+    // If nothing applies, VSCode's default will hopefully handle it
+    Logger.debug({
+      ctx,
+      msg: "Nothing applied for the URL, had to fall back to VSCode default.",
+    });
+    return LinkType.UNKNOWN;
   }
 
+  /** Try to find the note to navigate to if the given path references a note.
+   *
+   * @returns a note if one was found, `undefined` if no notes were found, and
+   * `null` if the link was ambiguous and user cancelled the prompt to pick a
+   * note.
+   */
   public async getNavigationTargetNoteForWikiLink({
     data,
-    notes,
+    engine,
   }: {
     data: NoteViewMessage["data"];
-    notes: NotePropsDict;
-  }) {
+    engine: DEngineClient;
+  }): Promise<{
+    note: NoteProps | undefined | null;
+    anchor: DNoteAnchorBasic | undefined;
+  }> {
     // wiki links will have the following format
     //
     // with `prettyLinks` set to false
@@ -178,8 +183,10 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       });
     }
 
-    const anchor = this.extractHeaderAnchorIfExists(data.href);
-    let note: NoteProps | undefined = notes[noteId];
+    const anchor = AnchorUtils.string2anchor(
+      vscode.Uri.parse(data.href).fragment
+    );
+    let note: NoteProps | undefined | null = engine.notes[noteId];
 
     if (note === undefined) {
       // If we could not find the note by the extracted id (when the note is within the same
@@ -187,7 +194,10 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       // of the note was in place of the id in the HREF (as in case of navigating to a note
       // in a different vault without explicit vault specification). Hence we will attempt
       // to find the note by file name.
-      const candidates = NoteUtils.getNotesByFname({ fname: noteId, notes });
+      const candidates = NoteUtils.getNotesByFnameFromEngine({
+        fname: noteId,
+        engine,
+      });
 
       if (candidates.length === 1) {
         note = candidates[0];
@@ -195,6 +205,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
         // We have more than one candidate hence lets as the user which candidate they would like
         // to navigate to
         note = await QuickPickUtil.showChooseNote(candidates);
+        if (note === undefined) note = null;
       }
     }
 
@@ -202,30 +213,6 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       note,
       anchor,
     };
-  }
-
-  private async handleAssetLink({
-    data,
-    wsRoot,
-  }: {
-    data: NoteViewMessage["data"];
-    wsRoot: string;
-  }) {
-    const assetFullPath: undefined | string = this.vaultlessAssetPath({
-      data,
-      wsRoot,
-    });
-
-    if (assetFullPath === undefined) {
-      Logger.error({
-        msg: `Was not able to construct asset path for data:'${ErrorFactory.safeStringify(
-          data
-        )}' wsRoot:'${wsRoot}'`,
-      });
-      return;
-    }
-
-    await ShowPreviewAssetOpener.openWithDefaultApp(assetFullPath);
   }
 
   public extractNoteIdFromHref(data: {
@@ -251,62 +238,6 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     const { path: hrefPath } = vscode.Uri.parse(data.href);
     const out = path.basename(hrefPath, ".html");
     return out;
-  }
-
-  public extractHeaderAnchorIfExists(link: string): DNoteAnchor | undefined {
-    if (link.indexOf("#") === -1) {
-      return undefined;
-    } else {
-      const tokens = link.split("#");
-      const anchorValue = tokens[tokens.length - 1];
-      return {
-        type: "header",
-        value: anchorValue,
-        depth: tokens.length - 1,
-      };
-    }
-  }
-
-  public vaultlessAssetPath({
-    data,
-    wsRoot,
-  }: {
-    data: NoteViewMessage["data"];
-    wsRoot: string;
-  }) {
-    const assetPathRelative = data.href?.substring(
-      data.href?.indexOf("assets/")
-    );
-
-    if (assetPathRelative === undefined) {
-      Logger.info({
-        msg: `Did not find 'assets/' string within asset type link.`,
-      });
-      return;
-    }
-    const noteId = data.id;
-    if (noteId === undefined) {
-      Logger.info({
-        msg: `LinkData did not contain note id data:'${ErrorFactory.safeStringify(
-          data
-        )}'`,
-      });
-      return;
-    }
-    const note: NoteProps | undefined = this._ext.getEngine().notes[noteId];
-    if (note === undefined) {
-      Logger.info({
-        msg: `Note was not found for id: '${noteId}'`,
-      });
-      return;
-    }
-
-    const assetPathFull = path.join(
-      vault2Path({ vault: note.vault, wsRoot }),
-      decodeURIComponent(assetPathRelative)
-    );
-
-    return assetPathFull;
   }
 }
 

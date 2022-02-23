@@ -1,5 +1,10 @@
-import vscode, { Uri } from "vscode";
-import { DVault, NoteProps, RespV3 } from "@dendronhq/common-all";
+import vscode, { TextEditor, Uri } from "vscode";
+import {
+  DNoteAnchorBasic,
+  DVault,
+  NoteProps,
+  RespV3,
+} from "@dendronhq/common-all";
 
 export interface IWSUtilsV2 {
   getNoteFromDocument(document: vscode.TextDocument): undefined | NoteProps;
@@ -7,6 +12,11 @@ export interface IWSUtilsV2 {
   getVaultFromDocument(document: vscode.TextDocument): DVault;
 
   tryGetNoteFromDocument(document: vscode.TextDocument): NoteProps | undefined;
+
+  trySelectRevealNonNoteAnchor(
+    editor: TextEditor,
+    anchor: DNoteAnchorBasic
+  ): Promise<void>;
 
   getActiveNote(): NoteProps | undefined;
 

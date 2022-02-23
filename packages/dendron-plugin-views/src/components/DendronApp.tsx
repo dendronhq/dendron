@@ -64,6 +64,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     const ctx = "useVSCodeMsg";
     logger.info({ ctx, msgType: msg.type });
     switch (msg.type) {
+      // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
         const { sync, note, syncChangedNote, activeNote } = cmsg.data;

@@ -791,6 +791,7 @@ export enum SeedBrowserMessageType {
   "onSeedStateChange" = "onSeedStateChange",
 }
 
+// TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps | undefined;
   /**
@@ -802,7 +803,8 @@ export type OnDidChangeActiveTextEditorData = {
    */
   syncChangedNote?: boolean;
   /**
-   * Current active note
+   * Current active note.
+   * If activeNote is defined, view will set that note as active note. Otherwise default to {@param note}
    */
   activeNote?: NoteProps;
 };

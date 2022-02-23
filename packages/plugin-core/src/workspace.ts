@@ -506,7 +506,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2(this, this.getEngine());
+        const dendronTreeView = new DendronTreeViewV2(this, this.getEngine());
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -539,7 +539,7 @@ export class DendronExtension implements IDendronExtension {
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
               DendronTreeViewV2.viewType,
-              provider,
+              dendronTreeView,
               {
                 webviewOptions: {
                   retainContextWhenHidden: true,
@@ -557,6 +557,7 @@ export class DendronExtension implements IDendronExtension {
         // Removing it for now.
         // backlinkTreeView.message = "There are no links to this note."
         context.subscriptions.push(backlinkTreeView);
+        context.subscriptions.push(dendronTreeView);
       }
     });
   }

@@ -119,14 +119,20 @@ VFile {
 `;
 
 exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
-"<h1 id=\\"root\\">Root</h1>
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"root#^block\\">Root</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
 <li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
-</ol>"
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
 `;
 
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
@@ -290,11 +296,17 @@ VFile {
 `;
 
 exports[`wikiLinks compile "MD_DENDRON: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
-"# Root
+VFile {
+  "contents": "# Root
 
 [[root#^block]]
 
-"
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
 `;
 
 exports[`wikiLinks compile "MD_DENDRON: WITH_SPACE_AND_ALIAS" 1`] = `
@@ -452,11 +464,17 @@ VFile {
 `;
 
 exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
-"# Root
+VFile {
+  "contents": "# Root
 
 [Root](root.md)
 
-"
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
 `;
 
 exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_SPACE_AND_ALIAS" 1`] = `
@@ -614,11 +632,17 @@ VFile {
 `;
 
 exports[`wikiLinks compile "MD_REGULAR: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
-"# Root
+VFile {
+  "contents": "# Root
 
 [Root](root)
 
-"
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
 `;
 
 exports[`wikiLinks compile "MD_REGULAR: WITH_SPACE_AND_ALIAS" 1`] = `

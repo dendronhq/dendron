@@ -1,7 +1,7 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { getReferenceAtPosition } from "../../utils/md";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
@@ -26,11 +26,16 @@ suite("WHEN getReferenceAtPosition", function () {
     () => {
       test("THEN initializes correctly", async () => {
         // You can access the workspace inside the test like this:
-        const { engine } = getDWorkspace();
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const activeNote = engine.notes[activeNoteName];
         const editor = await WSUtils.openNote(activeNote);
-        const pos = new vscode.Position(7, 0);
-        const reference = getReferenceAtPosition(editor.document, pos);
+        const position = new vscode.Position(7, 0);
+        const reference = await getReferenceAtPosition({
+          document: editor.document,
+          position,
+          wsRoot,
+          vaults,
+        });
         expect(reference).toEqual({
           anchorEnd: undefined,
           anchorStart: {

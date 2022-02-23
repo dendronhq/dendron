@@ -1,11 +1,11 @@
 import {
   ConfigUtils,
+  containsNonDendronUri,
+  DendronError,
   DVault,
   NoteProps,
   NoteUtils,
   VaultUtils,
-  containsNonDendronUri,
-  DendronError,
 } from "@dendronhq/common-all";
 import { findNonNoteFile, vault2Path } from "@dendronhq/common-server";
 import {
@@ -24,9 +24,9 @@ import { Logger } from "../logger";
 import {
   containsImageExt,
   getReferenceAtPosition,
+  getReferenceAtPositionResp,
   isUncPath,
 } from "../utils/md";
-import { DendronExtension } from "../workspace";
 
 const HOVER_IMAGE_MAX_HEIGHT = Math.max(200, 10);
 
@@ -35,7 +35,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     refAtPos,
     vault,
   }: {
-    refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>;
+    refAtPos: NonNullable<getReferenceAtPositionResp>;
     vault?: DVault;
   }): Promise<string> {
     const { wsRoot, config } = ExtensionProvider.getDWorkspace();
@@ -91,7 +91,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   }
 
   private async maybeFindNonNoteFile(
-    refAtPos: NonNullable<ReturnType<typeof getReferenceAtPosition>>,
+    refAtPos: NonNullable<getReferenceAtPositionResp>,
     vault?: DVault
   ) {
     const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
@@ -113,11 +113,20 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       const ctx = "provideHover";
 
       // No-op if we're not in a Dendron Workspace
-      if (!DendronExtension.isActive()) {
+      if (
+        !(await ExtensionProvider.isActiveAndIsDendronNote(document.uri.fsPath))
+      ) {
         return null;
       }
 
-      const refAtPos = getReferenceAtPosition(document, position);
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+      const refAtPos = await getReferenceAtPosition({
+        document,
+        position,
+        wsRoot,
+        vaults,
+      });
       if (!refAtPos) return null;
       const { range } = refAtPos;
       const hoverRange = new vscode.Range(

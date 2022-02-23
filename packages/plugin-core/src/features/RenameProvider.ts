@@ -17,6 +17,7 @@ import {
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export default class RenameProvider implements vscode.RenameProvider {
   private _targetNote: NoteProps | undefined;
@@ -176,7 +177,21 @@ export default class RenameProvider implements vscode.RenameProvider {
     document: vscode.TextDocument,
     position: vscode.Position
   ) {
-    const reference = getReferenceAtPosition(document, position);
+    if (
+      !(await ExtensionProvider.isActiveAndIsDendronNote(document.uri.fsPath))
+    ) {
+      throw new DendronError({
+        message: "Rename is not supported for non dendron notes",
+      });
+    }
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+    const reference = await getReferenceAtPosition({
+      document,
+      position,
+      wsRoot,
+      vaults,
+    });
     if (reference !== null) {
       this.refAtPos = reference;
       const range = this.getRangeForReference({ reference, document });

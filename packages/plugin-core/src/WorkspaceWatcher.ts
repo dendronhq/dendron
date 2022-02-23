@@ -30,7 +30,6 @@ import {
   workspace,
 } from "vscode";
 import { IDendronExtension } from "./dendronExtensionInterface";
-import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -438,10 +437,6 @@ export class WorkspaceWatcher {
     } catch (error: any) {
       Sentry.captureException(error);
       throw error;
-    } finally {
-      // TODO: Remove this call altogether once backlinks updates via
-      // EngineEvents
-      FileWatcher.refreshBacklinks();
     }
   }
 

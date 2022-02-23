@@ -1,12 +1,11 @@
-import vscode from "vscode";
-import { findReferences, getReferenceAtPosition } from "../utils/md";
-import * as Sentry from "@sentry/node";
-import { DendronExtension } from "../workspace";
-import { getHeaderAt } from "../utils/editor";
-import _ from "lodash";
-
 import { getSlugger } from "@dendronhq/common-all";
-import { WSUtils } from "../WSUtils";
+import * as Sentry from "@sentry/node";
+import _ from "lodash";
+import vscode from "vscode";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { getHeaderAt } from "../utils/editor";
+import { findReferences, getReferenceAtPosition } from "../utils/md";
+import { WSUtilsV2 } from "../WSUtilsV2";
 
 export default class ReferenceProvider implements vscode.ReferenceProvider {
   public async provideReferences(
@@ -14,15 +13,20 @@ export default class ReferenceProvider implements vscode.ReferenceProvider {
     position: vscode.Position
   ) {
     try {
-      // No-op if we're not in a Dendron Workspace
-      if (!DendronExtension.isActive()) {
+      // No-op if dendron isn't active
+      if (
+        !(await ExtensionProvider.isActiveAndIsDendronNote(document.uri.fsPath))
+      ) {
         return null;
       }
 
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
       // provide reference to header if selection is header.
       const header = getHeaderAt({ document, position });
       if (!_.isUndefined(header)) {
-        const note = WSUtils.getNoteFromDocument(document);
+        const note = new WSUtilsV2(
+          ExtensionProvider.getExtension()
+        ).getNoteFromDocument(document);
         const references = await findReferences(note!.fname);
         return references
           .filter((reference) => {
@@ -40,7 +44,12 @@ export default class ReferenceProvider implements vscode.ReferenceProvider {
           });
       }
 
-      const refAtPos = getReferenceAtPosition(document, position);
+      const refAtPos = await getReferenceAtPosition({
+        document,
+        position,
+        wsRoot,
+        vaults,
+      });
 
       return refAtPos
         ? (await findReferences(refAtPos.ref)).map(({ location }) => location)

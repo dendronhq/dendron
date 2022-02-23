@@ -113,6 +113,12 @@ export interface IDendronExtension {
   isActive(): boolean;
 
   /**
+   * Checks if a Dendron workspace is currently active and that the current {@link fpath} is a valid Dendron Note
+   * @param fpath: full path to current file
+   */
+  isActiveAndIsDendronNote(fpath: string): Promise<boolean>;
+
+  /**
    * Get Global Workspace configuration
    */
   getWorkspaceConfig(

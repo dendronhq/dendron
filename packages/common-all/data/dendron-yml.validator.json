@@ -486,6 +486,9 @@
         },
         "insertNoteIndex": {
           "$ref": "#/definitions/InsertNoteIndexConfig"
+        },
+        "copyNoteLink": {
+          "$ref": "#/definitions/CopyNoteLinkConfig"
         }
       },
       "required": [
@@ -493,7 +496,8 @@
         "randomNote",
         "insertNote",
         "insertNoteLink",
-        "insertNoteIndex"
+        "insertNoteIndex",
+        "copyNoteLink"
       ],
       "additionalProperties": false,
       "description": "Namespace for all command related configurations"
@@ -629,6 +633,31 @@
       ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  InsertNoteIndexCommand }"
+    },
+    "CopyNoteLinkConfig": {
+      "type": "object",
+      "properties": {
+        "nonNoteFile": {
+          "type": "object",
+          "properties": {
+            "anchorType": {
+              "$ref": "#/definitions/NonNoteFileLinkAnchorType"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "Namespace for configuring  {@link  CopyNoteLinkCommand }"
+    },
+    "NonNoteFileLinkAnchorType": {
+      "type": "string",
+      "enum": [
+        "line",
+        "block",
+        "prompt"
+      ],
+      "description": "\"line\" uses line numbers (`L23`), \"block\" inserts block anchors (`^xf1g...`). \"prompt\" means prompt the user to select one."
     },
     "DendronWorkspaceConfig": {
       "type": "object",

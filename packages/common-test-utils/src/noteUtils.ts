@@ -13,6 +13,7 @@ import {
 import {
   file2Note,
   file2Schema,
+  genHash,
   note2File,
   resolvePath,
   schemaModuleProps2File,
@@ -189,6 +190,7 @@ export class NoteTestUtilsV4 {
     }
   ) {
     const note = await this.createNote({ ...opts, noWrite: true });
+    note.contentHash = genHash(note.body);
     await opts.engine.writeNote(note, opts.engineWriteNoteOverride);
     return note;
   }

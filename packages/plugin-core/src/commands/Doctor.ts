@@ -28,7 +28,6 @@ import { DoctorScopeType } from "../components/doctor/types";
 import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
@@ -317,11 +316,15 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       isNotUndefined(document) &&
-      isNotUndefined(WSUtils.getNoteFromDocument(document))
+      isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
     ) {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
+
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+    }
 
     let note;
     if (opts.scope === "file") {
@@ -329,10 +332,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (_.isUndefined(document)) {
         throw new DendronError({ message: "No note open." });
       }
-      note = WSUtils.getNoteFromDocument(document);
+      note = this.extension.wsUtils.getNoteFromDocument(document);
     }
 
-    let engine;
+    const engine = this.extension.getEngine();
+
     switch (opts.action) {
       case PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS: {
         const installStatus =
@@ -347,7 +351,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
-        engine = await this.reload();
         await new BackfillService().updateNotes({
           engine,
           note,
@@ -358,7 +361,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         let notes;
-        engine = await this.reload();
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
           notes = notes.filter((note) => !note.stub);
@@ -399,7 +401,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         let notes;
-        engine = await this.reload();
         if (_.isUndefined(note)) {
           notes = _.values(engine.notes);
           notes = notes.filter((note) => !note.stub);
@@ -422,7 +423,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       default: {
-        engine = await this.reload();
         const candidates: NoteProps[] | undefined = _.isUndefined(note)
           ? undefined
           : [note];
@@ -440,13 +440,12 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.extension.fileWatcher.pause = false;
     }
 
-    await this.reload();
-
-    // Decorations don't auto-update here, I think because the contents of the
-    // note haven't updated within VSCode yet. Regenerate the decorations, but
-    // do so after a delay so that VSCode can update the file contents. Not a
-    // perfect solution, but the simplest.
     if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+      // Decorations don't auto-update here, I think because the contents of the
+      // note haven't updated within VSCode yet. Regenerate the decorations, but
+      // do so after a delay so that VSCode can update the file contents. Not a
+      // perfect solution, but the simplest.
       delayedUpdateDecorations();
     }
 

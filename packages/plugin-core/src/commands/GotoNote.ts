@@ -9,7 +9,7 @@ import {
 import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { Position, Selection, TextEditor, Uri, window } from "vscode";
+import { Position, Selection, Uri, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
@@ -24,7 +24,6 @@ import {
   GoToNoteCommandOutput,
   TargetKind,
 } from "./GoToNoteInterface";
-import { AnchorUtils } from "@dendronhq/engine-server";
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;
@@ -233,33 +232,6 @@ export class GotoNoteCommand extends BasicCommand<
     return opts;
   }
 
-  public static async trySelectRevealNonNoteAnchor(
-    editor: TextEditor,
-    anchor: DNoteAnchorBasic
-  ) {
-    let position: Position | undefined;
-    switch (anchor.type) {
-      case "line":
-        // Line anchors are direct line numbers from the start
-        position = new Position(anchor.line - 1 /* line 1 is index 0 */, 0);
-        break;
-      case "block":
-        // We don't parse non note files for anchors, so read the document and find where the anchor is
-        position = editor?.document.positionAt(
-          editor?.document.getText().indexOf(AnchorUtils.anchor2string(anchor))
-        );
-        break;
-      default:
-        // not supported for non-note files
-        position = undefined;
-    }
-    if (position) {
-      // if we did find the anchor, then select and scroll to it
-      editor.selection = new Selection(position, position);
-      editor.revealRange(editor.selection);
-    }
-  }
-
   /**
    *
    * Warning about `opts`! If `opts.qs` is provided but `opts.vault` is empty,
@@ -291,8 +263,12 @@ export class GotoNoteCommand extends BasicCommand<
           column: opts.column,
         }
       );
-      if (editor && opts.anchor)
-        await GotoNoteCommand.trySelectRevealNonNoteAnchor(editor, opts.anchor);
+      if (editor && opts.anchor) {
+        await this.extension.wsUtils.trySelectRevealNonNoteAnchor(
+          editor,
+          opts.anchor
+        );
+      }
 
       return {
         kind: TargetKind.NON_NOTE,

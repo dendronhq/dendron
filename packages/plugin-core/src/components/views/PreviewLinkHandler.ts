@@ -20,7 +20,6 @@ import open from "open";
 import textextensionslist from "textextensions";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { GotoNoteCommand } from "../../commands/GotoNote";
 
 const TEXT_EXTENSIONS: ReadonlySet<string> = new Set(
   textextensionslist.map((s) => s.toLowerCase())
@@ -89,7 +88,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
         return LinkType.WIKI;
       }
     } catch (err) {
-      Logger.error({ ctx, error: ErrorFactory.wrapIfNeeded(err) });
+      Logger.debug({ ctx, error: ErrorFactory.wrapIfNeeded(err) });
     }
     // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
     const { wsRoot, vaults } = this._ext.getDWorkspace();
@@ -120,7 +119,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
         );
         if (!_.isEmpty(uri.fragment) && editor) {
           const anchor = AnchorUtils.string2anchor(uri.fragment);
-          await GotoNoteCommand.trySelectRevealNonNoteAnchor(editor, anchor);
+          await this._ext.wsUtils.trySelectRevealNonNoteAnchor(editor, anchor);
         }
         return LinkType.TEXT;
       } else {

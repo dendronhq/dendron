@@ -25,6 +25,7 @@ suite("PreviewLinkHandler", () => {
     beforeHook: () => {},
   });
 
+  let testNoteAmbiguous: NoteProps;
   describeMultiWS(
     "GIVEN onLinkClicked",
     {
@@ -56,7 +57,7 @@ suite("PreviewLinkHandler", () => {
             id: "est",
           },
         });
-        await NoteTestUtilsV4.createNote({
+        testNoteAmbiguous = await NoteTestUtilsV4.createNote({
           fname: "lorem",
           vault: vaults[1],
           wsRoot,
@@ -167,10 +168,9 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND the link is ambiguous", () => {
           test("THEN it prompts for a note", async () => {
-            const { engine } = ExtensionProvider.getDWorkspace();
             const showChooseNote = sinon
               .stub(QuickPickUtil, "showChooseNote")
-              .returns(Promise.resolve(engine.notes["reprehenderit"]));
+              .returns(Promise.resolve(testNoteAmbiguous));
             const handler = new PreviewLinkHandler(
               ExtensionProvider.getExtension()
             );

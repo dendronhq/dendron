@@ -18,8 +18,8 @@ type CommandCLIOpts = {
   query?: string;
   cmd: NoteCommands;
   output?: NoteCLIOutput;
-  newName?: string;
-  newVault?: string;
+  destFname?: string;
+  destVaultName?: string;
 };
 
 export enum NoteCLIOutput {
@@ -36,7 +36,6 @@ export enum NoteCommands {
   LOOKUP = "lookup",
   DELETE = "delete",
   MOVE = "move",
-  RENAME = "rename",
 }
 
 export { CommandOpts as NoteCLICommandOpts };
@@ -80,12 +79,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       choices: Object.values(NoteCLIOutput),
       default: NoteCLIOutput.JSON,
     });
-    args.option("newName", {
-      describe: "name to change to (for rename/move)",
+    args.option("destFname", {
+      describe: "name to change to (for move)",
       type: "string",
     });
-    args.option("newVault", {
-      describe: "vault to move to (for rename/move)",
+    args.option("destVaultName", {
+      describe: "vault to move to (for move)",
       type: "string",
     });
   }
@@ -97,7 +96,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, wsRoot, output, newName, newVault } = opts;
+    const { cmd, engine, wsRoot, output, destFname, destVaultName } = opts;
 
     try {
       switch (cmd) {
@@ -157,8 +156,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           this.print(`deleted ${note.fname}`);
           return { data: { payload: note.fname, rawData: resp } };
         }
-        case NoteCommands.MOVE:
-        case NoteCommands.RENAME: {
+        case NoteCommands.MOVE: {
           const { query, vault } = checkQueryAndVault(opts);
           const note = NoteUtils.getNoteOrThrow({
             fname: query,
@@ -168,8 +166,8 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           });
           const oldLoc = NoteUtils.toNoteLoc(note);
           const newLoc = {
-            fname: newName || oldLoc.fname,
-            vaultName: newVault || oldLoc.vaultName,
+            fname: destFname || oldLoc.fname,
+            vaultName: destVaultName || oldLoc.vaultName,
           };
           const resp = await engine.renameNote({ oldLoc, newLoc });
           return { data: { payload: note.fname, rawData: resp } };

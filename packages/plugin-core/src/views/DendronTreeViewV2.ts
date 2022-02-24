@@ -9,16 +9,23 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { EngineEventEmitter, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import * as vscode from "vscode";
+import {
+  CancellationToken,
+  Disposable,
+  TextEditor,
+  WebviewView,
+  WebviewViewProvider,
+  WebviewViewResolveContext,
+  window,
+} from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
 import { WebViewUtils } from "./utils";
 
 /**
@@ -26,27 +33,41 @@ import { WebViewUtils } from "./utils";
  * TreeViewV2) - this is the side panel UI that gives the webview/react/antd
  * based tree view of the Dendron note hierarchy
  */
-export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
+export class DendronTreeViewV2 implements WebviewViewProvider, Disposable {
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
 
-  private _view?: vscode.WebviewView;
+  private _view?: WebviewView;
   private _ext: IDendronExtension;
+  private _onEngineNoteStateChangedDisposable: Disposable | undefined;
+  private _engineEvents;
 
-  constructor(ext: IDendronExtension) {
+  /**
+   *
+   * @param engineEvents - specifies when note state has been changed on the
+   * engine
+   */
+  constructor(ext: IDendronExtension, engineEvents: EngineEventEmitter) {
     this._ext = ext;
+    this._engineEvents = engineEvents;
 
     this._ext.context.subscriptions.push(
-      vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+      window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
 
-    this._ext.noteSyncService.onNoteChange((noteProps) => {
-      if (this._view && this._view.visible) {
-        this.refresh(noteProps);
-      }
-    });
+    this._onEngineNoteStateChangedDisposable =
+      this._engineEvents.onEngineNoteStateChanged((noteChangeEntry) => {
+        const ctx = "refreshDendronTreeViewV2EngineNoteStateChanged";
+        Logger.info({ ctx });
+        noteChangeEntry.map((changeEntry) => this.refresh(changeEntry.note));
+      });
+  }
+  dispose(): void {
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+    }
   }
 
-  async onOpenTextDocument(editor: vscode.TextEditor | undefined) {
+  async onOpenTextDocument(editor: TextEditor | undefined) {
     if (_.isUndefined(editor) || _.isUndefined(this._view)) {
       return;
     }
@@ -70,9 +91,9 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   }
 
   public async resolveWebviewView(
-    webviewView: vscode.WebviewView,
-    _context: vscode.WebviewViewResolveContext,
-    _token: vscode.CancellationToken
+    webviewView: WebviewView,
+    _context: WebviewViewResolveContext,
+    _token: CancellationToken
   ) {
     const ctx = "DendronTreeViewV2:resolveWebView";
     this._view = webviewView;
@@ -134,7 +155,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
           AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
             duration: profile,
           });
-          const note = WSUtils.getActiveNote();
+          const note = this._ext.wsUtils.getActiveNote();
           if (note) {
             this.refresh(note);
           }
@@ -146,7 +167,11 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     });
   }
 
-  public refresh(note: NoteProps) {
+  /**
+   * Notify webview to sync given note and to focus on active note
+   * @param note to sync
+   */
+  private refresh(note: NoteProps) {
     if (this._view) {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
       this._view.webview.postMessage({
@@ -154,6 +179,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         data: {
           note,
           syncChangedNote: true,
+          activeNote: this._ext.wsUtils.getActiveNote(),
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

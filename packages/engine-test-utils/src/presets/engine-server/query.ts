@@ -5,7 +5,7 @@ import {
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { setupBasic } from "./utils";
+import { setupBasic, setupEmpty } from "./utils";
 
 const SCHEMAS = {
   // TODO: multi-vault, this gets overwritten
@@ -98,6 +98,26 @@ const NOTES = {
     },
     {
       preSetupHook: setupBasic,
+    }
+  ),
+  // Querying for non-existing note should return empty []
+  MISSING_QUERY: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const { data } = await engine.queryNotes({
+        qs: "bar",
+        originalQS: "bar",
+        vault: vaults[0],
+      });
+
+      return [
+        {
+          actual: data,
+          expected: [],
+        },
+      ];
+    },
+    {
+      preSetupHook: setupEmpty,
     }
   ),
   STAR_QUERY: new TestPresetEntryV4(

@@ -25,7 +25,6 @@ import {
   GoToNoteCommandOutput,
   TargetKind,
 } from "./GoToNoteInterface";
-import { AnchorUtils } from "@dendronhq/engine-server";
 import { ExtensionProvider } from "../ExtensionProvider";
 
 export const findAnchorPos = (opts: {

@@ -4,11 +4,16 @@ import {
   TreeViewMessage,
   TreeViewMessageEnum,
 } from "@dendronhq/common-all";
-import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  TreeViewUtils,
+  engineHooks,
+} from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
+import { useWorkspaceProps } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 type OnExpandFunc = TreeProps["onExpand"];
@@ -23,6 +28,7 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
   const [roots, setRoots] = useState<DataNode[]>([]);
   // Used to avoid recomputing tree data unnecessarily
   const [numNotesLast, setNumNotesLast] = useState<number>(numNotes);
+  const { useEngine } = engineHooks;
 
   logger.info({
     msg: "enter",
@@ -30,6 +36,10 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     config,
     numNotes,
   });
+
+  // Load up the full engine state as all notes are needed for the Tree View
+  const [workspace] = useWorkspaceProps();
+  useEngine({ engineState: engine, opts: workspace });
 
   // update active notes in tree
   React.useEffect(() => {

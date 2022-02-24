@@ -25,7 +25,7 @@ import "../styles/scss/main.scss";
 import { Layout } from "antd";
 const { Content } = Layout;
 
-const { useEngineAppSelector, useEngine } = engineHooks;
+const { useEngineAppSelector } = engineHooks;
 
 function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const ctx = "DendronVSCodeApp";
@@ -36,8 +36,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const logger = createLogger("DendronApp");
 
   logger.info({ ctx, msg: "enter", workspace });
-  // used to initialize the engine
-  useEngine({ engineState: engine, opts: workspace });
 
   const props = {
     engine,
@@ -100,11 +98,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
     }
   });
-
-  // don't load until active
-  if (_.isEmpty(engine.notes)) {
-    return <div>Loading...</div>;
-  }
 
   return <Component {...props} />;
 }

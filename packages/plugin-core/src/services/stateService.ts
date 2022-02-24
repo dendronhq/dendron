@@ -1,12 +1,10 @@
+import _ from "lodash";
 import { ExtensionContext } from "vscode";
 import {
   GLOBAL_STATE,
   WORKSPACE_ACTIVATION_CONTEXT,
   WORKSPACE_STATE,
 } from "../constants";
-import * as vscode from "vscode";
-import { VSCodeUtils } from "../vsCodeUtils";
-import _ from "lodash";
 
 let _StateService: StateService | undefined;
 

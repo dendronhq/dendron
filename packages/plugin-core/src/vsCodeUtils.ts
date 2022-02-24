@@ -155,6 +155,10 @@ export class VSCodeUtils {
     return InstallStatus.NO_CHANGE;
   }
 
+  /**
+   * Get {@link InstallStatus}
+   * ^pubko8e3tu7i
+   */
   static getInstallStatusForExtension({
     previousGlobalVersion,
     currentVersion,
@@ -162,6 +166,7 @@ export class VSCodeUtils {
     previousGlobalVersion?: string;
     currentVersion: string;
   }): InstallStatus {
+    // if there is no global version set, then its a new install
     if (
       _.isUndefined(previousGlobalVersion) ||
       previousGlobalVersion === CONSTANTS.DENDRON_INIT_VERSION
@@ -204,6 +209,7 @@ export class VSCodeUtils {
     } as unknown as vscode.ExtensionContext;
   }
 
+  // create mock context for testing ^7a83pznb91c8
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const logPath = tmpDir().name;

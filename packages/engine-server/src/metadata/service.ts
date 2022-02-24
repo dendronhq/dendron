@@ -66,6 +66,10 @@ export class MetadataService {
     });
   }
 
+  /**
+   * Set first install logic
+   *  ^o4y7ijuvi5nv
+   */
   setInitialInstall() {
     return this.setMeta("firstInstall", Time.now().toSeconds());
   }

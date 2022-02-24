@@ -30,6 +30,7 @@ import {
 } from "../../commands/SetupWorkspace";
 import {
   DEFAULT_LEGACY_VAULT_NAME,
+  GLOBAL_STATE,
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -164,7 +165,7 @@ function stubWSFolders(wsRoot: string | undefined) {
   return stub;
 }
 
-suite("Extension", function () {
+suite("GIVEN SetupWorkspace Command", function () {
   let homeDirStub: SinonStub;
   let userConfigDirStub: SinonStub;
   let wsFoldersStub: SinonStub;
@@ -902,6 +903,11 @@ suite("per-init config migration logic", function () {
         DendronExtension.version = () => "0.83.0";
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
+      // afterHook: async () => {
+      //   homeDirStub.restore();
+      //   promptSpy.resetHistory();
+      //   confirmationSpy.resetHistory();
+      // },
     },
     () => {
       test("THEN: config migration is prompted on init", (done) => {
@@ -1023,4 +1029,57 @@ suite("per-init config migration logic", function () {
       });
     }
   );
+});
+
+suite("GIVEN initial activation", function () {
+  let homeDirStub: SinonStub;
+  let setInitialInstallSpy: sinon.SinonSpy;
+  let showTelemetryNoticeSpy: sinon.SinonSpy;
+
+  describe("AND WHEN first install", () => {
+    const ctx: ExtensionContext = setupBeforeAfter(this, {});
+
+    describeMultiWS(
+      "AND WHEN activate",
+      {
+        ctx,
+        preActivateHook: async ({ ctx }) => {
+          homeDirStub = TestEngineUtils.mockHomeDir();
+          setInitialInstallSpy = sinon.spy(
+            MetadataService.instance(),
+            "setInitialInstall"
+          );
+          showTelemetryNoticeSpy = sinon.spy(
+            AnalyticsUtils,
+            "showTelemetryNotice"
+          );
+          ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+        },
+        afterHook: async () => {
+          homeDirStub.restore();
+          showTelemetryNoticeSpy.resetHistory();
+          setInitialInstallSpy.resetHistory();
+        },
+        timeout: 1e5,
+      },
+      () => {
+        test("THEN set initial install called", () => {
+          expect(setInitialInstallSpy.called).toBeTruthy();
+        });
+
+        test("THEN global version set", () => {
+          expect(ctx.globalState.get(GLOBAL_STATE.VERSION)).toNotEqual(
+            undefined
+          );
+        });
+        test("THEN show telemetry notice", () => {
+          expect(showTelemetryNoticeSpy.called).toBeTruthy();
+        });
+      }
+    );
+
+    describe("AND WHEN firstInstall not set for old user", () => {
+      test("THEN retro-actively set firstInstall", () => {});
+    });
+  });
 });

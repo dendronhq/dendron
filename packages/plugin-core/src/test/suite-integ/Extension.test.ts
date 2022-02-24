@@ -866,17 +866,19 @@ suite(
 suite("WHEN migrate config", function () {
   let promptSpy: sinon.SinonSpy;
   let confirmationSpy: sinon.SinonSpy;
+  let mockHomeDirStub: sinon.SinonStub;
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
     noSetInstallStatus: true,
   });
 
   async function beforeSetup({ version }: { version: string }) {
-    TestEngineUtils.mockHomeDir();
+    mockHomeDirStub = TestEngineUtils.mockHomeDir();
     DendronExtension.version = () => version;
   }
 
   async function afterHook() {
+    mockHomeDirStub.restore();
     sinon.restore();
   }
 

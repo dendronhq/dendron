@@ -544,7 +544,6 @@ export type VSCodeIdentifyProps = {
   isTelemetryEnabled: boolean;
   language: string;
   machineId: string;
-  sessionId: string;
   shell: string;
 } & VSCodeProps;
 

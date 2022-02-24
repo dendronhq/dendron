@@ -15,13 +15,14 @@ export type SegmentContext = Partial<{
 }>;
 
 export class AnalyticsUtils {
+  static sessionStart = -1;
+
   static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
     const {
       appName,
       isNewAppInstall,
       language,
       machineId,
-      sessionId,
       shell,
       isTelemetryEnabled,
     } = vscode.env;
@@ -36,9 +37,26 @@ export class AnalyticsUtils {
       isTelemetryEnabled,
       language,
       machineId,
-      sessionId,
       shell,
     };
+  }
+
+  static getCommonTrackProps() {
+    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
+    const sessionId = AnalyticsUtils.getSessionId();
+    const vscodeSessionId = vscode.env.sessionId;
+    return {
+      firstWeekSinceInstall,
+      vscodeSessionId,
+      integrations: { Amplitude: { session_id: sessionId } },
+    };
+  }
+
+  static getSessionId(): number {
+    if (AnalyticsUtils.sessionStart < 0) {
+      AnalyticsUtils.sessionStart = Time.now().toSeconds();
+    }
+    return AnalyticsUtils.sessionStart;
   }
 
   static isFirstWeek() {
@@ -60,11 +78,10 @@ export class AnalyticsUtils {
 
   static track(event: string, props?: any) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
     SegmentUtils.track(
       event,
       { type: "vscode", ideVersion, ideFlavor },
-      { ...props, firstWeekSinceInstall }
+      { ...props, ...AnalyticsUtils.getCommonTrackProps() }
     );
   }
 

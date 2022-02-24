@@ -365,7 +365,6 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-
           if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
           }
@@ -441,15 +440,13 @@ export class MDUtilsV5 {
 
     // apply plugins enabled by config
     const config = data?.config as IntermediateDendronConfig;
-    const enableKatex = MDUtilsV5.shouldApplyPublishingRules(pRehype)
-      ? ConfigUtils.getProp(config, "useKatex")
-      : ConfigUtils.getPreview(config).enableKatex;
-
-    if (enableKatex) {
+    const shouldApplyPublishRules =
+      MDUtilsV5.shouldApplyPublishingRules(pRehype);
+    if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (this.shouldApplyPublishingRules(pRehype)) {
+    if (shouldApplyPublishRules) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",

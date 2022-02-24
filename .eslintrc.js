@@ -4,7 +4,6 @@ module.exports = {
     browser: true,
     es6: true,
     jest: true,
-    "cypress/globals": true,
   },
   extends: ["plugin:react/recommended", "airbnb", "airbnb/hooks", "prettier"],
   globals: {
@@ -20,7 +19,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "jest", "cypress"],
+  plugins: ["@typescript-eslint", "jest"],
   rules: {
     // don't care
     "comma-dangle": "off",

@@ -459,19 +459,22 @@ export function describeMultiWS(
   title: string,
   opts: SetupLegacyWorkspaceMultiOpts & {
     /**
-     * Run before everything
+     * Run before we stub vscode mock workspace
      */
     beforeHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
-     * Run before workspace is activated
+     * Run before dendron is activated
      */
     preActivateHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
-     * Run in after block
+     * Run after all the tests have run
      */
     afterHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
      * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
      */
     timeout?: number;
   },

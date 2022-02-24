@@ -356,6 +356,24 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return vault;
   }
 
+  markVaultAsRemoteInConfig(
+    targetVault: DVault,
+    remoteUrl: string
+  ): Promise<void> {
+    const config = this.config;
+    const vaults = ConfigUtils.getVaults(config);
+    ConfigUtils.setVaults(
+      config,
+      vaults.map((vault) => {
+        if (VaultUtils.isEqualV2(vault, targetVault)) {
+          vault.remote = { type: "git", url: remoteUrl };
+        }
+        return vault;
+      })
+    );
+    return this.setConfig(config);
+  }
+
   /** Converts a local vault to a remote vault, with `remoteUrl` as the upstream URL. */
   async convertVaultRemote({
     wsRoot,
@@ -398,18 +416,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     await git.push({ remote, branch });
     // Update `dendron.yml`, adding the remote to the converted vault
-    const config = this.config;
-    const vaults = ConfigUtils.getVaults(config);
-    ConfigUtils.setVaults(
-      config,
-      vaults.map((vault) => {
-        if (VaultUtils.isEqualV2(vault, targetVault)) {
-          vault.remote = { type: "git", url: remoteUrl };
-        }
-        return vault;
-      })
-    );
-    await this.setConfig(config);
+    await this.markVaultAsRemoteInConfig(targetVault, remoteUrl);
     // Remove the vault folder from the tree of the root repository. Otherwise, the files will be there when
     // someone else pulls the root repo, which can break remote vault initialization. This doesn't delete the actual files.
     if (await fs.pathExists(path.join(wsRoot, ".git"))) {

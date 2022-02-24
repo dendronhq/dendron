@@ -999,6 +999,7 @@ suite("GIVEN Dendron plugin activation", function () {
   let setInitialInstallSpy: sinon.SinonSpy;
   let showTelemetryNoticeSpy: sinon.SinonSpy;
   const ctx: ExtensionContext = setupBeforeAfter(this);
+  let mockHomeDirStub: sinon.SinonStub;
 
   function stubDendronWhenNotFirstInstall() {
     MetadataService.instance().setInitialInstall();
@@ -1017,6 +1018,7 @@ suite("GIVEN Dendron plugin activation", function () {
   }
 
   async function afterHook() {
+    mockHomeDirStub.restore();
     sinon.restore();
   }
 
@@ -1026,7 +1028,7 @@ suite("GIVEN Dendron plugin activation", function () {
       {
         ctx,
         preActivateHook: async () => {
-          TestEngineUtils.mockHomeDir();
+          mockHomeDirStub = TestEngineUtils.mockHomeDir();
           stubDendronWhenNotFirstInstall();
           setupSpies();
         },
@@ -1048,7 +1050,7 @@ suite("GIVEN Dendron plugin activation", function () {
       {
         ctx,
         preActivateHook: async () => {
-          TestEngineUtils.mockHomeDir();
+          mockHomeDirStub = TestEngineUtils.mockHomeDir();
           stubDendronWhenNotFirstInstall();
           setupSpies();
           // when check for first install, should be empty
@@ -1079,7 +1081,7 @@ suite("GIVEN Dendron plugin activation", function () {
       {
         ctx,
         preActivateHook: async ({ ctx }) => {
-          TestEngineUtils.mockHomeDir();
+          mockHomeDirStub = TestEngineUtils.mockHomeDir();
           setupSpies();
           stubDendronWhenFirstInstall(ctx);
         },

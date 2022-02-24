@@ -190,22 +190,6 @@ export class SegmentClient {
     return !this.isDisabled(status);
   }
 
-  /**
-   * Teleemtry has been set by user changing Dendron related configuration
-   * (vs vscode telemetry settings)
-   * @returns
-   */
-  static setByConfig(status: TelemetryStatus) {
-    switch (status) {
-      case TelemetryStatus.DISABLED_BY_WS_CONFIG:
-      case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
-      case TelemetryStatus.ENABLED_BY_CONFIG:
-        return true;
-      default:
-        return false;
-    }
-  }
-
   static enable(
     why:
       | TelemetryStatus.ENABLED_BY_COMMAND
@@ -556,9 +540,15 @@ type CLIProps = {
 export type VSCodeIdentifyProps = {
   appVersion: string;
   userAgent: string;
+  isNewAppInstall: boolean;
+  isTelemetryEnabled: boolean;
+  language: string;
+  machineId: string;
+  sessionId: string;
+  shell: string;
 } & VSCodeProps;
 
-export type CLIIdentifyProps = {} & CLIProps;
+export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
   static track(
@@ -600,12 +590,11 @@ export class SegmentUtils {
       return;
     }
     if (identifyProps.type === "vscode") {
-      const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
+      const { appVersion, userAgent, ...rest } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {
           ...SegmentUtils.getCommonProps(),
-          ideVersion,
-          ideFlavor,
+          ...rest,
         },
         {
           context: {

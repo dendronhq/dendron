@@ -14,13 +14,29 @@ export type SegmentContext = Partial<{
 }>;
 
 export class AnalyticsUtils {
-  static getVSCodeIdentifyProps() {
+  static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
+    const {
+      appName,
+      isNewAppInstall,
+      language,
+      machineId,
+      sessionId,
+      shell,
+      isTelemetryEnabled,
+    } = vscode.env;
+
     return {
       type: "vscode" as const,
       ideVersion: vscode.version,
-      ideFlavor: vscode.env.appName,
+      ideFlavor: appName,
       appVersion: VersionProvider.version(),
-      userAgent: vscode.env.appName,
+      userAgent: appName,
+      isNewAppInstall,
+      isTelemetryEnabled,
+      language,
+      machineId,
+      sessionId,
+      shell,
     };
   }
 

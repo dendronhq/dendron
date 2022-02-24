@@ -48,6 +48,14 @@ export class MetadataService {
     return path.join(os.homedir(), ".dendron", "meta.json");
   }
 
+  deleteMeta(key: keyof Metadata) {
+    const stateFromFile = this.getMeta();
+    delete stateFromFile[key];
+    fs.writeJSONSync(MetadataService.metaFilePath(), stateFromFile, {
+      spaces: 4,
+    });
+  }
+
   getMeta(): Metadata {
     const metaPath = MetadataService.metaFilePath();
     if (!fs.pathExistsSync(metaPath)) {
@@ -70,8 +78,9 @@ export class MetadataService {
    * Set first install logic
    *  ^o4y7ijuvi5nv
    */
-  setInitialInstall() {
-    return this.setMeta("firstInstall", Time.now().toSeconds());
+  setInitialInstall(time?: number) {
+    time ||= Time.now().toSeconds();
+    return this.setMeta("firstInstall", time);
   }
 
   setFirstWsInitialize() {

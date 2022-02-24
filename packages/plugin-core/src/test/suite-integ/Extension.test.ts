@@ -13,7 +13,7 @@ import {
   MetadataService,
   openWSMetaFile,
 } from "@dendronhq/engine-server";
-import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import * as mocha from "mocha";
@@ -863,25 +863,30 @@ suite(
   }
 );
 
-suite("per-init config migration logic", function () {
-  let homeDirStub: SinonStub;
+suite("WHEN migrate config", function () {
   let promptSpy: sinon.SinonSpy;
   let confirmationSpy: sinon.SinonSpy;
 
   const ctx: ExtensionContext = setupBeforeAfter(this, {
-    beforeHook: async (ctx) => {
-      new StateService(ctx);
-      await resetCodeWorkspace();
-      await new ResetConfigCommand().execute({ scope: "all" });
-      homeDirStub = TestEngineUtils.mockHomeDir();
-    },
-    afterHook: async () => {
-      homeDirStub.restore();
-      promptSpy.resetHistory();
-      confirmationSpy.resetHistory();
-    },
     noSetInstallStatus: true,
   });
+
+  async function beforeSetup({ version }: { version: string }) {
+    TestEngineUtils.mockHomeDir();
+    DendronExtension.version = () => version;
+  }
+
+  async function afterHook() {
+    sinon.restore();
+  }
+
+  function setupSpies() {
+    promptSpy = sinon.spy(ConfigMigrationUtils, "maybePromptConfigMigration");
+    confirmationSpy = sinon.spy(
+      ConfigMigrationUtils,
+      "showConfigMigrationConfirmationMessage"
+    );
+  }
 
   describeMultiWS(
     "GIVEN: current version is 0.83.0 and config is legacy",
@@ -891,34 +896,20 @@ suite("per-init config migration logic", function () {
         config.version = 4;
         return config;
       },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-        DendronExtension.version = () => "0.83.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      preSetupHook: async () => {
+        setupSpies();
+        await beforeSetup({ version: "0.83.0" });
       },
-      // afterHook: async () => {
-      //   homeDirStub.restore();
-      //   promptSpy.resetHistory();
-      //   confirmationSpy.resetHistory();
-      // },
+      afterHook,
     },
     () => {
-      test("THEN: config migration is prompted on init", (done) => {
+      test("THEN: config migration is prompted on init", () => {
         const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(4);
 
         expect(promptSpy.returnValues[0]).toEqual(true);
         expect(confirmationSpy.called).toBeTruthy();
-
-        done();
       });
     }
   );
@@ -931,29 +922,20 @@ suite("per-init config migration logic", function () {
         config.version = 5;
         return config;
       },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-        DendronExtension.version = () => "0.83.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      preSetupHook: async () => {
+        setupSpies();
+        await beforeSetup({ version: "0.83.0" });
       },
+      afterHook,
     },
     () => {
-      test("THEN: config migration is not prompted on init", (done) => {
+      test("THEN: config migration is not prompted on init", () => {
         const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(5);
 
         expect(promptSpy.returnValues[0]).toEqual(false);
         expect(confirmationSpy.called).toBeFalsy();
-
-        done();
       });
     }
   );
@@ -966,30 +948,20 @@ suite("per-init config migration logic", function () {
         config.version = 4;
         return config;
       },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-
-        DendronExtension.version = () => "0.84.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      preSetupHook: async () => {
+        setupSpies();
+        await beforeSetup({ version: "0.84.0" });
       },
+      afterHook,
     },
     () => {
-      test("THEN: config migration is prompted on init", (done) => {
+      test("THEN: config migration is prompted on init", () => {
         const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(4);
 
         expect(promptSpy.returnValues[0]).toEqual(true);
         expect(confirmationSpy.called).toBeTruthy();
-
-        done();
       });
     }
   );
@@ -1002,65 +974,115 @@ suite("per-init config migration logic", function () {
         config.version = 5;
         return config;
       },
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        promptSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "maybePromptConfigMigration"
-        );
-        confirmationSpy = sinon.spy(
-          ConfigMigrationUtils,
-          "showConfigMigrationConfirmationMessage"
-        );
-
-        DendronExtension.version = () => "0.84.0";
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      preSetupHook: async () => {
+        setupSpies();
+        await beforeSetup({ version: "0.84.0" });
       },
+      afterHook,
     },
     () => {
-      test("THEN: config migration is not prompted on init", (done) => {
+      test("THEN: config migration is not prompted on init", () => {
         const ws = ExtensionProvider.getDWorkspace();
         const config = ws.config;
         expect(config.version).toEqual(5);
 
         expect(promptSpy.returnValues[0]).toEqual(false);
         expect(confirmationSpy.called).toBeFalsy();
-
-        done();
       });
     }
   );
 });
 
-suite("GIVEN initial activation", function () {
-  let homeDirStub: SinonStub;
+suite("GIVEN Dendron plugin activation", function () {
   let setInitialInstallSpy: sinon.SinonSpy;
   let showTelemetryNoticeSpy: sinon.SinonSpy;
+  const ctx: ExtensionContext = setupBeforeAfter(this);
+
+  function stubDendronWhenNotFirstInstall() {
+    MetadataService.instance().setInitialInstall();
+  }
+
+  function stubDendronWhenFirstInstall(ctx: ExtensionContext) {
+    ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+  }
+
+  function setupSpies() {
+    setInitialInstallSpy = sinon.spy(
+      MetadataService.instance(),
+      "setInitialInstall"
+    );
+    showTelemetryNoticeSpy = sinon.spy(AnalyticsUtils, "showTelemetryNotice");
+  }
+
+  async function afterHook() {
+    sinon.restore();
+  }
+
+  describe("AND WHEN not first install", () => {
+    describeMultiWS(
+      "AND WHEN activate",
+      {
+        ctx,
+        preActivateHook: async () => {
+          TestEngineUtils.mockHomeDir();
+          stubDendronWhenNotFirstInstall();
+          setupSpies();
+        },
+        afterHook,
+        timeout: 1e4,
+      },
+      () => {
+        test("THEN set initial install not called", () => {
+          expect(setInitialInstallSpy.called).toBeFalsy();
+        });
+
+        test("THEN do not show telemetry notice", () => {
+          expect(showTelemetryNoticeSpy.called).toBeFalsy();
+        });
+      }
+    );
+    describeMultiWS(
+      "AND WHEN firstInstall not set for old user",
+      {
+        ctx,
+        preActivateHook: async () => {
+          TestEngineUtils.mockHomeDir();
+          stubDendronWhenNotFirstInstall();
+          setupSpies();
+          // when check for first install, should be empty
+          MetadataService.instance().deleteMeta("firstInstall");
+        },
+        afterHook,
+        timeout: 1e5,
+      },
+      () => {
+        test("THEN set initial install called", () => {
+          expect(
+            setInitialInstallSpy.calledWith(
+              Time.DateTime.fromISO("2022-01-01").toSeconds()
+            )
+          ).toBeTruthy();
+        });
+
+        test("THEN do not show telemetry notice", () => {
+          expect(showTelemetryNoticeSpy.called).toBeFalsy();
+        });
+      }
+    );
+  });
 
   describe("AND WHEN first install", () => {
-    const ctx: ExtensionContext = setupBeforeAfter(this, {});
-
     describeMultiWS(
       "AND WHEN activate",
       {
         ctx,
         preActivateHook: async ({ ctx }) => {
-          homeDirStub = TestEngineUtils.mockHomeDir();
-          setInitialInstallSpy = sinon.spy(
-            MetadataService.instance(),
-            "setInitialInstall"
-          );
-          showTelemetryNoticeSpy = sinon.spy(
-            AnalyticsUtils,
-            "showTelemetryNotice"
-          );
-          ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+          TestEngineUtils.mockHomeDir();
+          setupSpies();
+          stubDendronWhenFirstInstall(ctx);
         },
-        afterHook: async () => {
-          homeDirStub.restore();
-          showTelemetryNoticeSpy.resetHistory();
-          setInitialInstallSpy.resetHistory();
-        },
-        timeout: 1e5,
+        afterHook,
+        timeout: 1e4,
       },
       () => {
         test("THEN set initial install called", () => {
@@ -1077,9 +1099,5 @@ suite("GIVEN initial activation", function () {
         });
       }
     );
-
-    describe("AND WHEN firstInstall not set for old user", () => {
-      test("THEN retro-actively set firstInstall", () => {});
-    });
   });
 });

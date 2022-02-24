@@ -447,7 +447,7 @@ export async function _activate(
     // TODO: temporary backfill
     if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
       const time = Time.DateTime.fromISO("2022-01-01");
-      MetadataService.instance().setMeta("firstInstall", time.toSeconds());
+      MetadataService.instance().setInitialInstall(time.toSeconds());
     }
 
     const assetUri = VSCodeUtils.getAssetUri(context);

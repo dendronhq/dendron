@@ -459,6 +459,10 @@ export function describeMultiWS(
   title: string,
   opts: SetupLegacyWorkspaceMultiOpts & {
     /**
+     * Run before everything
+     */
+    beforeHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
      * Run before workspace is activated
      */
     preActivateHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
@@ -478,6 +482,10 @@ export function describeMultiWS(
       this.timeout(opts.timeout);
     }
     before(async () => {
+      if (opts.beforeHook) {
+        await opts.beforeHook({ ctx: opts.ctx });
+      }
+
       await setupLegacyWorkspaceMulti(opts);
 
       if (opts.preActivateHook) {

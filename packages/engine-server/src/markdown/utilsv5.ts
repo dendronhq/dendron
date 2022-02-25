@@ -439,7 +439,7 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = data?.config as IntermediateDendronConfig;
+    const config = data?.engine?.config as IntermediateDendronConfig;
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
     if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {

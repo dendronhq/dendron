@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   ExtensionEvents,
@@ -27,7 +28,6 @@ import { DoctorScopeType } from "../components/doctor/types";
 import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
@@ -288,16 +288,24 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
+  private async reload() {
+    const engine = await new ReloadIndexCommand().execute();
+    if (_.isUndefined(engine)) {
+      throw new DendronError({ message: "no engine found." });
+    }
+    return engine;
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
     const { wsRoot, config } = this.extension.getDWorkspace();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
-      throw Error("rootDir undefined");
+      throw new DendronError({ message: "rootDir undefined" });
     }
     if (_.isUndefined(config)) {
-      throw Error("no config found");
+      throw new DendronError({ message: "no config found" });
     }
 
     if (this.extension.fileWatcher) {
@@ -308,22 +316,26 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       isNotUndefined(document) &&
-      isNotUndefined(WSUtils.getNoteFromDocument(document))
+      isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
     ) {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine: DEngineClient =
-      (await new ReloadIndexCommand().execute()) as DEngineClient;
+
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+    }
 
     let note;
     if (opts.scope === "file") {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (_.isUndefined(document)) {
-        throw Error("No note open");
+        throw new DendronError({ message: "No note open." });
       }
-      note = WSUtils.getNoteFromDocument(document);
+      note = this.extension.wsUtils.getNoteFromDocument(document);
     }
+
+    const engine = this.extension.getEngine();
 
     switch (opts.action) {
       case PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS: {
@@ -427,12 +439,16 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (this.extension.fileWatcher) {
       this.extension.fileWatcher.pause = false;
     }
-    await new ReloadIndexCommand().execute();
-    // Decorations don't auto-update here, I think because the contents of the
-    // note haven't updated within VSCode yet. Regenerate the decorations, but
-    // do so after a delay so that VSCode can update the file contents. Not a
-    // perfect solution, but the simplest.
-    delayedUpdateDecorations();
+
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+      // Decorations don't auto-update here, I think because the contents of the
+      // note haven't updated within VSCode yet. Regenerate the decorations, but
+      // do so after a delay so that VSCode can update the file contents. Not a
+      // perfect solution, but the simplest.
+      delayedUpdateDecorations();
+    }
+
     return { data: findings };
   }
   async showResponse(findings: CommandOutput) {

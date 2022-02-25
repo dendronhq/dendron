@@ -654,6 +654,18 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
       ctx,
     },
     () => {
+      test("THEN reload is not called", async () => {
+        const extension = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(extension);
+        const reloadSpy = sinon.spy(cmd, "reload" as keyof DoctorCommand);
+        await cmd.execute({
+          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
+          scope: "workspace",
+        });
+
+        expect(reloadSpy.called).toBeFalsy();
+      });
+
       test("THEN List all as not installed if found none", async () => {
         const extension = ExtensionProvider.getExtension();
         const cmd = new DoctorCommand(extension);

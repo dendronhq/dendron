@@ -6,6 +6,7 @@ import _ from "lodash";
 import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { VersionProvider } from "../versionProvider";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -14,14 +15,48 @@ export type SegmentContext = Partial<{
 }>;
 
 export class AnalyticsUtils {
-  static getVSCodeIdentifyProps() {
+  static sessionStart = -1;
+
+  static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
+    const {
+      appName,
+      isNewAppInstall,
+      language,
+      machineId,
+      shell,
+      isTelemetryEnabled,
+    } = vscode.env;
+
     return {
       type: "vscode" as const,
       ideVersion: vscode.version,
-      ideFlavor: vscode.env.appName,
+      ideFlavor: appName,
       appVersion: VersionProvider.version(),
-      userAgent: vscode.env.appName,
+      userAgent: appName,
+      isNewAppInstall,
+      isTelemetryEnabled,
+      language,
+      machineId,
+      shell,
     };
+  }
+
+  static getCommonTrackProps() {
+    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
+    const sessionId = AnalyticsUtils.getSessionId();
+    const vscodeSessionId = vscode.env.sessionId;
+    return {
+      firstWeekSinceInstall,
+      vscodeSessionId,
+      integrations: { Amplitude: { session_id: sessionId } },
+    };
+  }
+
+  static getSessionId(): number {
+    if (AnalyticsUtils.sessionStart < 0) {
+      AnalyticsUtils.sessionStart = Time.now().toSeconds();
+    }
+    return AnalyticsUtils.sessionStart;
   }
 
   static isFirstWeek() {
@@ -43,17 +78,37 @@ export class AnalyticsUtils {
 
   static track(event: string, props?: any) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
     SegmentUtils.track(
       event,
       { type: "vscode", ideVersion, ideFlavor },
-      { ...props, firstWeekSinceInstall }
+      { ...props, ...AnalyticsUtils.getCommonTrackProps() }
     );
   }
 
   static identify() {
     const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
     SegmentUtils.identify(props);
+  }
+
+  static showTelemetryNotice() {
+    vscode.window
+      .showInformationMessage(
+        `Dendron collects limited usage data to help improve the quality of our software`,
+        "See Details",
+        "Opt Out"
+      )
+      .then((resp) => {
+        if (resp === "See Details") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html"
+          );
+        }
+        if (resp === "Opt Out") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html#how-to-opt-out-of-data-collection"
+          );
+        }
+      });
   }
 }
 

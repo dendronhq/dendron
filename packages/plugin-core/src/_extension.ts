@@ -439,9 +439,17 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+    // set initial install ^194e5bw7so9g
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       MetadataService.instance().setInitialInstall();
     }
+
+    // TODO: temporary backfill
+    if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
+      const time = Time.DateTime.fromISO("2021-06-22");
+      MetadataService.instance().setInitialInstall(time.toSeconds());
+    }
+
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -680,6 +688,7 @@ export async function _activate(
         codeWorkspacePresent,
       });
 
+      // on first install, warn if extensions are incompatible ^dlx35gstwsun
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
         warnIncompatibleExtensions({ ext: ws });
       }
@@ -727,6 +736,7 @@ export async function _activate(
     const backupPaths: string[] = [];
     let keybindingPath: string;
 
+    // check vim keybindings ^j7zygfkbxjnq
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
       // only need to run this for non-mac
@@ -868,15 +878,18 @@ async function showWelcomeOrWhatsNew({
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({ ctx, msg: "extension, initial install" });
 
+      // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
       });
+      // set the global version of dendron ^oncxlt645b5r
       await StateService.instance().setGlobalVersion(version);
 
-      // if user hasn't opted out of telemetry, notify them about it
+      // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
       if (!SegmentClient.instance().hasOptedOut) {
-        StateService.instance().showTelemetryNotice();
+        AnalyticsUtils.showTelemetryNotice();
       }
+      // show the welcome page ^ygtm7ofzezwd
       showWelcome(assetUri);
       break;
     }

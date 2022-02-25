@@ -68,6 +68,10 @@ export type SegmentClientOpts = {
   key?: string;
   forceNew?: boolean;
   cachePath?: string;
+  /**
+   * Workspace configuration disable analytics
+   */
+  disabledByWorkspace?: boolean;
 };
 
 export const SEGMENT_EVENTS = {
@@ -186,18 +190,6 @@ export class SegmentClient {
     return !this.isDisabled(status);
   }
 
-  static setByConfig(status?: TelemetryStatus) {
-    if (_.isUndefined(status)) status = this.getStatus();
-    switch (status) {
-      case TelemetryStatus.DISABLED_BY_WS_CONFIG:
-      case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
-      case TelemetryStatus.ENABLED_BY_CONFIG:
-        return true;
-      default:
-        return false;
-    }
-  }
-
   static enable(
     why:
       | TelemetryStatus.ENABLED_BY_COMMAND
@@ -226,7 +218,10 @@ export class SegmentClient {
   }
 
   constructor(_opts?: SegmentClientOpts) {
-    const key = _opts?.key || env("SEGMENT_VSCODE_KEY");
+    const { key, disabledByWorkspace } = _.defaults(_opts, {
+      key: env("SEGMENT_VSCODE_KEY"),
+      disabledByWorkspace: false,
+    });
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
     this._cachePath = _opts?.cachePath;
@@ -239,7 +234,7 @@ export class SegmentClient {
 
     const status = SegmentClient.getStatus();
     this.logger.info({ msg: `user telemetry setting: ${status}` });
-    this._hasOptedOut = SegmentClient.isDisabled();
+    this._hasOptedOut = SegmentClient.isDisabled() || disabledByWorkspace;
 
     if (this.hasOptedOut) {
       this._anonymousId = "";
@@ -544,9 +539,14 @@ type CLIProps = {
 export type VSCodeIdentifyProps = {
   appVersion: string;
   userAgent: string;
+  isNewAppInstall: boolean;
+  isTelemetryEnabled: boolean;
+  language: string;
+  machineId: string;
+  shell: string;
 } & VSCodeProps;
 
-export type CLIIdentifyProps = {} & CLIProps;
+export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
   static track(
@@ -588,12 +588,11 @@ export class SegmentUtils {
       return;
     }
     if (identifyProps.type === "vscode") {
-      const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
+      const { appVersion, userAgent, ...rest } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {
           ...SegmentUtils.getCommonProps(),
-          ideVersion,
-          ideFlavor,
+          ...rest,
         },
         {
           context: {

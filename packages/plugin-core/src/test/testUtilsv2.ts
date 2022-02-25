@@ -14,7 +14,6 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import {
-  EngineOpt,
   EngineTestUtilsV2,
   EngineTestUtilsV3,
   NotePresetsUtils,
@@ -59,16 +58,12 @@ export type SetupCodeConfigurationV2 = {
 type SetupCodeWorkspaceV2 = SetupWSOpts &
   SetupCodeConfigurationV2 & {
     ctx: ExtensionContext;
-    preActivateHook?: any;
-    postActivateHook?: any;
     preSetupHook?: PreSetupHookFunction;
     postSetupHook?: SetupHookFunction;
   };
 
 export type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
   ctx: ExtensionContext;
-  preActivateHook?: any;
-  postActivateHook?: any;
   preSetupHook?: SetupHookFunction;
   postSetupHook?: SetupHookFunction;
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
@@ -164,25 +159,6 @@ export async function runMultiVaultTest(
   await _activate(ctx);
 
   cleanupVSCodeContextSubscriptions(opts.ctx);
-}
-
-export async function runWorkspaceTestV3(
-  opts: SetupCodeWorkspaceMultiVaultV2Opts & {
-    onInit: (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
-  }
-) {
-  const { ctx } = opts;
-  const { vaults, wsRoot } = await setupCodeWorkspaceV3(opts);
-  onWSInit(async () => {
-    const { engine } = getDWorkspace();
-    await opts.onInit({ wsRoot, vaults, engine });
-  });
-  if (opts?.preActivateHook) {
-    await opts.preActivateHook();
-  }
-  await _activate(ctx);
-
-  cleanupVSCodeContextSubscriptions(ctx);
 }
 
 /**

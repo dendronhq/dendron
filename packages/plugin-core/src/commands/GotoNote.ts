@@ -1,11 +1,11 @@
 import {
   assertUnreachable,
+  Awaited,
   DNoteAnchorBasic,
   getSlugger,
   NoteProps,
   NoteUtils,
   VaultUtils,
-  Awaited,
 } from "@dendronhq/common-all";
 import { findNonNoteFile } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -14,18 +14,18 @@ import { Position, Selection, Uri, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
+import { BasicCommand } from "./base";
 import {
   GoToNoteCommandOpts,
   GoToNoteCommandOutput,
   TargetKind,
 } from "./GoToNoteInterface";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;

@@ -91,8 +91,6 @@ type SetupWorkspaceType = {
 export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 &
   SetupWorkspaceType & {
     ctx: ExtensionContext;
-    preActivateHook?: any;
-    postActivateHook?: any;
     preSetupHook?: PreSetupCmdHookFunction;
     postSetupHook?: PostSetupWorkspaceHook;
     setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
@@ -110,14 +108,6 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
      * Runs after the workspace is initialized
      */
     postSetupHook?: PostSetupWorkspaceHook;
-    /**
-     * Runs before the workspace is activated
-     */
-    preActivateHook?: any;
-    /**
-     * Run after workspace is activated
-     */
-    postActivateHook?: any;
     /**
      * By default, create workspace and vaults in a random temporary dir.
      */
@@ -205,6 +195,7 @@ export async function setupLegacyWorkspace(
   return { wsRoot, vaults };
 }
 
+//  ^bq7n7azzkpj2
 export async function setupLegacyWorkspaceMulti(
   opts: SetupLegacyWorkspaceMultiOpts
 ) {
@@ -314,7 +305,7 @@ export function addDebugServerOverride() {
  * @param _this
  * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
  * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
- * @returns
+ *  ^eveqm680bwxo
  */
 export function setupBeforeAfter(
   _this: any,
@@ -462,16 +453,47 @@ export function runSuiteButSkipForWindows() {
  * @param opts
  * @param fn - the test() functions to execute. NOTE: This function CANNOT be
  * async, or else the test may not fail reliably when your expect or assert
- * conditions are not met.
+ * conditions are not met. ^eq30h1lt0zat
  */
 export function describeMultiWS(
   title: string,
-  opts: SetupLegacyWorkspaceMultiOpts,
+  opts: SetupLegacyWorkspaceMultiOpts & {
+    /**
+     * Run before we stub vscode mock workspace
+     */
+    beforeHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
+     * Run before dendron is activated
+     */
+    preActivateHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
+     * Run after all the tests have run
+     */
+    afterHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
+     * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
+     */
+    timeout?: number;
+  },
   fn: () => void
 ) {
-  describe(title, () => {
+  describe(title, function () {
+    if (opts.timeout) {
+      this.timeout(opts.timeout);
+    }
     before(async () => {
+      if (opts.beforeHook) {
+        await opts.beforeHook({ ctx: opts.ctx });
+      }
+
       await setupLegacyWorkspaceMulti(opts);
+
+      if (opts.preActivateHook) {
+        await opts.preActivateHook({ ctx: opts.ctx });
+      }
       await _activate(opts.ctx);
     });
 
@@ -479,7 +501,10 @@ export function describeMultiWS(
     assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
-    after(() => {
+    after(async () => {
+      if (opts.afterHook) {
+        await opts.afterHook({ ctx: opts.ctx });
+      }
       cleanupVSCodeContextSubscriptions(opts.ctx);
     });
   });

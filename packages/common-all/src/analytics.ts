@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",

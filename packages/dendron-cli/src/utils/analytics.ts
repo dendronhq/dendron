@@ -5,12 +5,20 @@ import { CLIUtils } from "./cli";
 export class CLIAnalyticsUtils {
   static track(event: string, props?: any) {
     const cliVersion = CLIUtils.getClientVersion();
-    SegmentUtils.track(event, { type: "cli", cliVersion }, props);
+    SegmentUtils.track({
+      event,
+      platformProps: { type: "cli", cliVersion },
+      properties: props,
+    });
   }
 
   static async trackSync(event: string, props?: any) {
     const cliVersion = CLIUtils.getClientVersion();
-    await SegmentUtils.trackSync(event, { type: "cli", cliVersion }, props);
+    await SegmentUtils.trackSync({
+      event,
+      platformProps: { type: "cli", cliVersion },
+      properties: props,
+    });
   }
 
   static identify() {
@@ -36,6 +44,7 @@ export class CLIAnalyticsUtils {
     ].join("\n");
     const header = `\n===================\nTelemetry notice 🌱\n===================\n`;
     const container = `${header}${message}`;
+    // eslint-disable-next-line no-console
     console.log(container);
   }
 }

@@ -4,7 +4,7 @@ import { Logger } from "./logger";
 
 /** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
 export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
-  function instantiateSegmentClient() {
+  try {
     const disabledByWorkspace = ConfigUtils.getWorkspace(
       ws.config
     ).disableTelemetry;
@@ -15,10 +15,6 @@ export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
     });
     Logger.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
     Logger.info({ msg: "Segment Residual Cache Path is at " + cachePath });
-  }
-
-  try {
-    instantiateSegmentClient();
   } catch (err) {
     Logger.error({
       msg: "Error when trying to listen to the telemetry preference change event",

@@ -218,7 +218,6 @@ export class SegmentClient {
   }
 
   constructor(_opts?: SegmentClientOpts) {
-    // const key = _opts?.key || ;
     const { key, disabledByWorkspace } = _.defaults(_opts, {
       key: env("SEGMENT_VSCODE_KEY"),
       disabledByWorkspace: false,

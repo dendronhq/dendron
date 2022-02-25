@@ -374,7 +374,7 @@ export class Git {
     }
   }
 
-  /** Returns the URL for  */
+  /** Returns the URL for the current remote. */
   async getRemoteUrl(): Promise<string | undefined> {
     const remote = await this.getRemote();
     if (!remote) return undefined;

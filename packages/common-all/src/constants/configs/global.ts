@@ -50,6 +50,24 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
   };
 };
 
+export const ENABLE_FRONTMATTER_TAGS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Enable Frontmatter Tags (${namespace})`,
+    desc: `Show Frontmatter tags in published site. (${namespace})`,
+  };
+};
+
+export const ENABLE_HASHES_FOR_FM_TAGS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Enable Hashes for Frontmatter Tags (${namespace})`,
+    desc: `Display a '#' symbol in front of frontmatter tags in the tags listing. (${namespace})`,
+  };
+};
+
 export const ENABLE_CHILD_LINKS = (
   namespace: TopLevelDendronConfig
 ): DendronConfigEntry => {

@@ -1,12 +1,28 @@
+import { VaultUtils } from "@dendronhq/common-all";
 import { Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
+import type { DVault } from "..";
 
 export class GitTestUtils {
   static async createRepoForWorkspace(wsRoot: string) {
     const git = new Git({ localUrl: wsRoot });
     await git.init();
     await git.add("dendron.yml");
+    await git.commit({ msg: "init" });
+  }
+
+  static async createRepoForVault({
+    wsRoot,
+    vault,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+  }) {
+    const localUrl = path.join(wsRoot, VaultUtils.getRelPath(vault));
+    const git = new Git({ localUrl });
+    await git.init();
+    await git.add("root.md");
     await git.commit({ msg: "init" });
   }
 
@@ -44,6 +60,28 @@ export class GitTestUtils {
     await this.createRepoForWorkspace(wsRoot);
     await this.remoteCreate(remoteDir);
     await this.remoteAdd(wsRoot, remoteDir);
+  }
+
+  /** Set up a vault with a remote, intended to be used when testing pull or push functionality.
+   *
+   * @param wsRoot Directory where the vault exists.
+   * @param remoteDir Directory where the remote will be stored. The vault will pull and push to this remote.
+   */
+  static async createRepoForRemoteVault({
+    wsRoot,
+    vault,
+    remoteDir,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+    remoteDir: string;
+  }) {
+    await this.createRepoForVault({ wsRoot, vault });
+    await this.remoteCreate(remoteDir);
+    await this.remoteAdd(
+      path.join(wsRoot, VaultUtils.getRelPath(vault)),
+      remoteDir
+    );
   }
 
   /**

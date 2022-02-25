@@ -58,7 +58,9 @@ export class DendronTreeViewV2 implements WebviewViewProvider, Disposable {
       this._engineEvents.onEngineNoteStateChanged((noteChangeEntry) => {
         const ctx = "refreshDendronTreeViewV2EngineNoteStateChanged";
         Logger.info({ ctx });
-        noteChangeEntry.map((changeEntry) => this.refresh(changeEntry.note));
+        if (this._view && this._view.visible) {
+          noteChangeEntry.map((changeEntry) => this.refresh(changeEntry.note));
+        }
       });
   }
   dispose(): void {

@@ -1063,7 +1063,7 @@ suite("GIVEN Dendron plugin activation", function () {
         test("THEN set initial install called", () => {
           expect(
             setInitialInstallSpy.calledWith(
-              Time.DateTime.fromISO("2022-01-01").toSeconds()
+              Time.DateTime.fromISO("2021-06-22").toSeconds()
             )
           ).toBeTruthy();
         });

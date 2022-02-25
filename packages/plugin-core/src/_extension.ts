@@ -446,7 +446,7 @@ export async function _activate(
 
     // TODO: temporary backfill
     if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
-      const time = Time.DateTime.fromISO("2022-01-01");
+      const time = Time.DateTime.fromISO("2021-06-22");
       MetadataService.instance().setInitialInstall(time.toSeconds());
     }
 

@@ -35,9 +35,12 @@ export class BackfillService {
               n.title = NoteUtils.genTitle(n.fname);
               updated = true;
             } else if (f === "id") {
-              updated = true;
               // ids starting or ending with `-` or `_` break pages in Github publishing
-              if (n.id.match(/^[-_]|[-_]$/)) {
+              if (!_.isString(n.id)) {
+                updated = true;
+                n.id = genUUID();
+              } else if (n.id.match(/^[-_]|[-_]$/)) {
+                updated = true;
                 n.id = genUUID();
               }
             } else {

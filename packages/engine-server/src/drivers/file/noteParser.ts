@@ -80,6 +80,7 @@ export class NoteParser extends ParserBase {
     this.maxNoteLength = opts.maxNoteLength;
   }
 
+  //  ^vc6wy8vsw58p
   async parseFiles(
     allPaths: string[],
     vault: DVault
@@ -255,6 +256,7 @@ export class NoteParser extends ParserBase {
    *
    * @param opts
    * @returns List of all notes added. If a note has no direct parents, stub notes are added instead
+   *  ^2ozzw6feh53f
    */
   parseNoteProps(opts: {
     fileMeta: FileMeta;
@@ -277,7 +279,7 @@ export class NoteParser extends ParserBase {
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     let out: NoteProps[] = [];
-    let noteProps: NoteProps;
+    let noteProps: NoteProps | undefined;
     let noteHash: string;
     let matchHash: boolean;
 
@@ -287,7 +289,8 @@ export class NoteParser extends ParserBase {
         note: noteProps,
         noteHash,
         matchHash,
-      } = this.file2NoteWithCache({
+      } = file2NoteWithCache({
+        genTmpIdIfNotExist: true,
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
         errors,

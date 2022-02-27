@@ -151,18 +151,20 @@ export async function string2Schema({
  *
  * @param calculateHash - when set, add `contentHash` property to the note
  *  Default: false
- * @returns
+ *  ^piwaz833oxrq
  */
 export function string2Note({
   content,
   fname,
   vault,
   calculateHash,
+  genTmpIdIfNotExist,
 }: {
   content: string;
   fname: string;
   vault: DVault;
   calculateHash?: boolean;
+  genTmpIdIfNotExist?: boolean;
 }) {
   const options: any = {
     engines: {
@@ -178,15 +180,20 @@ export function string2Note({
   const custom = DNodeUtils.getCustomProps(data);
 
   const contentHash = calculateHash ? genHash(content) : undefined;
-  const note = DNodeUtils.create({
-    ...data,
-    custom,
-    fname,
-    body,
-    type: "note",
-    vault,
-    contentHash,
-  });
+  const note = DNodeUtils.create(
+    {
+      ...data,
+      custom,
+      fname,
+      body,
+      type: "note",
+      vault,
+      contentHash,
+    },
+    {
+      genTmpIdIfNotExist,
+    }
+  );
   return note;
 }
 

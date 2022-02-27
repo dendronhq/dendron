@@ -43,6 +43,7 @@ export const CONSTANTS = {
   DENDRON_INIT_VERSION: "0.0.0",
   /** Default for the `maxNoteLength` config. */
   DENDRON_DEFAULT_MAX_NOTE_LENGTH: 204800,
+  DENDRON_TMP_ID_PREFIX: "dendrontmp",
 };
 
 export const FOLDERS = {

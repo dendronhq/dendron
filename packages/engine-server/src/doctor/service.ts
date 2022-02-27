@@ -6,6 +6,7 @@ import {
   DEngineClient,
   Disposable,
   DLink,
+  DNodeUtils,
   DVault,
   genUUID,
   isNotUndefined,
@@ -21,7 +22,6 @@ import {
 } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
-import { BackfillService } from "../backfillV2";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
@@ -246,16 +246,16 @@ export class DoctorService implements Disposable {
         return { exit: true };
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
-        const changed = await new BackfillService().updateNotes({
-          engine,
-          // fix notes with broken ids if necessary
-          overwriteFields: ["id"],
-          dryRun,
-        });
-        this.L.info({
-          changed: changed.map((ent) => NoteUtils.toNoteLocString(ent.note)),
-        });
-        return { exit };
+        doctorAction = async (note: NoteProps) => {
+          if (DoctorUtils.isNoteIdInvalid(note)) {
+            note.id = genUUID();
+            await engineWrite(note, { updateExisting: true });
+            this.L.info({ msg: `add id to ${note.fname}` });
+            numChanges += 1;
+          }
+          return;
+        };
+        break;
       }
       // eslint-disable-next-line no-fallthrough
       case DoctorActionsEnum.H1_TO_TITLE: {
@@ -564,5 +564,18 @@ export class DoctorService implements Disposable {
         payload: error,
       });
     }
+  }
+}
+
+class DoctorUtils {
+  static isNoteIdInvalid(note: NoteProps): boolean {
+    return _.some([
+      // note id isn't string, could be because it was parsed as a number
+      !_.isString(note.id),
+      // tmp id indicates note did not have an id property
+      DNodeUtils.hasTmpId(note),
+      // id has an invalid character
+      note.id.match(/^[-_]|[-_]$/),
+    ]);
   }
 }

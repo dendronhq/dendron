@@ -59,11 +59,16 @@ export class DNodeUtils {
     child.parent = parent.id;
   }
 
-  static create(opts: DNodeOpts): DNodeProps {
-    const cleanProps: DNodeProps = _.defaults(opts, {
+  static create(
+    nodeOpts: DNodeOpts,
+    createOpts?: { genTmpIdIfNotExist?: boolean }
+  ): DNodeProps {
+    const cleanProps: DNodeProps = _.defaults(nodeOpts, {
       updated: Time.now().toMillis(),
       created: Time.now().toMillis(),
-      id: genUUID(),
+      id: createOpts?.genTmpIdIfNotExist
+        ? `${CONSTANTS.DENDRON_TMP_ID_PREFIX}${genUUID()}`
+        : genUUID,
       desc: "",
       links: [],
       anchors: {},
@@ -71,7 +76,7 @@ export class DNodeUtils {
       parent: null,
       body: "",
       data: {},
-      title: opts.title || NoteUtils.genTitle(opts.fname),
+      title: nodeOpts.title || NoteUtils.genTitle(nodeOpts.fname),
     });
 
     // TODO: remove
@@ -86,9 +91,9 @@ export class DNodeUtils {
       "image",
     ];
     _.forEach(optionalProps, (op) => {
-      if (opts[op]) {
+      if (nodeOpts[op]) {
         // @ts-ignore;
-        cleanProps[op] = opts[op];
+        cleanProps[op] = nodeOpts[op];
       }
     });
     return cleanProps;
@@ -286,6 +291,10 @@ export class DNodeUtils {
       );
     }
     return children;
+  }
+
+  static hasTmpId(note: DNodeProps) {
+    return note.id.startsWith(CONSTANTS.DENDRON_TMP_ID_PREFIX);
   }
 
   static isRoot(note: DNodeProps) {

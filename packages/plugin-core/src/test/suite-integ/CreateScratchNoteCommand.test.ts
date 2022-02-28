@@ -32,6 +32,24 @@ suite("CreateScratchNoteCommand", function () {
 
         expect(activeNote.fname.startsWith("scratch.")).toBeTruthy();
       });
+      test("THEN selection2link is applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const wsUtils = ext.wsUtils;
+        const cmd = new CreateScratchNoteCommand(ext);
+        const { vaults, engine } = ext.getDWorkspace();
+        const note = NoteUtils.getNoteByFnameFromEngine({
+          fname: "foo",
+          vault: vaults[0],
+          engine,
+        }) as NoteProps;
+        const fooNoteEditor = await wsUtils.openNote(note);
+        fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+        await cmd.run({ noConfirm: true });
+        const activeNote = getNoteFromTextEditor();
+        expect(activeNote.fname.endsWith(".foo-body")).toBeTruthy();
+        const changedFooNoteText = fooNoteEditor.document.getText();
+        expect(changedFooNoteText.endsWith(".foo-body]]\n"));
+      });
     }
   );
 });

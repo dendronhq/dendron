@@ -7,6 +7,7 @@ import {
   CopyNoteLinkBtn,
   HorizontalSplitBtn,
   ScratchBtn,
+  Selection2LinkBtn,
 } from "../components/lookup/buttons";
 import { CommandRunOpts as NoteLookupRunOpts } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
@@ -44,6 +45,7 @@ export class CreateScratchNoteCommand extends BasicCommand<
       vaultButtonPressed,
       extraButtons: [
         ScratchBtn.create({ pressed: true, canToggle: false }),
+        Selection2LinkBtn.create(true),
         CopyNoteLinkBtn.create(false),
         HorizontalSplitBtn.create(false),
       ],

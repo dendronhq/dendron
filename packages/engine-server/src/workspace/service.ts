@@ -12,6 +12,7 @@ import {
   DVaultSync,
   DWorkspace,
   DWorkspaceEntry,
+  FOLDERS,
   InstallStatus,
   IntermediateDendronConfig,
   NoteUtils,
@@ -102,6 +103,22 @@ type AddRemoveCommonOpts = {
    */
   onUpdatedWorkspace?: () => Promise<void>;
 };
+
+const ROOT_NOTE_TEMPLATE = [
+  "# Welcome to Dendron",
+  "",
+  `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.`,
+  "",
+  "## Lookup",
+  "",
+  "This section contains useful links to related resources.",
+  "",
+  "- [Getting Started Guide](https://link.dendron.so/6b25)",
+  "- [Discord](https://link.dendron.so/6b23)",
+  "- [Home Page](https://wiki.dendron.so/)",
+  "- [Github](https://link.dendron.so/6b24)",
+  "- [Developer Docs](https://docs.dendron.so/)",
+].join("\n");
 
 /** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
 export class WorkspaceService implements Disposable, IWorkspaceService {
@@ -322,21 +339,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     const note = NoteUtils.createRoot({
       vault,
-      body: [
-        "# Welcome to Dendron",
-        "",
-        `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.`,
-        "",
-        "## Lookup",
-        "",
-        "This section contains useful links to related resources.",
-        "",
-        "- [Getting Started Guide](https://link.dendron.so/6b25)",
-        "- [Discord](https://link.dendron.so/6b23)",
-        "- [Home Page](https://wiki.dendron.so/)",
-        "- [Github](https://link.dendron.so/6b24)",
-        "- [Developer Docs](https://docs.dendron.so/)",
-      ].join("\n"),
+      body: ROOT_NOTE_TEMPLATE,
     });
     const schema = SchemaUtils.createRootModule({ vault });
 
@@ -351,6 +354,72 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await this.addVault({ ...opts, updateWorkspace: false });
     }
     if (opts.addToCodeWorkspace || opts.updateWorkspace) {
+      await this.addVaultToCodeWorkspace(vault);
+    }
+    return vault;
+  }
+
+  /** Creates the given vault.
+   *
+   * @param vault Must be a self contained vault. Use
+   * {@link VaultUtils.selfContained} to ensure this is correct, which will
+   * allow the type to match.
+   * @param addToConfig If true, the created vault will be added to the config
+   * for the current workspace.
+   * @param addToCodeWorkspace If true, the created vault will be added to the
+   * `code-workspace` file for the current workspace.
+   */
+  async createSelfContainedVault(opts: {
+    addToConfig?: boolean;
+    addToCodeWorkspace?: boolean;
+    // Must be created with a self-contained vault
+    vault: Omit<DVault, "selfContained"> & { selfContained: true };
+  }) {
+    const { vault, addToConfig, addToCodeWorkspace } = opts;
+    /** The `vault` folder */
+    const vaultPath = path.join(this.wsRoot, vault.fsPath);
+    /** The `vault/notes` folder */
+    const notesPath = path.join(vaultPath, FOLDERS.NOTES);
+    // Create the folders we want for this vault.
+    await fs.mkdirp(notesPath);
+    await fs.mkdirp(path.join(notesPath, "assets"));
+
+    // Create root note and schema
+    const note = NoteUtils.createRoot({
+      vault,
+      body: ROOT_NOTE_TEMPLATE,
+    });
+    const schema = SchemaUtils.createRootModule({ vault });
+    if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
+      await note2File({ note, vault, wsRoot: this.wsRoot });
+    }
+    if (
+      !fs.existsSync(SchemaUtils.getPath({ root: notesPath, fname: "root" }))
+    ) {
+      await schemaModuleOpts2File(schema, notesPath, "root");
+    }
+
+    // Create the config and code-workspace for the vault, which make it self contained
+    DConfig.getOrCreate(vaultPath);
+    WorkspaceConfig.write(vaultPath, [], {
+      overrides: {
+        folders: [
+          {
+            path: ".",
+            name: VaultUtils.getName(vault),
+          },
+        ],
+      },
+    });
+    // Also add a gitignore, so files like `.dendron.port` are ignored if the
+    // self contained vault is opened on its own
+    WorkspaceService.createGitIgnore(vaultPath);
+
+    // Update the config and code-workspace for the current workspace
+    if (addToConfig) {
+      await this.addVault({ ...opts, updateWorkspace: false });
+    }
+    if (addToCodeWorkspace) {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;
@@ -706,6 +775,23 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     this.config;
   }
 
+  static async createGitIgnore(wsRoot: string) {
+    const gitIgnore = path.join(wsRoot, ".gitignore");
+    fs.writeFileSync(
+      gitIgnore,
+      [
+        "node_modules",
+        ".dendron.*",
+        "build",
+        "seeds",
+        ".next",
+        "pods/service-connections",
+        "\n",
+      ].join("\n"),
+      { encoding: "utf8" }
+    );
+  }
+
   /**
    * Initialize workspace with specified vaults
    * Files and folders created:
@@ -726,20 +812,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     // this creates `dendron.yml`
     ws.createConfig();
     // add gitignore
-    const gitIgnore = path.join(wsRoot, ".gitignore");
-    fs.writeFileSync(
-      gitIgnore,
-      [
-        "node_modules",
-        ".dendron.*",
-        "build",
-        "seeds",
-        ".next",
-        "pods/service-connections",
-        "\n",
-      ].join("\n"),
-      { encoding: "utf8" }
-    );
+    WorkspaceService.createGitIgnore(wsRoot);
     if (opts.createCodeWorkspace) {
       WorkspaceConfig.write(wsRoot, vaults);
     }

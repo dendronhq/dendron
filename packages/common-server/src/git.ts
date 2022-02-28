@@ -8,6 +8,7 @@ import {
   RESERVED_KEYS,
   VaultUtils,
   ConfigUtils,
+  FOLDERS,
 } from "@dendronhq/common-all";
 import execa from "execa";
 import fs from "fs-extra";
@@ -138,6 +139,63 @@ export class GitUtils {
 
   static getRepoNameFromURL(url: string): string {
     return path.basename(url, ".git");
+  }
+
+  /** Find the dependency path for a vault given the remote url. You can use
+   * this even if the vault has no remote.
+   *
+   * This is the relative path within the dependencies folder, like
+   * `github.com/dendronhq/dendron-site`. For more details see the
+   * [[Self Contained Vaults RFC|dendron://dendron.docs/rfc.42-self-contained-vaults]]
+   */
+  public static remoteUrlToDependencyPath({
+    vaultName,
+    url,
+  }: {
+    vaultName: string;
+    url?: string;
+  }): string {
+    // If no remote URL exists, then it's a local vault. We keep these in a
+    // local-only folder.
+    if (url === undefined) return FOLDERS.LOCAL_DEPENDENCY;
+    // Check if it matches any web URLs like
+    // https://github.com/dendronhq/dendron-site.git This may also look like
+    // http://example.com:8000/dendronhq/dendron-site.git, we skip the port
+    const webMatch =
+      /^(https?:\/\/)(?<domain>[^/:]+)(:[0-9]+)?\/(?<path>.+?)(\.git)?$/.exec(
+        url
+      );
+    if (webMatch?.groups?.domain && webMatch?.groups?.path) {
+      // matched a HTTP/S git remote
+      return path.join(
+        webMatch.groups.domain,
+        // Normalize for Windows so forward slashes are converted to backward ones
+        path.normalize(webMatch.groups.path)
+      );
+    }
+    // Check if it matches any SSH URLs like
+    // git@github.com:dendronhq/dendron-site.git This may also look like
+    // git@example.com:220/dendronhq/dendron-site.git, we skip the port and the
+    // initial slash
+    const sshMatch =
+      /^([^@]+@)(?<domain>[^:/]+):([0-9]+\/)?\/?(?<path>.+?)(\.git)?$/.exec(
+        url
+      );
+    if (sshMatch?.groups?.domain && sshMatch?.groups?.path) {
+      // matched a HTTP/S git remote
+      return path.join(
+        sshMatch.groups.domain,
+        // Normalize for Windows so forward slashes are converted to backward ones
+        path.normalize(sshMatch.groups.path)
+      );
+    }
+    // If none of these worked, try to make a fallback path. This may be because
+    // the remote points to a local directory, or because it's something we
+    // didn't expect.
+    const fallback = _.findLast(url.split(/[/\\]/), (part) => part.length > 0);
+    if (fallback) return fallback;
+    // Fallback for the fallback: if all else fails, just use the vault name
+    return vaultName;
   }
 
   static getVaultFromRepo(opts: {

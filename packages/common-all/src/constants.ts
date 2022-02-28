@@ -40,6 +40,17 @@ export const CONSTANTS = {
   DENDRON_DEFAULT_MAX_NOTE_LENGTH: 204800,
 };
 
+export const FOLDERS = {
+  /** The folder where the vault dependencies are stored. */
+  DEPENDENCIES: "dependencies",
+  /** The subfolder of {@link FOLDERS.DEPENDENCIES} where local vaults are stored. */
+  LOCAL_DEPENDENCY: "localhost",
+  /** The folder where the notes of the vault are stored. */
+  NOTES: "notes",
+  /** The folder where the assets are stored, this will be under {@link FOLDERS.NOTES}. */
+  ASSETS: "assets",
+};
+
 export enum ERROR_STATUS {
   NODE_EXISTS = "node_exists",
   NO_SCHEMA_FOUND = "no_schema_found",

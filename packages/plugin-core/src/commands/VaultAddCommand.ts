@@ -3,6 +3,7 @@ import {
   DVault,
   DWorkspace,
   ERROR_STATUS,
+  FOLDERS,
   VaultRemoteSource,
   VaultUtils,
   WorkspaceType,
@@ -19,9 +20,9 @@ import path from "path";
 import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -29,6 +30,7 @@ type CommandOpts = {
   path: string;
   pathRemote?: string;
   name?: string;
+  isSelfContained?: boolean;
 };
 
 type CommandOutput = { vaults: DVault[] };
@@ -55,18 +57,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     ]);
   };
 
-  async gatherInputs(): Promise<CommandOpts | undefined> {
-    const vaultRemoteSource = await VSCodeUtils.showQuickPick([
-      { label: "local", picked: true },
-      { label: "remote" },
-    ]);
+  async gatherVaultStandard(
+    sourceType: VaultRemoteSource
+  ): Promise<CommandOpts | undefined> {
+    const localVaultPathPlaceholder = "vault2";
     let sourcePath: string;
     let sourceName: string | undefined;
-    const localVaultPathPlaceholder = "vault2";
-    if (!vaultRemoteSource) {
-      return;
-    }
-    const sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
       // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
@@ -133,6 +129,82 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     };
   }
 
+  async gatherVaultSelfContained(
+    sourceType: VaultRemoteSource
+  ): Promise<CommandOpts | undefined> {
+    // For self contained vaults, we'll have the vault name match the folder for
+    // now. We can make this flexible later if that's a better UX, or give
+    // instructions on the wiki on how to change the name later.
+    const vaultName = await VSCodeUtils.showInputBox({
+      prompt: "Name for the new vault",
+    });
+    // If empty, then user cancelled the prompt
+    if (PickerUtilsV2.isInputEmpty(vaultName)) return;
+    // If the vault name already exists, creating a vault with the same name would break things
+    const { config } = ExtensionProvider.getDWorkspace();
+    if (config.vaults?.map(VaultUtils.getName).includes(vaultName)) {
+      throw new DendronError({
+        message: `There is already a vault with the name ${vaultName}, please pick a different name.`,
+      });
+    }
+
+    if (sourceType === "local") {
+      // Local vault
+      return {
+        type: sourceType,
+        name: vaultName,
+        path: path.join(
+          FOLDERS.DEPENDENCIES,
+          FOLDERS.LOCAL_DEPENDENCY,
+          vaultName
+        ),
+        isSelfContained: true,
+      };
+    } else {
+      // Remote vault
+      const remote = await VSCodeUtils.showInputBox({
+        title: "Remote URL",
+        prompt: "Enter the URL for the git remote",
+        placeHolder: "git@github.com:dendronhq/dendron.git",
+        ignoreFocusOut: true,
+      });
+      // Cancelled
+      if (PickerUtilsV2.isInputEmpty(remote)) return;
+
+      return {
+        type: sourceType,
+        name: vaultName,
+        path: path.join(
+          FOLDERS.DEPENDENCIES,
+          GitUtils.remoteUrlToDependencyPath({
+            vaultName,
+            url: remote,
+          })
+        ),
+        isSelfContained: true,
+      };
+    }
+  }
+
+  async gatherInputs(): Promise<CommandOpts | undefined> {
+    const sourceTypeSelected = await VSCodeUtils.showQuickPick([
+      { label: "local", picked: true },
+      { label: "remote" },
+    ]);
+    if (!sourceTypeSelected) {
+      return;
+    }
+    const sourceType = sourceTypeSelected.label as VaultRemoteSource;
+
+    const { config } = ExtensionProvider.getDWorkspace();
+    if (config.dev?.enableSelfContainedVaults) {
+      return this.gatherVaultSelfContained(sourceType);
+    } else {
+      // A "standard", non self contained vault
+      return this.gatherVaultStandard(sourceType);
+    }
+  }
+
   async handleRemoteRepo(
     opts: CommandOpts
   ): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
@@ -146,12 +218,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "cloning repo",
         });
-        const baseDir = getDWorkspace().wsRoot;
+        const baseDir = ExtensionProvider.getDWorkspace().wsRoot;
         const git = simpleGit({ baseDir });
         await git.clone(opts.pathRemote!, opts.path);
         const { vaults, workspace } = GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
-          wsRoot: getDWorkspace().wsRoot,
+          wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
           repoUrl: opts.pathRemote!,
         });
         if (_.size(vaults) === 1 && opts.name) {
@@ -161,7 +233,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         progress.report({
           message: "adding vault",
         });
-        const wsRoot = getDWorkspace().wsRoot;
+        const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
         const wsService = new WorkspaceService({ wsRoot });
 
         if (workspace) {
@@ -183,7 +255,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
-    const wsRoot = getDWorkspace().wsRoot;
+    const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
     const vaults = workspace.vaults;
     // Some things, like updating workspace file, can't be parallelized so needs to be done one at a time
     for (const vault of vaults) {
@@ -206,8 +278,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addVaultToWorkspace(vault: DVault) {
-    if (getDWorkspace().type === WorkspaceType.NATIVE) return;
-    const { wsRoot } = getDWorkspace();
+    if (ExtensionProvider.getExtension().type === WorkspaceType.NATIVE) return;
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
 
     // workspace file
     const resp = await WorkspaceUtils.getCodeWorkspaceSettings(wsRoot);
@@ -262,17 +334,27 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.type === "remote") {
       ({ vaults } = await this.handleRemoteRepo(opts));
     } else {
-      const wsRoot = getDWorkspace().wsRoot;
+      const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
       const fsPath = VaultUtils.normVaultPath({
         vault: { fsPath: opts.path },
         wsRoot,
       });
-      const vault: DVault = { fsPath };
-      if (opts.name) {
-        vault.name = opts.name;
-      }
       const wsService = new WorkspaceService({ wsRoot });
-      await wsService.createVault({ vault });
+      const vault: DVault = {
+        fsPath,
+        name: opts.name,
+        selfContained: opts.isSelfContained,
+      };
+
+      if (VaultUtils.isSelfContained(vault)) {
+        await wsService.createSelfContainedVault({
+          vault,
+          addToConfig: true,
+          addToCodeWorkspace: false,
+        });
+      } else {
+        await wsService.createVault({ vault });
+      }
       await this.addVaultToWorkspace(vault);
       vaults = [vault];
     }

@@ -43,18 +43,16 @@ export class AnalyticsUtils {
 
   static getCommonTrackProps() {
     const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
-    const sessionId = AnalyticsUtils.getSessionId();
     const vscodeSessionId = vscode.env.sessionId;
     return {
       firstWeekSinceInstall,
       vscodeSessionId,
-      integrations: { Amplitude: { session_id: sessionId } },
     };
   }
 
   static getSessionId(): number {
     if (AnalyticsUtils.sessionStart < 0) {
-      AnalyticsUtils.sessionStart = Time.now().toSeconds();
+      AnalyticsUtils.sessionStart = Math.round(Time.now().toSeconds());
     }
     return AnalyticsUtils.sessionStart;
   }
@@ -78,11 +76,18 @@ export class AnalyticsUtils {
 
   static track(event: string, props?: any) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    SegmentUtils.track(
+    const properties = { ...props, ...AnalyticsUtils.getCommonTrackProps() };
+    const sessionId = AnalyticsUtils.getSessionId();
+    SegmentUtils.track({
       event,
-      { type: "vscode", ideVersion, ideFlavor },
-      { ...props, ...AnalyticsUtils.getCommonTrackProps() }
-    );
+      platformProps: {
+        type: "vscode",
+        ideVersion,
+        ideFlavor,
+      },
+      properties,
+      integrations: { Amplitude: { session_id: sessionId } },
+    });
   }
 
   static identify() {

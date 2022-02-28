@@ -181,16 +181,13 @@ describe("GIVEN a SegmentClient", () => {
   const invalidPayload = "this is invalid JSON";
 
   function mockedTrackInternal(
-    event: string,
-    _payload: { [key: string]: any },
-    _context: any,
-    _timestamp?: Date
+    opts: SegmentEventProps
   ): Promise<RespV2<SegmentEventProps>> {
     return new Promise<RespV2<SegmentEventProps>>((resolve) => {
-      if (event === "mockFailToSend") {
+      if (opts.event === "mockFailToSend") {
         resolve({
           error: new DendronError({
-            message: "Mock - Failed to send event " + event,
+            message: "Mock - Failed to send event " + opts.event,
           }),
         });
       } else {
@@ -209,8 +206,11 @@ describe("GIVEN a SegmentClient", () => {
 
   describe("WHEN we track an event and we can connect to Segment backend", () => {
     beforeEach(async () => {
-      await instance.track("mockWillSend", {
-        hello: "world",
+      await instance.track({
+        event: "mockWillSend",
+        properties: {
+          hello: "world",
+        },
       });
     });
 
@@ -228,8 +228,11 @@ describe("GIVEN a SegmentClient", () => {
 
   describe("WHEN we track an event but we cannot connect to Segment backend", () => {
     beforeEach(async () => {
-      await instance.track("mockFailToSend", {
-        hello: "world",
+      await instance.track({
+        event: "mockFailToSend",
+        properties: {
+          hello: "world",
+        },
       });
     });
 

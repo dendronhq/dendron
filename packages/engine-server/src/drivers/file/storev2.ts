@@ -46,6 +46,7 @@ import {
   USER_MESSAGES,
   DNoteLoc,
   NoteChangeUpdateEntry,
+  DNodeUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -1006,37 +1007,71 @@ export class FileStorage implements DStore {
       msg: "enter",
       note: NoteUtils.toLogObj(note),
     });
+
     let changed: NoteChangeEntry[] = [];
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
     if (existingNote) {
-      // need to update parent metadata since child id is changing
-      const parentNote = this.notes[existingNote.parent as string] as NoteProps;
+      // make sure newly created note actually has a parent.
+      if (!note.parent) {
+        throw new DendronError({
+          message: `no parent found for ${note.fname}`,
+        });
+      }
 
-      // remove existing note from parent's children
-      parentNote.children = _.reject<string[]>(
-        parentNote.children,
-        (ent: string) => ent === existingNote.id
-      ) as string[];
-      // update parent's children
-      this.notes[existingNote.parent as string].children = parentNote.children;
-      // move existingNote's children to newly written note
-      note.children = existingNote.children;
-      // delete existingNote
+      // save the state of the parent to later record changed entry.
+      const parent = this.notes[note.parent];
+      const prevParentState = { ...parent };
+
+      // delete the existing note.
       delete this.notes[existingNote.id];
       this.noteFnames.delete(existingNote);
+
+      // first, update parent note
+      // so that it doesn't hold the deleted existing note's id as children
+      NoteUtils.deleteChildFromParent({
+        childToDelete: existingNote,
+        notes: this.notes,
+      });
+
+      // then update parent note again
+      // so that the newly created note is a child
+      DNodeUtils.addChild(this.notes[note.parent], note);
+
+      // add an entry for the updated parent if there was a change
+      changed.push({
+        prevNote: prevParentState,
+        note: parent,
+        status: "update",
+      });
+
+      // now move existing note's orphaned children to new note
+      existingNote.children.forEach((child) => {
+        const childNote = this.notes[child];
+        const prevChildNoteState = { ...childNote };
+        DNodeUtils.addChild(note, childNote);
+
+        // add one entry for each child updated
+        changed.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      });
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
     // this is the default behavior
-    if (!opts?.noAddParent) {
-      changed = NoteUtils.addOrUpdateParents({
+    // only do this if we aren't writing to existing note. we never hit this case in that situation.
+    if (!opts?.noAddParent && !existingNote) {
+      const out = NoteUtils.addOrUpdateParents({
         note,
         notesList: _.values(this.notes),
         createStubs: true,
         wsRoot: this.wsRoot,
       });
+      changed = changed.concat(out);
     }
     this.logger.info({
       ctx,

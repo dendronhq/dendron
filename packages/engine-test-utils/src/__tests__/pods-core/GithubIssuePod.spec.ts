@@ -193,13 +193,11 @@ describe("GIVEN: Github publish pod is run for a note", () => {
     pod.createDiscussion = jest.fn();
     pod.createIssue = jest.fn();
     pod.updateIssue = jest.fn();
-    pod.getDataFromGithub = jest
-      .fn()
-      .mockReturnValue({
-        labelsHashMap: { "area.misc": "sfgdjio", "type.bug": "gsfahhj" },
-        discussionCategoriesHashMap: { Ideas: "sfgdjio", General: "gsfahhj" },
-        assigneesHashMap: { john: "dhdjdj", doe: "dhdjdk" },
-      });
+    pod.getDataFromGithub = jest.fn().mockReturnValue({
+      labelsHashMap: { "area.misc": "sfgdjio", "type.bug": "gsfahhj" },
+      discussionCategoriesHashMap: { Ideas: "sfgdjio", General: "gsfahhj" },
+      assigneesHashMap: { john: "dhdjdj", doe: "dhdjdk" },
+    });
   });
 
   const utilityMethods = {
@@ -214,6 +212,11 @@ describe("GIVEN: Github publish pod is run for a note", () => {
         async ({ engine, vaults, wsRoot }) => {
           const vaultName = VaultUtils.getName(vaults[0]);
           pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
+
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, issue.vault)
+          );
+          issue.parent = rootNote!.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -246,6 +249,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const vaultName = VaultUtils.getName(vaults[0]);
           const scratchIssue: NoteProps = _.omit(issue, "tags");
           scratchIssue.tags = "documentation";
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, scratchIssue.vault)
+          );
+          scratchIssue.parent = rootNote!.id;
           await engine.writeNote(scratchIssue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -283,6 +290,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const vaultName = VaultUtils.getName(vaults[0]);
           pod.createIssue = jest.fn().mockReturnValue("https://github.com/foo");
           const scratchIssue: NoteProps = _.omit(issue, "custom");
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, issue.vault)
+          );
+          scratchIssue.parent = rootNote!.id;
           scratchIssue.custom = {};
           await engine.writeNote(scratchIssue, { newNode: true });
           const resp = await pod.execute({
@@ -320,6 +331,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             .fn()
             .mockReturnValue("https://github.com/foo");
           issue.custom.category = "Ideas";
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, issue.vault)
+          );
+          issue.parent = rootNote!.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -355,6 +370,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             .fn()
             .mockReturnValue("https://github.com/foo");
           issue.custom.category = "abcd";
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, issue.vault)
+          );
+          issue.parent = rootNote!.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -391,6 +410,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const vaultName = VaultUtils.getName(vaults[0]);
           pod.updateIssue = jest.fn().mockReturnValue("https://github.com/foo");
           issue.custom.assignees = ["john", "doe"];
+          const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
+            _.isEqual(note.vault, issue.vault)
+          );
+          issue.parent = rootNote!.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,

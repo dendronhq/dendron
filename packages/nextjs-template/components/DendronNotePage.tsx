@@ -1,8 +1,4 @@
-import {
-  IntermediateDendronConfig,
-  NoteProps,
-  TreeMenu,
-} from "@dendronhq/common-all";
+import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   DendronNote,
@@ -16,10 +12,10 @@ import DendronCustomHead from "../components/DendronCustomHead";
 import DendronSEO from "../components/DendronSEO";
 import DendronSpinner from "../components/DendronSpinner";
 import { DendronTOC } from "../components/DendronTOC";
-import { useCombinedDispatch, useCombinedSelector } from "../features";
+import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
-import { useDendronRouter, useIsMobile } from "../utils/hooks";
+import { useDendronRouter } from "../utils/hooks";
 
 const { HEADER } = DENDRON_STYLE_CONSTANTS;
 
@@ -31,7 +27,6 @@ export type DendronNotePageProps = {
   body: string;
   collectionChildren: NoteProps[] | null;
   config: IntermediateDendronConfig;
-  tree: TreeMenu;
 };
 
 export default function Note({
@@ -54,9 +49,7 @@ export default function Note({
 
   // --- Hooks
   const dispatch = useCombinedDispatch();
-  const engine = useCombinedSelector((state) => state.engine);
   logger.info({ ctx: "enter", id });
-  const { isMobile } = useIsMobile();
 
   // setup body
   React.useEffect(() => {

@@ -1,16 +1,15 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
-import { TreeMenu, TreeUtils } from "@dendronhq/common-all";
+import { TreeUtils } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
 import { Typography } from "antd";
-
-import dynamic from "next/dynamic";
 import _ from "lodash";
+import dynamic from "next/dynamic";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useState } from "react";
+import { useCombinedSelector } from "../features";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
-import { NoteData, verifyNoteData } from "../utils/types";
-import DendronSpinner from "./DendronSpinner";
+import { NoteData } from "../utils/types";
 
 const Menu = dynamic(() => import("./AntdMenuWrapper"), {
   ssr: false,
@@ -26,11 +25,12 @@ const MenuItem = dynamic(() => import("./AntdMenuItemWrapper"), {
 
 export default function DendronTreeMenu(
   props: Partial<NoteData> & {
-    tree: TreeMenu;
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
   }
 ) {
+  const ide = useCombinedSelector((state) => state.ide);
+  const tree = ide.tree;
   const logger = createLogger("DendronTreeMenu");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
@@ -41,7 +41,7 @@ export default function DendronTreeMenu(
 
   // set `activeNoteIds`
   useEffect(() => {
-    if (!noteActiveId) {
+    if (!noteActiveId || !props.tree) {
       return undefined;
     }
 
@@ -61,9 +61,12 @@ export default function DendronTreeMenu(
   const { notes, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
+  if (!tree) {
+    return null;
+  }
 
   const roots: DataNode[] = TreeViewUtils.treeMenuNode2DataNode({
-    roots: props.tree.roots,
+    roots: tree.roots,
     showVaultName: false,
     applyNavExclude: true,
   });

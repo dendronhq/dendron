@@ -35,7 +35,6 @@ export type NoteRouterQuery = {
 
 export type DendronCommonProps = Partial<NoteData> & {
   dendronRouter: DendronRouterProps;
-  tree: TreeMenu;
 };
 export type DendronPageWithNoteDataProps = NoteData & DendronCommonProps;
 

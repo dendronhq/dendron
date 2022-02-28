@@ -360,6 +360,8 @@ export class BuildUtils {
       "common-assets"
     );
 
+    const commonAssetsBuildRoot = path.join(commonAssetsRoot, "build");
+
     // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
@@ -375,6 +377,18 @@ export class BuildUtils {
 
     // copy over common assets
     fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
+
+    // copy over katex fonts
+    const katexFontsPath = path.join(
+      commonAssetsBuildRoot,
+      "assets",
+      "css",
+      "fonts"
+    );
+    fs.copySync(
+      katexFontsPath,
+      path.join(pluginStaticPath, "css", "themes", "fonts")
+    );
 
     // copy assets from next server
     // DEPRECATED

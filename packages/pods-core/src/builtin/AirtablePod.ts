@@ -13,6 +13,7 @@ import {
   NoteUtils,
   RespV3,
   StatusCodes,
+  stringifyError,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
@@ -46,6 +47,11 @@ type AirtablePodCustomOptsCommon = {
   tableName: string;
   apiKey: string;
   baseId: string;
+};
+
+export type AirtableMetadata = {
+  dendronId: string;
+  airtableId: string;
 };
 
 type AirtableExportPodCustomOpts = AirtablePodCustomOptsCommon & {
@@ -97,6 +103,7 @@ type MultiSelectField = {
 
 type LinkedRecordField = {
   type: "linkedRecord";
+  configId: string;
 } & SelectField;
 
 export type AirtableFieldsMap = { fields: { [key: string]: string | number } };
@@ -120,15 +127,28 @@ export class AirtableUtils {
     return _map;
   }
 
-  static checkNoteHasAirtableId(note: NoteProps): boolean {
-    return !_.isUndefined(_.get(note.custom, "airtableId"));
+  static getAirtableIdFromMetadataFile({
+    wsRoot,
+    note,
+    podId,
+  }: {
+    wsRoot: string;
+    note: NoteProps;
+    podId?: string;
+  }): string | undefined {
+    const { vault, id } = note;
+    const filePath = PodUtils.getPodMetadataJsonFilePath({
+      wsRoot,
+      vault,
+      podId,
+    });
+    const metadata = PodUtils.readMetadataFromFilepath(filePath);
+    const match = metadata.find((obj) => obj.dendronId === id);
+    return match?.airtableId;
   }
 
   static filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
-  }
-  static getAirtableIdFromNote(note: NoteProps): string {
-    return _.get(note.custom, "airtableId");
   }
 
   /***
@@ -255,6 +275,13 @@ export class AirtableUtils {
           note,
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
+        if (!fieldMapping.configId) {
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: "Please provide the pod config Id of linked records",
+            }),
+          };
+        }
         const { vaults, notes } = engine;
         const notesWithNoIds: NoteProps[] = [];
         const recordIds = links.flatMap((l) => {
@@ -271,7 +298,11 @@ export class AirtableUtils {
           const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
           const _recordIds = _notes
             .map((n) => {
-              const id = AirtableUtils.getAirtableIdFromNote(n);
+              const id = AirtableUtils.getAirtableIdFromMetadataFile({
+                wsRoot: engine.wsRoot,
+                note: n,
+                podId: fieldMapping.configId,
+              });
               return {
                 note: n,
                 id,
@@ -323,8 +354,9 @@ export class AirtableUtils {
     srcFieldMapping: { [key: string]: SrcFieldMapping };
     logger: DLogger;
     engine: DEngineClient;
+    podId?: string;
   }): RespV3<SrcFieldMappingResp> {
-    const { notes, srcFieldMapping, logger, engine } = opts;
+    const { notes, srcFieldMapping, logger, engine, podId } = opts;
     const ctx = "notesToSrc";
     const recordSets: SrcFieldMappingResp = {
       create: [],
@@ -370,11 +402,16 @@ export class AirtableUtils {
           }
         }
       }
-      if (AirtableUtils.checkNoteHasAirtableId(note)) {
+      const airtableId = AirtableUtils.getAirtableIdFromMetadataFile({
+        wsRoot: engine.wsRoot,
+        note,
+        podId,
+      });
+      if (airtableId) {
         logger.debug({ ctx, noteId: note.id, msg: "updating" });
         recordSets.update.push({
           fields,
-          id: AirtableUtils.getAirtableIdFromNote(note),
+          id: airtableId,
         });
       } else {
         logger.debug({ ctx, noteId: note.id, msg: "creating" });
@@ -396,34 +433,36 @@ export class AirtableUtils {
     return { data: recordSets };
   }
 
-  static async updateAirtableIdForNewlySyncedNotes({
+  static async updateMedataFileForNewlySyncedNotes({
     records,
     engine,
     logger,
+    podId,
   }: {
     records: Records<FieldSet>;
     engine: DEngineClient;
     logger: DLogger;
+    podId?: string;
   }) {
     const out = await Promise.all(
       records.map(async (ent) => {
         const airtableId = ent.id;
         const dendronId = ent.fields["DendronId"] as string;
         const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
-        const noteAirtableId = _.get(note.custom, "airtableId");
-        if (!noteAirtableId) {
-          const updatedNote = {
-            ...note,
-            custom: { ...note.custom, airtableId },
-          };
-          const out = await engine.writeNote(updatedNote, {
-            updateExisting: true,
-          });
-          return out;
-        }
-        return undefined;
+        const vault = note.vault;
+        const filePath = PodUtils.getPodMetadataJsonFilePath({
+          wsRoot: engine.wsRoot,
+          vault,
+          podId,
+        });
+        const metadata = PodUtils.readMetadataFromFilepath(filePath);
+        metadata.push({ dendronId, airtableId });
+        await fs.writeFile(filePath, JSON.stringify(metadata, null, 2));
+        return note;
       })
-    );
+    ).catch((err) => {
+      throw new DendronError({ message: stringifyError(err) });
+    });
     logger.info({
       msg: `${out.filter((n) => !_.isUndefined(n)).length} notes updated`,
     });
@@ -478,7 +517,7 @@ export class AirtablePublishPod extends PublishPod<AirtablePublishConfig> {
       return out[0].getId();
     } else {
       const created = await base(tableName).create(create);
-      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
+      await AirtableUtils.updateMedataFileForNewlySyncedNotes({
         records: created,
         engine,
         logger,
@@ -632,7 +671,7 @@ export class AirtableExportPod extends ExportPod<
         checkpoint,
         engine,
       });
-      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
+      await AirtableUtils.updateMedataFileForNewlySyncedNotes({
         records: created,
         engine,
         logger: this.L,

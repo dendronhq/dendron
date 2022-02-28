@@ -1,5 +1,5 @@
 import Airtable from "@dendronhq/airtable";
-import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableExportPodV2,
@@ -170,19 +170,20 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
    */
   public async onExportComplete({
     exportReturnValue,
+    config,
   }: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
-    payload: NoteProps[];
   }) {
     const records = exportReturnValue.data;
     const engine = ExtensionProvider.getEngine();
     const logger = this.L;
     if (records?.created) {
-      await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
+      await AirtableUtils.updateMedataFileForNewlySyncedNotes({
         records: records.created,
         engine,
         logger,
+        podId: config.podId,
       });
     }
 

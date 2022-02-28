@@ -6,6 +6,8 @@ import {
   stringifyError,
   RespV3,
   ErrorFactory,
+  DVault,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import Ajv, { JSONSchemaType } from "ajv";
@@ -17,6 +19,7 @@ import { PodClassEntryV4, PodItemV4 } from "./types";
 import { docs_v1 as docsV1 } from "googleapis";
 import download from "image-downloader";
 import axios from "axios";
+import { AirtableMetadata } from "./builtin/AirtablePod";
 
 export * from "./builtin";
 export * from "./types";
@@ -538,5 +541,24 @@ export class PodUtils {
     } catch (err: any) {
       throw new DendronError({ message: stringifyError(err) });
     }
+  }
+
+  static getPodMetadataJsonFilePath(opts: {
+    wsRoot: string;
+    vault: DVault;
+    podId?: string;
+  }) {
+    const { wsRoot, vault, podId = "default" } = opts;
+    const relPath = VaultUtils.getRelPath(vault);
+    return path.join(wsRoot, relPath, `${podId}.metadata.json`);
+  }
+
+  static readMetadataFromFilepath(filePath: string): AirtableMetadata[] {
+    if (!fs.pathExistsSync(filePath)) {
+      fs.ensureFileSync(filePath);
+      fs.writeJSONSync(filePath, []);
+      return [];
+    }
+    return fs.readJSONSync(filePath);
   }
 }

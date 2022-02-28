@@ -10,6 +10,7 @@ import {
   AirtableFieldsMap,
   ExportPodConfigurationFilterV2,
   PodExportScope,
+  PodUtils,
   RunnableAirtableV2PodConfig,
   SpecialSrcFieldToKey,
   SrcFieldMapping,
@@ -18,6 +19,7 @@ import _ from "lodash";
 import { TestEngineUtils } from "../../..";
 import { runEngineTestV5 } from "../../../engine";
 import { checkString } from "../../../utils";
+import fs from "fs-extra";
 
 const FakeAirtableBase = () => ({
   create: (allRecords: AirtableFieldsMap[]) => {
@@ -505,23 +507,22 @@ describe("WHEN export note with linked record", () => {
         type: "linkedRecord",
         to: "links",
         filter: "task.*",
+        configId: "dendron.tasks",
       },
     },
   });
 
-  describe("AND linked note does not have airtable id", () => {
+  describe("AND linked note is not already exported", () => {
     test("THEN show error message", async () => {
       const preSetupHook = async (opts: WorkspaceOpts) => {
         await TestEngineUtils.createNoteByFname({
           fname: "task.alpha",
           body: "This is a task",
-          custom: {},
           ...opts,
         });
         await TestEngineUtils.createNoteByFname({
           fname: "proj.beta",
           body: "[[task.alpha]]",
-          custom: {},
           ...opts,
         });
       };
@@ -533,20 +534,27 @@ describe("WHEN export note with linked record", () => {
     });
   });
 
-  describe("AND linked note has airtable id", () => {
+  describe("AND linked note's id is present in metadata file", () => {
     const preSetupHook = async (opts: WorkspaceOpts) => {
       await TestEngineUtils.createNoteByFname({
         fname: "task.alpha",
         body: "This is a task",
-        custom: { airtableId: "airtableId-task" },
         ...opts,
       });
       await TestEngineUtils.createNoteByFname({
         fname: "proj.beta",
         body: "[[task.alpha]]",
-        custom: {},
         ...opts,
       });
+      const filePath = PodUtils.getPodMetadataJsonFilePath({
+        wsRoot: opts.wsRoot,
+        vault: opts.vaults[0],
+        podId: "dendron.tasks",
+      });
+      const metadata = [
+        { dendronId: "task.alpha", airtableId: "airtableId-task" },
+      ];
+      await fs.writeFile(filePath, JSON.stringify(metadata, null, 2));
     };
 
     beforeAll(async () => {

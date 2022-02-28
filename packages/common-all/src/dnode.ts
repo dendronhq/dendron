@@ -346,6 +346,35 @@ export class NoteUtils {
     });
   }
 
+  static deleteChildFromParent(opts: {
+    childToDelete: NoteProps;
+    notes: NotePropsDict;
+  }): NoteChangeEntry[] {
+    const changed: NoteChangeEntry[] = [];
+    const { childToDelete, notes } = opts;
+    // const parent = DNodeUtils.getParent(childToDelete, { nodeDict: notes });
+    let parent;
+    if (childToDelete.parent) {
+      parent = notes[childToDelete.parent];
+    } else {
+      throw new DendronError({
+        message: `No parent found for ${childToDelete.fname}`,
+      });
+    }
+
+    const prevParentState = { ...parent };
+    parent.children = _.reject<string[]>(
+      parent.children,
+      (ent: string) => ent === childToDelete.id
+    ) as string[];
+    changed.push({
+      status: "update",
+      prevNote: prevParentState,
+      note: parent,
+    });
+    return changed;
+  }
+
   /**
    * Add node to parents up the note tree, or create stubs if no direct parents exists
    * @param opts

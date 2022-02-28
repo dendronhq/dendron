@@ -132,24 +132,21 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async gatherVaultSelfContained(
     sourceType: VaultRemoteSource
   ): Promise<CommandOpts | undefined> {
-    // For self contained vaults, we'll have the vault name match the folder for
-    // now. We can make this flexible later if that's a better UX, or give
-    // instructions on the wiki on how to change the name later.
-    const vaultName = await VSCodeUtils.showInputBox({
-      prompt: "Name for the new vault",
-    });
-    // If empty, then user cancelled the prompt
-    if (PickerUtilsV2.isInputEmpty(vaultName)) return;
     // If the vault name already exists, creating a vault with the same name would break things
-    const { config } = ExtensionProvider.getDWorkspace();
-    if (config.vaults?.map(VaultUtils.getName).includes(vaultName)) {
-      throw new DendronError({
-        message: `There is already a vault with the name ${vaultName}, please pick a different name.`,
-      });
-    }
 
     if (sourceType === "local") {
       // Local vault
+      // For self contained vaults, we'll have the vault name match the folder for
+      // now. We can make this flexible later if that's a better UX, or give
+      // instructions on the wiki on how to change the name later.
+      const vaultName = await VSCodeUtils.showInputBox({
+        title: "Vault name",
+        prompt: "Name for the new vault",
+        placeHolder: "my-vault",
+      });
+      // If empty, then user cancelled the prompt
+      if (PickerUtilsV2.isInputEmpty(vaultName)) return;
+
       return {
         type: sourceType,
         name: vaultName,
@@ -171,6 +168,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       // Cancelled
       if (PickerUtilsV2.isInputEmpty(remote)) return;
 
+      // Calculate the vault name from the remote. If that fails, ask the user for a unique name to use.
+      const vaultName: string | undefined = GitUtils.getRepoNameFromURL(remote);
+
       return {
         type: sourceType,
         name: vaultName,
@@ -181,6 +181,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             url: remote,
           })
         ),
+        pathRemote: remote,
         isSelfContained: true,
       };
     }

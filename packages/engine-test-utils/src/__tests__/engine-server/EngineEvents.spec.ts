@@ -142,10 +142,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
     });
   });
 
-  // TODO: This scenario doesn't seem to work - parent is updated, but children
-  // appear to get orphaned.
   describe("WHEN writing over an existing note by changing its ID", () => {
-    test.only("THEN expect all dependent notes to be updated", async (done) => {
+    test("THEN expect all dependent notes to be updated", async (done) => {
       await runEngineTestV5(
         async ({ engine }) => {
           const engineClient = engine as DendronEngineClient;

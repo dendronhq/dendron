@@ -29,6 +29,7 @@ export enum DoctorActionsEnum {
   REGENERATE_NOTE_ID = "regenerateNoteId",
   FIND_BROKEN_LINKS = "findBrokenLinks",
   FIX_REMOTE_VAULTS = "fixRemoteVaults",
+  UPDATE_AIRTABLE_METADATA = "updateAirtableMetadata",
 }
 
 export type DoctorServiceOpts = {
@@ -329,6 +330,20 @@ export class DoctorService implements Disposable {
           })
         );
         return { exit: true };
+      }
+      case DoctorActionsEnum.UPDATE_AIRTABLE_METADATA: {
+        resp = [];
+        doctorAction = async (note: NoteProps) => {
+          //get airtable id from note
+          const airtableId = _.get(note.custom, "airtableId") as string;
+          // get note id
+          const dendronId = note.id;
+          resp.push({ dendronId, airtableId });
+          delete note.custom["airtableId"];
+          // update note
+          engine.writeNote(note, { updateExisting: true });
+        };
+        break;
       }
       default:
         throw new DendronError({

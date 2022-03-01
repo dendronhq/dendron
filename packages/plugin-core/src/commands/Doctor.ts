@@ -32,6 +32,9 @@ import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
+import { PodUIControls } from "../components/pods/PodControls";
+import { PodUtils } from "@dendronhq/pods-core";
 
 const md = _md();
 type Finding = {
@@ -422,6 +425,38 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           break;
         }
         await this.showBrokenLinkPreview(out.resp, engine);
+        break;
+      }
+      case DoctorActionsEnum.UPDATE_AIRTABLE_METADATA: {
+        const selection = await new QuickPickHierarchySelector().getHierarchy();
+        if (!selection) break;
+        const { hierarchy, vault } = selection;
+        const podId = await PodUIControls.promptToSelectCustomPodId();
+        if (!podId) break;
+        const notes = engine.notes;
+        const candidates = Object.values(notes).filter(
+          (value) =>
+            value.fname.startsWith(hierarchy) &&
+            value.stub !== true &&
+            VaultUtils.isEqualV2(value.vault, vault) &&
+            value.custom.airtableId
+        );
+        const ds = new DoctorService();
+        const out = await ds.executeDoctorActions({
+          action: opts.action,
+          candidates,
+          engine,
+        });
+        if (out.resp) {
+          const filePath = PodUtils.getPodMetadataJsonFilePath({
+            wsRoot: engine.wsRoot,
+            vault,
+            podId,
+          });
+          const metadata = PodUtils.readMetadataFromFilepath(filePath);
+          metadata.push(...out.resp);
+          await fs.writeFile(filePath, JSON.stringify(metadata, null, 2));
+        }
         break;
       }
       default: {

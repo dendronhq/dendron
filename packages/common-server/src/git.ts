@@ -19,7 +19,7 @@ import simpleGit, {
   ResetMode as SimpleGitResetMode,
 } from "simple-git";
 import { parse } from "url";
-import { readYAML } from "./files";
+import { readYAMLAsync } from ".";
 import { vault2Path } from "./filesv2";
 
 export { simpleGit, SimpleGit, SimpleGitResetMode };
@@ -210,17 +210,19 @@ export class GitUtils {
     };
   }
 
-  static getVaultsFromRepo(opts: {
+  static async getVaultsFromRepo(opts: {
     repoPath: string;
     repoUrl: string;
     wsRoot: string;
-  }): { vaults: DVault[]; workspace?: DWorkspace } {
+  }): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
     const { repoPath, wsRoot, repoUrl } = opts;
     // is workspace root
-    if (fs.existsSync(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))) {
-      const config = readYAML(
+    if (
+      await fs.pathExists(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))
+    ) {
+      const config = (await readYAMLAsync(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
-      ) as IntermediateDendronConfig;
+      )) as IntermediateDendronConfig;
       const workspace = path.basename(repoPath);
       const vaultsConfig = ConfigUtils.getVaults(config);
       const vaults = vaultsConfig.map((ent) => {

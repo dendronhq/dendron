@@ -13,7 +13,11 @@ import {
   GitUtils,
   simpleGit,
 } from "@dendronhq/common-server";
-import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  Git,
+  WorkspaceService,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -222,7 +226,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const baseDir = ExtensionProvider.getDWorkspace().wsRoot;
         const git = simpleGit({ baseDir });
         await git.clone(opts.pathRemote!, opts.path);
-        const { vaults, workspace } = GitUtils.getVaultsFromRepo({
+        const { vaults, workspace } = await GitUtils.getVaultsFromRepo({
           repoPath: path.join(baseDir, opts.path),
           wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
           repoUrl: opts.pathRemote!,
@@ -253,6 +257,82 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     );
     return { vaults, workspace };
+  }
+
+  async handleRemoteRepoSelfContained(
+    opts: CommandOpts
+  ): Promise<{ vaults: DVault[] }> {
+    return window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Adding remote vault",
+        cancellable: false,
+      },
+      async (progress) => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        progress.report({
+          message: "cloning repo",
+          increment: 0,
+        });
+        const { path: localUrl, name, pathRemote: remoteUrl } = opts;
+        if (!remoteUrl) {
+          throw new DendronError({
+            message:
+              "Remote vault has no remote set. This should never happen, please send a bug report if you encounter this.",
+          });
+        }
+
+        await fs.ensureDir(localUrl);
+        const git = new Git({ localUrl, remoteUrl });
+        // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
+        await git.clone(".");
+        const { vaults, workspace } = await GitUtils.getVaultsFromRepo({
+          repoPath: path.join(wsRoot, localUrl),
+          wsRoot,
+          repoUrl: remoteUrl,
+        });
+        if (_.size(vaults) === 1 && name) {
+          vaults[0].name = name;
+        }
+        // add all vaults
+        const increment = 100 / (vaults.length + 1);
+        progress.report({
+          message:
+            vaults.length === 1
+              ? "adding vault"
+              : `adding ${vaults.length} vaults`,
+          increment,
+        });
+        const wsService = new WorkspaceService({ wsRoot });
+
+        if (workspace) {
+          // TODO: To be implemented for backwards compatibility until workspace vaults are phased out
+          throw new DendronError({
+            message:
+              "Adding a workspace vault while self contained vaults is enabled is not yet supported. Please disable self contained vaults temporarily to add this vault.",
+          });
+        } else {
+          // Some things, like updating config, can't be parallelized so needs to be done one at a time
+          for (const vault of vaults) {
+            if (VaultUtils.isSelfContained(vault)) {
+              // eslint-disable-next-line no-await-in-loop
+              await wsService.createSelfContainedVault({
+                vault,
+                addToConfig: true,
+              });
+            } else {
+              // eslint-disable-next-line no-await-in-loop
+              await wsService.createVault({ vault });
+            }
+            // eslint-disable-next-line no-await-in-loop
+            await this.addVaultToWorkspace(vault);
+            progress.report({ increment });
+          }
+        }
+        wsService.dispose();
+        return { vaults, workspace };
+      }
+    );
   }
 
   async addWorkspaceToWorkspace(workspace: DWorkspace) {
@@ -333,7 +413,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     let vaults: DVault[] = [];
     Logger.info({ ctx, msg: "enter", opts });
     if (opts.type === "remote") {
-      ({ vaults } = await this.handleRemoteRepo(opts));
+      if (opts.isSelfContained) {
+        ({ vaults } = await this.handleRemoteRepoSelfContained(opts));
+      } else {
+        ({ vaults } = await this.handleRemoteRepo(opts));
+      }
     } else {
       const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
       const fsPath = VaultUtils.normVaultPath({

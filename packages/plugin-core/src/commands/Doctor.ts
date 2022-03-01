@@ -382,6 +382,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
+        ds.dispose();
         if (this.extension.fileWatcher) {
           this.extension.fileWatcher.pause = false;
         }
@@ -403,6 +404,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           exit: false,
           quiet: true,
         });
+        ds.dispose();
         if (out.resp.length === 0) {
           window.showInformationMessage(`There are no broken links!`);
           break;
@@ -421,6 +423,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           engine,
           exit: false,
         });
+        ds.dispose();
       }
     }
 

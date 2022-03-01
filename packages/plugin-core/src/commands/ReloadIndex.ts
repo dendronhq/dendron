@@ -13,7 +13,6 @@ import {
   schemaModuleOpts2File,
   vault2Path,
 } from "@dendronhq/common-server";
-import { Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -26,7 +25,6 @@ import { BasicCommand } from "./base";
 enum AutoFixAction {
   CREATE_ROOT_SCHEMA = "create root schema",
   CREATE_ROOT_NOTE = "create root note",
-  SET_REMOTE_VAULT = "set remote vault",
 }
 
 function categorizeActions(actions: (AutoFixAction | undefined)[]) {
@@ -36,9 +34,6 @@ function categorizeActions(actions: (AutoFixAction | undefined)[]) {
     ).length,
     [AutoFixAction.CREATE_ROOT_SCHEMA]: actions.filter(
       (item) => item === AutoFixAction.CREATE_ROOT_SCHEMA
-    ).length,
-    [AutoFixAction.SET_REMOTE_VAULT]: actions.filter(
-      (item) => item === AutoFixAction.SET_REMOTE_VAULT
     ).length,
   };
 }
@@ -92,37 +87,6 @@ export class ReloadIndexCommand extends BasicCommand<
     return AutoFixAction.CREATE_ROOT_NOTE;
   }
 
-  /** Convert a local vault to a remote vault if it is in a git repository and has a remote set. */
-  private async convertToRemoteVaultIfPossible(
-    wsRoot: string,
-    vault: DVault
-  ): Promise<undefined | AutoFixAction> {
-    const ctx = "ReloadIndex.convertToRemoteVaultIfPossible";
-    const vaultDir = vault2Path({ wsRoot, vault });
-    const gitPath = path.join(vaultDir, ".git");
-    // Already a remote vault
-    if (vault.remote !== undefined) return;
-    // Not a git repository, nothing to convert
-    if (!(await fs.pathExists(gitPath))) return;
-
-    const git = new Git({ localUrl: vaultDir });
-    const remoteUrl = await git.getRemoteUrl();
-    // We can't convert if there is no remote
-    if (!remoteUrl) return;
-
-    // Need the workspace service to function
-    const { workspaceService } = ExtensionProvider.getExtension();
-    if (!workspaceService) return;
-    this.L.info({
-      ctx,
-      vaultDir,
-      remoteUrl,
-      msg: "converting local vault to a remote vault",
-    });
-    workspaceService.markVaultAsRemoteInConfig(vault, remoteUrl);
-    return AutoFixAction.SET_REMOTE_VAULT;
-  }
-
   /**
    * Update index
    * @param opts
@@ -142,7 +106,6 @@ export class ReloadIndexCommand extends BasicCommand<
           return [
             this.createRootSchemaIfMissing(wsRoot, vault),
             this.createRootNoteIfMissing(wsRoot, vault),
-            this.convertToRemoteVaultIfPossible(wsRoot, vault),
           ];
         })
       );

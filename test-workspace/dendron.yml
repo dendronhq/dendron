@@ -3,6 +3,7 @@ dev:
     enableWebUI: true
     enablePreviewV2: true
     enableExportPodV2: true
+    enableSelfContainedVaults: true
 commands:
     lookup:
         note:

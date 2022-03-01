@@ -352,7 +352,6 @@ export class NoteUtils {
   }): NoteChangeEntry[] {
     const changed: NoteChangeEntry[] = [];
     const { childToDelete, notes } = opts;
-    // const parent = DNodeUtils.getParent(childToDelete, { nodeDict: notes });
     let parent;
     if (childToDelete.parent) {
       parent = notes[childToDelete.parent];

@@ -1013,31 +1013,31 @@ export class FileStorage implements DStore {
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
     if (existingNote) {
-      // make sure newly created note actually has a parent.
-      if (!note.parent) {
+      // make sure existing note actually has a parent.
+      if (!existingNote.parent) {
         throw new DendronError({
           message: `no parent found for ${note.fname}`,
         });
       }
 
       // save the state of the parent to later record changed entry.
-      const parent = this.notes[note.parent];
+      const parent = this.notes[existingNote.parent];
       const prevParentState = { ...parent };
 
       // delete the existing note.
       delete this.notes[existingNote.id];
       this.noteFnames.delete(existingNote);
 
-      // first, update parent note
+      // first, update existing note's parent
       // so that it doesn't hold the deleted existing note's id as children
       NoteUtils.deleteChildFromParent({
         childToDelete: existingNote,
         notes: this.notes,
       });
 
-      // then update parent note again
+      // then update parent note of existing note
       // so that the newly created note is a child
-      DNodeUtils.addChild(this.notes[note.parent], note);
+      DNodeUtils.addChild(this.notes[existingNote.parent], note);
 
       // add an entry for the updated parent if there was a change
       changed.push({

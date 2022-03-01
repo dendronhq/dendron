@@ -119,7 +119,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data.indexOf("Usertag")).toEqual(-1);
+              expect(data).not.toContain("Usertag");
             }
           },
           {
@@ -161,7 +161,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       });
     });
 
-    describe(" AND WHEN wikilinkToURL is set to true", () => {
+    describe("AND WHEN wikilinkToURL is set to true", () => {
       test("THEN expect wikilinks to update with note URL and ref links to be resolved", async () => {
         await runEngineTestV5(
           async (opts) => {
@@ -176,8 +176,8 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             if (_.isString(data)) {
               expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
               expect(data).toContain("foo body");
-              expect(data.indexOf("[foo](/notes/foo)")).toEqual(-1);
-              expect(data.indexOf("![[foo]]")).toEqual(-1);
+              expect(data).not.toContain("[foo](/notes/foo)");
+              expect(data).not.toContain("![[foo]]");
             }
           },
           {
@@ -210,8 +210,8 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
               expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
-              expect(data.indexOf("![[alpha]]")).toEqual(-1);
-              expect(data.indexOf("[foo](/notes/foo)")).toEqual(-1);
+              expect(data).not.toContain("![[alpha]]");
+              expect(data).not.toContain("[foo](/notes/foo)");
             }
           },
           {
@@ -250,8 +250,8 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
               expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
-              expect(data.indexOf("[foo](/notes/foo)")).toEqual(-1);
-              expect(data.indexOf("![[alpha]]")).toEqual(-1);
+              expect(data).not.toContain("[foo](/notes/foo)");
+              expect(data).not.toContain("![[alpha]]");
             }
           },
           {

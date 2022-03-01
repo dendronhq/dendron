@@ -175,6 +175,11 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
                 expect(createEntries[0].note.fname).toEqual("foo");
                 expect(createEntries[0].note.id).toEqual("updatedID");
+                expect(createEntries[0].note.children).toEqual(["foo.ch1"]);
+                expect(
+                  createEntries[0].note.parent &&
+                    engine.notes[createEntries[0].note.parent].fname
+                ).toEqual("root");
                 expect(deleteEntries[0].note.fname).toEqual("foo");
                 expect(deleteEntries[0].note.id).toEqual("foo");
 

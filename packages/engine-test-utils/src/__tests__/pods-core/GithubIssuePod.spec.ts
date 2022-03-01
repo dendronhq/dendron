@@ -216,7 +216,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, issue.vault)
           );
-          issue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          issue.parent = rootNote.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -252,7 +255,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, scratchIssue.vault)
           );
-          scratchIssue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          scratchIssue.parent = rootNote.id;
           await engine.writeNote(scratchIssue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -293,7 +299,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, issue.vault)
           );
-          scratchIssue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          scratchIssue.parent = rootNote.id;
           scratchIssue.custom = {};
           await engine.writeNote(scratchIssue, { newNode: true });
           const resp = await pod.execute({
@@ -334,7 +343,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, issue.vault)
           );
-          issue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          issue.parent = rootNote.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -373,7 +385,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, issue.vault)
           );
-          issue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          issue.parent = rootNote.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,
@@ -413,7 +428,10 @@ describe("GIVEN: Github publish pod is run for a note", () => {
           const rootNote = NoteUtils.getRoots(engine.notes).find((note) =>
             _.isEqual(note.vault, issue.vault)
           );
-          issue.parent = rootNote!.id;
+          if (!rootNote) {
+            throw new Error("No root note found.");
+          }
+          issue.parent = rootNote.id;
           await engine.writeNote(issue, { newNode: true });
           const resp = await pod.execute({
             engine,

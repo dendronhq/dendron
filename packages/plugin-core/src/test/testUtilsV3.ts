@@ -90,16 +90,17 @@ type SetupWorkspaceType = {
 
 export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 &
   SetupWorkspaceType & {
-    ctx: ExtensionContext;
+    ctx?: ExtensionContext;
     preSetupHook?: PreSetupCmdHookFunction;
     postSetupHook?: PostSetupWorkspaceHook;
     setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
     modConfigCb?: ModConfigCb;
+    noSetInstallStatus?: boolean; // by default, we set install status to NO_CHANGE. use this when you need to test this logic
   };
 
 export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
   SetupWorkspaceType & {
-    ctx: ExtensionContext;
+    ctx?: ExtensionContext;
     /**
      * Runs before the workspace is initialized
      */
@@ -216,7 +217,7 @@ export async function setupLegacyWorkspaceMulti(
   let workspaceFolders: readonly WorkspaceFolder[] | undefined;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
-  new StateService(opts.ctx); // eslint-disable-line no-new
+  new StateService(opts.ctx!); // eslint-disable-line no-new
   setupCodeConfiguration(opts);
   if (copts.workspaceType === WorkspaceType.CODE) {
     stubWorkspace({ wsRoot, vaults });
@@ -271,11 +272,11 @@ export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
-  await _activate(opts.ctx);
+  await _activate(opts.ctx!);
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  cleanupVSCodeContextSubscriptions(opts.ctx);
+  cleanupVSCodeContextSubscriptions(opts.ctx!);
 }
 
 /**
@@ -285,11 +286,11 @@ export async function runLegacyMultiWorkspaceTest(
   opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
-  await _activate(opts.ctx);
+  await _activate(opts.ctx!);
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  cleanupVSCodeContextSubscriptions(opts.ctx);
+  cleanupVSCodeContextSubscriptions(opts.ctx!);
 }
 
 export function addDebugServerOverride() {
@@ -301,11 +302,13 @@ export function addDebugServerOverride() {
 }
 
 /**
+ * @deprecated. If using {@link describeSingleWS} or {@link describeMultiWS}, this call is no longer necessary
+ *
+ * If you need before or after hooks, you can use `before()` and `after()` to set them up.
+ * Timeout and `noSetInstallStatus` can be set on the options for the test harnesses.
  *
  * @param _this
  * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
- * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
- *  ^eveqm680bwxo
  */
 export function setupBeforeAfter(
   _this: any,
@@ -459,15 +462,15 @@ export function describeMultiWS(
   title: string,
   opts: SetupLegacyWorkspaceMultiOpts & {
     /**
-     * Run before we stub vscode mock workspace
+     * Run after we stub vscode mock workspace, but before the workspace is created
      */
     beforeHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
-     * Run before dendron is activated
+     * Run after the workspace is crated, but before dendron is activated
      */
     preActivateHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
-     * Run after all the tests have run
+     * @deprecated Please use an `after()` hook instead
      */
     afterHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
     /**
@@ -484,17 +487,19 @@ export function describeMultiWS(
     if (opts.timeout) {
       this.timeout(opts.timeout);
     }
+    let ctx: ExtensionContext;
     before(async () => {
+      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
       if (opts.beforeHook) {
-        await opts.beforeHook({ ctx: opts.ctx });
+        await opts.beforeHook({ ctx });
       }
 
-      await setupLegacyWorkspaceMulti(opts);
+      await setupLegacyWorkspaceMulti({ ...opts, ctx });
 
       if (opts.preActivateHook) {
-        await opts.preActivateHook({ ctx: opts.ctx });
+        await opts.preActivateHook({ ctx });
       }
-      await _activate(opts.ctx);
+      await _activate(ctx);
     });
 
     const result = fn();
@@ -503,9 +508,9 @@ export function describeMultiWS(
     // Release all registered resouces such as commands and providers
     after(async () => {
       if (opts.afterHook) {
-        await opts.afterHook({ ctx: opts.ctx });
+        await opts.afterHook({ ctx });
       }
-      cleanupVSCodeContextSubscriptions(opts.ctx);
+      cleanupWorkspaceStubs(ctx);
     });
   });
 }
@@ -525,9 +530,11 @@ export function describeSingleWS(
   fn: () => void
 ) {
   describe(title, () => {
+    let ctx: ExtensionContext;
     before(async () => {
+      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
       await setupLegacyWorkspace(opts);
-      await _activate(opts.ctx);
+      await _activate(ctx);
     });
 
     const result = fn();
@@ -535,7 +542,7 @@ export function describeSingleWS(
 
     // Release all registered resouces such as commands and providers
     after(() => {
-      cleanupVSCodeContextSubscriptions(opts.ctx);
+      cleanupWorkspaceStubs(ctx);
     });
   });
 }
@@ -566,4 +573,27 @@ export function stubCancellationToken(): CancellationToken {
       };
     },
   };
+}
+
+function setupWorkspaceStubs(opts: {
+  ctx?: ExtensionContext;
+  noSetInstallStatus?: boolean;
+}): ExtensionContext {
+  const ctx = opts.ctx ?? VSCodeUtils.getOrCreateMockContext();
+
+  // workspace has not upgraded
+  if (!opts.noSetInstallStatus) {
+    sinon
+      .stub(VSCodeUtils, "getInstallStatusForExtension")
+      .returns(InstallStatus.NO_CHANGE);
+  }
+  sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());
+  Logger.configure(ctx, "info");
+  return ctx;
+}
+
+function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
+  HistoryService.instance().clearSubscriptions();
+  cleanupVSCodeContextSubscriptions(ctx);
+  sinon.restore();
 }

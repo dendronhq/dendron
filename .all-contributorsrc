@@ -1491,6 +1491,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "novelhawk",
+      "name": "Raffaello Fraboni",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10281615?v=4",
+      "profile": "https://github.com/novelhawk",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1001,3 +1001,5 @@ export const INCOMPATIBLE_EXTENSIONS = [
   "maxedmands.vscode-zettel-markdown-notes",
   "tchayen.markdown-links",
 ];
+
+export const KEYBINDING_CONFLICT_EXTENSIONS = ["vscodevim.vim"];

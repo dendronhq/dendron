@@ -10,7 +10,7 @@ suite("JSONExportPodCommand", function () {
     beforeHook: () => {},
   });
 
-  describe("GIVEN a GoogleDocsExportPodCommand is ran with Vault scope", () => {
+  describe("GIVEN a JSONExportPodCommand is ran with Vault scope", () => {
     describeSingleWS(
       "WHEN the destination is clipboard",
       {

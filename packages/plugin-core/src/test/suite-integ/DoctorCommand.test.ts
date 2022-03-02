@@ -1,8 +1,10 @@
+/* eslint-disable no-undef */
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -10,6 +12,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { PodUIControls } from "../../components/pods/PodControls";
 import { INCOMPATIBLE_EXTENSIONS } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -23,9 +26,7 @@ import {
 } from "../testUtilsV3";
 
 suite("DoctorCommandTest", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {});
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -150,9 +151,7 @@ suite("DoctorCommandTest", function () {
 });
 
 suite("CREATE_MISSING_LINKED_NOTES", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this);
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("basic proceed, file scoped", (done) => {
     runLegacySingleWorkspaceTest({
@@ -654,18 +653,6 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
       ctx,
     },
     () => {
-      test("THEN reload is not called", async () => {
-        const extension = ExtensionProvider.getExtension();
-        const cmd = new DoctorCommand(extension);
-        const reloadSpy = sinon.spy(cmd, "reload" as keyof DoctorCommand);
-        await cmd.execute({
-          action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
-          scope: "workspace",
-        });
-
-        expect(reloadSpy.called).toBeFalsy();
-      });
-
       test("THEN List all as not installed if found none", async () => {
         const extension = ExtensionProvider.getExtension();
         const cmd = new DoctorCommand(extension);
@@ -712,6 +699,67 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
             nomatch: ["Not Installed"],
           })
         ).toBeTruthy();
+      });
+    }
+  );
+});
+
+suite("UPDATE_AIRTABLE_METADATA", function () {
+  const ctx = setupBeforeAfter(this);
+
+  describeMultiWS(
+    "GIVEN updateAirtableMetadata selected",
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo.bar",
+          vault: vaults[0],
+          custom: {
+            airtableId: "airtableId-one",
+          },
+        });
+      },
+      ctx,
+    },
+    () => {
+      test.only("THEN remove airtableId from note FM and update metadata.json", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const engine = ext.getEngine();
+        const cmd = new DoctorCommand(ext);
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActionsEnum.UPDATE_AIRTABLE_METADATA,
+            scope: "workspace",
+          })
+        );
+        const hierarchyQuickPickStub = sinon.stub(cmd, "getHierarchy");
+        const podIdQuickPickStub = sinon.stub(
+          PodUIControls,
+          "promptToSelectCustomPodId"
+        );
+        try {
+          hierarchyQuickPickStub
+            .onFirstCall()
+            .returns(
+              Promise.resolve({ hierarchy: "foo.bar", vault: engine.vaults[0] })
+            );
+          podIdQuickPickStub.onCall(0).returns(Promise.resolve("dendron.task"));
+          await cmd.run();
+          const filePath = PodUtils.getPodMetadataJsonFilePath({
+            wsRoot: engine.wsRoot,
+            vault: engine.vaults[0],
+            podId: "dendron.task",
+          });
+          const metadata = PodUtils.readMetadataFromFilepath(filePath);
+          expect(metadata.length).toEqual(1);
+          expect(metadata[0].airtableId).toEqual("airtableId-one");
+          expect(metadata[0].dendronId).toEqual("foo.bar");
+        } finally {
+          gatherInputsStub.restore();
+          hierarchyQuickPickStub.restore();
+          podIdQuickPickStub.restore();
+        }
       });
     }
   );

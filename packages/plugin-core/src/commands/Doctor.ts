@@ -94,6 +94,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.extension = ext;
   }
 
+  getHierarchy() {
+    return new QuickPickHierarchySelector().getHierarchy();
+  }
+
   createQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut, items } = _.defaults(opts, {
       ignoreFocusOut: true,
@@ -428,7 +432,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActionsEnum.UPDATE_AIRTABLE_METADATA: {
-        const selection = await new QuickPickHierarchySelector().getHierarchy();
+        const selection = await this.getHierarchy();
         if (!selection) break;
         const { hierarchy, vault } = selection;
         const podId = await PodUIControls.promptToSelectCustomPodId();

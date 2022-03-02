@@ -178,6 +178,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
     const records = exportReturnValue.data;
     const engine = ExtensionProvider.getEngine();
     const logger = this.L;
+    let errorMsg;
     if (records?.created) {
       await AirtableUtils.updateMedataFileForNewlySyncedNotes({
         records: records.created,
@@ -191,7 +192,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
     const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
 
     if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
+      errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
         exportReturnValue.error
       )}`;
 
@@ -201,6 +202,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
         `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
       );
     }
+    return errorMsg;
   }
 
   /**

@@ -22,8 +22,9 @@ suite("GoogleDocsExportPodCommand", function () {
         ctx,
       },
       () => {
-        const cmd = new GoogleDocsExportPodCommand();
         test("THEN error message must be displayed", async () => {
+          const ext = ExtensionProvider.getExtension();
+          const cmd = new GoogleDocsExportPodCommand(ext);
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
           const notePath = path.join(

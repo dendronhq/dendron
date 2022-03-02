@@ -151,11 +151,19 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        vault,
-        engine,
-      });
+      let note;
+
+      // Special Logic for 403 Error Static Page:
+      if (fname === "403") {
+        note = SiteUtils.addSiteOnlyNotes({ engine })[0];
+      } else {
+        note = NoteUtils.getNoteByFnameFromEngine({
+          fname,
+          vault,
+          engine,
+        });
+      }
+
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }

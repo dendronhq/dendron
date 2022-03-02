@@ -818,30 +818,6 @@ export class NoteUtils {
     return latestUpdated;
   }
 
-  /** @deprecated see {@link NoteUtils.getNotesByFnameFromEngine} */
-  static getNotesByFname({
-    fname,
-    notes,
-    vault,
-  }: {
-    fname: string;
-    notes: NotePropsDict | NoteProps[];
-    vault?: DVault;
-  }): NoteProps[] {
-    if (!_.isArray(notes)) {
-      notes = _.values(notes);
-    }
-    const lowercaseFName = fname.toLowerCase();
-
-    const out = _.filter(notes, (ent) => {
-      return (
-        ent.fname.toLowerCase() === lowercaseFName &&
-        (vault ? ent.vault.fsPath === vault.fsPath : true)
-      );
-    });
-    return out;
-  }
-
   static getNotesByFnameFromEngine({
     fname,
     engine,

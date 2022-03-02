@@ -23,11 +23,10 @@ const plugin: Plugin = function (this: Unified.Processor) {
       return;
     }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes: engine.notes,
-      vault: vault!,
-      wsRoot: engine.wsRoot,
+      engine,
+      vault,
     });
     if (_.isUndefined(note)) {
       return;
@@ -44,13 +43,11 @@ const plugin: Plugin = function (this: Unified.Processor) {
         vaults: engine.vaults,
         vname: vaultName,
       })!;
-      const note = NoteUtils.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname: backlink.from.fname!,
-        notes: engine.notes,
+        engine,
         vault,
-        wsRoot: engine.wsRoot,
       });
-
       if (!note) {
         return false;
       }

@@ -364,12 +364,13 @@ export async function provideBlockCompletionItems(
         })
       : undefined;
     // If we couldn't find the linked note, don't do anything
-    if (_.isNull(link) || _.isUndefined(link.value)) return;
-    note = NoteUtils.getNotesByFname({
+    if (_.isNull(link) || _.isUndefined(link.value) || _.isUndefined(vault))
+      return;
+    note = NoteUtils.getNoteByFnameFromEngine({
       fname: link.value,
       vault,
-      notes: engine.notes,
-    })[0];
+      engine,
+    });
     otherFile = true;
   } else {
     // This anchor is to the same file, e.g. [[#

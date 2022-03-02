@@ -1,14 +1,13 @@
 import {
   ConfigUtils,
   DEngine,
-  NoteProps,
   NoteUtils,
   TaskNoteUtils,
   VaultUtils,
   VSRange,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DECORATION_TYPES, Decoration } from "./utils";
+import { Decoration, DECORATION_TYPES } from "./utils";
 
 export type DecorationTaskNote = Decoration & {
   type: DECORATION_TYPES.taskNote;
@@ -28,16 +27,18 @@ export function decorateTaskNote({
   fname: string;
   vaultName?: string;
 }) {
-  const { notes, vaults, config } = engine;
+  const { vaults, config } = engine;
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
-  const note: NoteProps | undefined = NoteUtils.getNotesByFname({
+  if (!vault) return;
+
+  const note = NoteUtils.getNoteByFnameFromEngine({
     fname,
     vault,
-    notes,
-  })[0];
+    engine,
+  });
   if (!note || !TaskNoteUtils.isTaskNote(note)) return;
 
   // Determines whether the task link is preceded by an empty or full checkbox

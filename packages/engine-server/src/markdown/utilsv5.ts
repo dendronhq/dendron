@@ -171,19 +171,6 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
-  static getNoteByFname(proc: Processor, { fname }: { fname: string }) {
-    const { notes, vault, wsRoot } = this.getProcData(proc);
-    // TODO: this is for backwards compatibility
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
-      fname,
-      notes: notes || engine.notes,
-      vault,
-      wsRoot,
-    });
-    return note;
-  }
-
   static getProcData(proc: Processor): ProcDataFullV5 {
     let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
 
@@ -304,12 +291,11 @@ export class MDUtilsV5 {
             data.wsRoot = data.engine!.wsRoot;
           }
 
-          const note = NoteUtils.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
-            notes: data.engine!.notes,
+            engine: data.engine!,
             vault: data.vault!,
-            wsRoot: data.wsRoot,
-          }) as NoteProps;
+          });
 
           if (!_.isUndefined(note)) {
             proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
@@ -431,7 +417,7 @@ export class MDUtilsV5 {
     });
 
     // add additional plugin for publishing
-
+    //maybe something here is interfering
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })

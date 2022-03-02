@@ -42,7 +42,6 @@ import { extendedImage2html } from "./extendedImage";
 import { convertNoteRefASTV2, NoteRefsOptsV2 } from "./noteRefsV2";
 import {
   addError,
-  getNoteOrError,
   hashTag2WikiLinkNoteV4,
   RemarkUtils,
   userTag2WikiLinkNoteV4,
@@ -152,7 +151,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = MDUtilsV5.getNoteByFname(proc, { fname });
+      const note = NoteUtils.getNoteByFnameFromEngine({
+        fname,
+        vault,
+        engine,
+      });
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
@@ -218,14 +221,15 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
-          const notes = NoteUtils.getNotesByFname({
+          note = NoteUtils.getNoteByFnameFromEngine({
             fname: valueOrig,
-            notes: engine.notes,
             vault,
+            engine,
           });
-          const out = getNoteOrError(notes, value);
-          error = out.error;
-          note = out.note;
+
+          if (!note) {
+            error = new DendronError({ message: `no note found. ${value}` });
+          }
         }
 
         let color: string | undefined;

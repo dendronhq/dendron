@@ -255,7 +255,7 @@ export class AirtableUtils {
           note,
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
-        const { vaults, notes } = engine;
+        const { vaults } = engine;
         const notesWithNoIds: NoteProps[] = [];
         const recordIds = links.flatMap((l) => {
           if (_.isUndefined(l.to)) {
@@ -268,7 +268,11 @@ export class AirtableUtils {
           const vault = vaultName
             ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
             : undefined;
-          const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
+          const _notes = NoteUtils.getNotesByFnameFromEngine({
+            fname,
+            engine,
+            vault,
+          });
           const _recordIds = _notes
             .map((n) => {
               const id = AirtableUtils.getAirtableIdFromNote(n);

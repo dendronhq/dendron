@@ -496,7 +496,7 @@ export class LinkUtils {
     engine: DEngineClient;
   }) {
     const { activeNote, wikiLinks, engine } = opts;
-    const { vaults, notes, wsRoot } = engine;
+    const { vaults } = engine;
 
     let out: DNodeProps[] = [];
     wikiLinks.forEach((wikiLink) => {
@@ -510,19 +510,18 @@ export class LinkUtils {
         : undefined;
 
       if (vault) {
-        const note = NoteUtils.getNoteByFnameV5({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes,
+          engine,
           vault,
-          wsRoot,
         });
         if (note) {
           out.push(note);
         }
       } else {
-        const notesWithSameFname = NoteUtils.getNotesByFname({
+        const notesWithSameFname = NoteUtils.getNotesByFnameFromEngine({
           fname,
-          notes,
+          engine,
         });
         out = out.concat(notesWithSameFname);
       }

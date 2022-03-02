@@ -240,9 +240,9 @@ export class SiteUtils {
     const notesForHiearchy = _.clone(engine.notes);
 
     // get the domain note
-    const notes = NoteUtils.getNotesByFname({
+    const notes = NoteUtils.getNotesByFnameFromEngine({
       fname: domain,
-      notes: notesForHiearchy,
+      engine,
     });
     logger.info({
       ctx: "filterByHiearchy:candidates",
@@ -474,11 +474,10 @@ export class SiteUtils {
           vname,
           vaults: engine.vaults,
         });
-        const maybeNote = NoteUtils.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes: noteDict,
+          engine,
           vault,
-          wsRoot: engine.wsRoot,
         });
         if (maybeNote && maybeNote.stub && !allowStubs) {
           return;

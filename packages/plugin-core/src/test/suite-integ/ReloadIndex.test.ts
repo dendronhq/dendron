@@ -5,16 +5,13 @@ import _ from "lodash";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
-import * as vscode from "vscode";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { test } from "mocha";
 
 suite("ReloadIndex", function () {
-  // let root: DirResult;
-  let ctx: vscode.ExtensionContext;
-  // let vaultDir: string;
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 

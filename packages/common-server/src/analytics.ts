@@ -89,13 +89,6 @@ export type SegmentContext = Partial<{
   userAgent: string;
 }>;
 
-export type SegmentEventProps = {
-  event: string;
-  properties: { [key: string]: any };
-  timestamp?: Date;
-  context?: any;
-};
-
 export enum TelemetryStatus {
   /** The user set that telemetry should be disabled in the workspace config. */
   DISABLED_BY_WS_CONFIG = "disabled by ws config",
@@ -125,6 +118,14 @@ enum SegmentResidualFlushStatus {
 
 export type TelemetryConfig = {
   status: TelemetryStatus;
+};
+
+export type SegmentEventProps = {
+  event: string;
+  properties?: { [key: string]: any };
+  context?: any;
+  timestamp?: Date;
+  integrations?: { [key: string]: any };
 };
 
 export class SegmentClient {
@@ -298,27 +299,20 @@ export class SegmentClient {
    * successfully uploaded to Segment or has been written to the cache file. It
    * is not recommended to await this function for metrics tracking.
    */
-  async track(
-    event: string,
-    data?: { [key: string]: string | number | boolean },
-    opts?: { context: any }
-  ): Promise<void> {
+  async track(opts: SegmentEventProps): Promise<void> {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
-
-    const payload: { [key: string]: any } = { ...data };
-    const { context } = opts || {};
-
-    const resp = await this.trackInternal(event, payload, context);
+    const resp = await this.trackInternal(opts);
 
     if (resp.error && this._cachePath) {
       try {
         await this.writeToResidualCache(this._cachePath, {
-          event,
-          properties: payload,
+          event: opts.event,
+          properties: opts.properties,
+          context: opts.context,
           timestamp: resp.data?.timestamp,
-          context,
+          integrations: opts.integrations,
         });
       } catch (err: any) {
         this.logger.error(
@@ -330,51 +324,55 @@ export class SegmentClient {
     }
   }
 
-  private async trackInternal(
-    event: string,
-    properties: { [key: string]: any },
-    context: any,
-    timestamp?: Date
-  ): Promise<RespV2<SegmentEventProps>> {
+  private async trackInternal({
+    event,
+    properties,
+    context,
+    timestamp,
+    integrations,
+  }: SegmentEventProps): Promise<RespV2<SegmentEventProps>> {
     return new Promise<RespV2<SegmentEventProps>>((resolve) => {
-      const payload =
-        timestamp !== undefined
-          ? {
-              anonymousId: this._anonymousId,
-              event,
-              properties,
-              timestamp: new Date(timestamp),
-              context,
+      if (!_.isUndefined(timestamp)) {
+        timestamp ||= new Date(timestamp);
+      }
+      this._segmentInstance.track(
+        {
+          anonymousId: this._anonymousId,
+          event,
+          properties,
+          timestamp,
+          context,
+          integrations,
+        },
+        (err: Error) => {
+          if (err) {
+            this.logger.info("Failed to send event " + event);
+            let eventTime: Date;
+            try {
+              eventTime = new Date(
+                JSON.parse((err as any).config.data).timestamp
+              );
+            } catch (err) {
+              eventTime = new Date();
             }
-          : { anonymousId: this._anonymousId, event, properties, context };
-
-      this._segmentInstance.track(payload, (err: Error) => {
-        if (err) {
-          this.logger.info("Failed to send event " + event);
-          let eventTime: Date;
-          try {
-            eventTime = new Date(
-              JSON.parse((err as any).config.data).timestamp
-            );
-          } catch (err) {
-            eventTime = new Date();
+            resolve({
+              data: {
+                event,
+                properties,
+                context,
+                timestamp: eventTime,
+                integrations,
+              },
+              error: new DendronError({
+                message: "Failed to send event " + event,
+                innerError: err,
+              }),
+            });
           }
-          resolve({
-            data: {
-              event,
-              properties,
-              context,
-              timestamp: eventTime,
-            },
-            error: new DendronError({
-              message: "Failed to send event " + event,
-              innerError: err,
-            }),
-          });
-        }
 
-        resolve({ error: null });
-      });
+          resolve({ error: null });
+        }
+      );
     });
   }
 
@@ -446,12 +444,12 @@ export class SegmentClient {
             resolve(SegmentResidualFlushStatus.nonRetryableError);
           }
 
-          const promised = this.trackInternal(
-            data.event,
-            data.properties,
-            data.context,
-            data.timestamp
-          );
+          const promised = this.trackInternal({
+            event: data.event,
+            properties: data.properties,
+            context: data.context,
+            timestamp: data.timestamp,
+          });
 
           promised
             .then((resp) => {
@@ -508,7 +506,10 @@ export class SegmentClient {
     };
 
     if (successCount > 0) {
-      this.track("Segment_Residual_Data_Recovered", stats);
+      this.track({
+        event: "Segment_Residual_Data_Recovered",
+        properties: stats,
+      });
     }
 
     return stats;
@@ -549,38 +550,59 @@ export type VSCodeIdentifyProps = {
 export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
-  static track(
-    event: string,
-    platformProps: VSCodeProps | CLIProps,
-    props?: any
-  ) {
+  static _trackCommon({
+    event,
+    context,
+    platformProps,
+    properties,
+    integrations,
+    timestamp,
+  }: SegmentEventProps & {
+    platformProps: VSCodeProps | CLIProps;
+  }) {
     if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     const { type, ...rest } = platformProps;
-    SegmentClient.instance().track(event, {
-      ...props,
+    const _properties = {
+      ...properties,
       ...SegmentUtils.getCommonProps(),
       userAgent: type,
       ...rest,
+    };
+    return SegmentClient.instance().track({
+      event,
+      properties: _properties,
+      context,
+      integrations,
+      timestamp,
     });
   }
 
-  static async trackSync(
-    event: string,
-    platformProps: VSCodeProps | CLIProps,
-    props?: any
-  ) {
-    if (RuntimeUtils.isRunningInTestOrCI()) {
-      return;
+  /**
+   * Async tracking. Do not return promise from track call so it cannot be awaited
+   * in downstream functions
+   */
+  static track(
+    opts: SegmentEventProps & {
+      platformProps: VSCodeProps | CLIProps;
     }
-    const { type, ...rest } = platformProps;
-    await SegmentClient.instance().track(event, {
-      ...props,
-      ...SegmentUtils.getCommonProps(),
-      userAgent: type,
-      ...rest,
-    });
+  ): void {
+    this._trackCommon(opts);
+    return;
+  }
+
+  /**
+   * Sync tracking. NOTE that the downstream function must await this function in order for this to be synchronous
+   * @param opts
+   * @returns
+   */
+  static async trackSync(
+    opts: SegmentEventProps & {
+      platformProps: VSCodeProps | CLIProps;
+    }
+  ): Promise<void> {
+    return this._trackCommon(opts);
   }
 
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {

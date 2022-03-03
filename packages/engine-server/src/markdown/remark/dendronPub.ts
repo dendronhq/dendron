@@ -321,6 +321,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         //_node.value = newValue;
         //_node.value = alias;
         _node.data = {
+          vaultName: data.vaultName,
           alias,
           permalink: href,
           exists,

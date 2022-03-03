@@ -2,6 +2,7 @@ import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   FileTestUtils,
+  NoteTestUtilsV4,
   NOTE_PRESETS_V4,
   RunEngineTestFunctionOpts,
 } from "@dendronhq/common-test-utils";
@@ -21,16 +22,26 @@ import { ENGINE_HOOKS } from "../../../presets";
  */
 describe("GIVEN a Markdown Export Pod with a particular config", () => {
   describe("When the destination is clipboard", () => {
-    const setupPod = (opts: RunEngineTestFunctionOpts, fname: string) => {
+    const setupPod = (setupOpts: {
+      opts: RunEngineTestFunctionOpts;
+      fname: string;
+      podConfigOpts?: Partial<RunnableMarkdownV2PodConfig>;
+    }) => {
+      const { opts, fname, podConfigOpts } = setupOpts;
+      const config = opts.engine.config;
+      if (config.publishing) {
+        config.publishing.siteUrl = "https://foo.com";
+      }
       const podConfig: RunnableMarkdownV2PodConfig = {
         exportScope: PodExportScope.Note,
         destination: "clipboard",
+        ...podConfigOpts,
       };
 
       const pod = new MarkdownExportPodV2({
         podConfig,
         engine: opts.engine,
-        dendronConfig: opts.dendronConfig!,
+        dendronConfig: config,
       });
       const props = NoteUtils.getNoteByFnameFromEngine({
         fname,
@@ -43,7 +54,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       test("THEN expect wikilinks to be converted", async () => {
         await runEngineTestV5(
           async (opts) => {
-            const { pod, props } = setupPod(opts, "simple-wikilink");
+            const { pod, props } = setupPod({ opts, fname: "simple-wikilink" });
             const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
@@ -73,7 +84,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       test("THEN expect user tags to remain unchanged", async () => {
         await runEngineTestV5(
           async (opts) => {
-            const { pod, props } = setupPod(opts, "usertag");
+            const { pod, props } = setupPod({ opts, fname: "usertag" });
             const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
@@ -99,29 +110,16 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       test("THEN expect title to not be present as h1 header", async () => {
         await runEngineTestV5(
           async (opts) => {
-            const podConfig: RunnableMarkdownV2PodConfig = {
-              exportScope: PodExportScope.Note,
-              destination: "clipboard",
-              addFrontmatterTitle: false,
-            };
-
-            const pod = new MarkdownExportPodV2({
-              podConfig,
-              engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
-            });
-
-            const props = NoteUtils.getNoteByFnameFromEngine({
+            const { pod, props } = setupPod({
+              opts,
               fname: "usertag",
-              vault: opts.vaults[0],
-              engine: opts.engine,
-            }) as NoteProps;
-
+              podConfigOpts: { addFrontmatterTitle: false },
+            });
             const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data.indexOf("Usertag")).toEqual(-1);
+              expect(data).not.toContain("Usertag");
             }
           },
           {
@@ -141,7 +139,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       test("THEN expect tags to remain unparsed", async () => {
         await runEngineTestV5(
           async (opts) => {
-            const { pod, props } = setupPod(opts, "footag");
+            const { pod, props } = setupPod({ opts, fname: "footag" });
             const result = await pod.exportNotes([props]);
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
@@ -156,6 +154,130 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               await NOTE_PRESETS_V4.NOTE_WITH_TAG.create({
                 wsRoot,
                 vault: vaults[0],
+              });
+            },
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN wikilinkToURL is set to true", () => {
+      test("THEN expect wikilinks to update with note URL and ref links to be resolved", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const { props, pod } = setupPod({
+              opts,
+              fname: "parent",
+              podConfigOpts: { wikiLinkToURL: true },
+            });
+            const result = await pod.exportNotes([props]);
+            const data = result.data?.exportedNotes!;
+            expect(_.isString(data)).toBeTruthy();
+            if (_.isString(data)) {
+              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("foo body");
+              expect(data).not.toContain("[foo](/notes/foo)");
+              expect(data).not.toContain("![[foo]]");
+            }
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                wsRoot,
+                vault: vaults[0],
+              });
+              await NoteTestUtilsV4.createNote({
+                wsRoot,
+                vault: vaults[0],
+                fname: "parent",
+                body: ["![[foo]]", "[[foo]]"].join("\n"),
+              });
+            },
+          }
+        );
+      });
+      test("THEN expect wikilinks inside ref links to be converted to Note URL", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const { props, pod } = setupPod({
+              opts,
+              fname: "beta",
+              podConfigOpts: { wikiLinkToURL: true },
+            });
+            const result = await pod.exportNotes([props]);
+            const data = result.data?.exportedNotes!;
+            expect(_.isString(data)).toBeTruthy();
+            if (_.isString(data)) {
+              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).not.toContain("![[alpha]]");
+              expect(data).not.toContain("[foo](/notes/foo)");
+            }
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              //fname foo, body: foo body
+              await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                wsRoot,
+                vault: vaults[0],
+              });
+              // fname: "beta", body: "![[alpha]]",
+              await NOTE_PRESETS_V4.NOTE_WITH_NOTE_REF_LINK.create({
+                wsRoot,
+                vault: vaults[0],
+              });
+              await NoteTestUtilsV4.createNote({
+                wsRoot,
+                vault: vaults[0],
+                fname: "alpha",
+                body: "[[foo]]",
+              });
+            },
+          }
+        );
+      });
+      test("THEN expect cross vault wikilinks inside ref links to be converted to Note URL", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const { props, pod } = setupPod({
+              opts,
+              fname: "beta",
+              podConfigOpts: { wikiLinkToURL: true },
+            });
+            const result = await pod.exportNotes([props]);
+            const data = result.data?.exportedNotes!;
+            expect(_.isString(data)).toBeTruthy();
+            if (_.isString(data)) {
+              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).not.toContain("[foo](/notes/foo)");
+              expect(data).not.toContain("![[alpha]]");
+            }
+          },
+          {
+            expect,
+            preSetupHook: async ({ wsRoot, vaults }) => {
+              //fname foo, body: foo body in vault2
+              await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                wsRoot,
+                vault: vaults[1],
+              });
+              //fname foo, body: foo body in vault1
+              await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                wsRoot,
+                vault: vaults[0],
+                genRandomId: true,
+              });
+              // fname: "beta", body: "![[alpha]]",
+              await NOTE_PRESETS_V4.NOTE_WITH_NOTE_REF_LINK.create({
+                wsRoot,
+                vault: vaults[0],
+              });
+              await NoteTestUtilsV4.createNote({
+                wsRoot,
+                vault: vaults[0],
+                fname: "alpha",
+                body: "[[dendron://vault2/foo]]",
               });
             },
           }

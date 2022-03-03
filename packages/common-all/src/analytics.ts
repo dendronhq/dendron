@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",
@@ -98,6 +99,10 @@ export enum ContextualUIEvents {
   ContextualUICodeAction = "ContextualUI_CodeAction",
 }
 
+export enum WorkspaceEvents {
+  AutoFix = "AutoFix",
+}
+
 export enum NativeWorkspaceEvents {
   DetectedInNonDendronWS = "Native_Workspace_Detected_In_Non_Dendron_WS", // watcher has detected a Dendron workspace getting created inside a non-Dendron workspace
 }
@@ -111,4 +116,5 @@ export const DendronEvents = {
   ConfigEvents,
   ContextualUIEvents,
   NativeWorkspaceEvents,
+  WorkspaceEvents,
 };

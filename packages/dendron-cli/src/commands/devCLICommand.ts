@@ -352,6 +352,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
 
+    if (!shouldPublishLocal) {
+      this.print(
+        "sleeping 2 mins for remote npm registry to have packages ready"
+      );
+      await new Promise((r) => setTimeout(r, 120000));
+    }
+
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
 

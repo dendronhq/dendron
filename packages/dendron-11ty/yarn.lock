@@ -88,10 +88,10 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@dendronhq/common-all@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.81.0.tgz#6622f1566fef1b38810987e6d4f121f7a6322a57"
-  integrity sha512-nkAlsjI09CXfxeWhFMR4uFYgsLPx8DZ/ByF59vEf4INrfaj28rZr33CySUeH8qOihBqoM+V9kJw84y1s/dJQPQ==
+"@dendronhq/common-all@^0.82.0":
+  version "0.82.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.82.0.tgz#7c015bdd49abbaddd27e6d73d3478f440c8fea2b"
+  integrity sha512-atRmnyoGE0RtSMHNUsEOUTCdnlu5aAal8QIMhvRi+MYrcZjK+xS8EQGNuAmrkeqvgpGqh5S0Uogn5ocOq29/vQ==
   dependencies:
     "@dendronhq/title" "^3.4.3"
     "@types/github-slugger" "^1.3.0"
@@ -122,12 +122,12 @@
     vscode-uri "^2.1.2"
     yamljs "^0.3.0"
 
-"@dendronhq/common-server@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.81.0.tgz#961b09cda7d83ae87438abb210713aedd9a35678"
-  integrity sha512-vWrS8Se0R8dyrE94nGdJLno6x/wXOzpe5W025Q/JlRsYTftw8fw7dbp7l+GZ4s+HtB+nH2rUC3BO3dL29c10/g==
+"@dendronhq/common-server@^0.82.0":
+  version "0.82.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.82.0.tgz#86e9b08abde7abd9a89a4f668588263c0444b13e"
+  integrity sha512-i+H9Wp97i4LslXXAAenjH55MHfzU2xm6Mss7+HXTNRcueJeynF7D+KfeA4tOg6N0iJxLCgH3UYxcWawCZ+lD0Q==
   dependencies:
-    "@dendronhq/common-all" "^0.81.0"
+    "@dendronhq/common-all" "^0.82.0"
     "@sentry/integrations" "^6.13.3"
     "@sentry/node" "^6.13.3"
     "@types/analytics-node" "^3.1.6"
@@ -167,13 +167,13 @@
     html-entities "^1.2.1"
     lodash "^4.17.19"
 
-"@dendronhq/engine-server@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/engine-server/-/engine-server-0.81.0.tgz#180bbf84d22a97015cd1b0b15419a6ffa5765644"
-  integrity sha512-ih9q75Sw/7qg8UR9L7F486C9obaZnDJDqMpgOUNX3p25cBe/smMHgri48h2KAa7AkJ4nEmsu92JnMzuYpbJ1ug==
+"@dendronhq/engine-server@^0.82.0":
+  version "0.82.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/engine-server/-/engine-server-0.82.0.tgz#d660b06027720da16be8dfdb0a3e8c8256cac5c4"
+  integrity sha512-yzclNomXhrsq6qcOW+Mck2f0lO6LgoTQiLQEixrLtQGJMUWUGlgtsI4gl+zMtVrqrNKa23gnsuAkNiNYPvbR/g==
   dependencies:
-    "@dendronhq/common-all" "^0.81.0"
-    "@dendronhq/common-server" "^0.81.0"
+    "@dendronhq/common-all" "^0.82.0"
+    "@dendronhq/common-server" "^0.82.0"
     "@dendronhq/remark-mermaid" "^0.2.0"
     "@jcoreio/async-throttle" "^1.4.3"
     "@mapbox/rehype-prism" "^0.5.0"
@@ -5173,7 +5173,7 @@ querystring@0.2.0:
 
 querystringify@^2.1.1:
   version "2.2.0"
-  resolved "https://registry.npmjs.org/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
+  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
   integrity sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==
 
 queue-microtask@^1.2.2:
@@ -5555,7 +5555,7 @@ require-main-filename@^2.0.0:
 
 requires-port@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.npmjs.org/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
+  resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
 resolve-cwd@^2.0.0:
@@ -6705,9 +6705,9 @@ urix@^0.1.0:
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
 
 url-parse@^1.4.3, url-parse@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.npmjs.org/url-parse/-/url-parse-1.5.3.tgz#71c1303d38fb6639ade183c2992c8cc0686df862"
-  integrity sha512-IIORyIQD9rvj0A4CLWsHkBBJuNqWpFQe224b6j9t/ABmquIS0qDU2pY6kl6AuOrL5OkCXHMCFNe1jBcuAggjvQ==
+  version "1.5.10"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.10.tgz#9d3c2f736c1d75dd3bd2be507dcc111f1e2ea9c1"
+  integrity sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"

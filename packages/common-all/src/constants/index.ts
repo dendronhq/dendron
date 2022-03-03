@@ -46,6 +46,7 @@ export const CONSTANTS = {
 };
 
 export enum ERROR_STATUS {
+  BACKUP_FAILED = "backup_failed",
   NODE_EXISTS = "node_exists",
   NO_SCHEMA_FOUND = "no_schema_found",
   NO_ROOT_SCHEMA_FOUND = "no_root_schema_found",

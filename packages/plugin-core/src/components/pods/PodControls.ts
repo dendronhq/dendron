@@ -532,7 +532,7 @@ export class PodUIControls {
     }
   }
 
-  // Promt user to select custom pod Id
+  // Prompt user to select custom pod Id
   public static async promptToSelectCustomPodId(): Promise<string | undefined> {
     const configs = PodV2ConfigManager.getAllPodConfigs(
       path.join(getExtension().podsDir, "custom")

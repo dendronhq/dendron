@@ -284,13 +284,14 @@ export class AirtableUtils {
           note,
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
-        if (!fieldMapping.configId) {
-          return {
-            error: ErrorFactory.createInvalidStateError({
-              message: "Please provide the pod config Id of linked records",
-            }),
-          };
-        }
+        // TODO: uncomment when Airtable completely uses new workflow
+        // if (!fieldMapping.configId) {
+        //   return {
+        //     error: ErrorFactory.createInvalidStateError({
+        //       message: "Please provide the pod config Id of linked records",
+        //     }),
+        //   };
+        // }
         const { vaults, notes } = engine;
         const notesWithNoIds: NoteProps[] = [];
         const recordIds = links.flatMap((l) => {
@@ -307,11 +308,19 @@ export class AirtableUtils {
           const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
           const _recordIds = _notes
             .map((n) => {
-              const id = AirtableUtils.getAirtableIdFromMetadataFile({
-                wsRoot: engine.wsRoot,
-                note: n,
-                podId: fieldMapping.configId,
-              });
+              let id: string | undefined;
+              // if config Id is given, first check in the configId.metadata.json file
+              if (fieldMapping.configId) {
+                id = AirtableUtils.getAirtableIdFromMetadataFile({
+                  wsRoot: engine.wsRoot,
+                  note: n,
+                  podId: fieldMapping.configId,
+                });
+              }
+              // if airtable id is not present in the metadata file, look in note's FM
+              if (!id) {
+                id = AirtableUtils.getAirtableIdFromNote(n);
+              }
               return {
                 note: n,
                 id,

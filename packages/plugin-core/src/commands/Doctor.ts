@@ -445,6 +445,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             VaultUtils.isEqualV2(value.vault, vault) &&
             value.custom.airtableId
         );
+        this.L.info({
+          ctx,
+          msg: `${DoctorActionsEnum.UPDATE_AIRTABLE_METADATA} candidates: ${candidates.length}`,
+        });
         const ds = new DoctorService();
         const out = await ds.executeDoctorActions({
           action: opts.action,

@@ -352,12 +352,37 @@ export class Git {
     }
   }
 
+  /** Returns the first remote that has been configured. */
   async getRemote(): Promise<string | undefined> {
+    // First see if we can determine the correct remote from the upstream of the current branch
+    const upstream = await this.getUpstream();
+    if (upstream) {
+      const upstreamMatch = /^([^/]+)[/].*/.exec(upstream);
+      if (upstreamMatch) {
+        const remote = upstreamMatch[1];
+        if (!_.isEmpty(remote)) return remote;
+      }
+    }
+    // If that fails, just default to the first remote the user has.
     try {
       const { stdout } = await this._execute("git remote");
-      const upstream = _.trim(stdout.split("\n")[0]);
-      if (!upstream) return undefined;
-      return upstream;
+      const remote = _.trim(stdout.split("\n")[0]);
+      if (_.isEmpty(remote)) return undefined;
+      return remote;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /** Returns the URL for the current remote. */
+  async getRemoteUrl(): Promise<string | undefined> {
+    const remote = await this.getRemote();
+    if (!remote) return undefined;
+    try {
+      const { stdout } = await this._execute(`git remote get-url ${remote}`);
+      const url = _.trim(stdout);
+      if (_.isEmpty(url)) return undefined;
+      return url;
     } catch {
       return undefined;
     }

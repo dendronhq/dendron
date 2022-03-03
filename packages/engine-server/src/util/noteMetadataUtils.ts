@@ -153,7 +153,6 @@ export class NoteMetadataUtils {
     ...props
   }: NotemetadataExtractScalarProps): RespV3<string | undefined> {
     // TODO: we should validate
-    //val = _isNumber(val) ? DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL) : val
     const val = _.get(note, key);
     if (_.isNumber(val)) {
       return {

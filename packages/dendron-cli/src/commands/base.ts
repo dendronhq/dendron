@@ -15,8 +15,6 @@ import {
   TelemetryStatus,
 } from "@dendronhq/common-server";
 import {
-  ALL_MIGRATIONS,
-  CONFIG_MIGRATIONS,
   DConfig,
   MIGRATION_ENTRIES,
   WorkspaceUtils,

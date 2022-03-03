@@ -457,7 +457,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   showMigrations() {
-    // ALL_MIGRATIONS
     const headerMessage = [
       "",
       "Make note of the version number and use it in the run_migration command",

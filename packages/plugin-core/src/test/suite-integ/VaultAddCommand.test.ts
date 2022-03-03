@@ -31,7 +31,6 @@ import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
   describeSingleWS,
@@ -234,10 +233,9 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("WHEN vault was already in .gitignore", { ctx }, () => {
       describe("AND vaultAddCommand is run", () => {
-        // TODO: This test needs to be fixed
-        test.skip("THEN vault is not duplicated", async () => {
+        test("THEN vault is not duplicated", async () => {
           const vaultPath = "vaultRemote";
-          const { wsRoot } = getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const gitIgnore = path.join(wsRoot, ".gitignore");
           const remoteDir = tmpDir().name;
 

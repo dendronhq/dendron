@@ -460,7 +460,7 @@ export class GitUtils {
       (contents === undefined && noCreateIfMissing !== true) ||
       // gitignore exists, and the path is not in it yet
       (contents !== undefined &&
-        !contents.match(new RegExp(`^${addPath}/?$`, "g")))
+        !contents.match(new RegExp(`^${addPath}/?$`, "m")))
     ) {
       await fs.appendFile(gitignore, `\n${addPath}`);
     }

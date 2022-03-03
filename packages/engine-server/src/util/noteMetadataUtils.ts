@@ -20,6 +20,10 @@ export type NoteMetadataValidationProps = {
    * If enabled, will throw error if field is null
    */
   strictNullChecks?: boolean;
+  /**
+   * If enabled, will skip if field is empty
+   */
+  skipOnEmpty?: boolean;
 };
 
 export type NotemetadataExtractScalarProps = {
@@ -81,6 +85,25 @@ export class NoteMetadataUtils {
     };
   }
 
+  static checkIfSkipOnEmpty(
+    key: string,
+    val: any,
+    props: NoteMetadataValidationProps
+  ) {
+    const { skipOnEmpty = true } = props;
+    if (_.isEmpty(val) && skipOnEmpty) {
+      return { data: undefined };
+    }
+    if (_.isEmpty(val) && !skipOnEmpty) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `The value for ${key} is found empty. Please provide a valid value or enable skipOnEmpty in the srcFieldMapping.`,
+        }),
+      };
+    }
+    return { data: val };
+  }
+
   /**
    * Extract string metadata from note
    * @returns
@@ -127,13 +150,17 @@ export class NoteMetadataUtils {
   static extractDate({
     note,
     key,
-  }: NotemetadataExtractScalarProps): RespV3<DateTime | undefined> {
+    ...props
+  }: NotemetadataExtractScalarProps): RespV3<string | undefined> {
     // TODO: we should validate
-    let val = _.get(note, key);
+    //val = _isNumber(val) ? DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL) : val
+    const val = _.get(note, key);
     if (_.isNumber(val)) {
-      val = DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL);
+      return {
+        data: DateTime.fromMillis(val).toLocaleString(DateTime.DATETIME_FULL),
+      };
     }
-    return val;
+    return NoteMetadataUtils.checkIfSkipOnEmpty(key, val, props);
   }
 
   /**

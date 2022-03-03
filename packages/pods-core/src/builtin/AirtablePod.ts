@@ -213,9 +213,7 @@ export class AirtableUtils {
         });
       }
       case "date": {
-        return {
-          data: NoteMetadataUtils.extractDate({ note, key }),
-        };
+        return NoteMetadataUtils.extractDate({ note, key, ...props });
       }
       case "singleSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {

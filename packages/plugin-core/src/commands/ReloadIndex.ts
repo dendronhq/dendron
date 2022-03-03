@@ -60,10 +60,20 @@ export class ReloadIndexCommand extends BasicCommand<
     // If it already exists, nothing to do
     if (await fs.pathExists(rootSchemaPath)) return;
 
-    const schema = SchemaUtils.createRootModule({ vault });
-    this.L.info({ ctx, vaultDir, msg: "creating root schema" });
-    await schemaModuleOpts2File(schema, vaultDir, "root");
-    return AutoFixAction.CREATE_ROOT_SCHEMA;
+    try {
+      const schema = SchemaUtils.createRootModule({ vault });
+      this.L.info({ ctx, vaultDir, msg: "creating root schema" });
+      await schemaModuleOpts2File(schema, vaultDir, "root");
+      return AutoFixAction.CREATE_ROOT_SCHEMA;
+    } catch (err) {
+      this.L.info({
+        ctx,
+        vaultDir,
+        msg: "Error when creating root schema",
+        err,
+      });
+      return;
+    }
   }
 
   /** Creates the root note if it is missing. */
@@ -77,14 +87,19 @@ export class ReloadIndexCommand extends BasicCommand<
     // If it already exists, nothing to do
     if (await fs.pathExists(rootNotePath)) return;
 
-    const note = NoteUtils.createRoot({ vault });
-    this.L.info({ ctx, vaultDir, msg: "creating root note" });
-    await note2File({
-      note,
-      vault,
-      wsRoot,
-    });
-    return AutoFixAction.CREATE_ROOT_NOTE;
+    try {
+      const note = NoteUtils.createRoot({ vault });
+      this.L.info({ ctx, vaultDir, msg: "creating root note" });
+      await note2File({
+        note,
+        vault,
+        wsRoot,
+      });
+      return AutoFixAction.CREATE_ROOT_NOTE;
+    } catch (err) {
+      this.L.info({ ctx, vaultDir, msg: "Error when creating root note", err });
+      return;
+    }
   }
 
   /**

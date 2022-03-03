@@ -1,4 +1,4 @@
-import { DendronError, isTSError } from "@dendronhq/common-all";
+import { DendronError, getStage, isTSError } from "@dendronhq/common-all";
 import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
@@ -135,6 +135,10 @@ export abstract class BaseCommand<
       });
 
       isError = true;
+      // During development only, rethrow the errors to make them easier to debug
+      if (getStage() === "dev") {
+        throw error;
+      }
       return;
     } finally {
       const payload = this.addAnalyticsPayload

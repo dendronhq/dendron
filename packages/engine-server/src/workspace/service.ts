@@ -335,7 +335,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   ) {
     const { vault, noAddToConfig } = opts;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    fs.ensureDirSync(vpath);
+    await fs.ensureDir(vpath);
 
     const note = NoteUtils.createRoot({
       vault,

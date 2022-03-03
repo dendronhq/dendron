@@ -274,7 +274,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           message: "cloning repo",
           increment: 0,
         });
-        const { path: localUrl, name, pathRemote: remoteUrl } = opts;
+        const { name, pathRemote: remoteUrl } = opts;
+        const localUrl = path.join(wsRoot, opts.path);
         if (!remoteUrl) {
           throw new DendronError({
             message:
@@ -287,7 +288,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
         await git.clone(".");
         const { vaults, workspace } = await GitUtils.getVaultsFromRepo({
-          repoPath: path.join(wsRoot, localUrl),
+          repoPath: localUrl,
           wsRoot,
           repoUrl: remoteUrl,
         });
@@ -427,9 +428,14 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const wsService = new WorkspaceService({ wsRoot });
       const vault: DVault = {
         fsPath,
-        name: opts.name,
-        selfContained: opts.isSelfContained,
       };
+      // Make sure these don't get set to undefined, or serialization breaks
+      if (opts.isSelfContained) {
+        vault.selfContained = true;
+      }
+      if (opts.name) {
+        vault.name = opts.name;
+      }
 
       if (VaultUtils.isSelfContained(vault)) {
         await wsService.createSelfContainedVault({

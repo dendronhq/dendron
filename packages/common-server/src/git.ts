@@ -218,7 +218,12 @@ export class GitUtils {
     const { repoPath, wsRoot, repoUrl } = opts;
     // is workspace root
     if (
-      await fs.pathExists(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))
+      // Has a config file
+      (await fs.pathExists(
+        path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
+      )) &&
+      // But is not a self-contained vault
+      !(await fs.pathExists(path.join(repoPath, FOLDERS.NOTES)))
     ) {
       const config = (await readYAMLAsync(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
@@ -245,13 +250,15 @@ export class GitUtils {
         vaults,
       };
     } else {
+      const vault: DVault = {
+        fsPath: path.relative(wsRoot, repoPath),
+        remote: { type: "git", url: opts.repoUrl },
+      };
+      if (await fs.pathExists(path.join(repoPath, FOLDERS.NOTES))) {
+        vault.selfContained = true;
+      }
       return {
-        vaults: [
-          {
-            fsPath: path.relative(wsRoot, repoPath),
-            remote: { type: "git", url: opts.repoUrl },
-          },
-        ],
+        vaults: [vault],
       };
     }
   }

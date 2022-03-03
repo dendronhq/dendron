@@ -529,9 +529,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           addToCodeWorkspace: false,
         });
         const git = new Git({ localUrl: remoteDir });
-        git.init();
-        git.addAll();
-        git.commit({ msg: "start" });
+        await git.init();
+        await git.addAll();
+        await git.commit({ msg: "start" });
 
         sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
         sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);

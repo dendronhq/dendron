@@ -146,9 +146,18 @@ export class AirtableUtils {
     const match = metadata.find((obj) => obj.dendronId === id);
     return match?.airtableId;
   }
+  // TODO: remove after successful migration of new Airtable workflow
+  static checkNoteHasAirtableId(note: NoteProps): boolean {
+    return !_.isUndefined(_.get(note.custom, "airtableId"));
+  }
 
   static filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
+  }
+
+  // TODO: remove after successful migration of new Airtable workflow
+  static getAirtableIdFromNote(note: NoteProps): string {
+    return _.get(note.custom, "airtableId");
   }
 
   /***
@@ -402,11 +411,18 @@ export class AirtableUtils {
           }
         }
       }
-      const airtableId = AirtableUtils.getAirtableIdFromMetadataFile({
+      //get Airtable ID from metadata.json file
+      let airtableId = AirtableUtils.getAirtableIdFromMetadataFile({
         wsRoot: engine.wsRoot,
         note,
         podId,
       });
+
+      // if metadata.json file does not have airtableId, check in note's FM
+      if (!airtableId && AirtableUtils.checkNoteHasAirtableId(note)) {
+        airtableId = AirtableUtils.getAirtableIdFromNote(note);
+      }
+      // if airtableId is already present, update the record else create a new one.
       if (airtableId) {
         logger.debug({ ctx, noteId: note.id, msg: "updating" });
         recordSets.update.push({
@@ -457,7 +473,7 @@ export class AirtableUtils {
         });
         const metadata = PodUtils.readMetadataFromFilepath(filePath);
         metadata.push({ dendronId, airtableId });
-        await fs.writeFile(filePath, JSON.stringify(metadata, null, 2));
+        fs.writeFileSync(filePath, JSON.stringify(metadata, null, 2));
         return note;
       })
     ).catch((err) => {

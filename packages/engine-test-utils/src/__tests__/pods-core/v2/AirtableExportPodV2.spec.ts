@@ -580,3 +580,81 @@ describe("WHEN export note with linked record", () => {
     });
   });
 });
+
+// Testing backward compatability
+describe("WHEN metadata file does not have airtableId", () => {
+  let resp: AirtableExportReturnType;
+
+  const setupTest = setupTestFactoryForNote({
+    fname: "alpha",
+    srcFieldMapping: {
+      Tasks: {
+        type: "multiSelect",
+        to: "multi",
+      },
+    },
+  });
+
+  describe("AND note does not have airtableId in frontmatter", () => {
+    test("THEN create new record in Airtable", async () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        await TestEngineUtils.createNoteByFname({
+          fname: "alpha",
+          body: "This is a task",
+          custom: {
+            multi: ["one", "two"],
+          },
+          ...opts,
+        });
+      };
+      const resp = await setupTest(preSetupHook);
+      expect(resp).toEqual({
+        data: {
+          created: [
+            {
+              fields: {
+                DendronId: "alpha",
+                Tasks: ["one", "two"],
+              },
+              id: "airtable-alpha",
+            },
+          ],
+          updated: [],
+        },
+        error: null,
+      });
+    });
+  });
+
+  describe("AND note has airtableId in frontmatter", () => {
+    const preSetupHook = async (opts: WorkspaceOpts) => {
+      await TestEngineUtils.createNoteByFname({
+        fname: "alpha",
+        body: "This is a task",
+        custom: { airtableId: "airtableId-alpha", multi: ["one", "two"] },
+        ...opts,
+      });
+    };
+    beforeAll(async () => {
+      resp = await setupTest(preSetupHook);
+    });
+
+    test("THEN update the record", () => {
+      expect(resp).toEqual({
+        data: {
+          created: [],
+          updated: [
+            {
+              fields: {
+                DendronId: "alpha",
+                Tasks: ["one", "two"],
+              },
+              id: "airtable-alpha",
+            },
+          ],
+        },
+        error: null,
+      });
+    });
+  });
+});

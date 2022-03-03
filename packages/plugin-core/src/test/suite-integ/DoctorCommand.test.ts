@@ -723,7 +723,7 @@ suite("UPDATE_AIRTABLE_METADATA", function () {
       ctx,
     },
     () => {
-      test.only("THEN remove airtableId from note FM and update metadata.json", async () => {
+      test("THEN remove airtableId from note FM and update metadata.json", async () => {
         const ext = ExtensionProvider.getExtension();
         const engine = ext.getEngine();
         const cmd = new DoctorCommand(ext);

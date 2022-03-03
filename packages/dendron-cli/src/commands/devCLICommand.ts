@@ -11,10 +11,10 @@ import {
   TelemetryStatus,
 } from "@dendronhq/common-server";
 import {
-  ALL_MIGRATIONS,
   DConfig,
   MigrationChangeSetStatus,
   MigrationService,
+  MIGRATION_ENTRIES,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -126,7 +126,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("migrationVersion", {
       describe: "migration version to run",
-      choices: ALL_MIGRATIONS.map((m) => m.version),
+      choices: MIGRATION_ENTRIES.map((m) => m.version),
     });
     args.option("wsRoot", {
       describe: "root directory of the Dendron workspace",
@@ -430,7 +430,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return false;
     }
     if (opts.migrationVersion) {
-      return ALL_MIGRATIONS.map((m) => m.version).includes(
+      return MIGRATION_ENTRIES.map((m) => m.version).includes(
         opts.migrationVersion
       );
     }
@@ -468,7 +468,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     ].join("\n");
     const body: string[] = [];
     let maxLength = 0;
-    ALL_MIGRATIONS.forEach((migrations) => {
+    MIGRATION_ENTRIES.forEach((migrations) => {
       const version = migrations.version.padEnd(17);
       const changes = migrations.changes.map((set) => set.name).join(", ");
       const line = `${version}| ${changes}`;
@@ -489,7 +489,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async runMigration(opts: CommandOpts) {
     // grab the migration we want to run
-    const migrationsToRun = ALL_MIGRATIONS.filter(
+    const migrationsToRun = MIGRATION_ENTRIES.filter(
       (m) => m.version === opts.migrationVersion
     );
 

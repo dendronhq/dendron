@@ -295,3 +295,5 @@ export const ALL_MIGRATIONS: Migrations[] = [
     ],
   },
 ];
+
+export const MIGRATION_ENTRIES = [CONFIG_MIGRATIONS, ...ALL_MIGRATIONS];

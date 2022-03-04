@@ -20,8 +20,9 @@ commands:
     insertNoteIndex:
         enableMarker: false
     randomNote: {}
+    copyNoteLink: {}
 workspace:
-    dendronVersion: 0.82.0
+    dendronVersion: 0.83.0
     vaults:
         -
             fsPath: vault3
@@ -81,6 +82,8 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
 publishing:
     enableFMTitle: true
     enableNoteTitleForLink: true

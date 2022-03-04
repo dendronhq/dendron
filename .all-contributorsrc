@@ -330,7 +330,8 @@
       "profile": "https://github.com/flammehawk",
       "contributions": [
         "doc",
-        "financial"
+        "financial",
+        "code"
       ]
     },
     {
@@ -1489,6 +1490,33 @@
       "profile": "https://github.com/13013SwagR",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "novelhawk",
+      "name": "Raffaello Fraboni",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10281615?v=4",
+      "profile": "https://github.com/novelhawk",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Xanaxus",
+      "name": "Xanaxus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/53279068?v=4",
+      "profile": "https://github.com/Xanaxus",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Gander7",
+      "name": "Gander7",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4229134?v=4",
+      "profile": "https://github.com/Gander7",
+      "contributions": [
+        "bug"
       ]
     }
   ],

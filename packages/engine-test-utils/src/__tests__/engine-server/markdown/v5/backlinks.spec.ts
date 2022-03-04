@@ -30,7 +30,7 @@ describe("WHEN enableBackLinks", () => {
   );
 });
 
-describe.only("WHEN note enableBackLinks = false", () => {
+describe("WHEN note enableBackLinks = false", () => {
   runTestCases(
     createProcCompileTests({
       name: "noEnableBackLinks",

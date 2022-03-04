@@ -400,7 +400,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
 
     // Create the config and code-workspace for the vault, which make it self contained
-    DConfig.getOrCreate(vaultPath);
+    DConfig.getOrCreate(vaultPath, {
+      dev: {
+        enableSelfContainedVaults: true,
+      },
+    });
     WorkspaceConfig.write(vaultPath, [], {
       overrides: {
         folders: [

@@ -5,7 +5,11 @@ import {
   RespV3,
   Time,
 } from "@dendronhq/common-all";
-import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
+import {
+  createDisposableLogger,
+  DLogger,
+  GitUtils,
+} from "@dendronhq/common-server";
 import path from "path";
 import fs from "fs-extra";
 import { IBackupService } from "./backupServiceInterface";
@@ -15,7 +19,7 @@ export type BackupServiceOpts = {
 };
 
 export enum BackupKeyEnum {
-  CONFIG = "config",
+  config = "config",
 }
 
 export const BACKUP_DIR_NAME = ".backup";
@@ -40,22 +44,46 @@ export class BackupService implements Disposable, IBackupService {
     return path.join(this.wsRoot, BACKUP_DIR_NAME);
   }
 
-  generateBackupFileName(opts: { fileName: string }): string {
-    const { fileName } = opts;
-    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-    const fileNameSplit = fileName.split(".");
-    const extension = fileNameSplit.pop();
-    return [fileNameSplit.join("."), today, extension].join(".");
+  async ensureBackupDir(): Promise<void> {
+    await GitUtils.addToGitignore({
+      addPath: BACKUP_DIR_NAME,
+      root: this.wsRoot,
+    });
+    fs.ensureDirSync(this.backupRoot);
+    Object.keys(BackupKeyEnum).forEach((key) => {
+      fs.ensureDirSync(path.join(this.backupRoot, key));
+    });
   }
 
-  backup(opts: { key: BackupKeyEnum; pathToBackup: string }): RespV3<string> {
-    const { key, pathToBackup } = opts;
+  generateBackupFileName(opts: {
+    fileName: string;
+    timestamp?: boolean;
+    infix?: string;
+  }): string {
+    const { fileName, timestamp, infix } = opts;
+    const now = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
+    const fileNameSplit = fileName.split(".");
+    const extension = fileNameSplit.pop();
+    let out = fileNameSplit.join(".");
+    if (timestamp) out = `${out}.${now}`;
+    if (infix) out = `${out}.${infix}`;
+    return `${out}.${extension}`;
+  }
+
+  async backup(opts: {
+    key: BackupKeyEnum;
+    pathToBackup: string;
+    timestamp?: boolean;
+    infix?: string;
+  }): Promise<RespV3<string>> {
+    const { key, pathToBackup, timestamp, infix } = opts;
     const backupDir = path.join(this.backupRoot, key);
     const fileName = path.basename(pathToBackup);
     const backupPath = path.join(
       backupDir,
-      this.generateBackupFileName({ fileName })
+      this.generateBackupFileName({ fileName, timestamp, infix })
     );
+    await this.ensureBackupDir();
     fs.copyFileSync(pathToBackup, backupPath);
     if (!fs.existsSync(backupPath)) {
       return {
@@ -68,7 +96,22 @@ export class BackupService implements Disposable, IBackupService {
     return { data: backupPath };
   }
 
+  getBackupsWithKey(opts: { key: string }): string[] {
+    const { key } = opts;
+    const backupDir = path.join(this.backupRoot, key);
+    const backupsWithKey = fs.readdirSync(backupDir, { withFileTypes: true });
+    // filter out any possible symbolic links and directories
+    return backupsWithKey
+      .filter((dirent) => dirent.isFile)
+      .map((dirent) => dirent.name);
+  }
+
   getAllBackups() {
-    // TODO: return Map<string, string[]>
+    return Object.keys(BackupKeyEnum).map((key) => {
+      return {
+        key,
+        backups: this.getBackupsWithKey({ key }),
+      };
+    });
   }
 }

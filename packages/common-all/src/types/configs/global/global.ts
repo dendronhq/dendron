@@ -8,6 +8,7 @@ export type DendronGlobalConfig = {
   enablePrettyRefs: boolean; // TODO: split
   enableKatex: boolean; // TODO: split
   enableChildLinks: boolean;
+  enableBackLinks: boolean;
 };
 
 /**
@@ -22,5 +23,6 @@ export function genDefaultGlobalConfig(): DendronGlobalConfig {
     enableKatex: true,
     enablePrettyRefs: true,
     enableChildLinks: true,
+    enableBackLinks: true,
   };
 }

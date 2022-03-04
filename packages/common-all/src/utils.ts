@@ -976,6 +976,21 @@ export class ConfigUtils {
     }
     return true;
   }
+  static getEnableBackLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps }
+  ): boolean {
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      _.isBoolean(opts.note.config.global.enableBackLinks)
+    ) {
+      return opts.note.config.global.enableBackLinks;
+    }
+    return true;
+  }
 
   static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
     return (

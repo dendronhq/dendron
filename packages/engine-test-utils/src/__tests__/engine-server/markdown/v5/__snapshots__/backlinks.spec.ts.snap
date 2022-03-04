@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WHEN enableBackLinks "HTML: enableBackLinks: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/notes/beta\\">Beta (vault1)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`WHEN note enableBackLinks = false "HTML: noEnableBackLinks: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

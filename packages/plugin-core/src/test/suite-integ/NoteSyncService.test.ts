@@ -352,7 +352,7 @@ suite("NoteSyncService", function testSuite() {
     describeSingleWS(
       "WHEN the contents have not changed",
       {
-        //postSetupHook: ENGINE_HOOKS.setupBasic,
+        postSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
         before(async () => {
@@ -365,7 +365,7 @@ suite("NoteSyncService", function testSuite() {
           });
         });
 
-        test.only("THEN processTextDocumentChangeEvent should return undefined", async () => {
+        test("THEN processTextDocumentChangeEvent should return undefined", async () => {
           textDocumentService = new TextDocumentService(
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
@@ -373,7 +373,6 @@ suite("NoteSyncService", function testSuite() {
           vscode.workspace.onDidChangeTextDocument(async (event) => {
             const maybeNote =
               await textDocumentService?.processTextDocumentChangeEvent(event);
-            debugger;
             expect(maybeNote).toBeTruthy();
           });
           const engine = ExtensionProvider.getEngine();
@@ -385,11 +384,9 @@ suite("NoteSyncService", function testSuite() {
             fname: "food",
             body: ["[[test.txt]]", "[[test.txt#L1]]"].join("\n"),
           });
-          debugger;
           const editor = await ExtensionProvider.getWSUtils().openNote(
             testtest
           );
-          debugger;
 
           const textToAppend = "new text here";
           editor.edit((editBuilder) => {

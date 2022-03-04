@@ -3,6 +3,7 @@ import {
   createLogger,
   Provider,
   setLogLevel,
+  ideSlice,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
@@ -10,11 +11,15 @@ import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
-import { combinedStore, useCombinedDispatch } from "../features";
+import {
+  combinedStore,
+  useCombinedDispatch,
+  useCombinedSelector,
+} from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/assets-dendron/css/light.css";
 import "../styles/scss/main.scss";
-import { fetchConfig, fetchNotes } from "../utils/fetchers";
+import { fetchConfig, fetchNotes, fetchTreeMenu } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
@@ -45,9 +50,20 @@ function DendronApp({ Component, pageProps }: AppProps) {
   useDendronGATracking();
 
   useEffect(() => {
+    const logLevel = getLogLevel();
+    setLogLevel(logLevel);
+  }, []);
+
+  useEffect(() => {
     (async () => {
-      const logLevel = getLogLevel();
-      setLogLevel(logLevel);
+      const data = await fetchTreeMenu();
+      dispatch(ideSlice.actions.setTree(data));
+      logger.info({ ctx: "fetchTree:got-data", data });
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       logger.info({ ctx: "fetchNotes:pre" });
       const data = await fetchNotes();
       logger.info({ ctx: "fetchNotes:got-data" });
@@ -65,7 +81,11 @@ function DendronApp({ Component, pageProps }: AppProps) {
   logger.info({ ctx: "render" });
 
   return (
-    <DendronLayout {...noteData} dendronRouter={dendronRouter}>
+    <DendronLayout
+      {...noteData}
+      noteIndex={pageProps.noteIndex}
+      dendronRouter={dendronRouter}
+    >
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -11,6 +11,7 @@ import {
   getStage,
   configIsV4,
   DendronPublishingConfig,
+  TreeUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -454,6 +455,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
+
+    const treeDstPath = path.join(podDstDir, "tree.json");
+    const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
+
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");
     const fuseIndex = createSerializedFuseNoteIndex(publishedNotes);
@@ -468,6 +473,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         { encoding: "utf8", spaces: 2 }
       ),
       fs.writeJSON(podConfigDstPath, engineConfig, {
+        encoding: "utf8",
+        spaces: 2,
+      }),
+      fs.writeJSON(treeDstPath, tree, {
         encoding: "utf8",
         spaces: 2,
       }),

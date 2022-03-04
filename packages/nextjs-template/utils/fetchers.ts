@@ -1,6 +1,7 @@
 import {
   IntermediateDendronConfig,
   SerializedFuseIndex,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import { getAssetUrl } from "./links";
 import { NoteData } from "./types";
@@ -9,6 +10,11 @@ import Fuse from "fuse.js";
 export async function fetchNotes() {
   const resp = await fetch(getAssetUrl("/data/notes.json"));
   return (await resp.json()) as NoteData;
+}
+
+export async function fetchTreeMenu() {
+  const resp = await fetch(getAssetUrl("/data/tree.json"));
+  return (await resp.json()) as TreeMenu;
 }
 
 export async function fetchConfig() {

@@ -1,10 +1,9 @@
-import { ConfigFileUtils } from "@dendronhq/pods-core";
-import path from "path";
+import { ConfigFileUtils, PodUtils } from "@dendronhq/pods-core";
 import { Uri } from "vscode";
 import { PodUIControls } from "../../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { BasicCommand } from "../base";
 
 type CommandOutput = void;
@@ -20,7 +19,7 @@ export class ConfigureExportPodV2 extends BasicCommand<
   async execute() {
     const ctx = { ctx: "ConfigureExportPodV2" };
     this.L.info({ ctx, msg: "enter" });
-    const podsDir = path.join(getExtension().podsDir, "custom");
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
     let configFilePath: string;
     const exportChoice = await PodUIControls.promptForExportConfigOrNewExport();
     if (exportChoice === undefined) {
@@ -30,15 +29,18 @@ export class ConfigureExportPodV2 extends BasicCommand<
       if (!podType) {
         return;
       }
-      const id = await PodUIControls.promptForGenericId();
-      if (!id) return;
+      const podId = await PodUIControls.promptForGenericId();
+      if (!podId) return;
       configFilePath = ConfigFileUtils.genConfigFileV2({
-        fPath: path.join(getExtension().podsDir, "custom", `config.${id}.yml`),
+        fPath: PodUtils.getCustomConfigPath({ wsRoot, podId }),
         configSchema: ConfigFileUtils.getConfigSchema(podType),
-        setProperties: { podId: id, podType },
+        setProperties: { podId, podType },
       });
     } else {
-      configFilePath = path.join(podsDir, `config.${exportChoice.podId}.yml`);
+      configFilePath = PodUtils.getCustomConfigPath({
+        wsRoot,
+        podId: exportChoice.podId,
+      });
     }
     await VSCodeUtils.openFileInEditor(Uri.file(configFilePath));
   }

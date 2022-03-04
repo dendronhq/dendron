@@ -7,17 +7,15 @@ import sinon from "sinon";
 import { VaultConvertCommand } from "../../commands/VaultConvert";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 import fs from "fs-extra";
 import { before, after, describe } from "mocha";
 import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 
 suite("GIVEN VaultConvert", function () {
-  const ctx = setupBeforeAfter(this, {});
-
   describeMultiWS(
     "WHEN converting a local vault to a remote vault",
-    { ctx, preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
     () => {
       let remote: string;
       before(async () => {
@@ -101,7 +99,7 @@ suite("GIVEN VaultConvert", function () {
 
   describeMultiWS(
     "WHEN given a bad remote URL",
-    { ctx, preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
     () => {
       before(async () => {
         const { vaults } = getDWorkspace();

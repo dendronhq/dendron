@@ -13,19 +13,18 @@ import {
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
   JSONSchemaType,
+  PodUtils,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -38,15 +37,17 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   GoogleDocsExportReturnType
 > {
   public key = "dendron.googledocsexport";
+  private extension: IDendronExtension;
 
-  public constructor() {
+  public constructor(extension: IDendronExtension) {
     super(new QuickPickHierarchySelector());
+    this.extension = extension;
   }
 
   public createPod(
     config: RunnableGoogleDocsV2PodConfig
   ): ExportPodV2<GoogleDocsExportReturnType> {
-    const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = this.extension.getDWorkspace();
     const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     const port = openPortFile({ fpath });
     return new GoogleDocsExportPodV2({
@@ -67,10 +68,12 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     let refreshToken: string | undefined = opts?.refreshToken;
     let expirationTime: number | undefined = opts?.expirationTime;
     let connectionId: string | undefined = opts?.connectionId;
-
+    const { wsRoot } = this.extension.getDWorkspace();
     // Get tokens and expiration time for gdoc services
     if (!accessToken || !refreshToken || !expirationTime || !connectionId) {
-      const mngr = new ExternalConnectionManager(getExtension().podsDir);
+      const mngr = new ExternalConnectionManager(
+        PodUtils.getPodDir({ wsRoot })
+      );
 
       // If the tokens doesn't exist, see if we can first extract it from the connectedServiceId:
       if (opts?.connectionId) {
@@ -131,14 +134,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     // want to save as a new config or just run it one-time
     if (!opts?.podId) {
       const choice = await PodUIControls.promptToSaveInputChoicesAsNewConfig();
-
       if (choice !== undefined && choice !== false) {
         const configPath = ConfigFileUtils.genConfigFileV2({
-          fPath: path.join(
-            getExtension().podsDir,
-            "custom",
-            `config.${choice}.yml`
-          ),
+          fPath: PodUtils.getCustomConfigPath({ wsRoot, podId: choice }),
           configSchema: GoogleDocsExportPodV2.config(),
           setProperties: _.merge(inputs, {
             podId: choice,
@@ -179,7 +177,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     payload: NoteProps[];
     config: RunnableGoogleDocsV2PodConfig;
   }) {
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     const { exportReturnValue } = opts;
     let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);

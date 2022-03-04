@@ -1,15 +1,27 @@
 import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
+import { TreeUtils } from "@dendronhq/common-all";
 import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
-import { Menu, Typography } from "antd";
+import { Typography } from "antd";
 import _ from "lodash";
+import dynamic from "next/dynamic";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useState } from "react";
+import { useCombinedSelector } from "../features";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
-import { NoteData, verifyNoteData } from "../utils/types";
-import DendronSpinner from "./DendronSpinner";
+import { NoteData } from "../utils/types";
 
-const { SubMenu } = Menu;
+const Menu = dynamic(() => import("./AntdMenuWrapper"), {
+  ssr: false,
+});
+
+const SubMenu = dynamic(() => import("./AntdSubMenuWrapper"), {
+  ssr: false,
+});
+
+const MenuItem = dynamic(() => import("./AntdMenuItemWrapper"), {
+  ssr: false,
+});
 
 export default function DendronTreeMenu(
   props: Partial<NoteData> & {
@@ -17,7 +29,9 @@ export default function DendronTreeMenu(
     setCollapsed: (collapsed: boolean) => void;
   }
 ) {
-  const logger = createLogger("DendronTreeView");
+  const ide = useCombinedSelector((state) => state.ide);
+  const tree = ide.tree;
+  const logger = createLogger("DendronTreeMenu");
   const dendronRouter = useDendronRouter();
   const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
@@ -27,7 +41,7 @@ export default function DendronTreeMenu(
 
   // set `activeNoteIds`
   useEffect(() => {
-    if (!verifyNoteData(props) || !noteActiveId) {
+    if (!noteActiveId || !props.tree) {
       return undefined;
     }
 
@@ -36,41 +50,32 @@ export default function DendronTreeMenu(
     });
 
     // all parents should be in expanded position
-    const activeNoteIds = TreeViewUtils.getAllParents({
-      notes: props.notes,
+    const activeNoteIds = TreeUtils.getAllParents({
+      child2parent: props.tree.child2parent,
       noteId: noteActiveId,
     });
 
     setActiveNoteIds(activeNoteIds);
   }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
 
-  // --- Verify
-  // If no data, show spinner component
-  if (!verifyNoteData(props)) {
-    logger.info({
-      state: "exit:notes not initialized",
-    });
-    return <DendronSpinner />;
-  }
-
-  const { notes, domains, collapsed, setCollapsed } = props;
+  const { notes, collapsed, setCollapsed } = props;
 
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
+  if (!tree) {
+    return null;
+  }
 
-  // --- Calc
-  const roots: DataNode[] = domains
-    .map((note) => {
-      return TreeViewUtils.note2TreeDatanote({
-        noteId: note.id,
-        noteDict: notes,
-        showVaultName: false,
-        applyNavExclude: true,
-      });
-    })
-    .filter((ent): ent is DataNode => !_.isUndefined(ent));
+  const roots: DataNode[] = TreeViewUtils.treeMenuNode2DataNode({
+    roots: tree.roots,
+    showVaultName: false,
+    applyNavExclude: true,
+  });
 
   // --- Methods
   const onSelect = (noteId: string) => {
+    if (!props.noteIndex) {
+      return;
+    }
     setCollapsed(true);
     logger.info({ ctx: "onSelect", id: noteId });
     changeActiveNote(noteId, { noteIndex: props.noteIndex });
@@ -171,14 +176,14 @@ function MenuView({
       );
     }
     return (
-      <Menu.Item key={menu.key} icon={menu.icon}>
+      <MenuItem key={menu.key} icon={menu.icon}>
         <Typography.Text
           style={{ width: "100%" }}
           ellipsis={{ tooltip: menu.title }}
         >
           {menu.title}
         </Typography.Text>
-      </Menu.Item>
+      </MenuItem>
     );
   };
 

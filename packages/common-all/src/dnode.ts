@@ -1877,6 +1877,7 @@ export class SchemaUtils {
     });
   }
 
+  //  ^dtaatxvjb4s3
   static matchPath(opts: {
     notePath: string;
     schemaModDict: SchemaModuleDict;

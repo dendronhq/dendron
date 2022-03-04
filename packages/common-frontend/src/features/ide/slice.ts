@@ -3,6 +3,7 @@ import {
   DendronEditorViewKey,
   NoteProps,
   LookupModifierStatePayload,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // @ts-ignore
@@ -23,6 +24,7 @@ type InitialState = {
   };
   seedsInWorkspace: string[] | undefined; // Contains the seed ID's
   lookupModifiers: LookupModifierStatePayload | undefined;
+  tree?: TreeMenu;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -37,6 +39,7 @@ const INITIAL_STATE: InitialState = {
   },
   seedsInWorkspace: undefined,
   lookupModifiers: undefined,
+  tree: undefined,
 };
 
 export { InitialState as IDEState };
@@ -48,6 +51,9 @@ export const ideSlice = createSlice({
     setNoteActive: (state, action: PayloadAction<NoteProps | undefined>) => {
       state.notePrev = state.noteActive;
       state.noteActive = action.payload;
+    },
+    setTree: (state, action: PayloadAction<TreeMenu>) => {
+      state.tree = action.payload;
     },
     setTheme: (state, action: PayloadAction<Theme>) => {
       state.theme = action.payload;

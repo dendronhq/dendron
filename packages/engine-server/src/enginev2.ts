@@ -391,11 +391,10 @@ export class DendronEngineV2 implements DEngine {
   }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtils.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
       fname: npath,
-      notes: this.notes,
+      engine: this,
       vault,
-      wsRoot: this.wsRoot,
     });
     this.logger.debug({ ctx, maybeNote, msg: "post-query" });
     let noteNew: NoteProps | undefined = maybeNote;

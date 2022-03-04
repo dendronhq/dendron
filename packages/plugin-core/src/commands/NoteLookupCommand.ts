@@ -635,7 +635,7 @@ export class NoteLookupCommand
     const engine = ExtensionProvider.getEngine();
 
     const vaultsWithMatchingFile = new Set(
-      NoteUtils.getNotesByFname({ fname, notes: engine.notes }).map(
+      NoteUtils.getNotesByFnameFromEngine({ fname, engine }).map(
         (n) => n.vault.fsPath
       )
     );

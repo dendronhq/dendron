@@ -70,6 +70,7 @@ module.exports = {
     treePanelView: resolveApp("src/views/DendronTreeExplorerPanelView"),
     lookupPanelView: resolveApp("src/views/DendronLookupPanelView"),
     graphView: resolveApp("src/views/DendronGraphPanelView"),
+    schemaPageView: resolveApp("src/views/DendronSchemaPageView"),
   },
   yarnLockFile: resolveApp("yarn.lock"),
   testsSetup: resolveModule(resolveApp, "src/setupTests"),

@@ -1655,6 +1655,7 @@ export class SchemaUtils {
     notePath: string;
     schemaModDict: SchemaModuleDict;
   }): SchemaMatchResult | undefined {
+    debug;
     const { notePath, schemaModDict } = opts;
     const domainName = DNodeUtils.domainName(notePath);
     const match = schemaModDict[domainName];

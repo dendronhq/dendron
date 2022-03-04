@@ -7,6 +7,7 @@ import {
   ExternalService,
   ExternalTarget,
   PodExportScope,
+  PodUtils,
   PodV2ConfigManager,
   PodV2Types,
 } from "@dendronhq/pods-core";
@@ -210,7 +211,8 @@ export class PodUIControls {
   public static async promptForExternalServiceConnectionOrNew<
     T extends ExternalTarget
   >(connectionType: ExternalService): Promise<undefined | T> {
-    const mngr = new ExternalConnectionManager(getExtension().podsDir);
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const mngr = new ExternalConnectionManager(PodUtils.getPodDir({ wsRoot }));
 
     const existingConnections = await mngr.getAllConfigsByType(connectionType);
 

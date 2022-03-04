@@ -8,16 +8,16 @@ import {
   JSONExportReturnType,
   JSONSchemaType,
   JSONV2PodConfig,
+  PodUtils,
   PodV2Types,
   RunnableJSONV2PodConfig,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -30,9 +30,10 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
   JSONExportReturnType
 > {
   public key = "dendron.jsonexportv2";
-
-  public constructor() {
+  private extension: IDendronExtension;
+  public constructor(extension: IDendronExtension) {
     super(new QuickPickHierarchySelector());
+    this.extension = extension;
   }
 
   public async gatherInputs(
@@ -77,14 +78,10 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
     // want to save as a new config or just run it one-time
     if (!opts?.podId) {
       const choice = await PodUIControls.promptToSaveInputChoicesAsNewConfig();
-
+      const { wsRoot } = this.extension.getDWorkspace();
       if (choice !== undefined && choice !== false) {
         const configPath = ConfigFileUtils.genConfigFileV2({
-          fPath: path.join(
-            getExtension().podsDir,
-            "custom",
-            `config.${choice}.yml`
-          ),
+          fPath: PodUtils.getCustomConfigPath({ wsRoot, podId: choice }),
           configSchema: JSONExportPodV2.config(),
           setProperties: _.merge(config, {
             podId: choice,

@@ -13,10 +13,11 @@ import { VSCodeUtils } from "../../../../vsCodeUtils";
 suite("GoogleDocsExportPodCommand", function () {
   describe("GIVEN a GoogleDocsExportPodCommand is ran with Note scope", () => {
     describeSingleWS("WHEN there is an error in response", {}, () => {
-      const cmd = new GoogleDocsExportPodCommand();
       test("THEN error message must be displayed", async () => {
+        const cmd = new GoogleDocsExportPodCommand(
+          ExtensionProvider.getExtension()
+        );
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "root.md"

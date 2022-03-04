@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
@@ -112,6 +113,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = ExtensionProvider.getDWorkspace();
+    let initError: DendronError | undefined;
     const { wsRoot, engine } = ws;
 
     // Fix up any broken vaults
@@ -125,10 +127,11 @@ export class ReloadIndexCommand extends BasicCommand<
         })
       );
       if (autoFixActions.filter(isNotUndefined).length > 0) {
-        AnalyticsUtils.track(
-          WorkspaceEvents.AutoFix,
-          categorizeActions(autoFixActions)
-        );
+        AnalyticsUtils.track(WorkspaceEvents.AutoFix, {
+          ...categorizeActions(autoFixActions),
+          nonFatalInitError:
+            initError && initError.severity === ERROR_SEVERITY.MINOR,
+        });
       }
 
       const start = process.hrtime();
@@ -143,6 +146,7 @@ export class ReloadIndexCommand extends BasicCommand<
       }
       if (error) {
         const msg = "init error";
+        initError = error;
         this.L.error({ ctx, error, msg });
       }
       return autoFixActions;
@@ -161,7 +165,7 @@ export class ReloadIndexCommand extends BasicCommand<
       );
     }
 
-    this.L.info({ ctx, msg: "exit" });
+    this.L.info({ ctx, msg: "exit", initError });
     return engine;
   }
 }

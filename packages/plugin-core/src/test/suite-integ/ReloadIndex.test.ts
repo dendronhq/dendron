@@ -1,64 +1,87 @@
 import { vault2Path } from "@dendronhq/common-server";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { test } from "mocha";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
+import { test, before } from "mocha";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 
-suite("ReloadIndex", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+suite("GIVEN ReloadIndex", function () {
+  describeSingleWS("WHEN root files are missing", {}, () => {
+    let rootFiles: string[] = [];
+    before(async () => {
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
+      rootFiles = [
+        path.join(vaultDir, "root.md"),
+        path.join(vaultDir, "root.schema.yml"),
+      ];
+      await Promise.all(rootFiles.map((ent) => fs.remove(ent)));
 
-  test("re-create root files if missing", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      onInit: async ({ vaults, wsRoot }) => {
-        const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
-        const rootFiles = [
-          path.join(vaultDir, "root.md"),
-          path.join(vaultDir, "root.schema.yml"),
-        ];
-        rootFiles.map((ent) => fs.removeSync(ent));
-        await new ReloadIndexCommand().run();
-        expect(
-          _.every(rootFiles.map((ent) => fs.existsSync(ent)))
-        ).toBeTruthy();
-        done();
-      },
+      await new ReloadIndexCommand().run();
+    });
+
+    test("THEN the root files are recreated", async () => {
+      expect(
+        _.every(await Promise.all(rootFiles.map((ent) => fs.pathExists(ent))))
+      ).toBeTruthy();
     });
   });
 
-  test("don't overwrite if root exists", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      onInit: async ({ vaults, wsRoot }) => {
-        const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
-        const rootFiles = [
-          path.join(vaultDir, "root.md"),
-          path.join(vaultDir, "root.schema.yml"),
-        ];
-        fs.appendFileSync(rootFiles[0], "bond", { encoding: "utf8" });
-        fs.appendFileSync(rootFiles[1], "# bond", { encoding: "utf8" });
-        await new ReloadIndexCommand().run();
-        expect(
-          _.every(
-            rootFiles.map((ent) => fs.readFileSync(ent).indexOf("bond") >= 0)
+  describeSingleWS("WHEN root files exist", {}, () => {
+    let rootFiles: string[] = [];
+    before(async () => {
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
+      rootFiles = [
+        path.join(vaultDir, "root.md"),
+        path.join(vaultDir, "root.schema.yml"),
+      ];
+      await Promise.all([
+        fs.appendFile(rootFiles[0], "bond", { encoding: "utf8" }),
+        fs.appendFile(rootFiles[1], "# bond", { encoding: "utf8" }),
+      ]);
+
+      await new ReloadIndexCommand().run();
+    });
+
+    test("THEN the root files are not overwritten", async () => {
+      expect(
+        _.every(
+          await Promise.all(
+            rootFiles.map(async (ent) =>
+              (await fs.readFile(ent)).includes("bond")
+            )
           )
-        ).toBeTruthy();
-        done();
-      },
+        )
+      ).toBeTruthy();
+    });
+  });
+
+  describeMultiWS("WHEN there is a single vault missing", {}, () => {
+    before(async () => {
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const vaultPath = vault2Path({ vault: vaults[0], wsRoot });
+      await fs.rmdir(vaultPath, { recursive: true });
+    });
+
+    test("THEN other vaults are still loaded", async () => {
+      const engine = await new ReloadIndexCommand().run();
+      const { vaults } = ExtensionProvider.getDWorkspace();
+      expect(engine).toBeTruthy();
+      const notes = _.sortBy(
+        NoteUtils.getNotesByFnameFromEngine({
+          engine: engine!,
+          fname: "root",
+        }),
+        (note) => path.basename(note.vault.fsPath)
+      );
+      expect(notes.length).toEqual(2);
+      expect(VaultUtils.isEqualV2(notes[0].vault, vaults[1])).toBeTruthy();
+      expect(VaultUtils.isEqualV2(notes[1].vault, vaults[2])).toBeTruthy();
     });
   });
 });

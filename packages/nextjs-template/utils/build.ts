@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";

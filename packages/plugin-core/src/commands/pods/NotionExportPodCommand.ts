@@ -14,19 +14,18 @@ import {
   NotionUtils,
   NotionV2PodConfig,
   Page,
+  PodUtils,
   PodV2Types,
   RunnableNotionV2PodConfig,
   TitlePropertyValue,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { ProgressLocation, window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -39,9 +38,10 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
   NotionExportReturnType
 > {
   public key = "dendron.notionexport";
-
-  public constructor() {
+  private extension: IDendronExtension;
+  public constructor(extension: IDendronExtension) {
     super(new QuickPickHierarchySelector());
+    this.extension = extension;
   }
 
   public createPod(
@@ -62,10 +62,12 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     if (isRunnableNotionV2PodConfig(opts)) return opts;
     let apiKey: string | undefined = opts?.apiKey;
     let connectionId: string | undefined = opts?.connectionId;
-
+    const { wsRoot } = this.extension.getDWorkspace();
     // Get an Notion API Key
     if (!apiKey) {
-      const mngr = new ExternalConnectionManager(getExtension().podsDir);
+      const mngr = new ExternalConnectionManager(
+        PodUtils.getPodDir({ wsRoot })
+      );
       // If the apiKey doesn't exist, see if we can first extract it from the connectedServiceId:
       if (opts?.connectionId) {
         const config = mngr.getConfigById<NotionConnection>({
@@ -127,11 +129,7 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
 
       if (choice !== undefined && choice !== false) {
         const configPath = ConfigFileUtils.genConfigFileV2({
-          fPath: path.join(
-            getExtension().podsDir,
-            "custom",
-            `config.${choice}.yml`
-          ),
+          fPath: PodUtils.getCustomConfigPath({ wsRoot, podId: choice }),
           configSchema: NotionExportPodV2.config(),
           setProperties: _.merge(inputs, {
             podId: choice,
@@ -163,7 +161,7 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
     config: RunnableNotionV2PodConfig;
     payload: NoteProps[];
   }) {
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     const { data } = exportReturnValue;
     if (data?.created) {
       await NotionUtils.updateNotionIdForNewlyCreatedNotes(

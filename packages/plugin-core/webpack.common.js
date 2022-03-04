@@ -27,7 +27,6 @@ const config = {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded
       "pino-pretty": "pino-pretty",
     },
-    /(@dendronhq|packages)\/dendron-11ty-legacy$/,
     /\.\/webpack-require-hack/,
   ],
   resolve: {

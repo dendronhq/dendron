@@ -194,7 +194,7 @@ export class DendronEngineV2 implements DEngine {
 
   async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return {
-      data: await AnchorUtils.findAnchors({
+      data: AnchorUtils.findAnchors({
         note: opts.note,
       }),
       error: null,

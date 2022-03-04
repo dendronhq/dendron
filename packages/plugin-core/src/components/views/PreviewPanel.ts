@@ -25,7 +25,7 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
-import { INoteSyncService } from "../../services/NoteSyncService";
+import { ITextDocumentService } from "../../services/NoteSyncService";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -43,10 +43,10 @@ import { PreviewProxy } from "./PreviewProxy";
 export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   private _ext: IDendronExtension;
   private _panel: vscode.WebviewPanel | undefined;
-  private _noteSyncService: INoteSyncService;
+  private _textDocumentService: ITextDocumentService;
   private _onDidChangeActiveTextEditor: vscode.Disposable | undefined =
     undefined;
-  private _onNoteChanged: vscode.Disposable | undefined = undefined;
+  private _onTextChanged: vscode.Disposable | undefined = undefined;
   private _linkHandler: IPreviewLinkHandler;
 
   /**
@@ -57,13 +57,15 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   constructor({
     extension,
     linkHandler,
+    textDocumentService,
   }: {
     extension: IDendronExtension;
     linkHandler: IPreviewLinkHandler;
+    textDocumentService: ITextDocumentService;
   }) {
     this._ext = extension;
     this._linkHandler = linkHandler;
-    this._noteSyncService = this._ext.noteSyncService;
+    this._textDocumentService = textDocumentService;
   }
 
   /**
@@ -73,7 +75,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    * preview will follow default behavior (it will show the currently in-focus
    * Dendron note).
    */
-  show(note?: NoteProps): void {
+  async show(note?: NoteProps): Promise<void> {
     if (this._panel) {
       if (!this.isVisible()) {
         this._panel.reveal();
@@ -125,9 +127,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           this._onDidChangeActiveTextEditor = undefined;
         }
 
-        if (this._onNoteChanged) {
-          this._onNoteChanged.dispose();
-          this._onNoteChanged = undefined;
+        if (this._onTextChanged) {
+          this._onTextChanged.dispose();
+          this._onTextChanged = undefined;
         }
 
         this._panel = undefined;
@@ -136,8 +138,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       this._panel.reveal(viewColumn, preserveFocus);
     }
 
-    if (note) {
-      this.updateForNote(note);
+    if (note && this.isVisible()) {
+      this.sendRefreshMessage(this._panel, note, true);
     }
   }
   hide(): void {
@@ -190,7 +192,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             }
           }
           if (note) {
-            this.sendRefreshMessage(this._panel!, note);
+            this.sendRefreshMessage(this._panel!, note, true);
           }
           break;
         }
@@ -209,7 +211,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             : undefined;
 
           if (!_.isUndefined(maybeNote)) {
-            this.sendRefreshMessage(this._panel!, maybeNote);
+            this.sendRefreshMessage(this._panel!, maybeNote, true);
           }
           break;
         }
@@ -232,13 +234,13 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
               return;
             }
 
-            const uri = editor.document.uri;
+            const textDocument = editor.document;
             const { wsRoot, vaults } = this._ext.getDWorkspace();
             if (
               !WorkspaceUtils.isPathInWorkspace({
                 wsRoot,
                 vaults,
-                fpath: uri.fsPath,
+                fpath: textDocument.uri.fsPath,
               })
             ) {
               return;
@@ -251,29 +253,20 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             if (!maybeNote) {
               return;
             }
-
-            this._panel!.webview.postMessage({
-              type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-              data: {
-                note: maybeNote,
-                syncChangedNote: true,
-              },
-              source: "vscode",
-            } as OnDidChangeActiveTextEditorMsg);
+            this.sendRefreshMessage(this._panel!, maybeNote, true);
           }
         )
       );
 
-    // If the note contents have changed, update the preview with the new
-    // contents.
-    this._onNoteChanged = this._noteSyncService.onNoteChange(
-      (note: NoteProps) => {
-        this.updateForNote(note);
-      }
+    // If the text document contents have changed, update the preview with the new
+    // contents. This call is debounced every 200 ms
+    this._onTextChanged = vscode.workspace.onDidChangeTextDocument(
+      _.debounce(this.updatePreviewPanel, 200),
+      this
     );
 
     this._ext.addDisposable(this._onDidChangeActiveTextEditor);
-    this._ext.addDisposable(this._onNoteChanged);
+    this._ext.addDisposable(this._onTextChanged);
   }
 
   /** Rewrites the image URLs to use VSCode's webview URIs, which is required to
@@ -314,23 +307,66 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       previous.contentHash !== current.contentHash,
   });
 
-  private sendRefreshMessage(panel: vscode.WebviewPanel, note: NoteProps) {
-    const syncChangedNote = true;
-    note = this.rewriteImageUrls(note, panel);
+  /**
+   * Notify preview webview panel to display latest contents
+   *
+   * @param panel panel to notify
+   * @param note note to display
+   * @param isFullRefresh If true, sync contents of note with what's being seen in active editor.
+   * This will be true in cases where user switches between tabs or opens/closes notes without saving, as contents of notes may not match engine notes.
+   * Otherwise display contents of note
+   */
+  private async sendRefreshMessage(
+    panel: vscode.WebviewPanel,
+    note: NoteProps,
+    isFullRefresh: boolean
+  ) {
+    if (this.isVisible()) {
+      // Engine state has not changed so do not sync. This is for displaying updated text only
+      const syncChangedNote = false;
 
-    return panel.webview.postMessage({
-      type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-      data: {
-        note,
-        syncChangedNote,
-      },
-      source: "vscode",
-    } as OnDidChangeActiveTextEditorMsg);
+      // If full refresh is required, sync note with contents in active text editor
+      const textDocument = VSCodeUtils.getActiveTextEditor()?.document;
+      if (textDocument && isFullRefresh) {
+        note = await this._textDocumentService.applyTextDocument(
+          note,
+          textDocument
+        );
+      }
+      note = this.rewriteImageUrls(note, panel);
+
+      // This is necessary so that the cache will display these contents since it checks `updated` property
+      const now = NoteUtils.genUpdateTime();
+
+      return panel.webview.postMessage({
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        data: {
+          note: { ...note, updated: now },
+          syncChangedNote,
+        },
+        source: "vscode",
+      } as OnDidChangeActiveTextEditorMsg);
+    }
+    return;
   }
 
-  private async updateForNote(note: NoteProps) {
-    if (this._panel) {
-      return this.sendRefreshMessage(this._panel, note);
+  /**
+   * If panel is visible, update preview panel with text document changes
+   */
+  private async updatePreviewPanel(
+    textDocument: vscode.TextDocumentChangeEvent
+  ) {
+    if (textDocument.document.isDirty === false) {
+      return;
+    }
+    if (this.isVisible()) {
+      const note =
+        await this._textDocumentService.processTextDocumentChangeEvent(
+          textDocument
+        );
+      if (note) {
+        return this.sendRefreshMessage(this._panel!, note, false);
+      }
     }
     return undefined;
   }

@@ -1,6 +1,4 @@
 import {
-  ConfigUtils,
-  DendronError,
   DVault,
   NoteProps,
   NoteUtils,
@@ -19,7 +17,6 @@ import * as vscode from "vscode";
 import {
   Disposable,
   Event,
-  EventEmitter,
   TextDocument,
   TextDocumentChangeEvent,
 } from "vscode";
@@ -28,91 +25,72 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 
 /**
- * Interface for a service that synchronizes notes from the client to the engine
+ * Interface for a service that processes text document changes from vscode. TODO: Rename filename
  */
-export interface INoteSyncService extends Disposable {
+export interface ITextDocumentService extends Disposable {
   /**
-   * @deprecated - use EngineEvents interface instead
-   * Event that fires after a set of NoteProps has been changed AND those
-   * changes have been reflected on the engine side
+   * Process content changes from TextDocumentChangeEvent and return an updated note prop.
+   *
+   * Return undefined if changes cannot be processed (such as missing frontmatter or dirty changes) or if no changes have been detected
+   *
+   * @param event Event containing document changes
+   * @return NoteProps
    */
-  get onNoteChange(): Event<NoteProps>;
+  processTextDocumentChangeEvent(
+    event: TextDocumentChangeEvent
+  ): Promise<NoteProps | undefined>;
 
   /**
-   * @deprecated - Remove from interface once FileWatcher has been refactored to
-   * no longer take a dependency on sync service
-   * @param param0
+   * Apply content from a TextDocument to an existing note
+   *
+   * @param note Existing note to update
+   * @param textDocument TextDocument representation of note. May or may not have content changes from note
+   * @return New NoteProps with updated contents from TextDocument
    */
-  syncNoteMetadata({
-    note,
-    fmChangeOnly,
-  }: {
-    note: NoteProps;
-    fmChangeOnly: boolean;
-  }): Promise<NoteProps>;
+  applyTextDocument(
+    note: NoteProps,
+    textDocument: TextDocument
+  ): Promise<NoteProps>;
 }
 
 /**
  * This service keeps client state note state synchronized with the engine
  * state. It also exposes an event that allows callback functionality whenever
- * the engine has finished updating a note state. See {@link INoteSyncService}
+ * the engine has finished updating a note state. See {@link ITextDocumentService}
  * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
  * additional docs
  */
-export class NoteSyncService implements INoteSyncService {
+export class TextDocumentService implements ITextDocumentService {
   private L: DLogger;
 
   _textDocumentEventHandle: Disposable;
-  _textDocumentChangeEventHandle: Disposable;
-
   _extension: IDendronExtension;
-
-  private _emitter = new EventEmitter<NoteProps>();
-
-  public get onNoteChange(): Event<NoteProps> {
-    return this._emitter.event;
-  }
 
   /**
    *
    * @param ext Instance of IDendronExtension
    * @param textDocumentEvent - Event returning TextDocument, such as
    * vscode.workspace.OnDidSaveTextDocument. This call is not debounced
-   * @param textDocumentChangeEvent - Event returning a TextDocumentChangeEvent,
-   * such as vscode.workspace.OnDidChangeTextDocument. This call is debounced
-   * every 200 ms
    */
-  constructor(
-    ext: IDendronExtension,
-    textDocumentEvent: Event<TextDocument>,
-    textDocumentChangeEvent: Event<TextDocumentChangeEvent>
-  ) {
+  constructor(ext: IDendronExtension, textDocumentEvent: Event<TextDocument>) {
     this.L = Logger;
     this._extension = ext;
-    this._emitter = new EventEmitter<NoteProps>();
-
-    this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
-    this._textDocumentChangeEventHandle = textDocumentChangeEvent(
-      _.debounce(this.onDidChange, 200),
-      this
-    );
+    this._textDocumentEventHandle = textDocumentEvent(this.onDidSave);
   }
 
   dispose() {
     this._textDocumentEventHandle.dispose();
-    this._textDocumentChangeEventHandle.dispose();
   }
 
-  private async syncNoteContents(opts: {
+  private async updateNoteContents(opts: {
     oldNote: NoteProps;
     content: string;
     fmChangeOnly: boolean;
     fname: string;
     vault: DVault;
   }) {
-    const ctx = "NoteSyncService:updateNoteContents";
+    const ctx = "TextDocumentService:updateNoteContents";
     const { content, fmChangeOnly, fname, vault, oldNote } = opts;
-    const engine = this._extension.getEngine();
     // note is considered dirty, apply any necessary changes here
     // call `doc.getText` to get latest note
     let note = string2Note({
@@ -122,86 +100,26 @@ export class NoteSyncService implements INoteSyncService {
       calculateHash: true,
     });
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
-    note = await this.syncNoteMetadata({ note, fmChangeOnly });
+    note = await NoteUtils.updateNoteMetadata({
+      note,
+      fmChangeOnly,
+      engine: this._extension.getEngine(),
+      enableLinkCandidates:
+        this._extension.workspaceService?.config.dev?.enableLinkCandidates,
+    });
 
-    const now = NoteUtils.genUpdateTime();
-    note.updated = now;
-
-    const noteClean = await engine.updateNote(note);
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
-    return noteClean;
-  }
-
-  /**
-   * Update note metadata (eg. links and anchors)
-   */
-  public async syncNoteMetadata({
-    note,
-    fmChangeOnly,
-  }: {
-    note: NoteProps;
-    fmChangeOnly: boolean;
-  }) {
-    const engine = this._extension.getEngine();
-    // Avoid calculating links/anchors if the note is too long
-    if (
-      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
-    ) {
-      return note;
-    }
-    // Links have to be updated even with frontmatter only changes
-    // because `tags` in frontmatter adds new links
-    const links = await engine.getLinks({ note, type: "regular" });
-    if (!links.data) {
-      throw new DendronError({
-        message: "Unable to calculate the backlinks in note",
-        payload: {
-          note: NoteUtils.toLogObj(note),
-          error: links.error,
-        },
-      });
-    }
-    note.links = links.data;
-
-    // if only frontmatter changed, don't bother with heavy updates
-    if (!fmChangeOnly) {
-      const anchors = await engine.getAnchors({
-        note,
-      });
-      if (!anchors.data) {
-        throw new DendronError({
-          message: "Unable to calculate backlinks in note",
-          payload: {
-            note: NoteUtils.toLogObj(note),
-            error: anchors.error,
-          },
-        });
-      }
-      note.anchors = anchors.data;
-
-      if (this._extension.workspaceService?.config.dev?.enableLinkCandidates) {
-        const linkCandidates = await engine.getLinks({
-          note,
-          type: "candidate",
-        });
-        if (!linkCandidates.data) {
-          throw new DendronError({
-            message: "Unable to calculate the backlink candidates in note",
-            payload: {
-              note: NoteUtils.toLogObj(note),
-              error: linkCandidates.error,
-            },
-          });
-        }
-        note.links = note.links.concat(linkCandidates.data);
-      }
-    }
 
     return note;
   }
 
-  private async onDidSave(document: TextDocument) {
-    const ctx = "NoteSyncService:onDidChange";
+  /**
+   * Exposed for testing only. Callback function for vscode.workspace.OnDidSaveTextDocument
+   * @param document
+   * @returns
+   */
+  public async onDidSave(document: TextDocument) {
+    const ctx = "TextDocumentService:onDidChange";
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -217,15 +135,17 @@ export class NoteSyncService implements INoteSyncService {
     const engine = this._extension.getEngine();
     const vault = VaultUtils.getVaultByFilePath({
       vaults: engine.vaults,
-      wsRoot: this._extension.getEngine().wsRoot,
+      wsRoot,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameV5({
+    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      notes: engine.notes,
-      wsRoot: this._extension.getEngine().wsRoot,
-    }) as NoteProps;
+      engine,
+    });
+    if (_.isUndefined(noteHydrated)) {
+      return;
+    }
 
     const content = document.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
@@ -237,18 +157,20 @@ export class NoteSyncService implements INoteSyncService {
       return;
     }
 
-    const props = await this.syncNoteContents({
+    const props = await this.updateNoteContents({
       oldNote: noteHydrated,
       content,
       fmChangeOnly: false,
       fname,
       vault,
     });
-
-    this._emitter.fire(props);
+    return engine.updateNote(props);
   }
 
-  private async onDidChange(event: TextDocumentChangeEvent) {
+  /**
+   * See {@link ITextDocumentService.processTextDocumentChangeEvent}
+   */
+  public async processTextDocumentChangeEvent(event: TextDocumentChangeEvent) {
     if (event.document.isDirty === false) {
       return;
     }
@@ -256,7 +178,7 @@ export class NoteSyncService implements INoteSyncService {
     const document = event.document;
     const contentChanges = event.contentChanges;
 
-    const ctx = "NoteSyncService:onDidChange";
+    const ctx = "TextDocumentService:processTextDocumentChangeEvent";
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -292,12 +214,12 @@ export class NoteSyncService implements INoteSyncService {
       wsRoot: this._extension.getEngine().wsRoot,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameV5({
+    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      notes: engine.notes,
-      wsRoot: this._extension.getEngine().wsRoot,
+      engine,
     }) as NoteProps;
+    // TODO: check for undefined
 
     const content = document.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
@@ -308,14 +230,48 @@ export class NoteSyncService implements INoteSyncService {
       });
       return;
     }
-    const props = await this.syncNoteContents({
+
+    return this.updateNoteContents({
       oldNote: noteHydrated,
       content,
       fmChangeOnly,
       fname,
       vault,
     });
-    this._emitter.fire(props);
+  }
+
+  /**
+   * See {@link ITextDocumentService.applyTextDocument}
+   */
+  public async applyTextDocument(note: NoteProps, textDocument: TextDocument) {
+    const ctx = "TextDocumentService:applyTextDocument";
+    const uri = textDocument.uri;
+
+    const maybePos = await this.getFrontmatterPosition(textDocument);
+    if (!maybePos) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
+      return note;
+    }
+
+    this.L.debug({ ctx, uri: uri.fsPath });
+
+    const content = textDocument.getText();
+    if (!WorkspaceUtils.noteContentChanged({ content, note })) {
+      this.L.debug({
+        ctx,
+        uri: uri.fsPath,
+        msg: "note content unchanged, returning original note",
+      });
+      return note;
+    }
+
+    return this.updateNoteContents({
+      oldNote: note,
+      content,
+      fmChangeOnly: false,
+      fname: note.fname,
+      vault: note.vault,
+    });
   }
 
   private getFrontmatterPosition = (

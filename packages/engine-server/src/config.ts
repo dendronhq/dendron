@@ -6,7 +6,6 @@ import {
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
-  Time,
   ConfigUtils,
   DendronPublishingConfig,
   GithubEditViewModeEnum,
@@ -17,6 +16,7 @@ import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { BackupKeyEnum, BackupService } from "./backup";
 
 export class DConfig {
   static configPath(configRoot: string): string {
@@ -135,7 +135,7 @@ export class DConfig {
       siteUrl = process.env["SITE_URL"];
     }
     if (!siteRootDir) {
-      throw `siteRootDir is undefined`;
+      throw new DendronError({ message: "siteRootDir is undefined" });
     }
     if (!siteUrl && getStage() === "dev") {
       // this gets overridden in dev so doesn't matter
@@ -189,15 +189,19 @@ export class DConfig {
    * @param wsRoot workspace root
    * @param infix custom string used in the backup name
    */
-  static createBackup(wsRoot: string, infix: string): string {
+  static async createBackup(wsRoot: string, infix?: string): Promise<string> {
+    const backupService = new BackupService({ wsRoot });
     const configPath = DConfig.configPath(wsRoot);
-    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-    const prefix = `dendron.${today}.`;
-    const suffix = `yml`;
-    const maybeInfix = infix ? `${infix}.` : "";
-    const backupName = `${prefix}${maybeInfix}${suffix}`;
-    const backupPath = path.join(wsRoot, backupName);
-    fs.copyFileSync(configPath, backupPath);
-    return backupPath;
+    const backupResp = await backupService.backup({
+      key: BackupKeyEnum.config,
+      pathToBackup: configPath,
+      timestamp: true,
+      infix,
+    });
+    backupService.dispose();
+    if (backupResp.error) {
+      throw new DendronError({ ...backupResp.error });
+    }
+    return backupResp.data;
   }
 }

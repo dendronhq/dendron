@@ -388,12 +388,12 @@ export class GitUtils {
       if (err?.code !== "ENOENT") throw err;
     }
     // Avoid duplicating the gitignore line if it was already there
+    const pathExists = contents?.split("\n").indexOf(addPath) !== -1;
     if (
       // gitignore is missing but we are allowed to create it
       (contents === undefined && noCreateIfMissing !== true) ||
       // gitignore exists, and the path is not in it yet
-      (contents !== undefined &&
-        !contents.match(new RegExp(`^${addPath}/?$`, "g")))
+      (contents !== undefined && !pathExists)
     ) {
       await fs.appendFile(gitignore, `\n${addPath}`);
     }

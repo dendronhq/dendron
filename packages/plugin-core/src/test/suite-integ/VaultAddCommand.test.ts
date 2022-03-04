@@ -435,13 +435,11 @@ function enableSelfCOntainedVaults(config: IntermediateDendronConfig) {
   config.dev!.enableSelfContainedVaults = true;
   return config;
 }
-describe("GIVEN VaultAddCommand with self contained vaults enabled", function () {
-  const ctx = setupBeforeAfter(this, {});
 
+describe("GIVEN VaultAddCommand with self contained vaults enabled", function () {
   describeSingleWS(
     "WHEN creating and adding a local vault",
     {
-      ctx,
       modConfigCb: enableSelfCOntainedVaults,
     },
     () => {
@@ -506,7 +504,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
   describeSingleWS(
     "WHEN creating and adding a remote vault",
-    { ctx, modConfigCb: enableSelfCOntainedVaults },
+    { modConfigCb: enableSelfCOntainedVaults },
     () => {
       let remoteDir: string;
       let vaultName: string;

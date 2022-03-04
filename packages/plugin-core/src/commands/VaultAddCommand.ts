@@ -43,14 +43,19 @@ export { CommandOpts as VaultAddCommandOpts };
 
 type SourceQuickPickEntry = QuickPickItem & { src: string };
 
+enum VaultType {
+  LOCAL = "local",
+  REMOTE = "remote",
+}
+
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.VAULT_ADD.key;
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
-    return (
-      DENDRON_REMOTE_VAULTS.map(({ name: label, description, data: src }) => {
+    return DENDRON_REMOTE_VAULTS.map(
+      ({ name: label, description, data: src }): SourceQuickPickEntry => {
         return { label, description, src };
-      }) as SourceQuickPickEntry[]
+      }
     ).concat([
       {
         label: "custom",
@@ -67,7 +72,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const localVaultPathPlaceholder = "vault2";
     let sourcePath: string;
     let sourceName: string | undefined;
-    if (sourceType === "remote") {
+    if (sourceType === VaultType.REMOTE) {
       // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
         const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();
@@ -138,7 +143,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   ): Promise<CommandOpts | undefined> {
     // If the vault name already exists, creating a vault with the same name would break things
 
-    if (sourceType === "local") {
+    if (sourceType === VaultType.LOCAL) {
       // Local vault
       // For self contained vaults, we'll have the vault name match the folder for
       // now. We can make this flexible later if that's a better UX, or give
@@ -193,13 +198,13 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const sourceTypeSelected = await VSCodeUtils.showQuickPick([
-      { label: "local", picked: true },
-      { label: "remote" },
+      { label: VaultType.LOCAL, picked: true },
+      { label: VaultType.REMOTE },
     ]);
     if (!sourceTypeSelected) {
       return;
     }
-    const sourceType = sourceTypeSelected.label as VaultRemoteSource;
+    const sourceType = sourceTypeSelected.label;
 
     const { config } = ExtensionProvider.getDWorkspace();
     if (config.dev?.enableSelfContainedVaults) {
@@ -413,7 +418,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const ctx = "VaultAdd";
     let vaults: DVault[] = [];
     Logger.info({ ctx, msg: "enter", opts });
-    if (opts.type === "remote") {
+    if (opts.type === VaultType.REMOTE) {
       if (opts.isSelfContained) {
         ({ vaults } = await this.handleRemoteRepoSelfContained(opts));
       } else {

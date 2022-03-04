@@ -162,6 +162,11 @@ export class GitUtils {
     // https://github.com/dendronhq/dendron-site.git This may also look like
     // http://example.com:8000/dendronhq/dendron-site.git, we skip the port
     const webMatch =
+      // starts with http:// or https://
+      // followed by the domain, which will continue until we hit /
+      // if we see a port definition like :8000, we skip it for simplicity
+      // then we have the path of the URL, like dendronhq/dendron-site
+      // finally, if there's a `.git` we'll discard that for a cleaner name
       /^(https?:\/\/)(?<domain>[^/:]+)(:[0-9]+)?\/(?<path>.+?)(\.git)?$/.exec(
         url
       );
@@ -176,8 +181,13 @@ export class GitUtils {
     // Check if it matches any SSH URLs like
     // git@github.com:dendronhq/dendron-site.git This may also look like
     // git@example.com:220/dendronhq/dendron-site.git, we skip the port and the
-    // initial slash
     const sshMatch =
+      // SSH urls start with a user, like git@ or gitlab@, which we skip
+      // followed by the domain, which will continue until we hit :
+      // if we see a port definition like :8000, we skip it for simplicity
+      // then we have the path of the URL, like dendronhq/dendron-site
+      // this path may optionally begin with a /, which we'll skip
+      // finally, if there's a `.git` we'll discard that for a cleaner name
       /^([^@]+@)(?<domain>[^:/]+):([0-9]+\/)?\/?(?<path>.+?)(\.git)?$/.exec(
         url
       );

@@ -155,7 +155,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
-        note = SiteUtils.addSiteOnlyNotes({ engine })[0];
+        note = SiteUtils.create403StaticNote({ engine });
       } else {
         note = NoteUtils.getNoteByFnameFromEngine({
           fname,

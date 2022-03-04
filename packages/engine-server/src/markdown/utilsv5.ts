@@ -417,7 +417,6 @@ export class MDUtilsV5 {
     });
 
     // add additional plugin for publishing
-    //maybe something here is interfering
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })

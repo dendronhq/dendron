@@ -8,11 +8,11 @@ import querystring from "querystring";
 import semver from "semver";
 import { DateTime, LruCache } from ".";
 import { COLORS_LIST } from "./colors";
-import { ERROR_SEVERITY } from "./constants";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
-} from "./constants/configs/compat";
+  ERROR_SEVERITY,
+} from "./constants";
 import { DendronError, ErrorMessages } from "./error";
 import {
   DendronSiteConfig,

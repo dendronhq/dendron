@@ -6,23 +6,31 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { ERROR_SEVERITY } from "./constants";
-import { DendronError, ErrorMessages } from "./error";
+import { DateTime, LruCache } from ".";
 import { COLORS_LIST } from "./colors";
+import { ERROR_SEVERITY } from "./constants";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
 } from "./constants/configs/compat";
+import { DendronError, ErrorMessages } from "./error";
 import {
   DendronSiteConfig,
   DHookDict,
   DVault,
-  NoteProps,
-  SEOProps,
-  NotePropsDict,
   LegacyDuplicateNoteBehavior,
   LegacyHierarchyConfig,
+  NoteProps,
+  NotePropsDict,
+  SEOProps,
 } from "./types";
+import { GithubConfig } from "./types/configs/publishing/github";
+import {
+  DendronPublishingConfig,
+  DuplicateNoteBehavior,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   configIsV4,
@@ -42,14 +50,6 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { DateTime, LruCache } from ".";
-import {
-  DendronPublishingConfig,
-  DuplicateNoteBehavior,
-  genDefaultPublishingConfig,
-  HierarchyConfig,
-} from "./types/configs/publishing/publishing";
-import { GithubConfig } from "./types/configs/publishing/github";
 
 /**
  * Dendron utilities
@@ -980,6 +980,7 @@ export class ConfigUtils {
     _config: IntermediateDendronConfig,
     opts?: { note?: NoteProps }
   ): boolean {
+    // check if note has override. takes precedence
     if (
       opts &&
       opts.note &&
@@ -988,6 +989,13 @@ export class ConfigUtils {
       _.isBoolean(opts.note.config.global.enableBackLinks)
     ) {
       return opts.note.config.global.enableBackLinks;
+    }
+    // check config value, if enableBacklinks set, then use value set
+    const publishConfig = ConfigUtils.getPublishingConfig(_config);
+    if (ConfigUtils.isV5PublishingConfig(publishConfig)) {
+      if (_.isBoolean(publishConfig.enableBackLinks)) {
+        return publishConfig.enableBackLinks;
+      }
     }
     return true;
   }
@@ -1053,6 +1061,12 @@ export class ConfigUtils {
   ) {
     const path = `publishing.github.${key}`;
     _.set(config, path, value);
+  }
+
+  static isV5PublishingConfig(
+    config: unknown
+  ): config is DendronPublishingConfig {
+    return _.has(config, "enableBackLinks");
   }
 
   static overridePublishingConfig(

@@ -50,6 +50,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
+
     const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
     if (_.isUndefined(note)) {
       return;

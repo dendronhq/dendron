@@ -992,6 +992,12 @@
         "enableNoteTitleForLink": {
           "type": "boolean"
         },
+        "enableFrontmatterTags": {
+          "type": "boolean"
+        },
+        "enableHashesForFMTags": {
+          "type": "boolean"
+        },
         "enableMermaid": {
           "type": "boolean"
         },
@@ -1008,6 +1014,8 @@
       "required": [
         "enableFMTitle",
         "enableNoteTitleForLink",
+        "enableFrontmatterTags",
+        "enableHashesForFMTags",
         "enableMermaid",
         "enablePrettyRefs",
         "enableKatex",
@@ -1035,6 +1043,9 @@
           "type": "boolean"
         },
         "enablePrettyRefs": {
+          "type": "boolean"
+        },
+        "enableBackLinks": {
           "type": "boolean"
         },
         "enableKatex": {

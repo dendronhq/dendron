@@ -12,6 +12,7 @@ import {
   GithubEditViewModeEnum,
   CleanDendronPublishingConfig,
   configIsV4,
+  StrictConfigV5,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -35,12 +36,12 @@ export class DConfig {
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: Partial<IntermediateDendronConfig>
+    defaults?: Partial<StrictConfigV5>
   ): IntermediateDendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
     let config: IntermediateDendronConfig = {
-      ...defaults,
       ...ConfigUtils.genDefaultConfig(),
+      ...defaults,
     };
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);

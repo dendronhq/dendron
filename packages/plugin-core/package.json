@@ -432,6 +432,10 @@
       {
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial"
+      },
+      {
+        "command": "dendron.openBackup",
+        "title": "Dendron: Open Backup"
       }
     ],
     "menus": {
@@ -706,6 +710,10 @@
         },
         {
           "command": "dendron.diagnosticsReport",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.openBackup",
           "when": "dendron:pluginActive"
         }
       ],

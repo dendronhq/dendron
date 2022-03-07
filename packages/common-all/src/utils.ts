@@ -978,7 +978,7 @@ export class ConfigUtils {
   }
   static getEnableBackLinks(
     _config: IntermediateDendronConfig,
-    opts?: { note?: NoteProps }
+    opts?: { note?: NoteProps; shouldApplyPublishingRules?: boolean }
   ): boolean {
     // check if note has override. takes precedence
     if (
@@ -992,7 +992,10 @@ export class ConfigUtils {
     }
     // check config value, if enableBacklinks set, then use value set
     const publishConfig = ConfigUtils.getPublishingConfig(_config);
-    if (ConfigUtils.isV5PublishingConfig(publishConfig)) {
+    if (
+      ConfigUtils.isV5PublishingConfig(publishConfig) &&
+      opts?.shouldApplyPublishingRules
+    ) {
       if (_.isBoolean(publishConfig.enableBackLinks)) {
         return publishConfig.enableBackLinks;
       }

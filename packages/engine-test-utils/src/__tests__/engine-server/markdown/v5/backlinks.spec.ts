@@ -40,7 +40,7 @@ describe("GIVEN dendron.yml default", () => {
       }, opts);
     };
 
-    describe("no note override", () => {
+    describe("AND WHEN no note override", () => {
       runTestCases(
         createProcCompileTests({
           name: "THEN backlinks are not generated",

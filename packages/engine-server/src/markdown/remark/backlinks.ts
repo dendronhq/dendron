@@ -55,7 +55,13 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (_.isUndefined(note)) {
       return;
     }
-    if (ConfigUtils.getEnableBackLinks(config, { note }) === false) {
+
+    if (
+      ConfigUtils.getEnableBackLinks(config, {
+        note,
+        shouldApplyPublishingRules: MDUtilsV5.shouldApplyPublishingRules(proc),
+      }) === false
+    ) {
       return;
     }
 

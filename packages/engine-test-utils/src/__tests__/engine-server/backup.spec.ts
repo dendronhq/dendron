@@ -14,6 +14,7 @@ describe("GIVEN BackupService", () => {
         const backupService = new BackupService({ wsRoot });
         const root = backupService.backupRoot;
         expect(root).toEqual(path.join(wsRoot, ".backup"));
+        backupService.dispose();
       },
       {
         expect,
@@ -37,6 +38,7 @@ describe("GIVEN BackupService", () => {
             encoding: "utf-8",
           });
           expect(gitignoreContents.includes(".backup")).toBeTruthy();
+          backupService.dispose();
         },
         {
           expect,
@@ -60,6 +62,7 @@ describe("GIVEN BackupService", () => {
           });
 
           expect(backupResp.data && fs.existsSync(backupResp.data));
+          backupService.dispose();
         },
         {
           expect,
@@ -77,6 +80,7 @@ describe("GIVEN BackupService", () => {
           });
 
           expect(configBackups).toEqual([]);
+          backupService.dispose();
         },
         {
           expect,
@@ -97,6 +101,7 @@ describe("GIVEN BackupService", () => {
               backups: [],
             },
           ]);
+          backupService.dispose();
         },
         {
           expect,
@@ -137,6 +142,7 @@ describe("GIVEN BackupService", () => {
         expect(
           /foo\.\d{4}\.\d{2}\.\d{2}\.\d*\.backup\.yml$/g.test(timestampInfixOut)
         ).toBeTruthy();
+        backupService.dispose();
       },
       {
         expect,

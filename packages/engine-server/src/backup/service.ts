@@ -40,10 +40,18 @@ export class BackupService implements Disposable, IBackupService {
     this.loggerDispose();
   }
 
+  /**
+   * returns backup root path.
+   */
   get backupRoot(): string {
     return path.join(this.wsRoot, BACKUP_DIR_NAME);
   }
 
+  /**
+   * Makes sure the backup root and directory for each defined key exists.
+   * Creates one otherwise.
+   * Add to gitignore if not already.
+   */
   async ensureBackupDir(): Promise<void> {
     this.logger.info({ msg: "ensureBackupDir" });
     await GitUtils.addToGitignore({
@@ -56,6 +64,13 @@ export class BackupService implements Disposable, IBackupService {
     });
   }
 
+  /**
+   * Given some options and a file name, generate a new file name to use for the backup.
+   * @param fileName file name to generate backup name for. Assumes existence of extension.
+   * @param timestamp flag to enable adding timestamp to name.
+   * @param infix optional custom infix to append right before the extension.
+   * @returns generated backup file name.
+   */
   generateBackupFileName(opts: {
     fileName: string;
     timestamp?: boolean;
@@ -71,6 +86,14 @@ export class BackupService implements Disposable, IBackupService {
     return `${out}.${extension}`;
   }
 
+  /**
+   *
+   * @param key key to use for backup.
+   * @param pathToBackup path of file to back up.
+   * @param timestamp flag to enable timestamp in backup file name.
+   * @param infix optional custom infix to append right before the extension.
+   * @returns
+   */
   async backup(opts: {
     key: BackupKeyEnum;
     pathToBackup: string;
@@ -98,16 +121,29 @@ export class BackupService implements Disposable, IBackupService {
     return { data: backupPath };
   }
 
+  /**
+   *
+   * @param key backup key to use.
+   * @returns list of backups with given key.
+   */
   getBackupsWithKey(opts: { key: string }): string[] {
     const { key } = opts;
     const backupDir = path.join(this.backupRoot, key);
-    const backupsWithKey = fs.readdirSync(backupDir, { withFileTypes: true });
-    // filter out any possible symbolic links and directories
-    return backupsWithKey
-      .filter((dirent) => dirent.isFile)
-      .map((dirent) => dirent.name);
+    try {
+      const backupsWithKey = fs.readdirSync(backupDir, { withFileTypes: true });
+      // filter out any possible symbolic links and directories
+      return backupsWithKey
+        .filter((dirent) => dirent.isFile)
+        .map((dirent) => dirent.name);
+    } catch (error) {
+      return [];
+    }
   }
 
+  /**
+   *
+   * @returns all backups grouped by backup key.
+   */
   getAllBackups() {
     return Object.keys(BackupKeyEnum).map((key) => {
       return {

@@ -416,7 +416,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       config: engineConfig,
       noExpandSingleDomain: true,
     });
-    const siteNotes = SiteUtils.addSiteOnlyNotes({
+    const siteNotes = SiteUtils.createSiteOnlyNotes({
       engine,
     });
     _.forEach(siteNotes, (ent) => {

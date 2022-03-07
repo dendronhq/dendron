@@ -34,7 +34,6 @@ import vscode, {
 } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 
 export type RefT = {
   label: string;
@@ -459,7 +458,7 @@ export const noteLinks2Locations = (note: NoteProps) => {
   const linksMatch = note.links.filter((l) => l.type !== "backlink");
   const fsPath = NoteUtils.getFullPath({
     note,
-    wsRoot: getDWorkspace().wsRoot,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
   });
   const fileContent = fs.readFileSync(fsPath).toString();
   const fmOffset = fileContent.indexOf("\n---") + 4;
@@ -495,9 +494,13 @@ export const findReferences = async (
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
-  const { engine } = getDWorkspace();
+  const engine = ExtensionProvider.getEngine();
   // clean for anchor
-  const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
+  const notes = NoteUtils.getNotesByFnameFromEngine({
+    fname,
+    engine,
+  });
+
   const notesWithRefs = await Promise.all(
     notes.flatMap((note) => {
       return NoteUtils.getNotesWithLinkTo({
@@ -513,7 +516,7 @@ export const findReferences = async (
     );
     const fsPath = NoteUtils.getFullPath({
       note,
-      wsRoot: getDWorkspace().wsRoot,
+      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {

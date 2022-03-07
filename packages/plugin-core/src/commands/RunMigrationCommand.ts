@@ -1,6 +1,5 @@
 import {
-  ALL_MIGRATIONS,
-  CONFIG_MIGRATIONS,
+  MIGRATION_ENTRIES,
   MigrationChangeSetStatus,
   Migrations,
   MigrationService,
@@ -28,7 +27,7 @@ export class RunMigrationCommand extends BasicCommand<
 
   async gatherInputs(opts?: CommandInput): Promise<CommandInput | undefined> {
     const migrationItems: vscode.QuickPickItem[] = _.map(
-      [CONFIG_MIGRATIONS, ...ALL_MIGRATIONS],
+      MIGRATION_ENTRIES,
       (migration) => {
         return {
           label: migration.version,
@@ -61,7 +60,7 @@ export class RunMigrationCommand extends BasicCommand<
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { version } = opts;
     const migrationsToRun: Migrations[] = _.filter(
-      [CONFIG_MIGRATIONS, ...ALL_MIGRATIONS],
+      MIGRATION_ENTRIES,
       (migration) => migration.version === version
     );
     const { wsRoot, config } = getDWorkspace();

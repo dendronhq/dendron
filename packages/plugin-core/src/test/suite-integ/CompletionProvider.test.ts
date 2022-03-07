@@ -56,9 +56,9 @@ suite("completionProvider", function () {
           expect(items!.length).toEqual(7);
           for (const item of items!) {
             // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
+            const found = NoteUtils.getNotesByFnameFromEngine({
               fname: item.label as string,
-              notes: engine.notes,
+              engine,
             });
             expect(found.length > 0).toBeTruthy();
           }
@@ -134,9 +134,9 @@ suite("completionProvider", function () {
           expect(items!.length).toEqual(2);
           for (const item of items!) {
             // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
+            const found = NoteUtils.getNotesByFnameFromEngine({
               fname: `${TAGS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
+              engine,
             });
             expect(found.length > 0).toBeTruthy();
           }
@@ -185,9 +185,9 @@ suite("completionProvider", function () {
           expect(items!.length).toEqual(2);
           for (const item of items!) {
             // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
+            const found = NoteUtils.getNotesByFnameFromEngine({
               fname: `${TAGS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
+              engine,
             });
             expect(found.length > 0).toBeTruthy();
           }
@@ -236,9 +236,9 @@ suite("completionProvider", function () {
           expect(items!.length).toEqual(2);
           for (const item of items!) {
             // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
+            const found = NoteUtils.getNotesByFnameFromEngine({
               fname: `${USERS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
+              engine,
             });
             expect(found.length > 0).toBeTruthy();
           }

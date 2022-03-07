@@ -788,7 +788,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   static async createGitIgnore(wsRoot: string) {
     const gitIgnore = path.join(wsRoot, ".gitignore");
-    fs.writeFileSync(
+    await fs.writeFile(
       gitIgnore,
       [
         "node_modules",
@@ -797,7 +797,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         "seeds",
         ".next",
         "pods/service-connections",
-        "\n",
       ].join("\n"),
       { encoding: "utf8" }
     );

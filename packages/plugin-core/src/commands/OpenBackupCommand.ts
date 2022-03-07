@@ -79,7 +79,7 @@ export class OpenBackupCommand extends BasicCommand<
                 )
               )
             );
-            window.showTextDocument(backupFile);
+            await window.showTextDocument(backupFile);
           } else {
             window.showInformationMessage("No backup selected.");
           }

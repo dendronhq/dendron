@@ -10,7 +10,6 @@ import {
   DendronError,
   ERROR_SEVERITY,
   isNotNull,
-  isNotUndefined,
   RespV2,
 } from "@dendronhq/common-all";
 

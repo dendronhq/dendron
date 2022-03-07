@@ -45,6 +45,7 @@ export class BackupService implements Disposable, IBackupService {
   }
 
   async ensureBackupDir(): Promise<void> {
+    this.logger.info({ msg: "ensureBackupDir" });
     await GitUtils.addToGitignore({
       addPath: BACKUP_DIR_NAME,
       root: this.wsRoot,
@@ -83,6 +84,7 @@ export class BackupService implements Disposable, IBackupService {
       backupDir,
       this.generateBackupFileName({ fileName, timestamp, infix })
     );
+    this.logger.info({ msg: "creating backup", backupPath, pathToBackup });
     await this.ensureBackupDir();
     fs.copyFileSync(pathToBackup, backupPath);
     if (!fs.existsSync(backupPath)) {

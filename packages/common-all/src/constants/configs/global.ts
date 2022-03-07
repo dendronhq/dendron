@@ -77,6 +77,15 @@ export const ENABLE_CHILD_LINKS = (
   };
 };
 
+export const ENABLE_BACK_LINKS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Show Backlinks (${namespace})`,
+    desc: `Notes will render backlinks (${namespace})`,
+  };
+};
+
 export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableFMTitle: ENABLE_FM_TITLE("global"), // TODO: split implementation to respect non-global config
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
@@ -84,4 +93,5 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
   enableChildLinks: ENABLE_CHILD_LINKS("global"),
+  enableBackLinks: ENABLE_BACK_LINKS("global"),
 };

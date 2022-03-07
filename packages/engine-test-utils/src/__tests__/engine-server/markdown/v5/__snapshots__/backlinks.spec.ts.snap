@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`GIVEN dendron.yml default WHEN enableBackLinks = false AND WHEN no note override "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`GIVEN dendron.yml default WHEN enableBackLinks = false GIVEN note override, WHEN note enableBackLinks = false "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
@@ -18,16 +28,6 @@ VFile {
 <ul>
 <li><a href=\\"/notes/beta\\">Beta (vault1)</a></li>
 </ul>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`GIVEN dendron.yml default WHEN enableBackLinks = false no note override "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
-VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

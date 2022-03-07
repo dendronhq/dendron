@@ -993,7 +993,7 @@ export class ConfigUtils {
     // check config value, if enableBacklinks set, then use value set
     const publishConfig = ConfigUtils.getPublishingConfig(_config);
     if (
-      ConfigUtils.isV5PublishingConfig(publishConfig) &&
+      ConfigUtils.isDendronPublishingConfig(publishConfig) &&
       opts?.shouldApplyPublishingRules
     ) {
       if (_.isBoolean(publishConfig.enableBackLinks)) {
@@ -1066,7 +1066,7 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
-  static isV5PublishingConfig(
+  static isDendronPublishingConfig(
     config: unknown
   ): config is DendronPublishingConfig {
     return _.has(config, "enableBackLinks");

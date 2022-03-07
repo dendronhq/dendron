@@ -44,6 +44,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
     // - the destination isn't HTML
     // - the note can't be found
     // - neableChild links is toggled off
+    // enableBackLinks is set to false
     if (!fname || insideNoteRef) {
       return;
     }

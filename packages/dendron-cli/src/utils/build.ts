@@ -146,21 +146,6 @@ export class BuildUtils {
     $(`yarn build:prod`, { cwd: root });
   }
 
-  static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
-    const root = this.getPluginRootPath();
-    const sitePath = path.join(root, "src", "utils", "site.ts");
-    const dst = `dendron-11ty": "^${opts.nextVersion.replace(/^0./, "1.")}"`;
-
-    const newContent = fs
-      .readFileSync(sitePath, { encoding: "utf8" })
-      .replace(/dendron-11ty.*/, dst);
-    fs.writeFileSync(sitePath, newContent);
-    $("git add packages/plugin-core/src/utils/site.ts");
-    const { stdout, stderr } = $(`git commit -m "chore: bump 11ty"`);
-    console.log(stdout, stderr);
-    return;
-  }
-
   static installPluginDependencies() {
     // remove root package.json before installing locally
     fs.removeSync(path.join(this.getLernaRoot(), "package.json"));

@@ -22,14 +22,14 @@ import {
   InsertNoteLinkAliasModeEnum,
 } from "@dendronhq/common-all";
 import {
-  ALL_MIGRATIONS,
+  CONFIG_MIGRATIONS,
   Migrations,
   MigrateFunction,
   MigrationService,
   WorkspaceService,
   DConfig,
   MigrationUtils,
-  CONFIG_MIGRATIONS,
+  MIGRATION_ENTRIES,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { describe, test } from "mocha";
@@ -58,13 +58,15 @@ const getMigration = ({
   to,
 }: Partial<{ from: string; exact: string; to: string }>): Migrations[] => {
   if (exact) {
-    const maybeMigration = ALL_MIGRATIONS.find((ent) => ent.version === exact);
+    const maybeMigration = MIGRATION_ENTRIES.find(
+      (ent) => ent.version === exact
+    );
     if (_.isUndefined(maybeMigration)) {
       throw Error("no migration found");
     }
     return [maybeMigration];
   } else {
-    let migrations = ALL_MIGRATIONS;
+    let migrations = MIGRATION_ENTRIES;
     // eg. take all migrations greater than the `from`
     if (from) {
       migrations = _.takeWhile(migrations, (mig) => {

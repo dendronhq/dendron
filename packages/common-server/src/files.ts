@@ -91,6 +91,15 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
   return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }
 
+/** Gets all files in `root`, with include and exclude lists (glob matched)
+ *
+ * This function returns the full `Dirent` which gives you access to file
+ * metadata. If you don't need the metadata, see {@link getAllFiles}.
+ *
+ * @throws a `DendronError` with `ERROR_SEVERITY.MINOR`. This is to avoid
+ * crashing the Dendron initialization, please catch the error and modify the
+ * severity if needed.
+ */
 export async function getAllFilesWithTypes(
   opts: GetAllFilesOpts
 ): Promise<RespV2<Dirent[]>> {
@@ -130,6 +139,15 @@ export async function getAllFilesWithTypes(
   }
 }
 
+/** Gets all files in `root`, with include and exclude lists (glob matched)
+ *
+ * This function returns only the file name. If you need the file metadata, see
+ * {@link getAllFilesWithTypes}.
+ *
+ * @throws a `DendronError` with `ERROR_SEVERITY.MINOR`. This is to avoid
+ * crashing the Dendron initialization, please catch the error and modify the
+ * severity if needed.
+ */
 export async function getAllFiles(
   opts: GetAllFilesOpts
 ): Promise<RespV2<string[]>> {

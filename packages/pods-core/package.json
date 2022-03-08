@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.84.0",
+  "version": "0.85.0",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -52,9 +52,9 @@
   },
   "dependencies": {
     "@dendronhq/airtable": "^0.11.1",
-    "@dendronhq/common-all": "^0.84.0",
-    "@dendronhq/common-server": "^0.84.0",
-    "@dendronhq/engine-server": "^0.84.0",
+    "@dendronhq/common-all": "^0.85.0",
+    "@dendronhq/common-server": "^0.85.0",
+    "@dendronhq/engine-server": "^0.85.0",
     "@instantish/martian": "1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",

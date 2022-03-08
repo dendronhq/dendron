@@ -48,7 +48,7 @@ export class VaultUtils {
   static getRelPath(vault: DVault) {
     if (VaultUtils.isSelfContained(vault)) {
       // Return the path to the notes folder inside the vault. This is for
-      // backwards compatibility with existing code.
+      // compatibility with existing code.
       return path.join(vault.fsPath, FOLDERS.NOTES);
     }
     if (vault.workspace) {

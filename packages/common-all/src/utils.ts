@@ -607,6 +607,11 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
+/** Makes not just the top level, but all nested properties optional. */
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";

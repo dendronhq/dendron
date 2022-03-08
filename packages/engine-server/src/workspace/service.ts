@@ -399,17 +399,30 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await schemaModuleOpts2File(schema, notesPath, "root");
     }
 
-    // Create the config and code-workspace for the vault, which make it self contained
+    // Create the config and code-workspace for the vault, which make it self contained.
+    // This is the config that goes inside the vault itself
     DConfig.getOrCreate(vaultPath, {
       dev: {
         enableSelfContainedVaults: true,
+      },
+      workspace: {
+        vaults: [
+          // If the vault is opened as a workspace, then the workspace is also the vault
+          {
+            name: vault.name,
+            fsPath: ".",
+            selfContained: true,
+          },
+        ],
       },
     });
     WorkspaceConfig.write(vaultPath, [], {
       overrides: {
         folders: [
           {
-            path: ".",
+            // Following how we set up workspace config for workspaces, where
+            // the root is the `vault` directory
+            path: "notes",
             name: VaultUtils.getName(vault),
           },
         ],

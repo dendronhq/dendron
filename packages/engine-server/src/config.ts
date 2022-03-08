@@ -13,6 +13,7 @@ import {
   CleanDendronPublishingConfig,
   configIsV4,
   StrictConfigV5,
+  DeepPartial,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -36,13 +37,14 @@ export class DConfig {
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: Partial<StrictConfigV5>
+    defaults?: DeepPartial<StrictConfigV5>
   ): IntermediateDendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
-    let config: IntermediateDendronConfig = {
-      ...ConfigUtils.genDefaultConfig(),
-      ...defaults,
-    };
+    // Need merge here to recursively merge nested configs
+    let config: IntermediateDendronConfig = _.merge(
+      ConfigUtils.genDefaultConfig(),
+      defaults
+    );
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);
     } else {

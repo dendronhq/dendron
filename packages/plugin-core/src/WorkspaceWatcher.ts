@@ -244,9 +244,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  async onWillSaveTextDocument(
-    event: TextDocumentWillSaveEvent
-  ): Promise<{ changes: TextEdit[] }> {
+  async onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -303,6 +301,11 @@ export class WorkspaceWatcher {
       vault: this._extension.wsUtils.getVaultFromUri(uri),
       engine,
     }) as NoteProps;
+
+    // If we can't find the note, don't do anything
+    if (!note) {
+      return;
+    }
 
     const content = event.document.getText();
     const matchFM = NoteUtils.RE_FM;

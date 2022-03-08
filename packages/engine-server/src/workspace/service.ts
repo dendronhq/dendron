@@ -401,19 +401,17 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     // Create the config and code-workspace for the vault, which make it self contained.
     // This is the config that goes inside the vault itself
+    const selfContainedVaultConfig: DVault = {
+      fsPath: ".",
+      selfContained: true,
+    };
+    if (vault.name) selfContainedVaultConfig.name = vault.name;
     DConfig.getOrCreate(vaultPath, {
       dev: {
         enableSelfContainedVaults: true,
       },
       workspace: {
-        vaults: [
-          // If the vault is opened as a workspace, then the workspace is also the vault
-          {
-            name: vault.name,
-            fsPath: ".",
-            selfContained: true,
-          },
-        ],
+        vaults: [selfContainedVaultConfig],
       },
     });
     WorkspaceConfig.write(vaultPath, [], {

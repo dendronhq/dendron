@@ -1,34 +1,68 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DEngineClient,
+  DVault,
+  IntermediateDendronConfig,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
-import { SiteUtils } from "../../topics/site";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
-import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
+import { SiteUtils } from "../../topics/site";
+import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
 
 // Plugin that adds backlinks at the end of each page if they exist
+// eslint-disable-next-line func-names
 const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, vault, dest, insideNoteRef } =
-      MDUtilsV4.getDendronData(proc);
+    let fname: string;
+    let vault: DVault;
+    let dest: DendronASTDest;
+    let insideNoteRef: boolean | undefined;
+    let config: IntermediateDendronConfig;
+    let engine: DEngineClient;
+
+    if (MDUtilsV5.isV5Active(proc)) {
+      ({ fname, vault, dest, insideNoteRef, config, engine } =
+        MDUtilsV5.getProcData(proc));
+    } else {
+      ({ fname, vault, dest, insideNoteRef, config } =
+        MDUtilsV4.getDendronData(proc));
+      engine = MDUtilsV4.getEngineFromProc(proc).engine;
+    }
+
+    // Don't show backlinks for the following cases:
+    // - we are inside a note ref
+    // - the destination isn't HTML
+    // - the note can't be found
+    // - neableChild links is toggled off
+    // enableBackLinks is set to false
     if (!fname || insideNoteRef) {
       return;
     }
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      engine,
-      vault,
-    });
+
+    const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
     if (_.isUndefined(note)) {
+      return;
+    }
+
+    if (
+      ConfigUtils.getEnableBackLinks(config, {
+        note,
+        shouldApplyPublishingRules: MDUtilsV5.shouldApplyPublishingRules(proc),
+      }) === false
+    ) {
       return;
     }
 
@@ -48,6 +82,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
         engine,
         vault,
       });
+
       if (!note) {
         return false;
       }

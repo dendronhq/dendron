@@ -1053,6 +1053,9 @@
         "enablePrettyRefs": {
           "type": "boolean"
         },
+        "enableBackLinks": {
+          "type": "boolean"
+        },
         "enableKatex": {
           "type": "boolean"
         },

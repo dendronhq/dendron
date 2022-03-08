@@ -41,7 +41,7 @@ export default function DendronTreeMenu(
 
   // set `activeNoteIds`
   useEffect(() => {
-    if (!noteActiveId || !props.tree) {
+    if (!noteActiveId || !tree) {
       return undefined;
     }
 
@@ -51,7 +51,7 @@ export default function DendronTreeMenu(
 
     // all parents should be in expanded position
     const activeNoteIds = TreeUtils.getAllParents({
-      child2parent: props.tree.child2parent,
+      child2parent: tree.child2parent,
       noteId: noteActiveId,
     });
 

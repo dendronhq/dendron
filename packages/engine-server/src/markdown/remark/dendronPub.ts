@@ -397,7 +397,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         // no transform
         if (
           dest === DendronASTDest.MD_ENHANCED_PREVIEW ||
-          dest === DendronASTDest.MD_REGULAR
+          dest === DendronASTDest.MD_REGULAR ||
+          dest === DendronASTDest.MD_DENDRON
         ) {
           return;
         }

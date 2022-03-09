@@ -2,7 +2,6 @@
 // @ts-ignore
 import title from "title";
 import matter from "gray-matter";
-import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -2000,32 +1999,6 @@ export class SchemaUtils {
       builtinProps.parent = "root";
     }
     return { ...builtinProps, ...dataProps };
-  }
-
-  static serializeModuleProps(moduleProps: SchemaModuleProps) {
-    const { version, imports, schemas } = moduleProps;
-    // TODO: filter out imported schemas
-    const out: any = {
-      version,
-      imports: [],
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    if (imports) {
-      out.imports = imports;
-    }
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
-  }
-
-  static serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
-    const { version, imports, schemas } = _.defaults(moduleOpts, {
-      imports: [],
-    });
-    const out = {
-      version,
-      imports,
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
 
   static isSchemaUri(uri: URI) {

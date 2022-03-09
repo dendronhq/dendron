@@ -9,7 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { FrontmatterContent } from "mdast";
-import YAML from "yamljs";
+import YAML from "js-yaml";
 
 // These are used to match the warnings to code actions. Also displayed for users along with the warning message.
 export const BAD_FRONTMATTER_CODE = "bad frontmatter";
@@ -46,7 +46,7 @@ export function checkAndWarnBadFrontmatter(
   const errors: IDendronError[] = [];
   const range = position2VSCodeRange(frontmatter.position!);
   try {
-    const frontmatterData = YAML.parse(frontmatter.value);
+    const frontmatterData = YAML.load(frontmatter.value) as any;
     if (!_.isString(frontmatterData.id)) {
       // Missing id
       diagnostics.push(

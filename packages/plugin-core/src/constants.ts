@@ -15,6 +15,7 @@ export enum DendronContext {
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
   NOTE_LOOK_UP_ACTIVE = "dendron:noteLookupActive",
+  MOVE_NOTE_ACTIVE = "dendron:moveNoteActive",
   SHOULD_SHOW_LOOKUP_VIEW = "dendron:shouldShowLookupView",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
@@ -223,6 +224,14 @@ export const DENDRON_MENUS = {
   ],
 };
 
+// See LOOKUP_NOTE_AUTO_COMPLETE notes
+const tabAutoCompleteKeybindings = {
+  key: "Tab",
+  when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
+};
+
+const tabAutoCompleteWhenArg = `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`;
+
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // ---
   BACKLINK_SORT_BY_LAST_UPDATED: {
@@ -391,11 +400,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     /** This command will NOT show up within the command palette
      *  since its disabled within package.json in contributes.menus.commandPalette */
     title: `${CMD_PREFIX} hidden`,
+    keybindings: tabAutoCompleteKeybindings,
+    when: tabAutoCompleteWhenArg,
+  },
+  MOVE_NOTE_AUTO_COMPLETE: {
+    key: "dendron.moveNoteAutoComplete",
+    title: `${CMD_PREFIX} hidden`,
     keybindings: {
       key: "Tab",
-      when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.MOVE_NOTE_ACTIVE} && !editorFocus && !view`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && !editorFocus && !view`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.MOVE_NOTE_ACTIVE} && !editorFocus && !view`,
   },
   CREATE_JOURNAL: {
     key: "dendron.createJournalNote",

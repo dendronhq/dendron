@@ -70,12 +70,14 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { MoveNoteAutoCompleteCommand } from "./MoveNoteAutoCompleteCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
  * those cannot be cast to the CodeCommandConstructor interface.
  */
 const ALL_COMMANDS = [
+  MoveNoteCommand,
   AddAndCommit,
   ArchiveHierarchyCommand,
   BrowseNoteCommand,
@@ -111,6 +113,7 @@ const ALL_COMMANDS = [
   InsertNoteIndexCommand,
   NoteLookupCommand,
   NoteLookupAutoCompleteCommand,
+  MoveNoteAutoCompleteCommand,
   CreateJournalNoteCommand,
   CreateScratchNoteCommand,
   SchemaLookupCommand,
@@ -119,7 +122,6 @@ const ALL_COMMANDS = [
   PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,
-  MoveNoteCommand,
   RenameHeaderCommand,
   MoveHeaderCommand,
   RefactorHierarchyCommandV2,

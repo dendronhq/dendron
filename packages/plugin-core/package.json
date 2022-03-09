@@ -186,6 +186,10 @@
         "title": "Dendron: hidden"
       },
       {
+        "command": "dendron.moveNoteAutoComplete",
+        "title": "Dendron: hidden"
+      },
+      {
         "command": "dendron.createJournalNote",
         "title": "Dendron: Create Journal Note"
       },
@@ -511,6 +515,10 @@
         {
           "command": "dendron.lookupNoteAutoComplete",
           "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
+        },
+        {
+          "command": "dendron.moveNoteAutoComplete",
+          "when": "dendron:pluginActive && dendron:moveNoteActive && !editorFocus && !view"
         },
         {
           "command": "dendron.createJournalNote",
@@ -960,6 +968,11 @@
         "command": "dendron.lookupNoteAutoComplete",
         "key": "Tab",
         "when": "dendron:pluginActive && dendron:noteLookupActive && !editorFocus && !view"
+      },
+      {
+        "command": "dendron.moveNoteAutoComplete",
+        "key": "Tab",
+        "when": "dendron:pluginActive && dendron:moveNoteActive && !editorFocus && !view"
       },
       {
         "command": "dendron.createJournalNote",

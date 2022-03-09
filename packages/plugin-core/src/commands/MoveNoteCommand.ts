@@ -12,21 +12,26 @@ import _md from "markdown-it";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
+import type { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
+import {
+  ILookupProviderV3,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import {
   OldNewLocation,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { AutoCompletable } from "../utils/AutoCompletable";
+import { AutoCompleter } from "../utils/autoCompleter";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { getDWorkspace, getExtension } from "../workspace";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
-import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 
 type CommandInput = any;
 
@@ -69,14 +74,37 @@ function isMoveNecessary(move: RenameNoteOpts) {
   );
 }
 
-export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class MoveNoteCommand
+  extends BasicCommand<CommandOpts, CommandOutput>
+  implements AutoCompletable
+{
   key = DENDRON_COMMANDS.MOVE_NOTE.key;
+
+  private _provider: ILookupProviderV3 | undefined;
+  private _controller: ILookupControllerV3 | undefined;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
     }
     return;
+  }
+
+  async onAutoComplete() {
+    console.log("move note autocomplete");
+    // TODO: Current problem is that both _provider and _controller are
+    // undefined because we're not using the right instance of this command
+    // class in `MoveNoteAutoCompleteCommand.ts`
+    if (this._provider && this._controller) {
+      this._controller.quickpick.value = AutoCompleter.getAutoCompletedValue(
+        this._controller.quickpick
+      );
+
+      await this._provider.onUpdatePickerItems({
+        picker: this._controller.quickpick,
+        token: this._controller.createCancelSource().token,
+      });
+    }
   }
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
@@ -90,6 +118,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       : undefined;
 
     const lookupCreateOpts: LookupControllerV3CreateOpts = {
+      title: "Move Note",
       nodeType: "note",
       disableVaultSelection: opts?.useSameVault,
       // If vault selection is enabled we alwaysPrompt selection mode,
@@ -100,22 +129,45 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (vault) {
       lookupCreateOpts.buttons = [];
     }
-    const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
+    this._controller =
+      extension.lookupControllerFactory.create(lookupCreateOpts);
 
-    const provider = extension.noteLookupProviderFactory.create("move", {
+    // lc.quickpick.title = "Move Note";
+    // lc.quickpick.placeholder = "foo";
+
+    // const lookupCmd = AutoCompletableRegistrar.getNoteLookupCmd();
+    // lookupCmd.controller = lc;
+
+    this._provider = extension.noteLookupProviderFactory.create("move", {
       allowNewNote: true,
       forceAsIsPickerValueUsage: true,
     });
-    provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
+    this._provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
+
     const initialValue = path.basename(
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
       ".md"
     );
 
+    const resp = await this._controller.prepareQuickPick({
+      title: "Move note",
+      placeholder: "foo",
+      provider: this._provider!,
+      initialValue: opts?.initialValue || initialValue,
+      nonInteractive: opts?.nonInteractive,
+      onDidHide: () => {
+        VSCodeUtils.setContext(DendronContext.MOVE_NOTE_ACTIVE, false);
+      },
+    });
+
+    // this._controller.quickpick.onDidHide(() => {
+    //   VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
+    // });
+
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id: "move",
-        controller: lc,
+        controller: this._controller!,
         logger: this.L,
         onDone: (event: HistoryEvent) => {
           const data =
@@ -135,13 +187,22 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           resolve(undefined);
         },
       });
-      lc.show({
-        title: "Move note",
-        placeholder: "foo",
-        provider,
-        initialValue: opts?.initialValue || initialValue,
-        nonInteractive: opts?.nonInteractive,
+      // lookupCmd.run();
+
+      VSCodeUtils.setContext(DendronContext.MOVE_NOTE_ACTIVE, true);
+
+      this._controller!.showQuickPick({
+        quickpick: resp.quickpick,
+        provider: this._provider!,
       });
+
+      // this._controller!.show({
+      //   title: "Move note",
+      //   placeholder: "foo",
+      //   provider: this._provider!,
+      //   initialValue: opts?.initialValue || initialValue,
+      //   nonInteractive: opts?.nonInteractive,
+      // });
     });
   }
 
@@ -188,8 +249,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       allowMultiselect: true,
     });
 
-    const { engine } = getDWorkspace();
-    const ext = getExtension();
+    const { engine } = ExtensionProvider.getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
 
     if (ext.fileWatcher && !opts.noPauseWatcher) {
       ext.fileWatcher.pause = true;
@@ -315,7 +376,7 @@ async function closeCurrentFileOpenMovedFile(
   engine: DEngineClient,
   moveOpts: RenameNoteOpts
 ) {
-  const wsRoot = getDWorkspace().wsRoot;
+  const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
 
   const vault = VaultUtils.getVaultByName({
     vaults: engine.vaults,

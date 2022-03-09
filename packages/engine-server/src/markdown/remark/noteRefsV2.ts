@@ -845,13 +845,17 @@ function convertNoteRefHelperAST(
   } else {
     // Otherwise, just clone the existing proc instead of creating a new one.
     // This will largely preserve existing opts, we just need to change a few.
-    noteRefProc = proc();
-    // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-    MDUtilsV5.setProcData(noteRefProc, {
-      fname: note.fname,
-      insideNoteRef: true,
-      vault: note.vault,
-    });
+
+    noteRefProc = MDUtilsV5.procRemarkFull(
+      {
+        ...MDUtilsV5.getProcData(proc),
+        insideNoteRef: true,
+        fname: note.fname,
+        vault: note.vault,
+        engine,
+      },
+      MDUtilsV5.getProcOpts(proc)
+    );
   }
   const wsRoot = engine.wsRoot;
   noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));

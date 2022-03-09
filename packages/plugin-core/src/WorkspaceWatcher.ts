@@ -304,6 +304,11 @@ export class WorkspaceWatcher {
 
     // If we can't find the note, don't do anything
     if (!note) {
+      // Log at info level and not error level for now to reduce Sentry noise
+      Logger.info({
+        ctx,
+        msg: `Note with fname ${fname} not found in engine! Skipping updated field FM modification.`,
+      });
       return;
     }
 

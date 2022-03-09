@@ -237,7 +237,7 @@ workspace:
     seeds:
         dendron.foo:
             site:
-                url: 'https://foo.com'
+                url: https://foo.com
                 index: foo
 preview:
     enableFMTitle: true

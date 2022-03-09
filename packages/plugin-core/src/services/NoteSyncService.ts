@@ -114,11 +114,11 @@ export class TextDocumentService implements ITextDocumentService {
   }
 
   /**
-   * Exposed for testing only. Callback function for vscode.workspace.OnDidSaveTextDocument
+   * Callback function for vscode.workspace.OnDidSaveTextDocument. Updates note with contents from document and saves to engine
    * @param document
    * @returns
    */
-  public async onDidSave(document: TextDocument) {
+  private async onDidSave(document: TextDocument) {
     const ctx = "TextDocumentService:onDidChange";
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
@@ -218,8 +218,10 @@ export class TextDocumentService implements ITextDocumentService {
       fname,
       vault,
       engine,
-    }) as NoteProps;
-    // TODO: check for undefined
+    });
+    if (_.isUndefined(noteHydrated)) {
+      return;
+    }
 
     const content = document.getText();
     if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
@@ -292,4 +294,11 @@ export class TextDocumentService implements ITextDocumentService {
       });
     });
   };
+
+  // eslint-disable-next-line camelcase
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
+    return {
+      onDidSave: this.onDidSave.bind(this),
+    };
+  }
 }

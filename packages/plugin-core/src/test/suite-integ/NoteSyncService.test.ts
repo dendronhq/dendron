@@ -1,21 +1,12 @@
-import { assert, DateTime, milliseconds, Time } from "@dendronhq/common-all";
-import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
-import { afterEach, before, describe } from "mocha";
-import sinon from "sinon";
+import { assert, milliseconds } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
-import { EventEmitter, TextDocumentChangeEvent } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { TextDocumentService } from "../../services/NoteSyncService";
-import { WSUtils } from "../../WSUtils";
-import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
-import {
-  describeSingleWS,
-  describeMultiWS,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { describeSingleWS, describeMultiWS } from "../testUtilsV3";
 
 async function wait1Millisecond(): Promise<void> {
   return new Promise((resolve) => {
@@ -34,398 +25,199 @@ async function millisNowAndWait1Milli(): Promise<number> {
   return millis;
 }
 
-suite.skip("NoteSyncService tests without time stubbing", function testSuite() {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
-
-  describe(`GIVEN NoteSyncService`, () => {
-    let textDocumentService: TextDocumentService | undefined;
-
-    afterEach(() => {
-      if (textDocumentService) {
-        textDocumentService.dispose();
-      }
-    });
-
-    test.skip("WHEN only fontmatter title changes THEN updated stamp should be changed.", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-          let changeSelection: vscode.Selection;
-          const offset = `title: `.length;
-          await editor?.edit((builder) => {
-            const startTitlePos = new vscode.Position(2, offset);
-            const endTitlePos = new vscode.Position(
-              2,
-              `title: ${foo.title}`.length
-            );
-            changeSelection = new vscode.Selection(startTitlePos, endTitlePos);
-            builder.replace(changeSelection, `bar`);
-          });
-
-          const beforeStamp = await millisNowAndWait1Milli();
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
-          );
-
-          textDocumentService.onNoteChange(
-            async (noteProps) => {
-              expect(noteProps.updated > beforeStamp).toBeTruthy();
-
-              expect(
-                await AssertUtils.assertInString({
-                  body: engine.notes["foo"].title,
-                  match: ["bar"],
-                  nomatch: ["foo"],
-                })
-              ).toBeTruthy();
-
-              done();
-            },
-            this
-            // ctx.subscriptions
-          );
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [
-              {
-                range: new vscode.Range(
-                  changeSelection!.start.line,
-                  changeSelection!.start.character,
-                  changeSelection!.end.line,
-                  changeSelection!.end.character
-                ),
-                text: "bar",
-                rangeLength: 3,
-                rangeOffset: offset,
-              },
-            ],
-          });
-        },
-      });
-    });
-  });
-});
-
 suite("NoteSyncService", function testSuite() {
-  let newUpdatedTime: number;
-  let timeStub: sinon.SinonStub;
-
   let textDocumentService: TextDocumentService | undefined;
+  let onDidChangeTextDocumentHandler: vscode.Disposable | undefined;
+  this.timeout(5000);
 
   afterEach(() => {
     if (textDocumentService) {
       textDocumentService.dispose();
     }
-  });
-
-  /*const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    beforeHook: () => {
-      newUpdatedTime = 60000;
-      timeStub = sinon
-        .stub(Time, "now")
-        .returns(DateTime.fromMillis(newUpdatedTime));
-    },
-    afterHook: () => {
-      if (timeStub) {
-        timeStub.restore();
-      }
-    },
-  });*/
-
-  describe.skip("onDidChange", () => {
-    test("ok: onDidChange: change", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-          await editor?.edit((builder) => {
-            const pos = new vscode.Position(10, 0);
-            const selection = new vscode.Selection(pos, pos);
-            builder.replace(selection, `Hello`);
-          });
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
-          );
-
-          textDocumentService.onNoteChange(async (noteProps) => {
-            expect(noteProps.contentHash).toEqual(
-              "465a4f4ebf83fbea836eb7b8e8e040ec"
-            );
-            expect(noteProps.updated).toEqual(newUpdatedTime);
-            expect(
-              await AssertUtils.assertInString({
-                body: engine.notes["foo"].body,
-                match: ["Hello"],
-              })
-            ).toBeTruthy();
-
-            done();
-          }, this);
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
-          });
-        },
-      });
-    });
-
-    test.skip("onDidChange: changing `tags` updates links", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: async (opts) => {
-          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.test",
-            wsRoot: opts.wsRoot,
-            vault: opts.vaults[0],
-          });
-        },
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-          await editor?.edit((builder) => {
-            const pos = new vscode.Position(6, 0);
-            builder.insert(pos, `tags: test\n`);
-          });
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument,
-            emitter.event
-          );
-
-          textDocumentService.onNoteChange(async (_noteProps) => {
-            const updatedFoo = engine.notes["foo"];
-            expect(updatedFoo.links.length).toEqual(1);
-            expect(updatedFoo.links[0].type).toEqual("frontmatterTag");
-            expect(updatedFoo.links[0].to?.fname).toEqual("tags.test");
-
-            done();
-          }, this);
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
-          });
-        },
-      });
-    });
-
-    test("onDidChange: no change", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument,
-            emitter.event
-          );
-
-          textDocumentService.onNoteChange(async (_noteProps) => {
-            assert(false, "Callback not expected");
-          }, this);
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
-          });
-
-          // Small sleep to ensure callback doesn't fire.
-          await millisNowAndWait1Milli();
-          done();
-        },
-      });
-    });
+    if (onDidChangeTextDocumentHandler) {
+      onDidChangeTextDocumentHandler.dispose();
+    }
   });
 
   describe("Given a TextDocumentChangeEvent", () => {
-    test.skip("ok: onDidChange: change", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-          await editor?.edit((builder) => {
-            const pos = new vscode.Position(10, 0);
-            const selection = new vscode.Selection(pos, pos);
-            builder.replace(selection, `Hello`);
-          });
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
-          );
-
-          textDocumentService.onNoteChange(async (noteProps) => {
-            expect(noteProps.contentHash).toEqual(
-              "465a4f4ebf83fbea836eb7b8e8e040ec"
-            );
-            expect(noteProps.updated).toEqual(newUpdatedTime);
-            expect(
-              await AssertUtils.assertInString({
-                body: engine.notes["foo"].body,
-                match: ["Hello"],
-              })
-            ).toBeTruthy();
-
-            done();
-          }, this);
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
-          });
-        },
-      });
-    });
-
-    test.skip("onDidChange: changing `tags` updates links", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: async (opts) => {
-          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.test",
-            wsRoot: opts.wsRoot,
-            vault: opts.vaults[0],
-          });
-        },
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-          await editor?.edit((builder) => {
-            const pos = new vscode.Position(6, 0);
-            builder.insert(pos, `tags: test\n`);
-          });
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
-          textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument,
-            emitter.event
-          );
-
-          textDocumentService.onNoteChange(async (_noteProps) => {
-            const updatedFoo = engine.notes["foo"];
-            expect(updatedFoo.links.length).toEqual(1);
-            expect(updatedFoo.links[0].type).toEqual("frontmatterTag");
-            expect(updatedFoo.links[0].to?.fname).toEqual("tags.test");
-
-            done();
-          }, this);
-
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
-          });
-        },
-      });
-    });
-
     describeSingleWS(
-      "WHEN the contents have not changed",
+      "WHEN the contents have changed",
       {
-        postSetupHook: ENGINE_HOOKS.setupBasic,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault,
+            fname: "alpha",
+            body: "First Line\n",
+          });
+        },
       },
       () => {
-        before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "foo",
-            body: ["[[test.txt]]", "[[test.txt#L1]]"].join("\n"),
-          });
-        });
-
-        test("THEN processTextDocumentChangeEvent should return undefined", async () => {
+        test("THEN processTextDocumentChangeEvent should return note with updated text", (done) => {
           textDocumentService = new TextDocumentService(
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          vscode.workspace.onDidChangeTextDocument(async (event) => {
-            const maybeNote =
-              await textDocumentService?.processTextDocumentChangeEvent(event);
-            expect(maybeNote).toBeTruthy();
-          });
-          const engine = ExtensionProvider.getEngine();
-          const testNoteProps = engine.notes["foo"];
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const testtest = await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "food",
-            body: ["[[test.txt]]", "[[test.txt#L1]]"].join("\n"),
-          });
-          const editor = await ExtensionProvider.getWSUtils().openNote(
-            testtest
-          );
-
           const textToAppend = "new text here";
-          editor.edit((editBuilder) => {
-            const line = editor.document.getText().split("\n").length;
-            editBuilder.insert(new vscode.Position(line, 0), textToAppend);
-          });
+          const engine = ExtensionProvider.getEngine();
+          const alphaNote = engine.notes["alpha"];
+
+          onDidChangeTextDocumentHandler =
+            vscode.workspace.onDidChangeTextDocument(async (event) => {
+              if (event.document.isDirty) {
+                const maybeNote =
+                  await textDocumentService?.processTextDocumentChangeEvent(
+                    event
+                  );
+                expect(maybeNote?.body).toEqual("First Line\n" + textToAppend);
+                // Make sure updated has not changed
+                expect(maybeNote?.updated).toEqual(alphaNote.updated);
+                done();
+              }
+            });
+          ExtensionProvider.getWSUtils()
+            .openNote(alphaNote)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const line = editor.document.getText().split("\n").length;
+                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+              });
+            });
         });
       }
     );
 
-    test("onDidChange: no change", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ engine }) => {
-          const foo = engine.notes["foo"];
-          const editor = await WSUtils.openNote(foo);
-
-          const emitter = new EventEmitter<TextDocumentChangeEvent>();
-
+    describeSingleWS(
+      "WHEN the contents have changed tags",
+      {
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            wsRoot,
+            vault,
+            body: "foo body",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "tags.test",
+            wsRoot,
+            vault,
+          });
+        },
+      },
+      () => {
+        test("THEN processTextDocumentChangeEvent should return note with updated links", (done) => {
           textDocumentService = new TextDocumentService(
             ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument,
-            emitter.event
+            vscode.workspace.onDidSaveTextDocument
           );
+          const engine = ExtensionProvider.getEngine();
+          const foo = engine.notes["foo"];
 
-          textDocumentService.onNoteChange(async (_noteProps) => {
-            assert(false, "Callback not expected");
-          }, this);
+          onDidChangeTextDocumentHandler =
+            vscode.workspace.onDidChangeTextDocument(async (event) => {
+              if (event.document.isDirty) {
+                const maybeNote =
+                  await textDocumentService?.processTextDocumentChangeEvent(
+                    event
+                  );
+                expect(maybeNote?.links.length).toEqual(1);
+                expect(maybeNote?.links[0].type).toEqual("frontmatterTag");
+                expect(maybeNote?.links[0].to?.fname).toEqual("tags.test");
+                done();
+              }
+            });
+          ExtensionProvider.getWSUtils()
+            .openNote(foo)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const pos = new vscode.Position(6, 0);
+                editBuilder.insert(pos, `tags: test\n`);
+              });
+            });
+        });
+      }
+    );
 
-          emitter.fire({
-            document: editor.document,
-            contentChanges: [],
+    describeSingleWS(
+      "WHEN the contents have not changed",
+      {
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault,
+            fname: "beta",
+            body: "First Line\n",
           });
-
-          // Small sleep to ensure callback doesn't fire.
-          await millisNowAndWait1Milli();
-          done();
         },
+      },
+      () => {
+        test("THEN processTextDocumentChangeEvent should not be called", (done) => {
+          textDocumentService = new TextDocumentService(
+            ExtensionProvider.getExtension(),
+            vscode.workspace.onDidSaveTextDocument
+          );
+          const engine = ExtensionProvider.getEngine();
+          const alphaNote = engine.notes["beta"];
+
+          onDidChangeTextDocumentHandler =
+            vscode.workspace.onDidChangeTextDocument(() => {
+              assert(false, "Callback not expected");
+            });
+          ExtensionProvider.getWSUtils()
+            .openNote(alphaNote)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const line = editor.document.getText().split("\n").length;
+                editBuilder.insert(new vscode.Position(line, 0), "");
+              });
+            });
+          // Small sleep to ensure callback doesn't fire.
+          millisNowAndWait1Milli().then(() => done());
+        });
+      }
+    );
+
+    describeSingleWS("WHEN the contents don't match any notes", {}, () => {
+      test("THEN processTextDocumentChangeEvent should return undefined", (done) => {
+        textDocumentService = new TextDocumentService(
+          ExtensionProvider.getExtension(),
+          vscode.workspace.onDidSaveTextDocument
+        );
+        const textToAppend = "new text here";
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+        NoteTestUtilsV4.createNote({
+          fname: "blahblah123",
+          body: `[[beta]]`,
+          vault: vaults[0],
+          wsRoot,
+        }).then((testNoteProps) => {
+          ExtensionProvider.getWSUtils()
+            .openNote(testNoteProps)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const line = editor.document.getText().split("\n").length;
+                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+              });
+            });
+        });
+
+        expect(engine.notes["blahblah123"]).toBeFalsy();
+
+        onDidChangeTextDocumentHandler =
+          vscode.workspace.onDidChangeTextDocument(async (event) => {
+            if (event.document.isDirty) {
+              const maybeNote =
+                await textDocumentService?.processTextDocumentChangeEvent(
+                  event
+                );
+              expect(maybeNote).toBeFalsy();
+              done();
+            }
+          });
       });
     });
   });
@@ -454,9 +246,10 @@ suite("NoteSyncService", function testSuite() {
             editBuilder.insert(new vscode.Position(line, 0), textToAppend);
           });
           await editor.document.save();
-          const updatedNote = await textDocumentService.onDidSave(
-            editor.document
-          );
+
+          const { onDidSave } =
+            textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote?.body).toEqual(testNoteProps.body + textToAppend);
           expect(engine.notes["foo"].body).toEqual(
@@ -483,9 +276,9 @@ suite("NoteSyncService", function testSuite() {
             testNoteProps
           );
 
-          const updatedNote = await textDocumentService.onDidSave(
-            editor.document
-          );
+          const { onDidSave } =
+            textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote).toBeFalsy();
           expect(engine.notes["foo"].body).toEqual(testNoteProps.body);
@@ -516,9 +309,9 @@ suite("NoteSyncService", function testSuite() {
           );
 
           expect(engine.notes["blahblah123"]).toBeFalsy();
-          const updatedNote = await textDocumentService.onDidSave(
-            editor.document
-          );
+          const { onDidSave } =
+            textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote).toBeFalsy();
         });

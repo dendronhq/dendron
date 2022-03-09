@@ -1527,6 +1527,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "Non-J",
+      "name": "Non-J",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45286033?v=4",
+      "profile": "https://jirawut.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

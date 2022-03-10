@@ -32,6 +32,7 @@ import {
   HistoryService,
   MetadataService,
   MigrationChangeSetStatus,
+  MigrationUtils,
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -522,9 +523,10 @@ export async function _activate(
             ? MigrationEvents.MigrationSucceeded
             : MigrationEvents.MigrationFailed;
 
-          AnalyticsUtils.track(event, {
-            data: change.data,
-          });
+          AnalyticsUtils.track(
+            event,
+            MigrationUtils.getMigrationAnalyticProps(change)
+          );
         });
       } else {
         // no migration changes.

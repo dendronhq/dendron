@@ -101,6 +101,10 @@ export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
 }
 
+export function isNotNull<T>(t: T | null): t is T {
+  return !_.isNull(t);
+}
+
 /**
  * Check if the value u is a falsy value.
  */

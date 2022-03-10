@@ -14,6 +14,7 @@ import {
   DConfig,
   MigrationChangeSetStatus,
   MigrationService,
+  MigrationUtils,
   MIGRATION_ENTRIES,
   WorkspaceService,
 } from "@dendronhq/engine-server";
@@ -521,9 +522,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           ? CLIEvents.CLIMigrationSucceeded
           : CLIEvents.CLIMigrationFailed;
 
-        CLIAnalyticsUtils.track(event, {
-          data: change.data,
-        });
+        CLIAnalyticsUtils.track(
+          event,
+          MigrationUtils.getMigrationAnalyticProps(change)
+        );
 
         if (change.error) {
           this.print("Migration failed.");

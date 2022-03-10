@@ -12,7 +12,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import YAML from "yamljs";
+import YAML from "js-yaml";
 
 export class SchemaParser {
   private logger: DLogger;
@@ -30,11 +30,11 @@ export class SchemaParser {
     const fname = path.basename(fpath, ".schema.yml");
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault: root, wsRoot });
-    const schemaOpts: any = YAML.parse(
-      fs.readFileSync(path.join(vpath, fpath), "utf8")
+    const schemaOpts: any = YAML.load(
+      await fs.readFile(path.join(vpath, fpath), "utf8")
     );
 
-    return await cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
   }
 
   async parse(
@@ -52,23 +52,23 @@ export class SchemaParser {
         try {
           return await this.parseFile(fpath, vault);
         } catch (err) {
-          let message = undefined;
+          let message;
           if (err instanceof Error) {
             message = err.message;
           }
 
-          const vpath = vault2Path({ wsRoot: this.wsRoot, vault: vault });
+          const vpath = vault2Path({ wsRoot: this.wsRoot, vault });
           const fullPath = path.join(vpath, fpath);
 
           return new DendronError({
-            message: message ? message : ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
+            message: message || ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
             status: ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
             payload: { fpath, message, fullPath },
           });
         }
       })
     );
-    let errors = _.filter(
+    const errors = _.filter(
       out,
       (ent) => ent instanceof DendronError
     ) as DendronError[];

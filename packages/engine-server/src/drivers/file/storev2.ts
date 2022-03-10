@@ -350,10 +350,25 @@ export class FileStorage implements DStore {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    const schemaFiles = getAllFiles({
+    const out = await getAllFiles({
       root: vpath,
       include: ["*.schema.yml"],
-    }) as string[];
+    });
+    if (out.error || !out.data) {
+      return {
+        data: [],
+        errors: [
+          new DendronError({
+            message: `Unable to get schemas for vault ${VaultUtils.getName(
+              vault
+            )}`,
+            severity: ERROR_SEVERITY.MINOR,
+            payload: out.error,
+          }),
+        ],
+      };
+    }
+    const schemaFiles = out.data.map((entry) => entry.toString());
     this.logger.info({ ctx, schemaFiles });
     if (_.isEmpty(schemaFiles)) {
       throw DendronError.createFromStatus({
@@ -401,13 +416,22 @@ export class FileStorage implements DStore {
         };
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
-        if (!this.engine.config.noCaching) {
+        // Skip this if we found no notes, which means vault did not initialize
+        if (!this.engine.config.noCaching && notes.length > 0) {
           writeNotesToCache(vpath, newCache);
         }
         return notes;
       })
     );
     const allNotes = _.flatten(out);
+    if (allNotes.length === 0) {
+      errors.push(
+        new DendronError({
+          message: "No vaults initialized!",
+          severity: ERROR_SEVERITY.FATAL,
+        })
+      );
+    }
 
     this._addBacklinks({ notesWithLinks, allNotes });
 
@@ -495,15 +519,35 @@ export class FileStorage implements DStore {
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
+    let errors: DendronError[] = [];
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
-    const noteFiles = getAllFiles({
+    const out = await getAllFiles({
       root: vpath,
       include: ["*.md"],
-    }) as string[];
-
-    let errors: DendronError[] = [];
+    });
+    if (out.error) {
+      // Keep initializing other vaults
+      errors.push(
+        new DendronError({
+          message: `Unable to read notes for vault ${VaultUtils.getName(
+            vault
+          )}`,
+          severity: ERROR_SEVERITY.MINOR,
+          payload: out.error,
+        })
+      );
+    }
+    if (!out.data) {
+      return {
+        cache: { version: 0, notes: {} },
+        cacheUpdates: {},
+        errors,
+        notes: [],
+      };
+    }
+    const noteFiles = out.data;
 
     const cache: NotesCache = !this.engine.config.noCaching
       ? readNotesFromCache(vpath)

@@ -187,7 +187,7 @@ runTest("add", () => {
             fpath: path.join(wsRoot, "dendron.yml"),
             snapshot: true,
           },
-          "url: 'https://foo.com'",
+          "url: https://foo.com",
           "index: foo"
         );
         await checkFile(

@@ -985,8 +985,19 @@ export function shouldDisplayInactiveUserSurvey(): boolean {
     return false;
   }
 
+  // rare case where global state has been reset (or a reinstall) may cause issues with
+  // the prompt logic. ignore these cases and don't show the
+  if (
+    metaData.firstInstall !== undefined &&
+    metaData.firstLookupTime !== undefined
+  ) {
+    if (metaData.firstLookupTime - metaData.firstInstall < 0) {
+      return false;
+    }
+  }
+
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
+  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
   const currentTime = Time.now().toSeconds();
   const CUR_TIME = Duration.fromObject({ seconds: currentTime });
 
@@ -1016,17 +1027,17 @@ export function shouldDisplayInactiveUserSurvey(): boolean {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for more than two weeks?
+  // was the user active on the first week but has been inactive for more than four weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
 
-  // if they have cancelled last time, we should be waiting another 2 weeks.
+  // if they have cancelled last time, we should be waiting another four weeks.
   if (inactiveSurveyMsgStatus === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS &&
       isInactive;
     if (shouldSendAgain) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
@@ -1041,7 +1052,9 @@ export function shouldDisplayInactiveUserSurvey(): boolean {
     const shouldSend =
       metaData.dendronWorkspaceActivated !== undefined &&
       metaData.firstWsInitialize !== undefined &&
-      isInactive;
+      isInactive &&
+      // this is needed since we may have prompted them before we introduced this metadata
+      metaData.inactiveUserMsgSendTime === undefined;
     if (shouldSend) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
         reason: "initial_prompt",

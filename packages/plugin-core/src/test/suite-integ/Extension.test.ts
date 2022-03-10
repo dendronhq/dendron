@@ -1026,28 +1026,30 @@ describe("shouldDisplayInactiveUserSurvey", () => {
   const THREE_WEEKS_BEFORE = NOW - 3 * ONE_WEEK;
   const FOUR_WEEKS_BEFORE = NOW - 4 * ONE_WEEK;
   const FIVE_WEEKS_BEFORE = NOW - 5 * ONE_WEEK;
+  const SIX_WEEKS_BEFORE = NOW - 6 * ONE_WEEK;
+  const SEVEN_WEEKS_BEFORE = NOW - 7 * ONE_WEEK;
   describe("GIVEN not prompted yet", () => {
-    describe("WHEN is first week active user AND inactive for less than two weeks", () => {
+    describe("WHEN is first week active user AND inactive for less than four weeks", () => {
       test("THEN should not display inactive user survey", (done) => {
-        inactiveMessageTest({
-          done,
-          firstInstall: ONE_WEEK_BEFORE,
-          firstWsInitialize: ONE_WEEK_BEFORE,
-          firstLookupTime: ONE_WEEK_BEFORE,
-          lastLookupTime: ONE_WEEK_BEFORE,
-          workspaceActivated: true,
-          shouldDisplayMessage: false,
-        });
-      });
-    });
-    describe("WHEN is first week active user AND inactive for at two weeks", () => {
-      test("THEN should display inactive user survey", (done) => {
         inactiveMessageTest({
           done,
           firstInstall: THREE_WEEKS_BEFORE,
           firstWsInitialize: THREE_WEEKS_BEFORE,
           firstLookupTime: THREE_WEEKS_BEFORE,
-          lastLookupTime: TWO_WEEKS_BEFORE,
+          lastLookupTime: THREE_WEEKS_BEFORE,
+          workspaceActivated: true,
+          shouldDisplayMessage: false,
+        });
+      });
+    });
+    describe("WHEN is first week active user AND inactive for at least four weeks", () => {
+      test("THEN should display inactive user survey", (done) => {
+        inactiveMessageTest({
+          done,
+          firstInstall: FIVE_WEEKS_BEFORE,
+          firstWsInitialize: FIVE_WEEKS_BEFORE,
+          firstLookupTime: FIVE_WEEKS_BEFORE,
+          lastLookupTime: FOUR_WEEKS_BEFORE,
           workspaceActivated: true,
           shouldDisplayMessage: true,
         });
@@ -1070,30 +1072,43 @@ describe("shouldDisplayInactiveUserSurvey", () => {
         });
       });
     });
-    describe("WHEN it has been another two weeks since user rejected survey", () => {
-      test("THEN should display inactive user survey", (done) => {
+    describe("WHEN it has been another four weeks since user rejected survey", () => {
+      test("THEN should display inactive user survey if inactive", (done) => {
         inactiveMessageTest({
           done,
-          firstInstall: FIVE_WEEKS_BEFORE,
-          firstWsInitialize: FIVE_WEEKS_BEFORE,
-          firstLookupTime: FIVE_WEEKS_BEFORE,
-          lastLookupTime: FOUR_WEEKS_BEFORE,
-          inactiveUserMsgSendTime: TWO_WEEKS_BEFORE,
+          firstInstall: SEVEN_WEEKS_BEFORE,
+          firstWsInitialize: SEVEN_WEEKS_BEFORE,
+          firstLookupTime: SEVEN_WEEKS_BEFORE,
+          lastLookupTime: SIX_WEEKS_BEFORE,
+          inactiveUserMsgSendTime: FOUR_WEEKS_BEFORE,
           workspaceActivated: true,
           inactiveUserMsgStatus: "cancelled",
           shouldDisplayMessage: true,
         });
       });
+      test("THEN should not display inactive user survey if active", (done) => {
+        inactiveMessageTest({
+          done,
+          firstInstall: SEVEN_WEEKS_BEFORE,
+          firstWsInitialize: SEVEN_WEEKS_BEFORE,
+          firstLookupTime: SEVEN_WEEKS_BEFORE,
+          lastLookupTime: ONE_WEEK_BEFORE,
+          inactiveUserMsgSendTime: FOUR_WEEKS_BEFORE,
+          workspaceActivated: true,
+          inactiveUserMsgStatus: "cancelled",
+          shouldDisplayMessage: false,
+        });
+      });
     });
-    describe("WHEN it hasn't been another two weeks since rejected prompt", () => {
+    describe("WHEN it hasn't been another four weeks since rejected prompt", () => {
       test("THEN should not display inactive user survey", (done) => {
         inactiveMessageTest({
           done,
-          firstInstall: FIVE_WEEKS_BEFORE,
-          firstWsInitialize: FIVE_WEEKS_BEFORE,
-          firstLookupTime: FIVE_WEEKS_BEFORE,
-          lastLookupTime: FOUR_WEEKS_BEFORE,
-          inactiveUserMsgSendTime: ONE_WEEK_BEFORE,
+          firstInstall: SEVEN_WEEKS_BEFORE,
+          firstWsInitialize: SEVEN_WEEKS_BEFORE,
+          firstLookupTime: SEVEN_WEEKS_BEFORE,
+          lastLookupTime: SIX_WEEKS_BEFORE,
+          inactiveUserMsgSendTime: THREE_WEEKS_BEFORE,
           workspaceActivated: true,
           inactiveUserMsgStatus: "cancelled",
           shouldDisplayMessage: false,

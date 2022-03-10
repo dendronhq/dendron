@@ -280,7 +280,6 @@ export class SiteUtils {
         ctx: "filterByHiearchy",
         msg: "note not found",
         domain,
-        notesForHiearchy,
       });
       // TODO: add warning
       return;

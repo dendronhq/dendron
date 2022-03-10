@@ -1018,7 +1018,7 @@ suite("GIVEN Dendron plugin activation", function () {
   });
 });
 
-describe.only("shouldDisplayInactiveUserSurvey", () => {
+describe("shouldDisplayInactiveUserSurvey", () => {
   const ONE_WEEK = 604800;
   const NOW = Time.now().toSeconds();
   const ONE_WEEK_BEFORE = NOW - ONE_WEEK;

@@ -70,7 +70,6 @@ import {
   INCOMPATIBLE_EXTENSIONS,
 } from "./constants";
 import { IDendronExtension } from "./dendronExtensionInterface";
-import { ExtensionProvider } from "./ExtensionProvider";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";

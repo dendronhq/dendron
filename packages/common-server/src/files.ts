@@ -5,13 +5,18 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import os from "os";
 import path from "path";
-import { cleanName } from "@dendronhq/common-all";
+import {
+  cleanName,
+  DendronError,
+  ERROR_SEVERITY,
+  isNotNull,
+  RespV2,
+} from "@dendronhq/common-all";
 
-export type getAllFilesOpts = {
+export type GetAllFilesOpts = {
   root: string;
   include?: string[];
   exclude?: string[];
-  withFileTypes?: boolean;
 };
 
 /**
@@ -60,7 +65,7 @@ export function readMD(fpath: string): { data: any; content: string } {
 }
 
 export function readYAML(fpath: string): any {
-  return YAML.safeLoad(fs.readFileSync(fpath, { encoding: "utf8" }), {
+  return YAML.load(fs.readFileSync(fpath, { encoding: "utf8" }), {
     schema: YAML.JSON_SCHEMA,
   });
 }
@@ -72,12 +77,12 @@ export async function readYAMLAsync(fpath: string): Promise<any> {
 }
 
 export function writeYAML(fpath: string, data: any) {
-  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  const out = YAML.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);
 }
 
 export function writeYAMLAsync(fpath: string, data: any) {
-  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  const out = YAML.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFile(fpath, out);
 }
 
@@ -92,33 +97,69 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
   return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }
 
-export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
-  const { root, withFileTypes } = _.defaults(opts, {
+/** Gets all files in `root`, with include and exclude lists (glob matched)
+ *
+ * This function returns the full `Dirent` which gives you access to file
+ * metadata. If you don't need the metadata, see {@link getAllFiles}.
+ *
+ * @throws a `DendronError` with `ERROR_SEVERITY.MINOR`. This is to avoid
+ * crashing the Dendron initialization, please catch the error and modify the
+ * severity if needed.
+ */
+export async function getAllFilesWithTypes(
+  opts: GetAllFilesOpts
+): Promise<RespV2<Dirent[]>> {
+  const { root } = _.defaults(opts, {
     exclude: [".git", "Icon\r", ".*"],
-    withFileTypes: false,
   });
-  const allFiles = fs.readdirSync(root, { withFileTypes: true });
-  return _.reject(
-    allFiles.map((dirent) => {
-      const { name: fname } = dirent;
-      // match exclusions
-      if (
-        _.some([dirent.isDirectory(), globMatch(opts.exclude || [], fname)])
-      ) {
-        return null;
-      }
-      // match inclusion
-      if (opts.include && !globMatch(opts.include, fname)) {
-        return null;
-      }
-      if (withFileTypes) {
-        return dirent;
-      } else {
-        return dirent.name;
-      }
-    }),
-    _.isNull
-  ) as Dirent[] | string[];
+  try {
+    const allFiles = await fs.readdir(root, { withFileTypes: true });
+    return {
+      data: allFiles
+        .map((dirent) => {
+          const { name: fname } = dirent;
+          // match exclusions
+          if (
+            _.some([dirent.isDirectory(), globMatch(opts.exclude || [], fname)])
+          ) {
+            return null;
+          }
+          // match inclusion
+          if (opts.include && !globMatch(opts.include, fname)) {
+            return null;
+          }
+          return dirent;
+        })
+        .filter(isNotNull),
+      error: null,
+    };
+  } catch (err) {
+    return {
+      error: new DendronError({
+        message: "Error when reading the vault",
+        payload: err,
+        // Marked as minor to avoid stopping initialization. Even if we can't read one vault, we might be able to read other vaults.
+        severity: ERROR_SEVERITY.MINOR,
+      }),
+    };
+  }
+}
+
+/** Gets all files in `root`, with include and exclude lists (glob matched)
+ *
+ * This function returns only the file name. If you need the file metadata, see
+ * {@link getAllFilesWithTypes}.
+ *
+ * @throws a `DendronError` with `ERROR_SEVERITY.MINOR`. This is to avoid
+ * crashing the Dendron initialization, please catch the error and modify the
+ * severity if needed.
+ */
+export async function getAllFiles(
+  opts: GetAllFilesOpts
+): Promise<RespV2<string[]>> {
+  const out = await getAllFilesWithTypes(opts);
+  const data = out.data?.map((item) => item.name);
+  return { error: out.error, data };
 }
 
 /**

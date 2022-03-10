@@ -9,6 +9,7 @@ import {
   HTMLPublishPod,
   JSONPublishPod,
   MarkdownPublishPod,
+  NextjsExportPod,
   PodClassEntryV4,
   PodKind,
   PodUtils,
@@ -183,6 +184,10 @@ export function enrichPodArgs(opts: {
         case JSONPublishPod.id:
         case HTMLPublishPod.id:
           cleanConfig["dest"] = "stdout";
+          break;
+        default:
+          // default is no-op
+          break;
       }
       // if vault is specified, then override config to pass in
       if (args.vault) {
@@ -191,7 +196,7 @@ export function enrichPodArgs(opts: {
       if (args.query) {
         cleanConfig["fname"] = args.query;
       }
-    } else {
+    } else if (podId !== NextjsExportPod.id) {
       // eslint-disable-next-line no-console
       console.log(
         `WARN: --query and --vault parameter not implemented for podType ${podType}`

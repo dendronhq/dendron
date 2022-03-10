@@ -1518,6 +1518,33 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jgmpjgmp",
+      "name": "jgmpjgmp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100956804?v=4",
+      "profile": "https://github.com/jgmpjgmp",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Non-J",
+      "name": "Non-J",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45286033?v=4",
+      "profile": "https://jirawut.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "fnurl",
+      "name": "Jody Foo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/106794?v=4",
+      "profile": "https://github.com/fnurl",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

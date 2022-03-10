@@ -572,3 +572,60 @@ describe("WHEN export note with linked record", () => {
     });
   });
 });
+
+describe("GIVEN export note with date ", () => {
+  describe("WHEN skipOnEmpty is not defined/true", () => {
+    const setupTest = setupTestFactoryForNote({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "date",
+          to: "endDate",
+        },
+      },
+    });
+
+    describe("AND WHEN value is empty", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { endDate: "" });
+      };
+      test("THEN field is skipped and no error is thrown", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp.data?.created).toEqual([genField()]);
+      });
+    });
+    describe("AND WHEN value is present", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { endDate: "2022-03-05" });
+      };
+      test("THEN field is exported with value", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp.data?.created).toEqual([genField({ Tasks: "2022-03-05" })]);
+      });
+    });
+  });
+  describe("AND WHEN skipOnEmpty is set to false", () => {
+    const setupTest = setupTestFactoryForNote({
+      fname: "alpha",
+      srcFieldMapping: {
+        Tasks: {
+          type: "date",
+          to: "endDate",
+          skipOnEmpty: false,
+        },
+      },
+    });
+
+    describe("AND WHEN value is empty", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { endDate: "" });
+      };
+      test("THEN error is thrown", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp.error?.message).toEqual(
+          "The value for endDate is found empty. Please provide a valid value or enable skipOnEmpty in the srcFieldMapping."
+        );
+      });
+    });
+  });
+});

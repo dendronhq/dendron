@@ -134,7 +134,7 @@ async function inactiveMessageTest(opts: {
   svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
   svc.setMeta("firstLookupTime", firstLookupTime);
   svc.setMeta("lastLookupTime", lastLookupTime);
-  const expected = await shouldDisplayInactiveUserSurvey();
+  const expected = shouldDisplayInactiveUserSurvey();
   expect(expected).toEqual(shouldDisplayMessage);
   sinon.restore();
   done();

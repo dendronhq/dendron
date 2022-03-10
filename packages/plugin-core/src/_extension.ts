@@ -937,8 +937,7 @@ async function showWelcomeOrWhatsNew({
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  // TODO: there is a bug in the current logic. disabling until we fix it
-  if (false) {
+  if (shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();
   }
 }
@@ -978,7 +977,7 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
     });
 }
 
-export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
+export function shouldDisplayInactiveUserSurvey(): boolean {
   const metaData = MetadataService.instance().getMeta();
 
   const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;

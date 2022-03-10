@@ -65,18 +65,18 @@ export function readMD(fpath: string): { data: any; content: string } {
 }
 
 export function readYAML(fpath: string): any {
-  return YAML.safeLoad(fs.readFileSync(fpath, { encoding: "utf8" }), {
+  return YAML.load(fs.readFileSync(fpath, { encoding: "utf8" }), {
     schema: YAML.JSON_SCHEMA,
   });
 }
 
 export function writeYAML(fpath: string, data: any) {
-  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  const out = YAML.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);
 }
 
 export function writeYAMLAsync(fpath: string, data: any) {
-  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  const out = YAML.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFile(fpath, out);
 }
 

@@ -5,7 +5,7 @@ import Unified, { Plugin } from "unified";
 import { DendronASTDest, DendronASTTypes, ExtendedImage } from "../types";
 import { Element } from "hast";
 import { html } from "mdast-builder";
-import YAML from "yamljs";
+import YAML from "js-yaml";
 import { MDUtilsV5 } from "../utilsv5";
 
 export const EXTENDED_IMAGE_REGEX =
@@ -46,7 +46,7 @@ function attachParser(proc: Unified.Processor) {
     if (match && match.groups?.url) {
       let props: { [key: string]: any } = {};
       try {
-        props = YAML.parse(match.groups.props);
+        props = YAML.load(match.groups.props) as any;
       } catch {
         // Reject bad props so that it falls back to a regular image
         return;
@@ -82,9 +82,11 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
       const alt = node.alt ? node.alt : "";
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
-          return `![${alt}](${node.url})${YAML.stringify(
-            node.props,
-            0 /* Inline-only so we get JSON style {foo: bar} */
+          return `![${alt}](${node.url})${_.trim(
+            YAML.dump(node.props, {
+              /* Inline-only so we get JSON style {foo: bar} */
+              flowLevel: 0,
+            })
           )}`;
         case DendronASTDest.MD_REGULAR:
           return `![${alt}](${node.url})`;

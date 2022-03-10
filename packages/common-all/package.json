@@ -45,7 +45,6 @@
     "@types/semver": "^7.3.4",
     "@types/title": "^1.0.5",
     "@types/unist": "^2.0.3",
-    "@types/yamljs": "^0.2.31",
     "axios": "^0.21.4",
     "dropbox": "^4.0.30",
     "fast-levenshtein": "^3.0.0",
@@ -54,7 +53,6 @@
     "gray-matter": "^4.0.2",
     "http-status-codes": "^2.1.4",
     "isomorphic-fetch": "^2.2.1",
-    "js-yaml": "^3.14.0",
     "lodash": "^4.17.15",
     "luxon": "^1.25.0",
     "minimatch": "^3.0.4",
@@ -62,12 +60,10 @@
     "qs": "^6.10.1",
     "semver": "^7.3.2",
     "title": "^3.4.4",
-    "vscode-uri": "^2.1.2",
-    "yamljs": "^0.3.0"
+    "vscode-uri": "^2.1.2"
   },
   "devDependencies": {
     "@types/fast-levenshtein": "^0.0.2",
-    "@types/js-yaml": "^3.12.5",
     "@types/nanoid-dictionary": "^4.2.0",
     "coveralls": "^3.0.2",
     "rimraf": "^2.6.2",

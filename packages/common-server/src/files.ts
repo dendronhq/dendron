@@ -71,7 +71,7 @@ export function readYAML(fpath: string): any {
 }
 
 export async function readYAMLAsync(fpath: string): Promise<any> {
-  return YAML.safeLoad(await fs.readFile(fpath, { encoding: "utf8" }), {
+  return YAML.load(await fs.readFile(fpath, { encoding: "utf8" }), {
     schema: YAML.JSON_SCHEMA,
   });
 }

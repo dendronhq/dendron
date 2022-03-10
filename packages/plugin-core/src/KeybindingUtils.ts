@@ -7,16 +7,19 @@ import { CommentJSONArray, parse } from "comment-json";
 import _md from "markdown-it";
 import fs from "fs-extra";
 import _, { assign } from "lodash";
-import { DENDRON_COMMANDS, KEYBINDING_CONFLICT_EXTENSIONS } from "./constants";
+import {
+  DENDRON_COMMANDS,
+  isOSType,
+  KeybindingConflict,
+  KNOWN_KEYBINDING_CONFLICTS,
+  KWOWN_CONFLICTING_EXTENSIONS,
+} from "./constants";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import * as vscode from "vscode";
+import os from "os";
 
 type Keybindings = Record<string, string>;
-type KeybindingConflictExtensionInstallStatus = {
-  id: string;
-  installed: boolean;
-};
 export class KeybindingUtils {
   static async openDefaultKeybindingFileAndGetJSON(opts: { close?: boolean }) {
     await vscode.commands.executeCommand(
@@ -28,92 +31,177 @@ export class KeybindingUtils {
       await VSCodeUtils.closeCurrentFileEditor();
     }
     const defaultKeybindingJSON = parse(defaultKeybindingText!);
-    console.log({ defaultKeybindingJSON });
     return defaultKeybindingJSON;
   }
 
-  static getKeybindingConflictExtensionInstallStatus() {
-    return KEYBINDING_CONFLICT_EXTENSIONS.map((extId) => {
-      return { id: extId, installed: VSCodeUtils.isExtensionInstalled(extId) };
+  static getConflictingKeybindings() {
+    const installStatus = KWOWN_CONFLICTING_EXTENSIONS.map((extId) => {
+      return {
+        id: extId,
+        installed: VSCodeUtils.isExtensionInstalled(extId),
+      };
     });
+
+    const installed = installStatus
+      .filter((status) => status.installed)
+      .map((status) => status.id);
+
+    const conflicts = KNOWN_KEYBINDING_CONFLICTS.filter((conflict) => {
+      const isInstalled = installed.includes(conflict.extensionId);
+      const osType = os.type();
+      const conflictOSType = conflict.os || ["Darwin", "Linux", "Windows_NT"];
+      const matchesOS = isOSType(osType) && conflictOSType.includes(osType);
+      return isInstalled && matchesOS;
+    });
+
+    // for each of the found conflicts, see if the user has them remapped in keybinding.json
+    const { keybindingConfigPath } = this.getKeybindingConfigPath();
+    const userKeybindingConfigExists = fs.existsSync(keybindingConfigPath);
+
+    // all conflicts are valid
+    if (!userKeybindingConfigExists) {
+      return conflicts;
+    }
+
+    const userKeybindingConfig = readJSONWithCommentsSync(keybindingConfigPath);
+
+    // TODO: check for existing user keybinding items
+    return conflicts;
   }
 
-  static detectConflictingKeybindings(opts: {
-    extId: string;
-    keybindings: CommentJSONValue;
+  static generateKeybindingBlockForCopy(opts: {
+    entry: Keybindings;
+    disable?: boolean;
   }) {
-    const { extId } = opts;
-    // const dendronKeybindings = keybindings.filter((keybinding) => {
-    //   return keybinding.key.startsWith("dendron.");
-    // });
-    const keybindings = opts.keybindings as CommentJSONArray<Keybindings>;
-    const dendronKeybindings = keybindings.filter((keybinding) => {
-      return keybinding.command.startsWith("dendron.");
-    });
-    const extKeybindings = keybindings.filter((keybindings) => {
-      return keybindings.command.startsWith("extension.vim_");
-    });
+    const { entry, disable } = opts;
+    const whenClause = entry.when ? `  "when": "${entry.when}",` : undefined;
 
-    const extKeybindingsMap = new Map(
-      extKeybindings.map((i) => [i.key, { command: i.command, when: i.when }])
-    );
+    const args = entry.args
+      ? `  "args": ${JSON.stringify(entry.args)},`
+      : undefined;
 
-    const conflicts: object[] = [];
-    dendronKeybindings.forEach((dendronKeybinding) => {
-      const key = dendronKeybinding.key;
-      // find from extKeybindings that have the same key as a dendron keybinding.
-      const maybeConflict = extKeybindingsMap.get(key);
-      if (maybeConflict) {
-        conflicts.push({
-          extId,
-          command: maybeConflict.command,
-          key,
-        });
-      }
-    });
-
-    console.log({ extId, conflicts });
+    const block = [
+      "{",
+      `  "key": "${disable ? entry.key : ""}",`,
+      `  "command": "${disable ? "-" : ""}${entry.command}",`,
+      whenClause,
+      args,
+      "}",
+      "",
+    ]
+      .filter((line) => line !== undefined)
+      .join("\n");
+    return block;
   }
 
   static async showKeybindingConflictPreview(opts: {
-    installStatus: KeybindingConflictExtensionInstallStatus[];
+    conflicts: KeybindingConflict[];
   }) {
     const md = _md();
-    const { installStatus } = opts;
+    const { conflicts } = opts;
     const defaultKeybindingJSON =
-      await KeybindingUtils.openDefaultKeybindingFileAndGetJSON({
-        close: true,
-      });
-    const commandUri = vscode.Uri.parse(
-      `command:workbench.action.openGlobalKeybindings`
-    );
-    KeybindingUtils.detectConflictingKeybindings({
-      extId: "vscodevim.vim",
-      keybindings: defaultKeybindingJSON,
-    });
+      (await KeybindingUtils.openDefaultKeybindingFileAndGetJSON({
+        close: false,
+      })) as CommentJSONArray<Keybindings>;
+    const keybindingJSONCommandUri = `command:workbench.action.openGlobalKeybindingsFile`;
     const contents = [
-      "# Extensions that have keybinding conflicts with Dendron.",
+      "# Known Keybinding Conflicts",
       "",
-      "The extensions listed below are known to have default keybindings that conflict with Dendron.",
+      "The keybindings listed below are known to have conflicts with default keybindings for Dendron commands.",
       "",
-      "Neither Dendron nor the extension may function properly if the keybinding conflict exists.",
+      "Neither Dendron nor the extension may function properly if the keybinding conflict is not resolved.",
       "",
       "Consider resolving the keybinding conflicts throught the following methods:",
       "",
-      "//todo",
+      "#### 1. Disable conflicting keybindings",
+      "If you don't use the listed keybinding, consider disabling it.",
       "",
-      `[open keybinding editor](${commandUri})`,
-      // installStatus.map((status) => {
-      //   const commandUri = vscode.Uri.parse(
-      //     `command:toSide:workbench.action.openGlobalKeybindings`
-      //   );
-      //   const message = status.installed ? `[copy]`
-      // }),
+      `1. Open [keybinding.json](${keybindingJSONCommandUri})`,
+      `1. Click on the link "Disable Conflicting Keybinding" in each conflicting keybinding listed below. This will copy the necessary keybinding entry to your clipboard.`,
+      `1. Paste the clipboard content to \`keybinding.json\``,
+      "",
+      "#### 2. Remap conflicting keybindings",
+      "If you need to preserve the keybinding that is conflicting, consider remapping either of the conflicting keybindings.",
+      `1. Open [keybinding.json](${keybindingJSONCommandUri})`,
+      `1. Click on the link "Remap Dendron Keybinding" or "Remap Conflicting Keybinding" in each conflicting keybinding listed below. This will copy the necessary keybinding entry to your clipboard.`,
+      `1. Paste the clipboard content to \`keybinding.json\``,
+      `1. Set the value of "key" to the desired key combination.`,
+      "",
+      "For more information on how to set keyboard rules in VSCode, visit [Keyboard Rules](https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-rules)",
+      "",
+      "The exhaustive list of default keybindings is opened in the `Default Keybindings` tab for reference.",
+      "",
+      "***",
+      "## List of Keybinding Conflicts",
+      conflicts
+        .map((conflict) => {
+          const conflictKeybindingEntry = defaultKeybindingJSON.find(
+            (keybinding) => {
+              return keybinding.command === conflict.commandId;
+            }
+          );
+          const dendronKeybindingEntry = defaultKeybindingJSON.find(
+            (keybinding) => {
+              return keybinding.command === conflict.conflictsWith;
+            }
+          );
+          if (conflictKeybindingEntry === undefined) {
+            return undefined;
+          }
+          if (dendronKeybindingEntry === undefined) {
+            return undefined;
+          }
+
+          const disableBlock = KeybindingUtils.generateKeybindingBlockForCopy({
+            entry: conflictKeybindingEntry,
+            disable: true,
+          });
+
+          const remapDendronBlock =
+            KeybindingUtils.generateKeybindingBlockForCopy({
+              entry: dendronKeybindingEntry,
+              disable: false,
+            });
+
+          const remapConflictBlock =
+            KeybindingUtils.generateKeybindingBlockForCopy({
+              entry: conflictKeybindingEntry,
+              disable: false,
+            });
+
+          const copyCommandUri = (args: { text: string }) =>
+            `command:dendron.copyToClipboard?${encodeURIComponent(
+              JSON.stringify(args)
+            )}`;
+
+          const out = [
+            `### \`${conflict.commandId}\``,
+            `- key: \`${conflictKeybindingEntry.key}\``,
+            `- from: \`${conflict.extensionId}\``,
+            `- conflicts with: \`${conflict.conflictsWith}\``,
+            "",
+            `[Disable ${conflict.commandId}](${copyCommandUri({
+              text: disableBlock,
+            })})`,
+            "",
+            `[Remap ${conflict.commandId}](${copyCommandUri({
+              text: remapConflictBlock,
+            })})`,
+            "",
+            `[Remap ${conflict.conflictsWith}](${copyCommandUri({
+              text: remapDendronBlock,
+            })})`,
+          ].join("\n");
+
+          return out;
+        })
+        .filter((line) => line !== undefined)
+        .join("\n"),
     ].join("\n");
 
     const panel = vscode.window.createWebviewPanel(
-      "incompatibleExtensionsPreview",
-      "Incompatible Extensions",
+      "keybindingConflictPreview",
+      "Keybinding Conflicts",
       vscode.ViewColumn.One,
       {
         enableCommandUris: true,
@@ -123,36 +211,31 @@ export class KeybindingUtils {
     // AnalyticsUtils.track(
     //   ExtensionEvents.IncompatibleExtensionsPreviewDisplayed
     // );
-    return { installStatus, contents };
+    // return { installStatus, contents };
   }
 
   static async showKeybindingConflictConfirmationMessage(opts: {
-    installStatus: KeybindingConflictExtensionInstallStatus[];
+    conflicts: KeybindingConflict[];
   }) {
     const message =
       "We noticed some extensions that have known keybinding conflicts with Dendron. Would you like to view a list of keybinding conflicts?";
     const action = "Show Conflicts";
-    console.log("foo");
     await vscode.window
       .showWarningMessage(message, action)
       .then(async (resp) => {
         if (resp === action) {
-          console.log("bar");
           await this.showKeybindingConflictPreview(opts);
         }
       });
   }
 
   static async maybePromptKeybindingConflict() {
-    // if EXTENSIONS_WITH_KEYBINDING_CONFLICT is installed,
-    const installStatus =
-      KeybindingUtils.getKeybindingConflictExtensionInstallStatus();
-    console.log({ installStatus });
-    // if (installStatus.some((status) => status.installed)) {
-    await KeybindingUtils.showKeybindingConflictConfirmationMessage({
-      installStatus,
-    });
-    // }
+    const conflicts = KeybindingUtils.getConflictingKeybindings();
+    if (conflicts.length > 0) {
+      await KeybindingUtils.showKeybindingConflictConfirmationMessage({
+        conflicts,
+      });
+    }
   }
 
   static checkKeybindingsExist(

@@ -134,6 +134,10 @@
         "title": "Dendron: Copy Note Ref"
       },
       {
+        "command": "dendron.copyToClipboard",
+        "title": "Dendron: Copy To Clipboard"
+      },
+      {
         "command": "dendron.deleteNode",
         "title": "Dendron: Delete Node"
       },
@@ -463,6 +467,10 @@
         {
           "command": "dendron.copyNoteRef",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.copyToClipboard",
+          "when": "false"
         },
         {
           "command": "dendron.deleteNode",

@@ -300,7 +300,7 @@ export class WorkspaceWatcher {
       fname,
       vault: this._extension.wsUtils.getVaultFromUri(uri),
       engine,
-    }) as NoteProps;
+    });
 
     // If we can't find the note, don't do anything
     if (!note) {

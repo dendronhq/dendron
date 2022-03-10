@@ -7,6 +7,7 @@ import { StateService } from "./services/stateService";
 import { GLOBAL_STATE } from "./constants";
 import { resolve } from "path";
 import { VSCodeUtils } from "./vsCodeUtils";
+import { MetadataService } from "@dendronhq/engine-server";
 
 export class DendronQuickInputSurvey {
   opts: {
@@ -607,19 +608,13 @@ export class SurveyUtils {
             "https://airtable.com/shry4eLgvVE6WR0Or?prefill_SurveyName=InactiveFeedback";
           VSCodeUtils.openLink(AIRTABLE_URL);
 
-          await StateService.instance().updateGlobalState(
-            GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED,
-            "submitted"
-          );
+          MetadataService.instance().setInactiveUserMsgStatus("submitted");
           vscode.window.showInformationMessage(
             "Thanks for helping us make Dendron better 🌱"
           );
           AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyAccepted);
         } else {
-          await StateService.instance().updateGlobalState(
-            GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED,
-            "cancelled"
-          );
+          MetadataService.instance().setInactiveUserMsgStatus("cancelled");
           vscode.window.showInformationMessage("Survey cancelled.");
           AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyRejected);
         }

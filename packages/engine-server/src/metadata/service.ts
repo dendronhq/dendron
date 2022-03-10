@@ -21,6 +21,10 @@ type Metadata = Partial<{
    */
   inactiveUserMsgSendTime: number;
   /**
+   * The status of inactive user message. If submitted, we don't prompt again. If cancelled, we wait 2 weeks to send again.
+   */
+  inactiveUserMsgStatus: "submitted" | "cancelled";
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
@@ -105,5 +109,9 @@ export class MetadataService {
 
   setInactiveUserMsgSendTime() {
     return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+  }
+
+  setInactiveUserMsgStatus(value: "submitted" | "cancelled") {
+    return this.setMeta("inactiveUserMsgStatus", value);
   }
 }

@@ -979,12 +979,10 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
 }
 
 export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
-  const inactiveSurveySubmitted = await StateService.instance().getGlobalState(
-    GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
-  );
+  const metaData = MetadataService.instance().getMeta();
 
-  // don't display if they have submitted before.
-  if (inactiveSurveySubmitted === "submitted") {
+  const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;
+  if (inactiveSurveyMsgStatus === "submitted") {
     return false;
   }
 
@@ -992,7 +990,6 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
   const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
   const currentTime = Time.now().toSeconds();
   const CUR_TIME = Duration.fromObject({ seconds: currentTime });
-  const metaData = MetadataService.instance().getMeta();
 
   const FIRST_INSTALL =
     metaData.firstInstall !== undefined
@@ -1020,14 +1017,14 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for a two weeks?
+  // was the user active on the first week but has been inactive for more than two weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
     CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
 
   // if they have cancelled last time, we should be waiting another 2 weeks.
-  if (inactiveSurveySubmitted === "cancelled") {
+  if (inactiveSurveyMsgStatus === "cancelled") {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
       CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&

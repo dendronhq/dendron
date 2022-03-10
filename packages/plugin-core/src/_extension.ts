@@ -69,6 +69,7 @@ import {
   INCOMPATIBLE_EXTENSIONS,
 } from "./constants";
 import { IDendronExtension } from "./dendronExtensionInterface";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
@@ -94,12 +95,7 @@ import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
-import {
-  DendronExtension,
-  getDWorkspace,
-  getEngine,
-  getExtension,
-} from "./workspace";
+import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
 import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
@@ -667,7 +663,7 @@ export async function _activate(
         AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
       }
       // round to nearest 10th
-      let numNotes = _.size(getEngine().notes);
+      let numNotes = _.size(ws.getEngine().notes);
       if (numNotes > 10) {
         numNotes = Math.round(numNotes / 10) * 10;
       }
@@ -683,9 +679,14 @@ export async function _activate(
         duration: durationReloadWorkspace,
         noCaching: dendronConfig.noCaching || false,
         numNotes,
-        numVaults: _.size(getEngine().vaults),
+        numVaults: ws.getDWorkspace().vaults.length,
         workspaceType: ws.type,
         codeWorkspacePresent,
+        selfContainedVaultsEnabled:
+          dendronConfig.dev?.enableSelfContainedVaults || false,
+        numSelfContainedVaults: ws
+          .getDWorkspace()
+          .vaults.filter(VaultUtils.isSelfContained).length,
       });
 
       // on first install, warn if extensions are incompatible ^dlx35gstwsun

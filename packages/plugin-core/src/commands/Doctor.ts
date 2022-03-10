@@ -296,6 +296,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return engine;
   }
 
+  addAnalyticsPayload(opts: CommandOpts) {
+    return {
+      action: opts.action,
+      scope: opts.scope,
+    };
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");

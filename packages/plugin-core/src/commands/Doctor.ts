@@ -32,6 +32,7 @@ import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { KeybindingUtils } from "../KeybindingUtils";
 
 const md = _md();
 type Finding = {
@@ -80,6 +81,7 @@ type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export enum PluginDoctorActionsEnum {
   FIND_INCOMPATIBLE_EXTENSIONS = "findIncompatibleExtensions",
+  FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
 }
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -355,6 +357,15 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             };
           });
         await this.showIncompatibleExtensionPreview({ installStatus });
+        break;
+      }
+      case PluginDoctorActionsEnum.FIX_KEYBINDING_CONFLICTS: {
+        const conflicts = KeybindingUtils.getConflictingKeybindings();
+        if (conflicts.length > 0) {
+          await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
+        } else {
+          window.showInformationMessage(`There are no keybinding conflicts!`);
+        }
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {

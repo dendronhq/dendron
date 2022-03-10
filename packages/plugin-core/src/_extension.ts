@@ -25,7 +25,7 @@ import {
   getOS,
   initializeSentry,
   SegmentClient,
-  writeJSONWithComments,
+  // writeJSONWithComments,
 } from "@dendronhq/common-server";
 import {
   FileAddWatcher,
@@ -41,7 +41,7 @@ import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
-import os from "os";
+// import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -735,8 +735,8 @@ export async function _activate(
       }
     }
 
-    const backupPaths: string[] = [];
-    let keybindingPath: string;
+    // const backupPaths: string[] = [];
+    // let keybindingPath: string;
 
     // KeybindingUtils.
 

@@ -47,7 +47,7 @@ export interface ITextDocumentService extends Disposable {
    * @param textDocument TextDocument representation of note. May or may not have content changes from note
    * @return New NoteProps with updated contents from TextDocument
    */
-  applyTextDocument(
+  applyTextDocumentToNoteProps(
     note: NoteProps,
     textDocument: TextDocument
   ): Promise<NoteProps>;
@@ -243,9 +243,12 @@ export class TextDocumentService implements ITextDocumentService {
   }
 
   /**
-   * See {@link ITextDocumentService.applyTextDocument}
+   * See {@link ITextDocumentService.applyTextDocumentToNoteProps}
    */
-  public async applyTextDocument(note: NoteProps, textDocument: TextDocument) {
+  public async applyTextDocumentToNoteProps(
+    note: NoteProps,
+    textDocument: TextDocument
+  ) {
     const ctx = "TextDocumentService:applyTextDocument";
     const uri = textDocument.uri;
 

@@ -328,20 +328,17 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       // If full refresh is required, sync note with contents in active text editor
       const textDocument = VSCodeUtils.getActiveTextEditor()?.document;
       if (textDocument && isFullRefresh) {
-        note = await this._textDocumentService.applyTextDocument(
+        note = await this._textDocumentService.applyTextDocumentToNoteProps(
           note,
           textDocument
         );
       }
       note = this.rewriteImageUrls(note, panel);
 
-      // This is necessary so that the cache will display these contents since it checks `updated` property
-      const now = NoteUtils.genUpdateTime();
-
       return panel.webview.postMessage({
         type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
-          note: { ...note, updated: now },
+          note,
           syncChangedNote,
         },
         source: "vscode",

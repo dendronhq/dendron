@@ -134,9 +134,6 @@ export class FileWatcher {
         //TODO recognise vscode's create new file menu option to create a note.
       }
 
-      // add note
-      //TODO: After refactoring fileWatcher to an eventing pattern,
-      //make noteSyncService depend on fileWatcher, not the other way around
       note = await NoteUtils.updateNoteMetadata({
         note,
         fmChangeOnly: false,

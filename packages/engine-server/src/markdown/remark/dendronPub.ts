@@ -395,11 +395,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         // no transform
-        if (
-          dest === DendronASTDest.MD_ENHANCED_PREVIEW ||
-          dest === DendronASTDest.MD_REGULAR ||
-          dest === DendronASTDest.MD_DENDRON
-        ) {
+        if (dest !== DendronASTDest.HTML) {
           return;
         }
         const anchorHTML = blockAnchor2html(node as BlockAnchor);

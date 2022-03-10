@@ -20,7 +20,7 @@
     "settings": {
         "dendron.rootDir": ".",
         "dendron.defaultTimestampDecorationFormat": "DATETIME_HUGE_WITH_SECONDS",
-        "files.autoSave": "off",
+        "files.autoSave": "onFocusChange",
         "pasteImage.path": "${currentFileDir}/assets/images",
         "pasteImage.prefix": "/",
         "markdown-preview-enhanced.enableWikiLinkSyntax": true,

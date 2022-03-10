@@ -154,7 +154,7 @@ export class TextDocumentService implements ITextDocumentService {
         uri: uri.fsPath,
         msg: "note content unchanged, ignoring",
       });
-      return;
+      return noteHydrated;
     }
 
     const props = await this.updateNoteContents({
@@ -230,7 +230,7 @@ export class TextDocumentService implements ITextDocumentService {
         uri: uri.fsPath,
         msg: "note content unchanged, ignoring",
       });
-      return;
+      return noteHydrated;
     }
 
     return this.updateNoteContents({

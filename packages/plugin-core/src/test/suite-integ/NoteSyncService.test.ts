@@ -1,4 +1,5 @@
 import { assert, milliseconds } from "@dendronhq/common-all";
+import { genHash } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { afterEach, describe } from "mocha";
@@ -141,7 +142,7 @@ suite("NoteSyncService", function testSuite() {
     );
 
     describeSingleWS(
-      "WHEN the contents have not changed",
+      "WHEN the editor has not changed contents",
       {
         postSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -160,14 +161,14 @@ suite("NoteSyncService", function testSuite() {
             vscode.workspace.onDidSaveTextDocument
           );
           const engine = ExtensionProvider.getEngine();
-          const alphaNote = engine.notes["beta"];
+          const currentNote = engine.notes["beta"];
 
           onDidChangeTextDocumentHandler =
             vscode.workspace.onDidChangeTextDocument(() => {
               assert(false, "Callback not expected");
             });
           ExtensionProvider.getWSUtils()
-            .openNote(alphaNote)
+            .openNote(currentNote)
             .then((editor) => {
               editor.edit((editBuilder) => {
                 const line = editor.document.getText().split("\n").length;
@@ -176,6 +177,55 @@ suite("NoteSyncService", function testSuite() {
             });
           // Small sleep to ensure callback doesn't fire.
           millisNowAndWait1Milli().then(() => done());
+        });
+      }
+    );
+
+    describeSingleWS(
+      "WHEN the contents of the event are the same as what's in the engine",
+      {
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault,
+            fname: "beta",
+            body: "First Line\n",
+          });
+        },
+      },
+      () => {
+        test("THEN processTextDocumentChangeEvent should return original note", (done) => {
+          textDocumentService = new TextDocumentService(
+            ExtensionProvider.getExtension(),
+            vscode.workspace.onDidSaveTextDocument
+          );
+
+          const engine = ExtensionProvider.getEngine();
+          const currentNote = engine.notes["beta"];
+
+          onDidChangeTextDocumentHandler =
+            vscode.workspace.onDidChangeTextDocument(async (event) => {
+              if (event.document.isDirty) {
+                // Set content hash to be same as event to enter content no change logic
+                currentNote.contentHash = genHash(event.document.getText());
+
+                const maybeNote =
+                  await textDocumentService?.processTextDocumentChangeEvent(
+                    event
+                  );
+                expect(maybeNote).toEqual(currentNote);
+                done();
+              }
+            });
+          ExtensionProvider.getWSUtils()
+            .openNote(currentNote)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const line = editor.document.getText().split("\n").length;
+                editBuilder.insert(new vscode.Position(line, 0), "1");
+              });
+            });
         });
       }
     );
@@ -265,7 +315,7 @@ suite("NoteSyncService", function testSuite() {
         preSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        test("THEN onDidSave should return undefined and engine note contents should be untouched", async () => {
+        test("THEN onDidSave should return original note and engine note contents should be untouched", async () => {
           textDocumentService = new TextDocumentService(
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
@@ -280,7 +330,8 @@ suite("NoteSyncService", function testSuite() {
             textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
           const updatedNote = await onDidSave(editor.document);
 
-          expect(updatedNote).toBeFalsy();
+          expect(updatedNote).toBeTruthy();
+          expect(updatedNote).toEqual(testNoteProps);
           expect(engine.notes["foo"].body).toEqual(testNoteProps.body);
         });
       }

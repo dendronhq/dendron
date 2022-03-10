@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DEngineClient,
+  DVault,
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -468,7 +469,11 @@ export function describeMultiWS(
     /**
      * Run after the workspace is crated, but before dendron is activated
      */
-    preActivateHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    preActivateHook?: (opts: {
+      ctx: ExtensionContext;
+      wsRoot: string;
+      vaults: DVault[];
+    }) => Promise<void>;
     /**
      * @deprecated Please use an `after()` hook instead
      */
@@ -494,10 +499,10 @@ export function describeMultiWS(
         await opts.beforeHook({ ctx });
       }
 
-      await setupLegacyWorkspaceMulti({ ...opts, ctx });
+      const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
 
       if (opts.preActivateHook) {
-        await opts.preActivateHook({ ctx });
+        await opts.preActivateHook({ ctx, ...out });
       }
       await _activate(ctx);
     });

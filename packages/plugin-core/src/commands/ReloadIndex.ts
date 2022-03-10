@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
@@ -60,10 +61,20 @@ export class ReloadIndexCommand extends BasicCommand<
     // If it already exists, nothing to do
     if (await fs.pathExists(rootSchemaPath)) return;
 
-    const schema = SchemaUtils.createRootModule({ vault });
-    this.L.info({ ctx, vaultDir, msg: "creating root schema" });
-    await schemaModuleOpts2File(schema, vaultDir, "root");
-    return AutoFixAction.CREATE_ROOT_SCHEMA;
+    try {
+      const schema = SchemaUtils.createRootModule({ vault });
+      this.L.info({ ctx, vaultDir, msg: "creating root schema" });
+      await schemaModuleOpts2File(schema, vaultDir, "root");
+      return AutoFixAction.CREATE_ROOT_SCHEMA;
+    } catch (err) {
+      this.L.info({
+        ctx,
+        vaultDir,
+        msg: "Error when creating root schema",
+        err,
+      });
+      return;
+    }
   }
 
   /** Creates the root note if it is missing. */
@@ -77,14 +88,19 @@ export class ReloadIndexCommand extends BasicCommand<
     // If it already exists, nothing to do
     if (await fs.pathExists(rootNotePath)) return;
 
-    const note = NoteUtils.createRoot({ vault });
-    this.L.info({ ctx, vaultDir, msg: "creating root note" });
-    await note2File({
-      note,
-      vault,
-      wsRoot,
-    });
-    return AutoFixAction.CREATE_ROOT_NOTE;
+    try {
+      const note = NoteUtils.createRoot({ vault });
+      this.L.info({ ctx, vaultDir, msg: "creating root note" });
+      await note2File({
+        note,
+        vault,
+        wsRoot,
+      });
+      return AutoFixAction.CREATE_ROOT_NOTE;
+    } catch (err) {
+      this.L.info({ ctx, vaultDir, msg: "Error when creating root note", err });
+      return;
+    }
   }
 
   /**
@@ -97,6 +113,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = ExtensionProvider.getDWorkspace();
+    let initError: DendronError | undefined;
     const { wsRoot, engine } = ws;
 
     // Fix up any broken vaults
@@ -110,10 +127,11 @@ export class ReloadIndexCommand extends BasicCommand<
         })
       );
       if (autoFixActions.filter(isNotUndefined).length > 0) {
-        AnalyticsUtils.track(
-          WorkspaceEvents.AutoFix,
-          categorizeActions(autoFixActions)
-        );
+        AnalyticsUtils.track(WorkspaceEvents.AutoFix, {
+          ...categorizeActions(autoFixActions),
+          nonFatalInitError:
+            initError && initError.severity === ERROR_SEVERITY.MINOR,
+        });
       }
 
       const start = process.hrtime();
@@ -128,6 +146,7 @@ export class ReloadIndexCommand extends BasicCommand<
       }
       if (error) {
         const msg = "init error";
+        initError = error;
         this.L.error({ ctx, error, msg });
       }
       return autoFixActions;
@@ -146,7 +165,7 @@ export class ReloadIndexCommand extends BasicCommand<
       );
     }
 
-    this.L.info({ ctx, msg: "exit" });
+    this.L.info({ ctx, msg: "exit", initError });
     return engine;
   }
 }

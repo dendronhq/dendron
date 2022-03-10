@@ -43,7 +43,7 @@
     "@types/minimatch": "^3.0.3",
     "@types/node": "13.11.0",
     "@types/semver": "^7.3.4",
-    "@types/title": "^1.0.5",
+    "@types/title": "^3.4.1",
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",
     "axios": "^0.21.4",

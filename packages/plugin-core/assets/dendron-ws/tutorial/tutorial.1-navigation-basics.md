@@ -1,6 +1,6 @@
 ---
 id: vXh-HmSTsmgGA9j9IzcZh
-title: Navigation Basics
+title: Step 1: Navigation Basics
 desc: ''
 updated: 1624934444826
 created: 1624332288808
@@ -42,10 +42,9 @@ This shows a list of other notes that have links to the current note. More on li
 
 > 💡 VS Code lets you reposition any of these windows as you'd like, so feel free to rearrange the windows into the view that works best for you!
 
-### Next Steps
+### Next Step
 
-- You've completed navigation basics! You can go back to the [[tutorial]] page and check off the Navigation Basics checkbox to mark your progress.
-- Next is Tutorial Step 2: [[tutorial.2-taking-notes]]
+- [[Step 2: Taking Notes|tutorial.2-taking-notes]]
 
 ---
 [[Tutorial Home Page| tutorial]]

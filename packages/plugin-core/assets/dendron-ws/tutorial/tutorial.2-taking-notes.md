@@ -1,10 +1,12 @@
 ---
 id: DO_RXSlAbwNwbz-ILKoQa
-title: Taking Notes
+title: Step 2: Taking Notes
 desc: ""
 updated: 1624934082241
 created: 1624333266168
 ---
+
+Previous: [[Step 2: Taking Notes|tutorial.2-taking-notes]]
 
 ### Create a Note
 
@@ -56,9 +58,9 @@ When combined with hierarchies, this fast lookup system enables you to find your
 
 If you want to search for content within the notes, you can use VS Code's built-in search tools with `%KEYBINDING%+Shift+F`.
 
-### Next Steps
+### Next Step
 
-- Tutorial Step 3: [[Linking Your Notes|tutorial.3-linking-your-notes]]
+- [[Step 3: Linking Your Notes|tutorial.3-linking-your-notes]]
 
 ---
 

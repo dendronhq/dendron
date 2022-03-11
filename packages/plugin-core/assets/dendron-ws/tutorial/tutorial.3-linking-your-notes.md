@@ -1,10 +1,13 @@
 ---
 id: hAB2tQHsi0CGuhxz5HkTI
-title: Linking Your Notes
+title: Step 3: Linking Your Notes
 desc: Note Linking and your Knowledge Graph
 updated: 1624934268124
 created: 1624333278136
 ---
+
+
+Previous: [[Step 2: Taking Notes|tutorial.2-taking-notes]]
 
 ### Links
 
@@ -12,7 +15,7 @@ Dendron supports links between your notes, which can help you organically connec
 
 > 🌱 To create a link, just start typing [[ and Dendron will show you a list of notes in your workspace that you can link to. Try it in the editor pane now.
 
-Example: [[tutorial]]
+Example: [[This is a link|tutorial.3-linking-your-notes]]
 
 To navigate to the note in the link, you can just click on the link in the preview pane. In the editor pane, you can move the cursor into the link and hit `CTRL+ENTER`.
 
@@ -32,9 +35,12 @@ You can explore the hierarchical organization of your notes and how your notes a
 
 ![Graph View](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-graph-view.png)
 
-### Next Steps
+### Next Step
 
-- Tutorial Step 4: [[Rich Formatting|tutorial.4-rich-formatting]]
+- [[Step 4: Rich Formatting|tutorial.4-rich-formatting]]
+
+---
+### Try It Out
 - Try out some additional features of links:
   - Create a note directly from a link - place your cursor inside this link `[[recipes.new-recipes-to-try]]`, hit `CTRL+ENTER`.
   - Add an alias to a link to change how it shows in the preview. Example: [[My Alias|tutorial]]

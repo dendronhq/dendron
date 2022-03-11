@@ -1,10 +1,12 @@
 ---
 id: Jwq6452yNKOVw6WZhvQQd
-title: Conclusion
+title: Step 5: Conclusion
 desc: ""
 updated: 1624934419858
 created: 1624332987705
 ---
+
+Previous: [[Step 4: Rich Formatting|tutorial.4-rich-formatting]]
 
 **Congratulations!** You've completed the Dendron Tutorial 🙌.
 
@@ -34,3 +36,4 @@ A complete set of our documentation can be found on our [Wiki Site](https://wiki
 ---
 
 [[Tutorial Home Page| tutorial]]
+

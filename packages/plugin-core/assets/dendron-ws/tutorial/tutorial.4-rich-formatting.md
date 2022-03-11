@@ -1,10 +1,14 @@
 ---
 id: vAy0awBTwDaxKGHWUdSaP
-title: Rich Formatting
+title: Step 4: Rich Formatting
 desc: "Text Formatting, Images, Formulas, and Diagrams"
 updated: 1624865905667
 created: 1624352425213
 ---
+
+Previous: [[Step 3: Linking Your Notes|tutorial.3-linking-your-notes]]
+
+### Syntax
 
 Dendron supports an extended Markdown syntax, which provides a lot of options for rich formatting. Take a look at some examples in this note to see what's possible. Have the preview pane opened (`Dendron: Show Preview`) to see how these will get rendered.
 
@@ -25,7 +29,7 @@ Sample Image Link:
 
 #### Equations
 
-Math typesetting can be written through [Katex](https://wiki.dendron.so/notes/b1919663-cc48-4054-b0cf-4b26fe444907.html)
+Math typesetting can be written through Katex[^1]
 
 $$
 \int_{-\infty}^\infty f(x)dx
@@ -33,7 +37,7 @@ $$
 
 #### Diagrams
 
-Various types of diagrams are supported with the [mermaid](https://mermaid-js.github.io/mermaid/#/) visualization syntax.
+Various types of diagrams are supported with the mermaid[^2] visualization syntax.
 
 ##### Flow Charts
 
@@ -57,15 +61,22 @@ sequenceDiagram
 
 ### Note References
 
-You can link to a specific section of a different note and have the content in-lined into the current note.
+You can link to a specific section of a different note and have the content in-lined into the current note, like this:
 
 ![[tutorial#welcome-to-dendron:#*]]
 
-[References Docs](https://wiki.dendron.so/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference)
+### Next Step
 
-### Next Steps
+- [[Step 5: Conclusion|tutorial.5-conclusion]]
 
-- [[Conclude the Tutorial|tutorial.5-conclusion]]
+---
+### Links
+
+- [^1] [More about Katex](https://wiki.dendron.so/notes/b1919663-cc48-4054-b0cf-4b26fe444907.html)
+
+- [^2] [More about Mermaid](https://mermaid-js.github.io/mermaid/#/) 
+
+- [References Docs](https://wiki.dendron.so/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference)
 
 ---
 

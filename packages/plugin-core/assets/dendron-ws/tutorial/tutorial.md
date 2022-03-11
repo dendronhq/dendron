@@ -8,24 +8,17 @@ created: 1624333847315
 
 ## Welcome to Dendron
 
-This guide will help you learn the basics of Dendron. You can also follow the Getting Started guides on our [website](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html).
-
-By the end of the tutorial, you will also see how Dendron can help you manage your knowledge with super fast lookup, flexible hierarchies, and powerful linking.
+This guide will help you learn the basics of Dendron. You will see how Dendron can help you manage your knowledge with super fast lookup, flexible hierarchies, and powerful linking.
 
 If you close VS Code, you can always get back to this workspace by going to `File > Open Workspace` in VS Code's menu and then selecting your workspace file: `%WORKSPACE_ROOT%`
 
-The tutorial steps take about 10 minutes to complete. Let's get started!
+The tutorial steps take about 10 minutes to complete.
 
-#### Steps to get started with Dendron:
+### Next Step
 
-- [x] Install Dendron
-- [x] Create your first workspace
-- [ ] Complete the Tutorial (%KEYBINDING%+Click on the links to go to each tutorial note)
-  - [ ] One: [[tutorial.1-navigation-basics]]
-	- [ ] Two: [[tutorial.2-taking-notes]]
-	- [ ] Three: [[tutorial.3-linking-your-notes]]
-	- [ ] Four:  [[tutorial.4-rich-formatting]]
-	- [ ] Five:  [[tutorial.5-conclusion]]
+- [[Step 1: Navigation Basics|tutorial.1-navigation-basics]]
+
+---
 
 #### Getting Help
 

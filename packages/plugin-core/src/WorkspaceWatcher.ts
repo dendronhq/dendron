@@ -2,7 +2,6 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
-  NoteProps,
   NoteUtils,
   SchemaUtils,
   Time,

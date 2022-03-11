@@ -14,7 +14,6 @@ import {
 } from "./components/lookup/LookupProviderV3Interface";
 import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
-import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
@@ -66,7 +65,6 @@ export interface IDendronExtension {
   commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
-  noteSyncService: INoteSyncService;
 
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;

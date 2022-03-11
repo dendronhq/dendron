@@ -833,7 +833,7 @@ export async function _activate(
         note &&
         ws.workspaceService?.config.preview?.automaticallyShowPreview
       ) {
-        PreviewPanelFactory.create(getExtension()).show(note);
+        await PreviewPanelFactory.create(getExtension()).show(note);
       }
 
       return true;

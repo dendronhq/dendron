@@ -49,7 +49,7 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { INoteSyncService, NoteSyncService } from "./services/NoteSyncService";
+import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -141,7 +141,6 @@ export class DendronExtension implements IDendronExtension {
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
-  public noteSyncService: INoteSyncService;
   public lookupControllerFactory: ILookupControllerV3Factory;
   public noteLookupProviderFactory: INoteLookupProviderFactory;
   public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
@@ -368,13 +367,9 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
-    this.noteSyncService = new NoteSyncService(
-      this,
-      vscode.workspace.onDidSaveTextDocument,
-      vscode.workspace.onDidChangeTextDocument
-    );
 
-    context.subscriptions.push(this.noteSyncService);
+    // Instantiate TextDocumentService
+    context.subscriptions.push(TextDocumentServiceFactory.create(this));
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -712,7 +707,6 @@ export class DendronExtension implements IDendronExtension {
         wsRoot,
         vaults: realVaults,
       },
-      noteSyncSvc: this.noteSyncService,
     });
 
     fileWatcher.activate(getExtension().context);

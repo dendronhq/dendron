@@ -167,6 +167,18 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     return { message, maxMessageSeverity };
   }
 
+  addAnalyticsPayload(_opts: CommandOpts, resp: CommandReturns) {
+    const allActions = [
+      ...(resp?.committed ?? []),
+      ...(resp?.pulled ?? []),
+      ...(resp?.pushed ?? []),
+    ];
+
+    return {
+      hasMultiVaultRepo: allActions.some((action) => action.vaults.length > 1),
+    };
+  }
+
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });

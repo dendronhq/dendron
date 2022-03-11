@@ -171,6 +171,8 @@ export function string2Note({
     },
   };
   const { data, content: body } = matter(content, options);
+  if (data?.title) data.title = _.toString(data.title);
+  if (data?.id) data.id = _.toString(data.id);
   const custom = DNodeUtils.getCustomProps(data);
 
   const contentHash = calculateHash ? genHash(content) : undefined;

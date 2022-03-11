@@ -726,9 +726,7 @@ export class NoteUtils {
     // check if title is unchanged from default. if so, add default title
     if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
-      // type definitions are wrong
-      // @ts-ignore
-      return title(fname) as string;
+      return title(fname);
     }
     // if user customized title, return the title as user specified
     return titleFromBasename;
@@ -1141,7 +1139,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeExplicitProps(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps): Partial<NoteProps> {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1180,6 +1178,10 @@ export class NoteUtils {
       blacklist.push("stub");
     }
     const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
+    // Make sure title and ID are always strings
+    meta.title = _.toString(meta.title);
+    meta.id = _.toString(meta.id);
+
     return matter.stringify(body || "", meta);
   }
 

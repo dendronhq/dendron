@@ -25,7 +25,7 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 
 /**
- * Interface for a service that processes text document changes from vscode. TODO: Rename filename
+ * Interface for a service that processes text document changes from vscode.
  */
 export interface ITextDocumentService extends Disposable {
   /**

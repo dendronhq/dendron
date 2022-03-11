@@ -5,7 +5,7 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { TextDocumentService } from "../../services/NoteSyncService";
+import { TextDocumentService } from "../../services/TextDocumentService";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS, describeMultiWS } from "../testUtilsV3";
 
@@ -26,7 +26,7 @@ async function millisNowAndWait1Milli(): Promise<number> {
   return millis;
 }
 
-suite("NoteSyncService", function testSuite() {
+suite("TextDocumentService", function testSuite() {
   let textDocumentService: TextDocumentService | undefined;
   let onDidChangeTextDocumentHandler: vscode.Disposable | undefined;
   this.timeout(5000);

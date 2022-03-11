@@ -39,7 +39,19 @@ export function isBadErrorThatShouldBeSampled(
   );
 }
 
-export function initializeSentry(environment: Stage): void {
+/**
+ * Initialize Sentry
+ * @param environment
+ * @returns
+ *  ^4wcl13fw6gub
+ */
+export function initializeSentry({
+  environment,
+  sessionId,
+}: {
+  environment: Stage;
+  sessionId: number;
+}): void {
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
 
@@ -55,6 +67,11 @@ export function initializeSentry(environment: Stage): void {
     environment,
     attachStacktrace: true,
     beforeSend: eventModifier,
+    initialScope: {
+      tags: {
+        sessionId,
+      },
+    },
     integrations: [
       new RewriteFrames({
         iteratee: (frame) => {

@@ -356,7 +356,7 @@ async function startServerProcess(): Promise<{
   return out;
 }
 
-// Only exported for test purposes
+// Only exported for test purposes ^jtm6bf7utsxy
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
@@ -384,9 +384,13 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
-  // Respect user's telemetry settings for error reporting too.
+  // If telemetry is not disabled, we enable telemetry and error reporting ^rw8l1w51hnjz
+  // - NOTE: we do this outside of the try/catch block in case we run into an error with initialization
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
-    initializeSentry(getStage());
+    initializeSentry({
+      environment: getStage(),
+      sessionId: AnalyticsUtils.getSessionId(),
+    });
   }
 
   try {
@@ -395,17 +399,9 @@ export async function _activate(
 
     // This version check is a temporary, one-release patch to try to unblock
     // users who are on old versions of VS Code.
-    let userOnOldVSCodeVer = false;
-    // TODO: After temporary release, remove the version check and bump up our vs code
-    // compat version in package.json to ^1.58.0
-    if (semver.gte(vscode.version, "1.57.0")) {
-      vscode.workspace.onDidGrantWorkspaceTrust(() => {
-        getExtension().getEngine().trustedWorkspace =
-          vscode.workspace.isTrusted;
-      });
-    } else {
-      userOnOldVSCodeVer = true;
-    }
+    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+    });
 
     //  needs to be initialized to setup commands
     const ws = await DendronExtension.getOrCreate(context, {
@@ -499,7 +495,7 @@ export async function _activate(
       const wsService = new WorkspaceService({ wsRoot });
       const maybeWsSettings = wsService.getCodeWorkspaceSettingsSync();
 
-      // // initialize Segment client
+      // initialize Segment client
       ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
@@ -732,10 +728,6 @@ export async function _activate(
         );
         ws.addDisposable(autoInit);
       }
-    }
-
-    if (userOnOldVSCodeVer) {
-      AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

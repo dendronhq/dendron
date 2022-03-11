@@ -25,7 +25,7 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
-import { ITextDocumentService } from "../../services/NoteSyncService";
+import { ITextDocumentService } from "../../services/TextDocumentService";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";

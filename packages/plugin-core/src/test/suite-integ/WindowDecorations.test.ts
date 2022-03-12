@@ -33,7 +33,7 @@ function isTextDecorated(
   return false;
 }
 
-suite.only("GIVEN window decorations v2", function () {
+suite("GIVEN window decorations v2", function () {
   const CREATED = "1625648278263";
   const UPDATED = "1625758878263";
   const FNAME = "bar";

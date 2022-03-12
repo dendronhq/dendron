@@ -241,7 +241,7 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe.only("AND links with brackets infront", () => {
+  describe.skip("AND links with brackets infront", () => {
     describeMultiWS(
       "",
       {

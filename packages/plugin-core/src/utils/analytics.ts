@@ -1,4 +1,4 @@
-import { ContextualUIEvents, Time } from "@dendronhq/common-all";
+import { AppNames, ContextualUIEvents, Time } from "@dendronhq/common-all";
 import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -18,7 +18,7 @@ export class AnalyticsUtils {
   static sessionStart = -1;
 
   static getVSCodeSentryRelease(): string {
-    return `code@${VersionProvider.version()}`;
+    return `${AppNames.CODE}@${VersionProvider.version()}`;
   }
 
   static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
@@ -32,7 +32,7 @@ export class AnalyticsUtils {
     } = vscode.env;
 
     return {
-      type: "vscode" as const,
+      type: AppNames.CODE,
       ideVersion: vscode.version,
       ideFlavor: appName,
       appVersion: VersionProvider.version(),
@@ -85,7 +85,7 @@ export class AnalyticsUtils {
     SegmentUtils.track({
       event,
       platformProps: {
-        type: "vscode",
+        type: AppNames.CODE,
         ideVersion,
         ideFlavor,
       },

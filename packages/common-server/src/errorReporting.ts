@@ -1,6 +1,7 @@
 import { DendronError, Stage } from "@dendronhq/common-all";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
+import { CaptureContext } from "@sentry/types";
 import _ from "lodash";
 
 // Extracted to make testing easy
@@ -51,11 +52,16 @@ export function initializeSentry({
   release,
 }: {
   environment: Stage;
-  sessionId: number;
+  sessionId?: number;
   release: string;
 }): void {
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
+
+  const initialScope: CaptureContext = {};
+  if (sessionId) {
+    initialScope.tags = { sessionId };
+  }
 
   Sentry.init({
     dsn,
@@ -70,11 +76,7 @@ export function initializeSentry({
     release,
     attachStacktrace: true,
     beforeSend: eventModifier,
-    initialScope: {
-      tags: {
-        sessionId,
-      },
-    },
+    initialScope,
     integrations: [
       new RewriteFrames({
         iteratee: (frame) => {

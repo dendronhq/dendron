@@ -14,7 +14,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS } from "../testUtilsV3";
+import { describeMultiWS, runTestButSkipForWindows } from "../testUtilsV3";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -649,24 +649,26 @@ suite("GIVEN a text document with decorations", function () {
         );
       });
 
-      test("THEN don't warn for schemas", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const engine = ExtensionProvider.getEngine();
-        const schema = engine.schemas.root;
-        const schemaFile = path.join(
-          wsRoot,
-          schema.vault.fsPath,
-          `${schema.fname}.schema.yml`
-        );
-        const schemaURI = vscode.Uri.parse(schemaFile);
-        const editor = await VSCodeUtils.openFileInEditor(schemaURI);
+      runTestButSkipForWindows()("", () => {
+        test("THEN don't warn for schemas", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const engine = ExtensionProvider.getEngine();
+          const schema = engine.schemas.root;
+          const schemaFile = path.join(
+            wsRoot,
+            schema.vault.fsPath,
+            `${schema.fname}.schema.yml`
+          );
+          const schemaURI = vscode.Uri.parse(schemaFile);
+          const editor = await VSCodeUtils.openFileInEditor(schemaURI);
 
-        const { allDecorations, allWarnings } = (await updateDecorations(
-          editor!
-        ))!;
+          const { allDecorations, allWarnings } = (await updateDecorations(
+            editor!
+          ))!;
 
-        expect(allWarnings).toEqual(undefined);
-        expect(allDecorations).toEqual(undefined);
+          expect(allWarnings).toEqual(undefined);
+          expect(allDecorations).toEqual(undefined);
+        });
       });
     });
   });

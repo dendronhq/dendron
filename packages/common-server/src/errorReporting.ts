@@ -48,9 +48,11 @@ export function isBadErrorThatShouldBeSampled(
 export function initializeSentry({
   environment,
   sessionId,
+  release,
 }: {
   environment: Stage;
   sessionId: number;
+  release: string;
 }): void {
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
@@ -65,6 +67,7 @@ export function initializeSentry({
     tracesSampleRate: 0.0,
     enabled: true,
     environment,
+    release,
     attachStacktrace: true,
     beforeSend: eventModifier,
     initialScope: {

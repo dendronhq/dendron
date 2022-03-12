@@ -390,6 +390,7 @@ export async function _activate(
     initializeSentry({
       environment: getStage(),
       sessionId: AnalyticsUtils.getSessionId(),
+      release: AnalyticsUtils.getVSCodeSentryRelease(),
     });
   }
 

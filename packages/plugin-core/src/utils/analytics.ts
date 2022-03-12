@@ -17,6 +17,10 @@ export type SegmentContext = Partial<{
 export class AnalyticsUtils {
   static sessionStart = -1;
 
+  static getVSCodeSentryRelease(): string {
+    return `code@${VersionProvider.version()}`;
+  }
+
   static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
     const {
       appName,

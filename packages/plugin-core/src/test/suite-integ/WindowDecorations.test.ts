@@ -54,9 +54,9 @@ suite("GIVEN window decorations v2", function () {
   const UPDATED = "1625758878263";
   const FNAME = "bar";
 
-  describe("AND", () => {
+  describe("AND GIVEN links with highlights", () => {
     describeMultiWS(
-      "GIVEN links with highlights",
+      "",
       {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await NoteTestUtilsV4.createNote({

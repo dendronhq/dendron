@@ -12,6 +12,7 @@ import {
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -31,6 +32,21 @@ function isTextDecorated(
     if (document.getText(decoration.range) === text) return true;
   }
   return false;
+}
+
+async function getNote(opts: { fname: string }) {
+  const { engine, vaults } = ExtensionProvider.getDWorkspace();
+  const { fname } = opts;
+
+  const note = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    engine,
+    vault: vaults[0],
+  })!;
+  const editor = await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
+    note
+  );
+  return { note, editor };
 }
 
 suite("GIVEN window decorations v2", function () {
@@ -90,14 +106,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN links are decorated", async () => {
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
-
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: FNAME,
-            engine,
-            vault: vaults[0],
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -190,10 +199,9 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe("AND", () => {
-    const FNAME = "bar";
+  describe("AND GIVEN task notes", () => {
     describeMultiWS(
-      "GIVEN task notes",
+      "",
       {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
@@ -250,14 +258,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN task notes are highlighted", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -300,10 +301,9 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe("AND", () => {
-    const FNAME = "bar";
+  describe("AND highlighting same file wikilinks", () => {
     describeMultiWS(
-      "highlighting same file wikilinks",
+      "",
       {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
@@ -325,14 +325,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN links are highlighted", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -385,7 +378,6 @@ suite("GIVEN window decorations v2", function () {
   });
 
   describe("AND highlight wildcard references", () => {
-    const FNAME = "bar";
     describeMultiWS(
       "",
       {
@@ -400,14 +392,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN links are highlighted", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -440,14 +425,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN only the visible range should be decorate", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
 
           const { allDecorations } = (await updateDecorations(editor))!;
@@ -495,14 +473,7 @@ suite("GIVEN window decorations v2", function () {
       },
       () => {
         test("THEN decorations are not displayed ", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+          const { editor } = await getNote({ fname: FNAME });
 
           const { allDecorations, allWarnings } = (await updateDecorations(
             editor
@@ -514,14 +485,6 @@ suite("GIVEN window decorations v2", function () {
       }
     );
   });
-
-  // describe("AND", () => {
-  //   describeMultiWS("", {}, () => {
-  //     test("THEN ", async () => {
-  //       const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
-  //     });
-  //   });
-  // });
 });
 
 // eslint-disable-next-line func-names

@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils, Awaited } from "@dendronhq/common-all";
+import { Awaited, NoteUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
 import _ from "lodash";
@@ -14,13 +14,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  describeSingleWS,
-  runLegacyMultiWorkspaceTest,
-  runTestButSkipForWindows,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -73,12 +67,12 @@ function checkDecoration({
   expect(isTextDecorated(text, decorations!, document)).toBeTruthy();
 }
 
-suite("GIVEN window decorations v2", function () {
+suite("GIVEN a text document with decorations", function () {
   const CREATED = "1625648278263";
   const UPDATED = "1625758878263";
   const FNAME = "bar";
 
-  describe("AND GIVEN links with highlights", () => {
+  describe("AND GIVEN links ", () => {
     function checkTimestampsDecorated({
       decorations,
       document,
@@ -241,58 +235,6 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe.skip("AND links with brackets infront", () => {
-    describeMultiWS(
-      "",
-      {
-        timeout: 1e6,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.bar",
-            vault: vaults[0],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: FNAME,
-            body: ["[[good|test]]", "[ ] [[with-prefix|test]]"].join("\n"),
-            props: {
-              created: _.toInteger(CREATED),
-              updated: _.toInteger(UPDATED),
-            },
-            vault: vaults[0],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "test",
-            props: {
-              created: _.toInteger(CREATED),
-              updated: _.toInteger(UPDATED),
-            },
-            vault: vaults[0],
-            wsRoot,
-          });
-        },
-      },
-      () => {
-        test("TODO", async () => {
-          const { editor } = await getNote({ fname: FNAME });
-          const document = editor.document;
-          const { allDecorations } = (await updateDecorations(editor))!;
-          const decorations = getDecorations({
-            allDecorations,
-            decorationType: EDITOR_DECORATION_TYPES.wikiLink,
-          });
-          // expect(decorations!.length).toEqual(2);
-          checkDecoration({
-            text: "[[good|test]]",
-            decorations,
-            document,
-          });
-        });
-      }
-    );
-  });
-
   describe("AND GIVEN task notes", () => {
     describeMultiWS(
       "",
@@ -395,7 +337,7 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe("AND highlighting same file wikilinks", () => {
+  describe("AND GIVEN file with wikilinks to itself", () => {
     describeMultiWS(
       "",
       {
@@ -471,7 +413,7 @@ suite("GIVEN window decorations v2", function () {
     );
   });
 
-  describe("AND highlight wildcard references", () => {
+  describe("AND given wildcard references", () => {
     describeMultiWS(
       "",
       {
@@ -579,25 +521,14 @@ suite("GIVEN window decorations v2", function () {
       }
     );
   });
-});
 
-// eslint-disable-next-line func-names
-suite("windowDecorations", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
-  //TODO: Fix tests on Windows Test Pass
-  const runTestExceptOnWindows = runTestButSkipForWindows();
-
-  runTestExceptOnWindows("warnings", () => {
-    test("missing frontmatter", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND GIVEN warnings in document", () => {
+    describeMultiWS(
+      "AND WHEN missing frontmatter",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          const note = await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
           });
@@ -605,8 +536,10 @@ suite("windowDecorations", function () {
           const path = NoteUtils.getFullPath({ note, wsRoot });
           await writeFile(path, "foo bar");
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
 
           expect(allWarnings!.length).toEqual(1);
@@ -616,18 +549,16 @@ suite("windowDecorations", function () {
               match: ["frontmatter", "missing"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("bad note id", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "AND WHEN bad note id",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
             props: {
@@ -635,10 +566,11 @@ suite("windowDecorations", function () {
             },
           });
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
-
           expect(allWarnings!.length).toEqual(1);
           expect(
             AssertUtils.assertInString({
@@ -646,18 +578,16 @@ suite("windowDecorations", function () {
               match: ["id", "bad"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("note id is missing", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "AND WHEN note id is missing",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          const note = await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
           });
@@ -668,10 +598,11 @@ suite("windowDecorations", function () {
             ["---", "updated: 234", "created: 123", "---"].join("\n")
           );
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
-
           expect(allWarnings!.length).toEqual(1);
           expect(
             AssertUtils.assertInString({
@@ -679,12 +610,11 @@ suite("windowDecorations", function () {
               match: ["id", "missing"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    describeSingleWS("AND frontmatter is not visible", { ctx }, () => {
+    describeMultiWS("AND frontmatter is not visibl", {}, () => {
       before(async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const note = await NoteTestUtilsV4.createNoteWithEngine({
@@ -718,34 +648,31 @@ suite("windowDecorations", function () {
           })
         );
       });
-    });
 
-    test("doesn't warn for schemas", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ engine, wsRoot }) => {
-          const schema = engine.schemas.root;
-          const schemaFile = path.join(
-            wsRoot,
-            schema.vault.fsPath,
-            `${schema.fname}.schema.yml`
-          );
-          const schemaURI = vscode.Uri.parse(schemaFile);
-          const editor = await VSCodeUtils.openFileInEditor(schemaURI);
+      test("THEN don't warn for schemas", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const engine = ExtensionProvider.getEngine();
+        const schema = engine.schemas.root;
+        const schemaFile = path.join(
+          wsRoot,
+          schema.vault.fsPath,
+          `${schema.fname}.schema.yml`
+        );
+        const schemaURI = vscode.Uri.parse(schemaFile);
+        const editor = await VSCodeUtils.openFileInEditor(schemaURI);
 
-          const { allDecorations, allWarnings } = (await updateDecorations(
-            editor!
-          ))!;
+        const { allDecorations, allWarnings } = (await updateDecorations(
+          editor!
+        ))!;
 
-          expect(allWarnings).toEqual(undefined);
-          expect(allDecorations).toEqual(undefined);
-          done();
-        },
+        expect(allWarnings).toEqual(undefined);
+        expect(allDecorations).toEqual(undefined);
       });
     });
   });
 });
 
+// eslint-disable-next-line func-names
 function checkRanges(
   range: vscode.Range | undefined,
   startLine: number,

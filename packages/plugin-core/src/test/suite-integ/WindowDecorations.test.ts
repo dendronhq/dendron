@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, Awaited } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
 import _ from "lodash";
@@ -49,12 +49,62 @@ async function getNote(opts: { fname: string }) {
   return { note, editor };
 }
 
+function getDecorations({
+  allDecorations,
+  decorationType,
+}: {
+  allDecorations: Awaited<
+    ReturnType<typeof updateDecorations>
+  >["allDecorations"];
+  decorationType: vscode.TextEditorDecorationType;
+}) {
+  return allDecorations!.get(decorationType);
+}
+
+function checkDecoration({
+  text,
+  document,
+  decorations,
+}: {
+  text: string;
+  document: vscode.TextDocument;
+  decorations?: vscode.DecorationOptions[];
+}) {
+  expect(isTextDecorated(text, decorations!, document)).toBeTruthy();
+}
+
 suite("GIVEN window decorations v2", function () {
   const CREATED = "1625648278263";
   const UPDATED = "1625758878263";
   const FNAME = "bar";
 
   describe("AND GIVEN links with highlights", () => {
+    function checkTimestampsDecorated({
+      decorations,
+      document,
+    }: {
+      decorations: Awaited<ReturnType<typeof updateDecorations>>;
+      document: vscode.TextDocument;
+    }) {
+      const { allDecorations } = decorations;
+      const timestampDecorations = getDecorations({
+        allDecorations,
+        decorationType: EDITOR_DECORATION_TYPES.timestamp,
+      });
+      expect(timestampDecorations!.length).toEqual(2);
+      // check that the decorations are at the right locations
+      checkDecoration({
+        text: CREATED,
+        decorations: timestampDecorations,
+        document,
+      });
+      checkDecoration({
+        text: UPDATED,
+        decorations: timestampDecorations,
+        document,
+      });
+    }
+
     describeMultiWS(
       "",
       {
@@ -108,19 +158,10 @@ suite("GIVEN window decorations v2", function () {
         test("THEN links are decorated", async () => {
           const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
-          const { allDecorations } = (await updateDecorations(editor))!;
+          const decorations = (await updateDecorations(editor))!;
+          const { allDecorations } = decorations;
 
-          const timestampDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.timestamp
-          );
-          expect(timestampDecorations!.length).toEqual(2);
-          // check that the decorations are at the right locations
-          expect(
-            isTextDecorated(CREATED, timestampDecorations!, document)
-          ).toBeTruthy();
-          expect(
-            isTextDecorated(UPDATED, timestampDecorations!, document)
-          ).toBeTruthy();
+          checkTimestampsDecorated({ decorations, document });
 
           const blockAnchorDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.blockAnchor
@@ -137,9 +178,10 @@ suite("GIVEN window decorations v2", function () {
             isTextDecorated("^anchor-3", blockAnchorDecorations!, document)
           ).toBeTruthy();
 
-          const wikilinkDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.wikiLink
-          );
+          const wikilinkDecorations = getDecorations({
+            allDecorations,
+            decorationType: EDITOR_DECORATION_TYPES.wikiLink,
+          });
           expect(wikilinkDecorations!.length).toEqual(7);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
@@ -194,6 +236,58 @@ suite("GIVEN window decorations v2", function () {
             isTextDecorated("#foo", brokenWikilinkDecorations!, document)
           ).toBeTruthy();
           return;
+        });
+      }
+    );
+  });
+
+  describe.only("AND links with brackets infront", () => {
+    describeMultiWS(
+      "",
+      {
+        timeout: 1e6,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "tags.bar",
+            vault: vaults[0],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: ["[[good|test]]", "[ ] [[with-prefix|test]]"].join("\n"),
+            props: {
+              created: _.toInteger(CREATED),
+              updated: _.toInteger(UPDATED),
+            },
+            vault: vaults[0],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "test",
+            props: {
+              created: _.toInteger(CREATED),
+              updated: _.toInteger(UPDATED),
+            },
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      },
+      () => {
+        test("TODO", async () => {
+          const { editor } = await getNote({ fname: FNAME });
+          const document = editor.document;
+          const { allDecorations } = (await updateDecorations(editor))!;
+          const decorations = getDecorations({
+            allDecorations,
+            decorationType: EDITOR_DECORATION_TYPES.wikiLink,
+          });
+          // expect(decorations!.length).toEqual(2);
+          checkDecoration({
+            text: "[[good|test]]",
+            decorations,
+            document,
+          });
         });
       }
     );

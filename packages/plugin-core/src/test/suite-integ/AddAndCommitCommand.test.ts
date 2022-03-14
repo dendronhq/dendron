@@ -21,7 +21,7 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
-      timeout: 1e6,
+      timeout: 1e4,
     },
     () => {
       test("THEN skip committing AND show no new changes message", async () => {
@@ -50,7 +50,7 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
-      timeout: 1e6,
+      timeout: 1e4,
     },
     () => {
       test("THEN skip committing files AND show merge conflict message", async () => {
@@ -78,7 +78,7 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
-      timeout: 1e6,
+      timeout: 1e4,
     },
     () => {
       test("THEN skip committing files AND show rebase conflict message", async () => {
@@ -113,7 +113,7 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
-      timeout: 1e6,
+      timeout: 1e4,
     },
     () => {
       test("THEN Dendron commit files successfully", async () => {

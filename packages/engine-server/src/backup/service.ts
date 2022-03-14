@@ -63,9 +63,9 @@ export class BackupService implements Disposable, IBackupService {
       addPath: BACKUP_DIR_NAME,
       root: this.wsRoot,
     });
-    fs.ensureDirSync(this.backupRoot);
-    Object.keys(BackupKeyEnum).forEach((key) => {
-      fs.ensureDirSync(path.join(this.backupRoot, key));
+    await fs.ensureDir(this.backupRoot);
+    Object.keys(BackupKeyEnum).forEach(async (key) => {
+      await fs.ensureDir(path.join(this.backupRoot, key));
     });
   }
 

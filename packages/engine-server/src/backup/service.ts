@@ -36,6 +36,9 @@ export class BackupService implements Disposable, IBackupService {
     this.wsRoot = wsRoot;
   }
 
+  /**
+   * dispose backup service.
+   */
   dispose() {
     this.loggerDispose();
   }

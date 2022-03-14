@@ -95,9 +95,13 @@ export class OpenBackupCommand extends BasicCommand<
   }
 
   async execute(opts?: OpenBackupCommandOpts): Promise<void> {
-    const ctx = "execute";
-    this.L.info({ ctx, opts });
-    const allBackups = this.backupService.getAllBackups();
-    await this.promptBackupKeySelection({ allBackups });
+    try {
+      const ctx = "execute";
+      this.L.info({ ctx, opts });
+      const allBackups = this.backupService.getAllBackups();
+      await this.promptBackupKeySelection({ allBackups });
+    } finally {
+      this.backupService.dispose();
+    }
   }
 }

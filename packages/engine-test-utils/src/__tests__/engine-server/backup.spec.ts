@@ -12,9 +12,12 @@ describe("GIVEN BackupService", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const backupService = new BackupService({ wsRoot });
-        const root = backupService.backupRoot;
-        expect(root).toEqual(path.join(wsRoot, ".backup"));
-        backupService.dispose();
+        try {
+          const root = backupService.backupRoot;
+          expect(root).toEqual(path.join(wsRoot, ".backup"));
+        } finally {
+          backupService.dispose();
+        }
       },
       {
         expect,
@@ -27,18 +30,21 @@ describe("GIVEN BackupService", () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const backupService = new BackupService({ wsRoot });
-          const root = backupService.backupRoot;
-          expect(fs.existsSync(root)).toBeFalsy();
+          try {
+            const root = backupService.backupRoot;
+            expect(fs.existsSync(root)).toBeFalsy();
 
-          await backupService.ensureBackupDir();
+            await backupService.ensureBackupDir();
 
-          expect(fs.existsSync(root)).toBeTruthy();
-          const gitignore = path.join(wsRoot, ".gitignore");
-          const gitignoreContents = fs.readFileSync(gitignore, {
-            encoding: "utf-8",
-          });
-          expect(gitignoreContents.includes(".backup")).toBeTruthy();
-          backupService.dispose();
+            expect(fs.existsSync(root)).toBeTruthy();
+            const gitignore = path.join(wsRoot, ".gitignore");
+            const gitignoreContents = fs.readFileSync(gitignore, {
+              encoding: "utf-8",
+            });
+            expect(gitignoreContents.includes(".backup")).toBeTruthy();
+          } finally {
+            backupService.dispose();
+          }
         },
         {
           expect,
@@ -50,19 +56,22 @@ describe("GIVEN BackupService", () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const backupService = new BackupService({ wsRoot });
-          const root = backupService.backupRoot;
-          expect(fs.existsSync(root)).toBeFalsy();
+          try {
+            const root = backupService.backupRoot;
+            expect(fs.existsSync(root)).toBeFalsy();
 
-          const configPath = DConfig.configPath(wsRoot);
-          const backupResp = await backupService.backup({
-            key: BackupKeyEnum.config,
-            pathToBackup: configPath,
-            timestamp: true,
-            infix: "migration",
-          });
+            const configPath = DConfig.configPath(wsRoot);
+            const backupResp = await backupService.backup({
+              key: BackupKeyEnum.config,
+              pathToBackup: configPath,
+              timestamp: true,
+              infix: "migration",
+            });
 
-          expect(backupResp.data && fs.existsSync(backupResp.data));
-          backupService.dispose();
+            expect(backupResp.data && fs.existsSync(backupResp.data));
+          } finally {
+            backupService.dispose();
+          }
         },
         {
           expect,
@@ -75,12 +84,15 @@ describe("GIVEN BackupService", () => {
         async ({ wsRoot }) => {
           const backupService = new BackupService({ wsRoot });
 
-          const configBackups = backupService.getBackupsWithKey({
-            key: BackupKeyEnum.config,
-          });
+          try {
+            const configBackups = backupService.getBackupsWithKey({
+              key: BackupKeyEnum.config,
+            });
 
-          expect(configBackups).toEqual([]);
-          backupService.dispose();
+            expect(configBackups).toEqual([]);
+          } finally {
+            backupService.dispose();
+          }
         },
         {
           expect,
@@ -92,16 +104,18 @@ describe("GIVEN BackupService", () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const backupService = new BackupService({ wsRoot });
+          try {
+            const allBackups = backupService.getAllBackups();
 
-          const allBackups = backupService.getAllBackups();
-
-          expect(allBackups).toEqual([
-            {
-              key: BackupKeyEnum.config,
-              backups: [],
-            },
-          ]);
-          backupService.dispose();
+            expect(allBackups).toEqual([
+              {
+                key: BackupKeyEnum.config,
+                backups: [],
+              },
+            ]);
+          } finally {
+            backupService.dispose();
+          }
         },
         {
           expect,
@@ -114,35 +128,39 @@ describe("GIVEN BackupService", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const backupService = new BackupService({ wsRoot });
+        try {
+          const noOptionOut = backupService.generateBackupFileName({
+            fileName: "foo.yml",
+          });
+          expect(noOptionOut).toEqual("foo.yml");
 
-        const noOptionOut = backupService.generateBackupFileName({
-          fileName: "foo.yml",
-        });
-        expect(noOptionOut).toEqual("foo.yml");
+          const timestampOut = backupService.generateBackupFileName({
+            fileName: "foo.yml",
+            timestamp: true,
+          });
+          expect(
+            /foo\.\d{4}\.\d{2}\.\d{2}\.\d*\.yml$/g.test(timestampOut)
+          ).toBeTruthy();
 
-        const timestampOut = backupService.generateBackupFileName({
-          fileName: "foo.yml",
-          timestamp: true,
-        });
-        expect(
-          /foo\.\d{4}\.\d{2}\.\d{2}\.\d*\.yml$/g.test(timestampOut)
-        ).toBeTruthy();
+          const infixOut = backupService.generateBackupFileName({
+            fileName: "foo.yml",
+            infix: "backup",
+          });
+          expect(infixOut).toEqual("foo.backup.yml");
 
-        const infixOut = backupService.generateBackupFileName({
-          fileName: "foo.yml",
-          infix: "backup",
-        });
-        expect(infixOut).toEqual("foo.backup.yml");
-
-        const timestampInfixOut = backupService.generateBackupFileName({
-          fileName: "foo.yml",
-          timestamp: true,
-          infix: "backup",
-        });
-        expect(
-          /foo\.\d{4}\.\d{2}\.\d{2}\.\d*\.backup\.yml$/g.test(timestampInfixOut)
-        ).toBeTruthy();
-        backupService.dispose();
+          const timestampInfixOut = backupService.generateBackupFileName({
+            fileName: "foo.yml",
+            timestamp: true,
+            infix: "backup",
+          });
+          expect(
+            /foo\.\d{4}\.\d{2}\.\d{2}\.\d*\.backup\.yml$/g.test(
+              timestampInfixOut
+            )
+          ).toBeTruthy();
+        } finally {
+          backupService.dispose();
+        }
       },
       {
         expect,

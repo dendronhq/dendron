@@ -191,17 +191,20 @@ export class DConfig {
    */
   static async createBackup(wsRoot: string, infix?: string): Promise<string> {
     const backupService = new BackupService({ wsRoot });
-    const configPath = DConfig.configPath(wsRoot);
-    const backupResp = await backupService.backup({
-      key: BackupKeyEnum.config,
-      pathToBackup: configPath,
-      timestamp: true,
-      infix,
-    });
-    backupService.dispose();
-    if (backupResp.error) {
-      throw new DendronError({ ...backupResp.error });
+    try {
+      const configPath = DConfig.configPath(wsRoot);
+      const backupResp = await backupService.backup({
+        key: BackupKeyEnum.config,
+        pathToBackup: configPath,
+        timestamp: true,
+        infix,
+      });
+      if (backupResp.error) {
+        throw new DendronError({ ...backupResp.error });
+      }
+      return backupResp.data;
+    } finally {
+      backupService.dispose();
     }
-    return backupResp.data;
   }
 }

@@ -3,6 +3,11 @@ import { BackupKeyEnum } from ".";
 
 export interface IBackupService {
   /**
+   * dispose backup service.
+   */
+  dispose(): void;
+
+  /**
    * getter for backup root path.
    * returns regardless of the existence of the directory.
    */

@@ -23,7 +23,7 @@ export class OpenBackupCommand extends BasicCommand<
     this.backupService = new BackupService({ wsRoot: ws.wsRoot });
   }
 
-  async promptBackupEntrySelection(opts: { backups: string[] }) {
+  private async promptBackupEntrySelection(opts: { backups: string[] }) {
     const { backups } = opts;
     const options: QuickPickItem[] = backups.map((backupName) => {
       return {
@@ -38,7 +38,7 @@ export class OpenBackupCommand extends BasicCommand<
     return selectedBackupName;
   }
 
-  async promptBackupKeySelection(opts: {
+  private async promptBackupKeySelection(opts: {
     allBackups: { key: string; backups: string[] }[];
   }) {
     const { allBackups } = opts;

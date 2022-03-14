@@ -390,11 +390,17 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       body: ROOT_NOTE_TEMPLATE,
     });
     const schema = SchemaUtils.createRootModule({ vault });
-    if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
+    if (
+      !(await fs.pathExists(
+        NoteUtils.getFullPath({ note, wsRoot: this.wsRoot })
+      ))
+    ) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
-      !fs.existsSync(SchemaUtils.getPath({ root: notesPath, fname: "root" }))
+      !(await fs.pathExists(
+        SchemaUtils.getPath({ root: notesPath, fname: "root" })
+      ))
     ) {
       await schemaModuleOpts2File(schema, notesPath, "root");
     }

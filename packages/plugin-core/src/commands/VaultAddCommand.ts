@@ -66,6 +66,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     ]);
   };
 
+  /** A regular, non-self contained vault. */
   async gatherVaultStandard(
     sourceType: VaultRemoteSource
   ): Promise<CommandOpts | undefined> {

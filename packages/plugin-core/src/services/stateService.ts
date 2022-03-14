@@ -12,6 +12,8 @@ type ExtensionGlobalState = ExtensionContext["globalState"];
 type ExtensionWorkspaceState = ExtensionContext["workspaceState"];
 
 /**
+ * @deprecated All state service logic will be consolidated to {@link MetadataService}.
+ * Consider using it instead if you need to add a new state to track.
  * Keeps track of workspace state
  */
 export class StateService {

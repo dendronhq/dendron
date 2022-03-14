@@ -25,7 +25,7 @@ import {
   getOS,
   initializeSentry,
   SegmentClient,
-  writeJSONWithComments,
+  writeJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import {
   FileAddWatcher,
@@ -764,7 +764,7 @@ export async function _activate(
               fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
               backupPaths.push(maybeBackupPath);
             }
-            writeJSONWithComments(keybindingConfigPath, resolvedKeybindings);
+            writeJSONWithCommentsSync(keybindingConfigPath, resolvedKeybindings);
             AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
               fixApplied: true,
             });

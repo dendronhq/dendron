@@ -484,9 +484,14 @@ export const vault2Path = ({
   return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
 
-export function writeJSONWithComments(fpath: string, data: any) {
+export function writeJSONWithCommentsSync(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
   return fs.writeFileSync(fpath, payload);
+}
+
+export async function writeJSONWithComments(fpath: string, data: any) {
+  const payload = stringify(data, null, 4);
+  await fs.writeFile(fpath, payload);
 }
 
 /**

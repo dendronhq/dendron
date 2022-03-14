@@ -5,6 +5,10 @@ import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault, WorkspaceFolderRaw } from "./types";
 
+export type SelfContainedVault = Omit<DVault, "selfContained"> & {
+  selfContained: true;
+};
+
 export class VaultUtils {
   static getName(vault: DVault): string {
     if (vault.seed) {
@@ -34,9 +38,7 @@ export class VaultUtils {
     return VaultUtils.getRelPath(vaultSrc) === VaultUtils.getRelPath(vaultCmp);
   }
 
-  static isSelfContained(
-    vault: DVault
-  ): vault is Omit<DVault, "selfContained"> & { selfContained: true } {
+  static isSelfContained(vault: DVault): vault is SelfContainedVault {
     return vault.selfContained === true;
   }
 

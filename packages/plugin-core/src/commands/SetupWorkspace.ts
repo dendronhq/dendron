@@ -1,4 +1,9 @@
-import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DENDRON_VSCODE_CONFIG_KEYS,
+  DVault,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -12,6 +17,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = {
   rootDirRaw: string;
@@ -207,10 +213,17 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
       workspaceType === WorkspaceType.CODE || workspaceType === undefined;
+    // Default to standard vaults
+    const useSelfContainedVault =
+      ExtensionProvider.getWorkspaceConfig().get<boolean>(
+        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+      ) || false;
+
     const svc = await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace,
+      useSelfContainedVault,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({

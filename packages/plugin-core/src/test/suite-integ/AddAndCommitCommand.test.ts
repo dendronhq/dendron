@@ -1,4 +1,4 @@
-import { ConfigUtils, NoteUtils } from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   Git,
@@ -9,15 +9,11 @@ import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
-import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { AddAndCommit } from "../../commands/AddAndCommit";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
-const TIMEOUT = 60 * 1000 * 5;
-
 suite("GIVEN Workspace Add And Commit command is run", function () {
-  this.timeout(TIMEOUT);
   describeSingleWS(
     "WHEN there are no changes",
     {
@@ -25,9 +21,10 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
+      timeout: 1e6,
     },
     () => {
-      test("THEN Dendron skips committing", async () => {
+      test("THEN skip committing AND show no new changes message", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
@@ -53,54 +50,16 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
+      timeout: 1e6,
     },
     () => {
-      test("THEN Dendron skips committing files", async () => {
+      test("THEN skip committing files AND show merge conflict message", async () => {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
-        const remoteDir = tmpDir().name;
-        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
-        // Add everything and push, so that there's no untracked changes
-        const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
-        await git.addAll();
-        await git.commit({ msg: "first commit" });
-        await git.push();
-        // Update root note and add a commit that's not in remote, so there'll be something to rebase
-        const fpath = NoteUtils.getFullPath({
-          note: rootNote,
+        await GitTestUtils.createRemoteRepoWithRebaseConflict(
           wsRoot,
-        });
-        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
-        await git.addAll();
-        await git.commit({ msg: "second commit" });
-
-        // Clone to a second location, then push a change through that
-        const secondaryDir = tmpDir().name;
-        const secondaryGit = new Git({
-          localUrl: secondaryDir,
-          remoteUrl: remoteDir,
-        });
-        await secondaryGit.clone(".");
-        const secondaryFpath = NoteUtils.getFullPath({
-          note: rootNote,
-          wsRoot: secondaryDir,
-        });
-        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
-        await secondaryGit.addAll();
-        await secondaryGit.commit({ msg: "secondary" });
-        await secondaryGit.push();
-
-        // Cause an ongoing rebase
-        try {
-          await git.pull();
-        } catch {
-          // deliberately ignored
-        }
-
+          vaults,
+          engine
+        );
         const out = await new AddAndCommit().execute();
         const { committed, finalMessage } = out;
         expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
@@ -119,53 +78,17 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
+      timeout: 1e6,
     },
     () => {
-      test("THEN Dendron skips committing files", async () => {
+      test("THEN skip committing files AND show rebase conflict message", async () => {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
-        const remoteDir = tmpDir().name;
-        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
-        // Add everything and push, so that there's no untracked changes
-        const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
-        await git.addAll();
-        await git.commit({ msg: "first commit" });
-        await git.push();
-        // Update root note and add a commit that's not in remote, so there'll be something to rebase
-        const fpath = NoteUtils.getFullPath({
-          note: rootNote,
-          wsRoot,
-        });
-        await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
-        await git.addAll();
-        await git.commit({ msg: "second commit" });
-
-        // Clone to a second location, then push a change through that
-        const secondaryDir = tmpDir().name;
-        const secondaryGit = new Git({
-          localUrl: secondaryDir,
-          remoteUrl: remoteDir,
-        });
-        await secondaryGit.clone(".");
-        const secondaryFpath = NoteUtils.getFullPath({
-          note: rootNote,
-          wsRoot: secondaryDir,
-        });
-        await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
-        await secondaryGit.addAll();
-        await secondaryGit.commit({ msg: "secondary" });
-        await secondaryGit.push();
-
-        // Cause an ongoing rebase
-        try {
-          await git.pull();
-        } catch {
-          // deliberately ignored
-        }
+        const { git, fpath } =
+          await GitTestUtils.createRemoteRepoWithRebaseConflict(
+            wsRoot,
+            vaults,
+            engine
+          );
         // Mark the conflict as resolved
         await git.add(fpath);
 
@@ -190,6 +113,7 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "sync");
         return config;
       },
+      timeout: 1e6,
     },
     () => {
       test("THEN Dendron commit files successfully", async () => {

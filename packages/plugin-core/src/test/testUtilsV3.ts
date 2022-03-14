@@ -526,10 +526,21 @@ export function describeMultiWS(
  */
 export function describeSingleWS(
   title: string,
-  opts: SetupLegacyWorkspaceOpts,
+  opts: SetupLegacyWorkspaceOpts & {
+    /**
+     * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
+     */
+    timeout?: number;
+  },
   fn: () => void
 ) {
-  describe(title, () => {
+  describe(title, function () {
+    if (opts.timeout) {
+      this.timeout(opts.timeout);
+    }
     let ctx: ExtensionContext;
     before(async () => {
       ctx = opts.ctx ?? setupWorkspaceStubs(opts);

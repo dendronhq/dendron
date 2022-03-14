@@ -1,4 +1,5 @@
-import { VaultUtils } from "@dendronhq/common-all";
+import { DEngineClient, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { tmpDir } from "@dendronhq/common-server";
 import { Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
@@ -125,5 +126,60 @@ export class GitTestUtils {
     if (opts?.remote) {
       await git.remoteAdd();
     }
+  }
+
+  /** Set up a workspace with a remote, intended to be used when testing rebase and merge conflicts.
+   * @param wsRoot Directory where the workspace will be stored.
+   * @param engine
+   * @param vaults
+   */
+  static async createRemoteRepoWithRebaseConflict(
+    wsRoot: string,
+    vaults: DVault[],
+    engine: DEngineClient
+  ) {
+    const remoteDir = tmpDir().name;
+    await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+    const rootNote = NoteUtils.getNoteByFnameFromEngine({
+      fname: "root",
+      vault: vaults[0],
+      engine,
+    })!;
+    // Add everything and push, so that there's no untracked changes
+    const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
+    await git.addAll();
+    await git.commit({ msg: "first commit" });
+    await git.push();
+    // Update root note and add a commit that's not in remote, so there'll be something to rebase
+    const fpath = NoteUtils.getFullPath({
+      note: rootNote,
+      wsRoot,
+    });
+    await fs.appendFile(fpath, "Deserunt culpa in expedita\n");
+    await git.addAll();
+    await git.commit({ msg: "second commit" });
+
+    // Clone to a second location, then push a change through that
+    const secondaryDir = tmpDir().name;
+    const secondaryGit = new Git({
+      localUrl: secondaryDir,
+      remoteUrl: remoteDir,
+    });
+    await secondaryGit.clone(".");
+    const secondaryFpath = NoteUtils.getFullPath({
+      note: rootNote,
+      wsRoot: secondaryDir,
+    });
+    await fs.appendFile(secondaryFpath, "Aut ut nisi dolores quae et\n");
+    await secondaryGit.addAll();
+    await secondaryGit.commit({ msg: "secondary" });
+    await secondaryGit.push();
+    // Cause an ongoing rebase
+    try {
+      await git.pull();
+    } catch {
+      // deliberately ignored
+    }
+    return { git, fpath };
   }
 }

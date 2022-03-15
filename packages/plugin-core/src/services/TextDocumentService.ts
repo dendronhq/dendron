@@ -75,7 +75,7 @@ export class TextDocumentService implements ITextDocumentService {
   constructor(ext: IDendronExtension, textDocumentEvent: Event<TextDocument>) {
     this.L = Logger;
     this._extension = ext;
-    this._textDocumentEventHandle = textDocumentEvent(this.onDidSave);
+    this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
   }
 
   dispose() {
@@ -119,7 +119,7 @@ export class TextDocumentService implements ITextDocumentService {
    * @returns
    */
   private async onDidSave(document: TextDocument) {
-    const ctx = "TextDocumentService:onDidChange";
+    const ctx = "TextDocumentService:onDidSave";
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -174,7 +174,6 @@ export class TextDocumentService implements ITextDocumentService {
     if (event.document.isDirty === false) {
       return;
     }
-
     const document = event.document;
     const contentChanges = event.contentChanges;
 

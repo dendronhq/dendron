@@ -214,9 +214,7 @@ suite("GIVEN SetupWorkspace Command", function () {
     });
   });
 
-  describe("WHEN initializing a CODE workspace", function () {
-    this.timeout(6 * 1000);
-
+  describe("WHEN initializing a CODE workspace", () => {
     describe("AND workspace has not been set up yet", () => {
       test("THEN Dendon does not activate", async () => {
         const resp = await _activate(ctx);
@@ -584,9 +582,7 @@ suite("GIVEN SetupWorkspace Command", function () {
     });
   });
 
-  describe("WHEN initializing a NATIVE workspace", function () {
-    this.timeout(6 * 1000);
-
+  describe("WHEN initializing a NATIVE workspace", () => {
     test("not active, initial create ws", async () => {
       const wsRoot = tmpDir().name;
 

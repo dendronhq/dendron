@@ -32,6 +32,8 @@ type CommandOpts = CommandInput & {
    * override prompts
    */
   skipConfirmation?: boolean;
+  /** Create self contained vaults, overriding the Dendron VSCode setting. */
+  selfContained?: boolean;
 };
 
 type CommandOutput = DVault[];
@@ -194,7 +196,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
       rootDirRaw: rootDir,
       skipOpenWs,
       workspaceType,
-    } = _.defaults(opts, {});
+      selfContained,
+    } = _.defaults(opts, {
+      selfContained: ExtensionProvider.getWorkspaceConfig().get<boolean>(
+        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+      ),
+    });
     Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 
     if (
@@ -213,17 +220,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
       workspaceType === WorkspaceType.CODE || workspaceType === undefined;
-    // Default to standard vaults
-    const useSelfContainedVault =
-      ExtensionProvider.getWorkspaceConfig().get<boolean>(
-        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
-      ) || false;
 
     const svc = await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace,
-      useSelfContainedVault,
+      useSelfContainedVault: selfContained,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({

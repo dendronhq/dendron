@@ -174,6 +174,7 @@ export class TextDocumentService implements ITextDocumentService {
     if (event.document.isDirty === false) {
       return;
     }
+
     const document = event.document;
     const contentChanges = event.contentChanges;
 

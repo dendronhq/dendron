@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.86.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.86.1) (2022-03-15)
+
+
+
+# 0.86.0 (2022-03-15)
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **publish:** enable katex on published site ([7189cd8](https://github.com/dendronhq/dendron/commit/7189cd840e12d7aadf6f78b9e3281180bca903af))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+
+
+
+
+
 # 0.86.0 (2022-03-15)
 
 **Note:** Version bump only for package @dendronhq/common-assets

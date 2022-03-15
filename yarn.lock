@@ -5483,7 +5483,7 @@
 
 "@types/js-yaml@^4.0.5":
   version "4.0.5"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.5.tgz#738dd390a6ecc5442f35e7f03fa1431353f7e138"
+  resolved "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.5.tgz#738dd390a6ecc5442f35e7f03fa1431353f7e138"
   integrity sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
 
 "@types/json-schema@*", "@types/json-schema@^7.0.3", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.7", "@types/json-schema@^7.0.8":
@@ -5871,10 +5871,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/title@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.npmjs.org/@types/title/-/title-1.0.5.tgz#7ac1649180e8ac3352ee08507c42d873ee441921"
-  integrity sha1-esFkkYDorDNS7ghQfELYc+5EGSE=
+"@types/title@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.npmjs.org/@types/title/-/title-3.4.1.tgz#583cd7561291eac4ade4bef0d589d23c27bf71e7"
+  integrity sha512-GAt+5DJl84n7Qz+/weJteapG8j2csP/5NOg8H4dnaTxuqsK6AcZ4hPYsvvjAjcEVv5l9dfK8rz4pOfpgjlrNqg==
 
 "@types/tmp@^0.2.0":
   version "0.2.3"

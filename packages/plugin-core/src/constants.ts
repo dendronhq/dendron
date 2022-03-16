@@ -1045,9 +1045,11 @@ export const KNOWN_KEYBINDING_CONFLICTS: KeybindingConflict[] = [
     conflictsWith: "dendron.lookupNote",
     os: ["Linux", "Windows_NT"],
   },
-  {
-    extensionId: "vscodevim.vim",
-    commandId: "extension.vim_tab",
-    conflictsWith: "dendron.lookupNoteAutoComplete",
-  },
+  // This is left here so it could be tested in Darwin.
+  // This is not an actual conflict.
+  // {
+  //   extensionId: "vscodevim.vim",
+  //   commandId: "extension.vim_tab",
+  //   conflictsWith: "dendron.lookupNoteAutoComplete",
+  // },
 ];

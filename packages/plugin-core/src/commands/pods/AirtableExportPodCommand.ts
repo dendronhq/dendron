@@ -1,5 +1,5 @@
 import Airtable from "@dendronhq/airtable";
-import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableExportPodV2,
@@ -173,10 +173,10 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
    */
   public async onExportComplete({
     exportReturnValue,
+    config,
   }: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
-    payload: NoteProps[];
   }) {
     const records = exportReturnValue.data;
     const engine = this.extension.getEngine();
@@ -186,14 +186,15 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
         records: records.created,
         engine,
         logger,
+        podId: config.podId,
       });
     }
 
     const createdCount = exportReturnValue.data?.created?.length ?? 0;
     const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
-
+    let errorMsg = "";
     if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
+      errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
         exportReturnValue.error
       )}`;
 
@@ -203,6 +204,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
         `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
       );
     }
+    return errorMsg;
   }
 
   /**

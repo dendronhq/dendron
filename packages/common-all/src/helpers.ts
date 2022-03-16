@@ -4,6 +4,10 @@ export function makeResponse<T>(resp: T) {
   });
 }
 
+/**
+ * Loop through iterable one element at a time and await on async callback at every iteration
+ *  ^a7sx98zzqg5y
+ */
 export async function asyncLoopOneAtATime<T>(
   things: T[],
   cb: (t: T) => Promise<any>

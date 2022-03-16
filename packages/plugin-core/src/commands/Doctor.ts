@@ -38,6 +38,8 @@ import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { KeybindingUtils } from "../KeybindingUtils";
+import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
+import { PodUIControls } from "../components/pods/PodControls";
 
 const md = _md();
 type Finding = {
@@ -96,6 +98,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   constructor(ext: IDendronExtension) {
     super();
     this.extension = ext;
+  }
+
+  getHierarchy() {
+    return new QuickPickHierarchySelector().getHierarchy();
   }
 
   createQuickPick(opts: CreateQuickPickOpts) {
@@ -450,6 +456,33 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           break;
         }
         await this.showBrokenLinkPreview(out.resp, engine);
+        break;
+      }
+      case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
+        const selection = await this.getHierarchy();
+        if (!selection) break;
+        const { hierarchy, vault } = selection;
+        const podId = await PodUIControls.promptToSelectCustomPodId();
+        if (!podId) break;
+        const notes = engine.notes;
+        const candidates = Object.values(notes).filter(
+          (value) =>
+            value.fname.startsWith(hierarchy) &&
+            value.stub !== true &&
+            VaultUtils.isEqualV2(value.vault, vault) &&
+            value.custom.airtableId
+        );
+        this.L.info({
+          ctx,
+          msg: `${DoctorActionsEnum.FIX_FRONTMATTER} candidates: ${candidates.length}`,
+        });
+        const ds = new DoctorService();
+        await ds.executeDoctorActions({
+          action: opts.action,
+          candidates,
+          engine,
+          podId,
+        });
         break;
       }
       default: {

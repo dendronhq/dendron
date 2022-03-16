@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -10,6 +11,7 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { PodUIControls } from "../../components/pods/PodControls";
 import { INCOMPATIBLE_EXTENSIONS } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -23,9 +25,7 @@ import {
 } from "../testUtilsV3";
 
 suite("DoctorCommandTest", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this, {});
 
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
@@ -150,9 +150,7 @@ suite("DoctorCommandTest", function () {
 });
 
 suite("CREATE_MISSING_LINKED_NOTES", function () {
-  let ctx: vscode.ExtensionContext;
-
-  ctx = setupBeforeAfter(this);
+  const ctx = setupBeforeAfter(this);
 
   test("basic proceed, file scoped", (done) => {
     runLegacySingleWorkspaceTest({
@@ -712,6 +710,65 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
             nomatch: ["Not Installed"],
           })
         ).toBeTruthy();
+      });
+    }
+  );
+});
+
+suite("FIX_AIRTABLE_METADATA", function () {
+  describeMultiWS(
+    "GIVEN updateAirtableMetadata selected",
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "foo.bar",
+          vault: vaults[0],
+          custom: {
+            airtableId: "airtableId-one",
+          },
+        });
+      },
+    },
+    () => {
+      test("THEN remove airtableId from note FM and update it with pods namespace", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const engine = ext.getEngine();
+        const { vaults } = engine;
+        const cmd = new DoctorCommand(ext);
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActionsEnum.FIX_AIRTABLE_METADATA,
+            scope: "workspace",
+          })
+        );
+        const hierarchyQuickPickStub = sinon.stub(cmd, "getHierarchy");
+        const podIdQuickPickStub = sinon.stub(
+          PodUIControls,
+          "promptToSelectCustomPodId"
+        );
+        try {
+          hierarchyQuickPickStub
+            .onFirstCall()
+            .returns(
+              Promise.resolve({ hierarchy: "foo.bar", vault: engine.vaults[0] })
+            );
+          podIdQuickPickStub.onCall(0).returns(Promise.resolve("dendron.task"));
+          await cmd.run();
+          const note = NoteUtils.getNoteByFnameFromEngine({
+            fname: "foo.bar",
+            engine,
+            vault: vaults[0],
+          });
+          expect(note?.custom.airtableId).toBeFalsy();
+          expect(note?.custom.pods.airtable["dendron.task"]).toEqual(
+            "airtableId-one"
+          );
+        } finally {
+          gatherInputsStub.restore();
+          hierarchyQuickPickStub.restore();
+          podIdQuickPickStub.restore();
+        }
       });
     }
   );

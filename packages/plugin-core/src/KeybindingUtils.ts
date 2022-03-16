@@ -1,4 +1,4 @@
-import { DendronError, ERROR_STATUS, RespV3 } from "@dendronhq/common-all";
+import { DendronError } from "@dendronhq/common-all";
 import {
   CommentJSONValue,
   readJSONWithCommentsSync,
@@ -6,7 +6,7 @@ import {
 import { CommentJSONArray, parse } from "comment-json";
 import _md from "markdown-it";
 import fs from "fs-extra";
-import _, { assign } from "lodash";
+import _ from "lodash";
 import {
   DENDRON_COMMANDS,
   isOSType,
@@ -14,7 +14,6 @@ import {
   KNOWN_KEYBINDING_CONFLICTS,
   KWOWN_CONFLICTING_EXTENSIONS,
 } from "./constants";
-import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import * as vscode from "vscode";
 import os from "os";
@@ -55,7 +54,7 @@ export class KeybindingUtils {
       return isInstalled && matchesOS;
     });
 
-    // for each of the found conflicts, see if the user has them remapped in keybinding.json
+    // for each of the found conflicts, see if the user has them remapped / disabled  in keybinding.json
     const { keybindingConfigPath } = this.getKeybindingConfigPath();
     const userKeybindingConfigExists = fs.existsSync(keybindingConfigPath);
 
@@ -64,9 +63,41 @@ export class KeybindingUtils {
       return conflicts;
     }
 
-    // const userKeybindingConfig = readJSONWithCommentsSync(keybindingConfigPath);
+    const userKeybindingConfig = readJSONWithCommentsSync(
+      keybindingConfigPath
+    ) as CommentJSONArray<Keybindings>;
 
-    return conflicts;
+    const alreadyResolved: KeybindingConflict[] = [];
+
+    userKeybindingConfig.forEach((keybinding) => {
+      // find remap / disable of conflicting keybindings
+      let command = keybinding.command;
+      if (command.startsWith("-")) {
+        command = command.substring(1);
+      }
+
+      const resolvedConflict = conflicts.find(
+        (conflict) => conflict.commandId === command
+      );
+      if (resolvedConflict) {
+        alreadyResolved.push(resolvedConflict);
+      }
+
+      // find remap / disable of dendron keybindings
+      command = keybinding.command;
+      if (command.startsWith("-")) {
+        command = command.substring(1);
+      }
+      const resolvedDendronConflict = conflicts.find(
+        (conflict) => conflict.conflictsWith === command
+      );
+
+      if (resolvedDendronConflict) {
+        alreadyResolved.push(resolvedDendronConflict);
+      }
+    });
+
+    return _.differenceBy(conflicts, alreadyResolved);
   }
 
   static generateKeybindingBlockForCopy(opts: {
@@ -253,7 +284,12 @@ export class KeybindingUtils {
    * This returns the path of user-level `keybindings.json`.
    * This handles windows, linux and darwin, for both regular vscode and insider as well as portable mode.
    * This does NOT handle the case where vscode is opened through cli with a custom `--user-data-dir` argument.
-   * @returns path of user defined `keybindings.json`
+   *
+   * The most reliable way of accessing the path of `keybindings.json` is to execute `workbench.action.openGlobalKeybindingsFile`
+   * and fetching the uri of the active editor document, but this requires opening and closing an editor tab in quick succession.
+   * This will visually be very unpleasant, thus avoided here.
+   *
+   * @returns path of user defined `keybindings.json`, and the platform.
    */
   static getKeybindingConfigPath = () => {
     const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();

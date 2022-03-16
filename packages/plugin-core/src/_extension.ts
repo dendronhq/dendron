@@ -1320,6 +1320,7 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 function updateEngineAPI(port: number | string): EngineAPIService {
   const ext = getExtension();
 
+  // set engine api ^9dr6chh7ah9v
   const svc = EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,

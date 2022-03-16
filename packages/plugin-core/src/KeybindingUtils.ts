@@ -18,6 +18,7 @@ import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import * as vscode from "vscode";
 import os from "os";
+import path from "path";
 
 type Keybindings = Record<string, string>;
 export class KeybindingUtils {
@@ -248,10 +249,16 @@ export class KeybindingUtils {
     return true;
   }
 
+  /**
+   * This returns the path of user-level `keybindings.json`.
+   * This handles windows, linux and darwin, for both regular vscode and insider as well as portable mode.
+   * This does NOT handle the case where vscode is opened through cli with a custom `--user-data-dir` argument.
+   * @returns path of user defined `keybindings.json`
+   */
   static getKeybindingConfigPath = () => {
     const { userConfigDir, osName } = VSCodeUtils.getCodeUserConfigDir();
     return {
-      keybindingConfigPath: [userConfigDir, "keybindings.json"].join(""),
+      keybindingConfigPath: path.join(userConfigDir, "keybindings.json"),
       osName,
     };
   };

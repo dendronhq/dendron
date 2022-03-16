@@ -762,71 +762,71 @@ suite("GIVEN a native workspace", function () {
   });
 });
 
-suite("keybindings", function () {
-  let homeDirStub: SinonStub;
-  let userConfigDirStub: SinonStub;
+// suite("keybindings", function () {
+//   let homeDirStub: SinonStub;
+//   let userConfigDirStub: SinonStub;
 
-  setupBeforeAfter(this, {
-    beforeHook: async (ctx) => {
-      // eslint-disable-next-line no-new
-      new StateService(ctx);
-      await resetCodeWorkspace();
-      await new ResetConfigCommand().execute({ scope: "all" });
-      homeDirStub = TestEngineUtils.mockHomeDir();
-      userConfigDirStub = mockUserConfigDir();
-    },
-    afterHook: async () => {
-      homeDirStub.restore();
-      userConfigDirStub.restore();
-    },
-    noSetInstallStatus: true,
-  });
+//   setupBeforeAfter(this, {
+//     beforeHook: async (ctx) => {
+//       // eslint-disable-next-line no-new
+//       new StateService(ctx);
+//       await resetCodeWorkspace();
+//       await new ResetConfigCommand().execute({ scope: "all" });
+//       homeDirStub = TestEngineUtils.mockHomeDir();
+//       userConfigDirStub = mockUserConfigDir();
+//     },
+//     afterHook: async () => {
+//       homeDirStub.restore();
+//       userConfigDirStub.restore();
+//     },
+//     noSetInstallStatus: true,
+//   });
 
-  describe("keyboard shortcut conflict resolution", () => {
-    test("vim extension expandLineSelection override", (done) => {
-      const { keybindingConfigPath } =
-        KeybindingUtils.getKeybindingConfigPath();
-      fs.ensureFileSync(keybindingConfigPath);
-      const config = `// This is my awesome Dendron Keybinding
-      [
-        { // look up note to the side
-          "key": "ctrl+k l",
-          "command": "dendron.lookupNote",
-          "args": {
-            "splitType": "horizontal"
-          }
-        }
-      ]`;
-      fs.writeFileSync(keybindingConfigPath, config);
-      const resp = KeybindingUtils.getKeybindingConfig({
-        createIfMissing: false,
-      });
-      const existingConfig = resp.data!;
-      const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
-      const beforeKeySymbol = Object.getOwnPropertySymbols(
-        existingConfig[0]
-      )[0];
-      const { newKeybindings } =
-        KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists().data!;
-      const override = newKeybindings[1];
-      expect(_.isArray(newKeybindings)).toBeTruthy();
-      // override config exists after migration
-      expect(override).toEqual({
-        key: `ctrl+l`,
-        command: "-extension.vim_navigateCtrlL",
-      });
+//   describe("keyboard shortcut conflict resolution", () => {
+//     test("vim extension expandLineSelection override", (done) => {
+//       const { keybindingConfigPath } =
+//         KeybindingUtils.getKeybindingConfigPath();
+//       fs.ensureFileSync(keybindingConfigPath);
+//       const config = `// This is my awesome Dendron Keybinding
+//       [
+//         { // look up note to the side
+//           "key": "ctrl+k l",
+//           "command": "dendron.lookupNote",
+//           "args": {
+//             "splitType": "horizontal"
+//           }
+//         }
+//       ]`;
+//       fs.writeFileSync(keybindingConfigPath, config);
+//       const resp = KeybindingUtils.getKeybindingConfig({
+//         createIfMissing: false,
+//       });
+//       const existingConfig = resp.data!;
+//       const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
+//       const beforeKeySymbol = Object.getOwnPropertySymbols(
+//         existingConfig[0]
+//       )[0];
+//       const { newKeybindings } =
+//         KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists().data!;
+//       const override = newKeybindings[1];
+//       expect(_.isArray(newKeybindings)).toBeTruthy();
+//       // override config exists after migration
+//       expect(override).toEqual({
+//         key: `ctrl+l`,
+//         command: "-extension.vim_navigateCtrlL",
+//       });
 
-      // existing comments are preserved
-      expect(Object.getOwnPropertySymbols(newKeybindings)[0]).toEqual(
-        beforeAllSymbol
-      );
-      expect(Object.getOwnPropertySymbols(newKeybindings[0])[0]).toEqual(
-        beforeKeySymbol
-      );
-      done();
-    });
-  });
-});
+//       // existing comments are preserved
+//       expect(Object.getOwnPropertySymbols(newKeybindings)[0]).toEqual(
+//         beforeAllSymbol
+//       );
+//       expect(Object.getOwnPropertySymbols(newKeybindings[0])[0]).toEqual(
+//         beforeKeySymbol
+//       );
+//       done();
+//     });
+//   });
+// });
 
 suite(
   "temporary testing of Dendron version compatibility downgrade sequence",

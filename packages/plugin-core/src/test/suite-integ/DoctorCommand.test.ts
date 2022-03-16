@@ -717,7 +717,7 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
 
 suite("FIX_AIRTABLE_METADATA", function () {
   describeMultiWS(
-    "GIVEN updateAirtableMetadata selected",
+    "GIVEN fixAirtableMetadata selected",
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
         await NoteTestUtilsV4.createNote({

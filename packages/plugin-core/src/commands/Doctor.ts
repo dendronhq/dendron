@@ -461,7 +461,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
         const selection = await this.getHierarchy();
         if (!selection) break;
+        // get hierarchy of notes to be updated
         const { hierarchy, vault } = selection;
+        // get podId used to export the notes
         const podId = await PodUIControls.promptToSelectCustomPodId();
         if (!podId) break;
         const notes = engine.notes;

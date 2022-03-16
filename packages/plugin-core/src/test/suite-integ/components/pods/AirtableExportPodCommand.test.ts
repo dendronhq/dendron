@@ -8,7 +8,7 @@ import { ExtensionProvider } from "../../../../ExtensionProvider";
 import { vault2Path } from "@dendronhq/common-server";
 import path from "path";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
-import { DendronError, ErrorFactory, NoteUtils } from "@dendronhq/common-all";
+import { DendronError, ErrorFactory } from "@dendronhq/common-all";
 
 suite("AirtableExportCommand", function () {
   const setUpPod = async () => {
@@ -31,13 +31,12 @@ suite("AirtableExportCommand", function () {
 
   describe("GIVEN AirtableExportPodCommand is run with Note scope with podId dendron.task", () => {
     describeSingleWS(
-      "WHEN note is succesfully exported for the first",
+      "WHEN note is succesfully exported for the first time",
       {},
       () => {
         test("THEN note frontmatter should be updated with airtable metadata", async () => {
           const extension = ExtensionProvider.getExtension();
           const cmd = new AirtableExportPodCommand(extension);
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const { config } = await setUpPod();
           const note = getNoteFromTextEditor();
           const payload = await cmd.enrichInputs(config);
@@ -61,11 +60,7 @@ suite("AirtableExportCommand", function () {
             exportReturnValue: result as any,
             config: payload?.config!,
           });
-          const n = NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vaults[0],
-            engine,
-          });
+          const n = getNoteFromTextEditor();
           expect(n?.custom.pods.airtable["dendron.task"]).toEqual(airtableId);
         });
       }
@@ -112,7 +107,6 @@ suite("AirtableExportCommand", function () {
           const n = getNoteFromTextEditor();
           expect(n?.custom.pods.airtable["dendron.task"]).toEqual(airtableId);
           expect(n?.custom.pods.airtable["dendron.test"]).toEqual("airtable-1");
-          setTimeout(() => {}, 40000);
         });
       }
     );

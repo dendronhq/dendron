@@ -448,10 +448,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -460,7 +463,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -639,10 +642,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -651,7 +657,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -794,10 +800,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -806,7 +815,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -1015,10 +1024,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -1027,7 +1039,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.

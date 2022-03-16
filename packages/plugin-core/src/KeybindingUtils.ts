@@ -239,12 +239,6 @@ export class KeybindingUtils {
       }
     );
     panel.webview.html = md.render(contents);
-
-    // TODO: add proper tracking
-    // AnalyticsUtils.track(
-    //   ExtensionEvents.IncompatibleExtensionsPreviewDisplayed
-    // );
-    // return { installStatus, contents };
   }
 
   static async showKeybindingConflictConfirmationMessage(opts: {

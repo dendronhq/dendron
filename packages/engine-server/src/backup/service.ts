@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   DendronError,
   Disposable,
   ERROR_STATUS,
@@ -68,8 +69,8 @@ export class BackupService implements Disposable, IBackupService {
       root: this.wsRoot,
     });
     await fs.ensureDir(this.backupRoot);
-    Object.keys(BackupKeyEnum).forEach(async (key) => {
-      await fs.ensureDir(path.join(this.backupRoot, key));
+    await asyncLoopOneAtATime<string>(Object.values(BackupKeyEnum), (key) => {
+      return fs.ensureDir(path.join(this.backupRoot, key));
     });
   }
 

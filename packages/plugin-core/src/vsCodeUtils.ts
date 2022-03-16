@@ -570,7 +570,15 @@ export class VSCodeUtils {
         break;
       }
     }
-    // return [userConfigDir, delimiter, osName];
+
+    // if vscode is in portable mode, we need to handle it differently
+    // there is also a case where the user opens vscode with a custom `--user-data-dir` args through the CLI,
+    // but there is no reliable way for the extension authors to identify that through the node env or vscode API
+    const portableDir = process.env["VSCODE_PORTABLE"];
+    if (portableDir) {
+      userConfigDir = path.join(portableDir, "user-data", "User");
+    }
+
     return {
       userConfigDir,
       delimiter,

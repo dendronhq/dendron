@@ -18,6 +18,10 @@ export type BackupServiceOpts = {
   wsRoot: string;
 };
 
+/**
+ * Predefined keys to be used for backups
+ * ^6ao9nojre6ai
+ */
 export enum BackupKeyEnum {
   config = "config",
 }
@@ -114,6 +118,7 @@ export class BackupService implements Disposable, IBackupService {
    * @param opts.infix optional custom infix to append right before the extension.
    * @param opts.nameOverride if given, it will be used instead of calling {@link generateBackupFileName}.
    * @returns A promise of response containing either the path of the backup or a DendronError
+   * ^b0jdi7ncbflr
    */
   async backup(opts: {
     key: BackupKeyEnum;

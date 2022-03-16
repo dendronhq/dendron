@@ -1,13 +1,28 @@
-import { assert, milliseconds } from "@dendronhq/common-all";
+import {
+  assert,
+  milliseconds,
+  NoteChangeEntry,
+  NoteChangeUpdateEntry,
+} from "@dendronhq/common-all";
 import { genHash } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import {
+  NoteTestUtilsV4,
+  testAssertsInsideCallback,
+} from "@dendronhq/common-test-utils";
+import {
+  ENGINE_HOOKS,
+  extractNoteChangeEntriesByType,
+} from "@dendronhq/engine-test-utils";
 import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { TextDocumentService } from "../../services/TextDocumentService";
 import { expect } from "../testUtilsv2";
-import { describeSingleWS, describeMultiWS } from "../testUtilsV3";
+import {
+  describeSingleWS,
+  describeMultiWS,
+  subscribeToEngineStateChange,
+} from "../testUtilsV3";
 
 async function wait1Millisecond(): Promise<void> {
   return new Promise((resolve) => {
@@ -305,6 +320,67 @@ suite("TextDocumentService", function testSuite() {
           expect(engine.notes["foo"].body).toEqual(
             testNoteProps.body + textToAppend
           );
+        });
+      }
+    );
+
+    describeSingleWS(
+      "WHEN the contents of the note has changed",
+      {
+        postSetupHook: ENGINE_HOOKS.setupBasic,
+      },
+      () => {
+        test("THEN update engine events should be fired", (done) => {
+          textDocumentService = new TextDocumentService(
+            ExtensionProvider.getExtension(),
+            vscode.workspace.onDidSaveTextDocument
+          );
+          const engine = ExtensionProvider.getEngine();
+          const testNoteProps = engine.notes["foo"];
+          const textToAppend = "new text here";
+
+          const disposable = subscribeToEngineStateChange(
+            (noteChangeEntries: NoteChangeEntry[]) => {
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
+              testAssertsInsideCallback(() => {
+                expect(createEntries.length).toEqual(0);
+                expect(updateEntries.length).toEqual(1);
+                expect(deleteEntries.length).toEqual(0);
+
+                const updateEntry = updateEntries[0];
+
+                expect(updateEntry.note.fname).toEqual("foo");
+                expect(updateEntry.note.body).toEqual(
+                  testNoteProps.body + textToAppend
+                );
+                disposable.dispose();
+              }, done);
+            }
+          );
+
+          ExtensionProvider.getWSUtils()
+            .openNote(testNoteProps)
+            .then((editor) => {
+              editor.edit((editBuilder) => {
+                const line = editor.document.getText().split("\n").length;
+                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+              });
+              editor.document.save();
+            });
         });
       }
     );

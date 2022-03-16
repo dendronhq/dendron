@@ -12,7 +12,7 @@ import {
   isOSType,
   KeybindingConflict,
   KNOWN_KEYBINDING_CONFLICTS,
-  KWOWN_CONFLICTING_EXTENSIONS,
+  KNOWN_CONFLICTING_EXTENSIONS,
 } from "./constants";
 import { VSCodeUtils } from "./vsCodeUtils";
 import * as vscode from "vscode";
@@ -35,7 +35,7 @@ export class KeybindingUtils {
   }
 
   static getConflictingKeybindings() {
-    const installStatus = KWOWN_CONFLICTING_EXTENSIONS.map((extId) => {
+    const installStatus = KNOWN_CONFLICTING_EXTENSIONS.map((extId) => {
       return {
         id: extId,
         installed: VSCodeUtils.isExtensionInstalled(extId),

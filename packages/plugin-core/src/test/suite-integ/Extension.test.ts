@@ -34,7 +34,7 @@ import {
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { KeybindingUtils } from "../../KeybindingUtils";
+// import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ConfigMigrationUtils } from "../../utils/ConfigMigration";

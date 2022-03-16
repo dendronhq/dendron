@@ -1017,7 +1017,7 @@ export type KeybindingConflict = {
   /**
    * extension id of the extension that has keybinding conflict
    */
-  extensionId: typeof KWOWN_CONFLICTING_EXTENSIONS[number];
+  extensionId: typeof KNOWN_CONFLICTING_EXTENSIONS[number];
   /**
    * command id of the command contributed by `extensionId` that conflicts
    */
@@ -1033,7 +1033,7 @@ export type KeybindingConflict = {
   os?: osType[];
 };
 
-export const KWOWN_CONFLICTING_EXTENSIONS = ["vscodevim.vim"] as const;
+export const KNOWN_CONFLICTING_EXTENSIONS = ["vscodevim.vim"] as const;
 
 /**
  * List of known keybinding conflicts

@@ -25,7 +25,11 @@ import {
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
-import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
+import {
+  INCOMPATIBLE_EXTENSIONS,
+  DENDRON_COMMANDS,
+  KNOWN_KEYBINDING_CONFLICTS,
+} from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -360,7 +364,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case PluginDoctorActionsEnum.FIX_KEYBINDING_CONFLICTS: {
-        const conflicts = KeybindingUtils.getConflictingKeybindings();
+        const conflicts = KeybindingUtils.getConflictingKeybindings({
+          knownConflicts: KNOWN_KEYBINDING_CONFLICTS,
+        });
         if (conflicts.length > 0) {
           await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
         } else {

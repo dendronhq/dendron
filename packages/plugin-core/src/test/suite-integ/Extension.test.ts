@@ -17,10 +17,10 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import * as mocha from "mocha";
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { afterEach, beforeEach, describe, it, after } from "mocha";
 import path from "path";
 import semver from "semver";
-import sinon, { SinonStub } from "sinon";
+import sinon, { SinonStub, SinonSpy } from "sinon";
 import * as vscode from "vscode";
 import { ExtensionContext, window } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
@@ -34,7 +34,7 @@ import {
   WORKSPACE_ACTIVATION_CONTEXT,
 } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
-// import { KeybindingUtils } from "../../KeybindingUtils";
+import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
@@ -56,6 +56,7 @@ import {
 } from "../testUtilsv2";
 import {
   describeMultiWS,
+  describeSingleWS,
   runLegacySingleWorkspaceTest,
   runTestButSkipForWindows,
   setupBeforeAfter,
@@ -762,71 +763,68 @@ suite("GIVEN a native workspace", function () {
   });
 });
 
-// suite("keybindings", function () {
-//   let homeDirStub: SinonStub;
-//   let userConfigDirStub: SinonStub;
+suite("keybindings", function () {
+  let promptSpy: SinonSpy;
+  describeMultiWS(
+    "GIVEN initial install",
+    {
+      beforeHook: async ({ ctx }) => {
+        ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
+      },
+      noSetInstallStatus: true,
+    },
+    () => {
+      let installStatusStub: SinonStub;
+      beforeEach(() => {
+        installStatusStub = sinon
+          .stub(KeybindingUtils, "getInstallStatus")
+          .returns([{ id: "dummyExt", installed: true }]);
+      });
 
-//   setupBeforeAfter(this, {
-//     beforeHook: async (ctx) => {
-//       // eslint-disable-next-line no-new
-//       new StateService(ctx);
-//       await resetCodeWorkspace();
-//       await new ResetConfigCommand().execute({ scope: "all" });
-//       homeDirStub = TestEngineUtils.mockHomeDir();
-//       userConfigDirStub = mockUserConfigDir();
-//     },
-//     afterHook: async () => {
-//       homeDirStub.restore();
-//       userConfigDirStub.restore();
-//     },
-//     noSetInstallStatus: true,
-//   });
+      afterEach(() => {
+        installStatusStub.restore();
+      });
 
-//   describe("keyboard shortcut conflict resolution", () => {
-//     test("vim extension expandLineSelection override", (done) => {
-//       const { keybindingConfigPath } =
-//         KeybindingUtils.getKeybindingConfigPath();
-//       fs.ensureFileSync(keybindingConfigPath);
-//       const config = `// This is my awesome Dendron Keybinding
-//       [
-//         { // look up note to the side
-//           "key": "ctrl+k l",
-//           "command": "dendron.lookupNote",
-//           "args": {
-//             "splitType": "horizontal"
-//           }
-//         }
-//       ]`;
-//       fs.writeFileSync(keybindingConfigPath, config);
-//       const resp = KeybindingUtils.getKeybindingConfig({
-//         createIfMissing: false,
-//       });
-//       const existingConfig = resp.data!;
-//       const beforeAllSymbol = Object.getOwnPropertySymbols(existingConfig)[0];
-//       const beforeKeySymbol = Object.getOwnPropertySymbols(
-//         existingConfig[0]
-//       )[0];
-//       const { newKeybindings } =
-//         KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists().data!;
-//       const override = newKeybindings[1];
-//       expect(_.isArray(newKeybindings)).toBeTruthy();
-//       // override config exists after migration
-//       expect(override).toEqual({
-//         key: `ctrl+l`,
-//         command: "-extension.vim_navigateCtrlL",
-//       });
+      after(() => {
+        promptSpy.restore();
+      });
 
-//       // existing comments are preserved
-//       expect(Object.getOwnPropertySymbols(newKeybindings)[0]).toEqual(
-//         beforeAllSymbol
-//       );
-//       expect(Object.getOwnPropertySymbols(newKeybindings[0])[0]).toEqual(
-//         beforeKeySymbol
-//       );
-//       done();
-//     });
-//   });
-// });
+      test("THEN maybePromptKeybindingConflict is called", async () => {
+        expect(promptSpy.called).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN not initial install",
+    {
+      beforeHook: async () => {
+        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
+      },
+    },
+    () => {
+      let installStatusStub: SinonStub;
+      beforeEach(() => {
+        installStatusStub = sinon
+          .stub(KeybindingUtils, "getInstallStatus")
+          .returns([{ id: "dummyExt", installed: true }]);
+      });
+
+      afterEach(() => {
+        installStatusStub.restore();
+      });
+
+      after(() => {
+        promptSpy.restore();
+      });
+
+      test("THEN maybePromptKeybindingConflict is not called", async () => {
+        expect(promptSpy.called).toBeFalsy();
+      });
+    }
+  );
+});
 
 suite(
   "temporary testing of Dendron version compatibility downgrade sequence",

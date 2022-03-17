@@ -53,19 +53,25 @@ export class KeybindingUtils {
     return globalKeybindingJSON;
   }
 
-  static getConflictingKeybindings() {
-    const installStatus = KNOWN_CONFLICTING_EXTENSIONS.map((extId) => {
+  static getInstallStatus() {
+    return KNOWN_CONFLICTING_EXTENSIONS.map((extId) => {
       return {
         id: extId,
         installed: VSCodeUtils.isExtensionInstalled(extId),
       };
     });
+  }
 
+  static getConflictingKeybindings(opts: {
+    knownConflicts: KeybindingConflict[];
+  }) {
+    const { knownConflicts } = opts;
+    const installStatus = KeybindingUtils.getInstallStatus();
     const installed = installStatus
       .filter((status) => status.installed)
       .map((status) => status.id);
 
-    const conflicts = KNOWN_KEYBINDING_CONFLICTS.filter((conflict) => {
+    const conflicts = knownConflicts.filter((conflict) => {
       const isInstalled = installed.includes(conflict.extensionId);
       const osType = os.type();
       const conflictOSType = conflict.os || ["Darwin", "Linux", "Windows_NT"];
@@ -282,7 +288,9 @@ export class KeybindingUtils {
   }
 
   static async maybePromptKeybindingConflict() {
-    const conflicts = KeybindingUtils.getConflictingKeybindings();
+    const conflicts = KeybindingUtils.getConflictingKeybindings({
+      knownConflicts: KNOWN_KEYBINDING_CONFLICTS,
+    });
     if (conflicts.length > 0) {
       await KeybindingUtils.showKeybindingConflictConfirmationMessage({
         conflicts,

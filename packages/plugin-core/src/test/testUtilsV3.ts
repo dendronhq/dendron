@@ -489,6 +489,7 @@ export function describeMultiWS(
      * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
      */
     timeout?: number;
+    noSetInstallStatus?: boolean;
   },
   fn: () => void
 ) {

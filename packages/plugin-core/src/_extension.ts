@@ -738,6 +738,7 @@ export async function _activate(
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      // if keybinding conflict is detected, let the users know and guide them how to resolve  ^rikhd9cc0rwb
       await KeybindingUtils.maybePromptKeybindingConflict();
     }
 

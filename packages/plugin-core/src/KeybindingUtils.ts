@@ -167,7 +167,7 @@ export class KeybindingUtils {
     const contents = [
       "# Known Keybinding Conflicts",
       "",
-      "The keybindings listed below are known to have conflicts with default keybindings for Dendron commands.",
+      "The keybindings listed at the bottom are known to have conflicts with default keybindings for Dendron commands.",
       "",
       "Neither Dendron nor the extension may function properly if the keybinding conflict is not resolved.",
       "",

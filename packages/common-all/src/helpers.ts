@@ -18,3 +18,13 @@ export async function asyncLoopOneAtATime<T>(
   }
   return;
 }
+
+/**
+ * Loop through iterable in parallel
+ * @param things
+ * @param cb
+ * @returns
+ */
+export async function asyncLoop<T>(things: T[], cb: (t: T) => Promise<any>) {
+  return Promise.all(things.map((t) => cb(t)));
+}

@@ -2,8 +2,9 @@ import {
   ConfigUtils,
   DEngineClient,
   DVaultVisibility,
+  NoteUtils,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { note2File, tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
@@ -266,6 +267,67 @@ describe("backlinks", () => {
             wsRoot,
             body: "[[one]]",
           });
+        },
+      }
+    );
+  });
+
+  test("backlink to an invalid note doesn't cause a crash", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults }) => {
+        const vault = vaults[0];
+        const resp = await MDUtilsV4.procRehype({
+          proc: proc(engine, {
+            fname: "one",
+            vault,
+            dest,
+            config: engine.config,
+          }),
+        }).process("");
+
+        // The more important aspect of the verification is that the process()
+        // call doesn't crash.
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: [
+              `<a href="duplicateOne">duplicateTwo (vault2)</a>`,
+              `<a href="duplicateTwo">duplicateTwo (vault2)</a>`,
+            ],
+          })
+        ).toBeTruthy();
+      },
+      {
+        expect,
+        preSetupHook: async (opts: any) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "one",
+            vault: vaults[0],
+            wsRoot,
+            body: "one",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "duplicateOne",
+            vault: vaults[1],
+            wsRoot,
+            body: "[[one]]",
+          });
+
+          // Create a note with the same ID as the previous note to create an
+          // invalid engine state, and add links to the target note from both
+          // notes with the same ID:
+          const note = NoteUtils.create({
+            created: 1,
+            updated: 1,
+            id: "duplicateOne",
+            fname: "duplicateTwo",
+            vault: vaults[1],
+            body: "[[one]]",
+          });
+          await note2File({ note, vault: vaults[1], wsRoot });
         },
       }
     );

@@ -3,6 +3,108 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.86.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.86.1) (2022-03-15)
+
+
+
+# 0.86.0 (2022-03-15)
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+### Bug Fixes
+
+* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
+
+
+### Features Dendron
+
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
+# 0.86.0 (2022-03-15)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+
+
+
+
 # 0.85.0 (2022-03-08)
 
 **Note:** Version bump only for package @dendronhq/api-server

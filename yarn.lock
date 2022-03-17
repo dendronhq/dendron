@@ -5481,10 +5481,10 @@
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"
 
-"@types/js-yaml@^3.12.5":
-  version "3.12.7"
-  resolved "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-3.12.7.tgz#330c5d97a3500e9c903210d6e49f02964af04a0e"
-  integrity sha512-S6+8JAYTE1qdsc9HMVsfY7+SgSuUU/Tp6TYTmITW0PZxiyIMvol3Gy//y69Wkhs0ti4py5qgR3uZH6uz/DNzJQ==
+"@types/js-yaml@^4.0.5":
+  version "4.0.5"
+  resolved "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.5.tgz#738dd390a6ecc5442f35e7f03fa1431353f7e138"
+  integrity sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
 
 "@types/json-schema@*", "@types/json-schema@^7.0.3", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.7", "@types/json-schema@^7.0.8":
   version "7.0.9"
@@ -5871,10 +5871,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/title@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.npmjs.org/@types/title/-/title-1.0.5.tgz#7ac1649180e8ac3352ee08507c42d873ee441921"
-  integrity sha1-esFkkYDorDNS7ghQfELYc+5EGSE=
+"@types/title@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.npmjs.org/@types/title/-/title-3.4.1.tgz#583cd7561291eac4ade4bef0d589d23c27bf71e7"
+  integrity sha512-GAt+5DJl84n7Qz+/weJteapG8j2csP/5NOg8H4dnaTxuqsK6AcZ4hPYsvvjAjcEVv5l9dfK8rz4pOfpgjlrNqg==
 
 "@types/tmp@^0.2.0":
   version "0.2.3"
@@ -5923,11 +5923,6 @@
     "@types/webpack-sources" "*"
     anymatch "^3.0.0"
     source-map "^0.6.0"
-
-"@types/yamljs@^0.2.31":
-  version "0.2.31"
-  resolved "https://registry.npmjs.org/@types/yamljs/-/yamljs-0.2.31.tgz#b1a620b115c96db7b3bfdf0cf54aee0c57139245"
-  integrity sha512-QcJ5ZczaXAqbVD3o8mw/mEBhRvO5UAdTtbvgwL/OgoWubvNBh6/MxLBAigtcgIFaq3shon9m3POIxQaLQt4fxQ==
 
 "@types/yargs-parser@*":
   version "20.2.1"
@@ -15907,14 +15902,14 @@ js-yaml@3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-js-yaml@4.1.0:
+js-yaml@4.1.0, js-yaml@^4.1.0:
   version "4.1.0"
   resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
   integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
   dependencies:
     argparse "^2.0.1"
 
-js-yaml@^3.13.1, js-yaml@^3.14.0, js-yaml@^3.6.1:
+js-yaml@^3.13.1, js-yaml@^3.6.1:
   version "3.14.1"
   resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
   integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
@@ -26584,14 +26579,6 @@ yaml@^1.10.0, yaml@^1.10.2, yaml@^1.7.2:
   version "1.10.2"
   resolved "https://registry.npmjs.org/yaml/-/yaml-1.10.2.tgz#2301c5ffbf12b467de8da2333a459e29e7920e4b"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
-
-yamljs@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/yamljs/-/yamljs-0.3.0.tgz#dc060bf267447b39f7304e9b2bfbe8b5a7ddb03b"
-  integrity sha512-C/FsVVhht4iPQYXOInoxUM/1ELSf9EsgKH34FofQOp6hwCPrW4vG4w5++TED3xRUo8gD7l0P1J1dLlDYzODsTQ==
-  dependencies:
-    argparse "^1.0.7"
-    glob "^7.0.5"
 
 yargs-parser@13.1.2, yargs-parser@^13.1.2:
   version "13.1.2"

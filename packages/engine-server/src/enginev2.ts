@@ -92,6 +92,7 @@ type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 type CachedPreview = {
   data: string;
   updated: number;
+  contentHash?: string;
 };
 
 function createRenderedCache(
@@ -194,7 +195,7 @@ export class DendronEngineV2 implements DEngine {
 
   async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return {
-      data: await AnchorUtils.findAnchors({
+      data: AnchorUtils.findAnchors({
         note: opts.note,
       }),
       error: null,
@@ -597,6 +598,7 @@ export class DendronEngineV2 implements DEngine {
 
     this.renderedCache.set(id, {
       updated: note.updated,
+      contentHash: note.contentHash,
       data,
     });
 
@@ -619,9 +621,10 @@ export class DendronEngineV2 implements DEngine {
     // the note itself, hence before going through the trouble of checking whether linked
     // reference notes have been updated we should do the super cheap check to see
     // whether the note itself has invalidated the preview.
-    if (note.updated > cachedPreview.updated) {
+    if (note.contentHash !== cachedPreview.contentHash) {
       return false;
     }
+    // TODO: Add another check to see if backlinks have changed
 
     return (
       cachedPreview.updated >=

@@ -66,7 +66,7 @@ export class WindowWatcher {
   }
 
   private onDidChangeActiveTextEditor = sentryReportingCallback(
-    (editor: TextEditor | undefined) => {
+    async (editor: TextEditor | undefined) => {
       const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
       if (
         editor &&
@@ -99,7 +99,7 @@ export class WindowWatcher {
             ?.automaticallyShowPreview
         ) {
           if (!this._preview.isOpen()) {
-            this._preview.show();
+            await this._preview.show();
           }
         }
       } else {

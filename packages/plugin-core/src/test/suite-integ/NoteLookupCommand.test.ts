@@ -613,6 +613,18 @@ suite("NoteLookupCommand", function () {
         );
       });
     });
+
+    describe(`WHEN user look up a note (without using a space) where the query doesn't match the note's case`, () => {
+      test("THEN lookup result must cantain all matching values irrespective of case", (done) => {
+        runLookupInHierarchyTestWorkspace(
+          "bar.CH1",
+          (out) => {
+            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1");
+          },
+          done
+        );
+      });
+    });
   });
 
   describe("onAccept", () => {
@@ -669,6 +681,24 @@ suite("NoteLookupCommand", function () {
           );
           expect(note?.fname).toEqual("learn.mdone.test");
           expect(note?.title).toEqual("Test");
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN user lookup a note where the query doesn't match the note's case in multi-vault setup ",
+      {
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+      },
+      () => {
+        test("THEN result must include note irresepective of casing", async () => {
+          const cmd = new NoteLookupCommand();
+          const opts = (await cmd.run({
+            noConfirm: true,
+            initialValue: "FOOCH1",
+          }))!;
+          expectQuickPick(opts.quickpick).toIncludeFname("foo.ch1");
         });
       }
     );

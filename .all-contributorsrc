@@ -1545,6 +1545,24 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "dagriefaa",
+      "name": "Raymond K",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39538526?v=4",
+      "profile": "https://gitlab.com/dagriefaa",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "jhoan2",
+      "name": "John Hoang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/67968051?v=4",
+      "profile": "https://github.com/jhoan2",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1,10 +1,12 @@
 import {
   ConfigUtils,
   DEngineClient,
+  Disposable,
   DVault,
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
+  NoteChangeEntry,
   VaultRemoteSource,
   WorkspaceFolderRaw,
   WorkspaceOpts,
@@ -26,6 +28,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
+  DendronEngineClient,
   DendronEngineV2,
   HistoryService,
   WorkspaceUtils,
@@ -59,6 +62,7 @@ import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
+import { ExtensionProvider } from "../ExtensionProvider";
 import {
   cleanupVSCodeContextSubscriptions,
   setupCodeConfiguration,
@@ -531,10 +535,21 @@ export function describeMultiWS(
  */
 export function describeSingleWS(
   title: string,
-  opts: SetupLegacyWorkspaceOpts,
+  opts: SetupLegacyWorkspaceOpts & {
+    /**
+     * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
+     */
+    timeout?: number;
+  },
   fn: () => void
 ) {
-  describe(title, () => {
+  describe(title, function () {
+    if (opts.timeout) {
+      this.timeout(opts.timeout);
+    }
     let ctx: ExtensionContext;
     before(async () => {
       ctx = opts.ctx ?? setupWorkspaceStubs(opts);
@@ -601,4 +616,19 @@ function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
   HistoryService.instance().clearSubscriptions();
   cleanupVSCodeContextSubscriptions(ctx);
   sinon.restore();
+}
+
+/**
+ * Use this to test engine state changes through engine events. This can be used in
+ * situations where the engine state changes asynchorously from test logic (such as from vscode event callbacks)
+ *
+ * @param callback to handle engine state events
+ * @returns Disposable
+ */
+export function subscribeToEngineStateChange(
+  callback: (noteChangeEntries: NoteChangeEntry[]) => void
+): Disposable {
+  const engine = ExtensionProvider.getEngine();
+  const engineClient = engine as unknown as DendronEngineClient;
+  return engineClient.onEngineNoteStateChanged(callback);
 }

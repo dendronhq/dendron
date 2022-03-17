@@ -4,12 +4,12 @@ export class OrderedMatcher {
 
   constructor(tokens: string[]) {
     // https://regex101.com/r/eMTNJ0/1
-    this.regexPattern = tokens.join(".*");
+    this.regexPattern = tokens.join(".*").toLowerCase();
   }
 
   /** Checks whether the given strings matches all the tokens in order. */
   isMatch(str: string) {
-    const isMatch = str.match(this.regexPattern);
+    const isMatch = str.toLowerCase().match(this.regexPattern);
     return isMatch;
   }
 }

@@ -23,7 +23,7 @@ commands:
     randomNote: {}
     copyNoteLink: {}
 workspace:
-    dendronVersion: 0.82.0
+    dendronVersion: 0.83.0
     vaults:
         -
             fsPath: dependencies/localhost/vault3

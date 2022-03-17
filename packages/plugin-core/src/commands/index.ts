@@ -70,6 +70,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { OpenBackupCommand } from "./OpenBackupCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -147,6 +148,7 @@ const ALL_COMMANDS = [
   CreateTaskCommand,
   RegisterNoteTraitCommand,
   CreateNoteWithUserDefinedTrait,
+  OpenBackupCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

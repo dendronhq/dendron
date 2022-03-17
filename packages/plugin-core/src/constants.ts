@@ -756,6 +756,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.launchTutorial",
     title: `${CMD_PREFIX} Launch Tutorial`,
   },
+  OPEN_BACKUP: {
+    key: "dendron.openBackup",
+    title: `${CMD_PREFIX} Open Backup`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

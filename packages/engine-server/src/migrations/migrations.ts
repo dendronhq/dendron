@@ -10,7 +10,6 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import fs from "fs-extra";
 import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
@@ -23,20 +22,18 @@ export const CONFIG_MIGRATIONS: Migrations = {
     {
       name: "migrate config",
       func: async ({ dendronConfig, wsConfig, wsService }) => {
-        const backupPath = DConfig.createBackup(
-          wsService.wsRoot,
-          "migrate-configs"
-        );
-        if (!fs.existsSync(backupPath)) {
+        try {
+          await DConfig.createBackup(wsService.wsRoot, "migrate-configs");
+        } catch (error) {
           return {
-            error: new DendronError({
-              message:
-                "Backup failed during config migration. Exiting without migration.",
-            }),
             data: {
               dendronConfig,
               wsConfig,
             },
+            error: new DendronError({
+              message:
+                "Backup failed during config migration. Exiting without migration.",
+            }),
           };
         }
 

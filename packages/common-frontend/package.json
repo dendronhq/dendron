@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-frontend",
-  "version": "0.85.0",
+  "version": "0.86.1",
   "description": "common-frontend",
   "license": "GPLv3",
   "repository": {
@@ -39,12 +39,8 @@
   },
   "dependencies": {
     "@aws-amplify/core": "^4.0.2",
-    "@dendronhq/common-all": "^0.85.0",
+    "@dendronhq/common-all": "^0.86.1",
     "@reduxjs/toolkit": "^1.5.1",
-    "@types/lodash": "^4.14.161",
-    "@types/node": "^14.11.2",
-    "@types/react": "^17.0.5",
-    "@types/redux-logger": "^3.0.9",
     "antd": "^4.15.4",
     "lodash": "^4.17.20",
     "querystring": "^0.2.1",
@@ -52,6 +48,12 @@
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.3",
     "redux-logger": "^3.0.6"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.161",
+    "@types/node": "^14.11.2",
+    "@types/react": "^17.0.5",
+    "@types/redux-logger": "^3.0.9"
   },
   "nohoist": [
     "**/common-all",

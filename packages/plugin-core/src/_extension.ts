@@ -526,7 +526,7 @@ export async function _activate(
       } else {
         // no migration changes.
         // see if we need to force a config migration.
-        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-config-migration]]
+        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
         ConfigMigrationUtils.maybePromptConfigMigration({
           dendronConfig,
           wsService,
@@ -833,7 +833,7 @@ export async function _activate(
         note &&
         ws.workspaceService?.config.preview?.automaticallyShowPreview
       ) {
-        PreviewPanelFactory.create(getExtension()).show(note);
+        await PreviewPanelFactory.create(getExtension()).show(note);
       }
 
       return true;
@@ -1320,6 +1320,7 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 function updateEngineAPI(port: number | string): EngineAPIService {
   const ext = getExtension();
 
+  // set engine api ^9dr6chh7ah9v
   const svc = EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,

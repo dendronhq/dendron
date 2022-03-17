@@ -40,6 +40,7 @@ import {
   SchemaRaw,
 } from "./types";
 import {
+  ConfigUtils,
   DefaultMap,
   getSlugger,
   isNotUndefined,
@@ -726,9 +727,7 @@ export class NoteUtils {
     // check if title is unchanged from default. if so, add default title
     if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
-      // type definitions are wrong
-      // @ts-ignore
-      return title(fname) as string;
+      return title(fname);
     }
     // if user customized title, return the title as user specified
     return titleFromBasename;
@@ -1099,6 +1098,77 @@ export class NoteUtils {
     return { ...noteRaw, ...hydrateProps };
   }
 
+  /**
+   * Update note metadata (eg. links and anchors)
+   */
+  static async updateNoteMetadata({
+    note,
+    fmChangeOnly,
+    engine,
+    enableLinkCandidates,
+  }: {
+    note: NoteProps;
+    fmChangeOnly: boolean;
+    engine: DEngineClient;
+    enableLinkCandidates?: boolean;
+  }) {
+    // Avoid calculating links/anchors if the note is too long
+    if (
+      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
+    ) {
+      return note;
+    }
+    // Links have to be updated even with frontmatter only changes
+    // because `tags` in frontmatter adds new links
+    const links = await engine.getLinks({ note, type: "regular" });
+    if (!links.data) {
+      throw new DendronError({
+        message: "Unable to calculate the backlinks in note",
+        payload: {
+          note: NoteUtils.toLogObj(note),
+          error: links.error,
+        },
+      });
+    }
+    note.links = links.data;
+
+    // if only frontmatter changed, don't bother with heavy updates
+    if (!fmChangeOnly) {
+      const anchors = await engine.getAnchors({
+        note,
+      });
+      if (!anchors.data) {
+        throw new DendronError({
+          message: "Unable to calculate backlinks in note",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            error: anchors.error,
+          },
+        });
+      }
+      note.anchors = anchors.data;
+
+      if (enableLinkCandidates) {
+        const linkCandidates = await engine.getLinks({
+          note,
+          type: "candidate",
+        });
+        if (!linkCandidates.data) {
+          throw new DendronError({
+            message: "Unable to calculate the backlink candidates in note",
+            payload: {
+              note: NoteUtils.toLogObj(note),
+              error: linkCandidates.error,
+            },
+          });
+        }
+        note.links = note.links.concat(linkCandidates.data);
+      }
+    }
+
+    return note;
+  }
+
   static match({ notePath, pattern }: { notePath: string; pattern: string }) {
     return minimatch(notePath, pattern);
   }
@@ -1141,7 +1211,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeExplicitProps(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps): Partial<NoteProps> {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1180,6 +1250,10 @@ export class NoteUtils {
       blacklist.push("stub");
     }
     const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
+    // Make sure title and ID are always strings
+    meta.title = _.toString(meta.title);
+    meta.id = _.toString(meta.id);
+
     return matter.stringify(body || "", meta);
   }
 

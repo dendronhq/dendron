@@ -32,6 +32,10 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
+import {
+  SyncActionResult,
+  SyncActionStatus,
+} from "./workspaceServiceInterface";
 
 export class WorkspaceUtils {
   static isWorkspaceConfig(val: any): val is WorkspaceSettings {
@@ -316,5 +320,41 @@ export class WorkspaceUtils {
       }
     }
     return link;
+  }
+
+  /**
+   * @param results
+   * @returns number of repos that has Sync Action Status done.
+   */
+  static getCountForStatusDone(results: SyncActionResult[]): number {
+    return this.count(results, SyncActionStatus.DONE);
+  }
+
+  static count(results: SyncActionResult[], status: SyncActionStatus) {
+    return results.filter((result) => result.status === status).length;
+  }
+
+  /**
+   *
+   * @param results
+   * @param status
+   * @returns name of all the repos with status same as @param status.
+   */
+  static getFilteredRepoNames(
+    results: SyncActionResult[],
+    status: SyncActionStatus
+  ): string[] {
+    const matchingResults = results.filter(
+      (result) => result.status === status
+    );
+    if (matchingResults.length === 0) return [];
+    return matchingResults.map((result) => {
+      // Display the vault names for info/error messages
+      if (result.vaults.length === 1) {
+        return VaultUtils.getName(result.vaults[0]);
+      }
+      // But if there's more than one vault in the repo, then use the repo path which is easier to interpret
+      return result.repo;
+    });
   }
 }

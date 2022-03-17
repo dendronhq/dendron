@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.85.0",
+  "version": "0.86.1",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -37,14 +37,6 @@
     "test:watch": "echo 0"
   },
   "dependencies": {
-    "@types/github-slugger": "^1.3.0",
-    "@types/lodash": "^4.14.152",
-    "@types/luxon": "^1.25.0",
-    "@types/minimatch": "^3.0.3",
-    "@types/node": "13.11.0",
-    "@types/semver": "^7.3.4",
-    "@types/title": "^1.0.5",
-    "@types/unist": "^2.0.3",
     "axios": "^0.21.4",
     "dropbox": "^4.0.30",
     "fast-levenshtein": "^3.0.0",
@@ -65,6 +57,14 @@
   "devDependencies": {
     "@types/fast-levenshtein": "^0.0.2",
     "@types/nanoid-dictionary": "^4.2.0",
+    "@types/github-slugger": "^1.3.0",
+    "@types/lodash": "^4.14.152",
+    "@types/luxon": "^1.25.0",
+    "@types/minimatch": "^3.0.3",
+    "@types/node": "13.11.0",
+    "@types/semver": "^7.3.4",
+    "@types/title": "^3.4.1",
+    "@types/unist": "^2.0.3",
     "coveralls": "^3.0.2",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",

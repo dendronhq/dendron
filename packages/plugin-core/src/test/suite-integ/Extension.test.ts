@@ -56,7 +56,6 @@ import {
 } from "../testUtilsv2";
 import {
   describeMultiWS,
-  describeSingleWS,
   runLegacySingleWorkspaceTest,
   runTestButSkipForWindows,
   setupBeforeAfter,

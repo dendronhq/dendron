@@ -100,6 +100,10 @@
         "enableExportPodV2": {
           "type": "boolean",
           "description": "Enable export pod v2"
+        },
+        "enableSelfContainedVaults": {
+          "type": "boolean",
+          "description": "Sets self contained vaults as the default vault type. Dendron can read self-contained vaults even if this option is not enabled, but it will only create self contained vaults if this option is enabled."
         }
       },
       "additionalProperties": false
@@ -410,6 +414,10 @@
         "seed": {
           "type": "string",
           "description": "Id of a seed this vault belongs to"
+        },
+        "selfContained": {
+          "type": "boolean",
+          "description": "Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults."
         }
       },
       "required": [

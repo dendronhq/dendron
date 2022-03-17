@@ -70,6 +70,12 @@ export function readYAML(fpath: string): any {
   });
 }
 
+export async function readYAMLAsync(fpath: string): Promise<any> {
+  return YAML.load(await fs.readFile(fpath, { encoding: "utf8" }), {
+    schema: YAML.JSON_SCHEMA,
+  });
+}
+
 export function writeYAML(fpath: string, data: any) {
   const out = YAML.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);

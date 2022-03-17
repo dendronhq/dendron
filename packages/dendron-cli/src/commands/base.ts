@@ -114,7 +114,7 @@ export abstract class CLICommand<
     const { wsRoot } = opts;
 
     // we shouldn't use ConfigUtils.getProp for cases when `version` doesn't exist.
-    const configVersion = DConfig.getRaw(wsRoot).version;
+    const configVersion = (await DConfig.getRaw(wsRoot)).version;
     const clientVersion = CLIUtils.getClientVersion();
     let validationResp;
     try {

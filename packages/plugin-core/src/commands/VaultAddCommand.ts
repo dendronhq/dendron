@@ -1,13 +1,16 @@
 import {
+  CONSTANTS,
   DendronError,
   DVault,
   DWorkspace,
   FOLDERS,
+  SEED_REGISTRY,
   VaultRemoteSource,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { GitUtils, simpleGit } from "@dendronhq/common-server";
 import {
+  DConfig,
   Git,
   WorkspaceService,
   WorkspaceUtils,
@@ -15,7 +18,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
+import { commands, ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -259,6 +262,98 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { vaults, workspace };
   }
 
+  async cloneVault({
+    name,
+    remoteUrl,
+    localUrl,
+  }: {
+    name?: string;
+    localUrl: string;
+    remoteUrl: string;
+  }): Promise<DVault> {
+    await fs.ensureDir(localUrl);
+    const git = new Git({ localUrl, remoteUrl });
+    // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
+    await git.clone(".");
+    const vault: DVault = {
+      fsPath: localUrl,
+    };
+    if (name) vault.name = name;
+    // If it has a config file, it's a self contained vault. It also could be a
+    // workspace vault, but those are just self contained vaults without a notes
+    // folder.
+    if (await fs.pathExists(path.join(localUrl, CONSTANTS.DENDRON_CONFIG_FILE)))
+      vault.selfContained = true;
+    return vault;
+  }
+
+  // If `localUrl` points to the directory of a self contained vault (or a
+  // workspace vault), then get the dependencies for that self contained vault.
+  async getVaultDependencies({
+    wsRoot,
+    vault,
+  }: {
+    wsRoot: string;
+    vault: DVault;
+  }): Promise<DVault[]> {
+    const localUrl = path.join(wsRoot, vault.fsPath);
+    try {
+      const config = await DConfig.getRaw(localUrl);
+      return (config?.vaults ?? [])
+        .filter(
+          // Skip ...
+          (vault) =>
+            // ... the self entry of self-contained vaults
+            vault.fsPath !== "." &&
+            // ... vaults inside seeds, because the seed itself is a vault now
+            vault.seed === undefined &&
+            // ... vaults inside workspaces, because the workspace itself is a vault now
+            vault.workspace === undefined
+        )
+        .concat(
+          // Convert workspaces to self contained vault entries
+          Object.entries(config?.workspaces ?? {})?.map(
+            ([workspaceName, workspace]): DVault => {
+              return {
+                fsPath: path.join(wsRoot, workspaceName),
+                name: workspaceName,
+                remote: workspace?.remote,
+                selfContained: true,
+              };
+            }
+          ),
+          // Convert seeds to self contained vault entries
+          Object.entries(config?.seeds ?? {})?.map(
+            ([seedName, seed]): DVault => {
+              const seedRegistry = SEED_REGISTRY[seedName];
+              const vault: DVault = {
+                fsPath: path.join(wsRoot, "seeds", seedName),
+                name: seedName,
+                selfContained: true,
+              };
+              if (seedRegistry?.repository) {
+                vault.remote = {
+                  type: seedRegistry?.repository.type,
+                  url: seedRegistry?.repository.url,
+                };
+              }
+              if (seed?.site) {
+                vault.publish = {
+                  index: seed.site.index,
+                  url: seed.site.url,
+                };
+              }
+              return vault;
+            }
+          )
+        );
+    } catch (error: any) {
+      // If the config doesn't exist, ignore the error
+      if (error?.code !== "ENOENT") throw error;
+    }
+    return [];
+  }
+
   async handleRemoteRepoSelfContained(
     opts: CommandOpts
   ): Promise<{ vaults: DVault[] }> {
@@ -275,61 +370,34 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           increment: 0,
         });
         const { name, pathRemote: remoteUrl } = opts;
-        const localUrl = path.join(wsRoot, opts.path);
         if (!remoteUrl) {
           throw new DendronError({
             message:
               "Remote vault has no remote set. This should never happen, please send a bug report if you encounter this.",
           });
         }
-
-        await fs.ensureDir(localUrl);
-        const git = new Git({ localUrl, remoteUrl });
-        // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
-        await git.clone(".");
-        const { vaults, workspace } = await GitUtils.getVaultsFromRepo({
-          repoPath: localUrl,
-          wsRoot,
-          repoUrl: remoteUrl,
-        });
-        if (_.size(vaults) === 1 && name) {
-          vaults[0].name = name;
-        }
-        // add all vaults
-        const increment = 100 / (vaults.length + 1);
-        progress.report({
-          message:
-            vaults.length === 1
-              ? "adding vault"
-              : `adding ${vaults.length} vaults`,
-          increment,
-        });
+        const localUrl = path.join(wsRoot, opts.path);
+        const vault = await this.cloneVault({ remoteUrl, localUrl, name });
         const wsService = new WorkspaceService({ wsRoot });
+        const vaults = [vault];
 
-        if (workspace) {
-          // TODO: To be implemented for backwards compatibility until workspace vaults are phased out
-          throw new DendronError({
-            message:
-              "Adding a workspace vault while self contained vaults is enabled is not yet supported. Please disable self contained vaults temporarily to add this vault.",
-          });
-        } else {
-          // Some things, like updating config, can't be parallelized so needs to be done one at a time
-          for (const vault of vaults) {
-            if (VaultUtils.isSelfContained(vault)) {
-              // eslint-disable-next-line no-await-in-loop
-              await wsService.createSelfContainedVault({
-                vault,
-                addToConfig: true,
-              });
-            } else {
-              // eslint-disable-next-line no-await-in-loop
-              await wsService.createVault({ vault });
-            }
+        const dependencies = await this.getVaultDependencies({ vault, wsRoot });
+        for (const vault of dependencies) {
+          if (VaultUtils.isSelfContained(vault)) {
             // eslint-disable-next-line no-await-in-loop
-            await this.addVaultToWorkspace(vault);
-            progress.report({ increment });
+            await wsService.createSelfContainedVault({
+              vault,
+              addToConfig: true,
+              addToCodeWorkspace: false,
+            });
+          } else {
+            // eslint-disable-next-line no-await-in-loop
+            await wsService.createVault({ vault });
           }
+          // eslint-disable-next-line no-await-in-loop
+          await this.addVaultToWorkspace(vault);
         }
+
         wsService.dispose();
         return { vaults, workspace };
       }

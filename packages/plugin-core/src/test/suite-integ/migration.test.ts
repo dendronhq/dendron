@@ -292,7 +292,7 @@ suite("Migration", function () {
           ).toEqual(LegacyLookupSelectionType.selection2link);
 
           // // we explicitly deleted it. don't use ConfigUtils.
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = await DConfig.getRaw(wsRoot);
           const lookup = rawConfig.commands?.lookup;
           expect(_.isUndefined(lookup)).toBeTruthy();
           await MigrationService.applyMigrationRules({
@@ -341,7 +341,7 @@ suite("Migration", function () {
           ).toBeTruthy();
 
           // testing for explicitly deleted key.
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = await DConfig.getRaw(wsRoot);
           const lookup = rawConfig.commands?.lookup;
           expect(_.isUndefined(lookup)).toBeTruthy();
           await MigrationService.applyMigrationRules({
@@ -403,9 +403,9 @@ suite("Migration", function () {
           test("command config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-            const dendronConfig = DConfig.getRaw(
+            const dendronConfig = (await DConfig.getRaw(
               wsRoot
-            ) as IntermediateDendronConfig;
+            )) as IntermediateDendronConfig;
             const wsConfig =
               await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
@@ -588,9 +588,9 @@ suite("Migration", function () {
           test("workspace config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-            const dendronConfig = DConfig.getRaw(
+            const dendronConfig = (await DConfig.getRaw(
               wsRoot
-            ) as IntermediateDendronConfig;
+            )) as IntermediateDendronConfig;
             const wsConfig =
               await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
@@ -756,9 +756,9 @@ suite("Migration", function () {
           test("preview config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-            const dendronConfig = DConfig.getRaw(
+            const dendronConfig = (await DConfig.getRaw(
               wsRoot
-            ) as IntermediateDendronConfig;
+            )) as IntermediateDendronConfig;
             const wsConfig =
               await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });
@@ -944,9 +944,9 @@ suite("Migration", function () {
           test("publishing config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-            const dendronConfig = DConfig.getRaw(
+            const dendronConfig = (await DConfig.getRaw(
               wsRoot
-            ) as IntermediateDendronConfig;
+            )) as IntermediateDendronConfig;
             const wsConfig =
               await ExtensionProvider.getExtension().getWorkspaceSettings();
             const wsService = new WorkspaceService({ wsRoot });

@@ -14,7 +14,12 @@ import {
   StrictConfigV5,
   DeepPartial,
 } from "@dendronhq/common-all";
-import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
+import {
+  readYAML,
+  readYAMLAsync,
+  writeYAML,
+  writeYAMLAsync,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -29,9 +34,11 @@ export class DConfig {
    * Get without filling in defaults
    * @param wsRoot
    */
-  static getRaw(wsRoot: string) {
+  static async getRaw(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
+    const config = (await readYAMLAsync(
+      configPath
+    )) as Partial<IntermediateDendronConfig>;
     return config;
   }
 

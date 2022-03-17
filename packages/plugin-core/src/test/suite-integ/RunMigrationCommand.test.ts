@@ -1,9 +1,5 @@
 import _ from "lodash";
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  WorkspaceType,
-} from "@dendronhq/common-all";
+import { ConfigUtils, WorkspaceType } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
 import { CONFIG } from "../../constants";

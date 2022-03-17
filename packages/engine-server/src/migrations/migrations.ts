@@ -38,7 +38,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
         }
 
         const defaultV5Config = ConfigUtils.genDefaultConfig();
-        const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
+        const rawDendronConfig = await DConfig.getRaw(wsService.wsRoot);
 
         // remove all null properties
         const cleanDendronConfig = MigrationUtils.deepCleanObjBy(

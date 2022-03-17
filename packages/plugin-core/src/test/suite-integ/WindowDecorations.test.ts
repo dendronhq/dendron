@@ -444,7 +444,7 @@ suite("GIVEN a text document with decorations", function () {
     );
   });
 
-  describe("AND for long notesd", () => {
+  describe("AND for long notes", () => {
     const FNAME = "test.note";
     const repeat = 228;
     describeMultiWS(
@@ -460,7 +460,7 @@ suite("GIVEN a text document with decorations", function () {
         },
       },
       () => {
-        test("THEN only the visible range should be decorate", async () => {
+        test("THEN only the visible range should be decorated", async () => {
           const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
 
@@ -614,7 +614,7 @@ suite("GIVEN a text document with decorations", function () {
       }
     );
 
-    describeMultiWS("AND frontmatter is not visibl", {}, () => {
+    describeMultiWS("AND frontmatter is not visible", {}, () => {
       before(async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const note = await NoteTestUtilsV4.createNoteWithEngine({

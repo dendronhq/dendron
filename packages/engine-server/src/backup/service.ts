@@ -21,6 +21,7 @@ export type BackupServiceOpts = {
 
 /**
  * Predefined keys to be used for backups
+ * Loop over values when extracting keys
  * ^6ao9nojre6ai
  */
 export enum BackupKeyEnum {

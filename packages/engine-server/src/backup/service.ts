@@ -1,4 +1,5 @@
 import {
+  asyncLoop,
   DendronError,
   Disposable,
   ERROR_STATUS,
@@ -10,8 +11,8 @@ import {
   DLogger,
   GitUtils,
 } from "@dendronhq/common-server";
-import path from "path";
 import fs from "fs-extra";
+import path from "path";
 import { IBackupService } from "./backupServiceInterface";
 
 export type BackupServiceOpts = {
@@ -20,6 +21,7 @@ export type BackupServiceOpts = {
 
 /**
  * Predefined keys to be used for backups
+ * Loop over values when extracting keys
  * ^6ao9nojre6ai
  */
 export enum BackupKeyEnum {
@@ -68,8 +70,8 @@ export class BackupService implements Disposable, IBackupService {
       root: this.wsRoot,
     });
     await fs.ensureDir(this.backupRoot);
-    Object.keys(BackupKeyEnum).forEach(async (key) => {
-      await fs.ensureDir(path.join(this.backupRoot, key));
+    await asyncLoop<string>(Object.values(BackupKeyEnum), (key) => {
+      return fs.ensureDir(path.join(this.backupRoot, key));
     });
   }
 

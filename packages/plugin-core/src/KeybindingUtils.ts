@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
 import {
   CommentJSONValue,
   readJSONWithCommentsSync,
@@ -30,8 +30,27 @@ export class KeybindingUtils {
     if (opts.close) {
       await VSCodeUtils.closeCurrentFileEditor();
     }
-    const defaultKeybindingJSON = parse(defaultKeybindingText!);
+    const defaultKeybindingJSON = defaultKeybindingText
+      ? (parse(defaultKeybindingText) as CommentJSONArray<Keybindings>)
+      : undefined;
+
     return defaultKeybindingJSON;
+  }
+
+  static async openGlobalKeybindingFileAndGetJSON(opts: { close?: boolean }) {
+    await vscode.commands.executeCommand(
+      "workbench.action.openGlobalKeybindingsFile"
+    );
+    const editor = VSCodeUtils.getActiveTextEditor();
+    const globalKeybindingText = editor?.document.getText();
+    if (opts.close) {
+      await VSCodeUtils.closeCurrentFileEditor();
+    }
+    const globalKeybindingJSON = globalKeybindingText
+      ? (parse(globalKeybindingText) as CommentJSONArray<Keybindings>)
+      : undefined;
+
+    return globalKeybindingJSON;
   }
 
   static getConflictingKeybindings() {
@@ -131,10 +150,20 @@ export class KeybindingUtils {
     const md = _md();
     const { conflicts } = opts;
     const defaultKeybindingJSON =
-      (await KeybindingUtils.openDefaultKeybindingFileAndGetJSON({
+      await KeybindingUtils.openDefaultKeybindingFileAndGetJSON({
         close: false,
-      })) as CommentJSONArray<Keybindings>;
+      });
+    if (defaultKeybindingJSON === undefined) {
+      throw new DendronError({
+        message: "Failed reading default keybinding.",
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
+    await KeybindingUtils.openGlobalKeybindingFileAndGetJSON({
+      close: false,
+    });
     const keybindingJSONCommandUri = `command:workbench.action.openGlobalKeybindingsFile`;
+    const defaultKeybindingJSONCommandUri = `command:workbench.action.openDefaultKeybindingsFile`;
     const contents = [
       "# Known Keybinding Conflicts",
       "",
@@ -147,20 +176,22 @@ export class KeybindingUtils {
       "#### 1. Disable conflicting keybindings",
       "If you don't use the listed keybinding, consider disabling it.",
       "",
-      `1. Open [keybinding.json](${keybindingJSONCommandUri})`,
-      `1. Click on the link "Disable Conflicting Keybinding" in each conflicting keybinding listed below. This will copy the necessary keybinding entry to your clipboard.`,
-      `1. Paste the clipboard content to \`keybinding.json\``,
+      `1. Click on the link \`Disable\` next to each conflicting keybinding listed below.`,
+      `    - This will copy the necessary keybinding entry to your clipboard.`,
+      `1. Open [keybindings.json](${keybindingJSONCommandUri})`,
+      `1. Paste the clipboard content to \`keybindings.json\``,
       "",
       "#### 2. Remap conflicting keybindings",
       "If you need to preserve the keybinding that is conflicting, consider remapping either of the conflicting keybindings.",
-      `1. Open [keybinding.json](${keybindingJSONCommandUri})`,
-      `1. Click on the link "Remap Dendron Keybinding" or "Remap Conflicting Keybinding" in each conflicting keybinding listed below. This will copy the necessary keybinding entry to your clipboard.`,
-      `1. Paste the clipboard content to \`keybinding.json\``,
+      `1. Click on the link \`Remap\` next to each conflicting keybinding listed below.`,
+      `    - This will copy the necessary keybinding entry to your clipboard.`,
+      `1. Open [keybindings.json](${keybindingJSONCommandUri})`,
+      `1. Paste the clipboard content to \`keybindings.json\``,
       `1. Set the value of "key" to the desired key combination.`,
       "",
       "For more information on how to set keyboard rules in VSCode, visit [Keyboard Rules](https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-rules)",
       "",
-      "The exhaustive list of default keybindings is opened in the `Default Keybindings` tab for reference.",
+      `Use [Default Keybindings](${defaultKeybindingJSONCommandUri}) to reference all default keybindings.`,
       "",
       "***",
       "## List of Keybinding Conflicts",
@@ -208,20 +239,14 @@ export class KeybindingUtils {
           const out = [
             `### \`${conflict.commandId}\``,
             `- key: \`${conflictKeybindingEntry.key}\``,
-            `- from: \`${conflict.extensionId}\``,
-            `- conflicts with: \`${conflict.conflictsWith}\``,
-            "",
-            `[Disable ${conflict.commandId}](${copyCommandUri({
+            `- command: \`${conflict.commandId}\` [Disable](${copyCommandUri({
               text: disableBlock,
-            })})`,
+            })}) / [Remap](${copyCommandUri({ text: remapConflictBlock })})`,
+            `- from: \`${conflict.extensionId}\``,
+            `- conflicts with: \`${
+              conflict.conflictsWith
+            }\` [Remap](${copyCommandUri({ text: remapDendronBlock })})`,
             "",
-            `[Remap ${conflict.commandId}](${copyCommandUri({
-              text: remapConflictBlock,
-            })})`,
-            "",
-            `[Remap ${conflict.conflictsWith}](${copyCommandUri({
-              text: remapDendronBlock,
-            })})`,
           ].join("\n");
 
           return out;
@@ -233,7 +258,7 @@ export class KeybindingUtils {
     const panel = vscode.window.createWebviewPanel(
       "keybindingConflictPreview",
       "Keybinding Conflicts",
-      vscode.ViewColumn.One,
+      vscode.ViewColumn.Beside,
       {
         enableCommandUris: true,
       }

@@ -13,7 +13,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { LookupNoteTypeEnum } from "./components/lookup/types";
+import { LookupNoteTypeEnum } from "./components/lookup/ButtonTypes";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import { _noteAddBehaviorEnum } from "./constants";
 import { ExtensionProvider } from "./ExtensionProvider";

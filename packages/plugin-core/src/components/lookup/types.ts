@@ -8,11 +8,6 @@ import {
 import { QuickPick, TextEditor, Uri } from "vscode";
 import { DendronBtn } from "./ButtonTypes";
 
-export type LookupControllerState = {
-  buttons: DendronBtn[];
-  buttonsPrev: DendronBtn[];
-};
-
 export type FilterQuickPickFunction = (
   items: NoteQuickInput[]
 ) => NoteQuickInput[];
@@ -123,40 +118,6 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    */
   showNote?: (uri: Uri) => Promise<TextEditor>;
 };
-
-export type LookupFilterType = "directChildOnly";
-
-export enum LookupNoteTypeEnum {
-  "journal" = "journal",
-  "scratch" = "scratch",
-  "task" = "task",
-}
-export type LookupNoteType = LookupNoteTypeEnum;
-
-export enum LookupEffectTypeEnum {
-  "copyNoteLink" = "copyNoteLink",
-  "copyNoteRef" = "copyNoteRef",
-  "multiSelect" = "multiSelect",
-}
-export enum LookupSelectionTypeEnum {
-  "selection2link" = "selection2link",
-  "selectionExtract" = "selectionExtract",
-  "selection2Items" = "selection2Items",
-  "none" = "none",
-}
-export type LookupSelectionType =
-  | "selection2link"
-  | "selectionExtract"
-  | "selection2Items"
-  | "none";
-
-export enum LookupSplitTypeEnum {
-  "horizontal" = "horizontal",
-}
-export type LookupSplitType = "horizontal";
-
-export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
-export type LookupNoteExistBehavior = "open" | "overwrite";
 
 export enum VaultSelectionMode {
   /**

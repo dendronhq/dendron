@@ -1,5 +1,5 @@
 import { ConfigUtils } from "@dendronhq/common-all";
-import { LookupNoteTypeEnum } from "../components/lookup/types";
+import { LookupNoteTypeEnum } from "../components/lookup/ButtonTypes";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { getDWorkspace } from "../workspace";

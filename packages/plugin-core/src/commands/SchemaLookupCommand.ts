@@ -221,7 +221,7 @@ export class SchemaLookupCommand extends BaseCommand<
   }
 
   async acceptNewSchemaItem(): Promise<OnDidAcceptReturn | undefined> {
-    const picker = this.controller.quickpick;
+    const picker = this.controller.quickPick;
     const fname = picker.value;
     const ws = ExtensionProvider.getDWorkspace();
     const { engine } = ws;
@@ -265,7 +265,16 @@ export class SchemaLookupCommand extends BaseCommand<
       );
     } finally {
       opts.controller.onHide();
+      // if (this._controller) {
+      //   this._controller.onHide();
+      // }
     }
     return opts;
+  }
+
+  cleanUp() {
+    if (this._controller) {
+      this._controller.onHide();
+    }
   }
 }

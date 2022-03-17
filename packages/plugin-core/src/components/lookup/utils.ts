@@ -1,7 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import {
   DendronError,
-  DendronTreeViewKey,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
@@ -22,18 +21,17 @@ import path from "path";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
-import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getButtonCategory } from "./buttons";
 import { DendronBtn } from "./ButtonTypes";
 import {
   CREATE_NEW_DETAIL_LIST,
-  CREATE_NEW_NOTE_DETAIL,
   CREATE_NEW_LABEL,
+  CREATE_NEW_NOTE_DETAIL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { OnAcceptHook } from "./LookupProviderV3Interface";
 import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
+import { OnAcceptHook } from "./LookupProviderV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -259,17 +257,6 @@ export class PickerUtilsV2 {
       ...opts,
       label: opts.fname,
     };
-  }
-
-  static dumpPicker(picker: DendronQuickPickerV2) {
-    const activeItems = picker.activeItems.map((ent) =>
-      NoteUtils.toLogObj(ent)
-    );
-    const selectedItems = picker.selectedItems.map((ent) =>
-      NoteUtils.toLogObj(ent)
-    );
-    const value = picker.value;
-    return { activeItems, selectedItems, value };
   }
 
   static getValue(picker: DendronQuickPickerV2) {
@@ -651,35 +638,6 @@ export class PickerUtilsV2 {
   }) {
     opts.buttonsPrev = opts.quickpick.buttons.map((b: DendronBtn) => b.clone());
     opts.quickpick.buttons = opts.buttons;
-  }
-
-  /**
-   * Toggle all button enablement effects
-   * @param opts
-   */
-  static async refreshPickerBehavior(opts: {
-    quickpick: DendronQuickPickerV2;
-    buttons: DendronBtn[];
-  }) {
-    const buttonsEnabled = _.filter(opts.buttons, { pressed: true });
-    const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
-    // call onDisable first so that
-    // they don't modify state of the quickpick after onEnable.
-    await Promise.all(
-      buttonsDisabled.map((bt) => {
-        return bt.onDisable({ quickPick: opts.quickpick });
-      })
-    );
-    await Promise.all(
-      buttonsEnabled.map((bt) => {
-        return bt.onEnable({ quickPick: opts.quickpick });
-      })
-    );
-
-    const lookupView = ExtensionProvider.getTreeView(
-      DendronTreeViewKey.LOOKUP_VIEW
-    ) as LookupView;
-    lookupView.refresh({ buttons: opts.quickpick.buttons });
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

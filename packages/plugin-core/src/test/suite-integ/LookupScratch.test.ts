@@ -10,7 +10,7 @@ import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
-} from "../../components/lookup/types";
+} from "../../components/lookup/ButtonTypes";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import {

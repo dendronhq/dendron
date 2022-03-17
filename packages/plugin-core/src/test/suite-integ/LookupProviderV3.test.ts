@@ -187,6 +187,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
 
       test("THEN quickpick is populated with normal query results.", async () => {
@@ -222,6 +224,8 @@ suite("selection2Items", () => {
           (item) => item.label
         );
         expect(expectedItemLabels.sort()).toEqual(actualItemLabels?.sort());
+
+        cmd.cleanUp();
       });
 
       test("THEN if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
@@ -247,6 +251,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
 
       test("THEN if selection contains links that point to same note, correctly dedupes them", async () => {
@@ -272,6 +278,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
     }
   );

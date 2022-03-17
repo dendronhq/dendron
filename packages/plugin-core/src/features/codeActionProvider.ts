@@ -23,7 +23,7 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { NoteLookupCommand } from "../commands/NoteLookupCommand";
 import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
-import { LookupSelectionTypeEnum } from "../components/lookup/types";
+import { LookupSelectionTypeEnum } from "../components/lookup/ButtonTypes";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";

@@ -76,8 +76,7 @@ const createEngine = createEngineFactory({
 });
 
 suite("MoveNoteCommand", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this);
+  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   _.map(
     _.omit(ENGINE_RENAME_PRESETS["NOTES"], [
@@ -843,8 +842,9 @@ suite("MoveNoteCommand", function () {
           provider: mockProvider,
           initialValue,
         });
-        expect(_.isEmpty(lc.quickpick.buttons)).toBeTruthy();
+        expect(_.isEmpty(lc.quickPick.buttons)).toBeTruthy();
 
+        lc.onHide();
         done();
       },
     });
@@ -882,8 +882,9 @@ suite("MoveNoteCommand", function () {
           provider: mockProvider,
           initialValue,
         });
-        expect(lc.quickpick.buttons[0].pressed).toBeTruthy();
+        expect(lc.quickPick.buttons[0].pressed).toBeTruthy();
 
+        lc.onHide();
         done();
       },
     });

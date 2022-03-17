@@ -1,9 +1,8 @@
-import { DendronBtn } from "./ButtonTypes";
-import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { ILookupProviderV3 } from "./LookupProviderV3Interface";
-import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DNodeType } from "@dendronhq/common-all";
-import { LookupView } from "../../views/LookupView";
+import { CancellationTokenSource } from "vscode";
+import { DendronBtn } from "./ButtonTypes";
+import { ILookupProviderV3 } from "./LookupProviderV3Interface";
+import { DendronQuickPickerV2 } from "./types";
 
 export type CreateQuickPickOpts = {
   title?: string;
@@ -40,19 +39,15 @@ export type ShowQuickPickOpts = {
 };
 
 export interface ILookupControllerV3 {
-  readonly quickpick: DendronQuickPickerV2;
+  readonly quickPick: DendronQuickPickerV2;
 
   fuzzThreshold: number;
-
-  state: LookupControllerState;
 
   readonly cancelToken: CancellationTokenSource;
 
   nodeType: DNodeType;
 
   readonly provider: ILookupProviderV3;
-
-  readonly view: LookupView | undefined;
 
   /**
    * Wire up quickpick and initialize buttons
@@ -81,7 +76,7 @@ export interface ILookupControllerV3 {
 
   createCancelSource(): CancellationTokenSource;
 
-  onTriggerButton(btn: QuickInputButton): Promise<void>;
+  isJournalButtonPressed(): boolean;
 }
 
 export interface ILookupControllerV3Factory {

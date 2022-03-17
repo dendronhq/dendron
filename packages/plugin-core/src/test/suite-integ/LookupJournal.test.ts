@@ -8,13 +8,13 @@ import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { LookupNoteTypeEnum } from "../../components/lookup/types";
+import { LookupNoteTypeEnum } from "../../components/lookup/ButtonTypes";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("Scratch Notes", function () {
+suite("Journal Notes", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {});
 
   describe("multi", () => {

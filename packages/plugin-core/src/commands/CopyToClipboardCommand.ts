@@ -3,10 +3,15 @@ import { DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
 import { BasicCommand } from "./base";
 
-type CopyToClipboardCommandOpts = {
+export type CopyToClipboardCommandOpts = {
   text: string;
+  source: CopyToClipboardSourceEnum;
   message?: string;
 };
+
+export enum CopyToClipboardSourceEnum {
+  keybindingConflictPreview = "keybindingConflictPreview",
+}
 
 /**
  * This command is not accessible through the VSCode UI,

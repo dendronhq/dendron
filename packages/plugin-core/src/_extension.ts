@@ -30,6 +30,7 @@ import {
 import {
   FileAddWatcher,
   HistoryService,
+  InactvieUserMsgStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
@@ -981,7 +982,7 @@ export function shouldDisplayInactiveUserSurvey(): boolean {
   const metaData = MetadataService.instance().getMeta();
 
   const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;
-  if (inactiveSurveyMsgStatus === "submitted") {
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.submitted) {
     return false;
   }
 
@@ -1034,7 +1035,7 @@ export function shouldDisplayInactiveUserSurvey(): boolean {
     CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
 
   // if they have cancelled last time, we should be waiting another four weeks.
-  if (inactiveSurveyMsgStatus === "cancelled") {
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.cancelled) {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
       CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS &&

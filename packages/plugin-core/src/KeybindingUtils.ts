@@ -18,6 +18,10 @@ import { VSCodeUtils } from "./vsCodeUtils";
 import * as vscode from "vscode";
 import os from "os";
 import path from "path";
+import {
+  CopyToClipboardCommandOpts,
+  CopyToClipboardSourceEnum,
+} from "./commands/CopyToClipboardCommand";
 
 type Keybindings = Record<string, string>;
 export class KeybindingUtils {
@@ -80,7 +84,7 @@ export class KeybindingUtils {
       return isInstalled && matchesOS;
     });
 
-    // for each of the found conflicts, see if the user has them remapped / disabled  in keybinding.json
+    // for each of the found conflicts, see if the user has them disabled in keybinding.json
     const { keybindingConfigPath } = this.getKeybindingConfigPath();
     const userKeybindingConfigExists = fs.existsSync(keybindingConfigPath);
 
@@ -96,30 +100,17 @@ export class KeybindingUtils {
     const alreadyResolved: KeybindingConflict[] = [];
 
     userKeybindingConfig.forEach((keybinding) => {
-      // find remap / disable of conflicting keybindings
-      let command = keybinding.command;
-      if (command.startsWith("-")) {
-        command = command.substring(1);
-      }
-
-      const resolvedConflict = conflicts.find(
-        (conflict) => conflict.commandId === command
-      );
-      if (resolvedConflict) {
-        alreadyResolved.push(resolvedConflict);
-      }
-
-      // find remap / disable of dendron keybindings
-      command = keybinding.command;
-      if (command.startsWith("-")) {
-        command = command.substring(1);
-      }
-      const resolvedDendronConflict = conflicts.find(
-        (conflict) => conflict.conflictsWith === command
-      );
-
-      if (resolvedDendronConflict) {
-        alreadyResolved.push(resolvedDendronConflict);
+      // we only recognize disabling of the conflicting keybinding as resolution
+      // remapping of either the conflicting / dendron command's keybinding
+      // or disabling the dendron command's keybinding is not considered a resolution.
+      if (keybinding.command.startsWith("-")) {
+        const command = keybinding.command.substring(1);
+        const resolvedConflict = conflicts.find(
+          (conflict) => conflict.commandId === command
+        );
+        if (resolvedConflict) {
+          alreadyResolved.push(resolvedConflict);
+        }
       }
     });
 
@@ -178,23 +169,14 @@ export class KeybindingUtils {
       "",
       "Neither Dendron nor the extension may function properly if the keybinding conflict is not resolved.",
       "",
-      "Consider resolving the keybinding conflicts throught the following methods:",
+      "Consider resolving the keybinding conflicts throught the following method:",
       "",
-      "#### 1. Disable conflicting keybindings",
-      "If you don't use the listed keybinding, consider disabling it.",
+      "#### Disable conflicting keybindings",
       "",
-      `1. Click on the link \`Disable\` next to each conflicting keybinding listed below.`,
+      `1. Click on the link \`Copy JSON to disable this keybinding\` next to each conflicting keybinding listed below.`,
       `    - This will copy the necessary keybinding entry to your clipboard.`,
       `1. Open [keybindings.json](${keybindingJSONCommandUri})`,
       `1. Paste the clipboard content to \`keybindings.json\``,
-      "",
-      "#### 2. Remap conflicting keybindings",
-      "If you need to preserve the keybinding that is conflicting, consider remapping either of the conflicting keybindings.",
-      `1. Click on the link \`Remap\` next to each conflicting keybinding listed below.`,
-      `    - This will copy the necessary keybinding entry to your clipboard.`,
-      `1. Open [keybindings.json](${keybindingJSONCommandUri})`,
-      `1. Paste the clipboard content to \`keybindings.json\``,
-      `1. Set the value of "key" to the desired key combination.`,
       "",
       "For more information on how to set keyboard rules in VSCode, visit [Keyboard Rules](https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-rules)",
       "",
@@ -226,33 +208,24 @@ export class KeybindingUtils {
             disable: true,
           });
 
-          const remapDendronBlock =
-            KeybindingUtils.generateKeybindingBlockForCopy({
-              entry: dendronKeybindingEntry,
-              disable: false,
-            });
-
-          const remapConflictBlock =
-            KeybindingUtils.generateKeybindingBlockForCopy({
-              entry: conflictKeybindingEntry,
-              disable: false,
-            });
-
-          const copyCommandUri = (args: { text: string }) =>
+          const copyCommandUri = (args: CopyToClipboardCommandOpts) =>
             `command:dendron.copyToClipboard?${encodeURIComponent(
               JSON.stringify(args)
             )}`;
 
           const out = [
-            `### \`${conflict.commandId}\``,
-            `- key: \`${conflictKeybindingEntry.key}\``,
-            `- command: \`${conflict.commandId}\` [Disable](${copyCommandUri({
+            `### \`${
+              conflict.commandId
+            }\` [Copy JSON to disable this keybinding](${copyCommandUri({
               text: disableBlock,
-            })}) / [Remap](${copyCommandUri({ text: remapConflictBlock })})`,
+              source: CopyToClipboardSourceEnum.keybindingConflictPreview,
+              message:
+                "Copied JSON to clipboard. Paste this into keybindings.json",
+            })})`,
+            `- key: \`${conflictKeybindingEntry.key}\``,
+            `- command: \`${conflict.commandId}\``,
             `- from: \`${conflict.extensionId}\``,
-            `- conflicts with: \`${
-              conflict.conflictsWith
-            }\` [Remap](${copyCommandUri({ text: remapDendronBlock })})`,
+            `- conflicts with: \`${conflict.conflictsWith}\``,
             "",
           ].join("\n");
 

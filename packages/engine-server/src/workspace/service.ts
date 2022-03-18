@@ -303,7 +303,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         if (opts.onUpdatingWorkspace) {
           await opts.onUpdatingWorkspace();
         }
-        writeJSONWithComments(wsPath, out);
+        await writeJSONWithComments(wsPath, out);
 
         if (opts.onUpdatedWorkspace) {
           await opts.onUpdatedWorkspace();

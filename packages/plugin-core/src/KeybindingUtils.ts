@@ -184,6 +184,8 @@ export class KeybindingUtils {
       `1. Open [keybindings.json](${keybindingJSONCommandUri})`,
       `1. Paste the clipboard content to \`keybindings.json\``,
       "",
+      `[Video Guide](https://www.loom.com/embed/82d3fbccd126446bac7a4d16027c07aa)`,
+      "",
       "For more information on how to set keyboard rules in VSCode, visit [Keyboard Rules](https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-rules)",
       "",
       `Use [Default Keybindings](${defaultKeybindingJSONCommandUri}) to reference all default keybindings.`,

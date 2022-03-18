@@ -15,7 +15,6 @@ import {
 import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
-import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 export type DendronWorkspaceSettings = Partial<{
@@ -57,7 +56,6 @@ export type DendronWorkspaceSettings = Partial<{
 export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;
-  workspaceWatcher?: WorkspaceWatcher;
   serverWatcher?: vscode.FileSystemWatcher;
   fileWatcher?: FileWatcher;
   type: WorkspaceType;

@@ -22,7 +22,6 @@ import {
   setupBeforeAfter,
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { getDWorkspace } from "../../workspace";
 import { Position } from "vscode";
 import * as _ from "lodash";
 import { WSUtils } from "../../WSUtils";
@@ -31,6 +30,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockPreviewProxy } from "../MockPreviewProxy";
+import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -49,12 +49,14 @@ const setupBasic = async (opts: WorkspaceOpts) => {
 };
 
 // eslint-disable-next-line camelcase
-const UNSAFE_getWorkspaceWatcherPropsForTesting = (ext: IDendronExtension) => {
-  return ext.workspaceWatcher!.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+const UNSAFE_getWorkspaceWatcherPropsForTesting = (
+  watcher: WorkspaceWatcher
+) => {
+  return watcher.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
 };
 
 const doesSchemaExist = (schemaId: string) => {
-  const { engine } = getDWorkspace();
+  const { engine } = ExtensionProvider.getDWorkspace();
 
   return _.values(engine.schemas).some((schObj) => {
     return !_.isUndefined(schObj.schemas[schemaId]);
@@ -74,7 +76,7 @@ runSuiteButSkipForWindows()(
       },
       () => {
         test("AND new schema is schema file saved THEN schema is updated in engine.", async () => {
-          const { engine } = getDWorkspace();
+          const { engine } = ExtensionProvider.getDWorkspace();
           const testNote = engine.notes["foo"];
           expect(testNote).toBeTruthy();
 
@@ -216,10 +218,21 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
   describe("GIVEN the user opening a file", () => {
     let ext: IDendronExtension;
+    let workspaceWatcher: WorkspaceWatcher;
 
     beforeEach(async () => {
       ext = ExtensionProvider.getExtension();
-      await ext.activateWatchers();
+
+      const windowWatcher = new WindowWatcher({
+        extension: ext,
+        previewProxy: PreviewPanelFactory.create(this),
+      });
+
+      workspaceWatcher = new WorkspaceWatcher({
+        schemaSyncService: this.schemaSyncService,
+        extension: ext,
+        windowWatcher,
+      });
     });
     afterEach(async () => {
       // imporant since we activate workspace watchers
@@ -238,7 +251,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
             vscode.Uri.file(notePath)
           );
           const { onFirstOpen } =
-            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+            UNSAFE_getWorkspaceWatcherPropsForTesting(workspaceWatcher);
           expect(await onFirstOpen(editor)).toBeFalsy();
         });
       }
@@ -256,7 +269,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
             vscode.Uri.file(notePath)
           );
           const { onFirstOpen } =
-            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+            UNSAFE_getWorkspaceWatcherPropsForTesting(workspaceWatcher);
           expect(await onFirstOpen(editor)).toBeFalsy();
         });
       }
@@ -282,7 +295,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
           const wsutils = new WSUtilsV2(ext);
           const editor = await wsutils.openNote(note);
           const { onFirstOpen } =
-            UNSAFE_getWorkspaceWatcherPropsForTesting(ext);
+            UNSAFE_getWorkspaceWatcherPropsForTesting(workspaceWatcher);
 
           const stubTimeout = sinon.stub(Wrap, "setTimeout");
           expect(await onFirstOpen(editor)).toBeTruthy();

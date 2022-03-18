@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
-import { BasicCommand } from "./base";
+import { InputArgCommand } from "./base";
 
 export type CopyToClipboardCommandOpts = {
   text: string;
@@ -31,11 +31,16 @@ export enum CopyToClipboardSourceEnum {
  * content = `[click this](${commandUri})`
  *
  */
-export class CopyToClipboardCommand extends BasicCommand<
+export class CopyToClipboardCommand extends InputArgCommand<
   CopyToClipboardCommandOpts,
   void
 > {
   key = DENDRON_COMMANDS.COPY_TO_CLIPBOARD.key;
+
+  addAnalyticsPayload(opts: CopyToClipboardCommandOpts) {
+    return { source: opts.source };
+  }
+
   async execute(opts: CopyToClipboardCommandOpts) {
     const ctx = "execute";
     this.L.info({ ctx, opts });

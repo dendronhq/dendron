@@ -40,10 +40,18 @@ export enum TutorialEvents {
   Tutorial_5_Show = "Tutorial_5_Show",
 }
 
+export enum KeybindingConflictDetectedSource {
+  activation = "activation",
+  doctor = "doctor",
+}
+
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
   IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
   IncompatibleExtensionsPreviewDisplayed = "Incompatible_Extensions_Preview_Displayed",
+  KeybindingConflictDetected = "Keybinding_Conflict_Detected",
+  ShowKeybindingConflictAccepted = "Show_Keybinding_Conflict_Accepted",
+  ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
 }
 
 export enum LookupEvents {

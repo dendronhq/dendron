@@ -300,6 +300,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  COPY_TO_CLIPBOARD: {
+    key: "dendron.copyToClipboard",
+    title: `${CMD_PREFIX} Copy To Clipboard`,
+    when: "false",
+  },
   DELETE_NODE: {
     key: "dendron.deleteNode",
     title: `${CMD_PREFIX} Delete Node`,
@@ -1000,4 +1005,51 @@ export const INCOMPATIBLE_EXTENSIONS = [
   "kortina.vscode-markdown-notes",
   "maxedmands.vscode-zettel-markdown-notes",
   "tchayen.markdown-links",
+];
+
+export type osType = "Linux" | "Darwin" | "Windows_NT";
+
+export function isOSType(str: string): str is osType {
+  return str === "Linux" || str === "Darwin" || str === "Windows_NT";
+}
+
+export type KeybindingConflict = {
+  /**
+   * extension id of the extension that has keybinding conflict
+   */
+  extensionId: string;
+  /**
+   * command id of the command contributed by `extensionId` that conflicts
+   */
+  commandId: string;
+  /**
+   * command id of Dendron command that conflicts with `commandId`
+   */
+  conflictsWith: string;
+  /**
+   * os in which this conflict exists. assume all platforms if undefined.
+   * this is the os type returned by {@link os.type}
+   */
+  os?: osType[];
+};
+
+export const KNOWN_CONFLICTING_EXTENSIONS = ["vscodevim.vim"];
+
+/**
+ * List of known keybinding conflicts
+ */
+export const KNOWN_KEYBINDING_CONFLICTS: KeybindingConflict[] = [
+  {
+    extensionId: "vscodevim.vim",
+    commandId: "extension.vim_navigateCtrlL",
+    conflictsWith: "dendron.lookupNote",
+    os: ["Linux", "Windows_NT"],
+  },
+  // This is left here so it could be tested in Darwin.
+  // This is not an actual conflict.
+  // {
+  //   extensionId: "vscodevim.vim",
+  //   commandId: "extension.vim_tab",
+  //   conflictsWith: "dendron.lookupNoteAutoComplete",
+  // },
 ];

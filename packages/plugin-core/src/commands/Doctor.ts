@@ -4,6 +4,7 @@ import {
   DVault,
   ExtensionEvents,
   isNotUndefined,
+  KeybindingConflictDetectedSource,
   NoteProps,
   NoteUtils,
   Position,
@@ -25,13 +26,18 @@ import {
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
-import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
+import {
+  INCOMPATIBLE_EXTENSIONS,
+  DENDRON_COMMANDS,
+  KNOWN_KEYBINDING_CONFLICTS,
+} from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { KeybindingUtils } from "../KeybindingUtils";
 
 const md = _md();
 type Finding = {
@@ -80,6 +86,7 @@ type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export enum PluginDoctorActionsEnum {
   FIND_INCOMPATIBLE_EXTENSIONS = "findIncompatibleExtensions",
+  FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
 }
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -355,6 +362,20 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             };
           });
         await this.showIncompatibleExtensionPreview({ installStatus });
+        break;
+      }
+      case PluginDoctorActionsEnum.FIX_KEYBINDING_CONFLICTS: {
+        const conflicts = KeybindingUtils.getConflictingKeybindings({
+          knownConflicts: KNOWN_KEYBINDING_CONFLICTS,
+        });
+        if (conflicts.length > 0) {
+          await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
+          AnalyticsUtils.track(ExtensionEvents.KeybindingConflictDetected, {
+            source: KeybindingConflictDetectedSource.doctor,
+          });
+        } else {
+          window.showInformationMessage(`There are no keybinding conflicts!`);
+        }
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {

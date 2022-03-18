@@ -30,6 +30,7 @@ export type DendronWorkspaceConfig = {
   enableAutoFoldFrontmatter: boolean;
   enableUserTags: boolean;
   enableHashTags: boolean;
+  enableFullHierarchyNoteTitle: boolean;
   // performance related
   maxPreviewsCached: number;
   maxNoteLength: number;
@@ -73,5 +74,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     enableEditorDecorations: true,
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
+    enableFullHierarchyNoteTitle: false,
   };
 }

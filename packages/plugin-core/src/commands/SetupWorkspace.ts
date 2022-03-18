@@ -192,15 +192,19 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
+    // This command can run before the extension is registered, especially during testing
+    const defaultSelfContained = ExtensionProvider.isRegistered()
+      ? ExtensionProvider.getWorkspaceConfig().get<boolean>(
+          DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+        )
+      : undefined;
     const {
       rootDirRaw: rootDir,
       skipOpenWs,
       workspaceType,
       selfContained,
     } = _.defaults(opts, {
-      selfContained: ExtensionProvider.getWorkspaceConfig().get<boolean>(
-        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
-      ),
+      selfContained: defaultSelfContained,
     });
     Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 

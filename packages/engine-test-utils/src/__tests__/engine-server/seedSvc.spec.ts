@@ -238,7 +238,6 @@ runTest("add", () => {
           },
           "seed.yml"
         );
-        debugger;
         await checkFile(
           {
             fpath: path.join(wsRoot, "dendron.yml"),

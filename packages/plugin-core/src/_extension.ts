@@ -343,7 +343,7 @@ async function startServerProcess(): Promise<{
     return { port: out.port };
   }
 
-  // start server is separate process
+  // start server is separate process ^pyiildtq4tdx
   const logPath = getDWorkspace().logUri.fsPath;
   const out = await ServerUtils.execServerNode({
     scriptPath: path.join(__dirname, "server.js"),

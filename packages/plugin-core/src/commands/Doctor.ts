@@ -4,6 +4,7 @@ import {
   DVault,
   ExtensionEvents,
   isNotUndefined,
+  KeybindingConflictDetectedSource,
   NoteProps,
   NoteUtils,
   Position,
@@ -369,6 +370,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         if (conflicts.length > 0) {
           await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
+          AnalyticsUtils.track(ExtensionEvents.KeybindingConflictDetected, {
+            source: KeybindingConflictDetectedSource.doctor,
+          });
         } else {
           window.showInformationMessage(`There are no keybinding conflicts!`);
         }

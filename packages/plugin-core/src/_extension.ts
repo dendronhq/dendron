@@ -30,6 +30,7 @@ import {
 import {
   FileAddWatcher,
   HistoryService,
+  InactvieUserMsgStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
@@ -937,8 +938,7 @@ async function showWelcomeOrWhatsNew({
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  // TODO: there is a bug in the current logic. disabling until we fix it
-  if (false) {
+  if (shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();
   }
 }
@@ -978,21 +978,29 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
     });
 }
 
-export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
-  const inactiveSurveySubmitted = await StateService.instance().getGlobalState(
-    GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
-  );
+export function shouldDisplayInactiveUserSurvey(): boolean {
+  const metaData = MetadataService.instance().getMeta();
 
-  // don't display if they have submitted before.
-  if (inactiveSurveySubmitted === "submitted") {
+  const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.submitted) {
     return false;
   }
 
+  // rare case where global state has been reset (or a reinstall) may cause issues with
+  // the prompt logic. ignore these cases and don't show the
+  if (
+    metaData.firstInstall !== undefined &&
+    metaData.firstLookupTime !== undefined
+  ) {
+    if (metaData.firstLookupTime - metaData.firstInstall < 0) {
+      return false;
+    }
+  }
+
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
+  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
   const currentTime = Time.now().toSeconds();
   const CUR_TIME = Duration.fromObject({ seconds: currentTime });
-  const metaData = MetadataService.instance().getMeta();
 
   const FIRST_INSTALL =
     metaData.firstInstall !== undefined
@@ -1020,17 +1028,17 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for a two weeks?
+  // was the user active on the first week but has been inactive for more than four weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
 
-  // if they have cancelled last time, we should be waiting another 2 weeks.
-  if (inactiveSurveySubmitted === "cancelled") {
+  // if they have cancelled last time, we should be waiting another four weeks.
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.cancelled) {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS &&
       isInactive;
     if (shouldSendAgain) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
@@ -1045,7 +1053,9 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     const shouldSend =
       metaData.dendronWorkspaceActivated !== undefined &&
       metaData.firstWsInitialize !== undefined &&
-      isInactive;
+      isInactive &&
+      // this is needed since we may have prompted them before we introduced this metadata
+      metaData.inactiveUserMsgSendTime === undefined;
     if (shouldSend) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
         reason: "initial_prompt",

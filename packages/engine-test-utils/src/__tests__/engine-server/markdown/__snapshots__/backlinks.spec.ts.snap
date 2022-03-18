@@ -18,7 +18,7 @@ VFile {
 
 exports[`backlinks basic 1`] = `
 VFile {
-  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+  "contents": "<h1 id=\\"beta\\">Beta</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -34,7 +34,7 @@ VFile {
 
 exports[`backlinks frontmatter tags multiple 1`] = `
 VFile {
-  "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
+  "contents": "<h1 id=\\"test\\">Test</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -50,7 +50,7 @@ VFile {
 
 exports[`backlinks frontmatter tags single 1`] = `
 VFile {
-  "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
+  "contents": "<h1 id=\\"test\\">Test</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -65,7 +65,7 @@ VFile {
 
 exports[`backlinks hashtag 1`] = `
 VFile {
-  "contents": "<h1 id=\\"test\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#test\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Test</h1>
+  "contents": "<h1 id=\\"test\\">Test</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -80,7 +80,7 @@ VFile {
 
 exports[`backlinks multiple links 1`] = `
 VFile {
-  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#one\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>One</h1>
+  "contents": "<h1 id=\\"one\\">One</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>

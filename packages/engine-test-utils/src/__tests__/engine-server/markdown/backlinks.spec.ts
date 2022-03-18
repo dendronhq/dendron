@@ -1,36 +1,15 @@
 import {
   ConfigUtils,
-  DEngineClient,
   DVaultVisibility,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { note2File, tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { MDUtilsV4, MDUtilsV5 } from "@dendronhq/engine-server";
+import { runEngineTestV5, TestConfigUtils } from "../../..";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
-import {
-  DendronASTData,
-  DendronASTDest,
-  DendronPubOpts,
-  MDUtilsV4,
-} from "@dendronhq/engine-server";
-import { TestConfigUtils, runEngineTestV5 } from "../../..";
-import _ from "lodash";
-
-// runs all the processes
-function proc(
-  engine: DEngineClient,
-  dendron: DendronASTData,
-  opts?: DendronPubOpts
-) {
-  return MDUtilsV4.procFull({
-    engine,
-    ...dendron,
-    publishOpts: opts,
-  });
-}
 
 describe("backlinks", () => {
-  const dest = DendronASTDest.HTML;
   let siteRootDir: string;
 
   beforeEach(() => {
@@ -41,13 +20,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "beta",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "beta",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();
@@ -142,13 +118,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "one",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();
@@ -207,13 +180,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "one",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
         }).process("");
         expect(
           await AssertUtils.assertInString({
@@ -276,13 +246,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "one",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
         }).process("");
 
         // The more important aspect of the verification is that the process()
@@ -290,10 +257,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [
-              `<a href="duplicateOne">duplicateTwo (vault2)</a>`,
-              `<a href="duplicateTwo">duplicateTwo (vault2)</a>`,
-            ],
+            match: [`<strong>Backlinks</strong>`],
           })
         ).toBeTruthy();
       },
@@ -338,13 +302,10 @@ describe("backlinks", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const vault = vaults[0];
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(engine, {
-              fname: "tags.test",
-              vault,
-              dest,
-              config: engine.config,
-            }),
+          const resp = await MDUtilsV5.procRehypeFull({
+            engine,
+            vault,
+            fname: "tags.test",
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -393,13 +354,10 @@ describe("backlinks", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const vault = vaults[0];
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(engine, {
-              fname: "tags.test",
-              vault,
-              dest,
-              config: engine.config,
-            }),
+          const resp = await MDUtilsV5.procRehypeFull({
+            engine,
+            vault,
+            fname: "tags.test",
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -426,6 +384,7 @@ describe("backlinks", () => {
                 tags: ["test", "other"],
               },
             });
+
             await NoteTestUtilsV4.createNote({
               fname: "two",
               vault,
@@ -455,18 +414,15 @@ describe("backlinks", () => {
       );
     });
   });
-
+  //
   test("hashtag", async () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "tags.test",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "tags.test",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();

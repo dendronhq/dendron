@@ -777,7 +777,10 @@ suite("keybindings", function () {
       let installStatusStub: SinonStub;
       beforeEach(() => {
         installStatusStub = sinon
-          .stub(KeybindingUtils, "getInstallStatus")
+          .stub(
+            KeybindingUtils,
+            "getInstallStatusForKnownConflictingExtensions"
+          )
           .returns([{ id: "dummyExt", installed: true }]);
       });
 
@@ -806,7 +809,10 @@ suite("keybindings", function () {
       let installStatusStub: SinonStub;
       beforeEach(() => {
         installStatusStub = sinon
-          .stub(KeybindingUtils, "getInstallStatus")
+          .stub(
+            KeybindingUtils,
+            "getInstallStatusForKnownConflictingExtensions"
+          )
           .returns([{ id: "dummyExt", installed: true }]);
       });
 

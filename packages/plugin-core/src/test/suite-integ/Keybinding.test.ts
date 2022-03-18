@@ -43,7 +43,10 @@ suite("KeybindingUtils", function () {
       beforeEach(() => {
         userConfigDirStub = mockUserConfigDir();
         installStatusStub = sinon
-          .stub(KeybindingUtils, "getInstallStatus")
+          .stub(
+            KeybindingUtils,
+            "getInstallStatusForKnownConflictingExtensions"
+          )
           .returns([{ id: "dummyExt", installed: true }]);
       });
 

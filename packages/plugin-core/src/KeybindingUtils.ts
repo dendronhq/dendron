@@ -53,7 +53,7 @@ export class KeybindingUtils {
     return globalKeybindingJSON;
   }
 
-  static getInstallStatus() {
+  static getInstallStatusForKnownConflictingExtensions() {
     return KNOWN_CONFLICTING_EXTENSIONS.map((extId) => {
       return {
         id: extId,
@@ -66,7 +66,8 @@ export class KeybindingUtils {
     knownConflicts: KeybindingConflict[];
   }) {
     const { knownConflicts } = opts;
-    const installStatus = KeybindingUtils.getInstallStatus();
+    const installStatus =
+      KeybindingUtils.getInstallStatusForKnownConflictingExtensions();
     const installed = installStatus
       .filter((status) => status.installed)
       .map((status) => status.id);

@@ -1,6 +1,5 @@
 import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
 import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -40,6 +39,7 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
+            AnalyticsUtils.track(TutorialEvents.ClickStart);
             // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
             const { filePath } =
               FileUtils.genFilePathWithSuffixThatDoesNotExist({

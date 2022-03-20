@@ -23,7 +23,7 @@ import path from "path";
 import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
-import { resolvePath, resolveTilde } from "./files";
+import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 
 /** Dendron should ignore any of these folders when watching or searching folders.

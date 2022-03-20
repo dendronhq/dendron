@@ -43,24 +43,12 @@ export function showWelcome(assetUri: vscode.Uri) {
             // Try to put into a Default '~/Dendron' folder first. Only prompt
             // if that path and the backup path already exist to lower
             // onboarding friction
-            let wsPath;
-            const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
-            const wsPathBackup = path.join(
-              resolveTilde("~"),
-              "Dendron-Tutorial"
-            );
-
-            if (!fs.pathExistsSync(wsPathPrimary)) {
-              wsPath = wsPathPrimary;
-            } else if (!fs.pathExistsSync(wsPathBackup)) {
-              wsPath = wsPathBackup;
-            } else {
-              wsPath = await VSCodeUtils.gatherFolderPath({
-                default: path.join(resolveTilde("~"), "Dendron"),
-                override: {
-                  title: "Path for new Dendron Code Workspace",
-                },
-              });
+            let wsPath = path.join(resolveTilde("~"), "Dendron");
+            let acc = 0;
+            while (fs.pathExistsSync(wsPath)) {
+              acc += 1;
+              wsPath = path.join(resolveTilde("~"), `Dendron-${acc}`);
+              // TODO: telemetry if acc > 99
             }
 
             // User didn't pick a path, abort

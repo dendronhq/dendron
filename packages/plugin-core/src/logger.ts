@@ -124,6 +124,7 @@ export class Logger {
     Logger.log(payload, "error");
 
     if (payload.error) {
+      // if we log an error, also report it to sentry ^sf0k4z8hnvjo
       Sentry.captureException(payload.error, {
         extra: {
           ctx: payload.ctx,

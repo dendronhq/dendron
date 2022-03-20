@@ -115,6 +115,12 @@ export enum NativeWorkspaceEvents {
   DetectedInNonDendronWS = "Native_Workspace_Detected_In_Non_Dendron_WS", // watcher has detected a Dendron workspace getting created inside a non-Dendron workspace
 }
 
+export enum AppNames {
+  CODE = "vscode",
+  CLI = "cli",
+  EXPRESS_SERVER = "express",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,

@@ -23,7 +23,7 @@ import path from "path";
 import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
-import { resolvePath } from "./files";
+import { resolvePath, resolveTilde } from "./files";
 import { SchemaParserV2 } from "./parser";
 
 /** Dendron should ignore any of these folders when watching or searching folders.
@@ -569,6 +569,26 @@ export async function findNonNoteFile(opts: {
 }
 
 class FileUtils {
+  /**
+   * Keep incrementing a numerical suffix until we find a path name that does not correspond to an existing file
+   * @param param0
+   */
+  static genFilePathWithSuffixThatDoesNotExist({
+    fpath,
+    sep = "-",
+  }: {
+    fpath: string;
+    sep?: string;
+  }) {
+    // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
+    let acc = 0;
+    let tryPath = fpath;
+    while (fs.pathExistsSync(tryPath)) {
+      acc += 1;
+      tryPath = [fpath, acc].join(sep);
+    }
+    return { filePath: tryPath, acc };
+  }
   /**
    * Check if a file starts with a prefix string
    * @param fpath: full path to the file

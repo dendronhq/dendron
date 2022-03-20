@@ -1,5 +1,5 @@
 import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
-import { readMD, resolveTilde } from "@dendronhq/common-server";
+import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -40,24 +40,14 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            // Try to put into a Default '~/Dendron' folder first. Only prompt
-            // if that path and the backup path already exist to lower
-            // onboarding friction
-            let wsPath = path.join(resolveTilde("~"), "Dendron");
-            let acc = 0;
-            while (fs.pathExistsSync(wsPath)) {
-              acc += 1;
-              wsPath = path.join(resolveTilde("~"), `Dendron-${acc}`);
-              // TODO: telemetry if acc > 99
-            }
-
-            // User didn't pick a path, abort
-            if (!wsPath) {
-              return;
-            }
+            // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
+            const { filePath } =
+              FileUtils.genFilePathWithSuffixThatDoesNotExist({
+                fpath: path.join(resolveTilde("~"), "Dendron"),
+              });
 
             await new SetupWorkspaceCommand().execute({
-              rootDirRaw: wsPath,
+              rootDirRaw: filePath,
               workspaceInitializer: new TutorialInitializer(),
               workspaceType: WorkspaceType.CODE,
             });

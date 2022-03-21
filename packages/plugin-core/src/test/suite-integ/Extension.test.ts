@@ -1194,7 +1194,7 @@ describe("shouldDisplayInactiveUserSurvey", () => {
   });
 });
 
-suite.only("missing default config detection", () => {
+suite("missing default config detection", () => {
   describeMultiWS(
     "GIVEN dendron.yml with missing default key",
     {

@@ -1,6 +1,6 @@
 import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { file2Note, tmpDir } from "@dendronhq/common-server";
-import { DoctorActionsEnum } from "@dendronhq/engine-server";
+import { DConfig, DoctorActionsEnum } from "@dendronhq/engine-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
 import path from "path";
@@ -804,6 +804,64 @@ describe("GIVEN fixRemoteVaults", () => {
           expect(vaultAfter?.remote).toBeFalsy();
         },
         { expect }
+      );
+    });
+  });
+});
+
+describe("GIVEN addMissingDefaultConfigs", () => {
+  const action = DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS;
+  describe("WHEN missing a default key", () => {
+    test("THEN adds missing default and create backup", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect(rawConfigBefore.workspace?.workspaceVaultSyncMode).toBeFalsy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out.resp.backupPath).toBeTruthy();
+          expect(fs.existsSync(out.resp.backupPath)).toBeTruthy();
+          const rawConfig = DConfig.getRaw(wsRoot);
+          const defaultConfig = ConfigUtils.genDefaultConfig();
+          expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(
+            defaultConfig.workspace.workspaceVaultSyncMode
+          );
+        },
+        {
+          expect,
+          modConfigCb: (config) => {
+            // @ts-ignore
+            delete config.workspace.workspaceVaultSyncMode;
+            return config;
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN not missing a default key", () => {
+    test("THEN doesn't add missing default", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect(
+            rawConfigBefore.workspace?.workspaceVaultSyncMode
+          ).toBeTruthy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out).toEqual({ exit: true });
+          const rawConfig = DConfig.getRaw(wsRoot);
+          expect(rawConfigBefore).toEqual(rawConfig);
+        },
+        {
+          expect,
+        }
       );
     });
   });

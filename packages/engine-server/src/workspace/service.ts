@@ -445,7 +445,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     });
     // Also add a gitignore, so files like `.dendron.port` are ignored if the
     // self contained vault is opened on its own
-    WorkspaceService.createGitIgnore(vaultPath);
+    await WorkspaceService.createGitIgnore(vaultPath);
 
     // Update the config and code-workspace for the current workspace
     if (addToConfig) {
@@ -938,7 +938,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         WorkspaceService.standardToSelfContainedVault
       );
       // Needs to be done one at a time, otherwise config updates are racy
-      asyncLoopOneAtATime(selfContainedVaults, (vault) => {
+      await asyncLoopOneAtATime(selfContainedVaults, (vault) => {
         return ws.createSelfContainedVault({
           vault,
           addToCodeWorkspace: false,
@@ -990,7 +990,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
-      writeJSONWithCommentsSync(wsPath, out);
+      await writeJSONWithComments(wsPath, out);
     }
     return;
   }

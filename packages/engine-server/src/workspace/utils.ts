@@ -164,7 +164,7 @@ export class WorkspaceUtils {
     settings: WorkspaceSettings;
     wsRoot: string;
   }) {
-    await writeJSONWithComments(
+    return writeJSONWithComments(
       path.join(wsRoot, "dendron.code-workspace"),
       settings
     );
@@ -384,7 +384,7 @@ export class WorkspaceUtils {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(wsSettings.folders);
       wsSettings = assignJSONWithComment({ folders }, wsSettings);
-      WorkspaceUtils.writeCodeWorkspaceSettings({
+      await WorkspaceUtils.writeCodeWorkspaceSettings({
         settings: wsSettings,
         wsRoot,
       });

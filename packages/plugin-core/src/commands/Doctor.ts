@@ -15,6 +15,7 @@ import {
   DoctorActionsEnum,
   BackfillService,
   RemarkUtils,
+  DConfig,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -514,9 +515,24 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         }
 
         if (out.resp) {
-          window.showInformationMessage(
-            `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`
-          );
+          const OPEN_CONFIG = "Open dendron.yml and Backup";
+          window
+            .showInformationMessage(
+              `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`,
+              OPEN_CONFIG
+            )
+            .then(async (resp) => {
+              if (resp === OPEN_CONFIG) {
+                const configPath = DConfig.configPath(wsRoot);
+                const configUri = Uri.file(configPath);
+                await VSCodeUtils.openFileInEditor(configUri);
+
+                const backupUri = Uri.file(out.resp.backupPath);
+                await VSCodeUtils.openFileInEditor(backupUri, {
+                  column: ViewColumn.Beside,
+                });
+              }
+            });
           break;
         } else {
           // nothing happened.

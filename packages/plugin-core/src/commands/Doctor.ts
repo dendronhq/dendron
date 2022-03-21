@@ -501,6 +501,33 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         break;
       }
+      case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
+        const ds = new DoctorService();
+        const out = await ds.executeDoctorActions({
+          action: opts.action,
+          engine,
+        });
+
+        if (out.error) {
+          // throw out.error;
+          window.showErrorMessage(out.error.message);
+        }
+
+        if (out.resp) {
+          window.showInformationMessage(
+            `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`
+          );
+          break;
+        } else {
+          // nothing happened.
+          window.showInformationMessage(
+            "There are no missing defaults. Exiting."
+          );
+        }
+
+        ds.dispose();
+        break;
+      }
       default: {
         const candidates: NoteProps[] | undefined = _.isUndefined(note)
           ? undefined

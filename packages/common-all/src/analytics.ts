@@ -95,6 +95,9 @@ export enum SurveyEvents {
 export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
+  ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
+  MissingDefaultConfigMessageAccepted = "Missing_Default_Config_Message_Accepted",
+  MissingDefaultConfigMessageRejected = "Missing_Default_Config_Message_Rejected",
 }
 
 export enum MigrationEvents {

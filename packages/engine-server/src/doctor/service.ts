@@ -1,5 +1,6 @@
 import {
   assertInvalidState,
+  ConfigUtils,
   DendronError,
   DEngineClient,
   Disposable,
@@ -20,6 +21,7 @@ import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
 import fs from "fs-extra";
+import { DConfig } from "../config";
 
 export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",
@@ -31,6 +33,7 @@ export enum DoctorActionsEnum {
   FIND_BROKEN_LINKS = "findBrokenLinks",
   FIX_REMOTE_VAULTS = "fixRemoteVaults",
   FIX_AIRTABLE_METADATA = "fixAirtableMetadata",
+  ADD_MISSING_DEFAULT_CONFIGS = "addMissingDefaultConfigs",
 }
 
 export type DoctorServiceOpts = {
@@ -187,6 +190,44 @@ export class DoctorService implements Disposable {
 
     let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
+      case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
+        const { wsRoot } = engine;
+        const rawConfig = DConfig.getRaw(wsRoot);
+        const detectResp = ConfigUtils.detectMissingDefaults({
+          config: rawConfig,
+        });
+        if (detectResp.data) {
+          const { needsBackfill, backfilledConfig } = detectResp.data;
+          if (needsBackfill) {
+            // back up dendron.yml first
+            let backupPath: string;
+            try {
+              backupPath = await DConfig.createBackup(
+                wsRoot,
+                "add-missing-defaults"
+              );
+            } catch (error) {
+              return {
+                exit: true,
+                error: new DendronError({
+                  message:
+                    "Backup failed. Exiting without filling missing defaults.",
+                }),
+              };
+            }
+
+            // write config
+            await DConfig.writeConfig({ wsRoot, config: backfilledConfig });
+            return {
+              exit: true,
+              resp: {
+                backupPath,
+              },
+            };
+          }
+        }
+        return { exit: true };
+      }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
         // eslint-disable-next-line no-console
         console.log(

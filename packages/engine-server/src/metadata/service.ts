@@ -21,6 +21,10 @@ type Metadata = Partial<{
    */
   inactiveUserMsgSendTime: number;
   /**
+   * The status of inactive user message. If submitted, we don't prompt again. If cancelled, we wait 2 weeks to send again.
+   */
+  inactiveUserMsgStatus: InactvieUserMsgStatusEnum;
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
@@ -33,6 +37,11 @@ type Metadata = Partial<{
    */
   lastLookupTime: number;
 }>;
+
+export enum InactvieUserMsgStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
 
 let _singleton: MetadataService | undefined;
 
@@ -105,5 +114,9 @@ export class MetadataService {
 
   setInactiveUserMsgSendTime() {
     return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+  }
+
+  setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
+    return this.setMeta("inactiveUserMsgStatus", value);
   }
 }

@@ -25,11 +25,11 @@ import {
   getOS,
   initializeSentry,
   SegmentClient,
-  writeJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import {
   FileAddWatcher,
   HistoryService,
+  InactvieUserMsgStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
@@ -41,7 +41,6 @@ import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Duration } from "luxon";
-import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -357,7 +356,7 @@ async function startServerProcess(): Promise<{
   return out;
 }
 
-// Only exported for test purposes
+// Only exported for test purposes ^jtm6bf7utsxy
 export async function _activate(
   context: vscode.ExtensionContext
 ): Promise<boolean> {
@@ -385,9 +384,14 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
-  // Respect user's telemetry settings for error reporting too.
+  // If telemetry is not disabled, we enable telemetry and error reporting ^rw8l1w51hnjz
+  // - NOTE: we do this outside of the try/catch block in case we run into an error with initialization
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
-    initializeSentry(getStage());
+    initializeSentry({
+      environment: getStage(),
+      sessionId: AnalyticsUtils.getSessionId(),
+      release: AnalyticsUtils.getVSCodeSentryRelease(),
+    });
   }
 
   try {
@@ -396,17 +400,9 @@ export async function _activate(
 
     // This version check is a temporary, one-release patch to try to unblock
     // users who are on old versions of VS Code.
-    let userOnOldVSCodeVer = false;
-    // TODO: After temporary release, remove the version check and bump up our vs code
-    // compat version in package.json to ^1.58.0
-    if (semver.gte(vscode.version, "1.57.0")) {
-      vscode.workspace.onDidGrantWorkspaceTrust(() => {
-        getExtension().getEngine().trustedWorkspace =
-          vscode.workspace.isTrusted;
-      });
-    } else {
-      userOnOldVSCodeVer = true;
-    }
+    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      getExtension().getEngine().trustedWorkspace = vscode.workspace.isTrusted;
+    });
 
     //  needs to be initialized to setup commands
     const ws = await DendronExtension.getOrCreate(context, {
@@ -500,7 +496,7 @@ export async function _activate(
       const wsService = new WorkspaceService({ wsRoot });
       const maybeWsSettings = wsService.getCodeWorkspaceSettingsSync();
 
-      // // initialize Segment client
+      // initialize Segment client
       ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
@@ -735,83 +731,9 @@ export async function _activate(
       }
     }
 
-    const backupPaths: string[] = [];
-    let keybindingPath: string;
-
-    // check vim keybindings ^j7zygfkbxjnq
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      const vimInstalled = VSCodeUtils.isExtensionInstalled("vscodevim.vim");
-      // only need to run this for non-mac
-      if (vimInstalled && os.type() !== "Darwin") {
-        Logger.info({
-          ctx,
-          msg: "checkAndApplyVimKeybindingOverrideIfExists:pre",
-        });
-        AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled);
-        const keybindingPayload =
-          KeybindingUtils.checkAndApplyVimKeybindingOverrideIfExists();
-        if (keybindingPayload.data) {
-          const { keybindingConfigPath, newKeybindings: resolvedKeybindings } =
-            keybindingPayload.data;
-          keybindingPath = keybindingConfigPath;
-          if (!_.isUndefined(resolvedKeybindings)) {
-            const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-            const maybeBackupPath = `${keybindingConfigPath}.${today}.vim.old`;
-            if (!fs.existsSync(keybindingConfigPath)) {
-              fs.ensureFileSync(keybindingConfigPath);
-              fs.writeFileSync(keybindingConfigPath, "[]");
-            } else {
-              fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
-              backupPaths.push(maybeBackupPath);
-            }
-            writeJSONWithCommentsSync(keybindingConfigPath, resolvedKeybindings);
-            AnalyticsUtils.track(ExtensionEvents.VimExtensionInstalled, {
-              fixApplied: true,
-            });
-          }
-        } else {
-          Logger.info({ ctx, msg: "unable to apply keybinding fix" });
-          // TODO: report error
-        }
-      }
-    }
-
-    // TODO: remove, we are not tracking this today
-    // if (extensionInstallStatus === InstallStatus.UPGRADED) {
-    //   const { keybindingConfigPath, migratedKeybindings } =
-    //     KeybindingUtils.checkAndMigrateLookupKeybindingIfExists();
-    //   keybindingPath = keybindingConfigPath;
-    //   if (!_.isUndefined(migratedKeybindings)) {
-    //     const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-    //     const maybeBackupPath = `${keybindingConfigPath}.${today}.lookup.old`;
-    //     fs.copyFileSync(keybindingConfigPath, maybeBackupPath);
-    //     backupPaths.push(maybeBackupPath);
-    //     writeJSONWithComments(keybindingConfigPath, migratedKeybindings);
-    //   }
-    // }
-
-    if (backupPaths.length > 0) {
-      vscode.window
-        .showInformationMessage(
-          "Conflicting or outdated keybindings have been updated. Click the button below to see changes.",
-          ...["Open changes"]
-        )
-        .then(async (selection) => {
-          if (selection) {
-            const uri = vscode.Uri.file(keybindingPath);
-            await VSCodeUtils.openFileInEditor(uri);
-            backupPaths.forEach(async (backupPath) => {
-              const backupUri = vscode.Uri.file(backupPath);
-              await VSCodeUtils.openFileInEditor(backupUri, {
-                column: vscode.ViewColumn.Beside,
-              });
-            });
-          }
-        });
-    }
-
-    if (userOnOldVSCodeVer) {
-      AnalyticsUtils.track(VSCodeEvents.UserOnOldVSCodeVerUnblocked);
+      // if keybinding conflict is detected, let the users know and guide them how to resolve  ^rikhd9cc0rwb
+      await KeybindingUtils.maybePromptKeybindingConflict();
     }
 
     await showWelcomeOrWhatsNew({
@@ -937,8 +859,7 @@ async function showWelcomeOrWhatsNew({
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  // TODO: there is a bug in the current logic. disabling until we fix it
-  if (false) {
+  if (shouldDisplayInactiveUserSurvey()) {
     await showInactiveUserMessage();
   }
 }
@@ -978,21 +899,29 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
     });
 }
 
-export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
-  const inactiveSurveySubmitted = await StateService.instance().getGlobalState(
-    GLOBAL_STATE.INACTIVE_USER_SURVEY_SUBMITTED
-  );
+export function shouldDisplayInactiveUserSurvey(): boolean {
+  const metaData = MetadataService.instance().getMeta();
 
-  // don't display if they have submitted before.
-  if (inactiveSurveySubmitted === "submitted") {
+  const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.submitted) {
     return false;
   }
 
+  // rare case where global state has been reset (or a reinstall) may cause issues with
+  // the prompt logic. ignore these cases and don't show the
+  if (
+    metaData.firstInstall !== undefined &&
+    metaData.firstLookupTime !== undefined
+  ) {
+    if (metaData.firstLookupTime - metaData.firstInstall < 0) {
+      return false;
+    }
+  }
+
   const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const TWO_WEEKS = Duration.fromObject({ weeks: 2 });
+  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
   const currentTime = Time.now().toSeconds();
   const CUR_TIME = Duration.fromObject({ seconds: currentTime });
-  const metaData = MetadataService.instance().getMeta();
 
   const FIRST_INSTALL =
     metaData.firstInstall !== undefined
@@ -1020,17 +949,17 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     FIRST_LOOKUP_TIME !== undefined &&
     FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
 
-  // was the user active on the first week but has been inactive for a two weeks?
+  // was the user active on the first week but has been inactive for more than four weeks?
   const isInactive =
     isFirstWeekActive &&
     LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= TWO_WEEKS;
+    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
 
-  // if they have cancelled last time, we should be waiting another 2 weeks.
-  if (inactiveSurveySubmitted === "cancelled") {
+  // if they have cancelled last time, we should be waiting another four weeks.
+  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.cancelled) {
     const shouldSendAgain =
       INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= TWO_WEEKS &&
+      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS &&
       isInactive;
     if (shouldSendAgain) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
@@ -1045,7 +974,9 @@ export async function shouldDisplayInactiveUserSurvey(): Promise<boolean> {
     const shouldSend =
       metaData.dendronWorkspaceActivated !== undefined &&
       metaData.firstWsInitialize !== undefined &&
-      isInactive;
+      isInactive &&
+      // this is needed since we may have prompted them before we introduced this metadata
+      metaData.inactiveUserMsgSendTime === undefined;
     if (shouldSend) {
       AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
         reason: "initial_prompt",

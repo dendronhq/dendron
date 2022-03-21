@@ -1,4 +1,5 @@
 import {
+  AppNames,
   CONSTANTS,
   DendronError,
   env,
@@ -526,13 +527,13 @@ export class SegmentClient {
 
 // platform props
 type VSCodeProps = {
-  type: "vscode";
+  type: AppNames.CODE;
   ideVersion: string;
   ideFlavor: string;
 };
 
 type CLIProps = {
-  type: "cli";
+  type: AppNames.CLI;
   cliVersion: string;
 };
 
@@ -609,7 +610,7 @@ export class SegmentUtils {
     if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
-    if (identifyProps.type === "vscode") {
+    if (identifyProps.type === AppNames.CODE) {
       const { appVersion, userAgent, ...rest } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {
@@ -630,7 +631,7 @@ export class SegmentUtils {
       );
     }
 
-    if (identifyProps.type === "cli") {
+    if (identifyProps.type === AppNames.CLI) {
       const { cliVersion } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {

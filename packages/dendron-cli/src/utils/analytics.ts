@@ -1,4 +1,4 @@
-import { RuntimeUtils } from "@dendronhq/common-all";
+import { AppNames, RuntimeUtils } from "@dendronhq/common-all";
 import { SegmentUtils } from "@dendronhq/common-server";
 import { CLIUtils } from "./cli";
 
@@ -7,7 +7,7 @@ export class CLIAnalyticsUtils {
     const cliVersion = CLIUtils.getClientVersion();
     SegmentUtils.track({
       event,
-      platformProps: { type: "cli", cliVersion },
+      platformProps: { type: AppNames.CLI, cliVersion },
       properties: props,
     });
   }
@@ -16,14 +16,14 @@ export class CLIAnalyticsUtils {
     const cliVersion = CLIUtils.getClientVersion();
     await SegmentUtils.trackSync({
       event,
-      platformProps: { type: "cli", cliVersion },
+      platformProps: { type: AppNames.CLI, cliVersion },
       properties: props,
     });
   }
 
   static identify() {
     const cliVersion = CLIUtils.getClientVersion();
-    SegmentUtils.identify({ type: "cli", cliVersion });
+    SegmentUtils.identify({ type: AppNames.CLI, cliVersion });
   }
 
   /**

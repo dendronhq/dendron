@@ -491,7 +491,7 @@ export function writeJSONWithCommentsSync(fpath: string, data: any) {
 
 export async function writeJSONWithComments(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
-  await fs.writeFile(fpath, payload);
+  return fs.writeFile(fpath, payload);
 }
 
 /**

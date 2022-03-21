@@ -71,6 +71,7 @@ import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { OpenBackupCommand } from "./OpenBackupCommand";
+import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -90,6 +91,7 @@ const ALL_COMMANDS = [
   CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,
+  CopyToClipboardCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
   CreateSchemaFromHierarchyCommand,

@@ -147,7 +147,6 @@ export class DendronExtension implements IDendronExtension {
 
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
-  public workspaceWatcher?: WorkspaceWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
@@ -691,7 +690,6 @@ export class DendronExtension implements IDendronExtension {
       windowWatcher,
     });
     workspaceWatcher.activate(this.context);
-    this.workspaceWatcher = workspaceWatcher;
 
     const wsFolders = DendronExtension.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {

@@ -40,10 +40,18 @@ export enum TutorialEvents {
   Tutorial_5_Show = "Tutorial_5_Show",
 }
 
+export enum KeybindingConflictDetectedSource {
+  activation = "activation",
+  doctor = "doctor",
+}
+
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
   IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
   IncompatibleExtensionsPreviewDisplayed = "Incompatible_Extensions_Preview_Displayed",
+  KeybindingConflictDetected = "Keybinding_Conflict_Detected",
+  ShowKeybindingConflictAccepted = "Show_Keybinding_Conflict_Accepted",
+  ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
 }
 
 export enum LookupEvents {
@@ -105,6 +113,12 @@ export enum WorkspaceEvents {
 
 export enum NativeWorkspaceEvents {
   DetectedInNonDendronWS = "Native_Workspace_Detected_In_Non_Dendron_WS", // watcher has detected a Dendron workspace getting created inside a non-Dendron workspace
+}
+
+export enum AppNames {
+  CODE = "vscode",
+  CLI = "cli",
+  EXPRESS_SERVER = "express",
 }
 
 export const DendronEvents = {

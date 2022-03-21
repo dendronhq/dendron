@@ -173,10 +173,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
-  get dendronRoot(): string {
-    return path.join(this.wsRoot, "dendron");
-  }
-
   get seedService(): SeedService {
     return this._seedService;
   }
@@ -188,7 +184,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {
     writeJSONWithComments(
-      path.join(this.wsRoot, "dendron.code-workspace"),
+      path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME),
       config
     );
   }

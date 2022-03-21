@@ -103,24 +103,31 @@ const plugin: Plugin = function (this: Unified.Processor) {
         list(
           "unordered",
           backlinksToPublish.map((mdLink) => {
+            let alias;
+            const note = NoteUtils.getNoteByFnameFromEngine({
+              fname: mdLink.from.fname!,
+              vault: VaultUtils.getVaultByName({
+                vaults: engine.vaults,
+                vname: mdLink.from.vaultName!,
+              })!,
+              engine,
+            });
+
+            if (note) {
+              alias =
+                note.title +
+                (engine.vaults.length > 1
+                  ? ` (${mdLink.from.vaultName!})`
+                  : "");
+            } else {
+              alias = `Unable to find backlinked note ${mdLink.from.fname!}.`;
+            }
             return listItem(
               paragraph({
                 type: DendronASTTypes.WIKI_LINK,
                 value: mdLink.from.fname,
                 data: {
-                  alias:
-                    NoteUtils.getNoteOrThrow({
-                      fname: mdLink.from.fname!,
-                      notes: engine.notes,
-                      vault: VaultUtils.getVaultByName({
-                        vaults: engine.vaults,
-                        vname: mdLink.from.vaultName!,
-                      })!,
-                      wsRoot: engine.wsRoot,
-                    }).title +
-                    (engine.vaults.length > 1
-                      ? ` (${mdLink.from.vaultName!})`
-                      : ""),
+                  alias,
                   vaultName: mdLink.from.vaultName!,
                 },
                 children: [],

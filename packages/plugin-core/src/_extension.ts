@@ -26,6 +26,8 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
+  DConfig,
+  DoctorActionsEnum,
   FileAddWatcher,
   HistoryService,
   InactvieUserMsgStatusEnum,
@@ -463,6 +465,13 @@ export async function _activate(
         });
       }
 
+      // check for missing default config keys and prompt for a backfill.
+      if (extensionInstallStatus === InstallStatus.UPGRADED) {
+        if (shouldDisplayMissingDefaultConfigMessage({ ext: ws })) {
+          showMissingDefaultConfigMessage({ ext: ws });
+        }
+      }
+
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
@@ -844,6 +853,39 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
           await SurveyUtils.showLapsedUserSurvey();
         }
         return;
+      }
+    });
+}
+
+export function shouldDisplayMissingDefaultConfigMessage(opts: {
+  ext: IDendronExtension;
+}): boolean {
+  const wsRoot = opts.ext.getDWorkspace().wsRoot;
+  const rawConfig = DConfig.getRaw(wsRoot);
+  const resp = ConfigUtils.detectMissingDefaults({ config: rawConfig });
+  return resp.data !== undefined && resp.data.needsBackfill;
+}
+
+export function showMissingDefaultConfigMessage(opts: {
+  ext: IDendronExtension;
+}) {
+  AnalyticsUtils.track(ConfigEvents.ShowMissingDefaultConfigMessage);
+  const ADD_CONFIG = "Add Missing Configuration";
+  vscode.window
+    .showInformationMessage(
+      "We have detected a missing default configuration. Would you like to add them to dendron.yml?",
+      ADD_CONFIG
+    )
+    .then(async (resp) => {
+      if (resp === ADD_CONFIG) {
+        AnalyticsUtils.track(ConfigEvents.MissingDefaultConfigMessageAccepted);
+        const cmd = new DoctorCommand(opts.ext);
+        await cmd.execute({
+          action: DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS,
+          scope: "workspace",
+        });
+      } else {
+        AnalyticsUtils.track(ConfigEvents.MissingDefaultConfigMessageRejected);
       }
     });
 }

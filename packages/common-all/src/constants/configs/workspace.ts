@@ -208,4 +208,8 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable hashtags",
     desc: "Enable hashtags, which allows #word to link to the note tags.word",
   },
+  enableFullHierarchyNoteTitle: {
+    label: "Enable FullHierarchyNoteTitle mode",
+    desc: "When enabled, the full hierarchy position of a note is used to generate the note title",
+  },
 };

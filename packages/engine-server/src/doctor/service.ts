@@ -43,6 +43,8 @@ export type DoctorServiceOpts = {
   quiet?: boolean;
   engine: DEngineClient;
   podId?: string;
+  hierarchy?: string;
+  vault?: DVault | string;
 };
 
 /** DoctorService is a disposable, you **must** dispose instances you create
@@ -136,11 +138,21 @@ export class DoctorService implements Disposable {
   }
 
   async executeDoctorActions(opts: DoctorServiceOpts) {
-    const { action, engine, query, candidates, limit, dryRun, exit, podId } =
-      _.defaults(opts, {
-        limit: 99999,
-        exit: true,
-      });
+    const {
+      action,
+      engine,
+      query,
+      candidates,
+      limit,
+      dryRun,
+      exit,
+      podId,
+      hierarchy,
+      vault,
+    } = _.defaults(opts, {
+      limit: 99999,
+      exit: true,
+    });
 
     let notes: NoteProps[];
     if (_.isUndefined(candidates)) {
@@ -337,9 +349,32 @@ export class DoctorService implements Disposable {
         // Converts the airtable id in note frontmatter from a single scalar value to a hashmap
         if (!podId) {
           assertInvalidState(
-            "Please provide pod Id to perform Doctor operation"
+            "Please provide the pod Id that was used to export the note(s)."
           );
         }
+        // we get vault name(string) as parameter from cli and vault(DVault) from plugin
+        const selectedVault = _.isString(vault)
+          ? VaultUtils.getVaultByName({ vaults: engine.vaults, vname: vault })
+          : vault;
+        const selectedHierarchy = _.isUndefined(query) ? hierarchy : query;
+        // Plugin already checks for selected hierarchy. This check is useful when fixAirtableMetadata action is ran from cli
+        if (!selectedHierarchy || !selectedVault) {
+          assertInvalidState(
+            "Please provide the hierarchy(with --query arg) and vault(--vault) of notes you would like to update with new Airtable Metadata"
+          );
+        }
+        //finding candidate notes
+        notes = Object.values(notes).filter(
+          (value) =>
+            value.fname.startsWith(selectedHierarchy) &&
+            value.stub !== true &&
+            VaultUtils.isEqualV2(value.vault, selectedVault) &&
+            value.custom.airtableId
+        );
+        this.L.info({
+          msg: `${DoctorActionsEnum.FIX_FRONTMATTER} ${notes.length} Notes will be Affected`,
+        });
+
         doctorAction = async (note: NoteProps) => {
           //get airtable id from note
           const airtableId = _.get(note.custom, "airtableId") as string;

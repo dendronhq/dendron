@@ -460,30 +460,20 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
         const selection = await this.getHierarchy();
+        // break if no hierarchy is selected.
         if (!selection) break;
         // get hierarchy of notes to be updated
         const { hierarchy, vault } = selection;
         // get podId used to export the notes
         const podId = await PodUIControls.promptToSelectCustomPodId();
         if (!podId) break;
-        const notes = engine.notes;
-        const candidates = Object.values(notes).filter(
-          (value) =>
-            value.fname.startsWith(hierarchy) &&
-            value.stub !== true &&
-            VaultUtils.isEqualV2(value.vault, vault) &&
-            value.custom.airtableId
-        );
-        this.L.info({
-          ctx,
-          msg: `${DoctorActionsEnum.FIX_FRONTMATTER} candidates: ${candidates.length}`,
-        });
         const ds = new DoctorService();
         await ds.executeDoctorActions({
           action: opts.action,
-          candidates,
           engine,
           podId,
+          hierarchy,
+          vault,
         });
         break;
       }

@@ -127,10 +127,6 @@ export class AirtableUtils {
     return _map;
   }
 
-  static checkNoteHasAirtableId(note: NoteProps): boolean {
-    return !_.isUndefined(_.get(note.custom, "airtableId"));
-  }
-
   static filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
   }
@@ -440,7 +436,7 @@ export class AirtableUtils {
         const dendronId = ent.fields["DendronId"] as string;
         const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
         let pods: AirtablePodMetadata = _.get(note.custom, "pods");
-        // return if the note is already exported ie. update query is ran.
+        // return if the note is already exported for this pod Id
         if (pods && pods.airtable && pods.airtable[podId]) return undefined;
 
         // if this is the first time a pod metadata is added to the note, add airtable pod metadata under pods namespace

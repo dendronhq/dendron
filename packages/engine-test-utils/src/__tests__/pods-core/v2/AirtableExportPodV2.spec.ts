@@ -713,6 +713,51 @@ describe("GIVEN note has pods namespace in frontmatter", () => {
         });
       });
     });
+    describe("AND linked note is associated with multiple records", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        await TestEngineUtils.createNoteByFname({
+          fname: "task.alpha",
+          body: "This is a task",
+          custom: { pods: { airtable: { "dendron.task": "airtableId-task" } } },
+          ...opts,
+        });
+        await TestEngineUtils.createNoteByFname({
+          fname: "task.beta",
+          body: "This is a task beta",
+          custom: {
+            pods: {
+              airtable: {
+                "dendron.feat": "airtableId-feat",
+                "dendron.task": "airtableId-task2",
+              },
+            },
+          },
+          ...opts,
+        });
+        await TestEngineUtils.createNoteByFname({
+          fname: "proj.beta",
+          body: "[[task.alpha]] [[task.beta]]",
+          custom: {},
+          ...opts,
+        });
+      };
+
+      beforeAll(async () => {
+        resp = await setupTest(preSetupHook);
+      });
+
+      test("THEN create new record for the tasks with matching podId", () => {
+        expect(resp.data?.created).toEqual([
+          {
+            fields: {
+              DendronId: "proj.beta",
+              Tasks: ["airtableId-task", "airtableId-task2"],
+            },
+            id: "airtable-proj.beta",
+          },
+        ]);
+      });
+    });
   });
   describe("WHEN export a note", () => {
     const setupTest = setupTestFactoryForNote({

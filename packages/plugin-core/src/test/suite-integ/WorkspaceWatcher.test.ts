@@ -28,6 +28,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockPreviewProxy } from "../MockPreviewProxy";
+import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;

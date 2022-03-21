@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   ConfigUtils,
   CONSTANTS,
   CURRENT_CONFIG_VERSION,
@@ -936,16 +937,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       const selfContainedVaults = vaults.map(
         WorkspaceService.standardToSelfContainedVault
       );
-      for (const vault of selfContainedVaults) {
-        // Needs to be done one at a time, otherwise config updates are racy
-        // eslint-disable-next-line no-await-in-loop
-        await ws.createSelfContainedVault({
+      // Needs to be done one at a time, otherwise config updates are racy
+      asyncLoopOneAtATime(selfContainedVaults, (vault) => {
+        return ws.createSelfContainedVault({
           vault,
           addToCodeWorkspace: false,
           // Don't add to config, {@link SetupWorkspaceCommand} also adds vaults to the config
           addToConfig: false,
         });
-      }
+      });
     }
 
     // check if this is the first workspace created

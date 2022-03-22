@@ -31,6 +31,7 @@ import {
   DConfig,
   DendronEngineClient,
   DendronEngineV2,
+  Git,
   HistoryService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";

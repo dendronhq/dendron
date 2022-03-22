@@ -17,7 +17,7 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
-import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
+import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
 import {
   checkVaults,
   GitTestUtils,
@@ -34,6 +34,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
+  createSelfContainedVaultWithGit,
   describeSingleWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -507,28 +508,13 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
     "WHEN creating and adding a remote vault",
     { modConfigCb: enableSelfCOntainedVaults },
     () => {
-      let remoteDir: string;
       let vaultName: string;
+      let remoteDir: string;
       before(async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const tmpVaultPath = "tmp";
-        remoteDir = path.join(wsRoot, tmpVaultPath);
+        // Create a self contained vault outside the current workspace
+        remoteDir = tmpDir().name;
+        await createSelfContainedVaultWithGit(remoteDir);
         vaultName = path.basename(remoteDir);
-        const ws = new WorkspaceService({ wsRoot });
-        // Create a vault inside the WS but don't add it to the WS. This is a
-        // workaround because we can't create a vault without a workspace yet.
-        await ws.createSelfContainedVault({
-          vault: {
-            fsPath: tmpVaultPath,
-            selfContained: true,
-          },
-          addToConfig: false,
-          addToCodeWorkspace: false,
-        });
-        const git = new Git({ localUrl: remoteDir });
-        await git.init();
-        await git.addAll();
-        await git.commit({ msg: "start" });
 
         sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
         sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);
@@ -540,9 +526,8 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the vault is under `dependencies/remote`, and is self contained", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         // It's kinda hard to mock git cloning from a remote here, so the remote
-        // we're using is a directory. That means this looks like
-        // `dependencies/tmp-123-foo` which is not "up to spec" but it's a good
-        // fallback behavior
+        // we're using is a directory. Because of that, the name of the vault
+        // will fall back to the directory name.
         const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
         expect(await fs.pathExists(vaultPath)).toBeTruthy();
         expect(
@@ -564,6 +549,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         expect(vault?.fsPath).toEqual(
           path.join(FOLDERS.DEPENDENCIES, vaultName)
         );
+        expect(vault?.remote?.url).toEqual(remoteDir);
       });
 
       test("THEN the notes in this vault are accessible", async () => {

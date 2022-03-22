@@ -21,7 +21,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { commands, ProgressLocation, QuickPickItem, Uri, window } from "vscode";
+import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -49,9 +49,14 @@ enum VaultType {
 }
 
 type VaultCloneTarget = {
+  /** Name that the cloned vault should have, if any. */
   name?: string;
+  /** The local path the clone into. Should be an absolute path. */
   localUrl: string;
+  /** The git remote URL to clone from. */
   remoteUrl: string;
+  /** The root of the workspace that will include this vault. */
+  wsRoot: string;
 };
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -276,6 +281,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     name,
     remoteUrl,
     localUrl,
+    wsRoot,
   }: VaultCloneTarget): Promise<RespV3<DVault>> {
     if (await fs.pathExists(localUrl)) {
       return {
@@ -295,7 +301,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
     await git.clone(".");
     const vault: DVault = {
-      fsPath: localUrl,
+      fsPath: path.relative(wsRoot, localUrl),
       remote: {
         type: "git",
         url: remoteUrl,
@@ -413,6 +419,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const cloneQueue = new FIFOQueue<VaultCloneTarget>([
           // Initialize with the selected vault
           {
+            wsRoot,
             remoteUrl,
             localUrl,
             name,
@@ -425,7 +432,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           if (next === undefined) return false;
           const { data: vault, error } = await this.cloneAndExtractVault(next);
           // Vault already exists, may mean a circular vault dependency. Skip it.
-          if (error) return true;
+          if (error || !vault) return true;
           // Otherwise we successfully cloned the vault
           vaults.push(vault);
 
@@ -437,6 +444,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             // If the cloned vault has any remote dependencies, we'll need to clone them too
             dependencies.filter(VaultUtils.isRemote).map((vault) => {
               return {
+                wsRoot,
                 localUrl: "",
                 remoteUrl: vault.remote.url,
                 name: vault.name,

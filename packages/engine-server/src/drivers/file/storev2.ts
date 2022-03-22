@@ -855,7 +855,7 @@ export class FileStorage implements DStore {
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
-    // read from disk since contents migh have changed
+    // read from disk since contents might have changed
     const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtils.hydrate({
       noteRaw,
@@ -991,7 +991,7 @@ export class FileStorage implements DStore {
   }
 
   /**
-   * Update a note. If note exists, call {@link NoteUtils.hydrate} to populate new note with parent/children properties
+   * Update a note. If note exists, call {@link NoteUtils.hydrate} to populate new note with parent/children/backlink properties
    * of the existing note
    *
    * If {@link newNode} is set, set the {@link NoteProps["parent"]} property and create stubs as necessary

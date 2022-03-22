@@ -378,7 +378,10 @@ export class LinkUtils {
   }
   /**
    * Get all links from the note body
-   * Currently, just look for wiki links
+   * Currently, just look for wiki links and keep existing backlinks
+   *
+   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
+   *
    * @param opts.filter - {type, loc
    *
    * - type: filter by {@link DendronASTTypes}
@@ -409,7 +412,8 @@ export class LinkUtils {
       filter: { loc: filter?.loc },
       note,
     });
-    return links;
+    const backlinks = note.links.filter((link) => link.type === "backlink");
+    return links.concat(backlinks);
   }
 
   static findHashTags({ links }: { links: DLink[] }) {

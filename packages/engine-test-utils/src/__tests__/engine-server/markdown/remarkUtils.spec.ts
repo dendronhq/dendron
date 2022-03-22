@@ -220,6 +220,27 @@ describe("RemarkUtils and LinkUtils", () => {
       }
     );
 
+    // TODO: Add new test case
+    testWithEngine(
+      "backlink",
+      async ({ engine }) => {
+        const note = engine.notes["foo"];
+        const links = LinkUtils.findLinks({ note, engine });
+        expect(links).toMatchSnapshot();
+        expect(links[0].to?.fname).toEqual("bar");
+      },
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            body: "[[bar]]",
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      }
+    );
+
     testWithEngine(
       "xvault link",
       async ({ engine }) => {

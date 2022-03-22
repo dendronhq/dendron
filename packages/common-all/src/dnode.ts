@@ -1082,9 +1082,9 @@ export class NoteUtils {
   }
 
   /**
-   * Add {@link DNodeProps["parent"]} and {@link DNodeProps["children"]} from {@link noteHydrated} to {@link noteRaw}
+   * Add {@link DNodeProps["parent"]}, {@link DNodeProps["children"]}, and backlinks from {@link noteHydrated} to {@link noteRaw}
    * @param noteRaw - note for other fields
-   * @param noteHydrated - note to get {@link DNodeProps["parent"]} and {@link DNodeProps["children"]}  properties from
+   * @param noteHydrated - note to get {@link DNodeProps["parent"]}, {@link DNodeProps["children"]}, and backlink properties from
    * @returns Merged Note object
    */
   static hydrate({
@@ -1095,6 +1095,9 @@ export class NoteUtils {
     noteHydrated: NoteProps;
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
+    noteRaw.links = noteHydrated.links.filter(
+      (link) => link.type === "backlink"
+    );
     return { ...noteRaw, ...hydrateProps };
   }
 
@@ -1123,7 +1126,7 @@ export class NoteUtils {
     const links = await engine.getLinks({ note, type: "regular" });
     if (!links.data) {
       throw new DendronError({
-        message: "Unable to calculate the backlinks in note",
+        message: "Unable to calculate the links in note",
         payload: {
           note: NoteUtils.toLogObj(note),
           error: links.error,
@@ -1139,7 +1142,7 @@ export class NoteUtils {
       });
       if (!anchors.data) {
         throw new DendronError({
-          message: "Unable to calculate backlinks in note",
+          message: "Unable to calculate anchors in note",
           payload: {
             note: NoteUtils.toLogObj(note),
             error: anchors.error,

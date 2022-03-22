@@ -8,7 +8,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
-  DWorkspaceV2,
   ExtensionEvents,
   getStage,
   InstallStatus,
@@ -18,7 +17,6 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -82,7 +80,6 @@ import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
-import { setupSegmentClient } from "./telemetry";
 import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -95,8 +92,7 @@ import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
-import { DendronCodeWorkspace } from "./workspace/codeWorkspace";
-import { DendronNativeWorkspace } from "./workspace/nativeWorkspace";
+import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 
@@ -108,38 +104,6 @@ class ExtensionUtils {
    * Setup segment client
    * Also setup cache flushing in case of missed uploads
    */
-  static setupSegmentWithCacheFlush({
-    context,
-    ws,
-  }: {
-    context: vscode.ExtensionContext;
-    ws: DWorkspaceV2;
-  }) {
-    if (getStage() === "prod") {
-      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
-      fs.ensureDir(segmentResidualCacheDir);
-      setupSegmentClient(
-        ws,
-        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
-      );
-
-      // Try to flush the Segment residual cache every hour:
-      (function tryFlushSegmentCache() {
-        SegmentClient.instance()
-          .tryFlushResidualCache()
-          .then((result) => {
-            Logger.info(
-              `Segment Residual Cache flush attempted. ${JSON.stringify(
-                result
-              )}`
-            );
-          });
-
-        // Repeat once an hour:
-        setTimeout(tryFlushSegmentCache, 3600000);
-      })();
-    }
-  }
 
   static async startServerProcess({
     context,
@@ -198,41 +162,6 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
   return;
-}
-
-/** Prompts the user to pick a wsRoot if there are more than one. */
-async function getOrPromptWSRoot(workspaceFolders: string[]) {
-  if (!workspaceFolders) {
-    Logger.error({ msg: "No dendron.yml found in any workspace folder" });
-    return undefined;
-  }
-  if (workspaceFolders.length === 1) {
-    return workspaceFolders[0];
-  } else {
-    const selectedRoot = await VSCodeUtils.showQuickPick(
-      workspaceFolders.map((folder): vscode.QuickPickItem => {
-        return {
-          label: folder,
-        };
-      }),
-      {
-        ignoreFocusOut: true,
-        canPickMany: false,
-        title: "Select Dendron workspace to load",
-      }
-    );
-    if (!selectedRoot) {
-      await vscode.window.showInformationMessage(
-        "You skipped loading any Dendron workspace, Dendron is not active. You can run the 'Developer: Reload Window' command to reactivate Dendron."
-      );
-      Logger.info({
-        msg: "User skipped loading a Dendron workspace",
-        workspaceFolders,
-      });
-      return null;
-    }
-    return selectedRoot.label;
-  }
 }
 
 async function reloadWorkspace() {
@@ -455,37 +384,14 @@ export async function _activate(
     });
 
     if (await DendronExtension.isDendronWorkspace()) {
-      if (ws.type === WorkspaceType.NATIVE) {
-        const workspaceFolders =
-          await WorkspaceUtils.findWSRootsInWorkspaceFolders(
-            DendronExtension.workspaceFolders()!
-          );
-        if (!workspaceFolders) {
-          return false;
-        }
-        const wsRoot = await getOrPromptWSRoot(workspaceFolders);
-        if (!wsRoot) return false;
-
-        ws.workspaceImpl = new DendronNativeWorkspace({
-          wsRoot,
-          logUri: context.logUri,
-          assetUri,
-        });
-      } else {
-        ws.workspaceImpl = new DendronCodeWorkspace({
-          wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
-          logUri: context.logUri,
-          assetUri,
-        });
+      const activator = new WorkspaceActivator();
+      const maybeWs = await activator.activate({ ext: ws, context });
+      if (!maybeWs) {
+        return false;
       }
-      const wsImpl = getDWorkspace();
+      const wsImpl = maybeWs;
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
-
-      // Only set up note traits after workspaceImpl has been set, so that the
-      // wsRoot path is known for locating the note trait definition location.
-      // TODO: Unwind and simplify dependency ordering logic
-      ws.setupTraits();
 
       // --- Get Version State
       const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -496,8 +402,8 @@ export async function _activate(
       const wsService = new WorkspaceService({ wsRoot });
       const maybeWsSettings = wsService.getCodeWorkspaceSettingsSync();
 
-      // initialize Segment client
-      ExtensionUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
+      // // initialize Segment client
+      AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({

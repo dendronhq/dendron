@@ -32,7 +32,7 @@ export enum CLIEvents {
 
 export enum TutorialEvents {
   WelcomeShow = "WelcomeShow",
-  ClickStart = "ClickStart",
+  ClickStart = "Getting_Started_Clicked",
   Tutorial_0_Show = "Tutorial_0_Show",
   Tutorial_1_Show = "Tutorial_1_Show",
   Tutorial_2_Show = "Tutorial_2_Show",

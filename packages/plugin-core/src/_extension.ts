@@ -17,6 +17,7 @@ import {
   Time,
   VaultUtils,
   VSCodeEvents,
+  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -100,6 +101,29 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
 class ExtensionUtils {
+  static addCommand = ({
+    context,
+    key,
+    cmd,
+    existingCommands,
+  }: {
+    context: vscode.ExtensionContext;
+    key: string;
+    cmd: IBaseCommand;
+    existingCommands: string[];
+  }) => {
+    if (!existingCommands.includes(key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          key,
+          sentryReportingCallback(async (args) => {
+            cmd.run(args);
+          })
+        )
+      );
+    }
+  };
+
   /**
    * Setup segment client
    * Also setup cache flushing in case of missed uploads
@@ -400,7 +424,10 @@ export async function _activate(
       });
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
-      const maybeWsSettings = wsService.getCodeWorkspaceSettingsSync();
+      const maybeWsSettings =
+        maybeWs.type === WorkspaceType.CODE
+          ? wsService.getCodeWorkspaceSettingsSync()
+          : undefined;
 
       // // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
@@ -532,6 +559,22 @@ export async function _activate(
         context.subscriptions.push(treeView);
       }
 
+      // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
+      const existingCommands = await vscode.commands.getCommands();
+      if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
+        context.subscriptions.push(
+          vscode.commands.registerCommand(
+            DENDRON_COMMANDS.RELOAD_INDEX.key,
+            sentryReportingCallback(async (silent?: boolean) => {
+              const out = await new ReloadIndexCommand().run({ silent });
+              if (!silent) {
+                vscode.window.showInformationMessage(`finish reload`);
+              }
+              return out;
+            })
+          )
+        );
+      }
       const reloadSuccess = await reloadWorkspace();
       const durationReloadWorkspace = getDurationMilliseconds(start);
       if (!reloadSuccess) {
@@ -962,21 +1005,6 @@ async function _setupCommands({
       );
   });
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RELOAD_INDEX.key,
-        sentryReportingCallback(async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().run({ silent });
-          if (!silent) {
-            vscode.window.showInformationMessage(`finish reload`);
-          }
-          return out;
-        })
-      )
-    );
-  }
-
   // ---
   if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
     context.subscriptions.push(
@@ -1014,29 +1042,6 @@ async function _setupCommands({
       )
     );
   }
-
-  const addCommand = ({
-    context,
-    key,
-    cmd,
-    existingCommands,
-  }: {
-    context: vscode.ExtensionContext;
-    key: string;
-    cmd: IBaseCommand;
-    existingCommands: string[];
-  }) => {
-    if (!existingCommands.includes(key)) {
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          key,
-          sentryReportingCallback(async (args) => {
-            cmd.run(args);
-          })
-        )
-      );
-    }
-  };
 
   if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
     context.subscriptions.push(
@@ -1081,14 +1086,14 @@ async function _setupCommands({
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument
-  addCommand({
+  ExtensionUtils.addCommand({
     context,
     key: DENDRON_COMMANDS.SEED_ADD.key,
     cmd: new SeedAddCommand(),
     existingCommands,
   });
 
-  addCommand({
+  ExtensionUtils.addCommand({
     context,
     key: DENDRON_COMMANDS.SEED_REMOVE.key,
     cmd: new SeedRemoveCommand(),

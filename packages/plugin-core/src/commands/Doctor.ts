@@ -38,6 +38,8 @@ import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { KeybindingUtils } from "../KeybindingUtils";
+import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
+import { PodUIControls } from "../components/pods/PodControls";
 
 const md = _md();
 type Finding = {
@@ -96,6 +98,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   constructor(ext: IDendronExtension) {
     super();
     this.extension = ext;
+  }
+
+  getHierarchy() {
+    return new QuickPickHierarchySelector().getHierarchy();
   }
 
   createQuickPick(opts: CreateQuickPickOpts) {
@@ -450,6 +456,25 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           break;
         }
         await this.showBrokenLinkPreview(out.resp, engine);
+        break;
+      }
+      case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
+        const selection = await this.getHierarchy();
+        // break if no hierarchy is selected.
+        if (!selection) break;
+        // get hierarchy of notes to be updated
+        const { hierarchy, vault } = selection;
+        // get podId used to export the notes
+        const podId = await PodUIControls.promptToSelectCustomPodId();
+        if (!podId) break;
+        const ds = new DoctorService();
+        await ds.executeDoctorActions({
+          action: opts.action,
+          engine,
+          podId,
+          hierarchy,
+          vault,
+        });
         break;
       }
       default: {

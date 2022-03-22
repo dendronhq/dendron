@@ -156,7 +156,11 @@ export class ExportPodV2CLICommand extends CLICommand<
     const { exportReturnValue, podType, engine, config } = opts;
     switch (podType) {
       case PodV2Types.AirtableExportV2:
-        return this.onAirtableExportComplete({ exportReturnValue, engine });
+        return this.onAirtableExportComplete({
+          exportReturnValue,
+          engine,
+          config,
+        });
       case PodV2Types.GoogleDocsExportV2:
         return this.onGoogleDocsExportComplete({ exportReturnValue, engine });
       case PodV2Types.NotionExportV2:
@@ -173,14 +177,16 @@ export class ExportPodV2CLICommand extends CLICommand<
   async onAirtableExportComplete(opts: {
     exportReturnValue: AirtableExportReturnType;
     engine: DEngineClient;
+    config: any;
   }) {
-    const { exportReturnValue, engine } = opts;
+    const { exportReturnValue, engine, config } = opts;
     const records = exportReturnValue.data;
     if (records?.created) {
       await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
         records: records.created,
         engine,
         logger: this.L,
+        podId: config.podId,
       });
     }
     const createdCount = exportReturnValue.data?.created?.length ?? 0;

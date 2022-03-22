@@ -212,6 +212,7 @@ export class DoctorService implements Disposable {
                 error: new DendronError({
                   message:
                     "Backup failed. Exiting without filling missing defaults.",
+                  payload: error,
                 }),
               };
             }

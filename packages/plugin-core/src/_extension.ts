@@ -466,10 +466,13 @@ export async function _activate(
       }
 
       // check for missing default config keys and prompt for a backfill.
-      if (extensionInstallStatus === InstallStatus.UPGRADED) {
-        if (shouldDisplayMissingDefaultConfigMessage({ ext: ws })) {
-          showMissingDefaultConfigMessage({ ext: ws });
-        }
+      if (
+        shouldDisplayMissingDefaultConfigMessage({
+          ext: ws,
+          extensionInstallStatus,
+        })
+      ) {
+        showMissingDefaultConfigMessage({ ext: ws });
       }
 
       // Re-use the id for error reporting too:
@@ -859,11 +862,16 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
 
 export function shouldDisplayMissingDefaultConfigMessage(opts: {
   ext: IDendronExtension;
+  extensionInstallStatus: InstallStatus;
 }): boolean {
-  const wsRoot = opts.ext.getDWorkspace().wsRoot;
-  const rawConfig = DConfig.getRaw(wsRoot);
-  const resp = ConfigUtils.detectMissingDefaults({ config: rawConfig });
-  return resp.data !== undefined && resp.data.needsBackfill;
+  if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
+    const wsRoot = opts.ext.getDWorkspace().wsRoot;
+    const rawConfig = DConfig.getRaw(wsRoot);
+    const resp = ConfigUtils.detectMissingDefaults({ config: rawConfig });
+    return resp.data !== undefined && resp.data.needsBackfill;
+  } else {
+    return false;
+  }
 }
 
 export function showMissingDefaultConfigMessage(opts: {

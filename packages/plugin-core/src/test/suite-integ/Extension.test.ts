@@ -1220,50 +1220,78 @@ suite("missing default config detection", () => {
   );
 
   describe("GIVEN upgraded", () => {
-    let extensionInstallStatusStub: SinonStub;
-
-    const beforeHook = async () => {
-      extensionInstallStatusStub = sinon
-        .stub(VSCodeUtils, "getInstallStatusForExtension")
-        .returns(InstallStatus.UPGRADED);
-    };
     describeMultiWS(
       "AND missing default key",
       {
-        beforeHook,
         modConfigCb: (config) => {
           // @ts-ignore
           delete config.workspace.workspaceVaultSyncMode;
           return config;
         },
-        noSetInstallStatus: true,
       },
       () => {
-        test("THEN prompted to add missing defaults", (done) => {
+        test("THEN prompted to add missing defaults", () => {
           const ext = ExtensionProvider.getExtension();
-          const out = shouldDisplayMissingDefaultConfigMessage({ ext });
+          const out = shouldDisplayMissingDefaultConfigMessage({
+            ext,
+            extensionInstallStatus: InstallStatus.UPGRADED,
+          });
           expect(out).toBeTruthy();
-          extensionInstallStatusStub.restore();
-          done();
         });
       }
     );
 
+    describeMultiWS("AND not missing default key", {}, () => {
+      test("THEN not prompted to add missing defaults", () => {
+        const ext = ExtensionProvider.getExtension();
+        const out = shouldDisplayMissingDefaultConfigMessage({
+          ext,
+          extensionInstallStatus: InstallStatus.UPGRADED,
+        });
+        expect(out).toBeFalsy();
+      });
+    });
+  });
+
+  describe("GIVEN not upgraded", () => {
     describeMultiWS(
-      "AND not missing default key",
+      "AND missing default key",
       {
-        beforeHook,
-        noSetInstallStatus: true,
+        modConfigCb: (config) => {
+          // @ts-ignore
+          delete config.workspace.workspaceVaultSyncMode;
+          return config;
+        },
       },
       () => {
-        test("THEN not prompted to add missing defaults", (done) => {
+        test("THEN not prompted to add missing defaults", () => {
           const ext = ExtensionProvider.getExtension();
-          const out = shouldDisplayMissingDefaultConfigMessage({ ext });
-          expect(out).toBeFalsy();
-          extensionInstallStatusStub.restore();
-          done();
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+            (extensionInstallStatus) => {
+              const out = shouldDisplayMissingDefaultConfigMessage({
+                ext,
+                extensionInstallStatus,
+              });
+              expect(out).toBeFalsy();
+            }
+          );
         });
       }
     );
+
+    describeMultiWS("AND not missing default key", {}, () => {
+      test("THEN not prompted to add missing defaults", () => {
+        const ext = ExtensionProvider.getExtension();
+        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+          (extensionInstallStatus) => {
+            const out = shouldDisplayMissingDefaultConfigMessage({
+              ext,
+              extensionInstallStatus,
+            });
+            expect(out).toBeFalsy();
+          }
+        );
+      });
+    });
   });
 });

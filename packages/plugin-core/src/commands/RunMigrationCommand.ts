@@ -1,3 +1,4 @@
+import { WorkspaceType } from "@dendronhq/common-all";
 import {
   MIGRATION_ENTRIES,
   MigrationChangeSetStatus,
@@ -8,7 +9,7 @@ import {
 import _ from "lodash";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getExtension, getDWorkspace } from "../workspace";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -24,6 +25,12 @@ export class RunMigrationCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.RUN_MIGRATION.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
 
   async gatherInputs(opts?: CommandInput): Promise<CommandInput | undefined> {
     const migrationItems: vscode.QuickPickItem[] = _.map(
@@ -63,8 +70,15 @@ export class RunMigrationCommand extends BasicCommand<
       MIGRATION_ENTRIES,
       (migration) => migration.version === version
     );
-    const { wsRoot, config } = getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot, config } = ws;
     const wsService = new WorkspaceService({ wsRoot });
+
+    const wsConfig =
+      ws.type === WorkspaceType.CODE
+        ? wsService.getCodeWorkspaceSettingsSync()
+        : undefined;
+
     const response = vscode.window
       .withProgress(
         {
@@ -79,7 +93,7 @@ export class RunMigrationCommand extends BasicCommand<
             migrations: migrationsToRun,
             wsService,
             logger: this.L,
-            wsConfig: await getExtension().getWorkspaceSettings(),
+            wsConfig,
             dendronConfig: config,
           });
           return out;

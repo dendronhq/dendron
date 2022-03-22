@@ -17,7 +17,6 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = {
   rootDirRaw: string;
@@ -193,11 +192,10 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     // This command can run before the extension is registered, especially during testing
-    const defaultSelfContained = ExtensionProvider.isRegistered()
-      ? ExtensionProvider.getWorkspaceConfig().get<boolean>(
-          DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
-        )
-      : undefined;
+    const defaultSelfContained =
+      VSCodeUtils.getWorkspaceConfig().get<boolean>(
+        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+      ) ?? false;
     const {
       rootDirRaw: rootDir,
       skipOpenWs,

@@ -115,7 +115,9 @@ export interface IDendronExtension {
   isActiveAndIsDendronNote(fpath: string): Promise<boolean>;
 
   /**
-   * Get Global Workspace configuration
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
+   *
+   * There is no need to read the configuration from the extension, it doesn't depend on the extension itself.
    */
   getWorkspaceConfig(
     section?: string | undefined

@@ -24,15 +24,6 @@ export class ExtensionProvider {
     return ExtensionProvider.extension;
   }
 
-  /** Returns true if the extension is registered.
-   *
-   * This should be true most of the time, but you may need to check first in
-   * commands that run before or during initialization.
-   */
-  static isRegistered() {
-    return this.extension !== undefined;
-  }
-
   static getDWorkspace() {
     return ExtensionProvider.getExtension().getDWorkspace();
   }

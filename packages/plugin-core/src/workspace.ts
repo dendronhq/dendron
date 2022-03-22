@@ -389,12 +389,12 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
-   * See {@link IDendronExtension.getWorkspaceConfig()}
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
    */
   getWorkspaceConfig(
     section?: string | undefined
   ): vscode.WorkspaceConfiguration {
-    return vscode.workspace.getConfiguration(section);
+    return VSCodeUtils.getWorkspaceConfig(section);
   }
 
   isActive(): boolean {

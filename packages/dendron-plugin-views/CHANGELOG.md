@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.87.0 (2022-03-22)
+
+
+### Bug Fixes
+
+* Prevent fatal errors in Open Backup Command and Run Migration Command in native workspaces ([#2607](https://github.com/dendronhq/dendron/issues/2607)) ([dce17fe](https://github.com/dendronhq/dendron/commit/dce17fe293cf73016797257fd18e5f85c625a6a2))
+
+
+
+
+
 ## [0.86.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.86.1) (2022-03-15)
 
 

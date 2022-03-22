@@ -1,6 +1,6 @@
 import _ from "lodash";
 import path from "path";
-import { FOLDERS, normalizeUnixPath } from ".";
+import { FOLDERS, NonOptional, normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault, WorkspaceFolderRaw } from "./types";
@@ -8,6 +8,8 @@ import { DVault, WorkspaceFolderRaw } from "./types";
 export type SelfContainedVault = Omit<DVault, "selfContained"> & {
   selfContained: true;
 };
+
+export type RemoteVault = NonOptional<DVault, "remote">;
 
 export class VaultUtils {
   static getName(vault: DVault): string {
@@ -40,6 +42,10 @@ export class VaultUtils {
 
   static isSelfContained(vault: DVault): vault is SelfContainedVault {
     return vault.selfContained === true;
+  }
+
+  static isRemote(vault: DVault): vault is RemoteVault {
+    return vault.remote !== undefined;
   }
 
   /**

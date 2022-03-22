@@ -19,6 +19,15 @@ export async function asyncLoopOneAtATime<T>(
   return;
 }
 
+/** Similar to {@link asyncLoopOneAtATime}, but keeps calling `cb` until it returns false. */
+export async function asyncDoWhileLoop(cb: () => Promise<boolean>) {
+  let exit = false;
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    exit = await cb();
+  } while (!exit);
+}
+
 /**
  * Loop through iterable in parallel
  * @param things

@@ -1,9 +1,12 @@
 import {
+  asyncDoWhileLoop,
   CONSTANTS,
   DendronError,
   DVault,
   DWorkspace,
+  FIFOQueue,
   FOLDERS,
+  RespV3,
   SEED_REGISTRY,
   VaultRemoteSource,
   VaultUtils,
@@ -44,6 +47,12 @@ enum VaultType {
   LOCAL = "local",
   REMOTE = "remote",
 }
+
+type VaultCloneTarget = {
+  name?: string;
+  localUrl: string;
+  remoteUrl: string;
+};
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.VAULT_ADD.key;
@@ -262,21 +271,35 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { vaults, workspace };
   }
 
-  async cloneVault({
+  /** Clones a remote to a local location, and extracts the vault */
+  async cloneAndExtractVault({
     name,
     remoteUrl,
     localUrl,
-  }: {
-    name?: string;
-    localUrl: string;
-    remoteUrl: string;
-  }): Promise<DVault> {
+  }: VaultCloneTarget): Promise<RespV3<DVault>> {
+    if (await fs.pathExists(localUrl)) {
+      return {
+        error: new DendronError({
+          message: `Cloning ${remoteUrl} to ${localUrl} would write over existing data`,
+          payload: {
+            remoteUrl,
+            localUrl,
+            name,
+          },
+        }),
+      };
+    }
+
     await fs.ensureDir(localUrl);
     const git = new Git({ localUrl, remoteUrl });
     // `.` so it clones into the `localUrl` directory, not into a subdirectory of that
     await git.clone(".");
     const vault: DVault = {
       fsPath: localUrl,
+      remote: {
+        type: "git",
+        url: remoteUrl,
+      },
     };
     if (name) vault.name = name;
     // If it has a config file, it's a self contained vault. It also could be a
@@ -284,11 +307,17 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // folder.
     if (await fs.pathExists(path.join(localUrl, CONSTANTS.DENDRON_CONFIG_FILE)))
       vault.selfContained = true;
-    return vault;
+    return {
+      data: vault,
+    };
   }
 
-  // If `localUrl` points to the directory of a self contained vault (or a
-  // workspace vault), then get the dependencies for that self contained vault.
+  /** Get the dependencies of this vault.
+   *
+   * If `localUrl` points to the directory of a self contained vault (or a
+   * workspace vault), then gets the dependencies for that self contained vault.
+   * If it's an old style vault, then this will just return an empty list.
+   */
   async getVaultDependencies({
     wsRoot,
     vault,
@@ -357,6 +386,15 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async handleRemoteRepoSelfContained(
     opts: CommandOpts
   ): Promise<{ vaults: DVault[] }> {
+    const { name, pathRemote: remoteUrl } = opts;
+    if (!remoteUrl) {
+      throw new DendronError({
+        message:
+          "Remote vault has no remote set. This should never happen, please send a bug report if you encounter this.",
+      });
+    }
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+
     return window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -364,25 +402,54 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         cancellable: false,
       },
       async (progress) => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
         progress.report({
           message: "cloning repo",
           increment: 0,
         });
-        const { name, pathRemote: remoteUrl } = opts;
-        if (!remoteUrl) {
-          throw new DendronError({
-            message:
-              "Remote vault has no remote set. This should never happen, please send a bug report if you encounter this.",
-          });
-        }
-        const localUrl = path.join(wsRoot, opts.path);
-        const vault = await this.cloneVault({ remoteUrl, localUrl, name });
-        const wsService = new WorkspaceService({ wsRoot });
-        const vaults = [vault];
 
-        const dependencies = await this.getVaultDependencies({ vault, wsRoot });
-        for (const vault of dependencies) {
+        const localUrl = path.join(wsRoot, opts.path);
+        // The queue of vaults to be cloned. We may need to do more than 1 clone
+        // if there are transitive dependencies.
+        const cloneQueue = new FIFOQueue<VaultCloneTarget>([
+          // Initialize with the selected vault
+          {
+            remoteUrl,
+            localUrl,
+            name,
+          },
+        ]);
+
+        const vaults: DVault[] = [];
+        await asyncDoWhileLoop(async () => {
+          const next = cloneQueue.dequeue();
+          if (next === undefined) return false;
+          const { data: vault, error } = await this.cloneAndExtractVault(next);
+          // Vault already exists, may mean a circular vault dependency. Skip it.
+          if (error) return true;
+          // Otherwise we successfully cloned the vault
+          vaults.push(vault);
+
+          const dependencies = await this.getVaultDependencies({
+            wsRoot,
+            vault,
+          });
+          cloneQueue.enqueueAll(
+            // If the cloned vault has any remote dependencies, we'll need to clone them too
+            dependencies.filter(VaultUtils.isRemote).map((vault) => {
+              return {
+                localUrl: "",
+                remoteUrl: vault.remote.url,
+                name: vault.name,
+              };
+            })
+          );
+
+          return true;
+        });
+
+        const wsService = new WorkspaceService({ wsRoot });
+
+        for (const vault of vaults) {
           if (VaultUtils.isSelfContained(vault)) {
             // eslint-disable-next-line no-await-in-loop
             await wsService.createSelfContainedVault({
@@ -399,7 +466,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         }
 
         wsService.dispose();
-        return { vaults, workspace };
+        return { vaults };
       }
     );
   }

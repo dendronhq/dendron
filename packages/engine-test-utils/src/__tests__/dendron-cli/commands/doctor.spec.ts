@@ -1,6 +1,10 @@
 import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { file2Note, tmpDir } from "@dendronhq/common-server";
-import { DConfig, DoctorActionsEnum } from "@dendronhq/engine-server";
+import {
+  BackupService,
+  DConfig,
+  DoctorActionsEnum,
+} from "@dendronhq/engine-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
 import path from "path";
@@ -858,6 +862,16 @@ describe("GIVEN addMissingDefaultConfigs", () => {
           expect(out).toEqual({ exit: true });
           const rawConfig = DConfig.getRaw(wsRoot);
           expect(rawConfigBefore).toEqual(rawConfig);
+
+          const backupService = new BackupService({ wsRoot });
+          try {
+            const configBackups = backupService.getBackupsWithKey({
+              key: "config",
+            });
+            expect(configBackups.length).toEqual(0);
+          } finally {
+            backupService.dispose();
+          }
         },
         {
           expect,

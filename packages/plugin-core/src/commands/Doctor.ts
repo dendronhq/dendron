@@ -510,7 +510,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
 
         if (out.error) {
-          // throw out.error;
           window.showErrorMessage(out.error.message);
         }
 

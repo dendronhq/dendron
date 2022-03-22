@@ -580,7 +580,7 @@ class FileUtils {
     fpath: string;
     sep?: string;
   }) {
-    // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
+    // Try to put into `fpath`. If `fpath` exists, create a new folder with an numbered suffix
     let acc = 0;
     let tryPath = fpath;
     while (fs.pathExistsSync(tryPath)) {

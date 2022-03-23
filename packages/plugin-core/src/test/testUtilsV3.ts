@@ -530,7 +530,7 @@ export function describeMultiWS(
       }
 
       const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
-
+      console.log({ out });
       if (opts.preActivateHook) {
         await opts.preActivateHook({ ctx, ...out });
       }

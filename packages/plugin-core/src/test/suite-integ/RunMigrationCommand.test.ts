@@ -59,10 +59,10 @@ suite("RunMigrationCommand", function () {
       workspaceType: WorkspaceType.NATIVE,
     },
     () => {
-      test("THEN migration runs as expected without looking for workspace config.", async () => {
+      test.only("THEN migration runs as expected without looking for workspace config.", async () => {
         const ext = ExtensionProvider.getExtension();
         const cmd = new RunMigrationCommand(ext);
-
+        expect(ext.type).toEqual(WorkspaceType.NATIVE);
         // testing for explicitly delete key.
         const { wsRoot } = ext.getDWorkspace();
         const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;

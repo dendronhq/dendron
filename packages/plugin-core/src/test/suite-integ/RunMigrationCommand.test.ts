@@ -50,7 +50,7 @@ suite("RunMigrationCommand", function () {
   );
 
   describeMultiWS(
-    "GIVEN Code workspace",
+    "GIVEN Native workspace",
     {
       modConfigCb: (config) => {
         _.unset(config.commands, "lookup");

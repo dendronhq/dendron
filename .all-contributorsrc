@@ -1565,12 +1565,21 @@
       ]
     },
     {
+all-contributors/add-jpknwls
       "login": "jpknwls",
       "name": "jpknwls",
       "avatar_url": "https://avatars.githubusercontent.com/u/28238972?v=4",
       "profile": "https://github.com/jpknwls",
       "contributions": [
         "doc"
+
+      "login": "nickolay-kondratyev",
+      "name": "Nickolay Kondratyev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4050134?v=4",
+      "profile": "https://github.com/nickolay-kondratyev",
+      "contributions": [
+        "bug"
+ master
       ]
     }
   ],

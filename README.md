@@ -412,7 +412,11 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/fnurl"><img src="https://avatars.githubusercontent.com/u/106794?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jody Foo</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afnurl" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://gitlab.com/dagriefaa"><img src="https://avatars.githubusercontent.com/u/39538526?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Raymond K</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adagriefaa" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/jhoan2"><img src="https://avatars.githubusercontent.com/u/67968051?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Hoang</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajhoan2" title="Bug reports">🐛</a></td>
+all-contributors/add-jpknwls
     <td align="center"><a href="https://github.com/jpknwls"><img src="https://avatars.githubusercontent.com/u/28238972?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jpknwls</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jpknwls" title="Documentation">📖</a></td>
+
+    <td align="center"><a href="https://github.com/nickolay-kondratyev"><img src="https://avatars.githubusercontent.com/u/4050134?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nickolay Kondratyev</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Anickolay-kondratyev" title="Bug reports">🐛</a></td>
+ master
   </tr>
 </table>
 

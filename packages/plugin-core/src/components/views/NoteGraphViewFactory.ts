@@ -147,6 +147,7 @@ export class NoteGraphPanelFactory {
         data: {
           note,
           syncChangedNote: true,
+          activeNote: this._ext.wsUtils.getActiveNote(),
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

@@ -1636,15 +1636,6 @@ suite("NoteLookupCommand", function () {
           expect(scratchBtn.pressed).toBeFalsy();
           expect(controller.quickPick.value.startsWith("foo.journal."));
 
-          // await controller.onTriggerButton(journalBtn);
-
-          // ({ journalBtn, scratchBtn } = getNoteTypeButtons(
-          //   controller.quickPick.buttons
-          // ));
-          // expect(journalBtn.pressed).toBeFalsy();
-          // expect(scratchBtn.pressed).toBeFalsy();
-          // expect(controller.quickPick.value).toEqual("foo");
-
           cmd.cleanUp();
           done();
         },
@@ -1674,15 +1665,6 @@ suite("NoteLookupCommand", function () {
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeTruthy();
           expect(controller.quickPick.value.startsWith("scratch."));
-
-          // await controller.onTriggerButton(scratchBtn);
-
-          // ({ journalBtn, scratchBtn } = getNoteTypeButtons(
-          //   controller.quickPick.buttons
-          // ));
-          // expect(journalBtn.pressed).toBeFalsy();
-          // expect(scratchBtn.pressed).toBeFalsy();
-          // expect(controller.quickPick.value).toEqual("foo");
 
           cmd.cleanUp();
           done();
@@ -1715,81 +1697,11 @@ suite("NoteLookupCommand", function () {
           expect(taskBtn.pressed).toBeTruthy();
           expect(controller.quickPick.value.startsWith("task."));
 
-          // await controller.onTriggerButton(taskBtn);
-
-          // ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-          //   controller.quickPick.buttons
-          // ));
-          // expect(journalBtn.pressed).toBeFalsy();
-          // expect(scratchBtn.pressed).toBeFalsy();
-          // expect(taskBtn.pressed).toBeFalsy();
-          // expect(controller.quickPick.value).toEqual("foo");
-
           cmd.cleanUp();
           done();
         },
       });
     });
-
-    // test("scratch, journal, and task modifiers toggle each other off when triggered", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async ({ vaults, engine }) => {
-    //       await WSUtils.openNote(engine.notes["foo"]);
-
-    //       const cmd = new NoteLookupCommand();
-    //       stubVaultPick(vaults);
-
-    //       const { controller } = await cmd.gatherInputs({
-    //         noteType: LookupNoteTypeEnum.journal,
-    //       });
-
-    //       let { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       );
-
-    //       expect(journalBtn.pressed).toBeTruthy();
-    //       expect(scratchBtn.pressed).toBeFalsy();
-    //       expect(taskBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value.startsWith("foo.journal."));
-
-    //       await controller.onTriggerButton(scratchBtn);
-
-    //       ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-    //       expect(journalBtn.pressed).toBeFalsy();
-    //       expect(scratchBtn.pressed).toBeTruthy();
-    //       expect(taskBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value.startsWith("scratch."));
-
-    //       await controller.onTriggerButton(taskBtn);
-
-    //       ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-    //       expect(journalBtn.pressed).toBeFalsy();
-    //       expect(scratchBtn.pressed).toBeFalsy();
-    //       expect(taskBtn.pressed).toBeTruthy();
-    //       expect(controller.quickPick.value.startsWith("task."));
-
-    //       await controller.onTriggerButton(taskBtn);
-
-    //       ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-    //       expect(journalBtn.pressed).toBeFalsy();
-    //       expect(scratchBtn.pressed).toBeFalsy();
-    //       expect(taskBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value).toEqual("foo");
-
-    //       done();
-    //     },
-    //   });
-    // });
 
     test("selection modifier set to none in configs", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -1910,46 +1822,37 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    // test("selection2link modifier toggle", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async ({ vaults, engine }) => {
-    //       const cmd = new NoteLookupCommand();
-    //       stubVaultPick(vaults);
-    //       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+    test("selection2link modifier toggle", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        },
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
-    //       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-    //       const { text } = VSCodeUtils.getSelection();
-    //       expect(text).toEqual("foo body");
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("foo body");
 
-    //       const { controller } = await cmd.gatherInputs({
-    //         selectionType: "selection2link",
-    //       });
+          const { controller } = await cmd.gatherInputs({
+            selectionType: "selection2link",
+          });
 
-    //       let { selection2linkBtn, selectionExtractBtn } =
-    //         getSelectionTypeButtons(controller.quickPick.buttons);
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickPick.buttons);
 
-    //       expect(selection2linkBtn?.pressed).toBeTruthy();
-    //       expect(selectionExtractBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value).toEqual("foo.foo-body");
+          expect(selection2linkBtn?.pressed).toBeTruthy();
+          expect(selectionExtractBtn.pressed).toBeFalsy();
+          expect(controller.quickPick.value).toEqual("foo.foo-body");
 
-    //       await controller.onTriggerButton(selection2linkBtn);
-
-    //       ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-
-    //       expect(selection2linkBtn.pressed).toBeFalsy();
-    //       expect(selectionExtractBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value).toEqual("foo");
-
-    //       done();
-    //     },
-    //   });
-    // });
+          cmd.cleanUp();
+          done();
+        },
+      });
+    });
 
     test("selectionExtract basic", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -2098,70 +2001,11 @@ suite("NoteLookupCommand", function () {
           expect(selection2linkBtn?.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
 
-          // await controller.onTriggerButton(selectionExtractBtn);
-
-          // ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-          //   controller.quickPick.buttons
-          // ));
-
-          // expect(selection2linkBtn.pressed).toBeFalsy();
-          // expect(selectionExtractBtn.pressed).toBeFalsy();
           cmd.cleanUp();
           done();
         },
       });
     });
-
-    // test("selection2link and selectionExtract modifiers toggle each other off when triggered", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async ({ vaults, engine }) => {
-    //       const cmd = new NoteLookupCommand();
-    //       stubVaultPick(vaults);
-    //       const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
-    //       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-    //       const { text } = VSCodeUtils.getSelection();
-    //       expect(text).toEqual("foo body");
-
-    //       const { controller } = await cmd.gatherInputs({
-    //         selectionType: "selection2link",
-    //       });
-
-    //       let { selection2linkBtn, selectionExtractBtn } =
-    //         getSelectionTypeButtons(controller.quickPick.buttons);
-
-    //       expect(selection2linkBtn?.pressed).toBeTruthy();
-    //       expect(selectionExtractBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value).toEqual("foo.foo-body");
-
-    //       await controller.onTriggerButton(selectionExtractBtn);
-
-    //       ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-
-    //       expect(selection2linkBtn.pressed).toBeFalsy();
-    //       expect(selectionExtractBtn.pressed).toBeTruthy();
-    //       expect(controller.quickPick.value).toEqual("foo");
-
-    //       await controller.onTriggerButton(selectionExtractBtn);
-
-    //       ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-    //         controller.quickPick.buttons
-    //       ));
-
-    //       expect(selection2linkBtn.pressed).toBeFalsy();
-    //       expect(selectionExtractBtn.pressed).toBeFalsy();
-    //       expect(controller.quickPick.value).toEqual("foo");
-
-    //       done();
-    //     },
-    //   });
-    // });
 
     test("horizontal split basic", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -2218,14 +2062,6 @@ suite("NoteLookupCommand", function () {
           );
 
           expect(horizontalSplitBtn?.pressed).toBeTruthy();
-
-          // await controller.onTriggerButton(horizontalSplitBtn);
-
-          // ({ horizontalSplitBtn } = getSplitTypeButtons(
-          //   controller.quickPick.buttons
-          // ));
-
-          // expect(horizontalSplitBtn.pressed).toBeFalsy();
 
           cmd.cleanUp();
           done();
@@ -2312,102 +2148,6 @@ suite("NoteLookupCommand", function () {
       });
     });
 
-    // test("toggling journal modifier off will only leave selection2link applied", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async ({ vaults, engine }) => {
-    //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-    //       const { journalBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       );
-
-    //       const { selection2linkBtn } = getSelectionTypeButtons(
-    //         controller.quickPick.buttons
-    //       );
-
-    //       expect(journalBtn.pressed).toBeTruthy();
-    //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-    //       await controller.onTriggerButton(journalBtn);
-    //       expect(controller.quickPick.value).toEqual(`foo.foo-body`);
-
-    //       done();
-    //     },
-    //   });
-    // });
-
-    // test("toggling selection2link modifier off will only leave journal modifier applied", (done) => {
-    //   runLegacyMultiWorkspaceTest({
-    //     ctx,
-    //     preSetupHook: async ({ wsRoot, vaults }) => {
-    //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //     },
-    //     onInit: async ({ vaults, engine }) => {
-    //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-    //       const { journalBtn } = getNoteTypeButtons(
-    //         controller.quickPick.buttons
-    //       );
-
-    //       const { selection2linkBtn } = getSelectionTypeButtons(
-    //         controller.quickPick.buttons
-    //       );
-
-    //       expect(journalBtn.pressed).toBeTruthy();
-    //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-    //       await controller.onTriggerButton(selection2linkBtn);
-    //       const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-    //       const today = Time.now().toFormat(dateFormat);
-    //       expect(controller.quickPick.value).toEqual(`foo.journal.${today}`);
-
-    //       done();
-    //     },
-    //   });
-    // });
-
-    //   test("applying scratch strips journal modifier, and keeps selection2link applied", (done) => {
-    //     runLegacyMultiWorkspaceTest({
-    //       ctx,
-    //       preSetupHook: async ({ wsRoot, vaults }) => {
-    //         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-    //       },
-    //       onInit: async ({ vaults, engine }) => {
-    //         const { controller } = await prepareCommandFunc({ vaults, engine });
-
-    //         const { journalBtn, scratchBtn } = getNoteTypeButtons(
-    //           controller.quickPick.buttons
-    //         );
-
-    //         const { selection2linkBtn } = getSelectionTypeButtons(
-    //           controller.quickPick.buttons
-    //         );
-
-    //         expect(journalBtn.pressed).toBeTruthy();
-    //         expect(selection2linkBtn.pressed).toBeTruthy();
-
-    //         await controller.onTriggerButton(scratchBtn);
-    //         const dateFormat = DendronExtension.configuration().get<string>(
-    //           CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-    //         ) as string;
-    //         const today = Time.now().toFormat(dateFormat);
-    //         const todayFormatted = today.split(".").slice(0, -1).join(".");
-    //         const quickpickValue = controller.quickPick.value;
-    //         expect(
-    //           quickpickValue.startsWith(`scratch.${todayFormatted}`)
-    //         ).toBeTruthy();
-    //         expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
-
-    //         done();
-    //       },
-    //     });
-    //   });
-    // });
-
     describe("scratch + selection2link interactions", () => {
       const prepareCommandFunc = async ({ vaults, engine }: any) => {
         const cmd = new NoteLookupCommand();
@@ -2462,98 +2202,6 @@ suite("NoteLookupCommand", function () {
           },
         });
       });
-
-      // test("toggling scratch modifier off will only leave selection2link applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { scratchBtn } = getNoteTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(scratchBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(scratchBtn);
-      //       expect(controller.quickPick.value).toEqual(`foo.foo-body`);
-
-      //       done();
-      //     },
-      //   });
-      // });
-
-      // test("toggling selection2link modifier off will only leave scratch modifier applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { scratchBtn } = getNoteTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(scratchBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(selection2linkBtn);
-      //       const todayFormatted = getTodayInScratchDateFormat();
-      //       const quickpickValue = controller.quickPick.value;
-      //       expect(
-      //         quickpickValue.startsWith(`scratch.${todayFormatted}`)
-      //       ).toBeTruthy();
-      //       expect(quickpickValue.endsWith(".foo-body")).toBeFalsy();
-
-      //       done();
-      //     },
-      //   });
-      // });
-
-      // test("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { journalBtn, scratchBtn } = getNoteTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(scratchBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(journalBtn);
-      //       const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-      //       const today = Time.now().toFormat(dateFormat);
-      //       const quickpickValue = controller.quickPick.value;
-      //       expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
-
-      //       done();
-      //     },
-      //   });
-      // });
     });
 
     describe("task + selection2link interactions", () => {
@@ -2607,91 +2255,6 @@ suite("NoteLookupCommand", function () {
           },
         });
       });
-
-      // test("toggling task modifier off will only leave selection2link applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { taskBtn } = getNoteTypeButtons(controller.quickPick.buttons);
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(taskBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(taskBtn);
-      //       expect(controller.quickPick.value).toEqual(`foo.foo-body`);
-
-      //       done();
-      //     },
-      //   });
-      // });
-
-      // test("toggling selection2link modifier off will only leave task modifier applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { taskBtn } = getNoteTypeButtons(controller.quickPick.buttons);
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(taskBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(selection2linkBtn);
-      //       const quickpickValue = controller.quickPick.value;
-      //       expect(quickpickValue.startsWith(`foo`)).toBeTruthy();
-      //       expect(quickpickValue.endsWith("foo-body")).toBeFalsy();
-
-      //       done();
-      //     },
-      //   });
-      // });
-
-      // test("applying journal strips task modifier, and keeps selection2link applied", (done) => {
-      //   runLegacyMultiWorkspaceTest({
-      //     ctx,
-      //     preSetupHook: async ({ wsRoot, vaults }) => {
-      //       await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      //     },
-      //     onInit: async ({ vaults, engine }) => {
-      //       const { controller } = await prepareCommandFunc({ vaults, engine });
-
-      //       const { journalBtn, taskBtn } = getNoteTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       const { selection2linkBtn } = getSelectionTypeButtons(
-      //         controller.quickPick.buttons
-      //       );
-
-      //       expect(taskBtn.pressed).toBeTruthy();
-      //       expect(selection2linkBtn.pressed).toBeTruthy();
-
-      //       await controller.onTriggerButton(journalBtn);
-      //       const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-      //       const today = Time.now().toFormat(dateFormat);
-      //       const quickpickValue = controller.quickPick.value;
-      //       expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
-
-      //       done();
-      //     },
-      //   });
-      // });
     });
 
     describe("note modifiers + selectionExtract interactions", () => {

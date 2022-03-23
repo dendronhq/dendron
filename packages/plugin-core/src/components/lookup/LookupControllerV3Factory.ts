@@ -1,13 +1,16 @@
+import { DNodeType } from "@dendronhq/common-all";
+import _ from "lodash";
+import { IDendronExtension } from "../../dendronExtensionInterface";
+import { TwoWayBinding } from "../../types/TwoWayBinding";
+import { VaultSelectButton } from "./buttons";
+import { LookupControllerV3 } from "./LookupControllerV3";
 import {
   ILookupControllerV3,
   ILookupControllerV3Factory,
   LookupControllerV3CreateOpts,
 } from "./LookupControllerV3Interface";
-import _ from "lodash";
-import { VaultSelectButton } from "./buttons";
-import { DNodeType } from "@dendronhq/common-all";
-import { LookupControllerV3 } from "./LookupControllerV3";
-import { IDendronExtension } from "../../dendronExtensionInterface";
+import { NameModifierMode, SelectionMode } from "./LookupViewModel";
+import { VaultSelectionMode } from "./types";
 
 export class LookupControllerV3Factory implements ILookupControllerV3Factory {
   private extension: IDendronExtension;
@@ -41,12 +44,27 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
 
+    const viewModel = {
+      selectionState: new TwoWayBinding<SelectionMode>(SelectionMode.None),
+      vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
+        VaultSelectionMode.auto
+      ),
+      isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
+      isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
+      isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
+      nameModifierMode: new TwoWayBinding<NameModifierMode>(
+        NameModifierMode.None
+      ),
+      isSplitHorizontally: new TwoWayBinding<boolean>(false),
+    };
+
     return new LookupControllerV3({
       nodeType: opts?.nodeType as DNodeType,
       fuzzThreshold: opts?.fuzzThreshold,
       buttons: buttons.concat(extraButtons),
       disableLookupView: opts?.disableLookupView,
       title: opts?.title,
+      viewModel,
     });
   }
 }

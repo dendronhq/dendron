@@ -19,7 +19,6 @@ import { CancellationTokenSource } from "vscode";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
-import { TwoWayBinding } from "../../types/TwoWayBinding";
 import { clipboard } from "../../utils";
 import { VersionProvider } from "../../versionProvider";
 import { LookupPanelView } from "../../views/LookupPanelView";
@@ -71,6 +70,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     fuzzThreshold?: number;
     disableLookupView?: boolean;
     title?: string;
+    viewModel: ILookupViewModel;
   }) {
     const ctx = "LookupControllerV3:new";
     Logger.info({ ctx, msg: "enter" });
@@ -82,19 +82,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
     this._title = opts.title;
 
-    this._viewModel = {
-      selectionState: new TwoWayBinding<SelectionMode>(SelectionMode.None),
-      vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
-        VaultSelectionMode.auto
-      ),
-      isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
-      isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
-      isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
-      nameModifierMode: new TwoWayBinding<NameModifierMode>(
-        NameModifierMode.None
-      ),
-      isSplitHorizontally: new TwoWayBinding<boolean>(false),
-    };
+    this._viewModel = opts.viewModel;
     if (!opts.disableLookupView) {
       this._disposables.push(new LookupPanelView(this._viewModel));
     }
@@ -182,7 +170,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
 
     // Now Create the Views:
     this._disposables.push(
-      new LookupV3QuickPickView(quickpick, this._viewModel)
+      new LookupV3QuickPickView(quickpick, this._viewModel, this._provider.id)
     );
 
     // Set the initial View Model State from the initial Button state:
@@ -287,7 +275,6 @@ export class LookupControllerV3 implements ILookupControllerV3 {
               this.onSelect2ItemsBtnToggled(false);
               break;
             }
-
             case SelectionMode.selection2Link: {
               this.onSelection2LinkBtnToggled(false);
               break;
@@ -305,7 +292,6 @@ export class LookupControllerV3 implements ILookupControllerV3 {
               this.onSelect2ItemsBtnToggled(true);
               break;
             }
-
             case SelectionMode.selection2Link: {
               this.onSelection2LinkBtnToggled(true);
               break;
@@ -385,11 +371,9 @@ export class LookupControllerV3 implements ILookupControllerV3 {
             case NameModifierMode.Journal:
               this.onJournalButtonToggled(false);
               break;
-
             case NameModifierMode.Scratch:
               this.onScratchButtonToggled(false);
               break;
-
             case NameModifierMode.Task:
               this.onTaskButtonToggled(false);
               break;
@@ -402,18 +386,14 @@ export class LookupControllerV3 implements ILookupControllerV3 {
             case NameModifierMode.Journal:
               this.onJournalButtonToggled(true);
               break;
-
             case NameModifierMode.Scratch:
               this.onScratchButtonToggled(true);
               break;
-
             case NameModifierMode.Task:
               this.onTaskButtonToggled(true);
               break;
-
             case NameModifierMode.None:
               break;
-
             default:
               assertUnreachable(newValue);
           }

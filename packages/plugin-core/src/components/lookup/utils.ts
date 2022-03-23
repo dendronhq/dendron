@@ -627,19 +627,6 @@ export class PickerUtilsV2 {
     return vaultSuggestions;
   }
 
-  /**
-   * Update button props by value
-   * @param opts
-   */
-  static refreshButtons(opts: {
-    quickpick: DendronQuickPickerV2;
-    buttons: DendronBtn[];
-    buttonsPrev: DendronBtn[];
-  }) {
-    opts.buttonsPrev = opts.quickpick.buttons.map((b: DendronBtn) => b.clone());
-    opts.quickpick.buttons = opts.buttons;
-  }
-
   static resetPaginationOpts(picker: DendronQuickPickerV2) {
     delete picker.moreResults;
     delete picker.offset;

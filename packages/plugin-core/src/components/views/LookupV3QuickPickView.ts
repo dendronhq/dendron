@@ -22,16 +22,22 @@ import { DendronQuickPickerV2, VaultSelectionMode } from "../lookup/types";
 /**
  * A 'view' that represents the UI state of the Lookup Quick Pick. This
  * essentially controls the button state of the quick pick and reacts upon user
- * mouse clicks to the butttons.
+ * mouse clicks to the buttons.
  */
 export class LookupV3QuickPickView implements Disposable {
   private _quickPick: DendronQuickPickerV2;
   private _viewState: ILookupViewModel;
   private _disposables: Disposable[];
+  private _providerId?: string;
 
-  constructor(quickPick: DendronQuickPickerV2, viewModel: ILookupViewModel) {
+  constructor(
+    quickPick: DendronQuickPickerV2,
+    viewModel: ILookupViewModel,
+    providerId?: string // For telemetry purposes only
+  ) {
     this._quickPick = quickPick;
     this._viewState = viewModel;
+    this._providerId = providerId;
     this._disposables = [];
 
     this.setupViewModel();
@@ -87,18 +93,18 @@ export class LookupV3QuickPickView implements Disposable {
         if (ExtractBtn) buttons.push(ExtractBtn);
         if (ToItemsBtn) buttons.push(ToItemsBtn);
 
-        this.updateButtonsOnQuickpick(...buttons);
+        this.updateButtonsOnQuickPick(...buttons);
       })
     );
 
+    // Vault Selection is mapped to 'other' for some reason; Fix Later.
     const vaultSelectionBtn = this.getButton("other");
     if (vaultSelectionBtn !== undefined) {
       this._disposables.push(
         this._viewState.vaultSelectionMode.bind(async (newValue) => {
-          // Mapped to other for some reason; Fix Later.
           vaultSelectionBtn.pressed =
             newValue === VaultSelectionMode.alwaysPrompt;
-          this.updateButtonsOnQuickpick(vaultSelectionBtn);
+          this.updateButtonsOnQuickPick(vaultSelectionBtn);
         })
       );
     }
@@ -108,7 +114,7 @@ export class LookupV3QuickPickView implements Disposable {
       this._disposables.push(
         this._viewState.isMultiSelectEnabled.bind(async (newValue) => {
           multiSelectBtn.pressed = newValue;
-          this.updateButtonsOnQuickpick(multiSelectBtn);
+          this.updateButtonsOnQuickPick(multiSelectBtn);
         })
       );
     }
@@ -118,7 +124,7 @@ export class LookupV3QuickPickView implements Disposable {
       this._disposables.push(
         this._viewState.isCopyNoteLinkEnabled.bind(async (enabled) => {
           copyLinkBtn.pressed = enabled;
-          this.updateButtonsOnQuickpick(copyLinkBtn);
+          this.updateButtonsOnQuickPick(copyLinkBtn);
         })
       );
     }
@@ -128,7 +134,7 @@ export class LookupV3QuickPickView implements Disposable {
       this._disposables.push(
         this._viewState.isApplyDirectChildFilter.bind(async (newValue) => {
           directChildBtn.pressed = newValue;
-          this.updateButtonsOnQuickpick(directChildBtn);
+          this.updateButtonsOnQuickPick(directChildBtn);
         })
       );
     }
@@ -169,7 +175,7 @@ export class LookupV3QuickPickView implements Disposable {
               assertUnreachable(newValue);
           }
 
-          this.updateButtonsOnQuickpick(journalBtn, scratchBtn, taskBtn);
+          this.updateButtonsOnQuickPick(journalBtn, scratchBtn, taskBtn);
         })
       );
     }
@@ -180,7 +186,7 @@ export class LookupV3QuickPickView implements Disposable {
         this._viewState.isSplitHorizontally.bind(async (splitHorizontally) => {
           horizontalBtn.pressed = splitHorizontally;
 
-          this.updateButtonsOnQuickpick(horizontalBtn);
+          this.updateButtonsOnQuickPick(horizontalBtn);
         })
       );
     }
@@ -197,7 +203,7 @@ export class LookupV3QuickPickView implements Disposable {
     return;
   }
 
-  private updateButtonsOnQuickpick(...btns: DendronBtn[]): void {
+  private updateButtonsOnQuickPick(...btns: DendronBtn[]): void {
     const newButtons = this._quickPick!.buttons.map((b: DendronBtn) => {
       const toUpdate = _.find(btns, (value) => value.type === b.type);
 
@@ -289,7 +295,7 @@ export class LookupV3QuickPickView implements Disposable {
     }
 
     AnalyticsUtils.track(LookupEvents.LookupModifierToggledByUser, {
-      // command: this.provider.id, // TODO: Can we add this back somehow?
+      command: this._providerId,
       type: (btn as IDendronQuickInputButton).type,
       pressed: (btn as IDendronQuickInputButton).pressed,
     });

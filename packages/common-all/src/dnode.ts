@@ -1095,9 +1095,11 @@ export class NoteUtils {
     noteHydrated: NoteProps;
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
-    noteRaw.links = noteHydrated.links.filter(
-      (link) => link.type === "backlink"
-    );
+    if (noteHydrated) {
+      noteRaw.links = noteHydrated.links.filter(
+        (link) => link.type === "backlink"
+      );
+    }
     return { ...noteRaw, ...hydrateProps };
   }
 

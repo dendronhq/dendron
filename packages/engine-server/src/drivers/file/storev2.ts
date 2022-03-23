@@ -465,7 +465,8 @@ export class FileStorage implements DStore {
       try {
         noteFrom.links.forEach((link) => {
           const fname = link.to?.fname;
-          if (fname) {
+          // Note referencing itself does not count as backlink
+          if (fname && fname !== noteFrom.fname) {
             const notes = noteCache.getNotesByFileNameIgnoreCase(fname);
 
             notes.forEach((noteTo: NoteProps) => {

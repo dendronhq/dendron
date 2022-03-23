@@ -156,6 +156,7 @@ export class TextDocumentService implements ITextDocumentService {
       });
       return noteHydrated;
     }
+
     const props = await this.updateNoteContents({
       oldNote: noteHydrated,
       content,

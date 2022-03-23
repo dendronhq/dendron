@@ -297,10 +297,15 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   describe("WHEN updating a note (no links)", () => {
     test("THEN update event fired with the updated title", async (done) => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, vaults }) => {
           const engineClient = engine as DendronEngineClient;
-          const fooUpdated = { ...engine.notes["foo"] };
-          fooUpdated.title = "updated";
+          const resp = await engine.getNoteByPath({
+            npath: "root",
+            createIfNew: false,
+            vault: vaults[0],
+          });
+          const rootFile = resp.data!.note;
+          rootFile!.title = "updated";
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
@@ -328,12 +333,12 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.title).toEqual("updated");
-                expect(updatedEntry.prevNote.title).toEqual("Foo");
+                expect(updatedEntry.prevNote.title).toEqual("Root");
               }, done);
             }
           );
 
-          engineClient.updateNote(fooUpdated);
+          engineClient.updateNote(rootFile!);
         },
         {
           expect,

@@ -827,7 +827,8 @@ describe("GIVEN addMissingDefaultConfigs", () => {
             action,
           });
           expect(out.resp.backupPath).toBeTruthy();
-          expect(fs.existsSync(out.resp.backupPath)).toBeTruthy();
+          const backupPathExists = await fs.pathExists(out.resp.backupPath);
+          expect(backupPathExists).toBeTruthy();
           const rawConfig = DConfig.getRaw(wsRoot);
           const defaultConfig = ConfigUtils.genDefaultConfig();
           expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(

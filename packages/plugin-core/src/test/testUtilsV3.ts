@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DENDRON_VSCODE_CONFIG_KEYS,
+  DendronError,
   DEngineClient,
   Disposable,
   DVault,
@@ -524,17 +525,23 @@ export function describeMultiWS(
     }
     let ctx: ExtensionContext;
     before(async () => {
-      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
-      if (opts.beforeHook) {
-        await opts.beforeHook({ ctx });
-      }
+      try {
+        ctx = opts.ctx ?? setupWorkspaceStubs(opts);
+        if (opts.beforeHook) {
+          await opts.beforeHook({ ctx });
+        }
 
-      const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
-      console.log({ out });
-      if (opts.preActivateHook) {
-        await opts.preActivateHook({ ctx, ...out });
+        const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
+        if (opts.preActivateHook) {
+          await opts.preActivateHook({ ctx, ...out });
+        }
+        await _activate(ctx);
+      } catch (error) {
+        Logger.error({
+          ctx: `${title}: before`,
+          error: new DendronError({ message: "before", payload: error }),
+        });
       }
-      await _activate(ctx);
     });
 
     const result = fn();

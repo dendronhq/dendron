@@ -59,7 +59,7 @@ suite("RunMigrationCommand", function () {
       workspaceType: WorkspaceType.NATIVE,
     },
     () => {
-      test.only("THEN migration runs as expected without looking for workspace config.", async () => {
+      test("THEN migration runs as expected without looking for workspace config.", async () => {
         const ext = ExtensionProvider.getExtension();
         const cmd = new RunMigrationCommand(ext);
         expect(ext.type).toEqual(WorkspaceType.NATIVE);

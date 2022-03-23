@@ -1,35 +1,15 @@
 import {
   ConfigUtils,
-  DEngineClient,
   DVaultVisibility,
+  NoteUtils,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { note2File, tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { MDUtilsV4, MDUtilsV5 } from "@dendronhq/engine-server";
+import { runEngineTestV5, TestConfigUtils } from "../../..";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
-import {
-  DendronASTData,
-  DendronASTDest,
-  DendronPubOpts,
-  MDUtilsV4,
-} from "@dendronhq/engine-server";
-import { TestConfigUtils, runEngineTestV5 } from "../../..";
-import _ from "lodash";
-
-// runs all the processes
-function proc(
-  engine: DEngineClient,
-  dendron: DendronASTData,
-  opts?: DendronPubOpts
-) {
-  return MDUtilsV4.procFull({
-    engine,
-    ...dendron,
-    publishOpts: opts,
-  });
-}
 
 describe("backlinks", () => {
-  const dest = DendronASTDest.HTML;
   let siteRootDir: string;
 
   beforeEach(() => {
@@ -40,13 +20,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "beta",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "beta",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();
@@ -141,13 +118,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "one",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();
@@ -206,13 +180,10 @@ describe("backlinks", () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "one",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
         }).process("");
         expect(
           await AssertUtils.assertInString({
@@ -271,18 +242,70 @@ describe("backlinks", () => {
     );
   });
 
+  test("backlink to an invalid note doesn't cause a crash", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults }) => {
+        const vault = vaults[0];
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "one",
+        }).process("");
+
+        // The more important aspect of the verification is that the process()
+        // call doesn't crash.
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: [`<strong>Backlinks</strong>`],
+          })
+        ).toBeTruthy();
+      },
+      {
+        expect,
+        preSetupHook: async (opts: any) => {
+          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "one",
+            vault: vaults[0],
+            wsRoot,
+            body: "one",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "duplicateOne",
+            vault: vaults[1],
+            wsRoot,
+            body: "[[one]]",
+          });
+
+          // Create a note with the same ID as the previous note to create an
+          // invalid engine state, and add links to the target note from both
+          // notes with the same ID:
+          const note = NoteUtils.create({
+            created: 1,
+            updated: 1,
+            id: "duplicateOne",
+            fname: "duplicateTwo",
+            vault: vaults[1],
+            body: "[[one]]",
+          });
+          await note2File({ note, vault: vaults[1], wsRoot });
+        },
+      }
+    );
+  });
+
   describe("frontmatter tags", () => {
     test("single", async () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const vault = vaults[0];
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(engine, {
-              fname: "tags.test",
-              vault,
-              dest,
-              config: engine.config,
-            }),
+          const resp = await MDUtilsV5.procRehypeFull({
+            engine,
+            vault,
+            fname: "tags.test",
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -331,13 +354,10 @@ describe("backlinks", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           const vault = vaults[0];
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(engine, {
-              fname: "tags.test",
-              vault,
-              dest,
-              config: engine.config,
-            }),
+          const resp = await MDUtilsV5.procRehypeFull({
+            engine,
+            vault,
+            fname: "tags.test",
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -364,6 +384,7 @@ describe("backlinks", () => {
                 tags: ["test", "other"],
               },
             });
+
             await NoteTestUtilsV4.createNote({
               fname: "two",
               vault,
@@ -393,18 +414,15 @@ describe("backlinks", () => {
       );
     });
   });
-
+  //
   test("hashtag", async () => {
     await runEngineTestV5(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, {
-            fname: "tags.test",
-            vault,
-            dest,
-            config: engine.config,
-          }),
+        const resp = await MDUtilsV5.procRehypeFull({
+          engine,
+          vault,
+          fname: "tags.test",
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();

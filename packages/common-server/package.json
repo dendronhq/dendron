@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.86.1",
+  "version": "0.87.0",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {
@@ -37,7 +37,7 @@
     "test:watch": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.86.1",
+    "@dendronhq/common-all": "^0.87.0",
     "@sentry/integrations": "^6.13.3",
     "@sentry/node": "^6.13.3",
     "ajv": "^8.6.0",
@@ -59,8 +59,8 @@
     "yaml-unist-parser": "^1.3.1"
   },
   "devDependencies": {
-    "@types/comment-json": "^1.1.1",
     "@types/analytics-node": "^3.1.6",
+    "@types/comment-json": "^1.1.1",
     "@types/execa": "^2.0.0",
     "@types/express": "^4.17.11",
     "@types/fs-extra": "^9.0.1",

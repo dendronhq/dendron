@@ -49,6 +49,7 @@ function createPod({
     base: () => FakeAirtableBase,
   } as any;
   const cleanConfig: RunnableAirtableV2PodConfig = {
+    podId: "test",
     apiKey: "fakeKey",
     baseId: "fakeBase",
     tableName: "fakeTable",
@@ -89,6 +90,7 @@ const _setupTestFactoryCommon = ({
   srcFieldMapping,
   filters,
   cb,
+  podId,
 }: {
   srcFieldMapping: { [key: string]: SrcFieldMapping };
   filters?: ExportPodConfigurationFilterV2;
@@ -96,6 +98,7 @@ const _setupTestFactoryCommon = ({
     engine: DEngineClient;
     pod: AirtableExportPodV2;
   }) => Promise<AirtableExportReturnType>;
+  podId?: string;
 }) => {
   return async (preSetupHook: SetupHookFunction) => {
     let resp: Promise<AirtableExportReturnType>;
@@ -104,6 +107,7 @@ const _setupTestFactoryCommon = ({
         const { engine } = opts;
         const pod = createPod({
           config: {
+            podId,
             filters,
             sourceFieldMapping: {
               DendronId: {
@@ -136,6 +140,7 @@ const setupTestFactoryForNote = (opts: {
   srcFieldMapping: { [key: string]: SrcFieldMapping };
   filters?: ExportPodConfigurationFilterV2;
   fname: string;
+  podId?: string;
 }) => {
   return _setupTestFactoryCommon({
     ...opts,
@@ -625,6 +630,166 @@ describe("GIVEN export note with date ", () => {
         expect(resp.error?.message).toEqual(
           "The value for endDate is found empty. Please provide a valid value or enable skipOnEmpty in the srcFieldMapping."
         );
+      });
+    });
+  });
+});
+
+describe("GIVEN note has pods namespace in frontmatter", () => {
+  describe("WHEN export note with linked record", () => {
+    let resp: AirtableExportReturnType;
+
+    const setupTest = setupTestFactoryForNote({
+      fname: "proj.beta",
+      srcFieldMapping: {
+        Tasks: {
+          type: "linkedRecord",
+          to: "links",
+          podId: "dendron.task",
+          filter: "task.*",
+        },
+      },
+    });
+
+    describe("AND linked note does not have airtable id", () => {
+      test("THEN show error message", async () => {
+        const preSetupHook = async (opts: WorkspaceOpts) => {
+          await TestEngineUtils.createNoteByFname({
+            fname: "task.alpha",
+            body: "This is a task",
+            custom: {},
+            ...opts,
+          });
+          await TestEngineUtils.createNoteByFname({
+            fname: "proj.beta",
+            body: "[[task.alpha]]",
+            custom: {},
+            ...opts,
+          });
+        };
+        const resp = await setupTest(preSetupHook);
+        await checkString(
+          resp.error!.message,
+          "The following notes are missing airtable ids: dendron://vault1/task.alpha (task.alpha)"
+        );
+      });
+    });
+
+    describe("AND linked note has airtable id", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        await TestEngineUtils.createNoteByFname({
+          fname: "task.alpha",
+          body: "This is a task",
+          custom: { pods: { airtable: { "dendron.task": "airtableId-task" } } },
+          ...opts,
+        });
+        await TestEngineUtils.createNoteByFname({
+          fname: "proj.beta",
+          body: "[[task.alpha]]",
+          custom: {},
+          ...opts,
+        });
+      };
+
+      beforeAll(async () => {
+        resp = await setupTest(preSetupHook);
+      });
+
+      test("THEN create new record with task as foreign id", () => {
+        expect(resp).toEqual({
+          data: {
+            created: [
+              {
+                fields: {
+                  DendronId: "proj.beta",
+                  Tasks: ["airtableId-task"],
+                },
+                id: "airtable-proj.beta",
+              },
+            ],
+            updated: [],
+          },
+          error: null,
+        });
+      });
+    });
+    describe("AND linked note is associated with multiple records", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        await TestEngineUtils.createNoteByFname({
+          fname: "task.alpha",
+          body: "This is a task",
+          custom: { pods: { airtable: { "dendron.task": "airtableId-task" } } },
+          ...opts,
+        });
+        await TestEngineUtils.createNoteByFname({
+          fname: "task.beta",
+          body: "This is a task beta",
+          custom: {
+            pods: {
+              airtable: {
+                "dendron.feat": "airtableId-feat",
+                "dendron.task": "airtableId-task2",
+              },
+            },
+          },
+          ...opts,
+        });
+        await TestEngineUtils.createNoteByFname({
+          fname: "proj.beta",
+          body: "[[task.alpha]] [[task.beta]]",
+          custom: {},
+          ...opts,
+        });
+      };
+
+      beforeAll(async () => {
+        resp = await setupTest(preSetupHook);
+      });
+
+      test("THEN create new record for the tasks with matching podId", () => {
+        expect(resp.data?.created).toEqual([
+          {
+            fields: {
+              DendronId: "proj.beta",
+              Tasks: ["airtableId-task", "airtableId-task2"],
+            },
+            id: "airtable-proj.beta",
+          },
+        ]);
+      });
+    });
+  });
+  describe("WHEN export a note", () => {
+    const setupTest = setupTestFactoryForNote({
+      podId: "dendron.task",
+      fname: "alpha",
+      srcFieldMapping: {
+        Alpha: {
+          type: "number",
+          to: "custom.alpha",
+        },
+      },
+    });
+
+    describe("AND airtable id is present in frontmatter under pods namespace", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, {
+          alpha: 1,
+          pods: { airtable: { "dendron.task": "airtable-one" } },
+        });
+      };
+      test("THEN update the record", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp.data?.updated).toEqual([genField({ Alpha: 1 })]);
+      });
+    });
+    describe("AND airtable id is not present in frontmatter under pods namespace", () => {
+      const preSetupHook = async (opts: WorkspaceOpts) => {
+        return createTestNote(opts, { alpha: 1 });
+      };
+      test("THEN create the record", async () => {
+        const resp = await setupTest(preSetupHook);
+        expect(resp.data?.created).toEqual([genField({ Alpha: 1 })]);
       });
     });
   });

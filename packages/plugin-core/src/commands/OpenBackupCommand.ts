@@ -14,13 +14,10 @@ export class OpenBackupCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.OPEN_BACKUP.key;
   private extension: IDendronExtension;
-  private backupService: IBackupService;
 
   constructor(ext: IDendronExtension) {
     super();
     this.extension = ext;
-    const ws = this.extension.getDWorkspace();
-    this.backupService = new BackupService({ wsRoot: ws.wsRoot });
   }
 
   private async promptBackupEntrySelection(opts: { backups: string[] }) {
@@ -40,8 +37,9 @@ export class OpenBackupCommand extends BasicCommand<
 
   private async promptBackupKeySelection(opts: {
     allBackups: { key: string; backups: string[] }[];
+    backupService: IBackupService;
   }) {
-    const { allBackups } = opts;
+    const { allBackups, backupService } = opts;
     const options: QuickPickItem[] = allBackups
       .filter((keyEntry) => {
         return keyEntry.backups.length > 0;
@@ -73,7 +71,7 @@ export class OpenBackupCommand extends BasicCommand<
             const backupFile = await workspace.openTextDocument(
               Uri.file(
                 path.join(
-                  this.backupService.backupRoot,
+                  backupService.backupRoot,
                   selected.key,
                   selectedBackupName.label
                 )
@@ -95,13 +93,15 @@ export class OpenBackupCommand extends BasicCommand<
   }
 
   async execute(opts?: OpenBackupCommandOpts): Promise<void> {
+    const ws = this.extension.getDWorkspace();
+    const backupService = new BackupService({ wsRoot: ws.wsRoot });
     try {
       const ctx = "execute";
       this.L.info({ ctx, opts });
-      const allBackups = this.backupService.getAllBackups();
-      await this.promptBackupKeySelection({ allBackups });
+      const allBackups = backupService.getAllBackups();
+      await this.promptBackupKeySelection({ allBackups, backupService });
     } finally {
-      this.backupService.dispose();
+      backupService.dispose();
     }
   }
 }

@@ -533,4 +533,22 @@ export class PodUIControls {
         assertUnreachable(type);
     }
   }
+
+  /**
+   * Prompt user to select custom pod Id
+   */
+  public static async promptToSelectCustomPodId(): Promise<string | undefined> {
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configs = PodV2ConfigManager.getAllPodConfigs(
+      path.join(PodUtils.getPodDir({ wsRoot }), "custom")
+    );
+    const items = configs.map<QuickPickItem>((value) => {
+      return { label: value.podId, description: value.podType };
+    });
+    const podIdQuickPick = await VSCodeUtils.showQuickPick(items, {
+      title: "Pick a pod configuration Id",
+      ignoreFocusOut: true,
+    });
+    return podIdQuickPick?.label;
+  }
 }

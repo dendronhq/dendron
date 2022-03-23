@@ -50,14 +50,13 @@ export class WorkspaceUtils {
   static async getCodeWorkspaceSettings(
     wsRoot: string
   ): Promise<RespV3<WorkspaceSettings>> {
-    const wsConfig = await readJSONWithComments(
-      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-    );
+    const wsConfigPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
+    const wsConfig = await readJSONWithComments(wsConfigPath);
     if (!this.isWorkspaceConfig(wsConfig)) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_CONFIG,
-          message: "bad workspace config",
+          message: `Bad or missing code-workspace file ${wsConfigPath}`,
         }),
       };
     } else {
@@ -70,15 +69,14 @@ export class WorkspaceUtils {
   static getCodeWorkspaceSettingsSync(
     wsRoot: string
   ): RespV3<WorkspaceSettings> {
+    const wsConfigPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
     try {
-      const wsConfig = readJSONWithCommentsSync(
-        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
+      const wsConfig = readJSONWithCommentsSync(wsConfigPath);
       if (!this.isWorkspaceConfig(wsConfig)) {
         return {
           error: DendronError.createFromStatus({
             status: ERROR_STATUS.INVALID_CONFIG,
-            message: "bad workspace config",
+            message: `Bad code-workspace file ${wsConfigPath}`,
           }),
         };
       } else {
@@ -90,7 +88,7 @@ export class WorkspaceUtils {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_CONFIG,
-          message: "bad workspace config",
+          message: `Missing code-workspace file ${wsConfigPath}`,
         }),
       };
     }

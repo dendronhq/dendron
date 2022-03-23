@@ -1,5 +1,15 @@
-import { AppNames, ContextualUIEvents, Time } from "@dendronhq/common-all";
-import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
+import {
+  AppNames,
+  ContextualUIEvents,
+  DWorkspaceV2,
+  getStage,
+  Time,
+} from "@dendronhq/common-all";
+import {
+  SegmentClient,
+  SegmentUtils,
+  VSCodeIdentifyProps,
+} from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
@@ -7,6 +17,10 @@ import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { VersionProvider } from "../versionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
+import fs from "fs-extra";
+import { setupSegmentClient } from "../telemetry";
+import { Logger } from "../logger";
+import path from "path";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -97,6 +111,44 @@ export class AnalyticsUtils {
   static identify() {
     const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
     SegmentUtils.identify(props);
+  }
+
+  /**
+   * Setup segment client
+   * Also setup cache flushing in case of missed uploads
+   */
+  static setupSegmentWithCacheFlush({
+    context,
+    ws,
+  }: {
+    context: vscode.ExtensionContext;
+    ws: DWorkspaceV2;
+  }) {
+    if (getStage() === "prod") {
+      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+      fs.ensureDir(segmentResidualCacheDir);
+
+      setupSegmentClient(
+        ws,
+        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+      );
+
+      // Try to flush the Segment residual cache every hour:
+      (function tryFlushSegmentCache() {
+        SegmentClient.instance()
+          .tryFlushResidualCache()
+          .then((result) => {
+            Logger.info(
+              `Segment Residual Cache flush attempted. ${JSON.stringify(
+                result
+              )}`
+            );
+          });
+
+        // Repeat once an hour:
+        setTimeout(tryFlushSegmentCache, 3600000);
+      })();
+    }
   }
 
   static showTelemetryNotice() {

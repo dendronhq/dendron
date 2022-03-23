@@ -575,6 +575,26 @@ export async function findNonNoteFile(opts: {
 
 class FileUtils {
   /**
+   * Keep incrementing a numerical suffix until we find a path name that does not correspond to an existing file
+   * @param param0
+   */
+  static genFilePathWithSuffixThatDoesNotExist({
+    fpath,
+    sep = "-",
+  }: {
+    fpath: string;
+    sep?: string;
+  }) {
+    // Try to put into `fpath`. If `fpath` exists, create a new folder with an numbered suffix
+    let acc = 0;
+    let tryPath = fpath;
+    while (fs.pathExistsSync(tryPath)) {
+      acc += 1;
+      tryPath = [fpath, acc].join(sep);
+    }
+    return { filePath: tryPath, acc };
+  }
+  /**
    * Check if a file starts with a prefix string
    * @param fpath: full path to the file
    * @param prefix: string prefix to check for

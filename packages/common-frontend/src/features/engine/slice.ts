@@ -4,7 +4,6 @@ import {
   NoteProps,
   NotePropsDict,
   stringifyError,
-  APIUtils,
   NoteUtils,
   ConfigGetPayload,
 } from "@dendronhq/common-all";
@@ -19,9 +18,9 @@ import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
  */
 export const initNotes = createAsyncThunk(
   "engine/init",
-  async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
+  async ({ url, ws }: { url: string; ws: string }, { dispatch }) => {
     const logger = createLogger("initNotesThunk");
-    const endpoint = APIUtils.getLocalEndpoint(port);
+    const endpoint = url;
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -47,9 +46,9 @@ export const initNotes = createAsyncThunk(
  */
 export const syncConfig = createAsyncThunk(
   "engine/syncConfig",
-  async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
+  async ({ url, ws }: { url: string; ws: string }, { dispatch }) => {
     const logger = createLogger("syncConfigThunk");
-    const endpoint = APIUtils.getLocalEndpoint(port);
+    const endpoint = url;
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -73,11 +72,11 @@ export const syncConfig = createAsyncThunk(
 export const syncNote = createAsyncThunk(
   "engine/sync",
   async (
-    { port, ws, note }: { port: number; ws: string; note: NoteProps },
+    { url, ws, note }: { url: string; ws: string; note: NoteProps },
     { dispatch }
   ) => {
     const logger = createLogger("syncNoteThunk");
-    const endpoint = APIUtils.getLocalEndpoint(port);
+    const endpoint = url;
     const api = new DendronApiV2({
       endpoint,
       apiPath: "api",
@@ -104,14 +103,14 @@ export const renderNote = createAsyncThunk(
   "engine/render",
   async (
     {
-      port,
+      url,
       ws,
       id,
       note,
-    }: { port: number; ws: string; id: string; note?: NoteProps },
+    }: { url: string; ws: string; id: string; note?: NoteProps },
     { dispatch }
   ) => {
-    const endpoint = APIUtils.getLocalEndpoint(port);
+    const endpoint = url;
     const logger = createLogger("renderNoteThunk");
     const api = new DendronApiV2({
       endpoint,

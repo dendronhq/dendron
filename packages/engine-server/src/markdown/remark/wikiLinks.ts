@@ -99,8 +99,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
-      const { dest } = MDUtilsV4.getDendronData(proc);
-      const vault = MDUtilsV4.getVault(proc, data.vaultName);
+      const { dest, vault } = MDUtilsV5.getProcData(proc);
+
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
         return LinkUtils.renderNoteLink({
@@ -129,10 +129,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (copts.useId && dest === DendronASTDest.HTML) {
         // TODO: check for vault
-        const notes = NoteUtils.getNotesByFname({
+        const notes = NoteUtils.getNotesByFnameFromEngine({
           fname: value,
-          notes: engine.notes,
           vault,
+          engine,
         });
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
@@ -243,12 +243,10 @@ function attachParser(proc: Unified.Processor) {
       out.alias === out.value &&
       vault
     ) {
-      const wsRoot = engine.wsRoot;
-      const note = NoteUtils.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname: out.value,
-        notes: engine.notes,
+        engine,
         vault,
-        wsRoot,
       });
       if (note) {
         out.alias = note.title;

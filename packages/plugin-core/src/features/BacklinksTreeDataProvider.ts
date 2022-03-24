@@ -1,6 +1,18 @@
 import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
-import vscode, { ProviderResult } from "vscode";
 import path from "path";
+import _, { Dictionary } from "lodash";
+import {
+  Disposable,
+  Event,
+  EventEmitter,
+  ProviderResult,
+  Range,
+  ThemeIcon,
+  TreeDataProvider,
+  TreeItemCollapsibleState,
+  Uri,
+  window,
+} from "vscode";
 import {
   containsMarkdownExt,
   findReferences,
@@ -8,18 +20,16 @@ import {
   sortPaths,
 } from "../utils/md";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
-import _, { Dictionary } from "lodash";
 import { DendronContext, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BacklinkSortOrder } from "../types";
 import { Backlink, BacklinkFoundRef } from "./Backlink";
-import { Disposable } from "vscode-languageclient";
 
 export default class BacklinksTreeDataProvider
-  implements vscode.TreeDataProvider<Backlink>, Disposable
+  implements TreeDataProvider<Backlink>, Disposable
 {
-  private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
+  private _onDidChangeTreeDataEmitter: EventEmitter<
     Backlink | undefined | void
   >;
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
@@ -31,7 +41,7 @@ export default class BacklinksTreeDataProvider
   /**
    * Signals to vscode UI engine that the backlinks view needs to be refreshed.
    */
-  readonly onDidChangeTreeData: vscode.Event<Backlink | undefined | void>;
+  readonly onDidChangeTreeData: Event<Backlink | undefined | void>;
 
   /**
    *
@@ -45,7 +55,7 @@ export default class BacklinksTreeDataProvider
     this._isLinkCandidateEnabled = isLinkCandidateEnabled;
     this.updateSortOrder(BacklinkSortOrder.PathNames);
 
-    this._onDidChangeTreeDataEmitter = new vscode.EventEmitter<
+    this._onDidChangeTreeDataEmitter = new EventEmitter<
       Backlink | undefined | void
     >();
 
@@ -68,7 +78,7 @@ export default class BacklinksTreeDataProvider
 
   private setupSubscriptions(): void {
     this._onDidChangeActiveTextEditorDisposable =
-      vscode.window.onDidChangeActiveTextEditor(() => {
+      window.onDidChangeActiveTextEditor(() => {
         const ctx = "refreshBacklinksChangeActiveTextEditor";
         Logger.info({ ctx });
         this.refreshBacklinks();
@@ -113,7 +123,7 @@ export default class BacklinksTreeDataProvider
   }
 
   public async getChildren(element?: Backlink) {
-    const fsPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+    const fsPath = window.activeTextEditor?.document.uri.fsPath;
 
     if (!element) {
       // Root case, branch will get top level backlinks.
@@ -166,10 +176,10 @@ export default class BacklinksTreeDataProvider
       const backlinkTreeItem = new Backlink(
         "Linked",
         wikilinks,
-        vscode.TreeItemCollapsibleState.Collapsed
+        TreeItemCollapsibleState.Collapsed
       );
       backlinkTreeItem.parentBacklink = wikilinks[0].parentBacklink;
-      backlinkTreeItem.iconPath = new vscode.ThemeIcon(ICONS.WIKILINK);
+      backlinkTreeItem.iconPath = new ThemeIcon(ICONS.WIKILINK);
 
       const updatedString =
         wikilinks[0].note !== undefined
@@ -187,10 +197,10 @@ export default class BacklinksTreeDataProvider
         const candidateTreeItem = new Backlink(
           "Candidates",
           linkCandidates,
-          vscode.TreeItemCollapsibleState.Collapsed
+          TreeItemCollapsibleState.Collapsed
         );
         candidateTreeItem.parentBacklink = linkCandidates[0].parentBacklink;
-        candidateTreeItem.iconPath = new vscode.ThemeIcon(ICONS.LINK_CANDIDATE);
+        candidateTreeItem.iconPath = new ThemeIcon(ICONS.LINK_CANDIDATE);
         candidateTreeItem.description = `${linkCandidates.length} candidate(s).`;
         out.push(candidateTreeItem);
       }
@@ -216,7 +226,7 @@ export default class BacklinksTreeDataProvider
       const backlink = new Backlink(
         ref.matchText,
         undefined,
-        vscode.TreeItemCollapsibleState.None
+        TreeItemCollapsibleState.None
       );
       backlink.parentBacklink = parent;
       backlink.description = `on line ${lineNum + 1}`;
@@ -288,7 +298,7 @@ export default class BacklinksTreeDataProvider
       return [];
     }
 
-    const collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    const collapsibleState = TreeItemCollapsibleState.Collapsed;
 
     const out = pathsSorted.map((pathParam) => {
       const backlink = new Backlink(
@@ -308,10 +318,7 @@ export default class BacklinksTreeDataProvider
       backlink.tooltip = pathParam;
       backlink.command = {
         command: "vscode.open",
-        arguments: [
-          vscode.Uri.file(pathParam),
-          { selection: new vscode.Range(0, 0, 0, 0) },
-        ],
+        arguments: [Uri.file(pathParam), { selection: new Range(0, 0, 0, 0) }],
         title: "Open File",
       };
       return backlink;

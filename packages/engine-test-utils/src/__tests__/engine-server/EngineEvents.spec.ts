@@ -142,9 +142,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
     });
   });
 
-  // TODO: This scenario doesn't seem to work - parent is updated, but children
-  // appear to get orphaned.
-  describe.skip("WHEN writing over an existing note by changing its ID", () => {
+  describe("WHEN writing over an existing note by changing its ID", () => {
     test("THEN expect all dependent notes to be updated", async (done) => {
       await runEngineTestV5(
         async ({ engine }) => {
@@ -155,19 +153,57 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
-              try {
-                noteChangeEntries.forEach((entry) => {
-                  // TODO: Add validation once scenario works.
-                  console.log(entry);
+              const createEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "create"
+              );
+
+              const deleteEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "delete"
+              );
+
+              const updateEntries = extractNoteChangeEntriesByType(
+                noteChangeEntries,
+                "update"
+              ) as NoteChangeUpdateEntry[];
+
+              testAssertsInsideCallback(() => {
+                expect(createEntries.length).toEqual(1);
+                expect(updateEntries.length).toEqual(2);
+                expect(deleteEntries.length).toEqual(1);
+
+                expect(createEntries[0].note.fname).toEqual("foo");
+                expect(createEntries[0].note.id).toEqual("updatedID");
+                expect(createEntries[0].note.children).toEqual(["foo.ch1"]);
+                expect(
+                  createEntries[0].note.parent &&
+                    engine.notes[createEntries[0].note.parent].fname
+                ).toEqual("root");
+                expect(deleteEntries[0].note.fname).toEqual("foo");
+                expect(deleteEntries[0].note.id).toEqual("foo");
+
+                updateEntries.forEach((entry) => {
+                  if (entry.note.fname === "root") {
+                    expect(entry.note.children).toEqual(["bar", "updatedID"]);
+                    expect(entry.status).toEqual("update");
+                  } else if (entry.note.fname === "foo.ch1") {
+                    expect(entry.note.parent).toEqual("updatedID");
+                    expect(entry.status).toEqual("update");
+                  } else {
+                    done({
+                      message: `Unexpected NoteChangeEntry. fname: ${entry.note.fname}, id: ${entry.note.id}, status: ${entry.status}`,
+                    });
+                    return;
+                  }
                 });
+
                 done();
-              } catch (err) {
-                done(err);
-              }
+              }, done);
             }
           );
 
-          await engineClient.writeNote(fooUpdated, { updateExisting: true });
+          await engineClient.writeNote(fooUpdated);
         },
         {
           expect,
@@ -261,10 +297,15 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   describe("WHEN updating a note (no links)", () => {
     test("THEN update event fired with the updated title", async (done) => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, vaults }) => {
           const engineClient = engine as DendronEngineClient;
-          const fooUpdated = { ...engine.notes["foo"] };
-          fooUpdated.title = "updated";
+          const resp = await engine.getNoteByPath({
+            npath: "root",
+            createIfNew: false,
+            vault: vaults[0],
+          });
+          const rootFile = resp.data!.note;
+          rootFile!.title = "updated";
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
@@ -292,12 +333,12 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.title).toEqual("updated");
-                expect(updatedEntry.prevNote.title).toEqual("Foo");
+                expect(updatedEntry.prevNote.title).toEqual("Root");
               }, done);
             }
           );
 
-          engineClient.updateNote(fooUpdated);
+          engineClient.updateNote(rootFile!);
         },
         {
           expect,

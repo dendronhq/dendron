@@ -6,23 +6,31 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { ERROR_SEVERITY } from "./constants";
-import { DendronError, ErrorMessages } from "./error";
+import { DateTime, LruCache } from ".";
 import { COLORS_LIST } from "./colors";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
-} from "./constants/configs/compat";
+  ERROR_SEVERITY,
+} from "./constants";
+import { DendronError, ErrorMessages } from "./error";
 import {
   DendronSiteConfig,
   DHookDict,
   DVault,
-  NoteProps,
-  SEOProps,
-  NotePropsDict,
   LegacyDuplicateNoteBehavior,
   LegacyHierarchyConfig,
+  NoteProps,
+  NotePropsDict,
+  SEOProps,
 } from "./types";
+import { GithubConfig } from "./types/configs/publishing/github";
+import {
+  DendronPublishingConfig,
+  DuplicateNoteBehavior,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   configIsV4,
@@ -42,14 +50,6 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { DateTime, LruCache } from ".";
-import {
-  DendronPublishingConfig,
-  DuplicateNoteBehavior,
-  genDefaultPublishingConfig,
-  HierarchyConfig,
-} from "./types/configs/publishing/publishing";
-import { GithubConfig } from "./types/configs/publishing/github";
 
 /**
  * Dendron utilities
@@ -99,6 +99,10 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+export function isNotNull<T>(t: T | null): t is T {
+  return !_.isNull(t);
 }
 
 /**
@@ -607,6 +611,11 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
+/** Makes not just the top level, but all nested properties optional. */
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";
@@ -868,20 +877,34 @@ export class ConfigUtils {
       : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
   }
 
-  static getEnableFrontmatterTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableFrontmatterTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.showFrontMatterTags
       : ConfigUtils.getPublishing(config).enableFrontmatterTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableFrontmatterTags;
   }
 
-  static getEnableHashesForFMTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableHashesForFMTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.useHashesForFMTags
       : ConfigUtils.getPublishing(config).enableHashesForFMTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableHashesForFMTags;
   }
 
   static getEnablePrettlyLinks(
@@ -962,6 +985,32 @@ export class ConfigUtils {
     }
     return true;
   }
+  static getEnableBackLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps; shouldApplyPublishingRules?: boolean }
+  ): boolean {
+    // check if note has override. takes precedence
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      _.isBoolean(opts.note.config.global.enableBackLinks)
+    ) {
+      return opts.note.config.global.enableBackLinks;
+    }
+    // check config value, if enableBacklinks set, then use value set
+    const publishConfig = ConfigUtils.getPublishingConfig(_config);
+    if (
+      ConfigUtils.isDendronPublishingConfig(publishConfig) &&
+      opts?.shouldApplyPublishingRules
+    ) {
+      if (_.isBoolean(publishConfig.enableBackLinks)) {
+        return publishConfig.enableBackLinks;
+      }
+    }
+    return true;
+  }
 
   static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
     return (
@@ -1024,6 +1073,12 @@ export class ConfigUtils {
   ) {
     const path = `publishing.github.${key}`;
     _.set(config, path, value);
+  }
+
+  static isDendronPublishingConfig(
+    config: unknown
+  ): config is DendronPublishingConfig {
+    return _.has(config, "enableBackLinks");
   }
 
   static overridePublishingConfig(

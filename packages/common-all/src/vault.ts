@@ -1,9 +1,13 @@
 import _ from "lodash";
 import path from "path";
-import { normalizeUnixPath } from ".";
+import { FOLDERS, normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault, WorkspaceFolderRaw } from "./types";
+
+export type SelfContainedVault = Omit<DVault, "selfContained"> & {
+  selfContained: true;
+};
 
 export class VaultUtils {
   static getName(vault: DVault): string {
@@ -34,12 +38,21 @@ export class VaultUtils {
     return VaultUtils.getRelPath(vaultSrc) === VaultUtils.getRelPath(vaultCmp);
   }
 
+  static isSelfContained(vault: DVault): vault is SelfContainedVault {
+    return vault.selfContained === true;
+  }
+
   /**
    * Path of vault relative to workspace root
    * @param vault
    * @returns
    */
   static getRelPath(vault: DVault) {
+    if (VaultUtils.isSelfContained(vault)) {
+      // Return the path to the notes folder inside the vault. This is for
+      // compatibility with existing code.
+      return path.join(vault.fsPath, FOLDERS.NOTES);
+    }
     if (vault.workspace) {
       return path.join(vault.workspace, vault.fsPath);
     }
@@ -103,7 +116,7 @@ export class VaultUtils {
       fsPath,
     });
     const vault = _.find(vaults, (ent) => {
-      return normPath.startsWith(VaultUtils.getRelPath(ent));
+      return normPath.trim() === VaultUtils.getRelPath(ent).trim();
     });
     if (!vault) {
       throw new DendronError({

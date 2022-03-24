@@ -63,7 +63,7 @@ describe("extendedImage", () => {
     });
 
     test("doesn't parse broken YAML", () => {
-      const resp = proc().parse(`![](/assets/image.png){test:}`);
+      const resp = proc().parse(`![](/assets/image.png){'test}`);
       expect(getExtendedImage(resp).type).toEqual(DendronASTTypes.IMAGE);
     });
   });

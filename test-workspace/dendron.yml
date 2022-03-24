@@ -3,6 +3,7 @@ dev:
     enableWebUI: true
     enablePreviewV2: true
     enableExportPodV2: true
+    enableSelfContainedVaults: true
 commands:
     lookup:
         note:
@@ -20,12 +21,14 @@ commands:
     insertNoteIndex:
         enableMarker: false
     randomNote: {}
+    copyNoteLink: {}
 workspace:
-    dendronVersion: 0.82.0
+    dendronVersion: 0.83.0
     vaults:
         -
-            fsPath: vault3
-            name: vaultThree
+            fsPath: dependencies/localhost/vault3
+            selfContained: true
+            name: vault3
         -
             fsPath: vault2
             visibility: private
@@ -81,6 +84,8 @@ preview:
     enablePrettyRefs: true
     enableKatex: true
     automaticallyShowPreview: false
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
 publishing:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -109,6 +114,7 @@ publishing:
             - vault2
             - vaultThree
             - vaultThree
+            - vault3
     writeStubs: false
     seo:
         title: Dendron

@@ -284,6 +284,9 @@ export type EngineUpdateNodesOptsV2 = {
 };
 export type GetNoteOptsV2 = {
   vault: DVault;
+  /**
+   * Note file name minus the extension
+   */
   npath: string;
   /**
    * If node does not exist, create it?
@@ -600,6 +603,7 @@ export type DEngine = DCommonProps &
 
 /**
  * Implements the engine interface but has no backend store
+ *  ^sdxp5tjokad9
  */
 export type DEngineClient = Omit<DEngine, "store">;
 
@@ -791,6 +795,7 @@ export enum SeedBrowserMessageType {
   "onSeedStateChange" = "onSeedStateChange",
 }
 
+// TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps | undefined;
   /**
@@ -801,6 +806,11 @@ export type OnDidChangeActiveTextEditorData = {
    * Sync the changed note
    */
   syncChangedNote?: boolean;
+  /**
+   * Current active note.
+   * If activeNote is defined, view will set that note as active note. Otherwise default to {@param note}
+   */
+  activeNote?: NoteProps;
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;

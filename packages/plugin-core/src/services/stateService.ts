@@ -1,12 +1,10 @@
+import _ from "lodash";
 import { ExtensionContext } from "vscode";
 import {
   GLOBAL_STATE,
   WORKSPACE_ACTIVATION_CONTEXT,
   WORKSPACE_STATE,
 } from "../constants";
-import * as vscode from "vscode";
-import { VSCodeUtils } from "../vsCodeUtils";
-import _ from "lodash";
 
 let _StateService: StateService | undefined;
 
@@ -14,6 +12,8 @@ type ExtensionGlobalState = ExtensionContext["globalState"];
 type ExtensionWorkspaceState = ExtensionContext["workspaceState"];
 
 /**
+ * @deprecated All state service logic will be consolidated to {@link MetadataService}.
+ * Consider using it instead if you need to add a new state to track.
  * Keeps track of workspace state
  */
 export class StateService {
@@ -106,26 +106,5 @@ export class StateService {
     _.keys(WORKSPACE_STATE).map((k) => {
       this.workspaceState.update(k, undefined);
     });
-  }
-
-  showTelemetryNotice() {
-    vscode.window
-      .showInformationMessage(
-        `Dendron collects limited usage data to help improve the quality of our software`,
-        "See Details",
-        "Opt Out"
-      )
-      .then((resp) => {
-        if (resp === "See Details") {
-          VSCodeUtils.openLink(
-            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html"
-          );
-        }
-        if (resp === "Opt Out") {
-          VSCodeUtils.openLink(
-            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html#how-to-opt-out-of-data-collection"
-          );
-        }
-      });
   }
 }

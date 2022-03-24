@@ -97,7 +97,14 @@ type MultiSelectField = {
 
 type LinkedRecordField = {
   type: "linkedRecord";
+  podId?: string;
 } & SelectField;
+
+type AirtablePodMetadata = {
+  airtable?: {
+    [key: string]: string;
+  };
+};
 
 export type AirtableFieldsMap = { fields: { [key: string]: string | number } };
 
@@ -120,15 +127,23 @@ export class AirtableUtils {
     return _map;
   }
 
-  static checkNoteHasAirtableId(note: NoteProps): boolean {
-    return !_.isUndefined(_.get(note.custom, "airtableId"));
-  }
-
   static filterNotes(notes: NoteProps[], srcHierarchy: string) {
     return notes.filter((note) => note.fname.includes(srcHierarchy));
   }
-  static getAirtableIdFromNote(note: NoteProps): string {
-    return _.get(note.custom, "airtableId");
+  static getAirtableIdFromNote(
+    note: NoteProps,
+    podId?: string
+  ): string | undefined {
+    const airtableId = _.get(note.custom, "airtableId");
+    if (airtableId) {
+      return airtableId;
+    } else {
+      if (!podId) {
+        return undefined;
+      }
+      const airtableMetadata = _.get(note.custom, "pods.airtable");
+      return airtableMetadata ? airtableMetadata[podId] : undefined;
+    }
   }
 
   /***
@@ -213,9 +228,7 @@ export class AirtableUtils {
         });
       }
       case "date": {
-        return {
-          data: NoteMetadataUtils.extractDate({ note, key }),
-        };
+        return NoteMetadataUtils.extractDate({ note, key, ...props });
       }
       case "singleSelect": {
         if (fieldMapping.to === SpecialSrcFieldToKey.TAGS) {
@@ -255,7 +268,7 @@ export class AirtableUtils {
           note,
           filters: fieldMapping.filter ? [fieldMapping.filter] : [],
         });
-        const { vaults, notes } = engine;
+        const { vaults } = engine;
         const notesWithNoIds: NoteProps[] = [];
         const recordIds = links.flatMap((l) => {
           if (_.isUndefined(l.to)) {
@@ -268,10 +281,17 @@ export class AirtableUtils {
           const vault = vaultName
             ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
             : undefined;
-          const _notes = NoteUtils.getNotesByFname({ fname, notes, vault });
+          const _notes = NoteUtils.getNotesByFnameFromEngine({
+            fname,
+            engine,
+            vault,
+          });
           const _recordIds = _notes
             .map((n) => {
-              const id = AirtableUtils.getAirtableIdFromNote(n);
+              const id = AirtableUtils.getAirtableIdFromNote(
+                n,
+                fieldMapping.podId
+              );
               return {
                 note: n,
                 id,
@@ -323,8 +343,9 @@ export class AirtableUtils {
     srcFieldMapping: { [key: string]: SrcFieldMapping };
     logger: DLogger;
     engine: DEngineClient;
+    podId?: string;
   }): RespV3<SrcFieldMappingResp> {
-    const { notes, srcFieldMapping, logger, engine } = opts;
+    const { notes, srcFieldMapping, logger, engine, podId } = opts;
     const ctx = "notesToSrc";
     const recordSets: SrcFieldMappingResp = {
       create: [],
@@ -370,11 +391,12 @@ export class AirtableUtils {
           }
         }
       }
-      if (AirtableUtils.checkNoteHasAirtableId(note)) {
+      const airtableId = AirtableUtils.getAirtableIdFromNote(note, podId);
+      if (airtableId) {
         logger.debug({ ctx, noteId: note.id, msg: "updating" });
         recordSets.update.push({
           fields,
-          id: AirtableUtils.getAirtableIdFromNote(note),
+          id: airtableId,
         });
       } else {
         logger.debug({ ctx, noteId: note.id, msg: "creating" });
@@ -400,28 +422,50 @@ export class AirtableUtils {
     records,
     engine,
     logger,
+    podId,
   }: {
     records: Records<FieldSet>;
     engine: DEngineClient;
     logger: DLogger;
+    podId?: string;
   }) {
+    if (!podId) return;
     const out = await Promise.all(
       records.map(async (ent) => {
         const airtableId = ent.id;
         const dendronId = ent.fields["DendronId"] as string;
         const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
-        const noteAirtableId = _.get(note.custom, "airtableId");
-        if (!noteAirtableId) {
-          const updatedNote = {
-            ...note,
-            custom: { ...note.custom, airtableId },
+        let pods: AirtablePodMetadata = _.get(note.custom, "pods");
+        // return if the note is already exported for this pod Id
+        if (pods && pods.airtable && pods.airtable[podId]) return undefined;
+
+        // if this is the first time a pod metadata is added to the note, add airtable pod metadata under pods namespace
+        if (!pods) {
+          pods = {
+            airtable: {
+              [podId]: airtableId,
+            },
           };
-          const out = await engine.writeNote(updatedNote, {
-            updateExisting: true,
-          });
-          return out;
+        } else if (pods.airtable) {
+          // if airtable namespace is already present in frontmatter, update hashmap with podId: airtableId
+          pods.airtable[podId] = airtableId;
+        } else {
+          // else update pods hashmap with airtable namespace for the newly exported record
+          pods = {
+            ...pods,
+            airtable: {
+              [podId]: airtableId,
+            },
+          };
         }
-        return undefined;
+        const updatedNote = {
+          ...note,
+          custom: { ...note.custom, pods },
+        };
+        const out = await engine.writeNote(updatedNote, {
+          updateExisting: true,
+        });
+        return out;
       })
     );
     logger.info({

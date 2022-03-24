@@ -46,6 +46,7 @@ import {
   USER_MESSAGES,
   DNoteLoc,
   NoteChangeUpdateEntry,
+  DNodeUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -349,10 +350,25 @@ export class FileStorage implements DStore {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    const schemaFiles = getAllFiles({
+    const out = await getAllFiles({
       root: vpath,
       include: ["*.schema.yml"],
-    }) as string[];
+    });
+    if (out.error || !out.data) {
+      return {
+        data: [],
+        errors: [
+          new DendronError({
+            message: `Unable to get schemas for vault ${VaultUtils.getName(
+              vault
+            )}`,
+            severity: ERROR_SEVERITY.MINOR,
+            payload: out.error,
+          }),
+        ],
+      };
+    }
+    const schemaFiles = out.data.map((entry) => entry.toString());
     this.logger.info({ ctx, schemaFiles });
     if (_.isEmpty(schemaFiles)) {
       throw DendronError.createFromStatus({
@@ -400,13 +416,22 @@ export class FileStorage implements DStore {
         };
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
-        if (!this.engine.config.noCaching) {
+        // Skip this if we found no notes, which means vault did not initialize
+        if (!this.engine.config.noCaching && notes.length > 0) {
           writeNotesToCache(vpath, newCache);
         }
         return notes;
       })
     );
     const allNotes = _.flatten(out);
+    if (allNotes.length === 0) {
+      errors.push(
+        new DendronError({
+          message: "No vaults initialized!",
+          severity: ERROR_SEVERITY.FATAL,
+        })
+      );
+    }
 
     this._addBacklinks({ notesWithLinks, allNotes });
 
@@ -494,15 +519,35 @@ export class FileStorage implements DStore {
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
+    let errors: DendronError[] = [];
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
-    const noteFiles = getAllFiles({
+    const out = await getAllFiles({
       root: vpath,
       include: ["*.md"],
-    }) as string[];
-
-    let errors: DendronError[] = [];
+    });
+    if (out.error) {
+      // Keep initializing other vaults
+      errors.push(
+        new DendronError({
+          message: `Unable to read notes for vault ${VaultUtils.getName(
+            vault
+          )}`,
+          severity: ERROR_SEVERITY.MINOR,
+          payload: out.error,
+        })
+      );
+    }
+    if (!out.data) {
+      return {
+        cache: { version: 0, notes: {} },
+        cacheUpdates: {},
+        errors,
+        notes: [],
+      };
+    }
+    const noteFiles = out.data;
 
     const cache: NotesCache = !this.engine.config.noCaching
       ? readNotesFromCache(vpath)
@@ -1006,37 +1051,71 @@ export class FileStorage implements DStore {
       msg: "enter",
       note: NoteUtils.toLogObj(note),
     });
+
     let changed: NoteChangeEntry[] = [];
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
     if (existingNote) {
-      // need to update parent metadata since child id is changing
-      const parentNote = this.notes[existingNote.parent as string] as NoteProps;
+      // make sure existing note actually has a parent.
+      if (!existingNote.parent) {
+        throw new DendronError({
+          message: `no parent found for ${note.fname}`,
+        });
+      }
 
-      // remove existing note from parent's children
-      parentNote.children = _.reject<string[]>(
-        parentNote.children,
-        (ent: string) => ent === existingNote.id
-      ) as string[];
-      // update parent's children
-      this.notes[existingNote.parent as string].children = parentNote.children;
-      // move existingNote's children to newly written note
-      note.children = existingNote.children;
-      // delete existingNote
+      // save the state of the parent to later record changed entry.
+      const parent = this.notes[existingNote.parent];
+      const prevParentState = { ...parent };
+
+      // delete the existing note.
       delete this.notes[existingNote.id];
       this.noteFnames.delete(existingNote);
+
+      // first, update existing note's parent
+      // so that it doesn't hold the deleted existing note's id as children
+      NoteUtils.deleteChildFromParent({
+        childToDelete: existingNote,
+        notes: this.notes,
+      });
+
+      // then update parent note of existing note
+      // so that the newly created note is a child
+      DNodeUtils.addChild(this.notes[existingNote.parent], note);
+
+      // add an entry for the updated parent if there was a change
+      changed.push({
+        prevNote: prevParentState,
+        note: parent,
+        status: "update",
+      });
+
+      // now move existing note's orphaned children to new note
+      existingNote.children.forEach((child) => {
+        const childNote = this.notes[child];
+        const prevChildNoteState = { ...childNote };
+        DNodeUtils.addChild(note, childNote);
+
+        // add one entry for each child updated
+        changed.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      });
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
     // this is the default behavior
-    if (!opts?.noAddParent) {
-      changed = NoteUtils.addOrUpdateParents({
+    // only do this if we aren't writing to existing note. we never hit this case in that situation.
+    if (!opts?.noAddParent && !existingNote) {
+      const out = NoteUtils.addOrUpdateParents({
         note,
         notesList: _.values(this.notes),
         createStubs: true,
         wsRoot: this.wsRoot,
       });
+      changed = changed.concat(out);
     }
     this.logger.info({
       ctx,

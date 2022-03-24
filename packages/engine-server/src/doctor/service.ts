@@ -1,6 +1,8 @@
 import {
+  assertInvalidState,
   DendronError,
   DEngineClient,
+  Disposable,
   DLink,
   DVault,
   genUUID,
@@ -9,12 +11,15 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { createDisposableLogger, vault2Path } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
+import path from "path";
+import { Git, WorkspaceService } from "..";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
+import fs from "fs-extra";
 
 export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",
@@ -24,6 +29,8 @@ export enum DoctorActionsEnum {
   CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
   REGENERATE_NOTE_ID = "regenerateNoteId",
   FIND_BROKEN_LINKS = "findBrokenLinks",
+  FIX_REMOTE_VAULTS = "fixRemoteVaults",
+  FIX_AIRTABLE_METADATA = "fixAirtableMetadata",
 }
 
 export type DoctorServiceOpts = {
@@ -35,12 +42,25 @@ export type DoctorServiceOpts = {
   exit?: boolean;
   quiet?: boolean;
   engine: DEngineClient;
+  podId?: string;
+  hierarchy?: string;
+  vault?: DVault | string;
 };
-export class DoctorService {
-  public L: ReturnType<typeof createLogger>;
+
+/** DoctorService is a disposable, you **must** dispose instances you create
+ * otherwise you risk leaking file descriptors which may lead to crashes. */
+export class DoctorService implements Disposable {
+  public L: ReturnType<typeof createDisposableLogger>["logger"];
+  private loggerDispose: ReturnType<typeof createDisposableLogger>["dispose"];
 
   constructor() {
-    this.L = createLogger("DoctorService");
+    const { logger, dispose } = createDisposableLogger("DoctorService");
+    this.L = logger;
+    this.loggerDispose = dispose;
+  }
+
+  dispose() {
+    this.loggerDispose();
   }
 
   findBrokenLinks(note: NoteProps, notes: NoteProps[], engine: DEngineClient) {
@@ -118,11 +138,21 @@ export class DoctorService {
   }
 
   async executeDoctorActions(opts: DoctorServiceOpts) {
-    const { action, engine, query, candidates, limit, dryRun, exit } =
-      _.defaults(opts, {
-        limit: 99999,
-        exit: true,
-      });
+    const {
+      action,
+      engine,
+      query,
+      candidates,
+      limit,
+      dryRun,
+      exit,
+      podId,
+      hierarchy,
+      vault,
+    } = _.defaults(opts, {
+      limit: 99999,
+      exit: true,
+    });
 
     let notes: NoteProps[];
     if (_.isUndefined(candidates)) {
@@ -155,9 +185,10 @@ export class DoctorService {
           leading: true,
         });
 
-    let doctorAction: (note: NoteProps) => Promise<any>;
+    let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
       case DoctorActionsEnum.FIX_FRONTMATTER: {
+        // eslint-disable-next-line no-console
         console.log(
           "the CLI currently doesn't support this action. please run this using the plugin"
         );
@@ -282,26 +313,103 @@ export class DoctorService {
         };
         break;
       }
+      case DoctorActionsEnum.FIX_REMOTE_VAULTS: {
+        /** Convert a local vault to a remote vault if it is in a git repository and has a remote set. */
+        // This action deliberately doesn't set `doctorAction` since it doesn't run per note
+        const { wsRoot, vaults } = engine;
+        const ctx = "ReloadIndex.convertToRemoteVaultIfPossible";
+        await Promise.all(
+          vaults.map(async (vault) => {
+            const vaultDir = vault2Path({ wsRoot, vault });
+            const gitPath = path.join(vaultDir, ".git");
+            // Already a remote vault
+            if (vault.remote !== undefined) return;
+            // Not a git repository, nothing to convert
+            if (!(await fs.pathExists(gitPath))) return;
+
+            const git = new Git({ localUrl: vaultDir });
+            const remoteUrl = await git.getRemoteUrl();
+            // We can't convert if there is no remote
+            if (!remoteUrl) return;
+
+            // Need the workspace service to function
+            const workspaceService = new WorkspaceService({ wsRoot });
+            this.L.info({
+              ctx,
+              vaultDir,
+              remoteUrl,
+              msg: "converting local vault to a remote vault",
+            });
+            await workspaceService.markVaultAsRemoteInConfig(vault, remoteUrl);
+          })
+        );
+        return { exit: true };
+      }
+      case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
+        // Converts the airtable id in note frontmatter from a single scalar value to a hashmap
+        if (!podId) {
+          assertInvalidState(
+            "Please provide the pod Id that was used to export the note(s)."
+          );
+        }
+        // we get vault name(string) as parameter from cli and vault(DVault) from plugin
+        const selectedVault = _.isString(vault)
+          ? VaultUtils.getVaultByName({ vaults: engine.vaults, vname: vault })
+          : vault;
+        const selectedHierarchy = _.isUndefined(query) ? hierarchy : query;
+        // Plugin already checks for selected hierarchy. This check is useful when fixAirtableMetadata action is ran from cli
+        if (!selectedHierarchy || !selectedVault) {
+          assertInvalidState(
+            "Please provide the hierarchy(with --query arg) and vault(--vault) of notes you would like to update with new Airtable Metadata"
+          );
+        }
+        //finding candidate notes
+        notes = Object.values(notes).filter(
+          (value) =>
+            value.fname.startsWith(selectedHierarchy) &&
+            value.stub !== true &&
+            VaultUtils.isEqualV2(value.vault, selectedVault) &&
+            value.custom.airtableId
+        );
+        this.L.info({
+          msg: `${DoctorActionsEnum.FIX_FRONTMATTER} ${notes.length} Notes will be Affected`,
+        });
+
+        doctorAction = async (note: NoteProps) => {
+          //get airtable id from note
+          const airtableId = _.get(note.custom, "airtableId") as string;
+          const pods = {
+            airtable: {
+              [podId]: airtableId,
+            },
+          };
+          delete note.custom["airtableId"];
+          const updatedNote = {
+            ...note,
+            custom: { ...note.custom, pods },
+          };
+          // update note
+          engine.writeNote(updatedNote, { updateExisting: true });
+        };
+        break;
+      }
       default:
         throw new DendronError({
           message:
             "Unexpected Doctor action. If this is something Dendron should support, please create an issue on our Github repository.",
         });
     }
-    await _.reduce<any, Promise<any>>(
-      notes,
-      async (accInner, note) => {
-        await accInner;
-        if (numChanges >= limit) {
-          return;
-        }
+    if (doctorAction !== undefined) {
+      for (const note of notes) {
+        if (numChanges >= limit) break;
         this.L.debug({ msg: `processing ${note.fname}` });
-        return doctorAction(note);
-      },
-      Promise.resolve()
-    );
+        // eslint-disable-next-line no-await-in-loop
+        await doctorAction(note);
+      }
+    }
     this.L.info({ msg: "doctor done", numChanges });
     if (action === DoctorActionsEnum.FIND_BROKEN_LINKS && !opts.quiet) {
+      // eslint-disable-next-line no-console
       console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
     }
     return { exit, resp };

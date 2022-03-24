@@ -77,7 +77,11 @@ export async function setupEngine(
   // in memory
   if (useLocalEngine) {
     const engine = DendronEngineV2.create({ wsRoot, logger });
-    await engine.init();
+    const out = await engine.init();
+    if (out.error) {
+      // eslint-disable-next-line no-console
+      console.error(out.error);
+    }
     return {
       wsRoot,
       engine,
@@ -144,7 +148,9 @@ export async function setupEngine(
   const resp = await new LaunchEngineServerCommand().enrichArgs(opts);
   ({ engine, port, server, serverSockets } = resp.data);
   if (init) {
-    await engine.init();
+    const out = await engine.init();
+    // eslint-disable-next-line no-console
+    if (out.error) console.error(out.error);
   }
   return { wsRoot, engine, port, server, serverSockets };
 }

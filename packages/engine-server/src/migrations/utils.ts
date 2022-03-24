@@ -1,5 +1,6 @@
 import { HierarchyConfig, LegacyHierarchyConfig } from "@dendronhq/common-all";
 import _ from "lodash";
+import { MigrationChangeSetStatus } from "./types";
 
 type mappedConfigPath = {
   /**
@@ -263,5 +264,17 @@ export class MigrationUtils {
       }
     });
     return out;
+  }
+
+  static getMigrationAnalyticProps({
+    data: { changeName, status, version },
+  }: MigrationChangeSetStatus) {
+    return {
+      data: {
+        changeName,
+        status,
+        version,
+      },
+    };
   }
 }

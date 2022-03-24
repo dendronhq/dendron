@@ -19,10 +19,12 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
+  assignJSONWithComment,
   FileUtils,
   findDownTo,
   findUpTo,
   genHash,
+  GitUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
   uniqueOutermostFolders,
@@ -32,6 +34,10 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
+import {
+  SyncActionResult,
+  SyncActionStatus,
+} from "./workspaceServiceInterface";
 
 export class WorkspaceUtils {
   static isWorkspaceConfig(val: any): val is WorkspaceSettings {
@@ -44,14 +50,13 @@ export class WorkspaceUtils {
   static async getCodeWorkspaceSettings(
     wsRoot: string
   ): Promise<RespV3<WorkspaceSettings>> {
-    const wsConfig = await readJSONWithComments(
-      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-    );
+    const wsConfigPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
+    const wsConfig = await readJSONWithComments(wsConfigPath);
     if (!this.isWorkspaceConfig(wsConfig)) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_CONFIG,
-          message: "bad workspace config",
+          message: `Bad or missing code-workspace file ${wsConfigPath}`,
         }),
       };
     } else {
@@ -64,15 +69,14 @@ export class WorkspaceUtils {
   static getCodeWorkspaceSettingsSync(
     wsRoot: string
   ): RespV3<WorkspaceSettings> {
+    const wsConfigPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
     try {
-      const wsConfig = readJSONWithCommentsSync(
-        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
+      const wsConfig = readJSONWithCommentsSync(wsConfigPath);
       if (!this.isWorkspaceConfig(wsConfig)) {
         return {
           error: DendronError.createFromStatus({
             status: ERROR_STATUS.INVALID_CONFIG,
-            message: "bad workspace config",
+            message: `Bad code-workspace file ${wsConfigPath}`,
           }),
         };
       } else {
@@ -84,7 +88,7 @@ export class WorkspaceUtils {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_CONFIG,
-          message: "bad workspace config",
+          message: `Missing code-workspace file ${wsConfigPath}`,
         }),
       };
     }
@@ -158,7 +162,7 @@ export class WorkspaceUtils {
     settings: WorkspaceSettings;
     wsRoot: string;
   }) {
-    writeJSONWithComments(
+    return writeJSONWithComments(
       path.join(wsRoot, "dendron.code-workspace"),
       settings
     );
@@ -316,5 +320,87 @@ export class WorkspaceUtils {
       }
     }
     return link;
+  }
+
+  /**
+   * @param results
+   * @returns number of repos that has Sync Action Status done.
+   */
+  static getCountForStatusDone(results: SyncActionResult[]): number {
+    return this.count(results, SyncActionStatus.DONE);
+  }
+
+  static count(results: SyncActionResult[], status: SyncActionStatus) {
+    return results.filter((result) => result.status === status).length;
+  }
+
+  /**
+   *
+   * @param results
+   * @param status
+   * @returns name of all the repos with status same as @param status.
+   */
+  static getFilteredRepoNames(
+    results: SyncActionResult[],
+    status: SyncActionStatus
+  ): string[] {
+    const matchingResults = results.filter(
+      (result) => result.status === status
+    );
+    if (matchingResults.length === 0) return [];
+    return matchingResults.map((result) => {
+      // Display the vault names for info/error messages
+      if (result.vaults.length === 1) {
+        return VaultUtils.getName(result.vaults[0]);
+      }
+      // But if there's more than one vault in the repo, then use the repo path which is easier to interpret
+      return result.repo;
+    });
+  }
+
+  static async addVaultToWorkspace({
+    vault,
+    wsRoot,
+  }: {
+    vault: DVault;
+    wsRoot: string;
+  }) {
+    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(wsRoot);
+    if (resp.error) {
+      // If there is no workspace file, just skip updating it. The workspace
+      // file is optional with self contained vaults.
+      return;
+    }
+    let wsSettings = resp.data;
+
+    if (
+      !_.find(
+        wsSettings.folders,
+        (ent) => ent.path === VaultUtils.getRelPath(vault)
+      )
+    ) {
+      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+      const folders = [vault2Folder].concat(wsSettings.folders);
+      wsSettings = assignJSONWithComment({ folders }, wsSettings);
+      await WorkspaceUtils.writeCodeWorkspaceSettings({
+        settings: wsSettings,
+        wsRoot,
+      });
+    }
+
+    // check for .gitignore
+    await GitUtils.addToGitignore({
+      addPath: vault.fsPath,
+      root: wsRoot,
+      noCreateIfMissing: true,
+    });
+
+    const vaultDir = path.join(wsRoot, vault.fsPath);
+    fs.ensureDir(vaultDir);
+    await GitUtils.addToGitignore({
+      addPath: ".dendron.cache.*",
+      root: vaultDir,
+    });
+    return;
   }
 }

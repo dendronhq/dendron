@@ -1,4 +1,4 @@
-import { VaultUtils } from "@dendronhq/common-all";
+import { DendronError, DVault, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
@@ -13,6 +13,21 @@ describe("VaultUtils", () => {
           expect(
             VaultUtils.getVaultByDirPath({ vaults, wsRoot, fsPath })
           ).toEqual(_.find(engine.vaults, (ent) => ent.fsPath === "vault1"));
+        },
+        {
+          expect,
+        }
+      );
+    });
+
+    test("If no vault with exact name exists, return dendron error", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const test: DVault[] = [{ fsPath: "vault" }];
+          const fsPath = path.join(wsRoot, "vault1");
+          expect(() =>
+            VaultUtils.getVaultByDirPath({ vaults: test, wsRoot, fsPath })
+          ).toThrow(DendronError);
         },
         {
           expect,

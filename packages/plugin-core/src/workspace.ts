@@ -49,7 +49,7 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { INoteSyncService, NoteSyncService } from "./services/NoteSyncService";
+import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -141,14 +141,12 @@ export class DendronExtension implements IDendronExtension {
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
-  public noteSyncService: INoteSyncService;
   public lookupControllerFactory: ILookupControllerV3Factory;
   public noteLookupProviderFactory: INoteLookupProviderFactory;
   public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
-  public workspaceWatcher?: WorkspaceWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
@@ -368,13 +366,9 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
-    this.noteSyncService = new NoteSyncService(
-      this,
-      vscode.workspace.onDidSaveTextDocument,
-      vscode.workspace.onDidChangeTextDocument
-    );
 
-    context.subscriptions.push(this.noteSyncService);
+    // Instantiate TextDocumentService
+    context.subscriptions.push(TextDocumentServiceFactory.create(this));
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -395,12 +389,12 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
-   * See {@link IDendronExtension.getWorkspaceConfig()}
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
    */
   getWorkspaceConfig(
     section?: string | undefined
   ): vscode.WorkspaceConfiguration {
-    return vscode.workspace.getConfiguration(section);
+    return VSCodeUtils.getWorkspaceConfig(section);
   }
 
   isActive(): boolean {
@@ -506,7 +500,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2(this);
+        const dendronTreeView = new DendronTreeViewV2(this, this.getEngine());
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -539,7 +533,7 @@ export class DendronExtension implements IDendronExtension {
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
               DendronTreeViewV2.viewType,
-              provider,
+              dendronTreeView,
               {
                 webviewOptions: {
                   retainContextWhenHidden: true,
@@ -557,6 +551,7 @@ export class DendronExtension implements IDendronExtension {
         // Removing it for now.
         // backlinkTreeView.message = "There are no links to this note."
         context.subscriptions.push(backlinkTreeView);
+        context.subscriptions.push(dendronTreeView);
       }
     });
   }
@@ -695,7 +690,6 @@ export class DendronExtension implements IDendronExtension {
       windowWatcher,
     });
     workspaceWatcher.activate(this.context);
-    this.workspaceWatcher = workspaceWatcher;
 
     const wsFolders = DendronExtension.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
@@ -711,7 +705,6 @@ export class DendronExtension implements IDendronExtension {
         wsRoot,
         vaults: realVaults,
       },
-      noteSyncSvc: this.noteSyncService,
     });
 
     fileWatcher.activate(getExtension().context);

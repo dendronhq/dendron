@@ -1,5 +1,6 @@
 import {
   DNodeUtils,
+  NoteChangeUpdateEntry,
   NoteProps,
   NoteUtils,
   SchemaUtils,
@@ -13,6 +14,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import path from "path";
+import { extractNoteChangeEntriesByType } from "../..";
 import { setupBasic } from "./utils";
 
 const SCHEMAS = {
@@ -514,6 +516,85 @@ const NOTES_MULTI = {
           expected: true,
         },
       ];
+    }
+  ),
+  ID_UPDATED: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fooNote = engine.notes["foo"];
+      const fooUpdated = { ...fooNote };
+      fooUpdated.id = "updatedID";
+      const changes = await engine.writeNote(fooUpdated);
+      const createEntries = extractNoteChangeEntriesByType(
+        changes.data,
+        "create"
+      );
+
+      const deleteEntries = extractNoteChangeEntriesByType(
+        changes.data,
+        "delete"
+      );
+
+      const updateEntries = extractNoteChangeEntriesByType(
+        changes.data,
+        "update"
+      ) as NoteChangeUpdateEntry[];
+
+      const updatedParent = updateEntries.find(
+        (entry) => entry.note.fname === "root"
+      );
+      const updatedChild = updateEntries.find(
+        (entry) => entry.note.fname === "foo.ch1"
+      );
+      return [
+        {
+          actual: updateEntries.length,
+          expected: 2,
+          msg: "2 updates should happen.",
+        },
+        {
+          actual: deleteEntries.length,
+          expected: 1,
+          msg: "1 delete should happen.",
+        },
+        {
+          actual: createEntries.length,
+          expected: 1,
+          msg: "1 create should happen.",
+        },
+        {
+          actual: createEntries[0].note.fname,
+          expected: "foo",
+          msg: "new foo note is created.",
+        },
+        {
+          actual: createEntries[0].note.id,
+          expected: "updatedID",
+          msg: "created foo note's id is updatedID",
+        },
+        {
+          actual: deleteEntries[0].note.fname,
+          expected: "foo",
+          msg: "old foo note is deleted.",
+        },
+        {
+          actual: deleteEntries[0].note.id,
+          expected: "foo",
+          msg: "deleted old foo note's id is foo.",
+        },
+        {
+          actual: updatedParent?.note.children,
+          expected: ["bar", "updatedID"],
+          msg: "updatedID should be new child of root.",
+        },
+        {
+          actual: updatedChild?.note.parent,
+          expected: "updatedID",
+          msg: "updated child's parent should be updatedID.",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
     }
   ),
 };

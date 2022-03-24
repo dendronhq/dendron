@@ -17,6 +17,9 @@ import {
   ENABLE_MERMAID,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
+  ENABLE_FRONTMATTER_TAGS,
+  ENABLE_HASHES_FOR_FM_TAGS,
+  ENABLE_BACK_LINKS,
 } from "./global";
 
 const GITHUB_EDIT_VIEW_MODE: Record<
@@ -157,14 +160,9 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site URL",
       desc: "URL of the site without trailing slash.",
     },
-    enableFrontmatterTags: {
-      label: "Enable Frontmatter Tags",
-      desc: "Show Frontmatter tags in published site.",
-    },
-    enableHashesForFMTags: {
-      label: "Enable Hashes for Frontmatter Tags",
-      desc: "Display a `#` symbol in front of frontmatter tags in the tags listing.",
-    },
+    enableBackLinks: ENABLE_BACK_LINKS("publishing"),
+    enableFrontmatterTags: ENABLE_FRONTMATTER_TAGS("publishing"),
+    enableHashesForFMTags: ENABLE_HASHES_FOR_FM_TAGS("publishing"),
     enableRandomlyColoredTags: {
       label: "Enable Randomly Colored Tags",
       desc: "Display randomly generated colors for tags.",

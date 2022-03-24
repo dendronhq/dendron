@@ -125,10 +125,14 @@ export class SiteUtils {
     return;
   }
 
-  static addSiteOnlyNotes(opts: { engine: DEngineClient }) {
+  /**
+   * Creates a placeholder note that can be used for rendering a 403 error
+   * message.
+   */
+  static create403StaticNote(opts: { engine: DEngineClient }) {
     const { engine } = opts;
     const vaults = engine.vaults;
-    const note = NoteUtils.create({
+    return NoteUtils.create({
       vault: vaults[0],
       fname: "403",
       id: "403",
@@ -139,7 +143,12 @@ export class SiteUtils {
         "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)",
       ].join("\n"),
     });
-    return [note];
+  }
+
+  static createSiteOnlyNotes(opts: { engine: DEngineClient }) {
+    const { engine } = opts;
+    const note403 = this.create403StaticNote({ engine });
+    return [note403];
   }
 
   static async filterByConfig(opts: {
@@ -240,9 +249,9 @@ export class SiteUtils {
     const notesForHiearchy = _.clone(engine.notes);
 
     // get the domain note
-    const notes = NoteUtils.getNotesByFname({
+    const notes = NoteUtils.getNotesByFnameFromEngine({
       fname: domain,
-      notes: notesForHiearchy,
+      engine,
     });
     logger.info({
       ctx: "filterByHiearchy:candidates",
@@ -271,7 +280,6 @@ export class SiteUtils {
         ctx: "filterByHiearchy",
         msg: "note not found",
         domain,
-        notesForHiearchy,
       });
       // TODO: add warning
       return;
@@ -474,11 +482,10 @@ export class SiteUtils {
           vname,
           vaults: engine.vaults,
         });
-        const maybeNote = NoteUtils.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes: noteDict,
+          engine,
           vault,
-          wsRoot: engine.wsRoot,
         });
         if (maybeNote && maybeNote.stub && !allowStubs) {
           return;

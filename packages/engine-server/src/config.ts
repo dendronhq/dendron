@@ -6,17 +6,19 @@ import {
   DendronSiteConfig,
   ERROR_STATUS,
   getStage,
-  Time,
   ConfigUtils,
   DendronPublishingConfig,
   GithubEditViewModeEnum,
   CleanDendronPublishingConfig,
   configIsV4,
+  StrictConfigV5,
+  DeepPartial,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { BackupKeyEnum, BackupService } from "./backup";
 
 export class DConfig {
   static configPath(configRoot: string): string {
@@ -35,13 +37,14 @@ export class DConfig {
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: Partial<IntermediateDendronConfig>
+    defaults?: DeepPartial<StrictConfigV5>
   ): IntermediateDendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
-    let config: IntermediateDendronConfig = {
-      ...defaults,
-      ...ConfigUtils.genDefaultConfig(),
-    };
+    // Need merge here to recursively merge nested configs
+    let config: IntermediateDendronConfig = _.merge(
+      ConfigUtils.genDefaultConfig(),
+      defaults
+    );
     if (!fs.existsSync(configPath)) {
       writeYAML(configPath, config);
     } else {
@@ -135,7 +138,7 @@ export class DConfig {
       siteUrl = process.env["SITE_URL"];
     }
     if (!siteRootDir) {
-      throw `siteRootDir is undefined`;
+      throw new DendronError({ message: "siteRootDir is undefined" });
     }
     if (!siteUrl && getStage() === "dev") {
       // this gets overridden in dev so doesn't matter
@@ -188,16 +191,24 @@ export class DConfig {
    * `dendron.yyyy.MM.dd.HHmmssS.foo.yml`
    * @param wsRoot workspace root
    * @param infix custom string used in the backup name
+   * ^fd66z8uiuczz
    */
-  static createBackup(wsRoot: string, infix: string): string {
-    const configPath = DConfig.configPath(wsRoot);
-    const today = Time.now().toFormat("yyyy.MM.dd.HHmmssS");
-    const prefix = `dendron.${today}.`;
-    const suffix = `yml`;
-    const maybeInfix = infix ? `${infix}.` : "";
-    const backupName = `${prefix}${maybeInfix}${suffix}`;
-    const backupPath = path.join(wsRoot, backupName);
-    fs.copyFileSync(configPath, backupPath);
-    return backupPath;
+  static async createBackup(wsRoot: string, infix?: string): Promise<string> {
+    const backupService = new BackupService({ wsRoot });
+    try {
+      const configPath = DConfig.configPath(wsRoot);
+      const backupResp = await backupService.backup({
+        key: BackupKeyEnum.config,
+        pathToBackup: configPath,
+        timestamp: true,
+        infix,
+      });
+      if (backupResp.error) {
+        throw new DendronError({ ...backupResp.error });
+      }
+      return backupResp.data;
+    } finally {
+      backupService.dispose();
+    }
   }
 }

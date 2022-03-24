@@ -151,8 +151,16 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
 
     /** Add frontmatter tags, if any, ahead of time. This way wikilink compiler will pick them up and render them. */
     function addTags() {
-      const enableFrontmatterTags =
-        ConfigUtils.getEnableFrontmatterTags(config);
+      const shouldApplyPublishRules =
+        MDUtilsV5.shouldApplyPublishingRules(proc);
+      const enableFrontmatterTags = ConfigUtils.getEnableFrontmatterTags({
+        config,
+        shouldApplyPublishRules,
+      });
+      const enableHashesForFMTags = ConfigUtils.getEnableHashesForFMTags({
+        config,
+        shouldApplyPublishRules,
+      });
       if (
         enableFrontmatterTags !== false &&
         note?.tags &&
@@ -165,10 +173,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
           _.map(tags, (tag) =>
             listItem(
               paragraph(
-                frontmatterTag2WikiLinkNoteV4(
-                  tag,
-                  ConfigUtils.getEnableHashesForFMTags(config)
-                )
+                frontmatterTag2WikiLinkNoteV4(tag, enableHashesForFMTags)
               )
             )
           ),

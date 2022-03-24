@@ -9,7 +9,7 @@ import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import { WorkspaceService } from "../workspace";
-import { ALL_MIGRATIONS } from "./migrations";
+import { MIGRATION_ENTRIES } from "./migrations";
 import { MigrationChangeSetStatus, Migrations } from "./types";
 
 type ApplyMigrationRuleOpts = {
@@ -34,7 +34,7 @@ export class MigrationService {
     const results: MigrationChangeSetStatus[][] = [];
     // run migrations from oldest to newest
     const migrationsToRun = _.reverse(
-      _.takeWhile(migrations || ALL_MIGRATIONS, (ent) => {
+      _.takeWhile(migrations || MIGRATION_ENTRIES, (ent) => {
         const out =
           semver.lte(previousVersion, ent.version) &&
           semver.gte(currentVersion, ent.version);

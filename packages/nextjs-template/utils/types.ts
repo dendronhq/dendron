@@ -2,6 +2,7 @@ import {
   DVault,
   NoteProps,
   NotePropsDict,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";

@@ -9,8 +9,10 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { CancellationTokenSource, QuickInputButton } from "vscode";
 import { DENDRON_COMMANDS } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { VersionProvider } from "../../versionProvider";
 import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import {
@@ -18,19 +20,17 @@ import {
   getButtonCategory,
   VaultSelectButton,
 } from "./buttons";
-import { ILookupProviderV3 } from "./LookupProviderV3Interface";
-import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { PickerUtilsV2 } from "./utils";
+import { DendronBtn, IDendronQuickInputButton } from "./ButtonTypes";
 import type {
+  CreateQuickPickOpts,
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
   PrepareQuickPickOpts,
   ShowQuickPickOpts,
-  CreateQuickPickOpts,
 } from "./LookupControllerV3Interface";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import { VersionProvider } from "../../versionProvider";
-import { DendronBtn, IDendronQuickInputButton } from "./ButtonTypes";
+import { ILookupProviderV3 } from "./LookupProviderV3Interface";
+import { DendronQuickPickerV2, LookupControllerState } from "./types";
+import { PickerUtilsV2 } from "./utils";
 
 export { LookupControllerV3CreateOpts };
 
@@ -206,20 +206,29 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     });
     Logger.info({ ctx, msg: "onUpdatePickerItems:pre" });
     // initial call of update
-    await provider.onUpdatePickerItems({
-      picker: quickpick,
-      token: cancelToken.token,
-      fuzzThreshold: this.fuzzThreshold,
-    });
-    Logger.info({ ctx, msg: "onUpdatePickerItems:post" });
     if (!nonInteractive) {
+      // Show the quickpick first before getting item data to ensure we don't
+      // miss user key strokes
+      quickpick.show();
+
+      provider.onUpdatePickerItems({
+        picker: quickpick,
+        token: cancelToken.token,
+        fuzzThreshold: this.fuzzThreshold,
+      });
+
       provider.provide({
         quickpick,
         token: cancelToken,
         fuzzThreshold: this.fuzzThreshold,
       });
-      quickpick.show();
     } else {
+      await provider.onUpdatePickerItems({
+        picker: quickpick,
+        token: cancelToken.token,
+        fuzzThreshold: this.fuzzThreshold,
+      });
+
       quickpick.selectedItems = quickpick.items;
       await provider.onDidAccept({
         quickpick,

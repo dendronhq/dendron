@@ -1,11 +1,26 @@
-import { ContextualUIEvents, Time } from "@dendronhq/common-all";
-import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
+import {
+  AppNames,
+  ContextualUIEvents,
+  DWorkspaceV2,
+  getStage,
+  Time,
+} from "@dendronhq/common-all";
+import {
+  SegmentClient,
+  SegmentUtils,
+  VSCodeIdentifyProps,
+} from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { VersionProvider } from "../versionProvider";
+import { VSCodeUtils } from "../vsCodeUtils";
+import fs from "fs-extra";
+import { setupSegmentClient } from "../telemetry";
+import { Logger } from "../logger";
+import path from "path";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -14,14 +29,50 @@ export type SegmentContext = Partial<{
 }>;
 
 export class AnalyticsUtils {
-  static getVSCodeIdentifyProps() {
+  static sessionStart = -1;
+
+  static getVSCodeSentryRelease(): string {
+    return `${AppNames.CODE}@${VersionProvider.version()}`;
+  }
+
+  static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
+    const {
+      appName,
+      isNewAppInstall,
+      language,
+      machineId,
+      shell,
+      isTelemetryEnabled,
+    } = vscode.env;
+
     return {
-      type: "vscode" as const,
+      type: AppNames.CODE,
       ideVersion: vscode.version,
-      ideFlavor: vscode.env.appName,
+      ideFlavor: appName,
       appVersion: VersionProvider.version(),
-      userAgent: vscode.env.appName,
+      userAgent: appName,
+      isNewAppInstall,
+      isTelemetryEnabled,
+      language,
+      machineId,
+      shell,
     };
+  }
+
+  static getCommonTrackProps() {
+    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
+    const vscodeSessionId = vscode.env.sessionId;
+    return {
+      firstWeekSinceInstall,
+      vscodeSessionId,
+    };
+  }
+
+  static getSessionId(): number {
+    if (AnalyticsUtils.sessionStart < 0) {
+      AnalyticsUtils.sessionStart = Math.round(Time.now().toSeconds());
+    }
+    return AnalyticsUtils.sessionStart;
   }
 
   static isFirstWeek() {
@@ -43,17 +94,82 @@ export class AnalyticsUtils {
 
   static track(event: string, props?: any) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
-    SegmentUtils.track(
+    const properties = { ...props, ...AnalyticsUtils.getCommonTrackProps() };
+    const sessionId = AnalyticsUtils.getSessionId();
+    SegmentUtils.track({
       event,
-      { type: "vscode", ideVersion, ideFlavor },
-      { ...props, firstWeekSinceInstall }
-    );
+      platformProps: {
+        type: AppNames.CODE,
+        ideVersion,
+        ideFlavor,
+      },
+      properties,
+      integrations: { Amplitude: { session_id: sessionId } },
+    });
   }
 
   static identify() {
     const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
     SegmentUtils.identify(props);
+  }
+
+  /**
+   * Setup segment client
+   * Also setup cache flushing in case of missed uploads
+   */
+  static setupSegmentWithCacheFlush({
+    context,
+    ws,
+  }: {
+    context: vscode.ExtensionContext;
+    ws: DWorkspaceV2;
+  }) {
+    if (getStage() === "prod") {
+      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+      fs.ensureDir(segmentResidualCacheDir);
+
+      setupSegmentClient(
+        ws,
+        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+      );
+
+      // Try to flush the Segment residual cache every hour:
+      (function tryFlushSegmentCache() {
+        SegmentClient.instance()
+          .tryFlushResidualCache()
+          .then((result) => {
+            Logger.info(
+              `Segment Residual Cache flush attempted. ${JSON.stringify(
+                result
+              )}`
+            );
+          });
+
+        // Repeat once an hour:
+        setTimeout(tryFlushSegmentCache, 3600000);
+      })();
+    }
+  }
+
+  static showTelemetryNotice() {
+    vscode.window
+      .showInformationMessage(
+        `Dendron collects limited usage data to help improve the quality of our software`,
+        "See Details",
+        "Opt Out"
+      )
+      .then((resp) => {
+        if (resp === "See Details") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html"
+          );
+        }
+        if (resp === "Opt Out") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html#how-to-opt-out-of-data-collection"
+          );
+        }
+      });
   }
 }
 

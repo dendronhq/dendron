@@ -171,19 +171,6 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
-  static getNoteByFname(proc: Processor, { fname }: { fname: string }) {
-    const { notes, vault, wsRoot } = this.getProcData(proc);
-    // TODO: this is for backwards compatibility
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
-      fname,
-      notes: notes || engine.notes,
-      vault,
-      wsRoot,
-    });
-    return note;
-  }
-
   static getProcData(proc: Processor): ProcDataFullV5 {
     let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
 
@@ -304,12 +291,11 @@ export class MDUtilsV5 {
             data.wsRoot = data.engine!.wsRoot;
           }
 
-          const note = NoteUtils.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
-            notes: data.engine!.notes,
+            engine: data.engine!,
             vault: data.vault!,
-            wsRoot: data.wsRoot,
-          }) as NoteProps;
+          });
 
           if (!_.isUndefined(note)) {
             proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
@@ -365,7 +351,6 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-
           if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
           }
@@ -432,7 +417,6 @@ export class MDUtilsV5 {
     });
 
     // add additional plugin for publishing
-
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
@@ -440,16 +424,14 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = data?.config as IntermediateDendronConfig;
-    const enableKatex = MDUtilsV5.shouldApplyPublishingRules(pRehype)
-      ? ConfigUtils.getProp(config, "useKatex")
-      : ConfigUtils.getPreview(config).enableKatex;
-
-    if (enableKatex) {
+    const config = data?.engine?.config as IntermediateDendronConfig;
+    const shouldApplyPublishRules =
+      MDUtilsV5.shouldApplyPublishingRules(pRehype);
+    if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (this.shouldApplyPublishingRules(pRehype)) {
+    if (shouldApplyPublishRules) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",

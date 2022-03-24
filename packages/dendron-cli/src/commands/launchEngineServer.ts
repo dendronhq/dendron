@@ -103,7 +103,10 @@ export class LaunchEngineServerCommand extends CLICommand<
     });
     if (init) {
       this.L.info({ ctx, msg: "pre:engine.init" });
-      await engine.init();
+      const out = await engine.init();
+      if (out.error) {
+        this.printError(out.error);
+      }
     }
     return {
       data: {

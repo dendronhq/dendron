@@ -1817,12 +1817,11 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.81.0.tgz#6622f1566fef1b38810987e6d4f121f7a6322a57"
-  integrity sha512-nkAlsjI09CXfxeWhFMR4uFYgsLPx8DZ/ByF59vEf4INrfaj28rZr33CySUeH8qOihBqoM+V9kJw84y1s/dJQPQ==
+"@dendronhq/common-all@^0.83.0":
+  version "0.83.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.83.0.tgz#242c54dbc861402074ff98b4d7ad3dcd9003f0d7"
+  integrity sha512-bzwOvqP5BpAZxxB12DoPXdZaE8/K3Wx4l9uNboukUOHju5V1TRuayFD88NF3krjyrMxcxoLReuFjIVnPWDUuFg==
   dependencies:
-    "@dendronhq/title" "^3.4.3"
     "@types/github-slugger" "^1.3.0"
     "@types/lodash" "^4.14.152"
     "@types/luxon" "^1.25.0"
@@ -1845,19 +1844,19 @@
     luxon "^1.25.0"
     minimatch "^3.0.4"
     nanoid "^3.1.23"
-    nanoid-dictionary "^4.3.0"
     qs "^6.10.1"
     semver "^7.3.2"
+    title "^3.4.4"
     vscode-uri "^2.1.2"
     yamljs "^0.3.0"
 
-"@dendronhq/common-frontend@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.81.0.tgz#9c9bfbd2ae0a1deb81a2ffacc2e03f9ceb7587dc"
-  integrity sha512-b8RqcxQADBUG78ZnRK86QFcNBqVLcf2sW2Rx0E2hRCJJ8gH36eAjSObVBsubHUZNgSllPLSuCdTYG3Dse2dV0g==
+"@dendronhq/common-frontend@^0.83.0":
+  version "0.83.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.83.0.tgz#c4bf7dc9dc37774495289302db25af493a0e1b87"
+  integrity sha512-xtn+ZPHneVlYI1WVLUTEi3i8eY8HdwO52Abf4F29/Oo8c3patsxo0Ybndw6EAtBEscmdTpllyWb2IQOkmrkDog==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.81.0"
+    "@dendronhq/common-all" "^0.83.0"
     "@reduxjs/toolkit" "^1.5.1"
     "@types/lodash" "^4.14.161"
     "@types/node" "^14.11.2"
@@ -1871,12 +1870,12 @@
     react-redux "^7.2.3"
     redux-logger "^3.0.6"
 
-"@dendronhq/common-server@^0.81.0":
-  version "0.81.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.81.0.tgz#961b09cda7d83ae87438abb210713aedd9a35678"
-  integrity sha512-vWrS8Se0R8dyrE94nGdJLno6x/wXOzpe5W025Q/JlRsYTftw8fw7dbp7l+GZ4s+HtB+nH2rUC3BO3dL29c10/g==
+"@dendronhq/common-server@^0.83.0":
+  version "0.83.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.83.0.tgz#0117d4342b125fcef17414159832f3d034978f6f"
+  integrity sha512-2cU3syfPHvB2IQ9ElSIpgbD1cAehm9Wu3Ig1/qtYL7MiXS2eo6xxUKD7Se+SveY9aJnIIEkvdAd3DFXrSOHjxQ==
   dependencies:
-    "@dendronhq/common-all" "^0.81.0"
+    "@dendronhq/common-all" "^0.83.0"
     "@sentry/integrations" "^6.13.3"
     "@sentry/node" "^6.13.3"
     "@types/analytics-node" "^3.1.6"
@@ -1894,7 +1893,7 @@
     ajv-errors "^3.0.0"
     analytics-node "^5.1.0"
     anymatch "^3.1.2"
-    comment-json "^4.1.0"
+    comment-json "4.2.0"
     execa "^5.0.0"
     fs-extra "^9.0.1"
     gray-matter "^4.0.2"
@@ -1907,16 +1906,6 @@
     tmp "^0.2.1"
     vscode-uri "^2.1.2"
     yaml-unist-parser "^1.3.1"
-
-"@dendronhq/title@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/@dendronhq/title/-/title-3.4.3.tgz#6b800942df4e74519f675fd8a81d8bbbd9e6a97c"
-  integrity sha512-DgaHbLkpYToSZsAHKCujG3BytGYP289UBqH5oI3C8vHU19rRaCL9eHb+hrNPbW5k51mwyj6CTevBJdS6GsxvCw==
-  dependencies:
-    arg "1.0.0"
-    chalk "2.3.0"
-    clipboardy "1.2.2"
-    titleize "1.0.0"
 
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
@@ -4759,13 +4748,13 @@ commander@^4.1.1:
   resolved "https://registry.npmjs.org/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
 
-comment-json@^4.1.0:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/comment-json/-/comment-json-4.1.1.tgz#49df4948704bebb1cc0ffa6910e25669b668b7c5"
-  integrity sha512-v8gmtPvxhBlhdRBLwdHSjGy9BgA23t9H1FctdQKyUrErPjSrJcdDMqBq9B4Irtm7w3TNYLQJNH6ARKnpyag1sA==
+comment-json@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/comment-json/-/comment-json-4.2.0.tgz#d94b567fcdb52865e4a0a712a89333d32cb41ade"
+  integrity sha512-FChdhWlGfKbEDTOS7or0kJRXZO8kpvFMTAgI9mNXe7oEEmRQq/S1QDUHZ6BG9wAD+7LhST2cwLtV8nbe2uFEVw==
   dependencies:
     array-timsort "^1.0.3"
-    core-util-is "^1.0.2"
+    core-util-is "^1.0.3"
     esprima "^4.0.1"
     has-own-prop "^2.0.0"
     repeat-string "^1.6.1"
@@ -4960,7 +4949,7 @@ core-util-is@1.0.2:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
-core-util-is@^1.0.2, core-util-is@~1.0.0:
+core-util-is@^1.0.3, core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
@@ -9949,11 +9938,6 @@ nan@^2.12.1, nan@^2.13.2:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
   integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
 
-nanoid-dictionary@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.npmjs.org/nanoid-dictionary/-/nanoid-dictionary-4.3.0.tgz#d4cefa1e4c06b1f576789eeb2646101f8c5419e8"
-  integrity sha512-Xw1+/QnRGWO1KJ0rLfU1xR85qXmAHyLbE3TUkklu9gOIDburP6CsUnLmTaNECGpBh5SHb2uPFmx0VT8UPyoeyw==
-
 nanoid@^3.1.23, nanoid@^3.1.30:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.2.0.tgz#62667522da6673971cca916a6d3eff3f415ff80c"
@@ -11718,7 +11702,7 @@ querystring@^0.2.0, querystring@^0.2.1:
 
 querystringify@^2.1.1:
   version "2.2.0"
-  resolved "https://registry.npmjs.org/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
+  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
   integrity sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==
 
 queue-microtask@^1.2.2:
@@ -12469,7 +12453,7 @@ require-main-filename@^2.0.0:
 
 requires-port@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.npmjs.org/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
+  resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
 reselect@^4.0.0:
@@ -13763,6 +13747,16 @@ timsort@^0.3.0:
   resolved "https://registry.npmjs.org/timsort/-/timsort-0.3.0.tgz#405411a8e7e6339fe64db9a234de11dc31e02bd4"
   integrity sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=
 
+title@^3.4.4:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/title/-/title-3.4.4.tgz#5c0ab11fd69643bc05dc006bba52aaf5c1630f5e"
+  integrity sha512-ViLJMyg5TFwWQ7Aqrs3e0IPINA99++cOLzQFIuBw6rKPhn8Cz7J7sdsag0BQPCf4ip7bHY1/docykbQe2R4N6Q==
+  dependencies:
+    arg "1.0.0"
+    chalk "2.3.0"
+    clipboardy "1.2.2"
+    titleize "1.0.0"
+
 titleize@1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/titleize/-/titleize-1.0.0.tgz#7d350722061830ba6617631e0cfd3ea08398d95a"
@@ -14143,9 +14137,9 @@ url-loader@4.1.1:
     schema-utils "^3.0.0"
 
 url-parse@^1.4.3, url-parse@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.npmjs.org/url-parse/-/url-parse-1.5.3.tgz#71c1303d38fb6639ade183c2992c8cc0686df862"
-  integrity sha512-IIORyIQD9rvj0A4CLWsHkBBJuNqWpFQe224b6j9t/ABmquIS0qDU2pY6kl6AuOrL5OkCXHMCFNe1jBcuAggjvQ==
+  version "1.5.10"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.10.tgz#9d3c2f736c1d75dd3bd2be507dcc111f1e2ea9c1"
+  integrity sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"

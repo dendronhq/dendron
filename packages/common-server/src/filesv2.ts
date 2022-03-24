@@ -17,12 +17,12 @@ import { assign, CommentJSONValue, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
 import fs from "fs-extra";
 import matter from "gray-matter";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import path from "path";
 import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
-import YAML from "yamljs";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 
@@ -116,10 +116,10 @@ export async function file2Schema(
 ): Promise<SchemaModuleProps> {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
-  const schemaOpts = YAML.parse(
+  const schemaOpts = YAML.load(
     await fs.readFile(fpath, { encoding: "utf8" })
   ) as SchemaModuleOpts;
-  return await SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+  return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
 export function genHash(contents: any) {
@@ -137,8 +137,8 @@ export async function string2Schema({
   fname: string;
   wsRoot: string;
 }) {
-  const schemaOpts = YAML.parse(content) as SchemaModuleOpts;
-  return await SchemaParserV2.parseRaw(schemaOpts, {
+  const schemaOpts = YAML.load(content) as SchemaModuleOpts;
+  return SchemaParserV2.parseRaw(schemaOpts, {
     root: vault,
     fname,
     wsRoot,
@@ -165,12 +165,14 @@ export function string2Note({
   const options: any = {
     engines: {
       yaml: {
-        parse: (s: string) => YAML.parse(s),
-        stringify: (s: string) => YAML.stringify(s),
+        parse: (s: string) => YAML.load(s),
+        stringify: (s: string) => YAML.dump(s),
       },
     },
   };
   const { data, content: body } = matter(content, options);
+  if (data?.title) data.title = _.toString(data.title);
+  if (data?.id) data.id = _.toString(data.id);
   const custom = DNodeUtils.getCustomProps(data);
 
   const contentHash = calculateHash ? genHash(content) : undefined;
@@ -256,7 +258,8 @@ export function goUpTo(opts: {
   fname: string;
   maxLvl?: number;
 }): string {
-  let { fname, base, maxLvl } = _.defaults(opts, { maxLvl: 10 });
+  const { fname, base } = opts;
+  let maxLvl = opts.maxLvl ?? 10;
   const lvls = [];
   while (maxLvl > 0) {
     const tryPath = path.join(base, ...lvls, fname);
@@ -389,6 +392,36 @@ export function note2File({
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }
 
+function serializeModuleProps(moduleProps: SchemaModuleProps) {
+  const { version, imports, schemas } = moduleProps;
+  // TODO: filter out imported schemas
+  const out: any = {
+    version,
+    imports: [],
+    schemas: _.values(schemas).map((ent) =>
+      SchemaUtils.serializeSchemaProps(ent)
+    ),
+  };
+  if (imports) {
+    out.imports = imports;
+  }
+  return YAML.dump(out, { schema: JSON_SCHEMA });
+}
+
+function serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
+  const { version, imports, schemas } = _.defaults(moduleOpts, {
+    imports: [],
+  });
+  const out = {
+    version,
+    imports,
+    schemas: _.values(schemas).map((ent) =>
+      SchemaUtils.serializeSchemaProps(ent)
+    ),
+  };
+  return YAML.dump(out, { schema: JSON_SCHEMA });
+}
+
 export function schemaModuleOpts2File(
   schemaFile: SchemaModuleOpts,
   vaultPath: string,
@@ -397,7 +430,7 @@ export function schemaModuleOpts2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vaultPath, fname + ext),
-    SchemaUtils.serializeModuleOpts(schemaFile)
+    serializeModuleOpts(schemaFile)
   );
 }
 
@@ -409,7 +442,7 @@ export function schemaModuleProps2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vpath, fname + ext),
-    SchemaUtils.serializeModuleProps(schemaMProps)
+    serializeModuleProps(schemaMProps)
   );
 }
 
@@ -451,9 +484,14 @@ export const vault2Path = ({
   return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
 
-export function writeJSONWithComments(fpath: string, data: any) {
+export function writeJSONWithCommentsSync(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
   return fs.writeFileSync(fpath, payload);
+}
+
+export async function writeJSONWithComments(fpath: string, data: any) {
+  const payload = stringify(data, null, 4);
+  return fs.writeFile(fpath, payload);
 }
 
 /**
@@ -536,6 +574,26 @@ export async function findNonNoteFile(opts: {
 }
 
 class FileUtils {
+  /**
+   * Keep incrementing a numerical suffix until we find a path name that does not correspond to an existing file
+   * @param param0
+   */
+  static genFilePathWithSuffixThatDoesNotExist({
+    fpath,
+    sep = "-",
+  }: {
+    fpath: string;
+    sep?: string;
+  }) {
+    // Try to put into `fpath`. If `fpath` exists, create a new folder with an numbered suffix
+    let acc = 0;
+    let tryPath = fpath;
+    while (fs.pathExistsSync(tryPath)) {
+      acc += 1;
+      tryPath = [fpath, acc].join(sep);
+    }
+    return { filePath: tryPath, acc };
+  }
   /**
    * Check if a file starts with a prefix string
    * @param fpath: full path to the file

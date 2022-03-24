@@ -1,4 +1,4 @@
-import { ConfigUtils, DEngineClient } from "@dendronhq/common-all";
+import { ConfigUtils, DEngineClient, DVault } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
@@ -10,6 +10,7 @@ import {
   ProcMode,
   VFile,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5, testWithEngine } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -19,22 +20,26 @@ import { checkNotInVFile, checkVFile } from "./utils";
 function proc(
   engine: DEngineClient,
   dendron: DendronASTData,
-  opts?: DendronPubOpts
+  opts?: DendronPubOpts,
+  flavor?: ProcFlavor
 ) {
-  return MDUtilsV5.procRehypeFull({
-    engine,
-    ...dendron,
-    wikiLinksOpts: {
-      useId: false,
-      ...opts?.wikiLinkOpts,
-    },
-    publishOpts: {
-      wikiLinkOpts: {
+  return MDUtilsV5.procRehypeFull(
+    {
+      engine,
+      ...dendron,
+      wikiLinksOpts: {
         useId: false,
+        ...opts?.wikiLinkOpts,
       },
-      ...opts,
+      publishOpts: {
+        wikiLinkOpts: {
+          useId: false,
+        },
+        ...opts,
+      },
     },
-  });
+    flavor ? { flavor } : undefined
+  );
 }
 
 const verifyPrivateLink = async (vfile: VFile, value: string) => {
@@ -209,151 +214,211 @@ describe("dendronPub", () => {
   });
 
   describe("frontmatter tags", () => {
-    describe("are rendered when available", () => {
-      test("single tag", async () => {
-        await runEngineTestV5(
-          async ({ engine, vaults }) => {
-            const out = await proc(engine, {
-              fname: "has.fmtags",
-              dest: DendronASTDest.HTML,
-              vault: vaults[0],
-              config: engine.config,
-            }).process("has fm tags");
-            await checkVFile(out, "Tags", "first");
-            await checkNotInVFile(out, "#first");
-          },
-          {
-            preSetupHook: async ({ wsRoot, vaults }) => {
-              await NoteTestUtilsV4.createNote({
-                fname: "has.fmtags",
-                wsRoot,
-                vault: vaults[0],
-                props: { tags: "first" },
-              });
-            },
-            expect,
-          }
-        );
-      });
-
-      test("multiple tags", async () => {
-        await runEngineTestV5(
-          async ({ engine, vaults }) => {
-            const out = await proc(engine, {
-              fname: "has.fmtags",
-              dest: DendronASTDest.HTML,
-              vault: vaults[0],
-              config: engine.config,
-            }).process("has fm tags");
-            await checkVFile(out, "Tags", "first", "second");
-            await checkNotInVFile(out, "#first", "#second");
-          },
-          {
-            preSetupHook: async ({ wsRoot, vaults }) => {
-              await NoteTestUtilsV4.createNote({
-                fname: "has.fmtags",
-                wsRoot,
-                vault: vaults[0],
-                props: { tags: ["first", "second"] },
-              });
-            },
-            expect,
-          }
-        );
-      });
-    });
-
-    test("are not rendered when missing", async () => {
-      await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const out = await proc(engine, {
-            fname: "no.fmtags",
-            dest: DendronASTDest.HTML,
-            vault: vaults[0],
-            config: engine.config,
-          }).process("has no fm tags");
-          await checkNotInVFile(out, "Tags");
-        },
+    const runProcForHasFMTags = async (opts: {
+      engine: DEngineClient;
+      vaults: DVault[];
+      flavor: ProcFlavor;
+    }) => {
+      const { engine, vaults, flavor } = opts;
+      const out = await proc(
+        engine,
         {
-          preSetupHook: async ({ wsRoot, vaults }) => {
-            await NoteTestUtilsV4.createNote({
-              fname: "no.fmtags",
-              wsRoot,
-              vault: vaults[0],
-            });
-          },
-          expect,
-        }
-      );
-    });
-
-    test("are not rendered when disabled", async () => {
-      await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const out = await proc(engine, {
-            fname: "has.fmtags",
-            dest: DendronASTDest.HTML,
-            vault: vaults[0],
-            config: engine.config,
-          }).process("has fm tags");
-          await checkNotInVFile(out, "Tags");
+          fname: "has.fmtags",
+          dest: DendronASTDest.HTML,
+          vault: vaults[0],
+          config: engine.config,
         },
+        undefined,
+        flavor
+      ).process("has fm tags");
+      return out;
+    };
+
+    const runProcForNoFMTags = async (opts: {
+      engine: DEngineClient;
+      vaults: DVault[];
+      flavor: ProcFlavor;
+    }) => {
+      const { engine, vaults, flavor } = opts;
+      const out = await proc(
+        engine,
         {
-          preSetupHook: async ({ wsRoot, vaults }) => {
-            TestConfigUtils.withConfig(
-              (c) => {
-                ConfigUtils.setPublishProp(c, "enableFrontmatterTags", false);
-                return c;
+          fname: "no.fmtags",
+          dest: DendronASTDest.HTML,
+          vault: vaults[0],
+          config: engine.config,
+        },
+        undefined,
+        flavor
+      ).process("has no fm tags");
+      return out;
+    };
+
+    describe("GIVEN enableFrontmatterTags: true", () => {
+      _.map([ProcFlavor.PUBLISHING, ProcFlavor.PREVIEW], (flavor) => {
+        test(`THEN rendered when available: single tag, ${flavor}`, async () => {
+          await runEngineTestV5(
+            async ({ engine, vaults }) => {
+              const out = await runProcForHasFMTags({ engine, vaults, flavor });
+
+              // `Tags` section and a link to `first` with no hashtag should be present
+              await checkVFile(out, "Tags", "first");
+              await checkNotInVFile(out, "#first");
+            },
+            {
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                await NoteTestUtilsV4.createNote({
+                  fname: "has.fmtags",
+                  wsRoot,
+                  vault: vaults[0],
+                  props: { tags: "first" },
+                });
               },
-              { wsRoot }
+              expect,
+            }
+          );
+        });
+
+        test(`THEN rendered when available: multiple tags, ${flavor}`, async () => {
+          await runEngineTestV5(
+            async ({ engine, vaults }) => {
+              const out = await runProcForHasFMTags({ engine, vaults, flavor });
+
+              // `Tags` section and links to `first` and `second`,
+              // both without hashtags should be present
+              await checkVFile(out, "Tags", "first", "second");
+              await checkNotInVFile(out, "#first", "#second");
+            },
+            {
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                await NoteTestUtilsV4.createNote({
+                  fname: "has.fmtags",
+                  wsRoot,
+                  vault: vaults[0],
+                  props: { tags: ["first", "second"] },
+                });
+              },
+              expect,
+            }
+          );
+        });
+      });
+
+      _.map([ProcFlavor.PUBLISHING, ProcFlavor.PREVIEW], (flavor) => {
+        test(`THEN not rendered when missing: ${flavor}`, async () => {
+          await runEngineTestV5(
+            async ({ engine, vaults }) => {
+              const out = await runProcForNoFMTags({ engine, vaults, flavor });
+
+              // `Tags` section should not be present
+              await checkNotInVFile(out, "Tags");
+            },
+            {
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                await NoteTestUtilsV4.createNote({
+                  fname: "no.fmtags",
+                  wsRoot,
+                  vault: vaults[0],
+                });
+              },
+              expect,
+            }
+          );
+        });
+      });
+
+      describe("WHEN enableHashesForFMTags: true", () => {
+        _.map([ProcFlavor.PUBLISHING, ProcFlavor.PREVIEW], (flavor) => {
+          test(`THEN rendered with a hashtag(#): ${flavor}`, async () => {
+            await runEngineTestV5(
+              async ({ engine, vaults }) => {
+                const out = await runProcForHasFMTags({
+                  engine,
+                  vaults,
+                  flavor,
+                });
+
+                // `Tags` section with links to `first` and `second`, both with hashtags
+                // should be present
+                await checkVFile(out, "Tags", "#first", "#second");
+              },
+              {
+                preSetupHook: async ({ wsRoot, vaults }) => {
+                  await NoteTestUtilsV4.createNote({
+                    fname: "has.fmtags",
+                    wsRoot,
+                    vault: vaults[0],
+                    props: { tags: ["first", "second"] },
+                  });
+                  TestConfigUtils.withConfig(
+                    (config) => {
+                      if (flavor === ProcFlavor.PUBLISHING) {
+                        ConfigUtils.setPublishProp(
+                          config,
+                          "enableHashesForFMTags",
+                          true
+                        );
+                      } else {
+                        ConfigUtils.setPreviewProps(
+                          config,
+                          "enableHashesForFMTags",
+                          true
+                        );
+                      }
+                      return config;
+                    },
+                    { wsRoot }
+                  );
+                },
+                expect,
+              }
             );
-            await NoteTestUtilsV4.createNote({
-              fname: "has.fmtags",
-              wsRoot,
-              vault: vaults[0],
-              props: { tags: ["first", "second"] },
-            });
-          },
-          expect,
-        }
-      );
+          });
+        });
+      });
     });
 
-    describe("WHEN configured with enableHashesForFMTags option", () => {
-      test("THEN tags are rendered with a # symbol", async () => {
-        await runEngineTestV5(
-          async ({ engine, vaults }) => {
-            const out = await proc(engine, {
-              fname: "has.fmtags",
-              dest: DendronASTDest.HTML,
-              vault: vaults[0],
-              config: engine.config,
-            }).process("has fm tags");
-            await checkVFile(out, "Tags", "#first", "#second");
-          },
-          {
-            preSetupHook: async ({ wsRoot, vaults }) => {
-              await NoteTestUtilsV4.createNote({
-                fname: "has.fmtags",
-                wsRoot,
-                vault: vaults[0],
-                props: { tags: ["first", "second"] },
-              });
-              TestConfigUtils.withConfig(
-                (config) => {
-                  ConfigUtils.setPublishProp(
-                    config,
-                    "enableHashesForFMTags",
-                    true
-                  );
-                  return config;
-                },
-                { wsRoot }
-              );
+    describe("GIVEN enableFrontmatterTags: false", () => {
+      _.map([ProcFlavor.PUBLISHING, ProcFlavor.PREVIEW], (flavor) => {
+        test(`THEN not rendered: ${flavor}`, async () => {
+          await runEngineTestV5(
+            async ({ engine, vaults }) => {
+              const out = await runProcForHasFMTags({ engine, vaults, flavor });
+              // `Tags` section should not be present
+              await checkNotInVFile(out, "Tags");
             },
-            expect,
-          }
-        );
+            {
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                TestConfigUtils.withConfig(
+                  (c) => {
+                    if (flavor === ProcFlavor.PUBLISHING) {
+                      ConfigUtils.setPublishProp(
+                        c,
+                        "enableFrontmatterTags",
+                        false
+                      );
+                    } else {
+                      ConfigUtils.setPreviewProps(
+                        c,
+                        "enableFrontmatterTags",
+                        false
+                      );
+                    }
+                    return c;
+                  },
+                  { wsRoot }
+                );
+                await NoteTestUtilsV4.createNote({
+                  fname: "has.fmtags",
+                  wsRoot,
+                  vault: vaults[0],
+                  props: { tags: ["first", "second"] },
+                });
+              },
+              expect,
+            }
+          );
+        });
       });
     });
   });

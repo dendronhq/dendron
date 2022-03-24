@@ -6,7 +6,7 @@ import {
 } from "@dendronhq/common-frontend";
 import { useRouter } from "next/router";
 import React from "react";
-import { getWsAndPort } from "../../lib/env";
+import { getWsAndUrl } from "../../lib/env";
 import { DendronProps } from "../../lib/types";
 
 export default function MiniPreview({ engine, ide }: DendronProps) {
@@ -29,7 +29,7 @@ export default function MiniPreview({ engine, ide }: DendronProps) {
     if (!maybeContent) {
       dispatch(
         engineSlice.renderNote({
-          ...getWsAndPort(),
+          ...getWsAndUrl(),
           id: noteId,
           note: ide.noteActive,
         })

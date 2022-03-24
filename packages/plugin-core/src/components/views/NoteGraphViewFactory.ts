@@ -59,6 +59,7 @@ export class NoteGraphPanelFactory {
           }
         });
 
+      // listener
       this._panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
         const ctx = "ShowNoteGraph:onDidReceiveMessage";
         Logger.debug({ ctx, msgType: msg.type });
@@ -140,6 +141,10 @@ export class NoteGraphPanelFactory {
     return this._panel;
   }
 
+  /**
+   * Post message to the webview content.
+   * @param note
+   */
   static refresh(note: NoteProps): any {
     if (this._panel) {
       this._panel.webview.postMessage({
@@ -153,7 +158,10 @@ export class NoteGraphPanelFactory {
       } as OnDidChangeActiveTextEditorMsg);
     }
   }
-
+  /**
+   * If the user changes focus, then the newly in-focus Dendron note
+   * should be shown in the graph.
+   */
   static async onOpenTextDocument(editor: TextEditor | undefined) {
     if (_.isUndefined(editor) || _.isUndefined(this._panel)) {
       return;

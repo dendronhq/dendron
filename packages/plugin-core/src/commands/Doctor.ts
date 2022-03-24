@@ -91,15 +91,28 @@ export enum PluginDoctorActionsEnum {
   FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
 }
 
-const NO_RELOAD_ACTIONS = [
-  PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
-  DoctorActionsEnum.FIX_AIRTABLE_METADATA,
+// Only reload the workspace for these commands
+//  ^2z4m76v2e2xo
+const RELOAD_BEFORE_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
 ];
 
-function shouldDoctorReloadWorkspace(
+const RELOAD_AFTER_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
+];
+
+function shouldDoctorReloadWorkspaceBeforeDoctorAction(
   action: PluginDoctorActionsEnum | DoctorActionsEnum
 ) {
-  return !NO_RELOAD_ACTIONS.includes(action);
+  return RELOAD_BEFORE_ACTIONS.includes(action);
+}
+
+function shouldDoctorReloadWorkspaceAfterDoctorAction(
+  action: PluginDoctorActionsEnum | DoctorActionsEnum
+) {
+  return RELOAD_AFTER_ACTIONS.includes(action);
 }
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -353,7 +366,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     this.L.info({ ctx, msg: "pre:Reload" });
 
-    if (shouldDoctorReloadWorkspace(opts.action)) {
+    if (shouldDoctorReloadWorkspaceBeforeDoctorAction(opts.action)) {
       await this.reload();
     }
 
@@ -507,7 +520,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.extension.fileWatcher.pause = false;
     }
 
-    if (shouldDoctorReloadWorkspace(opts.action)) {
+    if (shouldDoctorReloadWorkspaceAfterDoctorAction(opts.action)) {
       await this.reload();
       // Decorations don't auto-update here, I think because the contents of the
       // note haven't updated within VSCode yet. Regenerate the decorations, but

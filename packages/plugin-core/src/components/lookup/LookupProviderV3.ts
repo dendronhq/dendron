@@ -122,7 +122,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       },
       100,
       {
-        leading: true,
+        // Use trailing to make sure we get the latest letters typed by the user
+        // before accepting.
+        leading: false,
       }
     );
     quickpick.onDidChangeValue(onUpdateDebounced);
@@ -132,7 +134,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         ctx: "NoteLookupProvider:onDidAccept",
         quickpick: quickpick.value,
       });
-      onUpdateDebounced.cancel();
+      await onUpdateDebounced.flush();
       if (_.isEmpty(quickpick.selectedItems)) {
         await onUpdatePickerItems({
           picker: quickpick,

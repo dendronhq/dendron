@@ -25,13 +25,13 @@ export const useCurrentTheme = () => {
 
 export const useWorkspaceProps = (): [WorkspaceProps] => {
   const elem = window.document.getElementById("root")!;
-  const url = elem.getAttribute("data-url")!;
+  const port = parseInt(elem.getAttribute("data-port")!, 10);
   const ws = elem.getAttribute("data-ws")!;
   const isBrowser = elem.getAttribute("data-browser")! === "true";
   const theme = elem.getAttribute("data-browser")!;
   return [
     {
-      url,
+      port,
       ws,
       browser: isBrowser,
       theme,

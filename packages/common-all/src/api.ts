@@ -219,11 +219,6 @@ export class APIUtils {
     return url + `?${str}`;
   }
 
-  /** Generate a localhost url to this API.
-   *
-   * Warning! In VSCode, the generated URL won't work if the user has a remote
-   * workspace. You'll need to use `vscode.env.asExternalUri` to make it remote.
-   */
   static getLocalEndpoint(port: number) {
     return `http://localhost:${port}`;
   }

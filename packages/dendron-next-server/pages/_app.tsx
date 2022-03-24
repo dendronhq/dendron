@@ -38,16 +38,14 @@ const themes = {
 const { useEngineAppSelector, useEngine } = engineHooks;
 
 const getWorkspaceParamsFromQueryString = (): WorkspaceProps => {
-  const { ws, theme, browser } = querystring.parse(
+  const { port, ws, theme, browser } = querystring.parse(
     window.location.search.slice(1)
   );
   return {
-    url: `${window.location.protocol}//${window.location.host}`,
+    port: parseInt(port as string, 10),
     ws,
     theme,
     browser,
-    // querystring.parse's type definition is pretty inaccurate, it just says
-    // `string | string[] | undefined` so we cast here to ignore that
   } as WorkspaceProps;
 };
 
@@ -89,7 +87,7 @@ function AppVSCode({ Component, pageProps }: any) {
     // when we get a msg from vscode, update our msg state
     logger.info({ ctx, msg, query });
     // NOTE: initial message, state might not be set
-    const { url, ws } = getWorkspaceParamsFromQueryString();
+    const { port, ws } = getWorkspaceParamsFromQueryString();
 
     if (msg.type === DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       const cmsg = msg as OnDidChangeActiveTextEditorMsg;
@@ -99,13 +97,13 @@ function AppVSCode({ Component, pageProps }: any) {
         logger.info({
           ctx,
           msg: "syncEngine:pre",
-          url,
+          port,
           ws,
         });
-        await ideDispatch(engineSlice.initNotes({ url, ws }));
+        await ideDispatch(engineSlice.initNotes({ port, ws }));
       }
       if (syncChangedNote && note) {
-        await ideDispatch(engineSlice.syncNote({ url, ws, note }));
+        await ideDispatch(engineSlice.syncNote({ port, ws, note }));
       }
       logger.info({ ctx, msg: "syncEngine:post" });
       ideDispatch(ideSlice.actions.setNoteActive(note));

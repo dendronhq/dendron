@@ -34,18 +34,20 @@ export const useEngine = ({
     }
     if (!engineSliceUtils.hasInitialized(engineState) || opts.force) {
       logger.info({ msg: "dispatch notes", force: opts.force });
-      if (_.isUndefined(opts.url)) {
+      if (_.isUndefined(opts.port)) {
         return;
       }
       if (!opts.ws) {
         return;
       }
       logger.info({ ctx: "useEffect", state: "initEngine" });
-      dispatch(initNotes({ url: opts.url, ws: opts.ws }));
+      dispatch(
+        initNotes({ port: parseInt(opts.port as any, 10), ws: opts.ws })
+      );
     }
     logger.info({ ctx: "useEffect", state: "exit", engineState });
     return;
-  }, [engineState.loading, opts.url, opts.ws]);
+  }, [engineState.loading, opts.port, opts.ws]);
 };
 
 /**
@@ -63,14 +65,14 @@ export const useConfig = ({
   useEffect(() => {
     logger.info({ ctx: "useEffect", state: "enter" });
 
-    if (_.isUndefined(opts.url)) {
+    if (_.isUndefined(opts.port)) {
       return;
     }
     if (!opts.ws) {
       return;
     }
     logger.info({ ctx: "useEffect", state: "syncConfig" });
-    dispatch(syncConfig({ url: opts.url, ws: opts.ws }));
+    dispatch(syncConfig({ port: parseInt(opts.port as any, 10), ws: opts.ws }));
     logger.info({ ctx: "useEffect", state: "exit" });
     return;
   }, []);

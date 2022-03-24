@@ -1,4 +1,3 @@
-import { APIUtils } from "@dendronhq/common-all";
 import { combinedStore, engineSlice } from "@dendronhq/common-frontend";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { createEngineFromServer, runEngineTestV5 } from "../../../../engine";
@@ -25,12 +24,10 @@ describe("GIVEN syncNote", () => {
             },
           });
           await engine.updateNote(newNote, { newNode: true });
-          expect(port).toBeTruthy();
-          const url = APIUtils.getLocalEndpoint(port!);
 
           // --- setup engineSlice
           // sync new note to redux engine
-          const initNotesOpts = { ws: wsRoot, url };
+          const initNotesOpts = { ws: wsRoot, port: port! };
           await combinedStore.dispatch(engineSlice.initNotes(initNotesOpts));
           await combinedStore.dispatch(
             engineSlice.syncNote({ ...initNotesOpts, note: newNote })
@@ -60,10 +57,8 @@ describe("GIVEN syncNote", () => {
       await runEngineTestV5(
         async ({ port, wsRoot, engine }) => {
           const note = engine.notes["foo"];
-          expect(port).toBeTruthy();
-          const url = APIUtils.getLocalEndpoint(port!);
 
-          const initNotesOpts = { ws: wsRoot, url };
+          const initNotesOpts = { ws: wsRoot, port: port! };
           await combinedStore.dispatch(engineSlice.initNotes(initNotesOpts));
           await combinedStore.dispatch(
             engineSlice.syncNote({ ...initNotesOpts, note })

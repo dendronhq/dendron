@@ -102,7 +102,7 @@ export class DendronTreeViewV2 implements WebviewViewProvider, Disposable {
     const start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
 
-    await WebViewUtils.prepareTreeView({
+    WebViewUtils.prepareTreeView({
       ext: this._ext,
       key: DendronTreeViewKey.TREE_VIEW_V2,
       webviewView,

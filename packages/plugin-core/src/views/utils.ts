@@ -1,5 +1,4 @@
 import {
-  APIUtils,
   DendronEditorViewKey,
   DendronTreeViewKey,
   DUtils,
@@ -62,7 +61,7 @@ export class WebViewUtils {
    * @param panel: required to convert asset URLs to VSCode Webview Extension format
    * @returns
    */
-  static async getWebviewContent({
+  static getWebviewContent({
     jsSrc,
     cssSrc,
     port,
@@ -90,16 +89,7 @@ export class WebViewUtils {
     const out = WebViewCommonUtils.genVSCodeHTMLIndex({
       jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
       cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
-      // Need to use `asExternalUri` to make sure port forwarding is set up
-      // correctly in remote workspaces
-      url: (
-        await vscode.env.asExternalUri(
-          vscode.Uri.parse(APIUtils.getLocalEndpoint(port))
-        )
-      )
-        .toString()
-        // Slice of trailing slash
-        .slice(undefined, -1),
+      port,
       wsRoot,
       browser: false,
       // acquireVsCodeApi() Documentation: This function can only be invoked once per session.
@@ -110,7 +100,7 @@ export class WebViewUtils {
     });
     return out;
   }
-  static async prepareTreeView({
+  static prepareTreeView({
     ext,
     key,
     webviewView,
@@ -128,7 +118,7 @@ export class WebViewUtils {
       enableCommandUris: false,
       localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
     };
-    const html = await WebViewUtils.getWebviewContent({
+    const html = WebViewUtils.getWebviewContent({
       ...webViewAssets,
       port,
       wsRoot: ext.getEngine().wsRoot,

@@ -23,7 +23,7 @@ import _ from "lodash";
 import Head from "next/head";
 import * as React from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
-import { getWsAndUrl } from "../../lib/env";
+import { getWsAndPort } from "../../lib/env";
 import { DendronProps, WorkspaceProps } from "../../lib/types";
 import { getThemeType } from "../../styles/theme";
 
@@ -73,14 +73,14 @@ function getMermaid(window: Window): Mermaid | undefined {
 function genThemeString(opts: {
   themeTarget: ThemeTarget;
   themeType: ThemeType;
-  url: string;
+  port: number;
   ws: string;
 }) {
   const themeRequest = {
     ...opts,
   } as AssetGetThemeRequest;
   const qs = querystring.stringify(themeRequest);
-  const base = `${opts.url}/api/assets/theme?${qs}`;
+  const base = `${APIUtils.getLocalEndpoint(opts.port)}/api/assets/theme?${qs}`;
   return base;
 }
 
@@ -157,7 +157,7 @@ const useMermaid = ({
   }, [config]);
 };
 
-function Note({ engine, ide, ws, url }: DendronProps & WorkspaceProps) {
+function Note({ engine, ide, ws, port }: DendronProps & WorkspaceProps) {
   const ctx = "Note";
 
   // apply initial hooks
@@ -185,7 +185,7 @@ function Note({ engine, ide, ws, url }: DendronProps & WorkspaceProps) {
       renderedNoteContentHash.current = contentHash;
       dispatch(
         engineSlice.renderNote({
-          ...getWsAndUrl(),
+          ...getWsAndPort(),
           id: noteId,
           note: noteActive,
         })
@@ -264,7 +264,7 @@ function Note({ engine, ide, ws, url }: DendronProps & WorkspaceProps) {
     themeTarget: ThemeTarget.PRISM,
     themeType: currentTheme as ThemeType,
     ws,
-    url,
+    port,
   });
   return (
     <AntLayout>

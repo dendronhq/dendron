@@ -19,10 +19,12 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
+  assignJSONWithComment,
   FileUtils,
   findDownTo,
   findUpTo,
   genHash,
+  GitUtils,
   readJSONWithComments,
   readJSONWithCommentsSync,
   uniqueOutermostFolders,
@@ -160,7 +162,7 @@ export class WorkspaceUtils {
     settings: WorkspaceSettings;
     wsRoot: string;
   }) {
-    writeJSONWithComments(
+    return writeJSONWithComments(
       path.join(wsRoot, "dendron.code-workspace"),
       settings
     );
@@ -354,5 +356,51 @@ export class WorkspaceUtils {
       // But if there's more than one vault in the repo, then use the repo path which is easier to interpret
       return result.repo;
     });
+  }
+
+  static async addVaultToWorkspace({
+    vault,
+    wsRoot,
+  }: {
+    vault: DVault;
+    wsRoot: string;
+  }) {
+    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(wsRoot);
+    if (resp.error) {
+      // If there is no workspace file, just skip updating it. The workspace
+      // file is optional with self contained vaults.
+      return;
+    }
+    let wsSettings = resp.data;
+
+    if (
+      !_.find(
+        wsSettings.folders,
+        (ent) => ent.path === VaultUtils.getRelPath(vault)
+      )
+    ) {
+      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
+      const folders = [vault2Folder].concat(wsSettings.folders);
+      wsSettings = assignJSONWithComment({ folders }, wsSettings);
+      await WorkspaceUtils.writeCodeWorkspaceSettings({
+        settings: wsSettings,
+        wsRoot,
+      });
+    }
+
+    // check for .gitignore
+    await GitUtils.addToGitignore({
+      addPath: vault.fsPath,
+      root: wsRoot,
+      noCreateIfMissing: true,
+    });
+
+    const vaultDir = path.join(wsRoot, vault.fsPath);
+    fs.ensureDir(vaultDir);
+    await GitUtils.addToGitignore({
+      addPath: ".dendron.cache.*",
+      root: vaultDir,
+    });
+    return;
   }
 }

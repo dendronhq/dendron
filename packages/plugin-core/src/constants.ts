@@ -1,5 +1,6 @@
 import {
   DendronTreeViewKey,
+  DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
   TREE_VIEWS,
 } from "@dendronhq/common-all";
@@ -984,6 +985,13 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     default: false,
     description:
       "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace.",
+  },
+  ENABLE_SELF_CONTAINED_VAULT_WORKSPACE: {
+    key: DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
+    type: "boolean",
+    default: false,
+    description:
+      "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature.",
   },
 };
 

@@ -112,3 +112,7 @@ export enum DENDRON_EMOJIS {
   OKAY = "✅",
   NOT_OKAY = "❎",
 }
+
+export enum DENDRON_VSCODE_CONFIG_KEYS {
+  ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE = "dendron.enableSelfContainedVaultWorkspace",
+}

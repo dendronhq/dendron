@@ -7,7 +7,7 @@ import {
 import {
   assignJSONWithComment,
   readJSONWithComments,
-  writeJSONWithComments,
+  writeJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -246,7 +246,7 @@ export class Snippets {
   ) {
     const snippetPath = path.join(dirPath, Snippets.filename);
     const snippets = assignJSONWithComment(orig, changed);
-    return writeJSONWithComments(snippetPath, snippets);
+    return writeJSONWithCommentsSync(snippetPath, snippets);
   }
 }
 

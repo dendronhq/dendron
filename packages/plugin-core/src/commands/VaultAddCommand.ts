@@ -2,17 +2,11 @@ import {
   DendronError,
   DVault,
   DWorkspace,
-  ERROR_STATUS,
   FOLDERS,
   VaultRemoteSource,
   VaultUtils,
-  WorkspaceType,
 } from "@dendronhq/common-all";
-import {
-  assignJSONWithComment,
-  GitUtils,
-  simpleGit,
-} from "@dendronhq/common-server";
+import { GitUtils, simpleGit } from "@dendronhq/common-server";
 import {
   Git,
   WorkspaceService,
@@ -366,48 +360,10 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async addVaultToWorkspace(vault: DVault) {
-    if (ExtensionProvider.getExtension().type === WorkspaceType.NATIVE) return;
-    const { wsRoot } = ExtensionProvider.getDWorkspace();
-
-    // workspace file
-    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(wsRoot);
-    if (resp.error) {
-      throw DendronError.createFromStatus({
-        status: ERROR_STATUS.INVALID_STATE,
-        message: "no dendron.code-workspace found",
-      });
-    }
-    let wsSettings = resp.data;
-
-    if (
-      !_.find(
-        wsSettings.folders,
-        (ent) => ent.path === VaultUtils.getRelPath(vault)
-      )
-    ) {
-      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
-      const folders = [vault2Folder].concat(wsSettings.folders);
-      wsSettings = assignJSONWithComment({ folders }, wsSettings);
-      WorkspaceUtils.writeCodeWorkspaceSettings({
-        settings: wsSettings,
-        wsRoot,
-      });
-    }
-
-    // check for .gitignore
-    await GitUtils.addToGitignore({
-      addPath: vault.fsPath,
-      root: wsRoot,
-      noCreateIfMissing: true,
+    return WorkspaceUtils.addVaultToWorkspace({
+      vault,
+      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
-
-    const vaultDir = path.join(wsRoot, vault.fsPath);
-    fs.ensureDir(vaultDir);
-    await GitUtils.addToGitignore({
-      addPath: ".dendron.cache.*",
-      root: vaultDir,
-    });
-    return;
   }
 
   /**

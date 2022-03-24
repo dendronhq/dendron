@@ -586,6 +586,8 @@ export class VSCodeUtils {
     };
   }
 
+  static getWorkspaceConfig = vscode.workspace.getConfiguration;
+
   static isExtensionInstalled(extensionId: string) {
     return !_.isUndefined(vscode.extensions.getExtension(extensionId));
   }

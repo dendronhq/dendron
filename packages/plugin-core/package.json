@@ -929,6 +929,11 @@
           "type": "boolean",
           "default": false,
           "description": "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace."
+        },
+        "dendron.enableSelfContainedVaultWorkspace": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature."
         }
       }
     },

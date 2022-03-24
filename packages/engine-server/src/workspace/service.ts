@@ -1,8 +1,10 @@
 import {
+  asyncLoopOneAtATime,
   ConfigUtils,
   CONSTANTS,
   CURRENT_CONFIG_VERSION,
   DendronError,
+  DENDRON_VSCODE_CONFIG_KEYS,
   DEngineClient,
   Disposable,
   DuplicateNoteActionEnum,
@@ -18,6 +20,7 @@ import {
   NoteUtils,
   SchemaUtils,
   SeedEntry,
+  SelfContainedVault,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -33,11 +36,12 @@ import {
   simpleGit,
   vault2Path,
   writeJSONWithComments,
+  writeJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
-import path from "path";
+import path, { basename } from "path";
 import { WorkspaceUtils } from ".";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
@@ -72,6 +76,8 @@ export type WorkspaceServiceCreateOpts = {
    * create dendron.code-workspace file
    */
   createCodeWorkspace?: boolean;
+  /** Create a self contained vault as the workspace */
+  useSelfContainedVault?: boolean;
 };
 
 export type WorkspaceServiceOpts = {
@@ -183,7 +189,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {
-    writeJSONWithComments(
+    writeJSONWithCommentsSync(
       path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME),
       config
     );
@@ -294,7 +300,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         if (opts.onUpdatingWorkspace) {
           await opts.onUpdatingWorkspace();
         }
-        writeJSONWithComments(wsPath, out);
+        await writeJSONWithComments(wsPath, out);
 
         if (opts.onUpdatedWorkspace) {
           await opts.onUpdatedWorkspace();
@@ -369,7 +375,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     addToConfig?: boolean;
     addToCodeWorkspace?: boolean;
     // Must be created with a self-contained vault
-    vault: Omit<DVault, "selfContained"> & { selfContained: true };
+    vault: SelfContainedVault;
   }) {
     const { vault, addToConfig, addToCodeWorkspace } = opts;
     /** The `vault` folder */
@@ -426,11 +432,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
             name: VaultUtils.getName(vault),
           },
         ],
+        settings: {
+          // Also enable the self contained vault workspaces when inside the self contained vault
+          [DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE]:
+            true,
+        },
       },
     });
     // Also add a gitignore, so files like `.dendron.port` are ignored if the
     // self contained vault is opened on its own
-    WorkspaceService.createGitIgnore(vaultPath);
+    await WorkspaceService.createGitIgnore(vaultPath);
 
     // Update the config and code-workspace for the current workspace
     if (addToConfig) {
@@ -777,7 +788,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         opts.onUpdatingWorkspace();
       }
 
-      writeJSONWithComments(wsPath, settings);
+      writeJSONWithCommentsSync(wsPath, settings);
 
       if (opts.onUpdatedWorkspace) {
         await opts.onUpdatedWorkspace();
@@ -829,6 +840,14 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @param opts
    */
   static async createWorkspace(opts: WorkspaceServiceCreateOpts) {
+    if (opts.useSelfContainedVault) {
+      return this.createSelfContainedVaultWorkspace(opts);
+    } else {
+      return this.createStandardWorkspace(opts);
+    }
+  }
+
+  static async createStandardWorkspace(opts: WorkspaceServiceCreateOpts) {
     const { wsRoot, vaults } = opts;
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
@@ -855,6 +874,83 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return ws;
   }
 
+  /** Given a standard vault, convert it into a self contained vault.
+   *
+   * The function **mutates** (modifies) the vault object. */
+  static standardToSelfContainedVault(vault: DVault): SelfContainedVault {
+    if (VaultUtils.isSelfContained(vault)) return vault;
+
+    if (vault.remote?.url) {
+      // Remote vault, calculate path based on the remote
+      vault.fsPath = path.join(
+        FOLDERS.DEPENDENCIES,
+        GitUtils.remoteUrlToDependencyPath({
+          vaultName: vault.name || basename(vault.fsPath),
+          url: vault.remote.url,
+        })
+      );
+    } else {
+      // Local vault, calculate path for local deps
+      vault.fsPath = path.join(
+        FOLDERS.DEPENDENCIES,
+        FOLDERS.LOCAL_DEPENDENCY,
+        path.basename(vault.fsPath)
+      );
+    }
+
+    vault.selfContained = true;
+    // Cast required, because TypeScript doesn't recognize `selfContained` is always set to true
+    return vault as SelfContainedVault;
+  }
+
+  /** Creates a new workspace where the workspace is a self contained vault.
+   *
+   * If the vaults passed to this function are not self contained vaults, they
+   * will be converted to self contained vaults before being created. The vault
+   * objects passed in are **mutated**.
+   *
+   * Further, the first vault given will be the self contained vault that is
+   * used as the workspace root.
+   */
+  static async createSelfContainedVaultWorkspace(
+    opts: WorkspaceServiceCreateOpts
+  ) {
+    const { wsRoot, vaults } = opts;
+    const ws = new WorkspaceService({ wsRoot });
+    if (vaults && vaults.length > 0) {
+      // First vault is the self contained vault we are using as the workspace
+      const wsVault = vaults[0];
+      // The vault is the workspace too
+      if (wsVault.name === undefined) {
+        wsVault.name = path.basename(wsRoot);
+      }
+      wsVault.fsPath = ".";
+      wsVault.selfContained = true;
+
+      // Mutate vault objects to convert them to self contained vaults. The
+      // first vault will be skipped because the conversion is a no-op for
+      // vaults that are already self contained.
+      const selfContainedVaults = vaults.map(
+        WorkspaceService.standardToSelfContainedVault
+      );
+      // Needs to be done one at a time, otherwise config updates are racy
+      await asyncLoopOneAtATime(selfContainedVaults, (vault) => {
+        return ws.createSelfContainedVault({
+          vault,
+          addToCodeWorkspace: false,
+          // Don't add to config, {@link SetupWorkspaceCommand} also adds vaults to the config
+          addToConfig: false,
+        });
+      });
+    }
+
+    // check if this is the first workspace created
+    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
+      MetadataService.instance().setFirstWsInitialize();
+    }
+    return ws;
+  }
+
   static async createFromConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
@@ -874,16 +970,23 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     // workspace file
     const wsPath = WorkspaceConfig.workspaceFile(wsRoot);
-    let out = (await readJSONWithComments(
-      wsPath
-    )) as unknown as WorkspaceSettings;
+    let out: WorkspaceSettings;
+    try {
+      out = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
+    } catch (err: any) {
+      // If the config file didn't exist, ignore the error
+      if (err?.code === "ENOENT") return;
+      throw err;
+    }
     if (
       !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
     ) {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
-      writeJSONWithComments(wsPath, out);
+      await writeJSONWithComments(wsPath, out);
     }
     return;
   }

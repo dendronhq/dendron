@@ -70,32 +70,7 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks backlink 1`] = `
-Array [
-  Object {
-    "alias": undefined,
-    "from": Object {
-      "fname": "simple-note-ref",
-      "vaultName": "vault1",
-    },
-    "position": Position {
-      "end": Object {
-        "column": 25,
-        "line": 1,
-        "offset": 24,
-      },
-      "indent": Array [],
-      "start": Object {
-        "column": 1,
-        "line": 1,
-        "offset": 0,
-      },
-    },
-    "type": "backlink",
-    "value": "simple-note-ref.one",
-  },
-]
-`;
+exports[`RemarkUtils and LinkUtils findLinks backlink 1`] = `Array []`;
 
 exports[`RemarkUtils and LinkUtils findLinks empty link 1`] = `Array []`;
 
@@ -230,28 +205,6 @@ Array [
     "type": "ref",
     "value": "foo.two",
     "xvault": false,
-  },
-  Object {
-    "alias": undefined,
-    "from": Object {
-      "fname": "foo",
-      "vaultName": "vault1",
-    },
-    "position": Position {
-      "end": Object {
-        "column": 13,
-        "line": 1,
-        "offset": 12,
-      },
-      "indent": Array [],
-      "start": Object {
-        "column": 1,
-        "line": 1,
-        "offset": 0,
-      },
-    },
-    "type": "backlink",
-    "value": "foo.one",
   },
 ]
 `;

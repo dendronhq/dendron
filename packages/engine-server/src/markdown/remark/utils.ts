@@ -378,9 +378,7 @@ export class LinkUtils {
   }
   /**
    * Get all links from the note body
-   * Currently, just look for wiki links and keep existing backlinks
-   *
-   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
+   * Currently, just look for wiki links
    *
    * @param opts.filter - {type, loc
    *
@@ -412,8 +410,7 @@ export class LinkUtils {
       filter: { loc: filter?.loc },
       note,
     });
-    const backlinks = note.links.filter((link) => link.type === "backlink");
-    return links.concat(backlinks);
+    return links;
   }
 
   static findHashTags({ links }: { links: DLink[] }) {

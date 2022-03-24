@@ -221,21 +221,6 @@ describe("RemarkUtils and LinkUtils", () => {
     );
 
     testWithEngine(
-      "backlink",
-      async ({ engine }) => {
-        const note = engine.notes["simple-note-ref.one"];
-        const links = LinkUtils.findLinks({ note, engine });
-        expect(links).toMatchSnapshot();
-        expect(links[0].from?.fname).toEqual("simple-note-ref");
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupRefs(opts);
-        },
-      }
-    );
-
-    testWithEngine(
       "xvault link",
       async ({ engine }) => {
         const note = engine.notes["foo"];
@@ -310,16 +295,6 @@ describe("RemarkUtils and LinkUtils", () => {
               type: "ref",
             },
             target: links[1],
-          });
-          checkLink({
-            src: {
-              from: {
-                fname: "foo",
-                vaultName: "vault1",
-              },
-              type: "backlink",
-            },
-            target: links[2],
           });
         },
         {

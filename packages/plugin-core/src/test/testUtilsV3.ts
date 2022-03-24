@@ -1,9 +1,13 @@
 import {
   ConfigUtils,
+  DENDRON_VSCODE_CONFIG_KEYS,
   DEngineClient,
+  Disposable,
+  DVault,
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
+  NoteChangeEntry,
   VaultRemoteSource,
   WorkspaceFolderRaw,
   WorkspaceOpts,
@@ -25,8 +29,10 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
+  DendronEngineClient,
   DendronEngineV2,
   HistoryService,
+  WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import {
   ModConfigCb,
@@ -57,6 +63,7 @@ import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
+import { ExtensionProvider } from "../ExtensionProvider";
 import {
   cleanupVSCodeContextSubscriptions,
   setupCodeConfiguration,
@@ -85,22 +92,28 @@ type PostSetupWorkspaceHook = (opts: WorkspaceOpts) => Promise<void>;
 type SetupWorkspaceType = {
   /** The type of workspace to create for the test, Native (w/o dendron.code-worksace) or Code (w/ dendron.code-workspace) */
   workspaceType?: WorkspaceType;
+  /** If true, create a self contained vault as the workspace.
+   *
+   * Setting this option will also override the VSCode setting `dendron.enableSelfContainedVaultWorkspace`.
+   *
+   * TODO: This option is temporary until self contained vaults become the default, at which point this should be removed and all tests should default to self contained.
+   */
+  selfContained?: boolean;
 };
 
 export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 &
   SetupWorkspaceType & {
-    ctx: ExtensionContext;
-    preActivateHook?: any;
-    postActivateHook?: any;
+    ctx?: ExtensionContext;
     preSetupHook?: PreSetupCmdHookFunction;
     postSetupHook?: PostSetupWorkspaceHook;
     setupWsOverride?: Omit<Partial<SetupWorkspaceOpts>, "workspaceType">;
     modConfigCb?: ModConfigCb;
+    noSetInstallStatus?: boolean; // by default, we set install status to NO_CHANGE. use this when you need to test this logic
   };
 
 export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
   SetupWorkspaceType & {
-    ctx: ExtensionContext;
+    ctx?: ExtensionContext;
     /**
      * Runs before the workspace is initialized
      */
@@ -109,14 +122,6 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 &
      * Runs after the workspace is initialized
      */
     postSetupHook?: PostSetupWorkspaceHook;
-    /**
-     * Runs before the workspace is activated
-     */
-    preActivateHook?: any;
-    /**
-     * Run after workspace is activated
-     */
-    postActivateHook?: any;
     /**
      * By default, create workspace and vaults in a random temporary dir.
      */
@@ -171,9 +176,18 @@ export async function setupLegacyWorkspace(
     workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
+    selfContained: false,
   });
   const wsRoot = tmpDir().name;
-  fs.ensureDirSync(wsRoot);
+  if (opts.selfContained) {
+    // If self contained, also override the self contained vaults VSCode config.
+    // This will make SetupWorkspaceCommand create self contained vaults.
+    if (!opts.configOverride) opts.configOverride = {};
+    opts.configOverride[
+      DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+    ] = true;
+  }
+  await fs.ensureDir(wsRoot);
   if (copts.workspaceType === WorkspaceType.CODE) stubWorkspaceFile(wsRoot);
   setupCodeConfiguration(opts);
 
@@ -187,6 +201,7 @@ export async function setupLegacyWorkspace(
     ...copts.setupWsOverride,
     workspaceInitializer: new BlankInitializer(),
     workspaceType: copts.workspaceType,
+    selfContained: copts.selfContained,
   });
   stubWorkspaceFolders(wsRoot, vaults);
 
@@ -195,7 +210,7 @@ export async function setupLegacyWorkspace(
   if (isNotUndefined(copts.modConfigCb)) {
     config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
-  DConfig.writeConfig({ wsRoot, config });
+  await DConfig.writeConfig({ wsRoot, config });
 
   await copts.postSetupHook({
     wsRoot,
@@ -204,6 +219,7 @@ export async function setupLegacyWorkspace(
   return { wsRoot, vaults };
 }
 
+//  ^bq7n7azzkpj2
 export async function setupLegacyWorkspaceMulti(
   opts: SetupLegacyWorkspaceMultiOpts
 ) {
@@ -219,11 +235,19 @@ export async function setupLegacyWorkspaceMulti(
   });
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
 
+  if (!opts.configOverride) opts.configOverride = {};
+  // Always override the self contained config, otherwise it picks up the
+  // setting in the developer's machine during testing.
+  opts.configOverride[
+    DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+  ] = !!opts.selfContained;
+
   let workspaceFile: Uri | undefined;
+  // check where the keyboard shortcut is configured
   let workspaceFolders: readonly WorkspaceFolder[] | undefined;
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
-  new StateService(opts.ctx); // eslint-disable-line no-new
+  new StateService(opts.ctx!); // eslint-disable-line no-new
   setupCodeConfiguration(opts);
   if (copts.workspaceType === WorkspaceType.CODE) {
     stubWorkspace({ wsRoot, vaults });
@@ -245,7 +269,8 @@ export async function setupLegacyWorkspaceMulti(
   });
   // update vscode settings
   if (copts.workspaceType === WorkspaceType.CODE) {
-    await DendronExtension.updateWorkspaceFile({
+    await WorkspaceUtils.updateCodeWorkspaceSettings({
+      wsRoot,
       updateCb: (settings) => {
         const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
           path: ent.fsPath,
@@ -262,7 +287,7 @@ export async function setupLegacyWorkspaceMulti(
     config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
   ConfigUtils.setVaults(config, vaults);
-  DConfig.writeConfig({ wsRoot, config });
+  await DConfig.writeConfig({ wsRoot, config });
   await postSetupHook({
     wsRoot,
     vaults,
@@ -277,11 +302,11 @@ export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
-  await _activate(opts.ctx);
+  await _activate(opts.ctx!);
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  cleanupVSCodeContextSubscriptions(opts.ctx);
+  cleanupVSCodeContextSubscriptions(opts.ctx!);
 }
 
 /**
@@ -291,11 +316,11 @@ export async function runLegacyMultiWorkspaceTest(
   opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
-  await _activate(opts.ctx);
+  await _activate(opts.ctx!);
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
-  cleanupVSCodeContextSubscriptions(opts.ctx);
+  cleanupVSCodeContextSubscriptions(opts.ctx!);
 }
 
 export function addDebugServerOverride() {
@@ -307,11 +332,13 @@ export function addDebugServerOverride() {
 }
 
 /**
+ * @deprecated. If using {@link describeSingleWS} or {@link describeMultiWS}, this call is no longer necessary
+ *
+ * If you need before or after hooks, you can use `before()` and `after()` to set them up.
+ * Timeout and `noSetInstallStatus` can be set on the options for the test harnesses.
  *
  * @param _this
  * @param opts.noSetInstallStatus: by default, we set install status to NO_CHANGE. use this when you need to test this logic
- * @param opts.noStubExecServerNode: stub this to be synchronous engine laungh for tests due to latency
- * @returns
  */
 export function setupBeforeAfter(
   _this: any,
@@ -459,25 +486,66 @@ export function runSuiteButSkipForWindows() {
  * @param opts
  * @param fn - the test() functions to execute. NOTE: This function CANNOT be
  * async, or else the test may not fail reliably when your expect or assert
- * conditions are not met.
+ * conditions are not met. ^eq30h1lt0zat
  */
 export function describeMultiWS(
   title: string,
-  opts: SetupLegacyWorkspaceMultiOpts,
+  opts: SetupLegacyWorkspaceMultiOpts & {
+    /**
+     * Run after we stub vscode mock workspace, but before the workspace is created
+     */
+    beforeHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
+     * Run after the workspace is crated, but before dendron is activated
+     */
+    preActivateHook?: (opts: {
+      ctx: ExtensionContext;
+      wsRoot: string;
+      vaults: DVault[];
+    }) => Promise<void>;
+    /**
+     * @deprecated Please use an `after()` hook instead
+     */
+    afterHook?: (opts: { ctx: ExtensionContext }) => Promise<void>;
+    /**
+     * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
+     */
+    timeout?: number;
+    noSetInstallStatus?: boolean;
+  },
   fn: () => void
 ) {
-  describe(title, () => {
+  describe(title, function () {
+    if (opts.timeout) {
+      this.timeout(opts.timeout);
+    }
+    let ctx: ExtensionContext;
     before(async () => {
-      await setupLegacyWorkspaceMulti(opts);
-      await _activate(opts.ctx);
+      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
+      if (opts.beforeHook) {
+        await opts.beforeHook({ ctx });
+      }
+
+      const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
+
+      if (opts.preActivateHook) {
+        await opts.preActivateHook({ ctx, ...out });
+      }
+      await _activate(ctx);
     });
 
     const result = fn();
     assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
-    after(() => {
-      cleanupVSCodeContextSubscriptions(opts.ctx);
+    after(async () => {
+      if (opts.afterHook) {
+        await opts.afterHook({ ctx });
+      }
+      cleanupWorkspaceStubs(ctx);
     });
   });
 }
@@ -493,13 +561,26 @@ export function describeMultiWS(
  */
 export function describeSingleWS(
   title: string,
-  opts: SetupLegacyWorkspaceOpts,
+  opts: SetupLegacyWorkspaceOpts & {
+    /**
+     * Custom timeout for test in milleseconds
+     * You will need to set this when stepping through mocha tests using breakpoints
+     * otherwise the test will timeout during debugging
+     * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
+     */
+    timeout?: number;
+  },
   fn: () => void
 ) {
-  describe(title, () => {
+  describe(title, function () {
+    if (opts.timeout) {
+      this.timeout(opts.timeout);
+    }
+    let ctx: ExtensionContext;
     before(async () => {
+      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
       await setupLegacyWorkspace(opts);
-      await _activate(opts.ctx);
+      await _activate(ctx);
     });
 
     const result = fn();
@@ -507,7 +588,7 @@ export function describeSingleWS(
 
     // Release all registered resouces such as commands and providers
     after(() => {
-      cleanupVSCodeContextSubscriptions(opts.ctx);
+      cleanupWorkspaceStubs(ctx);
     });
   });
 }
@@ -538,4 +619,42 @@ export function stubCancellationToken(): CancellationToken {
       };
     },
   };
+}
+
+export function setupWorkspaceStubs(opts: {
+  ctx?: ExtensionContext;
+  noSetInstallStatus?: boolean;
+}): ExtensionContext {
+  const ctx = opts.ctx ?? VSCodeUtils.getOrCreateMockContext();
+
+  // workspace has not upgraded
+  if (!opts.noSetInstallStatus) {
+    sinon
+      .stub(VSCodeUtils, "getInstallStatusForExtension")
+      .returns(InstallStatus.NO_CHANGE);
+  }
+  sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());
+  Logger.configure(ctx, "info");
+  return ctx;
+}
+
+export function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
+  HistoryService.instance().clearSubscriptions();
+  cleanupVSCodeContextSubscriptions(ctx);
+  sinon.restore();
+}
+
+/**
+ * Use this to test engine state changes through engine events. This can be used in
+ * situations where the engine state changes asynchorously from test logic (such as from vscode event callbacks)
+ *
+ * @param callback to handle engine state events
+ * @returns Disposable
+ */
+export function subscribeToEngineStateChange(
+  callback: (noteChangeEntries: NoteChangeEntry[]) => void
+): Disposable {
+  const engine = ExtensionProvider.getEngine();
+  const engineClient = engine as unknown as DendronEngineClient;
+  return engineClient.onEngineNoteStateChanged(callback);
 }

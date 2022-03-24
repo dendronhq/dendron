@@ -1,8 +1,10 @@
 import {
+  DendronError,
   DEngineClient,
   DVault,
   ExtensionEvents,
   isNotUndefined,
+  KeybindingConflictDetectedSource,
   NoteProps,
   NoteUtils,
   Position,
@@ -24,14 +26,20 @@ import {
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
-import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
+import {
+  INCOMPATIBLE_EXTENSIONS,
+  DENDRON_COMMANDS,
+  KNOWN_KEYBINDING_CONFLICTS,
+} from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { KeybindingUtils } from "../KeybindingUtils";
+import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
+import { PodUIControls } from "../components/pods/PodControls";
 
 const md = _md();
 type Finding = {
@@ -80,6 +88,7 @@ type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export enum PluginDoctorActionsEnum {
   FIND_INCOMPATIBLE_EXTENSIONS = "findIncompatibleExtensions",
+  FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
 }
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -89,6 +98,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   constructor(ext: IDendronExtension) {
     super();
     this.extension = ext;
+  }
+
+  getHierarchy() {
+    return new QuickPickHierarchySelector().getHierarchy();
   }
 
   createQuickPick(opts: CreateQuickPickOpts) {
@@ -288,16 +301,31 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
+  private async reload() {
+    const engine = await new ReloadIndexCommand().execute();
+    if (_.isUndefined(engine)) {
+      throw new DendronError({ message: "no engine found." });
+    }
+    return engine;
+  }
+
+  addAnalyticsPayload(opts: CommandOpts) {
+    return {
+      action: opts.action,
+      scope: opts.scope,
+    };
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
     const { wsRoot, config } = this.extension.getDWorkspace();
     const findings: Finding[] = [];
     if (_.isUndefined(wsRoot)) {
-      throw Error("rootDir undefined");
+      throw new DendronError({ message: "rootDir undefined" });
     }
     if (_.isUndefined(config)) {
-      throw Error("no config found");
+      throw new DendronError({ message: "no config found" });
     }
 
     if (this.extension.fileWatcher) {
@@ -308,22 +336,26 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const document = VSCodeUtils.getActiveTextEditor()?.document;
     if (
       isNotUndefined(document) &&
-      isNotUndefined(WSUtils.getNoteFromDocument(document))
+      isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
     ) {
       await document.save();
     }
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine: DEngineClient =
-      (await new ReloadIndexCommand().execute()) as DEngineClient;
+
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+    }
 
     let note;
     if (opts.scope === "file") {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (_.isUndefined(document)) {
-        throw Error("No note open");
+        throw new DendronError({ message: "No note open." });
       }
-      note = WSUtils.getNoteFromDocument(document);
+      note = this.extension.wsUtils.getNoteFromDocument(document);
     }
+
+    const engine = this.extension.getEngine();
 
     switch (opts.action) {
       case PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS: {
@@ -336,6 +368,20 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             };
           });
         await this.showIncompatibleExtensionPreview({ installStatus });
+        break;
+      }
+      case PluginDoctorActionsEnum.FIX_KEYBINDING_CONFLICTS: {
+        const conflicts = KeybindingUtils.getConflictingKeybindings({
+          knownConflicts: KNOWN_KEYBINDING_CONFLICTS,
+        });
+        if (conflicts.length > 0) {
+          await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
+          AnalyticsUtils.track(ExtensionEvents.KeybindingConflictDetected, {
+            source: KeybindingConflictDetectedSource.doctor,
+          });
+        } else {
+          window.showInformationMessage(`There are no keybinding conflicts!`);
+        }
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
@@ -382,6 +428,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
+        ds.dispose();
         if (this.extension.fileWatcher) {
           this.extension.fileWatcher.pause = false;
         }
@@ -403,11 +450,31 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           exit: false,
           quiet: true,
         });
+        ds.dispose();
         if (out.resp.length === 0) {
           window.showInformationMessage(`There are no broken links!`);
           break;
         }
         await this.showBrokenLinkPreview(out.resp, engine);
+        break;
+      }
+      case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
+        const selection = await this.getHierarchy();
+        // break if no hierarchy is selected.
+        if (!selection) break;
+        // get hierarchy of notes to be updated
+        const { hierarchy, vault } = selection;
+        // get podId used to export the notes
+        const podId = await PodUIControls.promptToSelectCustomPodId();
+        if (!podId) break;
+        const ds = new DoctorService();
+        await ds.executeDoctorActions({
+          action: opts.action,
+          engine,
+          podId,
+          hierarchy,
+          vault,
+        });
         break;
       }
       default: {
@@ -421,18 +488,23 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           engine,
           exit: false,
         });
+        ds.dispose();
       }
     }
 
     if (this.extension.fileWatcher) {
       this.extension.fileWatcher.pause = false;
     }
-    await new ReloadIndexCommand().execute();
-    // Decorations don't auto-update here, I think because the contents of the
-    // note haven't updated within VSCode yet. Regenerate the decorations, but
-    // do so after a delay so that VSCode can update the file contents. Not a
-    // perfect solution, but the simplest.
-    delayedUpdateDecorations();
+
+    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+      await this.reload();
+      // Decorations don't auto-update here, I think because the contents of the
+      // note haven't updated within VSCode yet. Regenerate the decorations, but
+      // do so after a delay so that VSCode can update the file contents. Not a
+      // perfect solution, but the simplest.
+      delayedUpdateDecorations();
+    }
+
     return { data: findings };
   }
   async showResponse(findings: CommandOutput) {

@@ -50,12 +50,39 @@ export const ENABLE_NOTE_TITLE_FOR_LINK = (
   };
 };
 
+export const ENABLE_FRONTMATTER_TAGS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Enable Frontmatter Tags (${namespace})`,
+    desc: `Show Frontmatter tags in published site. (${namespace})`,
+  };
+};
+
+export const ENABLE_HASHES_FOR_FM_TAGS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Enable Hashes for Frontmatter Tags (${namespace})`,
+    desc: `Display a '#' symbol in front of frontmatter tags in the tags listing. (${namespace})`,
+  };
+};
+
 export const ENABLE_CHILD_LINKS = (
   namespace: TopLevelDendronConfig
 ): DendronConfigEntry => {
   return {
     label: `Show Child Links (${namespace})`,
     desc: `Notes will render child links (${namespace})`,
+  };
+};
+
+export const ENABLE_BACK_LINKS = (
+  namespace: TopLevelDendronConfig
+): DendronConfigEntry => {
+  return {
+    label: `Show Backlinks (${namespace})`,
+    desc: `Notes will render backlinks (${namespace})`,
   };
 };
 
@@ -66,4 +93,5 @@ export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
   enableChildLinks: ENABLE_CHILD_LINKS("global"),
+  enableBackLinks: ENABLE_BACK_LINKS("global"),
 };

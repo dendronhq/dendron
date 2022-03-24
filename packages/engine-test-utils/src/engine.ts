@@ -174,7 +174,7 @@ export async function setupWS(opts: {
     ConfigUtils.setDuplicateNoteBehavior(config, updatedDuplicateNoteBehavior);
   }
   if (opts.modConfigCb) config = opts.modConfigCb(config);
-  ws.setConfig(config);
+  await ws.setConfig(config);
   if (opts.workspaces) {
     const vaultsFromWs = await _.reduce(
       opts.workspaces,

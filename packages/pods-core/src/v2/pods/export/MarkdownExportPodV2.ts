@@ -13,7 +13,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   DendronASTDest,
-  MDUtilsV4,
+  MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 import { JSONSchemaType } from "ajv";
@@ -57,21 +57,19 @@ export class MarkdownExportPodV2
     this._dendronConfig = dendronConfig;
   }
 
-  async exportNote(input: NoteProps): Promise<MarkdownExportReturnType> {
-    if (this._config.destination === "clipboard") {
-      const exportedNotes = this.renderNote(input);
+  async exportNotes(input: NoteProps[]): Promise<MarkdownExportReturnType> {
+    const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
+    const { destination, exportScope } = this._config;
+
+    if (destination === "clipboard") {
+      const exportedNotes = this.renderNote(input[0]);
       return ResponseUtil.createHappyResponse({
         data: {
           exportedNotes,
         },
       });
     }
-    return this.exportNotes([input]);
-  }
 
-  async exportNotes(input: NoteProps[]): Promise<MarkdownExportReturnType> {
-    const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
-    const { destination, exportScope } = this._config;
     try {
       fs.ensureDirSync(path.dirname(destination));
     } catch (err) {
@@ -111,6 +109,7 @@ export class MarkdownExportPodV2
         vaultsArray.push(...this._engine.vaults);
         break;
       }
+      // no default
     }
     await Promise.all(
       vaultsArray.map(async (vault) => {
@@ -170,7 +169,7 @@ export class MarkdownExportPodV2
       previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
-    let remark = MDUtilsV4.procFull({
+    let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...overrideConfig,
@@ -179,8 +178,6 @@ export class MarkdownExportPodV2
       engine,
       fname: input.fname,
       vault: input.vault,
-      shouldApplyPublishRules: false,
-      blockAnchorsOpts: { hideBlockAnchors: true },
     });
     if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
       remark = remark.use(

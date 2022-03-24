@@ -8,6 +8,7 @@ import {
   RESERVED_KEYS,
   VaultUtils,
   ConfigUtils,
+  FOLDERS,
 } from "@dendronhq/common-all";
 import execa from "execa";
 import fs from "fs-extra";
@@ -18,7 +19,7 @@ import simpleGit, {
   ResetMode as SimpleGitResetMode,
 } from "simple-git";
 import { parse } from "url";
-import { readYAML } from "./files";
+import { readYAMLAsync } from ".";
 import { vault2Path } from "./filesv2";
 
 export { simpleGit, SimpleGit, SimpleGitResetMode };
@@ -140,6 +141,73 @@ export class GitUtils {
     return path.basename(url, ".git");
   }
 
+  /** Find the dependency path for a vault given the remote url. You can use
+   * this even if the vault has no remote.
+   *
+   * This is the relative path within the dependencies folder, like
+   * `github.com/dendronhq/dendron-site`. For more details see the
+   * [[Self Contained Vaults RFC|dendron://dendron.docs/rfc.42-self-contained-vaults]]
+   */
+  public static remoteUrlToDependencyPath({
+    vaultName,
+    url,
+  }: {
+    vaultName: string;
+    url?: string;
+  }): string {
+    // If no remote URL exists, then it's a local vault. We keep these in a
+    // local-only folder.
+    if (url === undefined) return FOLDERS.LOCAL_DEPENDENCY;
+    // Check if it matches any web URLs like
+    // https://github.com/dendronhq/dendron-site.git This may also look like
+    // http://example.com:8000/dendronhq/dendron-site.git, we skip the port
+    const webMatch =
+      // starts with http:// or https://
+      // followed by the domain, which will continue until we hit /
+      // if we see a port definition like :8000, we skip it for simplicity
+      // then we have the path of the URL, like dendronhq/dendron-site
+      // finally, if there's a `.git` we'll discard that for a cleaner name
+      /^(https?:\/\/)(?<domain>[^/:]+)(:[0-9]+)?\/(?<path>.+?)(\.git)?$/.exec(
+        url
+      );
+    if (webMatch?.groups?.domain && webMatch?.groups?.path) {
+      // matched a HTTP/S git remote
+      return path.join(
+        webMatch.groups.domain,
+        // Normalize for Windows so forward slashes are converted to backward ones
+        path.normalize(webMatch.groups.path)
+      );
+    }
+    // Check if it matches any SSH URLs like
+    // git@github.com:dendronhq/dendron-site.git This may also look like
+    // git@example.com:220/dendronhq/dendron-site.git, we skip the port and the
+    const sshMatch =
+      // SSH urls start with a user, like git@ or gitlab@, which we skip
+      // followed by the domain, which will continue until we hit :
+      // if we see a port definition like :8000, we skip it for simplicity
+      // then we have the path of the URL, like dendronhq/dendron-site
+      // this path may optionally begin with a /, which we'll skip
+      // finally, if there's a `.git` we'll discard that for a cleaner name
+      /^([^@]+@)(?<domain>[^:/]+):([0-9]+\/)?\/?(?<path>.+?)(\.git)?$/.exec(
+        url
+      );
+    if (sshMatch?.groups?.domain && sshMatch?.groups?.path) {
+      // matched a HTTP/S git remote
+      return path.join(
+        sshMatch.groups.domain,
+        // Normalize for Windows so forward slashes are converted to backward ones
+        path.normalize(sshMatch.groups.path)
+      );
+    }
+    // If none of these worked, try to make a fallback path. This may be because
+    // the remote points to a local directory, or because it's something we
+    // didn't expect.
+    const fallback = _.findLast(url.split(/[/\\]/), (part) => part.length > 0);
+    if (fallback) return fallback;
+    // Fallback for the fallback: if all else fails, just use the vault name
+    return vaultName;
+  }
+
   static getVaultFromRepo(opts: {
     repoPath: string;
     repoUrl: string;
@@ -152,17 +220,24 @@ export class GitUtils {
     };
   }
 
-  static getVaultsFromRepo(opts: {
+  static async getVaultsFromRepo(opts: {
     repoPath: string;
     repoUrl: string;
     wsRoot: string;
-  }): { vaults: DVault[]; workspace?: DWorkspace } {
+  }): Promise<{ vaults: DVault[]; workspace?: DWorkspace }> {
     const { repoPath, wsRoot, repoUrl } = opts;
     // is workspace root
-    if (fs.existsSync(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))) {
-      const config = readYAML(
+    if (
+      // Has a config file
+      (await fs.pathExists(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
-      ) as IntermediateDendronConfig;
+      )) &&
+      // But is not a self-contained vault
+      !(await fs.pathExists(path.join(repoPath, FOLDERS.NOTES)))
+    ) {
+      const config = (await readYAMLAsync(
+        path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
+      )) as IntermediateDendronConfig;
       const workspace = path.basename(repoPath);
       const vaultsConfig = ConfigUtils.getVaults(config);
       const vaults = vaultsConfig.map((ent) => {
@@ -185,13 +260,15 @@ export class GitUtils {
         vaults,
       };
     } else {
+      const vault: DVault = {
+        fsPath: path.relative(wsRoot, repoPath),
+        remote: { type: "git", url: opts.repoUrl },
+      };
+      if (await fs.pathExists(path.join(repoPath, FOLDERS.NOTES))) {
+        vault.selfContained = true;
+      }
       return {
-        vaults: [
-          {
-            fsPath: path.relative(wsRoot, repoPath),
-            remote: { type: "git", url: opts.repoUrl },
-          },
-        ],
+        vaults: [vault],
       };
     }
   }
@@ -387,14 +464,17 @@ export class GitUtils {
       // if the .gitignore was missing, ignore it
       if (err?.code !== "ENOENT") throw err;
     }
+
+    // gitignore is missing but we are allowed to create it
+    const shouldCreate = contents === undefined && !noCreateIfMissing;
+
+    // gitignore exists, and the path is not in it yet
     // Avoid duplicating the gitignore line if it was already there
-    if (
-      // gitignore is missing but we are allowed to create it
-      (contents === undefined && noCreateIfMissing !== true) ||
-      // gitignore exists, and the path is not in it yet
-      (contents !== undefined &&
-        !contents.match(new RegExp(`^${addPath}/?$`, "g")))
-    ) {
+    const pathExists =
+      contents !== undefined &&
+      contents.match(new RegExp(`^${_.escapeRegExp(addPath)}/?$`, "m"));
+
+    if (shouldCreate || !pathExists) {
       await fs.appendFile(gitignore, `\n${addPath}`);
     }
   }

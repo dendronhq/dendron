@@ -1,4 +1,4 @@
-import { DendronError, isTSError } from "@dendronhq/common-all";
+import { DendronError, getStage, isTSError } from "@dendronhq/common-all";
 import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
@@ -9,6 +9,7 @@ import { IBaseCommand } from "../types";
 
 export type CodeCommandConstructor = {
   new (extension: IDendronExtension): CodeCommandInstance;
+  requireActiveWorkspace: boolean;
 };
 export type CodeCommandInstance = {
   key: string;
@@ -49,6 +50,11 @@ export abstract class BaseCommand<
   addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
 
   static showInput = window.showInputBox;
+
+  /**
+   * Does this command require an active workspace in order to function
+   */
+  static requireActiveWorkspace = false;
 
   abstract key: string;
 
@@ -129,6 +135,10 @@ export abstract class BaseCommand<
       });
 
       isError = true;
+      // During development only, rethrow the errors to make them easier to debug
+      if (getStage() === "dev") {
+        throw error;
+      }
       return;
     } finally {
       const payload = this.addAnalyticsPayload

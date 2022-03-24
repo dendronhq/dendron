@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableV2PodConfig,
@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/pods-core";
 import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
 import { BaseExportPodCommand } from "../../../../../src/commands/pods/BaseExportPodCommand";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 
 /**
  * Test implementation of BaseExportPodCommand. For testing purposes only.
@@ -20,12 +21,13 @@ export class TestExportPodCommand extends BaseExportPodCommand<
   public key = "dendron.testexport";
 
   /**
-   * Hardcoded to return the 'foo' Hierarchy from ENGINE_HOOKS.setupBasic
+   * Hardcoded to return the 'foo' Hierarchy and vault[0] from ENGINE_HOOKS.setupBasic 
    */
   static mockedSelector: HierarchySelector = {
-    getHierarchy(): Promise<string | undefined> {
-      return new Promise<string | undefined>((resolve) => {
-        resolve("foo");
+    getHierarchy(): Promise<{hierarchy: string, vault: DVault} | undefined> {
+      return new Promise<{hierarchy: string, vault: DVault} | undefined>((resolve) => {
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        resolve({hierarchy: "foo", vault: vaults[0] });
       });
     },
   };
@@ -41,7 +43,7 @@ export class TestExportPodCommand extends BaseExportPodCommand<
    */
   public createPod(_config: RunnablePodConfigV2): ExportPodV2<string> {
     return {
-      exportNote() {
+      exportNotes() {
         return new Promise<string>((resolve) => resolve("note"));
       },
     };

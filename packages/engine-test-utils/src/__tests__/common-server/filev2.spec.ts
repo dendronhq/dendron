@@ -6,10 +6,12 @@ import {
 import {
   file2Note,
   file2Schema,
+  FileUtils,
   goUpTo,
   schemaModuleProps2File,
   tmpDir,
 } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -28,7 +30,6 @@ describe("goUpTo", () => {
     expect(goUpTo({ base: cwd, fname: "foo" })).toEqual(path.join(root));
   });
 
-  // used in dendron-cli/src/commands/build-site-v2.ts
   test("double", () => {
     const cwd2 = path.join(cwd, "foo", "bar");
     fs.ensureDirSync(cwd2);
@@ -156,5 +157,114 @@ describe("file2Schema", () => {
     );
     const schema = await file2Schema(fpath, root);
     expect(_.values(schema.schemas).length).toEqual(8);
+  });
+});
+
+describe("GIVEN createFileWithSuffixThatDoesNotExist", () => {
+  let root: string;
+  let fpath: string;
+
+  describe("WHEN orig file does not exist", () => {
+    beforeEach(() => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+    });
+    test("THEN create file", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo"), acc: 0 });
+    });
+  });
+
+  describe("WHEN orig file does exist", () => {
+    beforeEach(async () => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+      await FileTestUtils.createFiles(root, [{ path: "foo" }]);
+    });
+    test("THEN increment suffix", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo-1"), acc: 1 });
+    });
+  });
+
+  describe("WHEN orig file and one prefix exists", () => {
+    beforeEach(async () => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+      await FileTestUtils.createFiles(root, [
+        { path: "foo" },
+        { path: "foo-1" },
+      ]);
+    });
+    test("THEN increment suffix", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo-2"), acc: 2 });
+    });
+  });
+});
+
+describe("GIVEN matchFilePrefix", () => {
+  let fpath: string;
+  const prefix = "---";
+
+  beforeEach(() => {
+    const root = FileTestUtils.tmpDir().name;
+    fpath = path.join(root, "test-file.md");
+  });
+
+  describe("WHEN file starts with prefix", () => {
+    test("THEN return true", async () => {
+      fs.writeFileSync(fpath, "---\nfoo");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: true,
+      });
+    });
+  });
+
+  describe("WHEN file matches prefix exactly", () => {
+    test("THEN return true", async () => {
+      fs.writeFileSync(fpath, "---");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: true,
+      });
+    });
+  });
+
+  describe("WHEN file does not start with prefix", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "--!");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+
+  describe("WHEN file is empty", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+
+  describe("WHEN file is shorter than prefix", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, "--");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
+  });
+  describe("WHEN file match is not at start of file", () => {
+    test("THEN return false", async () => {
+      fs.writeFileSync(fpath, " ---");
+      expect(await FileUtils.matchFilePrefix({ fpath, prefix })).toEqual({
+        data: false,
+      });
+    });
   });
 });

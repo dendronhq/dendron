@@ -148,6 +148,19 @@ describe("blockAnchors", () => {
             },
           ];
         },
+        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: [anchor],
+              }),
+              expected: true,
+            },
+          ];
+        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });

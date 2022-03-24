@@ -7,7 +7,17 @@ import {
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 import _ from "lodash";
-import vscode, { ProviderResult, ThemeIcon } from "vscode";
+import {
+  Disposable,
+  Event,
+  EventEmitter,
+  ProviderResult,
+  ThemeIcon,
+  TreeDataProvider,
+  TreeItem,
+  TreeItemCollapsibleState,
+  window,
+} from "vscode";
 import { ICONS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -16,17 +26,20 @@ import { TreeNote } from "./TreeNote";
 /**
  * Provides engine event data to generate the views for the native Tree View
  */
-export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
-  private _onDidChangeTreeDataEmitter: vscode.EventEmitter<
+export class EngineNoteProvider
+  implements TreeDataProvider<NoteProps>, Disposable
+{
+  private _onDidChangeTreeDataEmitter: EventEmitter<
     NoteProps | undefined | void
   >;
+  private _onEngineNoteStateChangedDisposable: Disposable;
   private _tree: { [key: string]: TreeNote } = {};
   private _engineEvents;
 
   /**
    * Signals to vscode UI engine that the tree view needs to be refreshed.
    */
-  readonly onDidChangeTreeData: vscode.Event<NoteProps | undefined | void>;
+  readonly onDidChangeTreeData: Event<NoteProps | undefined | void>;
 
   /**
    *
@@ -34,16 +47,25 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
    * engine
    */
   constructor(engineEvents: EngineEventEmitter) {
-    this._onDidChangeTreeDataEmitter = new vscode.EventEmitter<
+    this._onDidChangeTreeDataEmitter = new EventEmitter<
       NoteProps | undefined | void
     >();
 
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
-    this.setupSubscriptions();
+    this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
   }
 
-  getTreeItem(noteProps: NoteProps): vscode.TreeItem {
+  dispose(): void {
+    if (this._onDidChangeTreeDataEmitter) {
+      this._onDidChangeTreeDataEmitter.dispose();
+    }
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+    }
+  }
+
+  getTreeItem(noteProps: NoteProps): TreeItem {
     return this._tree[noteProps.id];
   }
 
@@ -53,7 +75,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
     const { engine } = ExtensionProvider.getDWorkspace();
     const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
     if (!roots) {
-      vscode.window.showInformationMessage("No notes found");
+      window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
     if (noteProps) {
@@ -86,8 +108,8 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
     return maybeParent || null;
   }
 
-  private setupSubscriptions(): void {
-    this._engineEvents.onEngineNoteStateChanged(() => {
+  private setupSubscriptions(): Disposable {
+    return this._engineEvents.onEngineNoteStateChanged(() => {
       this.refreshTreeView();
     });
   }
@@ -101,8 +123,8 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<NoteProps> {
 
   private createTreeNote(note: NoteProps) {
     const collapsibleState = _.isEmpty(note.children)
-      ? vscode.TreeItemCollapsibleState.None
-      : vscode.TreeItemCollapsibleState.Collapsed;
+      ? TreeItemCollapsibleState.None
+      : TreeItemCollapsibleState.Collapsed;
     const tn = new TreeNote({
       note,
       collapsibleState,

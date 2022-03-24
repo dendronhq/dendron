@@ -21,6 +21,10 @@ type Metadata = Partial<{
    */
   inactiveUserMsgSendTime: number;
   /**
+   * The status of inactive user message. If submitted, we don't prompt again. If cancelled, we wait 2 weeks to send again.
+   */
+  inactiveUserMsgStatus: InactvieUserMsgStatusEnum;
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
@@ -34,6 +38,11 @@ type Metadata = Partial<{
   lastLookupTime: number;
 }>;
 
+export enum InactvieUserMsgStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
+
 let _singleton: MetadataService | undefined;
 
 export class MetadataService {
@@ -46,6 +55,14 @@ export class MetadataService {
 
   static metaFilePath() {
     return path.join(os.homedir(), ".dendron", "meta.json");
+  }
+
+  deleteMeta(key: keyof Metadata) {
+    const stateFromFile = this.getMeta();
+    delete stateFromFile[key];
+    fs.writeJSONSync(MetadataService.metaFilePath(), stateFromFile, {
+      spaces: 4,
+    });
   }
 
   getMeta(): Metadata {
@@ -66,8 +83,13 @@ export class MetadataService {
     });
   }
 
-  setInitialInstall() {
-    return this.setMeta("firstInstall", Time.now().toSeconds());
+  /**
+   * Set first install logic
+   *  ^o4y7ijuvi5nv
+   */
+  setInitialInstall(time?: number) {
+    time ||= Time.now().toSeconds();
+    return this.setMeta("firstInstall", time);
   }
 
   setFirstWsInitialize() {
@@ -92,5 +114,9 @@ export class MetadataService {
 
   setInactiveUserMsgSendTime() {
     return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+  }
+
+  setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
+    return this.setMeta("inactiveUserMsgStatus", value);
   }
 }

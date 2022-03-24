@@ -63,32 +63,28 @@ export class GoogleDocsExportPodV2
   private _engine: DEngineClient;
   private _wsRoot: string;
   private _vaults: DVault[];
+  private _port: number;
 
   constructor({
     podConfig,
     engine,
-    vaults,
-    wsRoot,
+    port,
   }: {
     podConfig: RunnableGoogleDocsV2PodConfig;
     engine: DEngineClient;
-    vaults: DVault[];
-    wsRoot: string;
+    port: number;
   }) {
     this._config = podConfig;
     this._engine = engine;
-    this._vaults = vaults;
-    this._wsRoot = wsRoot;
-  }
-
-  async exportNote(input: NoteProps): Promise<GoogleDocsExportReturnType> {
-    const response = await this.exportNotes([input]);
-    return response;
+    this._vaults = engine.vaults;
+    this._wsRoot = engine.wsRoot;
+    this._port = port;
   }
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
     const resp = await this.getPayloadForNotes(notes);
-    let { accessToken, expirationTime, refreshToken } = this._config;
+    let { accessToken } = this._config;
+    const { expirationTime, refreshToken } = this._config;
     try {
       accessToken = await this.checkTokenExpiry(
         expirationTime,
@@ -150,8 +146,8 @@ export class GoogleDocsExportPodV2
   ) {
     if (Time.now().toSeconds() > expirationTime) {
       accessToken = await PodUtils.refreshGoogleAccessToken(
-        this._wsRoot,
         refreshToken,
+        this._port,
         this._config.connectionId
       );
     }
@@ -174,13 +170,15 @@ export class GoogleDocsExportPodV2
           convertLinks: false,
         };
         // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
-        const data = await pod.plant({
+        let data = await pod.plant({
           config,
           engine: this._engine,
           note: input,
           vaults: this._vaults,
           wsRoot: this._wsRoot,
         });
+        // wrap data in html tags
+        data = `<html>${data}</html>`;
         const content = Buffer.from(data);
         const documentId = input.custom.documentId;
         return {
@@ -331,5 +329,27 @@ export class GoogleDocsExportPodV2
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;
+  }
+}
+
+export class GoogleDocsUtils {
+  static async updateNotesWithCustomFrontmatter(
+    records: GoogleDocsFields[],
+    engine: DEngineClient
+  ) {
+    await Promise.all(
+      records.map(async (record) => {
+        if (_.isUndefined(record)) return;
+        const { documentId, revisionId, dendronId } = record;
+        if (!dendronId) return;
+        const note = engine.notes[dendronId];
+        note.custom = {
+          ...note.custom,
+          documentId,
+          revisionId,
+        };
+        await engine.writeNote(note, { updateExisting: true });
+      })
+    );
   }
 }

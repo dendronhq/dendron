@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  Awaited,
   DNoteAnchorBasic,
   getSlugger,
   NoteProps,
@@ -13,12 +14,13 @@ import { Position, Selection, Uri, window } from "vscode";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
+import { BasicCommand } from "./base";
 import {
   GoToNoteCommandOpts,
   GoToNoteCommandOutput,
@@ -51,7 +53,7 @@ export const findAnchorPos = (opts: {
 };
 
 type FoundLinkSelection = NonNullable<
-  ReturnType<GotoNoteCommand["getLinkFromSelection"]>
+  Awaited<ReturnType<GotoNoteCommand["getLinkFromSelection"]>>
 >;
 
 /**
@@ -71,21 +73,25 @@ export class GotoNoteCommand extends BasicCommand<
     this.wsUtils = extension.wsUtils;
   }
 
-  getLinkFromSelection() {
+  async getLinkFromSelection() {
     const { selection, editor } = VSCodeUtils.getSelection();
     if (
       _.isEmpty(selection) ||
       _.isUndefined(selection) ||
-      _.isUndefined(selection.start)
+      _.isUndefined(selection.start) ||
+      !editor
     )
       return;
-    const currentLine = editor?.document.lineAt(selection.start.line).text;
+    const currentLine = editor.document.lineAt(selection.start.line).text;
     if (!currentLine) return;
-    const reference = getReferenceAtPosition(
-      editor!.document,
-      selection.start,
-      { allowInCodeBlocks: true }
-    );
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const reference = await getReferenceAtPosition({
+      document: editor.document,
+      position: selection.start,
+      opts: { allowInCodeBlocks: true },
+      wsRoot,
+      vaults,
+    });
     if (!reference) return;
     return {
       alias: reference?.label,
@@ -128,9 +134,9 @@ export class GotoNoteCommand extends BasicCommand<
 
   private async maybeSetOptsFromExistingNote(opts: GoToNoteCommandOpts) {
     const engine = this.extension.getEngine();
-    const notes = NoteUtils.getNotesByFname({
+    const notes = NoteUtils.getNotesByFnameFromEngine({
       fname: opts.qs!,
-      notes: engine.notes,
+      engine,
     });
     if (notes.length === 1) {
       // There's just one note, so that's the one we'll go with.
@@ -196,7 +202,7 @@ export class GotoNoteCommand extends BasicCommand<
       return opts;
     }
 
-    const link = this.getLinkFromSelection();
+    const link = await this.getLinkFromSelection();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
       return null;
@@ -263,15 +269,13 @@ export class GotoNoteCommand extends BasicCommand<
           column: opts.column,
         }
       );
-      if (opts.anchor?.type === "line" && editor) {
-        // non-note files only support line based references right now
-        const position = new Position(
-          opts.anchor.line - 1 /* line anchors are 1-indexed */,
-          0
+      if (editor && opts.anchor) {
+        await this.extension.wsUtils.trySelectRevealNonNoteAnchor(
+          editor,
+          opts.anchor
         );
-        editor.selection = new Selection(position, position);
-        editor.revealRange(editor.selection);
       }
+
       return {
         kind: TargetKind.NON_NOTE,
         fullPath: qs,

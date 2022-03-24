@@ -4,9 +4,9 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.81.0",
+  "version": "0.87.0",
   "engines": {
-    "vscode": "^1.54.0"
+    "vscode": "^1.58.0"
   },
   "categories": [
     "Other"
@@ -132,6 +132,10 @@
       {
         "command": "dendron.copyNoteRef",
         "title": "Dendron: Copy Note Ref"
+      },
+      {
+        "command": "dendron.copyToClipboard",
+        "title": "Dendron: Copy To Clipboard"
       },
       {
         "command": "dendron.deleteNode",
@@ -432,6 +436,10 @@
       {
         "command": "dendron.launchTutorial",
         "title": "Dendron: Launch Tutorial"
+      },
+      {
+        "command": "dendron.openBackup",
+        "title": "Dendron: Open Backup"
       }
     ],
     "menus": {
@@ -459,6 +467,10 @@
         {
           "command": "dendron.copyNoteRef",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.copyToClipboard",
+          "when": "false"
         },
         {
           "command": "dendron.deleteNode",
@@ -707,6 +719,10 @@
         {
           "command": "dendron.diagnosticsReport",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.openBackup",
+          "when": "dendron:pluginActive"
         }
       ],
       "view/title": [
@@ -913,6 +929,11 @@
           "type": "boolean",
           "default": false,
           "description": "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace."
+        },
+        "dendron.enableSelfContainedVaultWorkspace": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature."
         }
       }
     },
@@ -1057,8 +1078,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.81.0",
-    "@dendronhq/engine-test-utils": "^0.81.0",
+    "@dendronhq/common-test-utils": "^0.87.0",
+    "@dendronhq/engine-test-utils": "^0.87.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1094,11 +1115,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.81.0",
-    "@dendronhq/common-all": "^0.81.0",
-    "@dendronhq/common-server": "^0.81.0",
-    "@dendronhq/engine-server": "^0.81.0",
-    "@dendronhq/pods-core": "^0.81.0",
+    "@dendronhq/api-server": "^0.87.0",
+    "@dendronhq/common-all": "^0.87.0",
+    "@dendronhq/common-server": "^0.87.0",
+    "@dendronhq/engine-server": "^0.87.0",
+    "@dendronhq/pods-core": "^0.87.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",
@@ -1115,6 +1136,7 @@
     "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
+    "textextensions": "^5.14.0",
     "unist-util-visit": "2.0.3",
     "vscode-languageclient": "^6.1.3"
   },

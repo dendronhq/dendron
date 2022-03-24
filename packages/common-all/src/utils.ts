@@ -6,19 +6,31 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { ERROR_SEVERITY } from "./constants";
-import { DendronError, ErrorMessages } from "./error";
+import { DateTime, LruCache } from ".";
 import { COLORS_LIST } from "./colors";
-import { CONFIG_TO_MINIMUM_COMPAT_MAPPING } from "./constants/configs/compat";
+import {
+  CompatUtils,
+  CONFIG_TO_MINIMUM_COMPAT_MAPPING,
+  ERROR_SEVERITY,
+} from "./constants";
+import { DendronError, ErrorMessages } from "./error";
 import {
   DendronSiteConfig,
   DHookDict,
   DVault,
-  NoteProps,
-  SEOProps,
-  NotePropsDict,
   LegacyDuplicateNoteBehavior,
+  LegacyHierarchyConfig,
+  NoteProps,
+  NotePropsDict,
+  SEOProps,
 } from "./types";
+import { GithubConfig } from "./types/configs/publishing/github";
+import {
+  DendronPublishingConfig,
+  DuplicateNoteBehavior,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   configIsV4,
@@ -31,19 +43,13 @@ import {
   IntermediateDendronConfig,
   JournalConfig,
   LookupConfig,
+  NonNoteFileLinkAnchorType,
   NoteLookupConfig,
   ScratchConfig,
   StrictConfigV4,
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import {
-  DendronPublishingConfig,
-  DuplicateNoteBehavior,
-  genDefaultPublishingConfig,
-  HierarchyConfig,
-} from "./types/configs/publishing/publishing";
-import { GithubConfig } from "./types/configs/publishing/github";
 
 /**
  * Dendron utilities
@@ -93,6 +99,10 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+export function isNotNull<T>(t: T | null): t is T {
+  return !_.isNull(t);
 }
 
 /**
@@ -255,6 +265,54 @@ export class ListMap<K, V> {
     if (values === undefined) return false;
     return values.includes(value);
   }
+}
+
+/** Memoizes function results, but allows a custom function to decide if the
+ * value needs to be recalculated.
+ *
+ * This function pretty closely reproduces the memoize function of Lodash,
+ * except that it allows a custom function to override whether a cached value
+ * should be updated.
+ *
+ * Similar to the lodash memoize, the backing cache is exposed with the
+ * `memoizedFunction.cache`. You can use this
+ *
+ * @param fn The function that is being memoized. This function will run when
+ * the cache needs to be updated.
+ * @param keyFn A function that given the inputs to `fn`, returns a key. Two
+ * inputs that will have the same output should resolve to the same key. The key
+ * may be anything, but it's recommended to use something simple like a string
+ * or integer. By default, the first argument to `fn` is stringified and used as
+ * the key (similar to lodash memoize)
+ * @param shouldUpdate If this function returns true, the wrapped function will
+ * run again and the cached value will update. `shouldUpdate` is passed the
+ * cached result, and the new inputs. By default, it will only update if there
+ * is a cache miss.
+ * @param maxCache The maximum number of items to cache.
+ */
+export function memoize<Inputs extends any[], Key, Output>({
+  fn,
+  keyFn = (...args) => args[0].toString(),
+  shouldUpdate = () => false,
+  maxCache = 64,
+}: {
+  fn: (...args: Inputs) => Output;
+  keyFn?: (...args: Inputs) => Key;
+  shouldUpdate?: (previous: Output, ...args: Inputs) => boolean;
+  maxCache?: number;
+}): (...args: Inputs) => Output {
+  const wrapped = function memoize(...args: Inputs) {
+    const key = keyFn(...args);
+    let value: Output | undefined = wrapped.cache.get(key);
+    if (value === undefined || shouldUpdate(value, ...args)) {
+      wrapped.cache.drop(key);
+      value = fn(...args);
+      wrapped.cache.set(key, value);
+    }
+    return value;
+  };
+  wrapped.cache = new LruCache<Key, Output>({ maxItems: maxCache });
+  return wrapped;
 }
 
 export class NoteFNamesDict {
@@ -553,9 +611,15 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
+/** Makes not just the top level, but all nested properties optional. */
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";
+  isSoftMapping?: boolean;
   minCompatClientVersion?: string;
   minCompatConfigVersion?: string;
 };
@@ -751,10 +815,13 @@ export class ConfigUtils {
 
   static getHierarchyConfig(
     config: IntermediateDendronConfig
-  ): { [key: string]: HierarchyConfig } | undefined {
+  ):
+    | { [key: string]: HierarchyConfig }
+    | { [key: string]: LegacyHierarchyConfig }
+    | undefined {
     if (configIsV4(config)) {
       const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return siteConfig.config as { [key: string]: HierarchyConfig };
+      return siteConfig.config as { [key: string]: LegacyHierarchyConfig };
     } else {
       return ConfigUtils.getPublishing(config).hierarchy;
     }
@@ -796,12 +863,10 @@ export class ConfigUtils {
     return ConfigUtils.getPublishingConfig(config).assetsPrefix;
   }
 
-  static getEnableContainers(
+  static getUseContainers(
     config: IntermediateDendronConfig
   ): boolean | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)?.useContainers
-      : ConfigUtils.getPublishing(config).enableContainers;
+    return ConfigUtils.getSite(config)?.useContainers;
   }
 
   static getEnableRandomlyColoredTags(
@@ -812,20 +877,34 @@ export class ConfigUtils {
       : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
   }
 
-  static getEnableFrontmatterTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableFrontmatterTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.showFrontMatterTags
       : ConfigUtils.getPublishing(config).enableFrontmatterTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableFrontmatterTags;
   }
 
-  static getEnableHashesForFMTags(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
+  static getEnableHashesForFMTags(opts: {
+    config: IntermediateDendronConfig;
+    shouldApplyPublishRules: boolean;
+  }): boolean | undefined {
+    const { config, shouldApplyPublishRules } = opts;
+
+    const publishRule = configIsV4(config)
       ? ConfigUtils.getSite(config)?.useHashesForFMTags
       : ConfigUtils.getPublishing(config).enableHashesForFMTags;
+
+    return shouldApplyPublishRules
+      ? publishRule
+      : ConfigUtils.getPreview(config).enableHashesForFMTags;
   }
 
   static getEnablePrettlyLinks(
@@ -906,6 +985,38 @@ export class ConfigUtils {
     }
     return true;
   }
+  static getEnableBackLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps; shouldApplyPublishingRules?: boolean }
+  ): boolean {
+    // check if note has override. takes precedence
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      _.isBoolean(opts.note.config.global.enableBackLinks)
+    ) {
+      return opts.note.config.global.enableBackLinks;
+    }
+    // check config value, if enableBacklinks set, then use value set
+    const publishConfig = ConfigUtils.getPublishingConfig(_config);
+    if (
+      ConfigUtils.isDendronPublishingConfig(publishConfig) &&
+      opts?.shouldApplyPublishingRules
+    ) {
+      if (_.isBoolean(publishConfig.enableBackLinks)) {
+        return publishConfig.enableBackLinks;
+      }
+    }
+    return true;
+  }
+
+  static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
+    return (
+      this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"
+    );
+  }
 
   // set
   static setProp<K extends keyof StrictConfigV4>(
@@ -962,6 +1073,12 @@ export class ConfigUtils {
   ) {
     const path = `publishing.github.${key}`;
     _.set(config, path, value);
+  }
+
+  static isDendronPublishingConfig(
+    config: unknown
+  ): config is DendronPublishingConfig {
+    return _.has(config, "enableBackLinks");
   }
 
   static overridePublishingConfig(
@@ -1075,6 +1192,13 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
+  static setNonNoteLinkAnchorType(
+    config: IntermediateDendronConfig,
+    value: NonNoteFileLinkAnchorType
+  ) {
+    _.set(config, "commands.copyNoteLink.nonNoteFile.anchorType", value);
+  }
+
   static configIsValid(opts: {
     clientVersion: string;
     configVersion: number | undefined;
@@ -1090,7 +1214,7 @@ export class ConfigUtils {
     }
 
     const minCompatClientVersion =
-      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion];
+      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion].clientVersion;
 
     if (_.isUndefined(minCompatClientVersion)) {
       throw new DendronError({
@@ -1104,7 +1228,7 @@ export class ConfigUtils {
     const minCompatConfigVersion = _.findLastKey(
       CONFIG_TO_MINIMUM_COMPAT_MAPPING,
       (ent) => {
-        return semver.lte(ent, clientVersion);
+        return semver.lte(ent.clientVersion, clientVersion);
       }
     );
 
@@ -1122,6 +1246,10 @@ export class ConfigUtils {
       clientVersion
     );
 
+    const isSoftMapping = CompatUtils.isSoftMapping({
+      configVersion: Number(minCompatConfigVersion),
+    });
+
     const configVersionCompatible =
       Number(minCompatConfigVersion) <= configVersion;
 
@@ -1131,6 +1259,7 @@ export class ConfigUtils {
       return {
         isValid,
         reason,
+        isSoftMapping,
         minCompatClientVersion,
         minCompatConfigVersion,
       };
@@ -1172,4 +1301,29 @@ export class Wrap {
   ) {
     return setTimeout(callback, ms, ...args);
   }
+}
+
+/**
+ * Gets the appropriately formatted title for a journal note, given the full
+ * note name and the configured date format.
+ * @param noteName note name like 'daily.journal.2021.01.01'
+ * @param dateFormat - should be gotten from Journal Config's 'dateFormat'
+ * @returns formatted title, or undefined if the journal title could not be parsed.
+ */
+export function getJournalTitle(
+  noteName: string,
+  dateFormat: string
+): string | undefined {
+  let title = noteName.split(".");
+
+  while (title.length > 0) {
+    const attemptedParse = DateTime.fromFormat(title.join("."), dateFormat);
+    if (attemptedParse.isValid) {
+      return title.join("-");
+    }
+
+    title = title.length > 1 ? title.slice(1) : [];
+  }
+
+  return undefined;
 }

@@ -14,8 +14,9 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
-import type { NoteFNamesDict } from "../utils";
+import type { NoteFNamesDict, Optional } from "../utils";
 import { DendronASTDest, ProcFlavor } from "./unified";
+import { GetAnchorsRequest, GetLinksRequest } from "..";
 
 export enum ResponseCode {
   OK = 200,
@@ -283,6 +284,9 @@ export type EngineUpdateNodesOptsV2 = {
 };
 export type GetNoteOptsV2 = {
   vault: DVault;
+  /**
+   * Note file name minus the extension
+   */
   npath: string;
   /**
    * If node does not exist, create it?
@@ -511,6 +515,9 @@ export type GetDecorationsPayload = RespV2<{
   decorations?: Decoration[];
   diagnostics?: Diagnostic[];
 }>;
+export type GetNoteLinksPayload = RespV2<DLink[]>;
+export type GetAnchorsResp = { [index: string]: DNoteAnchorPositioned };
+export type GetNoteAnchorsPayload = RespV2<GetAnchorsResp>;
 
 export type GetNotePayload = {
   note: NoteProps | undefined;
@@ -588,10 +595,15 @@ export type DEngine = DCommonProps &
     getDecorations: (
       opts: GetDecorationsOpts
     ) => Promise<GetDecorationsPayload>;
+    getLinks: (
+      opts: Optional<GetLinksRequest, "ws">
+    ) => Promise<GetNoteLinksPayload>;
+    getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
   };
 
 /**
  * Implements the engine interface but has no backend store
+ *  ^sdxp5tjokad9
  */
 export type DEngineClient = Omit<DEngine, "store">;
 
@@ -783,6 +795,7 @@ export enum SeedBrowserMessageType {
   "onSeedStateChange" = "onSeedStateChange",
 }
 
+// TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps | undefined;
   /**
@@ -793,6 +806,11 @@ export type OnDidChangeActiveTextEditorData = {
    * Sync the changed note
    */
   syncChangedNote?: boolean;
+  /**
+   * Current active note.
+   * If activeNote is defined, view will set that note as active note. Otherwise default to {@param note}
+   */
+  activeNote?: NoteProps;
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
@@ -826,3 +844,7 @@ export type SeedBrowserMessage = DMessage<
 >;
 
 export type LookupViewMessage = DMessage<LookupViewMessageEnum, any>;
+
+// from https://stackoverflow.com/questions/48011353/how-to-unwrap-the-type-of-a-promise
+// use to unwrap promise of return type. can be removed once we upgrade to typescript 4.5 (will be included in typescript library)
+export type Awaited<T> = T extends PromiseLike<infer U> ? U : T;

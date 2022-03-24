@@ -6,9 +6,7 @@ exports[`WorkspaceService create basic 1`] = `
 build
 seeds
 .next
-pods/service-connections
-
-"
+pods/service-connections"
 `;
 
 exports[`WorkspaceService initialize remote seed present 1`] = `".git .gitignore dendron.code-workspace dendron.yml seed.yml vault"`;

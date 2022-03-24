@@ -9,6 +9,7 @@ import {
 } from "./insertNoteIndex";
 import { genDefaultRandomNoteConfig, RandomNoteConfig } from "./randomNote";
 import { genDefaultInsertNoteConfig, InsertNoteConfig } from "./insertNote";
+import { CopyNoteLinkConfig, genDefaultCopyNoteLinkConfig } from ".";
 
 /**
  * Namespace for all command related configurations
@@ -19,6 +20,7 @@ export type DendronCommandConfig = {
   insertNote: InsertNoteConfig;
   insertNoteLink: InsertNoteLinkConfig;
   insertNoteIndex: InsertNoteIndexConfig;
+  copyNoteLink: CopyNoteLinkConfig;
 };
 
 /**
@@ -33,5 +35,6 @@ export function genDefaultCommandConfig(): DendronCommandConfig {
     insertNote: genDefaultInsertNoteConfig(),
     insertNoteLink: genDefaultInsertNoteLinkConfig(),
     insertNoteIndex: genDefaultInsertNoteIndexConfig(),
+    copyNoteLink: genDefaultCopyNoteLinkConfig(),
   };
 }

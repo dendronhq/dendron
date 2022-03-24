@@ -61,6 +61,8 @@ export type DVault = {
    * Id of a seed this vault belongs to
    */
   seed?: string;
+  /** Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults. */
+  selfContained?: boolean;
 };
 
 export type DWorkspace = {
@@ -418,6 +420,12 @@ export type DendronDevConfig = {
    * Enable export pod v2
    */
   enableExportPodV2?: boolean;
+  /**
+   * Sets self contained vaults as the default vault type. Dendron can read
+   * self-contained vaults even if this option is not enabled, but it will only
+   * create self contained vaults if this option is enabled.
+   */
+  enableSelfContainedVaults?: boolean;
 };
 
 export type DendronSiteConfig = {

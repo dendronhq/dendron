@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
+  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
@@ -80,6 +81,6 @@ export async function getCustomHead() {
     return null;
   }
   const publicDir = getPublicDir();
-  const headPath = path.join(publicDir, customHeadPathConfig);
+  const headPath = path.join(publicDir, "header.html");
   return fs.readFileSync(headPath, { encoding: "utf-8" });
 }

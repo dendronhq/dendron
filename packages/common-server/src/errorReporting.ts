@@ -1,6 +1,7 @@
 import { DendronError, Stage } from "@dendronhq/common-all";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
+import { CaptureContext } from "@sentry/types";
 import _ from "lodash";
 
 // Extracted to make testing easy
@@ -39,9 +40,28 @@ export function isBadErrorThatShouldBeSampled(
   );
 }
 
-export function initializeSentry(environment: Stage): void {
+/**
+ * Initialize Sentry
+ * @param environment
+ * @returns
+ *  ^4wcl13fw6gub
+ */
+export function initializeSentry({
+  environment,
+  sessionId,
+  release,
+}: {
+  environment: Stage;
+  sessionId?: number;
+  release: string;
+}): void {
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
+
+  const initialScope: CaptureContext = {};
+  if (sessionId) {
+    initialScope.tags = { sessionId };
+  }
 
   Sentry.init({
     dsn,
@@ -53,8 +73,10 @@ export function initializeSentry(environment: Stage): void {
     tracesSampleRate: 0.0,
     enabled: true,
     environment,
+    release,
     attachStacktrace: true,
     beforeSend: eventModifier,
+    initialScope,
     integrations: [
       new RewriteFrames({
         iteratee: (frame) => {

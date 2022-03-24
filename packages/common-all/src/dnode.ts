@@ -1,8 +1,7 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
-import title from "@dendronhq/title";
+import title from "title";
 import matter from "gray-matter";
-import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -41,6 +40,7 @@ import {
   SchemaRaw,
 } from "./types";
 import {
+  ConfigUtils,
   DefaultMap,
   getSlugger,
   isNotUndefined,
@@ -346,6 +346,34 @@ export class NoteUtils {
     });
   }
 
+  static deleteChildFromParent(opts: {
+    childToDelete: NoteProps;
+    notes: NotePropsDict;
+  }): NoteChangeEntry[] {
+    const changed: NoteChangeEntry[] = [];
+    const { childToDelete, notes } = opts;
+    let parent;
+    if (childToDelete.parent) {
+      parent = notes[childToDelete.parent];
+    } else {
+      throw new DendronError({
+        message: `No parent found for ${childToDelete.fname}`,
+      });
+    }
+
+    const prevParentState = { ...parent };
+    parent.children = _.reject<string[]>(
+      parent.children,
+      (ent: string) => ent === childToDelete.id
+    ) as string[];
+    changed.push({
+      status: "update",
+      prevNote: prevParentState,
+      note: parent,
+    });
+    return changed;
+  }
+
   /**
    * Add node to parents up the note tree, or create stubs if no direct parents exists
    * @param opts
@@ -444,11 +472,23 @@ export class NoteUtils {
       const maybeTemplate = schema.data.template;
       if (maybeTemplate) {
         // TODO: Support xvault with user prompting for this flow
-        const tempNote = NoteUtils.getNoteByFnameFromEngine({
+        /*
+         * Get first valid template note.
+         * First look for template in same vault as note. Otherwise, look across all vaults.
+         * If there are multiple template matches, apply first one.
+         * This is temp until we get xvault support
+         */
+        const tempInSameVault = NoteUtils.getNoteByFnameFromEngine({
           fname: maybeTemplate.id,
           vault: note.vault,
           engine,
         });
+        const tempNote =
+          tempInSameVault ||
+          NoteUtils.getNotesByFnameFromEngine({
+            fname: maybeTemplate.id,
+            engine,
+          })[0];
 
         if (tempNote) {
           SchemaUtils.applyTemplate({
@@ -687,9 +727,7 @@ export class NoteUtils {
     // check if title is unchanged from default. if so, add default title
     if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
-      // type definitions are wrong
-      // @ts-ignore
-      return title(fname) as string;
+      return title(fname);
     }
     // if user customized title, return the title as user specified
     return titleFromBasename;
@@ -804,30 +842,6 @@ export class NoteUtils {
     }
 
     return latestUpdated;
-  }
-
-  /** @deprecated see {@link NoteUtils.getNotesByFnameFromEngine} */
-  static getNotesByFname({
-    fname,
-    notes,
-    vault,
-  }: {
-    fname: string;
-    notes: NotePropsDict | NoteProps[];
-    vault?: DVault;
-  }): NoteProps[] {
-    if (!_.isArray(notes)) {
-      notes = _.values(notes);
-    }
-    const lowercaseFName = fname.toLowerCase();
-
-    const out = _.filter(notes, (ent) => {
-      return (
-        ent.fname.toLowerCase() === lowercaseFName &&
-        (vault ? ent.vault.fsPath === vault.fsPath : true)
-      );
-    });
-    return out;
   }
 
   static getNotesByFnameFromEngine({
@@ -1084,6 +1098,77 @@ export class NoteUtils {
     return { ...noteRaw, ...hydrateProps };
   }
 
+  /**
+   * Update note metadata (eg. links and anchors)
+   */
+  static async updateNoteMetadata({
+    note,
+    fmChangeOnly,
+    engine,
+    enableLinkCandidates,
+  }: {
+    note: NoteProps;
+    fmChangeOnly: boolean;
+    engine: DEngineClient;
+    enableLinkCandidates?: boolean;
+  }) {
+    // Avoid calculating links/anchors if the note is too long
+    if (
+      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
+    ) {
+      return note;
+    }
+    // Links have to be updated even with frontmatter only changes
+    // because `tags` in frontmatter adds new links
+    const links = await engine.getLinks({ note, type: "regular" });
+    if (!links.data) {
+      throw new DendronError({
+        message: "Unable to calculate the backlinks in note",
+        payload: {
+          note: NoteUtils.toLogObj(note),
+          error: links.error,
+        },
+      });
+    }
+    note.links = links.data;
+
+    // if only frontmatter changed, don't bother with heavy updates
+    if (!fmChangeOnly) {
+      const anchors = await engine.getAnchors({
+        note,
+      });
+      if (!anchors.data) {
+        throw new DendronError({
+          message: "Unable to calculate backlinks in note",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            error: anchors.error,
+          },
+        });
+      }
+      note.anchors = anchors.data;
+
+      if (enableLinkCandidates) {
+        const linkCandidates = await engine.getLinks({
+          note,
+          type: "candidate",
+        });
+        if (!linkCandidates.data) {
+          throw new DendronError({
+            message: "Unable to calculate the backlink candidates in note",
+            payload: {
+              note: NoteUtils.toLogObj(note),
+              error: linkCandidates.error,
+            },
+          });
+        }
+        note.links = note.links.concat(linkCandidates.data);
+      }
+    }
+
+    return note;
+  }
+
   static match({ notePath, pattern }: { notePath: string; pattern: string }) {
     return minimatch(notePath, pattern);
   }
@@ -1126,7 +1211,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeExplicitProps(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps): Partial<NoteProps> {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1165,6 +1250,10 @@ export class NoteUtils {
       blacklist.push("stub");
     }
     const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
+    // Make sure title and ID are always strings
+    meta.title = _.toString(meta.title);
+    meta.id = _.toString(meta.id);
+
     return matter.stringify(body || "", meta);
   }
 
@@ -1837,6 +1926,7 @@ export class SchemaUtils {
     });
   }
 
+  //  ^dtaatxvjb4s3
   static matchPath(opts: {
     notePath: string;
     schemaModDict: SchemaModuleDict;
@@ -1983,32 +2073,6 @@ export class SchemaUtils {
       builtinProps.parent = "root";
     }
     return { ...builtinProps, ...dataProps };
-  }
-
-  static serializeModuleProps(moduleProps: SchemaModuleProps) {
-    const { version, imports, schemas } = moduleProps;
-    // TODO: filter out imported schemas
-    const out: any = {
-      version,
-      imports: [],
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    if (imports) {
-      out.imports = imports;
-    }
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
-  }
-
-  static serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
-    const { version, imports, schemas } = _.defaults(moduleOpts, {
-      imports: [],
-    });
-    const out = {
-      version,
-      imports,
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
 
   static isSchemaUri(uri: URI) {

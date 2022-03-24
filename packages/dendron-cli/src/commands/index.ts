@@ -1,5 +1,4 @@
 export * from "./backfillV2";
-export * from "./build-site-v2";
 export * from "./doctor";
 export * from "./exportPod";
 export { ExportPodCLICommand } from "./exportPod";
@@ -14,3 +13,4 @@ export * from "./seedCLICommand";
 export * from "./devCLICommand";
 export * from "./publishCLICommand";
 export * from "./base";
+export { ExportPodV2CLICommand } from "./exportPodV2";

@@ -1,24 +1,20 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { Awaited, NoteUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
 import _ from "lodash";
+import { before, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import {
   EDITOR_DECORATION_TYPES,
   updateDecorations,
 } from "../../features/windowDecorations";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { expect } from "../testUtilsv2";
-import { describe, before } from "mocha";
-import {
-  describeSingleWS,
-  runLegacyMultiWorkspaceTest,
-  runTestButSkipForWindows,
-  setupBeforeAfter,
-} from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { WSUtilsV2 } from "../../WSUtilsV2";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS, runTestButSkipForWindows } from "../testUtilsV3";
 
 /** Check if the ranges decorated by `decorations` contains `text` */
 function isTextDecorated(
@@ -32,24 +28,81 @@ function isTextDecorated(
   return false;
 }
 
-// eslint-disable-next-line func-names
-suite("windowDecorations", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+async function getNote(opts: { fname: string }) {
+  const { engine, vaults } = ExtensionProvider.getDWorkspace();
+  const { fname } = opts;
 
-  //TODO: Fix tests on Windows Test Pass
-  const runTestExceptOnWindows = runTestButSkipForWindows();
+  const note = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    engine,
+    vault: vaults[0],
+  })!;
+  const editor = await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
+    note
+  );
+  return { note, editor };
+}
 
-  runTestExceptOnWindows("decorations", () => {
-    test("highlighting", (done) => {
-      const CREATED = "1625648278263";
-      const UPDATED = "1625758878263";
-      const FNAME = "bar";
+function getDecorations({
+  allDecorations,
+  decorationType,
+}: {
+  allDecorations: Awaited<
+    ReturnType<typeof updateDecorations>
+  >["allDecorations"];
+  decorationType: vscode.TextEditorDecorationType;
+}) {
+  return allDecorations!.get(decorationType);
+}
 
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ vaults, wsRoot }) => {
+function checkDecoration({
+  text,
+  document,
+  decorations,
+}: {
+  text: string;
+  document: vscode.TextDocument;
+  decorations?: vscode.DecorationOptions[];
+}) {
+  expect(isTextDecorated(text, decorations!, document)).toBeTruthy();
+}
+
+suite("GIVEN a text document with decorations", function () {
+  const CREATED = "1625648278263";
+  const UPDATED = "1625758878263";
+  const FNAME = "bar";
+
+  describe("AND GIVEN links ", () => {
+    function checkTimestampsDecorated({
+      decorations,
+      document,
+    }: {
+      decorations: Awaited<ReturnType<typeof updateDecorations>>;
+      document: vscode.TextDocument;
+    }) {
+      const { allDecorations } = decorations;
+      const timestampDecorations = getDecorations({
+        allDecorations,
+        decorationType: EDITOR_DECORATION_TYPES.timestamp,
+      });
+      expect(timestampDecorations!.length).toEqual(2);
+      // check that the decorations are at the right locations
+      checkDecoration({
+        text: CREATED,
+        decorations: timestampDecorations,
+        document,
+      });
+      checkDecoration({
+        text: UPDATED,
+        decorations: timestampDecorations,
+        document,
+      });
+    }
+
+    describeMultiWS(
+      "",
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
           await NoteTestUtilsV4.createNote({
             fname: "tags.bar",
             vault: vaults[0],
@@ -94,28 +147,15 @@ suite("windowDecorations", function () {
             "et\nnam\nvelit\nlaboriosam\n"
           );
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN links are decorated", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
-          const { allDecorations } = (await updateDecorations(editor))!;
+          const decorations = (await updateDecorations(editor))!;
+          const { allDecorations } = decorations;
 
-          const timestampDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.timestamp
-          );
-          expect(timestampDecorations!.length).toEqual(2);
-          // check that the decorations are at the right locations
-          expect(
-            isTextDecorated(CREATED, timestampDecorations!, document)
-          ).toBeTruthy();
-          expect(
-            isTextDecorated(UPDATED, timestampDecorations!, document)
-          ).toBeTruthy();
+          checkTimestampsDecorated({ decorations, document });
 
           const blockAnchorDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.blockAnchor
@@ -132,9 +172,10 @@ suite("windowDecorations", function () {
             isTextDecorated("^anchor-3", blockAnchorDecorations!, document)
           ).toBeTruthy();
 
-          const wikilinkDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.wikiLink
-          );
+          const wikilinkDecorations = getDecorations({
+            allDecorations,
+            decorationType: EDITOR_DECORATION_TYPES.wikiLink,
+          });
           expect(wikilinkDecorations!.length).toEqual(7);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
@@ -188,17 +229,16 @@ suite("windowDecorations", function () {
           expect(
             isTextDecorated("#foo", brokenWikilinkDecorations!, document)
           ).toBeTruthy();
+          return;
+        });
+      }
+    );
+  });
 
-          done();
-        },
-      });
-    });
-
-    test("task notes", (done) => {
-      const FNAME = "bar";
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND GIVEN task notes", () => {
+    describeMultiWS(
+      "",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: "with.all",
@@ -251,14 +291,10 @@ suite("windowDecorations", function () {
             wsRoot,
           });
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN task notes are highlighted", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -296,17 +332,15 @@ suite("windowDecorations", function () {
           expect(taskDecorations![2].renderOptions?.after?.contentText).toEqual(
             " @grace priority:high #foo #bar"
           );
+        });
+      }
+    );
+  });
 
-          done();
-        },
-      });
-    });
-
-    test("highlighting same file wikilinks", (done) => {
-      const FNAME = "bar";
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND GIVEN file with wikilinks to itself", () => {
+    describeMultiWS(
+      "",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: FNAME,
@@ -324,14 +358,10 @@ suite("windowDecorations", function () {
             wsRoot,
           });
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN links are highlighted", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -378,17 +408,15 @@ suite("windowDecorations", function () {
               document
             )
           ).toBeTruthy();
+        });
+      }
+    );
+  });
 
-          done();
-        },
-      });
-    });
-
-    test("highlighting wildcard references", (done) => {
-      const FNAME = "bar";
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND given wildcard references", () => {
+    describeMultiWS(
+      "",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: FNAME,
@@ -397,14 +425,10 @@ suite("windowDecorations", function () {
             wsRoot,
           });
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN links are highlighted", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
@@ -415,17 +439,17 @@ suite("windowDecorations", function () {
           expect(
             isTextDecorated("![[foo.bar.*]]", wikilinkDecorations!, document)
           ).toBeTruthy();
+        });
+      }
+    );
+  });
 
-          done();
-        },
-      });
-    });
-
-    test("for long notes, only the visible range should be decorated", (done) => {
-      const FNAME = "test.note";
-      const repeat = 228;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND for long notes", () => {
+    const FNAME = "test.note";
+    const repeat = 228;
+    describeMultiWS(
+      "",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             fname: FNAME,
@@ -434,14 +458,10 @@ suite("windowDecorations", function () {
             wsRoot,
           });
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: FNAME,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN only the visible range should be decorated", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const document = editor.document;
 
           const { allDecorations } = (await updateDecorations(editor))!;
@@ -465,60 +485,50 @@ suite("windowDecorations", function () {
               document
             )
           ).toBeTruthy();
-
-          done();
-        },
-      });
-    });
-
-    describe("WHEN disabled", () => {
-      test("THEN decorations are not displayed", (done) => {
-        const FNAME = "test.note";
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          modConfigCb: (config) => {
-            config.workspace!.enableEditorDecorations = false;
-            return config;
-          },
-          preSetupHook: async ({ vaults, wsRoot }) => {
-            await NoteTestUtilsV4.createNote({
-              fname: FNAME,
-              body: "[[does.not.exist]] #does.not.exist\n",
-              vault: vaults[0],
-              wsRoot,
-            });
-          },
-          onInit: async ({ vaults, engine, wsRoot }) => {
-            const note = NoteUtils.getNoteByFnameV5({
-              fname: FNAME,
-              notes: engine.notes,
-              vault: vaults[0],
-              wsRoot,
-            });
-            const editor = await WSUtils.openNote(note!);
-
-            const { allDecorations, allWarnings } = (await updateDecorations(
-              editor
-            ))!;
-
-            expect(allDecorations).toBeFalsy();
-            expect(allWarnings).toBeFalsy();
-
-            done();
-          },
         });
-      });
-    });
+      }
+    );
   });
 
-  runTestExceptOnWindows("warnings", () => {
-    test("missing frontmatter", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+  describe("AND WHEN disabled", () => {
+    describeMultiWS(
+      "",
+      {
+        modConfigCb: (config) => {
+          config.workspace!.enableEditorDecorations = false;
+          return config;
+        },
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
+            body: "[[does.not.exist]] #does.not.exist\n",
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      },
+      () => {
+        test("THEN decorations are not displayed ", async () => {
+          const { editor } = await getNote({ fname: FNAME });
+
+          const { allDecorations, allWarnings } = (await updateDecorations(
+            editor
+          ))!;
+
+          expect(allDecorations).toBeFalsy();
+          expect(allWarnings).toBeFalsy();
+        });
+      }
+    );
+  });
+
+  describe("AND GIVEN warnings in document", () => {
+    describeMultiWS(
+      "AND WHEN missing frontmatter",
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          const note = await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
           });
@@ -526,8 +536,10 @@ suite("windowDecorations", function () {
           const path = NoteUtils.getFullPath({ note, wsRoot });
           await writeFile(path, "foo bar");
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
 
           expect(allWarnings!.length).toEqual(1);
@@ -537,18 +549,16 @@ suite("windowDecorations", function () {
               match: ["frontmatter", "missing"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("bad note id", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "AND WHEN bad note id",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
             props: {
@@ -556,10 +566,11 @@ suite("windowDecorations", function () {
             },
           });
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
-
           expect(allWarnings!.length).toEqual(1);
           expect(
             AssertUtils.assertInString({
@@ -567,18 +578,16 @@ suite("windowDecorations", function () {
               match: ["id", "bad"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("note id is missing", (done) => {
-      let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "AND WHEN note id is missing",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "foo",
+          const note = await NoteTestUtilsV4.createNote({
+            fname: FNAME,
             vault: vaults[0],
             wsRoot,
           });
@@ -589,10 +598,11 @@ suite("windowDecorations", function () {
             ["---", "updated: 234", "created: 123", "---"].join("\n")
           );
         },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(note!);
+      },
+      () => {
+        test("THEN show frontmatter missing warning", async () => {
+          const { editor } = await getNote({ fname: FNAME });
           const { allWarnings } = (await updateDecorations(editor))!;
-
           expect(allWarnings!.length).toEqual(1);
           expect(
             AssertUtils.assertInString({
@@ -600,12 +610,11 @@ suite("windowDecorations", function () {
               match: ["id", "missing"],
             })
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    describeSingleWS("AND frontmatter is not visible", { ctx }, () => {
+    describeMultiWS("AND frontmatter is not visible", {}, () => {
       before(async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const note = await NoteTestUtilsV4.createNoteWithEngine({
@@ -639,12 +648,11 @@ suite("windowDecorations", function () {
           })
         );
       });
-    });
 
-    test("doesn't warn for schemas", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ engine, wsRoot }) => {
+      runTestButSkipForWindows()("", () => {
+        test("THEN don't warn for schemas", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const engine = ExtensionProvider.getEngine();
           const schema = engine.schemas.root;
           const schemaFile = path.join(
             wsRoot,
@@ -660,13 +668,13 @@ suite("windowDecorations", function () {
 
           expect(allWarnings).toEqual(undefined);
           expect(allDecorations).toEqual(undefined);
-          done();
-        },
+        });
       });
     });
   });
 });
 
+// eslint-disable-next-line func-names
 function checkRanges(
   range: vscode.Range | undefined,
   startLine: number,

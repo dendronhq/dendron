@@ -30,6 +30,17 @@ $$
 f(x) = 5
 $$
 
+### Rule
+
+Horizontal rule below
+
+---
+
+Another rule below this too
+
+*** 
+
+Rules above!
 
 ### Mermaid
 

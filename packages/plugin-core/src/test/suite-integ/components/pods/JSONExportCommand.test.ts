@@ -4,21 +4,23 @@ import * as vscode from "vscode";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
 import { JSONExportPodCommand } from "../../../../commands/pods/JSONExportPodCommand";
 import { expect } from "../../../testUtilsv2";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 
 suite("JSONExportPodCommand", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
-  describe("GIVEN a GoogleDocsExportPodCommand is ran with Vault scope", () => {
+  describe("GIVEN a JSONExportPodCommand is ran with Vault scope", () => {
     describeSingleWS(
       "WHEN the destination is clipboard",
       {
         ctx,
       },
       () => {
-        const cmd = new JSONExportPodCommand();
         test("THEN multi notes export error message must be displayed", async () => {
+          const ext = ExtensionProvider.getExtension();
+          const cmd = new JSONExportPodCommand(ext);
           await expect(async () =>
             cmd.gatherInputs({
               exportScope: PodExportScope.Vault,

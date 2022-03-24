@@ -17,25 +17,16 @@ export class AssertUtils {
     nomatch,
   }: {
     body: string;
-    match?: string[];
-    nomatch?: string[];
+    match?: (string | RegExp)[];
+    nomatch?: (string | RegExp)[];
   }): Promise<boolean> {
-    await Promise.all(
-      (match || []).map((m) => {
-        if (body.indexOf(m) < 0) {
-          throw `${m} not found\n. Original text:\n ${body}`;
-        }
-        return true;
-      })
-    );
-    await Promise.all(
-      (nomatch || []).map((m) => {
-        if (body.indexOf(m) > 0) {
-          throw `${m} found in ${body}`;
-        }
-        return true;
-      })
-    );
+    await this.assertTimesInString({
+      body,
+      // match must appear more than 0 times (at least once) in the body
+      moreThan: match?.map((v) => [0, v]),
+      // nomatch must appear fewer than 1 times (never) in the body
+      fewerThan: nomatch?.map((v) => [1, v]),
+    });
     return true;
   }
 

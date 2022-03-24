@@ -4,11 +4,13 @@ import {
   DVault,
   SchemaOpts,
   NoteProps,
+  genUUID,
 } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
+import { makeSchemaTests, SchemaTest } from "../../utils/schema";
 
 describe(`NoteUtils tests:`, () => {
   describe(`genSchemaDesc tests`, () => {
@@ -218,7 +220,7 @@ describe(`SchemaUtil tests:`, () => {
       });
     });
 
-    describe("GIVEN template type is not a note", async () => {
+    describe("GIVEN template type is not a note", () => {
       beforeEach(async () => {
         note = await noteFactory.createForFName("new note");
       });
@@ -243,4 +245,186 @@ describe(`SchemaUtil tests:`, () => {
       });
     });
   });
+
+  describe("Schema match tests", () => {
+    describe("GIVEN schema anatomy example from the wiki", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+schemas:
+# this will match "cli.*" notes
+- id: cli 
+  # human readable description of hierarchy
+  desc: command line interface reference
+  # add this to the domain of your schema hierarchy
+  parent: root
+  # when a schema is a namespace, it can have arbitrary children. equivalent to cli.* glob pattern
+  namespace: true 
+  children:
+    - cmd
+    - env
+# will match cli.*.env
+- id: env
+  desc: cli specific env variables
+# will match cli.*.cmd.*
+- id: cmd
+  desc: subcommands 
+  namespace: true`,
+          checks: {
+            "cli.fd": "cli",
+            "cli.fd.bar.usage": false,
+            "cli.fd.cmd.usage": "cmd",
+            "cli.fd.env": "env",
+            "foo.bar": false,
+          },
+          expect,
+        })
+      );
+    });
+
+    describe("GIVEN inline schema anatomy example from the wiki", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+schemas:
+# Daily is the top most schema since its parent is 'root' it must have an identifier
+# this identifier 'daily' will be used when using 'Lookup (schema)' command.
+- id: daily
+  parent: root
+  # Children of the top most schema do not need to contain identifier and just 
+  # require a 'pattern' to be set to match the hierarchy of notes.
+  children:
+    - pattern: journal
+      children:
+        - pattern: "[0-2][0-9][0-9][0-9]"
+          children:
+            - pattern: "[0-1][0-9]"
+              children:
+                - pattern: "[0-3][0-9]"
+                  # As with regular schema we can set the template to be used with
+                  # the match of our notes. Below is an example usage of shorthand template
+                  # definition (which defaults to type: note). 
+                  template: templates.daily`,
+          checks: {
+            "daily.journal.2021.10.24": true,
+            "journal.2021.10.24": false,
+            "daily.journal.5000.10.24": false,
+            "daily.journal.2021.10.foo": false,
+            "daily.journal.2021.10.24.foo": false,
+          },
+          expect,
+        })
+      );
+    });
+
+    describe("GIVEN daily journal pattern from the wiki", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+schemas:
+- id: journal
+  title: journal
+  desc: ""
+  parent: root
+  children:
+    - year
+- id: year
+  title: year
+  pattern: "[0-2][0-9][0-9][0-9]"
+  children: 
+    - month
+- id: month
+  title: month
+  pattern: "[0-9][0-9]"
+  children: 
+    - day
+- id: day
+  title: day
+  pattern: "[0-9][0-9]"
+  namespace: true`,
+          checks: {
+            journal: "journal",
+            "journal.2020": "year",
+            "journal.2020.09": "month",
+            "journal.2020.09.12": "day",
+            "journal.2020.09.12.foo": true,
+            "daily.journal.2021.10.24": false,
+            "journal.5000.10.24": false,
+            "journal.2021.10.foo": false,
+          },
+          expect,
+        })
+      );
+    });
+
+    describe("GIVEN negated pattern", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+schemas:
+- id: projects
+  parent: root
+  children:
+    - name
+- id: name
+  pattern: "!(scratch)"`,
+          checks: {
+            "projects.web-app": "name",
+            "web-app": false,
+            "projects.scratch": false,
+          },
+          expect,
+        })
+      );
+    });
+
+    describe("GIVEN dendron-docs RFC schema", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+schemas:
+  - id: rfc
+    title: RFC
+    parent: root
+    children:
+      - pattern: "+([0-9])-+([!])" # starts with 1 or more digits, a dash, then one or more characters
+        template: dendron://dendron.docs/templates.rfc`,
+          checks: {
+            "rfc.41-test": true,
+            "rfc.41": false,
+            "rfc.test": false,
+            "rfc.41-": false,
+            "rfc.-test": false,
+            "rfc.123123-foo-bar-baz": true,
+          },
+          expect,
+        })
+      );
+    });
+  });
 });
+
+/** Run all schema tests.
+ *
+ * Supports `.skip` pattern (you can write `runAllTests.skip(...` if you are trying to skip a test).
+ * Also supports `.only` pattern, but you need to specify which test to do.
+ * Should look like `runAllTests.only("rfc.41", ...`
+ */
+function runAllTests(tests: SchemaTest[], onlyFname?: string) {
+  tests.forEach(({ testCase, preSetupHook, name, testedFname }) => {
+    const testfn = onlyFname && onlyFname !== testedFname ? test.only : test;
+    testfn(name, async () => {
+      await runEngineTestV5(testCase, {
+        preSetupHook,
+        expect,
+      });
+    });
+  });
+}
+runAllTests.only = (onlyFname: string, tests: SchemaTest[]) =>
+  runAllTests(tests, onlyFname);
+runAllTests.skip = (tests: SchemaTest[]) =>
+  runAllTests(
+    tests,
+    genUUID() /* No test will match, so everything will get skipped */
+  );

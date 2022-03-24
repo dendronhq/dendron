@@ -101,6 +101,21 @@ export class VSCodeUtils {
     await editor.edit((edit) => edit.delete(range));
   };
 
+  /** Wraps the selected range with comment symbols using builtin VSCode command. */
+  static async makeBlockComment(
+    editor: vscode.TextEditor,
+    range?: vscode.Range
+  ) {
+    // The command doesn't accept any arguments, it uses the current selection.
+    // So save then restore the selection.
+    const selectionsBefore = editor.selections;
+    if (range) {
+      editor.selection = new vscode.Selection(range?.start, range?.end);
+    }
+    await vscode.commands.executeCommand("editor.action.blockComment");
+    editor.selections = selectionsBefore;
+  }
+
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }
@@ -140,6 +155,10 @@ export class VSCodeUtils {
     return InstallStatus.NO_CHANGE;
   }
 
+  /**
+   * Get {@link InstallStatus}
+   * ^pubko8e3tu7i
+   */
   static getInstallStatusForExtension({
     previousGlobalVersion,
     currentVersion,
@@ -147,6 +166,7 @@ export class VSCodeUtils {
     previousGlobalVersion?: string;
     currentVersion: string;
   }): InstallStatus {
+    // if there is no global version set, then its a new install
     if (
       _.isUndefined(previousGlobalVersion) ||
       previousGlobalVersion === CONSTANTS.DENDRON_INIT_VERSION
@@ -189,6 +209,7 @@ export class VSCodeUtils {
     } as unknown as vscode.ExtensionContext;
   }
 
+  // create mock context for testing ^7a83pznb91c8
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const logPath = tmpDir().name;
@@ -549,13 +570,23 @@ export class VSCodeUtils {
         break;
       }
     }
-    // return [userConfigDir, delimiter, osName];
+
+    // if vscode is in portable mode, we need to handle it differently
+    // there is also a case where the user opens vscode with a custom `--user-data-dir` args through the CLI,
+    // but there is no reliable way for the extension authors to identify that through the node env or vscode API
+    const portableDir = process.env["VSCODE_PORTABLE"];
+    if (portableDir) {
+      userConfigDir = path.join(portableDir, "user-data", "User");
+    }
+
     return {
       userConfigDir,
       delimiter,
       osName,
     };
   }
+
+  static getWorkspaceConfig = vscode.workspace.getConfiguration;
 
   static isExtensionInstalled(extensionId: string) {
     return !_.isUndefined(vscode.extensions.getExtension(extensionId));

@@ -18,12 +18,12 @@
       "packages/dendron-next-server",
       "packages/nextjs-template",
       "packages/plugin-core",
-      "packages/dendron-11ty",
       "packages/common-frontend",
       "packages/dendron-plugin-views"
     ],
     "nohoist": [
-      "**/@types/mocha"
+      "**/@types/mocha",
+      "**/@types/eslint"
     ]
   },
   "devDependencies": {
@@ -70,10 +70,10 @@
     "dendron": "node packages/dendron-cli/lib/bin/dendron-cli.js",
     "cleanup": "./bootstrap/scripts/cleanup.sh",
     "release": "standard-version",
-    "format": "lerna exec --parallel --ignore @dendronhq/dendron-11ty-legacy -- yarn format",
+    "format": "lerna exec --parallel -- yarn format",
     "format:pkg": "prettier --write",
     "lint": "eslint . --ext ts,tsx",
-    "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/common-assets --ignore @dendronhq/nextjs-template --ignore @dendronhq/dendron-11ty-legacy --ignore @dendronhq/dendron-plugin-views -- tsc -p tsconfig.build.json --noEmit",
+    "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/common-assets --ignore @dendronhq/nextjs-template --ignore @dendronhq/dendron-plugin-views -- tsc -p tsconfig.build.json --noEmit",
     "bootstrap:bootstrap": "npx yarn --network-timeout 600000 --frozen-lockfile && yarn gen:meta",
     "bootstrap:build": "node bootstrap/scripts/buildAll.js",
     "bootstrap:buildCI": "node bootstrap/scripts/buildAllForTest.js",
@@ -104,7 +104,7 @@
     "hooks:pre-push": "node ./hooks/pre-push.js",
     "gen:meta": "node ./bootstrap/scripts/genMeta.js",
     "backend:updateDendronDeps": "node bootstrap/backend/updateDendronhqDeps.js",
-    "stash:unstaged": "git stash save -k 'pre-linting-stash' >> /dev/null",
+    "stash:unstaged": "git stash save -k 'pre-linting-stash'",
     "stash:pop": "git stash && git stash pop stash@{1} && git read-tree stash && git stash drop"
   },
   "packages": [

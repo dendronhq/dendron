@@ -22,7 +22,6 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-import { INoteSyncService } from "../services/NoteSyncService";
 import { ISchemaSyncService } from "../services/SchemaSyncServiceInterface";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
@@ -85,9 +84,6 @@ export class MockDendronExtension implements IDendronExtension {
       wsRoot: this._wsRoot,
     });
   }
-  get noteSyncService(): INoteSyncService {
-    throw new Error("Method not implemented in MockDendronExtension");
-  }
   get lookupControllerFactory(): ILookupControllerV3Factory {
     throw new Error("Method not implemented in MockDendronExtension");
   }
@@ -97,6 +93,14 @@ export class MockDendronExtension implements IDendronExtension {
 
   get schemaLookupProviderFactory(): ISchemaLookupProviderFactory {
     throw new Error("Method not implemented in MockDendronExtension.");
+  }
+
+  async activateWatchers(): Promise<void> {
+    return;
+  }
+
+  async deactivate(): Promise<void> {
+    return;
   }
 
   /**
@@ -175,8 +179,14 @@ export class MockDendronExtension implements IDendronExtension {
     return true;
   }
 
+  async isActiveAndIsDendronNote(_fpath: string): Promise<boolean> {
+    throw new Error("not implemented");
+  }
+
   getWorkspaceConfig(): WorkspaceConfiguration {
-    throw new Error("Method not implemented in MockDendronExtension.");
+    // TODO: the old implementation of this was wrong - it did not return WorkspaceConfiguration but a WorkspaceSettings object
+    // since this doesn't seem to be used, just adding an exception here for future work
+    throw Error("not implemented");
   }
 
   getTreeView(_key: DendronTreeViewKey): WebviewViewProvider {

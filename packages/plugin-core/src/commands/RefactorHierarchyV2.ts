@@ -16,7 +16,6 @@ import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
-import { FileWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
 import { getExtension, getDWorkspace } from "../workspace";
@@ -404,34 +403,22 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return;
     }
 
-    try {
-      if (ext.fileWatcher) {
-        ext.fileWatcher.pause = true;
-      }
-      const renameCmd = new RenameNoteV2aCommand();
-      const out = await window.withProgress(
-        {
-          location: ProgressLocation.Notification,
-          title: "Refactoring...",
-          cancellable: false,
-        },
-        async () => {
-          const out = await this.runOperations({ operations, renameCmd });
-          return out;
-        }
-      );
-      return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
-    } finally {
-      if (ext.fileWatcher) {
-        setTimeout(() => {
-          if (ext.fileWatcher) {
-            ext.fileWatcher.pause = false;
-            FileWatcher.refreshBacklinks();
-          }
-          this.L.info({ ctx, msg: "exit" });
-        }, 3000);
-      }
+    if (ext.fileWatcher) {
+      ext.fileWatcher.pause = true;
     }
+    const renameCmd = new RenameNoteV2aCommand();
+    const out = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Refactoring...",
+        cancellable: false,
+      },
+      async () => {
+        const out = await this.runOperations({ operations, renameCmd });
+        return out;
+      }
+    );
+    return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
   }
 
   async showResponse(res: CommandOutput) {

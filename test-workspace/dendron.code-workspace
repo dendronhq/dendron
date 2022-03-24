@@ -1,10 +1,11 @@
 {
     "folders": [
         {
-            "path": "assets"
+            "path": "dependencies/localhost/vault3/notes",
+            "name": "vault3"
         },
         {
-            "path": "vault3"
+            "path": "assets"
         },
         {
             "path": "vault2",

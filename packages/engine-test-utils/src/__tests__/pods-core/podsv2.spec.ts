@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import {
   AirtableExportPodV2,
   ConfigFileUtils,
@@ -326,12 +327,13 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             expirationTime: Time.now().toSeconds() + 5000,
             connectionId: "foo",
           };
-
+          const { wsRoot } = opts;
+          const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+          const port = openPortFile({ fpath });
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            vaults: opts.vaults,
-            wsRoot: opts.wsRoot,
+            port,
           });
           const response = {
             data: [
@@ -350,7 +352,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             engine: opts.engine,
           }) as NoteProps;
 
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           const entUpdate = result.data?.updated!;
           expect(entCreate.length).toEqual(1);
@@ -368,6 +370,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               wsRoot,
               vault: vaults[0],
             });
+            await fs.writeFileSync(
+              path.join(wsRoot, ".dendron.port.cli"),
+              "300"
+            );
           },
         }
       );
@@ -385,12 +391,13 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             expirationTime: Time.now().toSeconds() + 5000,
             connectionId: "foo",
           };
-
+          const { wsRoot } = opts;
+          const fpath = EngineUtils.getPortFilePathForCLI({ wsRoot });
+          const port = openPortFile({ fpath });
           const pod = new GoogleDocsExportPodV2({
             podConfig,
             engine: opts.engine,
-            vaults: opts.vaults,
-            wsRoot: opts.wsRoot,
+            port,
           });
           const response = {
             data: [],
@@ -408,7 +415,7 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
             engine: opts.engine,
           }) as NoteProps;
 
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(0);
           expect(ResponseUtil.hasError(result)).toBeTruthy();
@@ -420,6 +427,10 @@ describe("GIVEN a Google Docs Export Pod with a particular config", () => {
               wsRoot,
               vault: vaults[0],
             });
+            await fs.writeFileSync(
+              path.join(wsRoot, ".dendron.port.cli"),
+              "300"
+            );
           },
         }
       );
@@ -461,7 +472,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
           };
           pod.convertMdToNotionBlock = jest.fn();
           pod.createPagesInNotion = jest.fn().mockResolvedValue(response);
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;
           expect(entCreate.length).toEqual(1);
           expect(entCreate[0]?.notionId).toEqual("test");
@@ -473,16 +484,13 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
       );
     });
   });
-
-
 });
-
 
 /**
  * JSONExportPod
  */
 
- describe("GIVEN a JSON Export Pod with a particular config", () => {
+describe("GIVEN a JSON Export Pod with a particular config", () => {
   describe("WHEN exporting a note and destination is clipboard", () => {
     test("THEN expect note to be exported", async () => {
       await runEngineTestV5(
@@ -499,7 +507,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
             vault: opts.vaults[0],
             engine: opts.engine,
           }) as NoteProps;
-          const result = await pod.exportNote(props);
+          const result = await pod.exportNotes([props]);
           const data = result.data?.exportedNotes!;
           expect(_.isString(data)).toBeTruthy();
           if (_.isString(data)) {
@@ -539,7 +547,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
               engine: opts.engine,
             }) as NoteProps;
 
-            await pod.exportNote(props);
+            await pod.exportNotes([props]);
             const content = fs.readFileSync(path.join(exportDest), {
               encoding: "utf8",
             });

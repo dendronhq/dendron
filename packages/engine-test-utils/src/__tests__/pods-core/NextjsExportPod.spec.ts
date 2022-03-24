@@ -51,7 +51,8 @@ async function verifyExport(dest: string) {
     "dendron.json",
     "meta",
     "notes",
-    "notes.json"
+    "notes.json",
+    "tree.json"
   );
 }
 
@@ -245,6 +246,13 @@ describe("nextjs export", () => {
           `"siteUrl": "https://foo.com"`,
           `"enablePrettyLinks": true`
         );
+
+        await checkFile(
+          { fpath: path.join(dest, "data", "tree.json") },
+          `"roots": [`,
+          `"child2parent": {`
+        );
+
         // check pretty url
         await checkFile(
           {

@@ -180,11 +180,6 @@ function updateLernaPkgJson({ pkgJson }: PkgUpdateOpts) {
 function main() {
   const repos = [
     {
-      root: ".",
-      packages: getPackages({ blacklist: ["dendron-11ty"] }),
-      repoUrl: "ssh://git@github.com/dendronhq/dendron.git",
-    },
-    {
       root: path.join("..", "dendron-backend"),
       packages: getPackagesBackend(),
       repoUrl: "ssh://git@github.com/dendronhq/dendron-backend.git",

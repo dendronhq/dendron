@@ -1,9 +1,9 @@
+import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
 import {
-  DendronError,
-  ERROR_SEVERITY,
-  VaultUtils,
-} from "@dendronhq/common-all";
-import { SyncActionResult, SyncActionStatus } from "@dendronhq/engine-server";
+  SyncActionResult,
+  SyncActionStatus,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -25,32 +25,6 @@ type CommandReturns =
 
 export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   key = DENDRON_COMMANDS.SYNC.key;
-
-  static countDone(results: SyncActionResult[]): number {
-    return this.count(results, SyncActionStatus.DONE);
-  }
-
-  static count(results: SyncActionResult[], status: SyncActionStatus) {
-    return results.filter((result) => result.status === status).length;
-  }
-
-  private static filteredRepoNames(
-    results: SyncActionResult[],
-    status: SyncActionStatus
-  ): string[] {
-    const matchingResults = results.filter(
-      (result) => result.status === status
-    );
-    if (matchingResults.length === 0) return [];
-    return matchingResults.map((result) => {
-      // Display the vault names for info/error messages
-      if (result.vaults.length === 1) {
-        return VaultUtils.getName(result.vaults[0]);
-      }
-      // But if there's more than one vault in the repo, then use the repo path which is easier to interpret
-      return result.repo;
-    });
-  }
 
   private static generateReportMessage({
     committed,
@@ -74,7 +48,7 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
       }
     ) => {
       const uniqResults = _.uniq(_.flattenDeep(results));
-      const repos = SyncCommand.filteredRepoNames(uniqResults, status);
+      const repos = WorkspaceUtils.getFilteredRepoNames(uniqResults, status);
       if (repos.length === 0) return;
       const { msg, severity } = fn(repos.join(", "));
       message.push(msg);
@@ -167,6 +141,18 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     return { message, maxMessageSeverity };
   }
 
+  addAnalyticsPayload(_opts: CommandOpts, resp: CommandReturns) {
+    const allActions = [
+      ...(resp?.committed ?? []),
+      ...(resp?.pulled ?? []),
+      ...(resp?.pushed ?? []),
+    ];
+
+    return {
+      hasMultiVaultRepo: allActions.some((action) => action.vaults.length > 1),
+    };
+  }
+
   async execute(opts?: CommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
@@ -208,9 +194,9 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     });
 
     // Successful operations
-    const committedDone = SyncCommand.countDone(committed);
-    const pulledDone = SyncCommand.countDone(pulled);
-    const pushedDone = SyncCommand.countDone(pushed);
+    const committedDone = WorkspaceUtils.getCountForStatusDone(committed);
+    const pulledDone = WorkspaceUtils.getCountForStatusDone(pulled);
+    const pushedDone = WorkspaceUtils.getCountForStatusDone(pushed);
     const repos = (count: number) => (count === 1 ? "repo" : "repos");
     message.push(`Committed ${committedDone} ${repos(committedDone)},`);
     message.push(`tried pulling ${pulledDone}`);

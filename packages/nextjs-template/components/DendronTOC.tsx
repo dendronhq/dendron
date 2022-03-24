@@ -29,7 +29,10 @@ export const DendronTOC = ({
             <Link
               key={key}
               href={`#${key}`}
-              title={unslug(entry?.text ?? entry?.value)}
+              // `anchor.text` contains clean, user displayable text for
+              // headings. It should always exist for exported notes, but we
+              // have this fallback just in case.
+              title={entry?.text ?? unslug(entry?.value)}
             />
           ) : (
             <></>

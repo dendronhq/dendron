@@ -1,5 +1,5 @@
 import Airtable from "@dendronhq/airtable";
-import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { ErrorFactory, ResponseUtil } from "@dendronhq/common-all";
 import {
   AirtableConnection,
   AirtableExportPodV2,
@@ -13,18 +13,17 @@ import {
   ExternalService,
   isRunnableAirtableV2PodConfig,
   JSONSchemaType,
+  PodUtils,
   PodV2Types,
   RunnableAirtableV2PodConfig,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -37,9 +36,11 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   AirtableExportReturnType
 > {
   public key = "dendron.airtableexport";
+  private extension: IDendronExtension;
 
-  public constructor() {
+  public constructor(extension: IDendronExtension) {
     super(new QuickPickHierarchySelector());
+    this.extension = extension;
   }
 
   public createPod(
@@ -48,7 +49,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
     return new AirtableExportPodV2({
       airtable: new Airtable({ apiKey: config.apiKey }),
       config,
-      engine: ExtensionProvider.getEngine(),
+      engine: this.extension.getEngine(),
     });
   }
 
@@ -61,10 +62,12 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   ): Promise<RunnableAirtableV2PodConfig | undefined> {
     let apiKey: string | undefined = opts?.apiKey;
     let connectionId: string | undefined = opts?.connectionId;
-
+    const { wsRoot } = this.extension.getDWorkspace();
     // Get an Airtable API Key
     if (!apiKey) {
-      const mngr = new ExternalConnectionManager(getExtension().podsDir);
+      const mngr = new ExternalConnectionManager(
+        PodUtils.getPodDir({ wsRoot })
+      );
 
       // If the apiKey doesn't exist, see if we can first extract it from the connectedServiceId:
       if (opts?.connectionId) {
@@ -141,7 +144,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
       }
 
       const configPath = ConfigFileUtils.genConfigFileV2({
-        fPath: path.join(getExtension().podsDir, "custom", `config.${id}.yml`),
+        fPath: PodUtils.getCustomConfigPath({ wsRoot, podId: id }),
         configSchema: AirtableExportPodV2.config(),
         setProperties: _.merge(inputs, {
           podId: id,
@@ -170,27 +173,28 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
    */
   public async onExportComplete({
     exportReturnValue,
+    config,
   }: {
     exportReturnValue: AirtableExportReturnType;
     config: RunnableAirtableV2PodConfig;
-    payload: NoteProps[];
   }) {
     const records = exportReturnValue.data;
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     const logger = this.L;
     if (records?.created) {
       await AirtableUtils.updateAirtableIdForNewlySyncedNotes({
         records: records.created,
         engine,
         logger,
+        podId: config.podId,
       });
     }
 
     const createdCount = exportReturnValue.data?.created?.length ?? 0;
     const updatedCount = exportReturnValue.data?.updated?.length ?? 0;
-
+    let errorMsg = "";
     if (ResponseUtil.hasError(exportReturnValue)) {
-      const errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
+      errorMsg = `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated. Error encountered: ${ErrorFactory.safeStringify(
         exportReturnValue.error
       )}`;
 
@@ -200,6 +204,7 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
         `Finished Airtable Export. ${createdCount} records created; ${updatedCount} records updated.`
       );
     }
+    return errorMsg;
   }
 
   /**

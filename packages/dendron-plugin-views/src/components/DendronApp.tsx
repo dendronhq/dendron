@@ -25,7 +25,7 @@ import "../styles/scss/main.scss";
 import { Layout } from "antd";
 const { Content } = Layout;
 
-const { useEngineAppSelector, useEngine } = engineHooks;
+const { useEngineAppSelector } = engineHooks;
 
 function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const ctx = "DendronVSCodeApp";
@@ -36,8 +36,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const logger = createLogger("DendronApp");
 
   logger.info({ ctx, msg: "enter", workspace });
-  // used to initialize the engine
-  useEngine({ engineState: engine, opts: workspace });
 
   const props = {
     engine,
@@ -64,9 +62,10 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     const ctx = "useVSCodeMsg";
     logger.info({ ctx, msgType: msg.type });
     switch (msg.type) {
+      // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
-        const { sync, note, syncChangedNote } = cmsg.data;
+        const { sync, note, syncChangedNote, activeNote } = cmsg.data;
         if (sync) {
           // skip the initial ?
           logger.info({
@@ -87,7 +86,9 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           await ideDispatch(engineSlice.syncNote({ ...workspace, note }));
         }
         logger.info({ ctx, msg: "setNoteActive:pre" });
-        ideDispatch(ideSlice.actions.setNoteActive(note));
+        // If activeNote is in the data payload, set that as active note. Otherwise default to changed note
+        const noteToSetActive = activeNote ? activeNote : note;
+        ideDispatch(ideSlice.actions.setNoteActive(noteToSetActive));
         logger.info({ ctx, msg: "setNoteActive:post" });
         break;
       case LookupViewMessageEnum.onUpdate:
@@ -100,11 +101,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
     }
   });
-
-  // don't load until active
-  if (_.isEmpty(engine.notes)) {
-    return <div>Loading...</div>;
-  }
 
   return <Component {...props} />;
 }

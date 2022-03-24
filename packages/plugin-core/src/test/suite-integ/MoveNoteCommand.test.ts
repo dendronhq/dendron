@@ -440,24 +440,22 @@ suite("MoveNoteCommand", function () {
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        await NoteTestUtilsV4.createNote({
-          fname: "scratch.2020.02.03.0123",
-          vault: vaults[0],
-          wsRoot,
-        });
       },
       onInit: async ({ engine, vaults, wsRoot }) => {
+        const ext = ExtensionProvider.getExtension();
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[0];
         const fname = "scratch.2020.02.03.0123";
-        const fooNote = NoteUtils.getNoteByFnameV5({
+
+        const scratchNote = await NoteTestUtilsV4.createNoteWithEngine({
           fname,
-          notes,
-          vault: vault1,
+          vault: vaults[0],
           wsRoot,
-        }) as NoteProps;
-        await WSUtils.openNote(fooNote);
+          engine,
+        });
+
+        await ext.wsUtils.openNote(scratchNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
           moves: [

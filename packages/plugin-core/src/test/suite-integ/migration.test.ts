@@ -22,14 +22,14 @@ import {
   InsertNoteLinkAliasModeEnum,
 } from "@dendronhq/common-all";
 import {
-  ALL_MIGRATIONS,
+  CONFIG_MIGRATIONS,
   Migrations,
   MigrateFunction,
   MigrationService,
   WorkspaceService,
   DConfig,
   MigrationUtils,
-  CONFIG_MIGRATIONS,
+  MIGRATION_ENTRIES,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { describe, test } from "mocha";
@@ -58,13 +58,15 @@ const getMigration = ({
   to,
 }: Partial<{ from: string; exact: string; to: string }>): Migrations[] => {
   if (exact) {
-    const maybeMigration = ALL_MIGRATIONS.find((ent) => ent.version === exact);
+    const maybeMigration = MIGRATION_ENTRIES.find(
+      (ent) => ent.version === exact
+    );
     if (_.isUndefined(maybeMigration)) {
       throw Error("no migration found");
     }
     return [maybeMigration];
   } else {
-    let migrations = ALL_MIGRATIONS;
+    let migrations = MIGRATION_ENTRIES;
     // eg. take all migrations greater than the `from`
     if (from) {
       migrations = _.takeWhile(migrations, (mig) => {
@@ -436,7 +438,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.62.0",
               dendronConfig,
               wsConfig,
@@ -446,10 +448,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -458,7 +463,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -516,6 +521,7 @@ suite("Migration", function () {
               insertNoteIndex: {
                 enableMarker: true,
               },
+              copyNoteLink: {},
             };
 
             expect(postMigrationDendronConfig.commands).toEqual(
@@ -626,7 +632,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.64.0",
               dendronConfig,
               wsConfig,
@@ -636,10 +642,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -648,7 +657,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -675,7 +684,7 @@ suite("Migration", function () {
 
             // and new workspace namespace should be correctly mapped
             const expectedWorkspaceConfig: DendronWorkspaceConfig = {
-              dendronVersion: "0.81.0",
+              dendronVersion: "0.83.0",
               vaults: [
                 {
                   fsPath: "vault1",
@@ -781,7 +790,7 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
+              currentVersion: "0.83.0",
               previousVersion: "0.69.0",
               dendronConfig,
               wsConfig,
@@ -791,10 +800,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -803,7 +815,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -827,6 +839,8 @@ suite("Migration", function () {
             const expectedPreviewConfig: DendronPreviewConfig = {
               enableFMTitle: false,
               enableNoteTitleForLink: false,
+              enableFrontmatterTags: true,
+              enableHashesForFMTags: false,
               enableMermaid: false,
               enablePrettyRefs: false,
               enableKatex: false,
@@ -841,7 +855,7 @@ suite("Migration", function () {
       );
 
       describeMultiWS(
-        "GIVEN v4 config",
+        "GIVEN v4 config (pre 0.83)",
         {
           ctx,
           modConfigCb: (config) => {
@@ -878,6 +892,17 @@ suite("Migration", function () {
                     public: true,
                     private: false,
                   },
+                  noindexByDefault: true,
+                  customFrontmatter: [
+                    {
+                      key: "foo",
+                      value: 1,
+                    },
+                    {
+                      key: "bar",
+                      value: 2,
+                    },
+                  ],
                 },
                 ipsum: {
                   publishByDefault: false,
@@ -915,7 +940,7 @@ suite("Migration", function () {
           },
         },
         () => {
-          DendronExtension.version = () => "0.80.0";
+          DendronExtension.version = () => "0.82.0";
           test("publishing config correctly migrates to new namespace", async () => {
             const engine = ExtensionProvider.getEngine();
             const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
@@ -989,8 +1014,8 @@ suite("Migration", function () {
             });
 
             await MigrationService.applyMigrationRules({
-              currentVersion: "0.81.0",
-              previousVersion: "0.81.0",
+              currentVersion: "0.83.0",
+              previousVersion: "0.82.0",
               dendronConfig,
               wsConfig,
               wsService,
@@ -999,10 +1024,13 @@ suite("Migration", function () {
             });
 
             // backup of the original should exist.
-            const allWSRootFiles = fs.readdirSync(wsRoot, {
-              withFileTypes: true,
-            });
-            const maybeBackupFileName = allWSRootFiles
+            const allBackupFiles = fs.readdirSync(
+              path.join(wsRoot, ".backup", "config"),
+              {
+                withFileTypes: true,
+              }
+            );
+            const maybeBackupFileName = allBackupFiles
               .filter((ent) => ent.isFile())
               .filter((fileEnt) =>
                 fileEnt.name.includes("migrate-config")
@@ -1011,7 +1039,7 @@ suite("Migration", function () {
 
             // backup content should be identical to original deep copy.
             const backupContent = readYAML(
-              path.join(wsRoot, maybeBackupFileName)
+              path.join(wsRoot, ".backup", "config", maybeBackupFileName)
             ) as IntermediateDendronConfig;
 
             // need to omit these because they are set by default during ws init.
@@ -1053,7 +1081,6 @@ suite("Migration", function () {
               siteHierarchies: ["dendron", "lorem", "ipsum"],
               enableSiteLastModified: true,
               siteRootDir: "docs",
-              siteRepoDir: "https://github.com/dendronhq/dendron-site",
               siteUrl: "https://foo.dev.dendron.so",
               enableFrontmatterTags: true,
               enableHashesForFMTags: true,
@@ -1067,6 +1094,16 @@ suite("Migration", function () {
                     public: true,
                     private: false,
                   },
+                  customFrontmatter: [
+                    {
+                      key: "foo",
+                      value: 1,
+                    },
+                    {
+                      key: "bar",
+                      value: 2,
+                    },
+                  ],
                 },
                 ipsum: {
                   publishByDefault: false,
@@ -1096,8 +1133,6 @@ suite("Migration", function () {
                 editBranch: "main",
                 editViewMode: "edit",
               },
-              enableContainers: true,
-              generateChangelog: true,
               segmentKey: "abcdefg",
               cognitoUserPoolId: "qwerty",
               cognitoClientId: "azerty",

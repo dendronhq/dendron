@@ -15,8 +15,8 @@ import {
   TelemetryStatus,
 } from "@dendronhq/common-server";
 import {
-  ALL_MIGRATIONS,
   DConfig,
+  MIGRATION_ENTRIES,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -132,7 +132,7 @@ export abstract class CLICommand<
       const instruction =
         reason === "client"
           ? "Please make sure dendron-cli is up to date by running the following: \n npm install @dendronhq/dendron-cli@latest"
-          : `Please make sure dendron.yml is up to date by running the following: \n dendron dev run_migration --migrationVersion=${ALL_MIGRATIONS[0].version}`;
+          : `Please make sure dendron.yml is up to date by running the following: \n dendron dev run_migration --migrationVersion=${MIGRATION_ENTRIES[0].version}`;
       const clientVersionOkay =
         reason === "client" ? DENDRON_EMOJIS.NOT_OKAY : DENDRON_EMOJIS.OKAY;
       const configVersionOkay =
@@ -155,15 +155,29 @@ export abstract class CLICommand<
         instruction,
       ].join("\n");
 
-      this.print(message);
+      if (!validationResp.isSoftMapping) {
+        // we should wait for this before exiting the process.
+        await CLIAnalyticsUtils.trackSync(CLIEvents.CLIClientConfigMismatch, {
+          ...validationResp,
+          configVersion,
+        });
 
-      // we should wait for this before exiting the process.
-      await CLIAnalyticsUtils.trackSync(CLIEvents.CLIClientConfigMismatch, {
-        ...validationResp,
-        configVersion,
-      });
+        this.print(message);
+        this.print("Exiting due to configuration / client version mismatch.");
 
-      process.exit();
+        process.exit();
+      } else {
+        CLIAnalyticsUtils.track(CLIEvents.CLIClientConfigMismatch, {
+          ...validationResp,
+          configVersion,
+        });
+
+        this.print(message);
+        // show warning but don't exit if it's a soft mapping.
+        this.print(
+          "WARN: Your configuration version is outdated and is scheduled for deprecation in the near future."
+        );
+      }
     }
   }
 

@@ -277,7 +277,7 @@ export class SeedService {
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};
     delete seeds[SeedUtils.getSeedId(seed)];
     ConfigUtils.setWorkspaceProp(config, "seeds", seeds);
-    ws.setConfig(config);
+    await ws.setConfig(config);
 
     const updateWorkspace =
       (await WorkspaceUtils.getWorkspaceTypeFromDir(this.wsRoot)) ===

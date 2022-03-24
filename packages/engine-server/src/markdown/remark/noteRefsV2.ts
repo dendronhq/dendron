@@ -821,38 +821,27 @@ function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
-  const { dest } = MDUtilsV5.getProcData(proc);
   let noteRefProc: Processor;
   // Workaround until all usages of MDUtilsV4 are removed
   const engine =
     MDUtilsV5.getProcData(proc).engine ||
     MDUtilsV4.getEngineFromProc(proc).engine;
-  if (dest === DendronASTDest.HTML) {
-    // For HTML, we need to make sure that we don't use a processor with HTML
-    // target. Otherwise as we process recursive references, the HTML output
-    // from deeper levels is broken (everything gets converted into `<div>`s for
-    // some reason)
-    noteRefProc = MDUtilsV5.procRemarkFull(
-      {
-        ...MDUtilsV5.getProcData(proc),
-        insideNoteRef: true,
-        fname: note.fname,
-        vault: note.vault,
-        engine,
-      },
-      MDUtilsV5.getProcOpts(proc)
-    );
-  } else {
-    // Otherwise, just clone the existing proc instead of creating a new one.
-    // This will largely preserve existing opts, we just need to change a few.
-    noteRefProc = proc();
-    // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-    MDUtilsV5.setProcData(noteRefProc, {
-      fname: note.fname,
+
+  // Create a new proc to parse the reference; set the fname accordingly.
+  // NOTE: a new proc is created here instead of using the proc() copy
+  // constructor, as that is an expensive op since it deep clones the entire
+  // engine state in proc.data
+  noteRefProc = MDUtilsV5.procRemarkFull(
+    {
+      ...MDUtilsV5.getProcData(proc),
       insideNoteRef: true,
+      fname: note.fname,
       vault: note.vault,
-    });
-  }
+      engine,
+    },
+    MDUtilsV5.getProcOpts(proc)
+  );
+
   const wsRoot = engine.wsRoot;
   noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
   MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);

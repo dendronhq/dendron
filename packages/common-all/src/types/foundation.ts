@@ -69,7 +69,10 @@ export type DNodeImage = { url: string; alt: string };
  */
 export type NoteLocalConfig = Partial<{
   global: Partial<
-    Pick<DendronGlobalConfig, "enableChildLinks" | "enablePrettyRefs">
+    Pick<
+      DendronGlobalConfig,
+      "enableChildLinks" | "enablePrettyRefs" | "enableBackLinks"
+    >
   >;
 }>;
 export type DNodeAllProps = DNodeExplicitPropsEnum & DNodeImplicitPropsEnum;

@@ -126,10 +126,6 @@ export class AirtableExportPodV2
     });
   }
 
-  async exportNote(input: NoteProps): Promise<AirtableExportReturnType> {
-    return this.exportNotes([input]);
-  }
-
   async exportNotes(input: NoteProps[]): Promise<AirtableExportReturnType> {
     input = this.cleanNotes(input, _.get(this._config, "filters.fname"));
     const resp = this.getPayloadForNotes(input);
@@ -189,6 +185,7 @@ export class AirtableExportPodV2
       srcFieldMapping: this._config.sourceFieldMapping,
       logger,
       engine: this._engine,
+      podId: this._config.podId,
     });
     return resp;
   }

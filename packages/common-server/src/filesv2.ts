@@ -6,24 +6,25 @@ import {
   NoteProps,
   NotesCache,
   NoteUtils,
+  RespV3,
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { assign, parse, stringify } from "comment-json";
+import anymatch from "anymatch";
+import { assign, CommentJSONValue, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
 import fs from "fs-extra";
 import matter from "gray-matter";
-import YAML from "yamljs";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import path from "path";
+import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
-import SparkMD5 from "spark-md5";
-import anymatch from "anymatch";
 
 /** Dendron should ignore any of these folders when watching or searching folders.
  *
@@ -115,10 +116,10 @@ export async function file2Schema(
 ): Promise<SchemaModuleProps> {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
-  const schemaOpts = YAML.parse(
+  const schemaOpts = YAML.load(
     await fs.readFile(fpath, { encoding: "utf8" })
   ) as SchemaModuleOpts;
-  return await SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+  return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
 export function genHash(contents: any) {
@@ -136,8 +137,8 @@ export async function string2Schema({
   fname: string;
   wsRoot: string;
 }) {
-  const schemaOpts = YAML.parse(content) as SchemaModuleOpts;
-  return await SchemaParserV2.parseRaw(schemaOpts, {
+  const schemaOpts = YAML.load(content) as SchemaModuleOpts;
+  return SchemaParserV2.parseRaw(schemaOpts, {
     root: vault,
     fname,
     wsRoot,
@@ -164,12 +165,14 @@ export function string2Note({
   const options: any = {
     engines: {
       yaml: {
-        parse: (s: string) => YAML.parse(s),
-        stringify: (s: string) => YAML.stringify(s),
+        parse: (s: string) => YAML.load(s),
+        stringify: (s: string) => YAML.dump(s),
       },
     },
   };
   const { data, content: body } = matter(content, options);
+  if (data?.title) data.title = _.toString(data.title);
+  if (data?.id) data.id = _.toString(data.id);
   const custom = DNodeUtils.getCustomProps(data);
 
   const contentHash = calculateHash ? genHash(content) : undefined;
@@ -255,7 +258,8 @@ export function goUpTo(opts: {
   fname: string;
   maxLvl?: number;
 }): string {
-  let { fname, base, maxLvl } = _.defaults(opts, { maxLvl: 10 });
+  const { fname, base } = opts;
+  let maxLvl = opts.maxLvl ?? 10;
   const lvls = [];
   while (maxLvl > 0) {
     const tryPath = path.join(base, ...lvls, fname);
@@ -388,6 +392,36 @@ export function note2File({
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }
 
+function serializeModuleProps(moduleProps: SchemaModuleProps) {
+  const { version, imports, schemas } = moduleProps;
+  // TODO: filter out imported schemas
+  const out: any = {
+    version,
+    imports: [],
+    schemas: _.values(schemas).map((ent) =>
+      SchemaUtils.serializeSchemaProps(ent)
+    ),
+  };
+  if (imports) {
+    out.imports = imports;
+  }
+  return YAML.dump(out, { schema: JSON_SCHEMA });
+}
+
+function serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
+  const { version, imports, schemas } = _.defaults(moduleOpts, {
+    imports: [],
+  });
+  const out = {
+    version,
+    imports,
+    schemas: _.values(schemas).map((ent) =>
+      SchemaUtils.serializeSchemaProps(ent)
+    ),
+  };
+  return YAML.dump(out, { schema: JSON_SCHEMA });
+}
+
 export function schemaModuleOpts2File(
   schemaFile: SchemaModuleOpts,
   vaultPath: string,
@@ -396,7 +430,7 @@ export function schemaModuleOpts2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vaultPath, fname + ext),
-    SchemaUtils.serializeModuleOpts(schemaFile)
+    serializeModuleOpts(schemaFile)
   );
 }
 
@@ -408,7 +442,7 @@ export function schemaModuleProps2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vpath, fname + ext),
-    SchemaUtils.serializeModuleProps(schemaMProps)
+    serializeModuleProps(schemaMProps)
   );
 }
 
@@ -421,13 +455,15 @@ export function assignJSONWithComment(jsonObj: any, dataToAdd: any) {
   );
 }
 
-export async function readJSONWithComments(fpath: string) {
+export async function readJSONWithComments(
+  fpath: string
+): Promise<CommentJSONValue | null> {
   const content = await fs.readFile(fpath);
   const obj = parse(content.toString());
   return obj;
 }
 
-export function readJSONWithCommentsSync(fpath: string) {
+export function readJSONWithCommentsSync(fpath: string): CommentJSONValue {
   const content = fs.readFileSync(fpath);
   const obj = parse(content.toString());
   return obj;
@@ -448,9 +484,14 @@ export const vault2Path = ({
   return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
 
-export function writeJSONWithComments(fpath: string, data: any) {
+export function writeJSONWithCommentsSync(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
   return fs.writeFileSync(fpath, payload);
+}
+
+export async function writeJSONWithComments(fpath: string, data: any) {
+  const payload = stringify(data, null, 4);
+  return fs.writeFile(fpath, payload);
 }
 
 /**
@@ -500,14 +541,30 @@ export async function findNonNoteFile(opts: {
   fpath: string;
   wsRoot: string;
   vaults: DVault[];
+  currentVault?: DVault;
 }): Promise<{ vault?: DVault; fullPath: string } | undefined> {
   let { fpath } = opts;
-  // Especially for assets, `/assets` and `assets` refers to the same place.
+  if (path.isAbsolute(fpath)) {
+    // The path could be an absolute path. If it is and the file exists, then directly use that.
+    if (await fileExists(fpath)) return { fullPath: fpath };
+  }
+  // Not an absolute path. Then the leading slash is meaningless:
+  // `/assets` and `assets` refers to the same place.
   fpath = _.trim(fpath, "/\\");
   // Check if this is an asset first
   if (fpath.startsWith("assets")) {
     const out = await findFileInVault(opts);
     if (out !== undefined) return out;
+  }
+  // If not an asset, this also might be relative to the current note
+  if (opts.currentVault) {
+    const fullPath = path.join(
+      opts.wsRoot,
+      VaultUtils.getRelPath(opts.currentVault),
+      fpath
+    );
+    if (await fileExists(fullPath))
+      return { fullPath, vault: opts.currentVault };
   }
   // If not an asset, or if we couldn't find it in assets, then check from wsRoot for out-of-vault files
   const fullPath = path.join(opts.wsRoot, fpath);
@@ -516,4 +573,67 @@ export async function findNonNoteFile(opts: {
   return undefined;
 }
 
-export { tmp, DirResult };
+class FileUtils {
+  /**
+   * Keep incrementing a numerical suffix until we find a path name that does not correspond to an existing file
+   * @param param0
+   */
+  static genFilePathWithSuffixThatDoesNotExist({
+    fpath,
+    sep = "-",
+  }: {
+    fpath: string;
+    sep?: string;
+  }) {
+    // Try to put into `fpath`. If `fpath` exists, create a new folder with an numbered suffix
+    let acc = 0;
+    let tryPath = fpath;
+    while (fs.pathExistsSync(tryPath)) {
+      acc += 1;
+      tryPath = [fpath, acc].join(sep);
+    }
+    return { filePath: tryPath, acc };
+  }
+  /**
+   * Check if a file starts with a prefix string
+   * @param fpath: full path to the file
+   * @param prefix: string prefix to check for
+   */
+  static matchFilePrefix = async ({
+    fpath,
+    prefix,
+  }: {
+    fpath: string;
+    prefix: string;
+  }): Promise<RespV3<boolean>> => {
+    // solution adapted from https://stackoverflow.com/questions/70707646/reading-part-of-file-in-node
+    return new Promise((resolve) => {
+      const fileStream = fs.createReadStream(fpath, { highWaterMark: 60 });
+      const prefixLength = prefix.length;
+      fileStream
+        .on("error", (err) =>
+          resolve({
+            error: new DendronError({ innerError: err, message: "error" }),
+          })
+        )
+        // we got to the end without a match
+        .on("end", () => resolve({ data: false }))
+        .on("data", (chunk: Buffer) => {
+          // eslint-disable-next-line no-plusplus
+          for (let i = 0; i < chunk.length; i++) {
+            const a = String.fromCharCode(chunk[i]);
+            // not a match, return
+            if (a !== prefix[i]) {
+              resolve({ data: false });
+            }
+            // all matches
+            if (i === prefixLength - 1) {
+              resolve({ data: true });
+            }
+          }
+        });
+    });
+  };
+}
+
+export { tmp, DirResult, FileUtils };

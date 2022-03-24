@@ -2030,10 +2030,10 @@
   resolved "http://localhost:4873/@ctrl%2ftinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.78.4.tgz#a603e8d225b7f96771b92f43898d21e348eb2781"
-  integrity sha512-rRQR/DBZnIR8wqY+ieM+hPKzopvOQH5lox4IGjjX0PmBuPMMXPYpB+xpfuH44oMccsrtOunU9RwgFIypV6q4Hg==
+"@dendronhq/common-all@^0.81.0":
+  version "0.81.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.81.0.tgz#6622f1566fef1b38810987e6d4f121f7a6322a57"
+  integrity sha512-nkAlsjI09CXfxeWhFMR4uFYgsLPx8DZ/ByF59vEf4INrfaj28rZr33CySUeH8qOihBqoM+V9kJw84y1s/dJQPQ==
   dependencies:
     "@dendronhq/title" "^3.4.3"
     "@types/github-slugger" "^1.3.0"
@@ -2064,13 +2064,13 @@
     vscode-uri "^2.1.2"
     yamljs "^0.3.0"
 
-"@dendronhq/common-frontend@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.78.4.tgz#7ac36be1156f450af7292d28ec9c2e336bc6f0b8"
-  integrity sha512-UXUbYbvOINKahlWvuI6JhfwP1B8hEHHNuSGrusHpcownpSsxaWsI+8QIdygQ/BLjY3sz0hphKGQFa6/moHqt3Q==
+"@dendronhq/common-frontend@^0.81.0":
+  version "0.81.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.81.0.tgz#9c9bfbd2ae0a1deb81a2ffacc2e03f9ceb7587dc"
+  integrity sha512-b8RqcxQADBUG78ZnRK86QFcNBqVLcf2sW2Rx0E2hRCJJ8gH36eAjSObVBsubHUZNgSllPLSuCdTYG3Dse2dV0g==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.78.4"
+    "@dendronhq/common-all" "^0.81.0"
     "@reduxjs/toolkit" "^1.5.1"
     "@types/lodash" "^4.14.161"
     "@types/node" "^14.11.2"
@@ -2084,12 +2084,12 @@
     react-redux "^7.2.3"
     redux-logger "^3.0.6"
 
-"@dendronhq/common-server@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.78.4.tgz#0530d0f7e5fec019e5cd1bdaa37da5ee04ca175d"
-  integrity sha512-Jj2G0uwIpxcaScEYS4dEeOb7CuRH856mtyakJxl5H/7y0VhFHsjKwnB7nmrtCWtQdpqIqdM2ETJBie1PDp5Swg==
+"@dendronhq/common-server@^0.81.0":
+  version "0.81.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.81.0.tgz#961b09cda7d83ae87438abb210713aedd9a35678"
+  integrity sha512-vWrS8Se0R8dyrE94nGdJLno6x/wXOzpe5W025Q/JlRsYTftw8fw7dbp7l+GZ4s+HtB+nH2rUC3BO3dL29c10/g==
   dependencies:
-    "@dendronhq/common-all" "^0.78.4"
+    "@dendronhq/common-all" "^0.81.0"
     "@sentry/integrations" "^6.13.3"
     "@sentry/node" "^6.13.3"
     "@types/analytics-node" "^3.1.6"
@@ -2121,13 +2121,13 @@
     vscode-uri "^2.1.2"
     yaml-unist-parser "^1.3.1"
 
-"@dendronhq/engine-server@^0.78.4":
-  version "0.78.4"
-  resolved "https://registry.yarnpkg.com/@dendronhq/engine-server/-/engine-server-0.78.4.tgz#061ea1603498c30deafe7c305230e6563f8dfb7d"
-  integrity sha512-faflMKkk8mK8xpBfZSi6Z1CfjiMRSWBTnIfo6tSMPEEf75WWkC4o9Vtn8S0WpqevfsZUCXHx0yMKlqUJT6DvGQ==
+"@dendronhq/engine-server@^0.81.0":
+  version "0.81.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/engine-server/-/engine-server-0.81.0.tgz#180bbf84d22a97015cd1b0b15419a6ffa5765644"
+  integrity sha512-ih9q75Sw/7qg8UR9L7F486C9obaZnDJDqMpgOUNX3p25cBe/smMHgri48h2KAa7AkJ4nEmsu92JnMzuYpbJ1ug==
   dependencies:
-    "@dendronhq/common-all" "^0.78.4"
-    "@dendronhq/common-server" "^0.78.4"
+    "@dendronhq/common-all" "^0.81.0"
+    "@dendronhq/common-server" "^0.81.0"
     "@dendronhq/remark-mermaid" "^0.2.0"
     "@jcoreio/async-throttle" "^1.4.3"
     "@mapbox/rehype-prism" "^0.5.0"
@@ -5132,9 +5132,9 @@ focus-lock@^0.8.1:
     tslib "^1.9.3"
 
 follow-redirects@^1.10.0, follow-redirects@^1.14.0:
-  version "1.14.7"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.7.tgz#2004c02eb9436eee9a21446a6477debf17e81685"
-  integrity sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==
+  version "1.14.8"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.8.tgz#016996fb9a11a100566398b1c6839337d7bfa8fc"
+  integrity sha512-1x0S9UVJHsQprFcEC/qnNzBLcIxsjAV905f/UkQxbclCsoTWlacCNOpQa/anodLl2uaEKFhfWOvM2Qg77+15zA==
 
 for-in@^1.0.1, for-in@^1.0.2:
   version "1.0.2"

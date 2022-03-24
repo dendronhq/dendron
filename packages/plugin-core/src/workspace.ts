@@ -11,12 +11,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import {
-  readJSONWithComments,
-  readJSONWithCommentsSync,
-  resolvePath,
-  writeJSONWithComments,
-} from "@dendronhq/common-server";
+import { resolvePath } from "@dendronhq/common-server";
 import {
   HistoryService,
   WorkspaceService,
@@ -48,15 +43,13 @@ import {
   IDendronExtension,
 } from "./dendronExtensionInterface";
 import { ExtensionProvider } from "./ExtensionProvider";
-import BacklinksTreeDataProvider, {
-  Backlink,
-  secondLevelRefsToBacklinks,
-} from "./features/BacklinksTreeDataProvider";
+import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import { Backlink } from "./features/Backlink";
 import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { INoteSyncService, NoteSyncService } from "./services/NoteSyncService";
+import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -148,14 +141,12 @@ export class DendronExtension implements IDendronExtension {
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
-  public noteSyncService: INoteSyncService;
   public lookupControllerFactory: ILookupControllerV3Factory;
   public noteLookupProviderFactory: INoteLookupProviderFactory;
   public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
   public context: vscode.ExtensionContext;
   public windowWatcher?: WindowWatcher;
-  public workspaceWatcher?: WorkspaceWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
@@ -309,6 +300,18 @@ export class DendronExtension implements IDendronExtension {
     return false;
   }
 
+  async isActiveAndIsDendronNote(fpath: string): Promise<boolean> {
+    if (!this.isActive()) {
+      return false;
+    }
+    const { wsRoot, vaults } = this.getDWorkspace();
+    return WorkspaceUtils.isDendronNote({
+      wsRoot,
+      vaults,
+      fpath,
+    });
+  }
+
   /**
    * When in dev mode, version is equivalent to `package.json` that is checked out locally
    * Otherwise, get from published extension `package.json`
@@ -343,17 +346,6 @@ export class DendronExtension implements IDendronExtension {
     return _DendronWorkspace;
   }
 
-  static async updateWorkspaceFile(opts: {
-    updateCb: (settings: WorkspaceSettings) => WorkspaceSettings;
-  }) {
-    const { updateCb } = opts;
-    const wsPath = DendronExtension.workspaceFile().fsPath;
-    let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
-    settings = updateCb(settings);
-    await writeJSONWithComments(wsPath, settings);
-    return settings;
-  }
-
   constructor(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
@@ -374,13 +366,9 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
-    this.noteSyncService = new NoteSyncService(
-      this,
-      vscode.workspace.onDidSaveTextDocument,
-      vscode.workspace.onDidChangeTextDocument
-    );
 
-    context.subscriptions.push(this.noteSyncService);
+    // Instantiate TextDocumentService
+    context.subscriptions.push(TextDocumentServiceFactory.create(this));
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -401,12 +389,12 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
-   * See {@link IDendronExtension.getWorkspaceConfig()}
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
    */
   getWorkspaceConfig(
     section?: string | undefined
   ): vscode.WorkspaceConfiguration {
-    return vscode.workspace.getConfiguration(section);
+    return VSCodeUtils.getWorkspaceConfig(section);
   }
 
   isActive(): boolean {
@@ -415,28 +403,27 @@ export class DendronExtension implements IDendronExtension {
 
   /** For Native workspaces (without .code-workspace file) this will return undefined. */
   async getWorkspaceSettings(): Promise<WorkspaceSettings | undefined> {
-    let workspaceFile: vscode.Uri;
-    try {
-      workspaceFile = DendronExtension.workspaceFile();
-      if (workspaceFile === undefined) return undefined;
-    } catch {
-      // No workspace file exists (or some other disk issue)
+    const workspaceFile = DendronExtension.workspaceFile();
+    const resp = await WorkspaceUtils.getCodeWorkspaceSettings(
+      path.dirname(workspaceFile.fsPath)
+    );
+    if (resp.error) {
       return undefined;
+    } else {
+      return resp.data;
     }
-    return (await readJSONWithComments(
-      workspaceFile.fsPath
-    )) as WorkspaceSettings;
   }
 
   getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
-    let workspaceFile: vscode.Uri;
-    try {
-      workspaceFile = DendronExtension.workspaceFile();
-    } catch {
-      // No workspace file exists (or some other disk issue)
+    const workspaceFile = DendronExtension.workspaceFile();
+    const resp = WorkspaceUtils.getCodeWorkspaceSettingsSync(
+      path.dirname(workspaceFile.fsPath)
+    );
+    if (resp.error) {
       return undefined;
+    } else {
+      return resp.data;
     }
-    return readJSONWithCommentsSync(workspaceFile.fsPath) as WorkspaceSettings;
   }
 
   getDendronWorkspaceSettingsSync(): DendronWorkspaceSettings | undefined {
@@ -513,7 +500,7 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2(this);
+        const dendronTreeView = new DendronTreeViewV2(this, this.getEngine());
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -546,7 +533,7 @@ export class DendronExtension implements IDendronExtension {
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
               DendronTreeViewV2.viewType,
-              provider,
+              dendronTreeView,
               {
                 webviewOptions: {
                   retainContextWhenHidden: true,
@@ -564,6 +551,7 @@ export class DendronExtension implements IDendronExtension {
         // Removing it for now.
         // backlinkTreeView.message = "There are no links to this note."
         context.subscriptions.push(backlinkTreeView);
+        context.subscriptions.push(dendronTreeView);
       }
     });
   }
@@ -603,15 +591,8 @@ export class DendronExtension implements IDendronExtension {
     Logger.info({ ctx, msg: "init:backlinks" });
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-      getDWorkspace().config.dev?.enableLinkCandidates
-    );
-
-    vscode.window.onDidChangeActiveTextEditor(() =>
-      backlinksTreeDataProvider.refresh()
-    );
-
-    this.noteSyncService.onNoteChange(() =>
-      backlinksTreeDataProvider.refresh()
+      this.getEngine(),
+      this.getDWorkspace().config.dev?.enableLinkCandidates
     );
 
     const backlinkTreeView = vscode.window.createTreeView(
@@ -621,7 +602,8 @@ export class DendronExtension implements IDendronExtension {
         showCollapseAll: true,
       }
     );
-    getExtension().backlinksDataProvider = backlinksTreeDataProvider;
+    this.backlinksDataProvider = backlinksTreeDataProvider;
+    this.context.subscriptions.push(backlinksTreeDataProvider);
 
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.BACKLINK_SORT_BY_LAST_UPDATED.key,
@@ -655,10 +637,10 @@ export class DendronExtension implements IDendronExtension {
           expand(backlink);
 
           if (backlink.refs) {
-            const childBacklinks = secondLevelRefsToBacklinks(
-              backlink.refs,
-              backlinksTreeDataProvider.isLinkCandidateEnabled
-            );
+            const childBacklinks =
+              backlinksTreeDataProvider.getSecondLevelRefsToBacklinks(
+                backlink.refs
+              );
 
             if (childBacklinks) {
               childBacklinks.forEach((b) => {
@@ -708,7 +690,6 @@ export class DendronExtension implements IDendronExtension {
       windowWatcher,
     });
     workspaceWatcher.activate(this.context);
-    this.workspaceWatcher = workspaceWatcher;
 
     const wsFolders = DendronExtension.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
@@ -724,7 +705,6 @@ export class DendronExtension implements IDendronExtension {
         wsRoot,
         vaults: realVaults,
       },
-      noteSyncSvc: this.noteSyncService,
     });
 
     fileWatcher.activate(getExtension().context);

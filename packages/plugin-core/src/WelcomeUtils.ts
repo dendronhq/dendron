@@ -1,6 +1,5 @@
 import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
-import { readMD, resolveTilde } from "@dendronhq/common-server";
-import fs from "fs-extra";
+import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -40,36 +39,15 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            // Try to put into a Default '~/Dendron' folder first. Only prompt
-            // if that path and the backup path already exist to lower
-            // onboarding friction
-            let wsPath;
-            const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
-            const wsPathBackup = path.join(
-              resolveTilde("~"),
-              "Dendron-Tutorial"
-            );
-
-            if (!fs.pathExistsSync(wsPathPrimary)) {
-              wsPath = wsPathPrimary;
-            } else if (!fs.pathExistsSync(wsPathBackup)) {
-              wsPath = wsPathBackup;
-            } else {
-              wsPath = await VSCodeUtils.gatherFolderPath({
-                default: path.join(resolveTilde("~"), "Dendron"),
-                override: {
-                  title: "Path for new Dendron Code Workspace",
-                },
+            AnalyticsUtils.track(TutorialEvents.ClickStart);
+            // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
+            const { filePath } =
+              FileUtils.genFilePathWithSuffixThatDoesNotExist({
+                fpath: path.join(resolveTilde("~"), "Dendron"),
               });
-            }
-
-            // User didn't pick a path, abort
-            if (!wsPath) {
-              return;
-            }
 
             await new SetupWorkspaceCommand().execute({
-              rootDirRaw: wsPath,
+              rootDirRaw: filePath,
               workspaceInitializer: new TutorialInitializer(),
               workspaceType: WorkspaceType.CODE,
             });

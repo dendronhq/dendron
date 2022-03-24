@@ -1,4 +1,4 @@
-import { ConfigUtils, VaultUtils } from "@dendronhq/common-all";
+import { ConfigUtils, DendronError, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
@@ -9,9 +9,14 @@ import {
 } from "./CreateNoteWithTraitCommand";
 
 export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
+  static requireActiveWorkspace: boolean = true;
   constructor(ext: IDendronExtension) {
-    super(ext, "dendron.journal", new JournalNote());
+    const workspaceService = ext.workspaceService;
 
+    if (!workspaceService) {
+      throw new DendronError({ message: "Workspace Service not initialized!" });
+    }
+    super(ext, "dendron.journal", new JournalNote(workspaceService.config));
     // override the key to maintain compatibility
     this.key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   }

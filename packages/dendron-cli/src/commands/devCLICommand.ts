@@ -1,17 +1,25 @@
 import {
   assertUnreachable,
+  CLIEvents,
   DendronError,
   error2PlainObject,
-  CLIEvents,
-  CONSTANTS,
+  ERROR_STATUS,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import {
+  readYAML,
   SegmentClient,
   TelemetryStatus,
-  readYAML,
-  readJSONWithCommentsSync,
 } from "@dendronhq/common-server";
+import {
+  DConfig,
+  MigrationChangeSetStatus,
+  MigrationService,
+  MigrationUtils,
+  MIGRATION_ENTRIES,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
+import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
@@ -23,14 +31,6 @@ import {
   SemverVersion,
 } from "../utils/build";
 import { CLICommand, CommandCommonProps } from "./base";
-import {
-  ALL_MIGRATIONS,
-  DConfig,
-  MigrationChangeSetStatus,
-  MigrationService,
-  WorkspaceService,
-} from "@dendronhq/engine-server";
-import _ from "lodash";
 
 type CommandCLIOpts = {
   cmd: DevCommands;
@@ -127,7 +127,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("migrationVersion", {
       describe: "migration version to run",
-      choices: ALL_MIGRATIONS.map((m) => m.version),
+      choices: MIGRATION_ENTRIES.map((m) => m.version),
     });
     args.option("wsRoot", {
       describe: "root directory of the Dendron workspace",
@@ -163,7 +163,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "dist",
       "dendron-yml.validator.json"
     );
-    const configType = "StrictConfigV4";
+    const configType = "ConfigForSchemaGenerator";
     // NOTE: this is removed by webpack when building plugin which is why we're loading this dynamically
     // eslint-disable-next-line global-require
     const tsj = require("ts-json-schema-generator");
@@ -353,6 +353,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("prep repo...");
     await BuildUtils.prepPluginPkg();
 
+    if (!shouldPublishLocal) {
+      this.print(
+        "sleeping 2 mins for remote npm registry to have packages ready"
+      );
+      await new Promise((r) => setTimeout(r, 120000));
+    }
+
     this.print("install deps...");
     BuildUtils.installPluginDependencies();
 
@@ -424,7 +431,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       return false;
     }
     if (opts.migrationVersion) {
-      return ALL_MIGRATIONS.map((m) => m.version).includes(
+      return MIGRATION_ENTRIES.map((m) => m.version).includes(
         opts.migrationVersion
       );
     }
@@ -451,7 +458,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   showMigrations() {
-    // ALL_MIGRATIONS
     const headerMessage = [
       "",
       "Make note of the version number and use it in the run_migration command",
@@ -462,7 +468,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     ].join("\n");
     const body: string[] = [];
     let maxLength = 0;
-    ALL_MIGRATIONS.forEach((migrations) => {
+    MIGRATION_ENTRIES.forEach((migrations) => {
       const version = migrations.version.padEnd(17);
       const changes = migrations.changes.map((set) => set.name).join(", ");
       const line = `${version}| ${changes}`;
@@ -483,7 +489,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async runMigration(opts: CommandOpts) {
     // grab the migration we want to run
-    const migrationsToRun = ALL_MIGRATIONS.filter(
+    const migrationsToRun = MIGRATION_ENTRIES.filter(
       (m) => m.version === opts.migrationVersion
     );
 
@@ -491,9 +497,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const currentVersion = migrationsToRun[0].version;
     const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });
     const configPath = DConfig.configPath(opts.wsRoot!);
-    const wsConfigPath = path.join(opts.wsRoot!, CONSTANTS.DENDRON_WS_NAME);
     const dendronConfig = readYAML(configPath);
-    const wsConfig = readJSONWithCommentsSync(wsConfigPath);
+    const wsConfig = wsService.getCodeWorkspaceSettingsSync();
+    if (_.isUndefined(wsConfig)) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "no workspace config found",
+      });
+    }
     const changes = await MigrationService.applyMigrationRules({
       currentVersion,
       previousVersion: "0.0.0",
@@ -511,9 +522,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           ? CLIEvents.CLIMigrationSucceeded
           : CLIEvents.CLIMigrationFailed;
 
-        CLIAnalyticsUtils.track(event, {
-          data: change.data,
-        });
+        CLIAnalyticsUtils.track(
+          event,
+          MigrationUtils.getMigrationAnalyticProps(change)
+        );
 
         if (change.error) {
           this.print("Migration failed.");

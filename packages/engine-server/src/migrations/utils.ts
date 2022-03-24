@@ -1,4 +1,6 @@
+import { HierarchyConfig, LegacyHierarchyConfig } from "@dendronhq/common-all";
 import _ from "lodash";
+import { MigrationChangeSetStatus } from "./types";
 
 type mappedConfigPath = {
   /**
@@ -187,7 +189,6 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["publishing.siteHierarchies", { target: "site.siteHierarchies" }],
   ["publishing.enableSiteLastModified", { target: "site.siteLastModified" }],
   ["publishing.siteRootDir", { target: "site.siteRootDir" }],
-  ["publishing.siteRepoDir", { target: "site.siteRepoDir" }],
   ["publishing.siteUrl", { target: "site.siteUrl" }],
   ["publishing.enableFrontmatterTags", { target: "site.showFrontMatterTags" }],
   ["publishing.enableHashesForFMTags", { target: "site.useHashesForFMTags" }],
@@ -195,7 +196,19 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
     "publishing.enableRandomlyColoredTags",
     { target: "site.noRandomlyColoredTags", iteratee: FLIP },
   ],
-  ["publishing.hierarchy", { target: "site.config" }],
+  [
+    "publishing.hierarchy",
+    {
+      target: "site.config",
+      iteratee: (hconfig: LegacyHierarchyConfig) => {
+        const tmp = {} as HierarchyConfig;
+        _.forEach(_.keys(hconfig), (key: string) => {
+          _.set(tmp, key, _.omit(_.get(hconfig, key), "noindexByDefault"));
+        });
+        return tmp;
+      },
+    },
+  ],
   [
     "publishing.duplicateNoteBehavior",
     { target: "site.duplicateNoteBehavior" },
@@ -215,9 +228,6 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["publishing.github.editBranch", { target: "site.gh_edit_branch" }],
   ["publishing.github.editViewMode", { target: "site.gh_edit_view_mode" }],
   ["publishing.github.editRepository", { target: "site.gh_edit_repository" }],
-  ["publishing.enableContainers", { target: "site.useContainers" }],
-  ["publishing.generateChangelog", { target: "site.generateChangelog" }],
-  ["publishing.previewPort", { target: "site.previewPort" }],
   ["publishing.segmentKey", { target: "site.segmentKey" }],
   ["publishing.cognitoUserPoolId", { target: "site.cognitoUserPoolId" }],
   ["publishing.cognitoClientId", { target: "site.cognitoClientId" }],
@@ -233,6 +243,10 @@ export const DEPRECATED_PATHS = [
   "useNunjucks",
   "noLegacyNoteRef",
   "site.siteNotesDir",
+  "site.siteRepoDir",
+  "site.previewPort",
+  "site.useContainers",
+  "site.generateChangelog",
 ];
 
 export class MigrationUtils {
@@ -250,5 +264,17 @@ export class MigrationUtils {
       }
     });
     return out;
+  }
+
+  static getMigrationAnalyticProps({
+    data: { changeName, status, version },
+  }: MigrationChangeSetStatus) {
+    return {
+      data: {
+        changeName,
+        status,
+        version,
+      },
+    };
   }
 }

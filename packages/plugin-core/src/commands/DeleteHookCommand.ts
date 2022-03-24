@@ -50,7 +50,7 @@ export class DeleteHookCommand extends BasicCommand<
       hookId: hookName,
       hookType: DHookType.onCreate,
     });
-    DConfig.writeConfig({ wsRoot, config });
+    await DConfig.writeConfig({ wsRoot, config });
     window.showInformationMessage(`hook ${hookName} removed`);
     await new ReloadIndexCommand().run();
     return;

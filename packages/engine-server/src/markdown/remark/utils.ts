@@ -17,8 +17,11 @@ import {
   DNoteRefLinkRaw,
   DVault,
   ERROR_STATUS,
+  GetAnchorsResp,
   getSlugger,
   IntermediateDendronConfig,
+  isBlockAnchor,
+  isLineAnchor,
   isNotUndefined,
   LINK_CONTENTS,
   LINK_NAME,
@@ -34,13 +37,18 @@ import {
   USERS_HIERARCHY_BASE,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { createDisposableLogger } from "@dendronhq/common-server";
+import {
+  createDisposableLogger,
+  getFrontmatterTags,
+  parseFrontmatter,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
   FootnoteDefinition,
   FrontmatterContent,
   Heading,
   Image,
+  InlineCode,
   Link,
   List,
   ListItem,
@@ -50,6 +58,7 @@ import type {
   TableCell,
   TableRow,
   Text,
+  YAML,
 } from "mdast";
 import * as mdastBuilder from "mdast-builder";
 import { Processor } from "unified";
@@ -289,11 +298,11 @@ const getLinks = ({
 const getLinkCandidates = ({
   ast,
   note,
-  notesMap,
+  engine,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  notesMap: Map<string, NoteProps>;
+  engine: DEngineClient;
 }) => {
   const textNodes: Text[] = [];
   visit(
@@ -316,22 +325,25 @@ const getLinkCandidates = ({
         column: 1,
       };
     }
-    value.split(/\s+/).filter((word) => {
-      const maybeNote = notesMap.get(word);
-      if (maybeNote !== undefined) {
-        const candidate = {
-          type: "linkCandidate",
-          from: NoteUtils.toNoteLoc(note),
-          value: value.trim(),
-          position: textNode.position as Position,
-          to: {
-            fname: word,
-            vaultName: VaultUtils.getName(maybeNote.vault),
-          },
-        } as DLink;
-        linkCandidates.push(candidate);
-      }
-      return maybeNote !== undefined;
+    value.split(/\s+/).forEach((word) => {
+      const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
+        fname: word,
+        engine,
+      }).filter((note) => note.stub !== true);
+      linkCandidates.push(
+        ...possibleCandidates.map((candidate): DLink => {
+          return {
+            type: "linkCandidate",
+            from: NoteUtils.toNoteLoc(note),
+            value: value.trim(),
+            position: textNode.position as Position,
+            to: {
+              fname: word,
+              vaultName: VaultUtils.getName(candidate.vault),
+            },
+          };
+        })
+      );
     });
   });
   return linkCandidates;
@@ -484,7 +496,7 @@ export class LinkUtils {
     engine: DEngineClient;
   }) {
     const { activeNote, wikiLinks, engine } = opts;
-    const { vaults, notes, wsRoot } = engine;
+    const { vaults } = engine;
 
     let out: DNodeProps[] = [];
     wikiLinks.forEach((wikiLink) => {
@@ -498,19 +510,18 @@ export class LinkUtils {
         : undefined;
 
       if (vault) {
-        const note = NoteUtils.getNoteByFnameV5({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes,
+          engine,
           vault,
-          wsRoot,
         });
         if (note) {
           out.push(note);
         }
       } else {
-        const notesWithSameFname = NoteUtils.getNotesByFname({
+        const notesWithSameFname = NoteUtils.getNotesByFnameFromEngine({
           fname,
-          notes,
+          engine,
         });
         out = out.concat(notesWithSameFname);
       }
@@ -718,13 +729,9 @@ export class LinkUtils {
 
   static findLinkCandidates({
     note,
-    // notes,
-    notesMap,
     engine,
   }: {
     note: NoteProps;
-    // notes: NoteProps[];
-    notesMap: Map<string, NoteProps>;
     engine: DEngineClient;
   }) {
     const content = note.body;
@@ -741,7 +748,7 @@ export class LinkUtils {
     const linkCandidates: DLink[] = getLinkCandidates({
       ast: tree,
       note,
-      notesMap,
+      engine,
     });
     return linkCandidates;
   }
@@ -785,6 +792,12 @@ export class AnchorUtils {
           break;
         case DendronASTTypes.HASHTAG:
           headerText.push((node as HashTag).value);
+          break;
+        case DendronASTTypes.USERTAG:
+          headerText.push((node as UserTag).value);
+          break;
+        case DendronASTTypes.INLINE_CODE:
+          headerText.push((node as InlineCode).value);
           break;
         default:
         /* nothing */
@@ -865,10 +878,7 @@ export class AnchorUtils {
     }
   }
 
-  static async findAnchors(opts: {
-    note: NoteProps;
-    wsRoot: string;
-  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+  static findAnchors(opts: { note: NoteProps }): GetAnchorsResp {
     if (opts.note.stub) return {};
     try {
       const noteContents = NoteUtils.serialize(opts.note);
@@ -883,7 +893,7 @@ export class AnchorUtils {
     } catch (err) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
-        payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
+        payload: { note: NoteUtils.toLogObj(opts.note) },
         innerError: err as Error,
       });
       const { logger, dispose } = createDisposableLogger("AnchorUtils");
@@ -898,6 +908,26 @@ export class AnchorUtils {
     if (anchor.type === "header") return anchor.value;
     if (anchor.type === "line") return `L${anchor.line}`;
     assertUnreachable(anchor);
+  }
+
+  static string2anchor(anchor: string): DNoteAnchorBasic {
+    if (isBlockAnchor(anchor))
+      return {
+        type: "block",
+        value: anchor.slice(1, undefined),
+        text: anchor,
+      };
+    else if (isLineAnchor(anchor))
+      return {
+        type: "line",
+        line: Number.parseInt(anchor.slice(1, undefined), 10),
+        value: anchor,
+      };
+    return {
+      type: "header",
+      value: anchor,
+      text: anchor,
+    };
   }
 }
 
@@ -1045,6 +1075,10 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.LINK;
   }
 
+  static isWikiLink(node: Node): node is WikiLinkNoteV4 {
+    return node.type === DendronASTTypes.WIKI_LINK;
+  }
+
   static isFootnoteDefinition(node: Node): node is FootnoteDefinition {
     return node.type === DendronASTTypes.FOOTNOTE_DEFINITION;
   }
@@ -1123,21 +1157,13 @@ export class RemarkUtils {
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
-
-        /** used findLinks to get vault of wikilink */
-        const links = LinkUtils.findLinks({ note, engine }).filter(
-          (linkNode) => linkNode.type === "wiki"
-        );
         let dirty = false;
-
-        links.forEach((linkNode, i) => {
+        wikiLinks.forEach((linkNode) => {
           let vault: DVault | undefined;
-
-          // If the link specifies a vault, we should only look at that vault
-          if (linkNode.to && !_.isUndefined(linkNode.to?.vaultName)) {
+          if (!_.isUndefined(linkNode.data.vaultName)) {
             vault = VaultUtils.getVaultByName({
               vaults: engine.vaults,
-              vname: linkNode.to?.vaultName,
+              vname: linkNode.data.vaultName,
             });
           }
           const existingNote = NoteUtils.getNoteFromMultiVault({
@@ -1152,12 +1178,12 @@ export class RemarkUtils {
               ConfigUtils.getPublishingConfig(dendronConfig);
             const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
-            wikiLinks[i]["value"] = WorkspaceUtils.getNoteUrl({
+            linkNode.value = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
               urlRoot,
-              anchor: linkNode.to?.anchorHeader,
+              anchor: linkNode.data.anchorHeader,
             });
             dirty = true;
           }
@@ -1419,5 +1445,27 @@ export class RemarkUtils {
     return selectAll(DendronASTTypes.FOOTNOTE_DEFINITION, root).filter(
       RemarkUtils.isFootnoteDefinition
     );
+  }
+
+  /**
+   * Extract frontmatter tags from note
+   * @param body
+   * @returns
+   */
+  static extractFMTags(body: string) {
+    let parsed: ReturnType<typeof parseFrontmatter> | undefined;
+    const noteAST = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.NO_DATA },
+      {}
+    ).parse(body);
+    visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
+      parsed = parseFrontmatter(frontmatter);
+      return false; // stop traversing, there is only one frontmatter
+    });
+    if (parsed) {
+      return getFrontmatterTags(parsed);
+    } else {
+      return [];
+    }
   }
 }

@@ -91,7 +91,6 @@ export class NoteController {
   async info(): Promise<RespRequired<EngineInfoResp>> {
     const ctx = "NoteController:info";
     getLogger().info({ ctx, msg: "enter" });
-    // const engine = await getWS({ ws });
     try {
       const version = NodeJSUtils.getVersionFromPkg();
       return {

@@ -14,28 +14,28 @@ import {
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
+import stringSimilarity from "string-similarity";
 import { CancellationTokenSource, window } from "vscode";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { LookupControllerV3 } from "./LookupControllerV3";
-import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
-import { OldNewLocation, PickerUtilsV2 } from "./utils";
 import { NotePickerUtils } from "../lookup/NotePickerUtils";
 import { SchemaPickerUtils } from "../lookup/SchemaPickerUtils";
-import { transformQueryString } from "./queryStringTransformer";
-import stringSimilarity from "string-similarity";
 import { IDendronQuickInputButton } from "./ButtonTypes";
+import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_SCHEMA_DETAIL } from "./constants";
 import {
   ILookupProviderOptsV3,
   ILookupProviderV3,
   NoteLookupProviderSuccessResp,
   OnAcceptHook,
   OnUpdatePickerItemsOpts,
+  ProvideOpts,
   SchemaLookupProviderSuccessResp,
 } from "./LookupProviderV3Interface";
-import { IDendronExtension } from "../../dendronExtensionInterface";
-import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_SCHEMA_DETAIL } from "./constants";
+import { transformQueryString } from "./queryStringTransformer";
+import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
+import { OldNewLocation, PickerUtilsV2 } from "./utils";
 
 /** This function presumes that 'CreateNew' should be shown and determines whether
  *  CreateNew should be at the top of the look up results or not. */
@@ -98,10 +98,15 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     this.opts = opts;
   }
 
-  async provide(lc: LookupControllerV3) {
+  async provide(opts: {
+    quickpick: DendronQuickPickerV2;
+    token: CancellationTokenSource;
+    fuzzThreshold: number;
+  }) {
     const ctx = "NoteLookupProvider.provide";
     Logger.info({ ctx, msg: "enter" });
-    const quickpick = lc.quickpick;
+
+    const { quickpick, token, fuzzThreshold } = opts;
     const onUpdatePickerItems = _.bind(this.onUpdatePickerItems, this);
     const onUpdateDebounced = _.debounce(
       () => {
@@ -109,15 +114,17 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         Logger.debug({ ctx, msg: "enter" });
         const out = onUpdatePickerItems({
           picker: quickpick,
-          token: lc.createCancelSource().token,
-          fuzzThreshold: lc.fuzzThreshold,
+          token: token.token,
+          fuzzThreshold,
         } as OnUpdatePickerItemsOpts);
         Logger.debug({ ctx, msg: "exit" });
         return out;
       },
       100,
       {
-        leading: true,
+        // Use trailing to make sure we get the latest letters typed by the user
+        // before accepting.
+        leading: false,
       }
     );
     quickpick.onDidChangeValue(onUpdateDebounced);
@@ -127,15 +134,15 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         ctx: "NoteLookupProvider:onDidAccept",
         quickpick: quickpick.value,
       });
-      onUpdateDebounced.cancel();
+      await onUpdateDebounced.flush();
       if (_.isEmpty(quickpick.selectedItems)) {
         await onUpdatePickerItems({
           picker: quickpick,
           token: new CancellationTokenSource().token,
-          fuzzThreshold: lc.fuzzThreshold,
+          fuzzThreshold,
         });
       }
-      this.onDidAccept({ quickpick, lc })();
+      this.onDidAccept({ quickpick, cancellationToken: token })();
     });
     Logger.info({ ctx, msg: "exit" });
     return;
@@ -148,11 +155,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
    */
   onDidAccept(opts: {
     quickpick: DendronQuickPickerV2;
-    lc: LookupControllerV3;
+    cancellationToken: CancellationTokenSource;
   }) {
     return async () => {
       const ctx = "NoteLookupProvider:onDidAccept";
-      const { quickpick: picker, lc } = opts;
+      const { quickpick: picker, cancellationToken } = opts;
 
       picker.buttons.forEach((button) => {
         AnalyticsUtils.track(LookupEvents.LookupModifiersSetOnAccept, {
@@ -197,13 +204,14 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         }
       }
       // last chance to cancel
-      lc.cancelToken.cancel();
+      cancellationToken.cancel();
+
       if (!this.opts.noHidePickerOnAccept) {
         picker.state = DendronQuickPickState.FULFILLED;
         picker.hide();
       }
       const onAcceptHookResp = await Promise.all(
-        await this._onAcceptHooks.map((hook) =>
+        this._onAcceptHooks.map((hook) =>
           hook({ quickpick: picker, selectedItems })
         )
       );
@@ -490,15 +498,16 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     this.opts = opts;
   }
 
-  async provide(lc: LookupControllerV3) {
-    const quickpick = lc.quickpick;
+  async provide(opts: ProvideOpts) {
+    const { quickpick, token, fuzzThreshold } = opts;
+
     const onUpdatePickerItems = _.bind(this.onUpdatePickerItems, this);
     const onUpdateDebounced = _.debounce(
       () => {
         onUpdatePickerItems({
           picker: quickpick,
-          token: lc.createCancelSource().token,
-          fuzzThreshold: lc.fuzzThreshold,
+          token: token.token,
+          fuzzThreshold,
         } as OnUpdatePickerItemsOpts);
       },
       100,
@@ -518,10 +527,10 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         await onUpdatePickerItems({
           picker: quickpick,
           token: new CancellationTokenSource().token,
-          fuzzThreshold: lc.fuzzThreshold,
+          fuzzThreshold,
         });
       }
-      this.onDidAccept({ quickpick, lc })();
+      this.onDidAccept({ quickpick, cancellationToken: token })();
     });
     return;
   }
@@ -533,11 +542,11 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
    */
   onDidAccept(opts: {
     quickpick: DendronQuickPickerV2;
-    lc: LookupControllerV3;
+    cancellationToken: CancellationTokenSource;
   }) {
     return async () => {
       const ctx = "SchemaLookupProvider:onDidAccept";
-      const { quickpick: picker, lc } = opts;
+      const { quickpick: picker, cancellationToken } = opts;
       let selectedItems = NotePickerUtils.getSelection(picker);
       Logger.debug({
         ctx,
@@ -594,12 +603,12 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         return;
       }
       // last chance to cancel
-      lc.cancelToken.cancel();
+      cancellationToken.cancel();
       if (!this.opts.noHidePickerOnAccept) {
         picker.hide();
       }
       const onAcceptHookResp = await Promise.all(
-        await this._onAcceptHooks.map((hook) =>
+        this._onAcceptHooks.map((hook) =>
           hook({ quickpick: picker, selectedItems })
         )
       );

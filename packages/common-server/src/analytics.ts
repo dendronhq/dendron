@@ -1,4 +1,5 @@
 import {
+  AppNames,
   CONSTANTS,
   DendronError,
   env,
@@ -68,6 +69,10 @@ export type SegmentClientOpts = {
   key?: string;
   forceNew?: boolean;
   cachePath?: string;
+  /**
+   * Workspace configuration disable analytics
+   */
+  disabledByWorkspace?: boolean;
 };
 
 export const SEGMENT_EVENTS = {
@@ -84,13 +89,6 @@ export type SegmentContext = Partial<{
   os: Partial<{ name: string; version: string }>;
   userAgent: string;
 }>;
-
-export type SegmentEventProps = {
-  event: string;
-  properties: { [key: string]: any };
-  timestamp?: Date;
-  context?: any;
-};
 
 export enum TelemetryStatus {
   /** The user set that telemetry should be disabled in the workspace config. */
@@ -121,6 +119,14 @@ enum SegmentResidualFlushStatus {
 
 export type TelemetryConfig = {
   status: TelemetryStatus;
+};
+
+export type SegmentEventProps = {
+  event: string;
+  properties?: { [key: string]: any };
+  context?: any;
+  timestamp?: Date;
+  integrations?: { [key: string]: any };
 };
 
 export class SegmentClient {
@@ -186,18 +192,6 @@ export class SegmentClient {
     return !this.isDisabled(status);
   }
 
-  static setByConfig(status?: TelemetryStatus) {
-    if (_.isUndefined(status)) status = this.getStatus();
-    switch (status) {
-      case TelemetryStatus.DISABLED_BY_WS_CONFIG:
-      case TelemetryStatus.DISABLED_BY_VSCODE_CONFIG:
-      case TelemetryStatus.ENABLED_BY_CONFIG:
-        return true;
-      default:
-        return false;
-    }
-  }
-
   static enable(
     why:
       | TelemetryStatus.ENABLED_BY_COMMAND
@@ -226,7 +220,10 @@ export class SegmentClient {
   }
 
   constructor(_opts?: SegmentClientOpts) {
-    const key = _opts?.key || env("SEGMENT_VSCODE_KEY");
+    const { key, disabledByWorkspace } = _.defaults(_opts, {
+      key: env("SEGMENT_VSCODE_KEY"),
+      disabledByWorkspace: false,
+    });
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
     this._cachePath = _opts?.cachePath;
@@ -239,7 +236,7 @@ export class SegmentClient {
 
     const status = SegmentClient.getStatus();
     this.logger.info({ msg: `user telemetry setting: ${status}` });
-    this._hasOptedOut = SegmentClient.isDisabled();
+    this._hasOptedOut = SegmentClient.isDisabled() || disabledByWorkspace;
 
     if (this.hasOptedOut) {
       this._anonymousId = "";
@@ -303,27 +300,20 @@ export class SegmentClient {
    * successfully uploaded to Segment or has been written to the cache file. It
    * is not recommended to await this function for metrics tracking.
    */
-  async track(
-    event: string,
-    data?: { [key: string]: string | number | boolean },
-    opts?: { context: any }
-  ): Promise<void> {
+  async track(opts: SegmentEventProps): Promise<void> {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
-
-    const payload: { [key: string]: any } = { ...data };
-    const { context } = opts || {};
-
-    const resp = await this.trackInternal(event, payload, context);
+    const resp = await this.trackInternal(opts);
 
     if (resp.error && this._cachePath) {
       try {
         await this.writeToResidualCache(this._cachePath, {
-          event,
-          properties: payload,
+          event: opts.event,
+          properties: opts.properties,
+          context: opts.context,
           timestamp: resp.data?.timestamp,
-          context,
+          integrations: opts.integrations,
         });
       } catch (err: any) {
         this.logger.error(
@@ -335,51 +325,55 @@ export class SegmentClient {
     }
   }
 
-  private async trackInternal(
-    event: string,
-    properties: { [key: string]: any },
-    context: any,
-    timestamp?: Date
-  ): Promise<RespV2<SegmentEventProps>> {
+  private async trackInternal({
+    event,
+    properties,
+    context,
+    timestamp,
+    integrations,
+  }: SegmentEventProps): Promise<RespV2<SegmentEventProps>> {
     return new Promise<RespV2<SegmentEventProps>>((resolve) => {
-      const payload =
-        timestamp !== undefined
-          ? {
-              anonymousId: this._anonymousId,
-              event,
-              properties,
-              timestamp: new Date(timestamp),
-              context,
+      if (!_.isUndefined(timestamp)) {
+        timestamp ||= new Date(timestamp);
+      }
+      this._segmentInstance.track(
+        {
+          anonymousId: this._anonymousId,
+          event,
+          properties,
+          timestamp,
+          context,
+          integrations,
+        },
+        (err: Error) => {
+          if (err) {
+            this.logger.info("Failed to send event " + event);
+            let eventTime: Date;
+            try {
+              eventTime = new Date(
+                JSON.parse((err as any).config.data).timestamp
+              );
+            } catch (err) {
+              eventTime = new Date();
             }
-          : { anonymousId: this._anonymousId, event, properties, context };
-
-      this._segmentInstance.track(payload, (err: Error) => {
-        if (err) {
-          this.logger.info("Failed to send event " + event);
-          let eventTime: Date;
-          try {
-            eventTime = new Date(
-              JSON.parse((err as any).config.data).timestamp
-            );
-          } catch (err) {
-            eventTime = new Date();
+            resolve({
+              data: {
+                event,
+                properties,
+                context,
+                timestamp: eventTime,
+                integrations,
+              },
+              error: new DendronError({
+                message: "Failed to send event " + event,
+                innerError: err,
+              }),
+            });
           }
-          resolve({
-            data: {
-              event,
-              properties,
-              context,
-              timestamp: eventTime,
-            },
-            error: new DendronError({
-              message: "Failed to send event " + event,
-              innerError: err,
-            }),
-          });
-        }
 
-        resolve({ error: null });
-      });
+          resolve({ error: null });
+        }
+      );
     });
   }
 
@@ -451,12 +445,12 @@ export class SegmentClient {
             resolve(SegmentResidualFlushStatus.nonRetryableError);
           }
 
-          const promised = this.trackInternal(
-            data.event,
-            data.properties,
-            data.context,
-            data.timestamp
-          );
+          const promised = this.trackInternal({
+            event: data.event,
+            properties: data.properties,
+            context: data.context,
+            timestamp: data.timestamp,
+          });
 
           promised
             .then((resp) => {
@@ -513,7 +507,10 @@ export class SegmentClient {
     };
 
     if (successCount > 0) {
-      this.track("Segment_Residual_Data_Recovered", stats);
+      this.track({
+        event: "Segment_Residual_Data_Recovered",
+        properties: stats,
+      });
     }
 
     return stats;
@@ -530,13 +527,13 @@ export class SegmentClient {
 
 // platform props
 type VSCodeProps = {
-  type: "vscode";
+  type: AppNames.CODE;
   ideVersion: string;
   ideFlavor: string;
 };
 
 type CLIProps = {
-  type: "cli";
+  type: AppNames.CLI;
   cliVersion: string;
 };
 
@@ -544,56 +541,81 @@ type CLIProps = {
 export type VSCodeIdentifyProps = {
   appVersion: string;
   userAgent: string;
+  isNewAppInstall: boolean;
+  isTelemetryEnabled: boolean;
+  language: string;
+  machineId: string;
+  shell: string;
 } & VSCodeProps;
 
-export type CLIIdentifyProps = {} & CLIProps;
+export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
-  static track(
-    event: string,
-    platformProps: VSCodeProps | CLIProps,
-    props?: any
-  ) {
+  static _trackCommon({
+    event,
+    context,
+    platformProps,
+    properties,
+    integrations,
+    timestamp,
+  }: SegmentEventProps & {
+    platformProps: VSCodeProps | CLIProps;
+  }) {
     if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
     const { type, ...rest } = platformProps;
-    SegmentClient.instance().track(event, {
-      ...props,
+    const _properties = {
+      ...properties,
       ...SegmentUtils.getCommonProps(),
       userAgent: type,
       ...rest,
+    };
+    return SegmentClient.instance().track({
+      event,
+      properties: _properties,
+      context,
+      integrations,
+      timestamp,
     });
   }
 
-  static async trackSync(
-    event: string,
-    platformProps: VSCodeProps | CLIProps,
-    props?: any
-  ) {
-    if (RuntimeUtils.isRunningInTestOrCI()) {
-      return;
+  /**
+   * Async tracking. Do not return promise from track call so it cannot be awaited
+   * in downstream functions
+   */
+  static track(
+    opts: SegmentEventProps & {
+      platformProps: VSCodeProps | CLIProps;
     }
-    const { type, ...rest } = platformProps;
-    await SegmentClient.instance().track(event, {
-      ...props,
-      ...SegmentUtils.getCommonProps(),
-      userAgent: type,
-      ...rest,
-    });
+  ): void {
+    this._trackCommon(opts);
+    return;
+  }
+
+  /**
+   * Sync tracking. NOTE that the downstream function must await this function in order for this to be synchronous
+   * @param opts
+   * @returns
+   */
+  static async trackSync(
+    opts: SegmentEventProps & {
+      platformProps: VSCodeProps | CLIProps;
+    }
+  ): Promise<void> {
+    return this._trackCommon(opts);
   }
 
   static identify(identifyProps: VSCodeIdentifyProps | CLIIdentifyProps) {
     if (RuntimeUtils.isRunningInTestOrCI()) {
       return;
     }
-    if (identifyProps.type === "vscode") {
-      const { ideVersion, ideFlavor, appVersion, userAgent } = identifyProps;
+    if (identifyProps.type === AppNames.CODE) {
+      const { appVersion, userAgent, ...rest } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {
           ...SegmentUtils.getCommonProps(),
-          ideVersion,
-          ideFlavor,
+          ...rest,
         },
         {
           context: {
@@ -609,7 +631,7 @@ export class SegmentUtils {
       );
     }
 
-    if (identifyProps.type === "cli") {
+    if (identifyProps.type === AppNames.CLI) {
       const { cliVersion } = identifyProps;
       SegmentClient.instance().identifyAnonymous(
         {

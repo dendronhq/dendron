@@ -10,7 +10,6 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import fs from "fs-extra";
 import { DConfig } from "../config";
 import { removeCache } from "../utils";
 import { Migrations } from "./types";
@@ -18,25 +17,23 @@ import { MigrationUtils, PATH_MAP } from "./utils";
 import { DEPRECATED_PATHS } from ".";
 
 export const CONFIG_MIGRATIONS: Migrations = {
-  version: "0.81.0",
+  version: "0.83.0",
   changes: [
     {
       name: "migrate config",
       func: async ({ dendronConfig, wsConfig, wsService }) => {
-        const backupPath = DConfig.createBackup(
-          wsService.wsRoot,
-          "migrate-configs"
-        );
-        if (!fs.existsSync(backupPath)) {
+        try {
+          await DConfig.createBackup(wsService.wsRoot, "migrate-configs");
+        } catch (error) {
           return {
-            error: new DendronError({
-              message:
-                "Backup failed during config migration. Exiting without migration.",
-            }),
             data: {
               dendronConfig,
               wsConfig,
             },
+            error: new DendronError({
+              message:
+                "Backup failed during config migration. Exiting without migration.",
+            }),
           };
         }
 
@@ -130,7 +127,7 @@ export const CONFIG_MIGRATIONS: Migrations = {
 /**
  * Migrations are sorted by version numbers, from greatest to least
  */
-export const ALL_MIGRATIONS: Migrations[] = [
+const ALL_MIGRATIONS: Migrations[] = [
   // CONFIG_MIGRATIONS,
   {
     version: "0.55.2",
@@ -295,3 +292,5 @@ export const ALL_MIGRATIONS: Migrations[] = [
     ],
   },
 ];
+
+export const MIGRATION_ENTRIES = [CONFIG_MIGRATIONS, ...ALL_MIGRATIONS];

@@ -1,9 +1,4 @@
-import {
-  DLink,
-  NoteProps,
-  NoteUtils,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { DLink, NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -853,11 +848,8 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["bar"];
-          const notes = _.values(engine.notes);
-          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
-          const linkCandidates = await LinkUtils.findLinkCandidates({
+          const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            notesMap,
             engine,
           });
           expect(linkCandidates[0].from.fname).toEqual("bar");
@@ -875,11 +867,8 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["baz"];
-          const notes = _.values(engine.notes);
-          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
           const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            notesMap,
             engine,
           });
           expect(linkCandidates.length).toEqual(8);
@@ -895,11 +884,8 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["nodes"];
-          const notes = _.values(engine.notes);
-          const notesMap = NoteUtils.createFnameNoteMap(notes, true);
           const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            notesMap,
             engine,
           });
           expect(linkCandidates.length).toEqual(8);

@@ -1,4 +1,5 @@
 import { ErrorFactory, NoteProps, ResponseUtil } from "@dendronhq/common-all";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import {
   ConfigFileUtils,
   createRunnableGoogleDocsV2PodConfigSchema,
@@ -8,23 +9,22 @@ import {
   GoogleDocsConnection,
   GoogleDocsExportPodV2,
   GoogleDocsExportReturnType,
-  GoogleDocsFields,
+  GoogleDocsUtils,
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
   JSONSchemaType,
+  PodUtils,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { QuickPickHierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getEngine, getExtension } from "../../workspace";
 import { BaseExportPodCommand } from "./BaseExportPodCommand";
 
 /**
@@ -37,21 +37,23 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   GoogleDocsExportReturnType
 > {
   public key = "dendron.googledocsexport";
+  private extension: IDendronExtension;
 
-  public constructor() {
+  public constructor(extension: IDendronExtension) {
     super(new QuickPickHierarchySelector());
+    this.extension = extension;
   }
 
   public createPod(
     config: RunnableGoogleDocsV2PodConfig
   ): ExportPodV2<GoogleDocsExportReturnType> {
-    const { wsRoot, vaults } = getDWorkspace();
-
+    const { engine, wsRoot } = this.extension.getDWorkspace();
+    const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
+    const port = openPortFile({ fpath });
     return new GoogleDocsExportPodV2({
       podConfig: config,
-      engine: getEngine(),
-      wsRoot,
-      vaults,
+      engine,
+      port,
     });
   }
 
@@ -66,10 +68,12 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     let refreshToken: string | undefined = opts?.refreshToken;
     let expirationTime: number | undefined = opts?.expirationTime;
     let connectionId: string | undefined = opts?.connectionId;
-
+    const { wsRoot } = this.extension.getDWorkspace();
     // Get tokens and expiration time for gdoc services
     if (!accessToken || !refreshToken || !expirationTime || !connectionId) {
-      const mngr = new ExternalConnectionManager(getExtension().podsDir);
+      const mngr = new ExternalConnectionManager(
+        PodUtils.getPodDir({ wsRoot })
+      );
 
       // If the tokens doesn't exist, see if we can first extract it from the connectedServiceId:
       if (opts?.connectionId) {
@@ -130,14 +134,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     // want to save as a new config or just run it one-time
     if (!opts?.podId) {
       const choice = await PodUIControls.promptToSaveInputChoicesAsNewConfig();
-
       if (choice !== undefined && choice !== false) {
         const configPath = ConfigFileUtils.genConfigFileV2({
-          fPath: path.join(
-            getExtension().podsDir,
-            "custom",
-            `config.${choice}.yml`
-          ),
+          fPath: PodUtils.getCustomConfigPath({ wsRoot, podId: choice }),
           configSchema: GoogleDocsExportPodV2.config(),
           setProperties: _.merge(inputs, {
             podId: choice,
@@ -178,6 +177,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     payload: NoteProps[];
     config: RunnableGoogleDocsV2PodConfig;
   }) {
+    const engine = this.extension.getEngine();
     const { exportReturnValue } = opts;
     let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
@@ -185,10 +185,16 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     const createdCount = createdDocs?.length ?? 0;
     const updatedCount = updatedDocs?.length ?? 0;
     if (createdDocs && createdCount > 0) {
-      await this.updateNoteWithCustomFrontmatter(createdDocs);
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
+        createdDocs,
+        engine
+      );
     }
     if (updatedDocs && updatedCount > 0) {
-      await this.updateNoteWithCustomFrontmatter(updatedDocs);
+      await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
+        updatedDocs,
+        engine
+      );
     }
     if (ResponseUtil.hasError(exportReturnValue)) {
       errorMsg = `Finished GoogleDocs Export. ${createdCount} docs created; ${updatedCount} docs updated. Error encountered: ${ErrorFactory.safeStringify(
@@ -202,23 +208,5 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       );
     }
     return errorMsg;
-  }
-
-  private async updateNoteWithCustomFrontmatter(records: GoogleDocsFields[]) {
-    const engine = ExtensionProvider.getEngine();
-    await Promise.all(
-      records.map(async (record) => {
-        if (_.isUndefined(record)) return;
-        const { documentId, revisionId, dendronId } = record;
-        if (!dendronId) return;
-        const note = engine.notes[dendronId];
-        note.custom = {
-          ...note.custom,
-          documentId,
-          revisionId,
-        };
-        await engine.writeNote(note, { updateExisting: true });
-      })
-    );
   }
 }

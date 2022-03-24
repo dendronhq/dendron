@@ -1,8 +1,10 @@
 import {
+  asyncLoopOneAtATime,
   ConfigUtils,
   CONSTANTS,
   CURRENT_CONFIG_VERSION,
   DendronError,
+  DENDRON_VSCODE_CONFIG_KEYS,
   DEngineClient,
   Disposable,
   DuplicateNoteActionEnum,
@@ -12,11 +14,13 @@ import {
   DVaultSync,
   DWorkspace,
   DWorkspaceEntry,
+  FOLDERS,
   InstallStatus,
   IntermediateDendronConfig,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
+  SelfContainedVault,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -28,16 +32,17 @@ import {
   GitUtils,
   note2File,
   readJSONWithComments,
-  readJSONWithCommentsSync,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
   writeJSONWithComments,
+  writeJSONWithCommentsSync,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import os from "os";
+import path, { basename } from "path";
+import { WorkspaceUtils } from ".";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
@@ -71,6 +76,8 @@ export type WorkspaceServiceCreateOpts = {
    * create dendron.code-workspace file
    */
   createCodeWorkspace?: boolean;
+  /** Create a self contained vault as the workspace */
+  useSelfContainedVault?: boolean;
 };
 
 export type WorkspaceServiceOpts = {
@@ -102,6 +109,22 @@ type AddRemoveCommonOpts = {
    */
   onUpdatedWorkspace?: () => Promise<void>;
 };
+
+const ROOT_NOTE_TEMPLATE = [
+  "# Welcome to Dendron",
+  "",
+  `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.`,
+  "",
+  "## Lookup",
+  "",
+  "This section contains useful links to related resources.",
+  "",
+  "- [Getting Started Guide](https://link.dendron.so/6b25)",
+  "- [Discord](https://link.dendron.so/6b23)",
+  "- [Home Page](https://wiki.dendron.so/)",
+  "- [Github](https://link.dendron.so/6b24)",
+  "- [Developer Docs](https://docs.dendron.so/)",
+].join("\n");
 
 /** You **must** dispose workspace services you create, otherwise you risk leaking file descriptors which may lead to crashes. */
 export class WorkspaceService implements Disposable, IWorkspaceService {
@@ -156,10 +179,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
-  get dendronRoot(): string {
-    return path.join(this.wsRoot, "dendron");
-  }
-
   get seedService(): SeedService {
     return this._seedService;
   }
@@ -169,23 +188,20 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
-  setWorkspaceConfig(config: WorkspaceSettings) {
-    writeJSONWithComments(
-      path.join(this.wsRoot, "dendron.code-workspace"),
+  setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {
+    writeJSONWithCommentsSync(
+      path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME),
       config
     );
   }
 
-  getWorkspaceConfig(): WorkspaceSettings | undefined {
-    try {
-      const wsConfig = readJSONWithCommentsSync(
-        path.join(this.wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
-      return wsConfig;
-    } catch (err) {
-      this.logger.error(err);
+  getCodeWorkspaceSettingsSync(): WorkspaceSettings | undefined {
+    const resp = WorkspaceUtils.getCodeWorkspaceSettingsSync(this.wsRoot);
+    if (resp.error) {
+      this.logger.error(resp.error);
       return undefined;
     }
+    return resp.data;
   }
 
   /**
@@ -214,7 +230,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       Promise.resolve([] as DVault[])
     );
     ConfigUtils.setWorkspaceProp(config, "workspaces", allWorkspaces);
-    this.setConfig(config);
+    await this.setConfig(config);
     return { vaults: newVaults };
   }
 
@@ -271,7 +287,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
-      let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      let out = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
       if (
         !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
       ) {
@@ -282,7 +300,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         if (opts.onUpdatingWorkspace) {
           await opts.onUpdatingWorkspace();
         }
-        writeJSONWithComments(wsPath, out);
+        await writeJSONWithComments(wsPath, out);
 
         if (opts.onUpdatedWorkspace) {
           await opts.onUpdatedWorkspace();
@@ -319,25 +337,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   ) {
     const { vault, noAddToConfig } = opts;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-    fs.ensureDirSync(vpath);
+    await fs.ensureDir(vpath);
 
     const note = NoteUtils.createRoot({
       vault,
-      body: [
-        "# Welcome to Dendron",
-        "",
-        `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top.`,
-        "",
-        "## Lookup",
-        "",
-        "This section contains useful links to related resources.",
-        "",
-        "- [Getting Started Guide](https://link.dendron.so/6b25)",
-        "- [Discord](https://link.dendron.so/6b23)",
-        "- [Home Page](https://wiki.dendron.so/)",
-        "- [Github](https://link.dendron.so/6b24)",
-        "- [Developer Docs](https://docs.dendron.so/)",
-      ].join("\n"),
+      body: ROOT_NOTE_TEMPLATE,
     });
     const schema = SchemaUtils.createRootModule({ vault });
 
@@ -355,6 +359,116 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await this.addVaultToCodeWorkspace(vault);
     }
     return vault;
+  }
+
+  /** Creates the given vault.
+   *
+   * @param vault Must be a self contained vault. Use
+   * {@link VaultUtils.selfContained} to ensure this is correct, which will
+   * allow the type to match.
+   * @param addToConfig If true, the created vault will be added to the config
+   * for the current workspace.
+   * @param addToCodeWorkspace If true, the created vault will be added to the
+   * `code-workspace` file for the current workspace.
+   */
+  async createSelfContainedVault(opts: {
+    addToConfig?: boolean;
+    addToCodeWorkspace?: boolean;
+    // Must be created with a self-contained vault
+    vault: SelfContainedVault;
+  }) {
+    const { vault, addToConfig, addToCodeWorkspace } = opts;
+    /** The `vault` folder */
+    const vaultPath = path.join(this.wsRoot, vault.fsPath);
+    /** The `vault/notes` folder */
+    const notesPath = path.join(vaultPath, FOLDERS.NOTES);
+    // Create the folders we want for this vault.
+    await fs.mkdirp(notesPath);
+    await fs.mkdirp(path.join(notesPath, "assets"));
+
+    // Create root note and schema
+    const note = NoteUtils.createRoot({
+      vault,
+      body: ROOT_NOTE_TEMPLATE,
+    });
+    const schema = SchemaUtils.createRootModule({ vault });
+    if (
+      !(await fs.pathExists(
+        NoteUtils.getFullPath({ note, wsRoot: this.wsRoot })
+      ))
+    ) {
+      await note2File({ note, vault, wsRoot: this.wsRoot });
+    }
+    if (
+      !(await fs.pathExists(
+        SchemaUtils.getPath({ root: notesPath, fname: "root" })
+      ))
+    ) {
+      await schemaModuleOpts2File(schema, notesPath, "root");
+    }
+
+    // Create the config and code-workspace for the vault, which make it self contained.
+    // This is the config that goes inside the vault itself
+    const selfContainedVaultConfig: DVault = {
+      fsPath: ".",
+      selfContained: true,
+    };
+    if (vault.name) selfContainedVaultConfig.name = vault.name;
+    DConfig.getOrCreate(vaultPath, {
+      dev: {
+        enableSelfContainedVaults: true,
+      },
+      workspace: {
+        vaults: [selfContainedVaultConfig],
+      },
+    });
+    WorkspaceConfig.write(vaultPath, [], {
+      overrides: {
+        folders: [
+          {
+            // Following how we set up workspace config for workspaces, where
+            // the root is the `vault` directory
+            path: "notes",
+            name: VaultUtils.getName(vault),
+          },
+        ],
+        settings: {
+          // Also enable the self contained vault workspaces when inside the self contained vault
+          [DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE]:
+            true,
+        },
+      },
+    });
+    // Also add a gitignore, so files like `.dendron.port` are ignored if the
+    // self contained vault is opened on its own
+    await WorkspaceService.createGitIgnore(vaultPath);
+
+    // Update the config and code-workspace for the current workspace
+    if (addToConfig) {
+      await this.addVault({ ...opts, updateWorkspace: false });
+    }
+    if (addToCodeWorkspace) {
+      await this.addVaultToCodeWorkspace(vault);
+    }
+    return vault;
+  }
+
+  markVaultAsRemoteInConfig(
+    targetVault: DVault,
+    remoteUrl: string
+  ): Promise<void> {
+    const config = this.config;
+    const vaults = ConfigUtils.getVaults(config);
+    ConfigUtils.setVaults(
+      config,
+      vaults.map((vault) => {
+        if (VaultUtils.isEqualV2(vault, targetVault)) {
+          vault.remote = { type: "git", url: remoteUrl };
+        }
+        return vault;
+      })
+    );
+    return this.setConfig(config);
   }
 
   /** Converts a local vault to a remote vault, with `remoteUrl` as the upstream URL. */
@@ -399,18 +513,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     await git.push({ remote, branch });
     // Update `dendron.yml`, adding the remote to the converted vault
-    const config = this.config;
-    const vaults = ConfigUtils.getVaults(config);
-    ConfigUtils.setVaults(
-      config,
-      vaults.map((vault) => {
-        if (VaultUtils.isEqualV2(vault, targetVault)) {
-          vault.remote = { type: "git", url: remoteUrl };
-        }
-        return vault;
-      })
-    );
-    await this.setConfig(config);
+    await this.markVaultAsRemoteInConfig(targetVault, remoteUrl);
     // Remove the vault folder from the tree of the root repository. Otherwise, the files will be there when
     // someone else pulls the root repo, which can break remote vault initialization. This doesn't delete the actual files.
     if (await fs.pathExists(path.join(wsRoot, ".git"))) {
@@ -672,7 +775,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     if (updateWorkspace) {
       const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
-      let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+      let settings = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
       const folders = _.reject(
         settings.folders,
         (ent) => ent.path === VaultUtils.getRelPath(vault)
@@ -683,7 +788,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         opts.onUpdatingWorkspace();
       }
 
-      writeJSONWithComments(wsPath, settings);
+      writeJSONWithCommentsSync(wsPath, settings);
 
       if (opts.onUpdatedWorkspace) {
         await opts.onUpdatedWorkspace();
@@ -705,6 +810,22 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     this.config;
   }
 
+  static async createGitIgnore(wsRoot: string) {
+    const gitIgnore = path.join(wsRoot, ".gitignore");
+    await fs.writeFile(
+      gitIgnore,
+      [
+        "node_modules",
+        ".dendron.*",
+        "build",
+        "seeds",
+        ".next",
+        "pods/service-connections",
+      ].join("\n"),
+      { encoding: "utf8" }
+    );
+  }
+
   /**
    * Initialize workspace with specified vaults
    * Files and folders created:
@@ -719,26 +840,21 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @param opts
    */
   static async createWorkspace(opts: WorkspaceServiceCreateOpts) {
+    if (opts.useSelfContainedVault) {
+      return this.createSelfContainedVaultWorkspace(opts);
+    } else {
+      return this.createStandardWorkspace(opts);
+    }
+  }
+
+  static async createStandardWorkspace(opts: WorkspaceServiceCreateOpts) {
     const { wsRoot, vaults } = opts;
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
     // this creates `dendron.yml`
     ws.createConfig();
     // add gitignore
-    const gitIgnore = path.join(wsRoot, ".gitignore");
-    fs.writeFileSync(
-      gitIgnore,
-      [
-        "node_modules",
-        ".dendron.*",
-        "build",
-        "seeds",
-        ".next",
-        "pods/service-connections",
-        "\n",
-      ].join("\n"),
-      { encoding: "utf8" }
-    );
+    WorkspaceService.createGitIgnore(wsRoot);
     if (opts.createCodeWorkspace) {
       WorkspaceConfig.write(wsRoot, vaults);
     }
@@ -751,6 +867,83 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       },
       Promise.resolve()
     );
+    // check if this is the first workspace created
+    if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
+      MetadataService.instance().setFirstWsInitialize();
+    }
+    return ws;
+  }
+
+  /** Given a standard vault, convert it into a self contained vault.
+   *
+   * The function **mutates** (modifies) the vault object. */
+  static standardToSelfContainedVault(vault: DVault): SelfContainedVault {
+    if (VaultUtils.isSelfContained(vault)) return vault;
+
+    if (vault.remote?.url) {
+      // Remote vault, calculate path based on the remote
+      vault.fsPath = path.join(
+        FOLDERS.DEPENDENCIES,
+        GitUtils.remoteUrlToDependencyPath({
+          vaultName: vault.name || basename(vault.fsPath),
+          url: vault.remote.url,
+        })
+      );
+    } else {
+      // Local vault, calculate path for local deps
+      vault.fsPath = path.join(
+        FOLDERS.DEPENDENCIES,
+        FOLDERS.LOCAL_DEPENDENCY,
+        path.basename(vault.fsPath)
+      );
+    }
+
+    vault.selfContained = true;
+    // Cast required, because TypeScript doesn't recognize `selfContained` is always set to true
+    return vault as SelfContainedVault;
+  }
+
+  /** Creates a new workspace where the workspace is a self contained vault.
+   *
+   * If the vaults passed to this function are not self contained vaults, they
+   * will be converted to self contained vaults before being created. The vault
+   * objects passed in are **mutated**.
+   *
+   * Further, the first vault given will be the self contained vault that is
+   * used as the workspace root.
+   */
+  static async createSelfContainedVaultWorkspace(
+    opts: WorkspaceServiceCreateOpts
+  ) {
+    const { wsRoot, vaults } = opts;
+    const ws = new WorkspaceService({ wsRoot });
+    if (vaults && vaults.length > 0) {
+      // First vault is the self contained vault we are using as the workspace
+      const wsVault = vaults[0];
+      // The vault is the workspace too
+      if (wsVault.name === undefined) {
+        wsVault.name = path.basename(wsRoot);
+      }
+      wsVault.fsPath = ".";
+      wsVault.selfContained = true;
+
+      // Mutate vault objects to convert them to self contained vaults. The
+      // first vault will be skipped because the conversion is a no-op for
+      // vaults that are already self contained.
+      const selfContainedVaults = vaults.map(
+        WorkspaceService.standardToSelfContainedVault
+      );
+      // Needs to be done one at a time, otherwise config updates are racy
+      await asyncLoopOneAtATime(selfContainedVaults, (vault) => {
+        return ws.createSelfContainedVault({
+          vault,
+          addToCodeWorkspace: false,
+          // Don't add to config, {@link SetupWorkspaceCommand} also adds vaults to the config
+          addToConfig: false,
+        });
+      });
+    }
+
     // check if this is the first workspace created
     if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
       MetadataService.instance().setFirstWsInitialize();
@@ -777,14 +970,23 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     // workspace file
     const wsPath = WorkspaceConfig.workspaceFile(wsRoot);
-    let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+    let out: WorkspaceSettings;
+    try {
+      out = (await readJSONWithComments(
+        wsPath
+      )) as unknown as WorkspaceSettings;
+    } catch (err: any) {
+      // If the config file didn't exist, ignore the error
+      if (err?.code === "ENOENT") return;
+      throw err;
+    }
     if (
       !_.find(out.folders, (ent) => ent.path === VaultUtils.getRelPath(vault))
     ) {
       const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
-      writeJSONWithComments(wsPath, out);
+      await writeJSONWithComments(wsPath, out);
     }
     return;
   }
@@ -1136,7 +1338,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       // NOTE: this migration will create a `migration-config` backup file in the user's home directory
       changes = await MigrationService.applyMigrationRules({
         currentVersion,
-        previousVersion: "0.81.0", // to force apply
+        previousVersion: "0.83.0", // to force apply
         dendronConfig,
         wsService: this,
         logger: this.logger,
@@ -1242,7 +1444,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       );
     // if we added a workspace, we also add new vaults
     if (!_.isEmpty(workspacePaths)) {
-      this.setConfig(config);
+      await this.setConfig(config);
     }
     if (progressIndicator && didClone) {
       progressIndicator();

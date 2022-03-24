@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.81.0",
+  "version": "0.87.0",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -18,8 +18,6 @@
     "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json && mv dist/scripts/sitemap.js . ",
     "build:sitemap": "next-sitemap --config sitemap.js",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
     "clean": "yarn rimraf public data out",
     "rimraf": "npx rimraf",
     "test": "playwright test",
@@ -27,15 +25,15 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",
-    "@dendronhq/common-all": "^0.81.0",
-    "@dendronhq/common-frontend": "^0.81.0",
+    "@dendronhq/common-all": "^0.87.0",
+    "@dendronhq/common-frontend": "^0.87.0",
     "antd": "^4.15.5",
     "fs-extra": "^10.0.0",
     "html-react-parser": "^1.3.0",
     "lodash": "^4.17.21",
     "next": "12",
     "next-seo": "^4.27.0",
-    "next-sitemap": "^1.6.168",
+    "next-sitemap": "1.8.11",
     "react": "^17.0.2",
     "react-css-theme-switcher": "^0.3.0",
     "react-dom": "^17.0.2",
@@ -49,10 +47,8 @@
     "@playwright/test": "^1.18.1",
     "@types/fs-extra": "^9.0.12",
     "@types/react": "^17.0.21",
-    "cypress": "^8.7.0",
     "eslint": "^7.32.0",
     "eslint-config-next": "^11.1.2",
-    "eslint-plugin-cypress": "^2.12.1",
     "har-validator": "^5.1.5",
     "typescript": "^4.4.3"
   }

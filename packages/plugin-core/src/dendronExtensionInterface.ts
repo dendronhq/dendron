@@ -14,7 +14,6 @@ import {
 } from "./components/lookup/LookupProviderV3Interface";
 import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
-import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
@@ -64,12 +63,16 @@ export interface IDendronExtension {
   commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
-  noteSyncService: INoteSyncService;
 
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
 
+  activateWatchers(): Promise<void>;
+  /**
+   * This will deactivate the entire Dendron Extension. Takes care of disposing of all resources that Dendron has created
+   */
+  deactivate(): Promise<void>;
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;
@@ -106,7 +109,15 @@ export interface IDendronExtension {
   isActive(): boolean;
 
   /**
-   * Get Global Workspace configuration
+   * Checks if a Dendron workspace is currently active and that the current {@link fpath} is a valid Dendron Note
+   * @param fpath: full path to current file
+   */
+  isActiveAndIsDendronNote(fpath: string): Promise<boolean>;
+
+  /**
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
+   *
+   * There is no need to read the configuration from the extension, it doesn't depend on the extension itself.
    */
   getWorkspaceConfig(
     section?: string | undefined

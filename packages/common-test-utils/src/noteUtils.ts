@@ -13,6 +13,7 @@ import {
 import {
   file2Note,
   file2Schema,
+  genHash,
   note2File,
   resolvePath,
   schemaModuleProps2File,
@@ -83,10 +84,21 @@ export class TestNoteFactory {
     });
   }
 
+  async createForFNameWithEngine(
+    fname: string,
+    props: Partial<NoteProps> & { engine: DEngineClient }
+  ): Promise<NoteProps> {
+    return NoteTestUtilsV4.createNoteWithEngine({
+      fname,
+      ...this._defaults,
+      ...props,
+    });
+  }
+
   async createNoteInputWithFNames(
     fnames: string[]
   ): Promise<DNodePropsQuickInputV2[]> {
-    return await Promise.all(
+    return Promise.all(
       fnames.map((name) => this.createNoteInputWithFName(name))
     );
   }
@@ -99,7 +111,7 @@ export class TestNoteFactory {
   }
 
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
-    return await Promise.all(fnames.map((name) => this.createForFName(name)));
+    return Promise.all(fnames.map((name) => this.createForFName(name)));
   }
 
   toNotePropsDict(notes: NoteProps[]): NotePropsDict {
@@ -178,6 +190,7 @@ export class NoteTestUtilsV4 {
     }
   ) {
     const note = await this.createNote({ ...opts, noWrite: true });
+    note.contentHash = genHash(note.body);
     await opts.engine.writeNote(note, opts.engineWriteNoteOverride);
     return note;
   }

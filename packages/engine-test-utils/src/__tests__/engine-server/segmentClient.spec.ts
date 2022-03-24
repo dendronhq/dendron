@@ -11,13 +11,17 @@ import sinon from "sinon";
 import { TestEngineUtils } from "../../engine";
 
 describe("SegmentClient", () => {
+  let mockHomeDirStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    mockHomeDirStub = TestEngineUtils.mockHomeDir();
+  });
   afterEach(() => {
+    mockHomeDirStub.restore();
     sinon.restore();
   });
-  test("enabled by default", (done) => {
-    // this is only for the SegmentClient, telemetry as a whole respects VSCode settings by default
-    TestEngineUtils.mockHomeDir();
 
+  test("enabled by default", (done) => {
     const instance = SegmentClient.instance({ forceNew: true });
     expect(instance.hasOptedOut).toEqual(false);
 
@@ -25,7 +29,6 @@ describe("SegmentClient", () => {
   });
 
   test("enabled by command", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
 
     const instance = SegmentClient.instance({ forceNew: true });
@@ -35,7 +38,6 @@ describe("SegmentClient", () => {
   });
 
   test("enabled by config", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
@@ -45,7 +47,6 @@ describe("SegmentClient", () => {
   });
 
   test("disabled by command", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
 
     const instance = SegmentClient.instance({ forceNew: true });
@@ -55,7 +56,6 @@ describe("SegmentClient", () => {
   });
 
   test("disabled by vscode config", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_VSCODE_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
@@ -65,7 +65,6 @@ describe("SegmentClient", () => {
   });
 
   test("disabled by workspace config", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_WS_CONFIG);
 
     const instance = SegmentClient.instance({ forceNew: true });
@@ -75,7 +74,6 @@ describe("SegmentClient", () => {
   });
 
   test("still recognizes legacy disable", (done) => {
-    TestEngineUtils.mockHomeDir();
     const disablePath = SegmentClient.getDisableConfigPath();
     writeFileSync(disablePath, "");
 
@@ -86,7 +84,6 @@ describe("SegmentClient", () => {
   });
 
   test("enable command overrides legacy disable", (done) => {
-    TestEngineUtils.mockHomeDir();
     const disablePath = SegmentClient.getDisableConfigPath();
     writeFileSync(disablePath, "");
 
@@ -98,7 +95,6 @@ describe("SegmentClient", () => {
   });
 
   test("disabled then enabled with command", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.disable(TelemetryStatus.DISABLED_BY_COMMAND);
 
     let instance = SegmentClient.instance({ forceNew: true });
@@ -113,7 +109,6 @@ describe("SegmentClient", () => {
   });
 
   test("enabled then disabled with command", (done) => {
-    TestEngineUtils.mockHomeDir();
     SegmentClient.enable(TelemetryStatus.ENABLED_BY_COMMAND);
 
     let instance = SegmentClient.instance({ forceNew: true });
@@ -129,7 +124,6 @@ describe("SegmentClient", () => {
 
   describe("WHEN: Enabled by CLI command", () => {
     test("THEN: recognized as enabled", (done) => {
-      TestEngineUtils.mockHomeDir();
       SegmentClient.enable(TelemetryStatus.ENABLED_BY_CLI_COMMAND);
       const instance = SegmentClient.instance({ forceNew: true });
       expect(instance.hasOptedOut).toBeFalsy();
@@ -139,7 +133,6 @@ describe("SegmentClient", () => {
 
   describe("WHEN: Disabled by CLI command", () => {
     test("THEN: recognized as disabled", (done) => {
-      TestEngineUtils.mockHomeDir();
       SegmentClient.disable(TelemetryStatus.DISABLED_BY_CLI_COMMAND);
       const instance = SegmentClient.instance({ forceNew: true });
       expect(instance.hasOptedOut).toBeTruthy();
@@ -149,7 +142,6 @@ describe("SegmentClient", () => {
 
   describe("WHEN: Enabled by CLI as default", () => {
     test("THEN: recognized as enabled", (done) => {
-      TestEngineUtils.mockHomeDir();
       SegmentClient.enable(TelemetryStatus.ENABLED_BY_CLI_DEFAULT);
       const instance = SegmentClient.instance({ forceNew: true });
       expect(instance.hasOptedOut).toBeFalsy();
@@ -189,16 +181,13 @@ describe("GIVEN a SegmentClient", () => {
   const invalidPayload = "this is invalid JSON";
 
   function mockedTrackInternal(
-    event: string,
-    _payload: { [key: string]: any },
-    _context: any,
-    _timestamp?: Date
+    opts: SegmentEventProps
   ): Promise<RespV2<SegmentEventProps>> {
     return new Promise<RespV2<SegmentEventProps>>((resolve) => {
-      if (event === "mockFailToSend") {
+      if (opts.event === "mockFailToSend") {
         resolve({
           error: new DendronError({
-            message: "Mock - Failed to send event " + event,
+            message: "Mock - Failed to send event " + opts.event,
           }),
         });
       } else {
@@ -217,8 +206,11 @@ describe("GIVEN a SegmentClient", () => {
 
   describe("WHEN we track an event and we can connect to Segment backend", () => {
     beforeEach(async () => {
-      await instance.track("mockWillSend", {
-        hello: "world",
+      await instance.track({
+        event: "mockWillSend",
+        properties: {
+          hello: "world",
+        },
       });
     });
 
@@ -236,8 +228,11 @@ describe("GIVEN a SegmentClient", () => {
 
   describe("WHEN we track an event but we cannot connect to Segment backend", () => {
     beforeEach(async () => {
-      await instance.track("mockFailToSend", {
-        hello: "world",
+      await instance.track({
+        event: "mockFailToSend",
+        properties: {
+          hello: "world",
+        },
       });
     });
 

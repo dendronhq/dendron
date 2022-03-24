@@ -4,10 +4,10 @@ import { env } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
 import { PublishCLICommand } from "../src/commands";
-import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DevCLICommand } from "../src/commands/devCLICommand";
 import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
+import { ExportPodV2CLICommand } from "../src/commands/exportPodV2";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
@@ -23,8 +23,6 @@ if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {
 
 const buildYargs = yargs;
 
-new BuildSiteV2CLICommand().buildCmd(buildYargs);
-new BuildSiteV2CLICommand("buildSite").buildCmd(buildYargs);
 new ExportPodCLICommand().buildCmd(buildYargs);
 new LaunchEngineServerCommand().buildCmd(buildYargs);
 new ImportPodCLICommand().buildCmd(buildYargs);
@@ -36,5 +34,7 @@ new WorkspaceCLICommand().buildCmd(buildYargs);
 new SeedCLICommand().buildCmd(buildYargs);
 new DevCLICommand().buildCmd(buildYargs);
 new PublishCLICommand().buildCmd(buildYargs);
+new ExportPodV2CLICommand().buildCmd(buildYargs);
+
 // eslint-disable-next-line no-unused-expressions
 buildYargs.demandCommand(1).help().argv;

@@ -146,21 +146,6 @@ export class BuildUtils {
     $(`yarn build:prod`, { cwd: root });
   }
 
-  static bump11ty(opts: { currentVersion: string; nextVersion: string }) {
-    const root = this.getPluginRootPath();
-    const sitePath = path.join(root, "src", "utils", "site.ts");
-    const dst = `dendron-11ty": "^${opts.nextVersion.replace(/^0./, "1.")}"`;
-
-    const newContent = fs
-      .readFileSync(sitePath, { encoding: "utf8" })
-      .replace(/dendron-11ty.*/, dst);
-    fs.writeFileSync(sitePath, newContent);
-    $("git add packages/plugin-core/src/utils/site.ts");
-    const { stdout, stderr } = $(`git commit -m "chore: bump 11ty"`);
-    console.log(stdout, stderr);
-    return;
-  }
-
   static installPluginDependencies() {
     // remove root package.json before installing locally
     fs.removeSync(path.join(this.getLernaRoot(), "package.json"));
@@ -360,6 +345,8 @@ export class BuildUtils {
       "common-assets"
     );
 
+    const commonAssetsBuildRoot = path.join(commonAssetsRoot, "build");
+
     // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
@@ -375,6 +362,18 @@ export class BuildUtils {
 
     // copy over common assets
     fs.copySync(path.join(commonAssetsRoot, "assets", "css"), pluginStaticPath);
+
+    // copy over katex fonts
+    const katexFontsPath = path.join(
+      commonAssetsBuildRoot,
+      "assets",
+      "css",
+      "fonts"
+    );
+    fs.copySync(
+      katexFontsPath,
+      path.join(pluginStaticPath, "css", "themes", "fonts")
+    );
 
     // copy assets from next server
     // DEPRECATED

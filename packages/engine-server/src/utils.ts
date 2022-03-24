@@ -13,13 +13,13 @@ import {
   NotePropsDict,
   NotesCache,
   NotesCacheEntry,
+  NoteUtils,
   RespV3,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
-import { AnchorUtils, LinkUtils } from "./markdown";
 import { WSMeta } from "./types";
 
 function normalize(text: string) {
@@ -393,35 +393,51 @@ export class EngineUtils {
   static async refreshNoteLinksAndAnchors({
     note,
     engine,
-    notesMap,
   }: {
     note: NoteProps;
     engine: DEngineClient;
-    notesMap: Map<string, NoteProps>;
   }) {
     const maxNoteLength = ConfigUtils.getWorkspace(engine.config).maxNoteLength;
     if (
       note.body.length <
       (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
     ) {
-      const links = LinkUtils.findLinks({ note, engine });
-      const anchors = await AnchorUtils.findAnchors({
+      const links = await engine.getLinks({ note, type: "regular" });
+      const anchors = await engine.getAnchors({
         note,
-        wsRoot: engine.wsRoot,
       });
+      if (!anchors.data || !links.data)
+        throw new DendronError({
+          message: "Failed to calculate note anchors",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            anchorsError: anchors.error,
+            linksError: links.error,
+          },
+        });
+
       // update links for note
-      note.links = links.concat(links);
+      note.links = links.data;
+      note.anchors = anchors.data;
+
       const devConfig = ConfigUtils.getProp(engine.config, "dev");
       const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
       if (linkCandidatesEnabled) {
-        const linkCandidates = LinkUtils.findLinkCandidates({
+        const linkCandidates = await engine.getLinks({
           note,
-          notesMap,
-          engine,
+          type: "candidate",
         });
-        note.links = links.concat(linkCandidates);
+        if (!linkCandidates.data)
+          throw new DendronError({
+            message: "Failed to calculate link candidates",
+            payload: {
+              note: NoteUtils.toLogObj(note),
+              anchorsError: anchors.error,
+              linksError: links.error,
+            },
+          });
+        note.links = note.links.concat(linkCandidates.data);
       }
-      note.anchors = anchors;
       return note;
     }
     return note;

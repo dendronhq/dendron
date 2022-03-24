@@ -34,7 +34,7 @@ import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { blockAnchors } from "./remark/blockAnchors";
-import { dendronPreview, dendronHoverPreview } from "./remark/dendronPreview";
+import { dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
@@ -171,19 +171,6 @@ export class MDUtilsV5 {
     return _data || {};
   }
 
-  static getNoteByFname(proc: Processor, { fname }: { fname: string }) {
-    const { notes, vault, wsRoot } = this.getProcData(proc);
-    // TODO: this is for backwards compatibility
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtils.getNoteByFnameV5({
-      fname,
-      notes: notes || engine.notes,
-      vault,
-      wsRoot,
-    });
-    return note;
-  }
-
   static getProcData(proc: Processor): ProcDataFullV5 {
     let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
 
@@ -234,7 +221,7 @@ export class MDUtilsV5 {
     const custom = note.custom ? note.custom : undefined;
 
     const ws = new WorkspaceService({ wsRoot });
-    const wsConfig = ws.getWorkspaceConfig();
+    const wsConfig = ws.getCodeWorkspaceSettingsSync();
     ws.dispose();
     const timestampConfig: keyof typeof DateTime =
       wsConfig?.settings["dendron.defaultTimestampDecorationFormat"];
@@ -304,12 +291,11 @@ export class MDUtilsV5 {
             data.wsRoot = data.engine!.wsRoot;
           }
 
-          const note = NoteUtils.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
-            notes: data.engine!.notes,
+            engine: data.engine!,
             vault: data.vault!,
-            wsRoot: data.wsRoot,
-          }) as NoteProps;
+          });
 
           if (!_.isUndefined(note)) {
             proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
@@ -327,7 +313,10 @@ export class MDUtilsV5 {
           // Add flavor specific plugins. These need to come before `dendronPub`
           // to fix extended image URLs before they get converted to HTML
           if (opts.flavor === ProcFlavor.PREVIEW) {
-            proc = proc.use(dendronPreview);
+            // No extra plugins needed for the preview right now. We used to
+            // need a plugin to rewrite URLs to get the engine to proxy images,
+            // but now that's done by the
+            // [[PreviewPanel|../packages/plugin-core/src/components/views/PreviewPanel.ts#^preview-rewrites-images]]
           }
           if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
             proc = proc.use(dendronHoverPreview);
@@ -362,7 +351,6 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-
           if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
             proc = proc.use(mermaid, { simple: true });
           }
@@ -429,7 +417,6 @@ export class MDUtilsV5 {
     });
 
     // add additional plugin for publishing
-
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
@@ -437,16 +424,14 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = data?.config as IntermediateDendronConfig;
-    const enableKatex = MDUtilsV5.shouldApplyPublishingRules(pRehype)
-      ? ConfigUtils.getProp(config, "useKatex")
-      : ConfigUtils.getPreview(config).enableKatex;
-
-    if (enableKatex) {
+    const config = data?.engine?.config as IntermediateDendronConfig;
+    const shouldApplyPublishRules =
+      MDUtilsV5.shouldApplyPublishingRules(pRehype);
+    if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (this.shouldApplyPublishingRules(pRehype)) {
+    if (shouldApplyPublishRules) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",

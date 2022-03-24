@@ -70,8 +70,6 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks backlink 1`] = `Array []`;
-
 exports[`RemarkUtils and LinkUtils findLinks empty link 1`] = `Array []`;
 
 exports[`RemarkUtils and LinkUtils findLinks filter loc match 1`] = `

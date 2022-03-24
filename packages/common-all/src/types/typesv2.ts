@@ -284,6 +284,9 @@ export type EngineUpdateNodesOptsV2 = {
 };
 export type GetNoteOptsV2 = {
   vault: DVault;
+  /**
+   * Note file name minus the extension
+   */
   npath: string;
   /**
    * If node does not exist, create it?

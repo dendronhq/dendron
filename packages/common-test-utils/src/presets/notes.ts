@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all";
+import { DEngineClient, DVault } from "@dendronhq/common-all";
 import _ from "lodash";
 import { CreateNoteOptsV4, NoteTestUtilsV4 } from "../noteUtils";
 
@@ -50,8 +50,40 @@ export const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     }
     return NoteTestUtilsV4.createNote(_opts);
   };
+
+  const createWithEngineFunc = ({
+    vault,
+    wsRoot,
+    genRandomId,
+    noWrite,
+    body,
+    fname,
+    props,
+    engine,
+  }: CreateNotePresetOptsV4 & { engine: DEngineClient }) => {
+    const _opts: CreateNoteOptsV4 & { engine: DEngineClient } = {
+      ...opts,
+      vault,
+      wsRoot,
+      genRandomId,
+      noWrite,
+      engine,
+    };
+    if (!_.isUndefined(body)) {
+      _opts.body = body;
+    }
+    if (!_.isUndefined(props)) {
+      _opts.props = props;
+    }
+    if (!_.isUndefined(fname)) {
+      _opts.fname = fname;
+    }
+    return NoteTestUtilsV4.createNoteWithEngine(_opts);
+  };
+
   return {
     create: func,
+    createWithEngine: createWithEngineFunc,
     fname: opts.fname,
     selection: opts.selection || SIMPLE_SELECTION,
     body: opts.body,

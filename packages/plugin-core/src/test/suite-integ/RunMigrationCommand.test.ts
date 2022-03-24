@@ -12,7 +12,7 @@ import { describeMultiWS } from "../testUtilsV3";
 import { DConfig } from "@dendronhq/engine-server";
 import { ExtensionProvider } from "../../ExtensionProvider";
 
-suite("RunMigrationCommand", function () {
+suite("RunMigrationCommand: Code", function () {
   describeMultiWS(
     "GIVEN Code workspace",
     {
@@ -48,7 +48,9 @@ suite("RunMigrationCommand", function () {
       });
     }
   );
+});
 
+suite("RunMigrationCommand: Native", function () {
   describeMultiWS(
     "GIVEN Native workspace",
     {

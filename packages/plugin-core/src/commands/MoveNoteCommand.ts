@@ -105,6 +105,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const provider = extension.noteLookupProviderFactory.create("move", {
       allowNewNote: true,
       forceAsIsPickerValueUsage: true,
+      newNoteDetail: "Move current note and rename it",
     });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
     const initialValue = path.basename(
@@ -136,7 +137,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         },
       });
       lc.show({
-        title: "Move note",
+        title: "Move note - select the note to move",
         placeholder: "foo",
         provider,
         initialValue: opts?.initialValue || initialValue,

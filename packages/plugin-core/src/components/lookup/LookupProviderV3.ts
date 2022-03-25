@@ -425,7 +425,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       if (shouldAddCreateNew) {
         const entryCreateNew = NotePickerUtils.createNoActiveItem({
           fname: queryOrig,
-          detail: CREATE_NEW_NOTE_DETAIL,
+          detail: this.opts.newNoteDetail ?? CREATE_NEW_NOTE_DETAIL,
         });
 
         const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note

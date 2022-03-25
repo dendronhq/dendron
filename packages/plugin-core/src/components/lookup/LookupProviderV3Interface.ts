@@ -53,6 +53,9 @@ export type ILookupProviderOptsV3 = {
    * when (and only when) nothing is queried.
    */
   extraItems?: DNodePropsQuickInputV2[];
+  /** If given, override the default "Note does not exists, create?" detail for
+   * the create new note option. */
+  newNoteDetail?: string;
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {

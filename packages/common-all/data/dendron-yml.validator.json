@@ -391,7 +391,7 @@
         },
         "fsPath": {
           "type": "string",
-          "description": "Filesystem path to fault"
+          "description": "Filesystem path to vault"
         },
         "workspace": {
           "type": "string",

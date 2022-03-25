@@ -42,6 +42,41 @@ function getExtendedImage(node: UnistNode): ExtendedImage {
 
 describe("extendedImage", () => {
   describe("parse", () => {
+    test("with alt", () => {
+      const resp = proc().parse(
+        `![this is the (alt) text](/assets/image.png){width: 50%}`
+      );
+      expect(getExtendedImage(resp).type).toEqual(
+        DendronASTTypes.EXTENDED_IMAGE
+      );
+      expect(getExtendedImage(resp).alt).toEqual("this is the (alt) text");
+      expect(getExtendedImage(resp).url).toEqual("/assets/image.png");
+      expect(getExtendedImage(resp).props?.width).toEqual("50%");
+    });
+
+    test("with parenthesis in url", () => {
+      const resp = proc().parse(
+        `![this is the (alt) text](/assets/image_(file).png){width: 50%}`
+      );
+      expect(getExtendedImage(resp).type).toEqual(
+        DendronASTTypes.EXTENDED_IMAGE
+      );
+      expect(getExtendedImage(resp).alt).toEqual("this is the (alt) text");
+      expect(getExtendedImage(resp).url).toEqual("/assets/image_(file).png");
+      expect(getExtendedImage(resp).props?.width).toEqual("50%");
+    });
+
+    test("with empty props", () => {
+      const resp = proc().parse(
+        `![this is the (alt) text](/assets/image.png){}`
+      );
+      expect(getExtendedImage(resp).type).toEqual(
+        DendronASTTypes.EXTENDED_IMAGE
+      );
+      expect(getExtendedImage(resp).alt).toEqual("this is the (alt) text");
+      expect(getExtendedImage(resp).url).toEqual("/assets/image.png");
+    });
+
     test("without alt", () => {
       const resp = proc().parse(`![](/assets/image.png){width: 50%}`);
       expect(getExtendedImage(resp).type).toEqual(

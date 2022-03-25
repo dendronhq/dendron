@@ -9,9 +9,9 @@ import YAML from "js-yaml";
 import { MDUtilsV5 } from "../utilsv5";
 
 export const EXTENDED_IMAGE_REGEX =
-  /^!\[(?<alt>[^[\]]*)\]\((?<url>[^()]+)\)(?<props>{[^{}]+})/;
+  /^!\[(?<alt>[^[\]]*)\]\((?<url>.*)\)(?<props>{[^{}]*})/;
 export const EXTENDED_IMAGE_REGEX_LOOSE =
-  /!\[(?<alt>[^[\]]*)\]\((?<url>[^()]+)\)(?<props>{[^{}]+})/;
+  /!\[(?<alt>[^[\]]*)\]\((?<url>.*)\)(?<props>{[^{}]*})/;
 
 export const matchExtendedImage = (
   text: string,

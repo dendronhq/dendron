@@ -32,6 +32,8 @@ import { WebViewUtils } from "./utils";
  * Class managing the webview version of the Dendron tree view (currently called
  * TreeViewV2) - this is the side panel UI that gives the webview/react/antd
  * based tree view of the Dendron note hierarchy
+ *
+ * @deprecated We are going back to using VSCode native tree views.
  */
 export class DendronTreeViewV2 implements WebviewViewProvider, Disposable {
   public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;

@@ -25,6 +25,7 @@ export enum DendronEditorViewKey {
 export enum DendronTreeViewKey {
   SAMPLE_VIEW = "dendron.sample",
   TREE_VIEW = "dendron.treeView",
+  /** @deprecated: We will be deprecating treeview v2 and going back to v1 **/
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
   CALENDAR_VIEW = "dendron.calendar-view",

@@ -751,6 +751,7 @@ export enum DMessageEnum {
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
 }
 
+/** @deprecated: Tree view v2 is deprecated */
 export enum TreeViewMessageEnum {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
@@ -814,6 +815,8 @@ export type OnDidChangeActiveTextEditorData = {
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
+
+/** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;
 
 export type VSCodeMessage = DMessage;
@@ -836,6 +839,8 @@ export type NoteViewMessage = DMessage<
   NoteViewMessageType,
   { id?: string; href?: string }
 >;
+
+/** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 
 export type SeedBrowserMessage = DMessage<

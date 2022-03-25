@@ -310,6 +310,16 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     );
     panel.webview.html = md.render(contentLines.join("\n"));
   }
+
+  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
+    return {
+      movedNotesCount:
+        // `out.changed` also includes the notes that had to be renamed in the
+        // process, but the created notes are the ones we moved
+        out?.changed?.filter((change) => change?.status === "create").length ||
+        0,
+    };
+  }
 }
 
 async function closeCurrentFileOpenMovedFile(

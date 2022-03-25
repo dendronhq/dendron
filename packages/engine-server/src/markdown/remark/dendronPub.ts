@@ -313,21 +313,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
-        const maybeFileExtension =
-          _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";
-        // if v5, copts.prefix = ""
-        let href: string;
-        if (MDUtilsV5.isV5Active(proc)) {
-          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
-            data.anchorHeader ? "#" + data.anchorHeader : ""
-          }`;
-        } else {
-          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
-            data.anchorHeader ? "#" + data.anchorHeader : ""
-          }`;
-        }
+        const href = SiteUtils.getSiteUrlPathForNote({
+          pathPrefix: copts?.prefix,
+          pathValue: value,
+          config,
+          pathAnchor: data.anchorHeader,
+        });
         const exists = true;
         // for rehype
         //_node.value = newValue;

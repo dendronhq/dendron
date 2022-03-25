@@ -35,6 +35,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
+import { SiteUtils } from "../topics/site";
 import {
   SyncActionResult,
   SyncActionStatus,
@@ -294,44 +295,34 @@ export class WorkspaceUtils {
     anchor?: string;
   }) {
     const { config, note, anchor, vault } = opts;
-    let { urlRoot } = opts;
-    const notePrefix = "notes";
     /**
      * set to true if index node, don't append id at the end
      */
     let isIndex: boolean = false;
+    const { url: root, index } = SiteUtils.getSiteUrlRootForVault({
+      vault,
+      config,
+    });
+    if (!root) {
+      throw new DendronError({ message: "no urlRoot set" });
+    }
+    if (!_.isUndefined(note) && _.isUndefined(index)) {
+      // if custom index is set, match against that, otherwise `root` is default index
+      isIndex = SiteUtils.isIndexNote({
+        indexNote: index,
+        note,
+      });
+    }
+    const pathPrefix = "notes/";
+    const pathValue = note.id;
+    const siteUrlPath = SiteUtils.getSiteUrlPathForNote({
+      pathPrefix,
+      pathValue,
+      config,
+      pathAnchor: anchor,
+    });
 
-    const seeds = ConfigUtils.getWorkspace(config).seeds;
-    if (vault.seed) {
-      if (seeds && seeds[vault.seed]) {
-        const maybeSite = seeds[vault.seed]?.site;
-        if (maybeSite) {
-          urlRoot = maybeSite.url;
-          if (!_.isUndefined(note)) {
-            // if custom index is set, match against that, otherwise `root` is default index
-            isIndex = maybeSite.index
-              ? note.fname === maybeSite.index
-              : DNodeUtils.isRoot(note);
-          }
-        }
-      }
-    }
-    let root = "";
-    if (!_.isUndefined(urlRoot)) {
-      root = urlRoot;
-    } else {
-      // assume github
-      throw new DendronError({ message: "not implemented" });
-    }
-    let link = isIndex ? root : [root, notePrefix, note.id + ".html"].join("/");
-
-    if (anchor) {
-      if (!isBlockAnchor(anchor)) {
-        link += `#${getSlugger().slug(anchor)}`;
-      } else {
-        link += `#${anchor}`;
-      }
-    }
+    const link = isIndex ? root : [root, siteUrlPath].join("/");
     return link;
   }
 

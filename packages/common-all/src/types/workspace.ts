@@ -63,6 +63,15 @@ export type DVault = {
   seed?: string;
   /** Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults. */
   selfContained?: boolean;
+  /**
+   * Published URL endpoint for the vault.
+   * When wikilinks are exported from this vault, they will be converted with url defined here
+   */
+  siteUrl?: string;
+  /**
+   * Index page for the vault
+   */
+  siteIndex?: string;
 };
 
 export type DWorkspace = {

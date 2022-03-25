@@ -1,6 +1,7 @@
 /**
  * Note Trait Interface TODO: this is a work in progress; more properties will be
  * added as the note type system functionality expands
+ *  ^fgscb0hek3bg
  */
 export type NoteTrait = {
   id: string;

@@ -174,7 +174,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).toContain("foo body");
               expect(data).not.toContain("[foo](/notes/foo)");
               expect(data).not.toContain("![[foo]]");
@@ -209,7 +209,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).not.toContain("![[alpha]]");
               expect(data).not.toContain("[foo](/notes/foo)");
             }
@@ -249,7 +249,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).not.toContain("[foo](/notes/foo)");
               expect(data).not.toContain("![[alpha]]");
             }

@@ -19,6 +19,8 @@ import {
   ConfigUtils,
   DendronPublishingConfig,
   configIsV4,
+  isBlockAnchor,
+  getSlugger,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -444,6 +446,53 @@ export class SiteUtils {
     }
     return siteRootPath;
   }
+  static getSiteUrlRootForVault({
+    vault,
+    config,
+  }: {
+    vault: DVault;
+    config: IntermediateDendronConfig;
+  }): { url?: string; index?: string } {
+    if (vault.seed) {
+      const seeds = ConfigUtils.getWorkspace(config).seeds;
+      if (seeds && seeds[vault.seed]) {
+        const maybeSite = seeds[vault.seed]?.site;
+        if (maybeSite) {
+          return { url: maybeSite.url, index: maybeSite.index };
+        }
+      }
+    }
+    if (vault.siteUrl) {
+      return { url: vault.siteUrl, index: vault.siteIndex };
+    }
+    const { siteUrl, siteIndex } = ConfigUtils.getPublishingConfig(config);
+    return { url: siteUrl, index: siteIndex };
+  }
+
+  static getSiteUrlPathForNote({
+    pathPrefix,
+    pathValue,
+    pathAnchor,
+    config,
+  }: {
+    pathPrefix?: string;
+    pathValue?: string;
+    pathAnchor?: string;
+    config: IntermediateDendronConfig;
+  }): string {
+    // slug anchor if it is not a block anchor
+    if (pathAnchor && !isBlockAnchor(pathAnchor)) {
+      pathAnchor = `#${getSlugger().slug(pathAnchor)}`;
+    }
+    // remove extension for pretty links
+    const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
+    const pathExtension =
+      _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+    // put together the url path
+    return `${pathPrefix || ""}${pathValue}${pathExtension}${
+      pathAnchor ? "#" + pathAnchor : ""
+    }`;
+  }
 
   static handleDup(opts: {
     dupBehavior?: DuplicateNoteBehavior;
@@ -555,6 +604,20 @@ export class SiteUtils {
       children: domainNote.children,
     });
     return domainNote;
+  }
+
+  /**
+   * Is the current note equivalent ot the index of the published site?
+   * @returns
+   */
+  static isIndexNote({
+    indexNote,
+    note,
+  }: {
+    indexNote?: string;
+    note: NoteProps;
+  }): boolean {
+    return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }
 
   static validateConfig(

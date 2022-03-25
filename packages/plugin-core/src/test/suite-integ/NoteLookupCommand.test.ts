@@ -628,11 +628,15 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("onAccept", () => {
-    test("new node", (done) => {
-      runLegacyMultiWorkspaceTest({
+    describeMultiWS(
+      "WHEN new NODE",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ vaults }) => {
+      },
+      () => {
+        test("THEN create new item has name of quickpick value", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -650,10 +654,9 @@ suite("NoteLookupCommand", function () {
               VSCodeUtils.getActiveTextEditorOrThrow().document
             )?.fname
           ).toEqual("foobar");
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     describeMultiWS(
       "WHEN a new note with .md in its name is created",
@@ -703,8 +706,9 @@ suite("NoteLookupCommand", function () {
       }
     );
 
-    test("new node, stub", (done) => {
-      runLegacyMultiWorkspaceTest({
+    describeMultiWS(
+      "WHEN new node is stub",
+      {
         ctx,
         preSetupHook: async ({ vaults, wsRoot }) => {
           const vault = TestEngineUtils.vault1(vaults);
@@ -713,7 +717,10 @@ suite("NoteLookupCommand", function () {
             wsRoot,
           });
         },
-        onInit: async ({ vaults, engine, wsRoot }) => {
+      },
+      () => {
+        test("THEN stub is created", async () => {
+          const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
           stubVaultPick(vaults);
@@ -728,10 +735,9 @@ suite("NoteLookupCommand", function () {
             vault,
             wsRoot,
           });
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     test("new domain", (done) => {
       runLegacyMultiWorkspaceTest({

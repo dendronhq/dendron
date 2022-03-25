@@ -34,7 +34,7 @@ export type ProvideOpts = {
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
-  token: CancellationToken;
+  token?: CancellationToken;
   fuzzThreshold?: number;
   /**
    * force update even if picker vaule didn't change

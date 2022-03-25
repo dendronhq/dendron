@@ -164,6 +164,7 @@ export class NoteLookupCommand
     return this._provider;
   }
 
+  //  ^1h1dr08geo6c
   async onAutoComplete() {
     if (this._quickPick) {
       this._quickPick.value = AutoCompleter.getAutoCompletedValue(
@@ -172,7 +173,6 @@ export class NoteLookupCommand
 
       await this.provider.onUpdatePickerItems({
         picker: this._quickPick,
-        token: this.controller.createCancelSource().token,
       });
     }
   }
@@ -625,6 +625,7 @@ export class NoteLookupCommand
     }
   }
 
+  //  ^8jd6vr4qcsol
   private async getVaultForNewNote({
     fname,
     picker,

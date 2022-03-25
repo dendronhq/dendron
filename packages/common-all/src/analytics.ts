@@ -10,6 +10,7 @@ export enum VSCodeEvents {
   SchemaLookup_Update = "SchemaLookup_Update",
   NoteLookup_Accept = "NoteLookup_Accept",
   SchemaLookup_Accept = "SchemaLookup_Accept",
+  /** @deprecated: treeview v2 is deprecated. */
   TreeView_Ready = "TreeView_Ready",
   Upgrade = "Upgrade",
   DisableTelemetry = "DisableTelemetry",

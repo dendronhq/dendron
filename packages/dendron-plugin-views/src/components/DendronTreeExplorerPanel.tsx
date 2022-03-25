@@ -19,6 +19,8 @@ import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
+
+/** @deprecated: Tree view v2 is deprecated */
 const DendronTreeExplorerPanel: DendronComponent = (props) => {
   const logger = createLogger("DendronTreeExplorerPanel");
   const engine = props.engine;

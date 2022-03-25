@@ -400,6 +400,7 @@ export type DendronDevConfig = {
   engineServerPort?: number;
   /**
    * Enable experimental web ui. Default is false
+   * @deprecated
    */
   enableWebUI?: boolean;
   /**

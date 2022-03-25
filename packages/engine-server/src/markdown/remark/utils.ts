@@ -379,6 +379,7 @@ export class LinkUtils {
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
+   *
    * @param opts.filter - {type, loc
    *
    * - type: filter by {@link DendronASTTypes}

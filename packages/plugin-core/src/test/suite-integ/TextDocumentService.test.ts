@@ -385,6 +385,42 @@ suite("TextDocumentService", function testSuite() {
       }
     );
 
+    describeSingleWS(
+      "WHEN the original note contains backlinks",
+      {
+        postSetupHook: ENGINE_HOOKS.setupRefs,
+      },
+      () => {
+        test("THEN the backlinks should remain unchanged", async () => {
+          textDocumentService = new TextDocumentService(
+            ExtensionProvider.getExtension(),
+            vscode.workspace.onDidSaveTextDocument
+          );
+          const engine = ExtensionProvider.getEngine();
+          const testNoteProps = engine.notes["simple-note-ref.one"];
+          const editor = await ExtensionProvider.getWSUtils().openNote(
+            testNoteProps
+          );
+
+          const textToAppend = "new text here";
+          editor.edit((editBuilder) => {
+            const line = editor.document.getText().split("\n").length;
+            editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+          });
+          await editor.document.save();
+
+          const { onDidSave } =
+            textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          const updatedNote = await onDidSave(editor.document);
+
+          expect(updatedNote?.links).toEqual(testNoteProps.links);
+          expect(engine.notes["simple-note-ref.one"].links).toEqual(
+            testNoteProps.links
+          );
+        });
+      }
+    );
+
     describeMultiWS(
       "WHEN the contents of the note has not changed",
       {

@@ -169,6 +169,9 @@ export class DendronEngineV2 implements DEngine {
     this.renderedCache = createRenderedCache(this.config, this.logger);
   }
 
+  /**
+   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
+   */
   async getLinks(
     opts: Optional<GetLinksRequest, "ws">
   ): Promise<GetNoteLinksPayload> {
@@ -190,7 +193,8 @@ export class DendronEngineV2 implements DEngine {
       default:
         assertUnreachable(type);
     }
-    return { data: links, error: null };
+    const backlinks = note.links.filter((link) => link.type === "backlink");
+    return { data: links.concat(backlinks), error: null };
   }
 
   async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {

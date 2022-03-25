@@ -91,6 +91,30 @@ export enum PluginDoctorActionsEnum {
   FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
 }
 
+// Only reload the workspace for these commands
+//  ^2z4m76v2e2xo
+const RELOAD_BEFORE_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
+];
+
+const RELOAD_AFTER_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
+];
+
+function shouldDoctorReloadWorkspaceBeforeDoctorAction(
+  action: PluginDoctorActionsEnum | DoctorActionsEnum
+) {
+  return RELOAD_BEFORE_ACTIONS.includes(action);
+}
+
+function shouldDoctorReloadWorkspaceAfterDoctorAction(
+  action: PluginDoctorActionsEnum | DoctorActionsEnum
+) {
+  return RELOAD_AFTER_ACTIONS.includes(action);
+}
+
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.DOCTOR.key;
   private extension: IDendronExtension;
@@ -342,7 +366,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     this.L.info({ ctx, msg: "pre:Reload" });
 
-    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+    if (shouldDoctorReloadWorkspaceBeforeDoctorAction(opts.action)) {
       await this.reload();
     }
 
@@ -496,7 +520,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.extension.fileWatcher.pause = false;
     }
 
-    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+    if (shouldDoctorReloadWorkspaceAfterDoctorAction(opts.action)) {
       await this.reload();
       // Decorations don't auto-update here, I think because the contents of the
       // note haven't updated within VSCode yet. Regenerate the decorations, but

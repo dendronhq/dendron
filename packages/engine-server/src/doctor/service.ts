@@ -389,7 +389,7 @@ export class DoctorService implements Disposable {
             custom: { ...note.custom, pods },
           };
           // update note
-          engine.writeNote(updatedNote, { updateExisting: true });
+          await engine.writeNote(updatedNote, { updateExisting: true });
         };
         break;
       }

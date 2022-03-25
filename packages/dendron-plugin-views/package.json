@@ -61,7 +61,7 @@
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
     "lodash": "^4.17.21",
-    "mermaid": "^8.13.3",
+    "mermaid": "^8.14.0",
     "mini-css-extract-plugin": "0.11.3",
     "node-sass": "^7.0.0",
     "optimize-css-assets-webpack-plugin": "5.0.4",
@@ -184,7 +184,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.176",
-    "@types/mermaid": "^8.2.7",
+    "@types/mermaid": "^8.2.9",
     "cross-env": "^7.0.3",
     "rimraf": "^3.0.2"
   }

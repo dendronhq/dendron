@@ -94,7 +94,10 @@ export const useMermaid = ({
     if (config && ConfigUtils.getPreview(config)?.enableMermaid) {
       mermaid.initialize({
         startOnLoad: true,
-        theme: themeType === "light" ? "forest" : "dark",
+        // Cast here because the type definitions seem to be incorrect. I can't
+        // get a value for the mermaid Theme enum, it's always undefined at
+        // runtime.
+        theme: (themeType === "light" ? "forest" : "dark") as any,
       });
       // use for debugging
       // @ts-ignore

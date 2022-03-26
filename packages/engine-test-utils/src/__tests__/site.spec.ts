@@ -95,63 +95,6 @@ describe("SiteUtils", () => {
     siteRootDir = tmpDir().name;
   });
 
-  describe("xvault links", () => {
-    testWithEngine(
-      "can publish alpha",
-      async ({ engine, wsRoot, vaults }) => {
-        const noteIndex = engine.notes["alpha"];
-        const config = TestConfigUtils.withConfig(
-          (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-            ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
-                siteHierarchies: ["alpha"],
-                siteRootDir,
-                ...dupNote(vaults[1]),
-              })
-            );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
-          },
-          {
-            wsRoot,
-          }
-        );
-        const { notes } = await SiteUtils.filterByConfig({
-          engine,
-          config,
-        });
-        const alpha = notes["alpha"];
-        expect(_.values(notes)).toEqual([alpha]);
-        const resp = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "alpha",
-          vault: vaults[0],
-          noteIndex,
-        }).process(alpha.body);
-        // beta not published
-        await TestUnifiedUtils.verifyPrivateLink({
-          contents: resp.contents as string,
-          value: "Beta",
-        });
-      },
-      {
-        preSetupHook: (opts) =>
-          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
-            workspaceType: "multi",
-            ...opts,
-            withVaultPrefix: true,
-          }),
-      }
-    );
-  });
-
   describe("gen", () => {
     test("write stub", async () => {
       await runEngineTestV5(

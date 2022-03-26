@@ -124,11 +124,11 @@ function createProc({
   return proc.process(linkText);
 }
 
-describe.only("GIVEN dendronPub", () => {
+describe("GIVEN dendronPub", () => {
   const fnameAlpha = "alpha";
   const fnameBeta = "beta";
 
-  describe.only("WHEN all notes are public", () => {
+  describe("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
     const fname = fnameBeta;
 
@@ -267,7 +267,7 @@ describe.only("GIVEN dendronPub", () => {
   });
 });
 
-describe("dendronPub", () => {
+describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("prefix", () => {
     testWithEngine("imagePrefix", async ({ engine, vaults }) => {
       const out = proc(

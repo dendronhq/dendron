@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DEngineClient,
   DVault,
+  VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -20,7 +21,7 @@ import _ from "lodash";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5, testWithEngine } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
-import { TestUnifiedUtils } from "../../../utils";
+import { checkString, TestUnifiedUtils } from "../../../utils";
 import { checkNotInVFile, checkVFile } from "./utils";
 
 function proc(
@@ -55,10 +56,14 @@ const verifyPrivateLink = async (vfile: VFile, value: string) => {
   });
 };
 
+function verifyLink(resp: any, match: string) {
+  return checkString(resp.contents as string, match);
+}
+
 function genPublishConfig() {
   const config = ConfigUtils.genDefaultConfig();
-  ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-  ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);
+  ConfigUtils.setPublishProp(config, "siteRootDir", "beta");
   return config;
 }
 
@@ -66,11 +71,11 @@ function createProc({
   vaults,
   engine,
   linkText,
-  fname = "foo",
+  fname,
 }: WorkspaceOpts & {
   engine: DEngineClient;
   linkText: string;
-  fname?: string;
+  fname: string;
 }) {
   const vault = vaults[0];
   const config = genPublishConfig();
@@ -87,81 +92,112 @@ function createProc({
   return proc.process(linkText);
 }
 
-describe("GIVEN dendronPub", () => {
-  describe("WHEN link is private", () => {
-    test("THEN show private link", async () => {
-      await runEngineTestV5(
-        async (opts) => {
-          const resp = await createProc({
-            ...opts,
-            linkText: "[[an alias|bar]]",
-          });
-          await verifyPrivateLink(resp, "an alias");
-        },
-        {
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-          expect,
-        }
-      );
-    });
-  });
+describe.only("GIVEN dendronPub", () => {
+  const fnamePrivate = "alpha";
+  const fnamePublished = "beta";
 
-  describe("WHEN inside note ref", () => {
-    test("THEN show private link", async () => {
-      await runEngineTestV5(
-        async (opts) => {
-          const resp = await createProc({
-            ...opts,
-            fname: "gamma",
-            linkText: "[[alpha]]",
-          });
-          await verifyPrivateLink(resp, "Alpha");
-        },
-        {
-          preSetupHook: async (opts) => {
-            await ENGINE_HOOKS.setupLinks(opts);
-            await NoteTestUtilsV4.createNote({
-              fname: "gamma",
-              body: `![[alpha]]`,
-              vault: opts.vaults[0],
-              wsRoot: opts.wsRoot,
-            });
-          },
-          expect,
-        }
-      );
-    });
-
-    describe("AND noteRef link", () => {
-      test("THEN noteRef link is blank", async () => {
+  describe("WHEN linking to non-published note", () => {
+    const fname = fnamePrivate;
+    describe("AND WHEN render wikilink", () => {
+      test("THEN wikilink is marked private", async () => {
         await runEngineTestV5(
           async (opts) => {
             const resp = await createProc({
               ...opts,
-              fname: "gamma",
-              linkText: "![[alpha]]",
+              fname,
+              linkText: "[[an alias|bar]]",
             });
-            await checkVFile(resp, "<p></p><p></p>");
+            await verifyPrivateLink(resp, "an alias");
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+    });
+
+    describe("WHEN inside note ref", () => {
+      describe("AND WHEN render wikilink", () => {
+        test("THEN show private link", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const resp = await createProc({
+                ...opts,
+                fname,
+                linkText: "[[alpha]]",
+              });
+              await verifyPrivateLink(resp, "Alpha");
+            },
+            {
+              preSetupHook: async (opts) => {
+                await ENGINE_HOOKS.setupLinks(opts);
+                await NoteTestUtilsV4.createNote({
+                  fname: "gamma",
+                  body: `![[alpha]]`,
+                  vault: opts.vaults[0],
+                  wsRoot: opts.wsRoot,
+                });
+              },
+              expect,
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN render noteRef", () => {
+        test("THEN noteRef is blank", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const resp = await createProc({
+                ...opts,
+                fname: "gamma",
+                linkText: "![[alpha]]",
+              });
+              await checkVFile(resp, "<p></p><p></p>");
+            },
+            {
+              preSetupHook: async (opts) => {
+                await ENGINE_HOOKS.setupLinks(opts);
+                await NoteTestUtilsV4.createNote({
+                  fname: "gamma",
+                  body: `![[alpha]]`,
+                  vault: opts.vaults[0],
+                  wsRoot: opts.wsRoot,
+                });
+              },
+              expect,
+            }
+          );
+        });
+      });
+    });
+  });
+
+  describe("WHEN linking to published note", () => {
+    const fname = fnamePublished;
+    describe("WHEN xvault link", () => {
+      test("THEN links are generated correctly", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const vaultName = VaultUtils.getName(opts.vaults[0]);
+            const resp = await createProc({
+              ...opts,
+              fname,
+              linkText: `[[dendron://${vaultName}/beta]]`,
+            });
+            expect(resp).toMatchSnapshot("bond");
+            await verifyLink(resp, '<a href="/notes/beta">Beta</a>');
           },
           {
             preSetupHook: async (opts) => {
               await ENGINE_HOOKS.setupLinks(opts);
-              await NoteTestUtilsV4.createNote({
-                fname: "gamma",
-                body: `![[alpha]]`,
-                vault: opts.vaults[0],
-                wsRoot: opts.wsRoot,
-              });
             },
             expect,
           }
         );
       });
     });
-  });
-
-  describe("WHEN xvault link", () => {
-    test("THEN links are generated correctly", () => {});
   });
 });
 

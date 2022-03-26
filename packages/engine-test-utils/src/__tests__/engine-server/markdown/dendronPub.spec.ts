@@ -1,8 +1,14 @@
-import { ConfigUtils, DEngineClient, DVault } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DEngineClient,
+  DVault,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
   DendronASTDest,
+  DendronEngineClient,
   DendronPubOpts,
   MDUtilsV4,
   MDUtilsV5,
@@ -49,29 +55,47 @@ const verifyPrivateLink = async (vfile: VFile, value: string) => {
   });
 };
 
+function genPublishConfig() {
+  const config = ConfigUtils.genDefaultConfig();
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+  ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+  return config;
+}
+
+function createProc({
+  vaults,
+  engine,
+  linkText,
+  fname = "foo",
+}: WorkspaceOpts & {
+  engine: DEngineClient;
+  linkText: string;
+  fname?: string;
+}) {
+  const vault = vaults[0];
+  const config = genPublishConfig();
+
+  const proc = MDUtilsV5.procRehypeFull(
+    {
+      engine,
+      fname,
+      vault,
+      config,
+    },
+    { flavor: ProcFlavor.PUBLISHING }
+  );
+  return proc.process(linkText);
+}
+
 describe("GIVEN dendronPub", () => {
   describe("WHEN link is private", () => {
     test("THEN show private link", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const config = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(
-              engine,
-              {
-                fname: "foo",
-                dest: DendronASTDest.HTML,
-                vault: vaults[0],
-                config,
-              },
-              {
-                wikiLinkOpts: { useId: true },
-                transformNoPublish: true,
-              }
-            ),
-          }).process(`[[an alias|bar]]`);
+        async (opts) => {
+          const resp = await createProc({
+            ...opts,
+            linkText: "[[an alias|bar]]",
+          });
           await verifyPrivateLink(resp, "an alias");
         },
         {
@@ -81,30 +105,16 @@ describe("GIVEN dendronPub", () => {
       );
     });
   });
+
   describe("WHEN inside note ref", () => {
     test("THEN show private link", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const vault = vaults[0];
-          const config = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(
-              engine,
-              {
-                dest: DendronASTDest.HTML,
-                config,
-                vault,
-                fname: "gamma",
-                shouldApplyPublishRules: true,
-              },
-              {
-                wikiLinkOpts: { useId: true },
-                transformNoPublish: true,
-              }
-            ),
-          }).process("[[alpha]]");
+        async (opts) => {
+          const resp = await createProc({
+            ...opts,
+            fname: "gamma",
+            linkText: "[[alpha]]",
+          });
           await verifyPrivateLink(resp, "Alpha");
         },
         {
@@ -121,31 +131,16 @@ describe("GIVEN dendronPub", () => {
         }
       );
     });
+
     describe("AND noteRef link", () => {
       test("THEN noteRef link is blank", async () => {
         await runEngineTestV5(
-          async ({ engine, vaults }) => {
-            const vault = vaults[0];
-            const config = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-            ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-            ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
-            const resp = await MDUtilsV4.procRehype({
-              proc: proc(
-                engine,
-                {
-                  dest: DendronASTDest.HTML,
-                  config,
-                  vault,
-                  fname: "gamma",
-                  shouldApplyPublishRules: true,
-                },
-                {
-                  wikiLinkOpts: { useId: true },
-                  transformNoPublish: true,
-                }
-              ),
-            }).process("![[alpha]]");
+          async (opts) => {
+            const resp = await createProc({
+              ...opts,
+              fname: "gamma",
+              linkText: "![[alpha]]",
+            });
             await checkVFile(resp, "<p></p><p></p>");
           },
           {
@@ -163,6 +158,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
     });
+  });
+
+  describe("WHEN xvault link", () => {
+    test("THEN links are generated correctly", () => {});
   });
 });
 

@@ -168,7 +168,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       });
     });
 
-    describe.only("AND WHEN wikilinkToURL is set to true", () => {
+    describe("AND WHEN wikilinkToURL is set to true", () => {
       describe("AND WHEN assetPrefix is set", () => {
         test("THEN expect assetPrefix to be in url", async () => {
           await runEngineTestV5(

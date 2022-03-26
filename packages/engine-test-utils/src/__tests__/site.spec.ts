@@ -97,69 +97,6 @@ describe("SiteUtils", () => {
 
   describe("xvault links", () => {
     testWithEngine(
-      "can publish all",
-      async ({ engine, wsRoot, vaults }) => {
-        const noteIndex = engine.notes["alpha"];
-        const config = TestConfigUtils.withConfig(
-          (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-            ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
-                siteHierarchies: ["alpha", "beta"],
-                siteRootDir,
-                siteNotesDir: "docs",
-                ...dupNote(vaults[1]),
-              })
-            );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
-          },
-          {
-            wsRoot,
-          }
-        );
-        const { notes } = await SiteUtils.filterByConfig({
-          engine,
-          config,
-        });
-        const alpha = notes["alpha"];
-        const beta = notes["beta"];
-        const resp = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "alpha",
-          vault: vaults[0],
-          noteIndex,
-        }).process(alpha.body);
-        await checkString(
-          resp.contents as string,
-          "https://localhost:8080/docs/beta.html"
-        );
-        const resp2 = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "beta",
-          vault: vaults[0],
-          noteIndex,
-        }).process(beta.body);
-        await checkString(resp2.contents as string, "https://localhost:8080");
-      },
-      {
-        preSetupHook: (opts) =>
-          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
-            workspaceType: "multi",
-            ...opts,
-            withVaultPrefix: true,
-          }),
-      }
-    );
-
-    testWithEngine(
       "can publish alpha",
       async ({ engine, wsRoot, vaults }) => {
         const noteIndex = engine.notes["alpha"];

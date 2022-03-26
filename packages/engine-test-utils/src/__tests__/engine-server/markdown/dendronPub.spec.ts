@@ -125,16 +125,40 @@ function createProc({
 }
 
 describe.only("GIVEN dendronPub", () => {
-  const fnamePrivate = "alpha";
-  const fnamePublished = "beta";
+  const fnameAlpha = "alpha";
+  const fnameBeta = "beta";
 
-  describe("WHEN all notes are public", () => {
+  describe.only("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
-    const fname = fnamePublished;
+    const fname = fnameBeta;
+
+    describe("AND WHEN wikilink", () => {
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[beta]] [[alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+      test("THEN all links are rendered", async () => {
+        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, fnameAlpha);
+      });
+    });
   });
 
-  describe.only("WHEN publish and private hierarchies", () => {
-    const fname = fnamePublished;
+  describe("WHEN publish and private hierarchies", () => {
+    const fname = fnameBeta;
     const config = genPublishConfigWithPublicPrivateHierarchies();
 
     describe("AND WHEN noteRef", () => {
@@ -157,10 +181,10 @@ describe.only("GIVEN dendronPub", () => {
           );
         });
         test("THEN published note is rendered", async () => {
-          await verifyPublicNoteRef(resp, fnamePublished);
+          await verifyPublicNoteRef(resp, fnameBeta);
         });
         test("THEN private link in published note is hidden", async () => {
-          await verifyPrivateLink(resp, fnamePrivate);
+          await verifyPrivateLink(resp, fnameAlpha);
         });
       });
 
@@ -207,10 +231,10 @@ describe.only("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnamePublished);
+        await verifyPublicLink(resp, fnameBeta);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnamePrivate);
+        await verifyPrivateLink(resp, fnameAlpha);
       });
     });
 
@@ -234,10 +258,10 @@ describe.only("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnamePublished);
+        await verifyPublicLink(resp, fnameBeta);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnamePrivate);
+        await verifyPrivateLink(resp, fnameAlpha);
       });
     });
   });

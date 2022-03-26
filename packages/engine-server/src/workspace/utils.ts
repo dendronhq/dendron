@@ -294,7 +294,6 @@ export class WorkspaceUtils {
     /**
      * set to true if index node, don't append id at the end
      */
-    let isIndex: boolean = false;
     const { url: root, index } = SiteUtils.getSiteUrlRootForVault({
       vault,
       config,
@@ -302,13 +301,13 @@ export class WorkspaceUtils {
     if (!root) {
       throw new DendronError({ message: "no urlRoot set" });
     }
-    if (!_.isUndefined(note) && _.isUndefined(index)) {
-      // if custom index is set, match against that, otherwise `root` is default index
-      isIndex = SiteUtils.isIndexNote({
-        indexNote: index,
-        note,
-      });
-    }
+    // if we have a note, see if we are at index
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtils.isIndexNote({
+          indexNote: index,
+          note,
+        });
     const pathValue = note.id;
     const siteUrlPath = SiteUtils.getSiteUrlPathForNote({
       addPrefix: true,

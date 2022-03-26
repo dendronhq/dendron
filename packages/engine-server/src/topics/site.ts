@@ -489,7 +489,7 @@ export class SiteUtils {
 
     // slug anchor if it is not a block anchor
     if (pathAnchor && !isBlockAnchor(pathAnchor)) {
-      pathAnchor = `#${getSlugger().slug(pathAnchor)}`;
+      pathAnchor = `${getSlugger().slug(pathAnchor)}`;
     }
     // remove extension for pretty links
     const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);

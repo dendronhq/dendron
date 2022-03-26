@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DEngineClient,
   DVault,
+  IntermediateDendronConfig,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -9,9 +10,7 @@ import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
   DendronASTDest,
-  DendronEngineClient,
   DendronPubOpts,
-  MDUtilsV4,
   MDUtilsV5,
   ProcFlavor,
   ProcMode,
@@ -49,21 +48,53 @@ function proc(
   );
 }
 
-const verifyPrivateLink = async (vfile: VFile, value: string) => {
+const verifyPrivateLink = async (
+  vfile: VFile,
+  value: string,
+  capitalize = true
+) => {
   return TestUnifiedUtils.verifyPrivateLink({
     contents: vfile.contents as string,
-    value,
+    value: capitalize ? _.capitalize(value) : value,
   });
 };
 
-function verifyLink(resp: any, match: string) {
-  return checkString(resp.contents as string, match);
+function verifyPublicLink(resp: any, match: string) {
+  return checkString(resp.contents as string, `<a href="/notes/${match}">`);
 }
 
-function genPublishConfig() {
+function verifyPrivateNoteRef(resp: VFile) {
+  // Example:
+  // A private note ref is currently 2 empty <p> blocks in succession
+  //
+  // "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\">
+  // <use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+  // <p></p><p></p><div class=\\"portal-container\\">
+  // <div class=\\"portal-head\\">
+  return checkString(
+    resp.contents as string,
+    `<p></p><p></p><div class="portal-container">`
+  );
+}
+
+function verifyPublicNoteRef(resp: VFile, match: string) {
+  // example: <a href=\\"/notes/beta\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  // return checkString(resp.contents as string, `<a href="/notes/${match}">`);
+  return checkString(
+    resp.contents as string,
+    `<a href="/notes/${match}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`
+  );
+}
+
+function genPublishConfigWithPublicPrivateHierarchies() {
   const config = ConfigUtils.genDefaultConfig();
   ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);
-  ConfigUtils.setPublishProp(config, "siteRootDir", "beta");
+  return config;
+}
+
+function genPublishConfigWithAllPublicHierarchies() {
+  const config = ConfigUtils.genDefaultConfig();
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["alpha", "beta"]);
   return config;
 }
 
@@ -72,13 +103,14 @@ function createProc({
   engine,
   linkText,
   fname,
+  config,
 }: WorkspaceOpts & {
   engine: DEngineClient;
   linkText: string;
   fname: string;
+  config: IntermediateDendronConfig;
 }) {
   const vault = vaults[0];
-  const config = genPublishConfig();
 
   const proc = MDUtilsV5.procRehypeFull(
     {
@@ -96,18 +128,77 @@ describe.only("GIVEN dendronPub", () => {
   const fnamePrivate = "alpha";
   const fnamePublished = "beta";
 
-  describe("WHEN linking to non-published note", () => {
-    const fname = fnamePrivate;
-    describe("AND WHEN render wikilink", () => {
-      test("THEN wikilink is marked private", async () => {
+  describe("WHEN all notes are public", () => {
+    const config = genPublishConfigWithAllPublicHierarchies();
+    const fname = fnamePublished;
+  });
+
+  describe.only("WHEN publish and private hierarchies", () => {
+    const fname = fnamePublished;
+    const config = genPublishConfigWithPublicPrivateHierarchies();
+
+    describe("AND WHEN noteRef", () => {
+      describe("AND WHEN noteref of published note", () => {
+        let resp: VFile;
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname,
+                linkText: `![[beta]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        test("THEN published note is rendered", async () => {
+          await verifyPublicNoteRef(resp, fnamePublished);
+        });
+        test("THEN private link in published note is hidden", async () => {
+          await verifyPrivateLink(resp, fnamePrivate);
+        });
+      });
+
+      describe("AND WHEN noteref of private note", () => {
+        let resp: VFile;
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname,
+                linkText: `![[alpha]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        test("THEN private note is not rendered", async () => {
+          await verifyPrivateNoteRef(resp);
+        });
+      });
+    });
+
+    describe("AND WHEN wikilink", () => {
+      let resp: VFile;
+      beforeAll(async () => {
         await runEngineTestV5(
           async (opts) => {
-            const resp = await createProc({
+            resp = await createProc({
               ...opts,
+              config,
               fname,
-              linkText: "[[an alias|bar]]",
+              linkText: `[[beta]] [[alpha]]`,
             });
-            await verifyPrivateLink(resp, "an alias");
           },
           {
             preSetupHook: ENGINE_HOOKS.setupLinks,
@@ -115,87 +206,38 @@ describe.only("GIVEN dendronPub", () => {
           }
         );
       });
-    });
-
-    describe("WHEN inside note ref", () => {
-      describe("AND WHEN render wikilink", () => {
-        test("THEN show private link", async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              const resp = await createProc({
-                ...opts,
-                fname,
-                linkText: "[[alpha]]",
-              });
-              await verifyPrivateLink(resp, "Alpha");
-            },
-            {
-              preSetupHook: async (opts) => {
-                await ENGINE_HOOKS.setupLinks(opts);
-                await NoteTestUtilsV4.createNote({
-                  fname: "gamma",
-                  body: `![[alpha]]`,
-                  vault: opts.vaults[0],
-                  wsRoot: opts.wsRoot,
-                });
-              },
-              expect,
-            }
-          );
-        });
+      test("THEN public link is rendered", async () => {
+        await verifyPublicLink(resp, fnamePublished);
       });
-
-      describe("AND WHEN render noteRef", () => {
-        test("THEN noteRef is blank", async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              const resp = await createProc({
-                ...opts,
-                fname: "gamma",
-                linkText: "![[alpha]]",
-              });
-              await checkVFile(resp, "<p></p><p></p>");
-            },
-            {
-              preSetupHook: async (opts) => {
-                await ENGINE_HOOKS.setupLinks(opts);
-                await NoteTestUtilsV4.createNote({
-                  fname: "gamma",
-                  body: `![[alpha]]`,
-                  vault: opts.vaults[0],
-                  wsRoot: opts.wsRoot,
-                });
-              },
-              expect,
-            }
-          );
-        });
+      test("THEN private link is hidden", async () => {
+        await verifyPrivateLink(resp, fnamePrivate);
       });
     });
-  });
 
-  describe("WHEN linking to published note", () => {
-    const fname = fnamePublished;
-    describe("WHEN xvault link", () => {
-      test("THEN links are generated correctly", async () => {
+    describe("AND WHEN xvault link", () => {
+      let resp: VFile;
+      beforeAll(async () => {
         await runEngineTestV5(
           async (opts) => {
             const vaultName = VaultUtils.getName(opts.vaults[0]);
-            const resp = await createProc({
+            resp = await createProc({
               ...opts,
+              config,
               fname,
-              linkText: `[[dendron://${vaultName}/beta]]`,
+              linkText: `[[dendron://${vaultName}/beta]] [[dendron://${vaultName}/alpha]]`,
             });
-            expect(resp).toMatchSnapshot("bond");
-            await verifyLink(resp, '<a href="/notes/beta">Beta</a>');
           },
           {
-            preSetupHook: async (opts) => {
-              await ENGINE_HOOKS.setupLinks(opts);
-            },
+            preSetupHook: ENGINE_HOOKS.setupLinks,
             expect,
           }
         );
+      });
+      test("THEN public link is rendered", async () => {
+        await verifyPublicLink(resp, fnamePublished);
+      });
+      test("THEN private link is hidden", async () => {
+        await verifyPrivateLink(resp, fnamePrivate);
       });
     });
   });

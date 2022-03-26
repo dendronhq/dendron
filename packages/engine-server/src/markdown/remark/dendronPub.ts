@@ -6,6 +6,7 @@ import {
   isWebUri,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
@@ -314,7 +315,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
         const alias = data.alias ? data.alias : value;
         const href = SiteUtils.getSiteUrlPathForNote({
-          pathPrefix: copts?.prefix,
+          addPrefix: pOpts.flavor === ProcFlavor.PUBLISHING,
           pathValue: value,
           config,
           pathAnchor: data.anchorHeader,

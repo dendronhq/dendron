@@ -1,4 +1,9 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  IntermediateDendronConfig,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -26,12 +31,14 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       opts: RunEngineTestFunctionOpts;
       fname: string;
       podConfigOpts?: Partial<RunnableMarkdownV2PodConfig>;
+      publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
     }) => {
       const { opts, fname, podConfigOpts } = setupOpts;
       const config = opts.engine.config;
       if (config.publishing) {
         config.publishing.siteUrl = "https://foo.com";
       }
+      _.mergeWith(config.publishing, setupOpts.publishConfigOverride);
       const podConfig: RunnableMarkdownV2PodConfig = {
         exportScope: PodExportScope.Note,
         destination: "clipboard",
@@ -161,7 +168,50 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       });
     });
 
-    describe("AND WHEN wikilinkToURL is set to true", () => {
+    describe.only("AND WHEN wikilinkToURL is set to true", () => {
+      describe("AND WHEN assetPrefix is set", () => {
+        test("THEN expect assetPrefix to be in url", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const { props, pod } = setupPod({
+                opts,
+                fname: "parent",
+                podConfigOpts: { wikiLinkToURL: true },
+                publishConfigOverride: {
+                  assetsPrefix: "/prefix",
+                },
+              });
+              const result = await pod.exportNotes([props]);
+              const data = result.data?.exportedNotes!;
+              expect(_.isString(data)).toBeTruthy();
+              if (_.isString(data)) {
+                expect(data).toContain(
+                  "[Foo](https://foo.com/prefix/notes/foo)"
+                );
+                expect(data).toContain("foo body");
+                expect(data).not.toContain("[foo](/notes/foo)");
+                expect(data).not.toContain("![[foo]]");
+              }
+            },
+            {
+              expect,
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                  wsRoot,
+                  vault: vaults[0],
+                });
+                await NoteTestUtilsV4.createNote({
+                  wsRoot,
+                  vault: vaults[0],
+                  fname: "parent",
+                  body: ["![[foo]]", "[[foo]]"].join("\n"),
+                });
+              },
+            }
+          );
+        });
+      });
+
       test("THEN expect wikilinks to update with note URL and ref links to be resolved", async () => {
         await runEngineTestV5(
           async (opts) => {

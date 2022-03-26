@@ -1,14 +1,10 @@
 import {
-  ConfigUtils,
   CONSTANTS,
   DendronError,
-  DNodeUtils,
   DVault,
   DWorkspaceV2,
   ERROR_STATUS,
-  getSlugger,
   IntermediateDendronConfig,
-  isBlockAnchor,
   isNotUndefined,
   NoteProps,
   RespV3,
@@ -313,16 +309,15 @@ export class WorkspaceUtils {
         note,
       });
     }
-    const pathPrefix = "notes/";
     const pathValue = note.id;
     const siteUrlPath = SiteUtils.getSiteUrlPathForNote({
-      pathPrefix,
+      addPrefix: true,
       pathValue,
       config,
       pathAnchor: anchor,
     });
 
-    const link = isIndex ? root : [root, siteUrlPath].join("/");
+    const link = isIndex ? root : [root, siteUrlPath].join("");
     return link;
   }
 

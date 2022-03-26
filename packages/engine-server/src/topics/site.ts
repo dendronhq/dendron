@@ -470,16 +470,23 @@ export class SiteUtils {
   }
 
   static getSiteUrlPathForNote({
-    pathPrefix,
     pathValue,
     pathAnchor,
     config,
+    addPrefix,
   }: {
-    pathPrefix?: string;
     pathValue?: string;
     pathAnchor?: string;
     config: IntermediateDendronConfig;
+    addPrefix?: boolean;
   }): string {
+    // add path prefix if valid
+    let pathPrefix: string = "";
+    if (addPrefix) {
+      const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+      pathPrefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+    }
+
     // slug anchor if it is not a block anchor
     if (pathAnchor && !isBlockAnchor(pathAnchor)) {
       pathAnchor = `#${getSlugger().slug(pathAnchor)}`;
@@ -488,6 +495,7 @@ export class SiteUtils {
     const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
     const pathExtension =
       _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+
     // put together the url path
     return `${pathPrefix || ""}${pathValue}${pathExtension}${
       pathAnchor ? "#" + pathAnchor : ""

@@ -3,6 +3,7 @@ import { TreeSelect, Input } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import {
   SchemaModuleDict,
+  SchemaModuleProps,
   SchemaProps,
   SchemaPropsDict,
   SchemaUtils,
@@ -12,30 +13,44 @@ import { DefaultOptionType } from "rc-tree-select/lib/TreeSelect";
 function traverseSchemaNode(
   node: SchemaProps,
   schemas: SchemaPropsDict,
-  prefix: string
+  prefix: string,
+  module: string
 ): DefaultOptionType {
   const title = (prefix === "" ? "" : prefix + ".") + node.id;
   return {
     title,
-    value: node.id,
+    value: `${module}.${node.id}`,
     children: node.children.map((child) =>
-      traverseSchemaNode(schemas[child], schemas, title)
+      traverseSchemaNode(schemas[child], schemas, title, module)
     ),
   };
 }
 
-function treeDataFromSchema(schemas: SchemaModuleDict): DefaultOptionType[] {
-  return Object.entries(schemas).map(([key, schema]) =>
-    traverseSchemaNode(schema.root, schema.schemas, "")
+function treeDataFromSchema(modules: SchemaModuleDict): DefaultOptionType[] {
+  return Object.entries(modules).map(([domain, module]) =>
+    traverseSchemaNode(module.root, module.schemas, "", domain)
   );
 }
 
-// antd forms
-// formik
-// antd to formik
+type valueToSchemaModule = {
+  [value: string]: { schema: string; module: string };
+};
+function mapValuesToSchemas(schemas: SchemaModuleDict): valueToSchemaModule {
+  const valueMap: valueToSchemaModule = {};
+  Object.entries(schemas).forEach(([domain, module]) => {
+    Object.values(module.schemas).forEach((schema) => {
+      valueMap[`${domain}.${schema.id}`] = {
+        schema: schema.id,
+        module: domain,
+      };
+    });
+  });
+  return valueMap;
+}
+
 export default function DendronSchemaPage({ engine }: DendronProps) {
-  const [selectedSchema, setSelectedSchema] = useState<string | null>(null);
-  const [matchState, setMatchState] = useState<boolean>(false);
+  const [selectedSchemaId, setSelectedSchemaId] = useState<string | null>(null);
+  const [matchState, setMatchState] = useState<string>("");
   const [noteHierarchy, setNoteHierarchy] = useState("");
   useEffect(() => {
     window.postMessage({
@@ -46,23 +61,42 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
   }, []);
   useEffect(() => {
     const schemaKeys = Object.keys(engine.schemas);
-    if (selectedSchema === null && schemaKeys.length > 0) {
-      setSelectedSchema(schemaKeys[0]);
+    if (selectedSchemaId === null && schemaKeys.length > 0) {
+      setSelectedSchemaId(schemaKeys[0]);
     }
-  }, [engine.schemas, selectedSchema]);
+  }, [engine.schemas, selectedSchemaId]);
   const onNoteHierarchyChange = useCallback(
     (e) => {
       const { value } = e.target;
       setNoteHierarchy(value);
-      if (selectedSchema !== null) {
-        const matches = SchemaUtils.matchPath({
+      if (selectedSchemaId !== null) {
+        // should this be memoized somehow?
+        const schemaMap = mapValuesToSchemas(engine.schemas);
+        const schemaValue = schemaMap[selectedSchemaId];
+        const schemaModule = engine.schemas[schemaValue.module];
+        const selectedSchema = schemaModule.schemas[schemaValue.schema];
+        const match = SchemaUtils.matchPath({
           notePath: value,
           schemaModDict: engine.schemas,
         });
-        setMatchState(matches !== undefined);
+        if (match) {
+          const matchedModule = match.schemaModule;
+          const matchedSchema = match.schema;
+          if (match.partial) {
+            setMatchState(`partially matched to ${match.schema.id}`);
+          } else if (matchedSchema.id === selectedSchema.id) {
+            setMatchState(`matched with ${match.schema.id}`);
+          } else {
+            setMatchState(`matched to another schema ${matchedSchema.id}`);
+          }
+        } else {
+          setMatchState("no match");
+        }
+        // match less than schema
+        // match more than schema?
       }
     },
-    [selectedSchema, engine.schemas]
+    [selectedSchemaId, engine.schemas]
   );
   return (
     <div>
@@ -70,9 +104,10 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
       <div style={{ padding: "1em" }}>
         <TreeSelect
           treeData={treeDataFromSchema(engine.schemas)}
-          value={selectedSchema}
-          onChange={setSelectedSchema}
+          value={selectedSchemaId}
+          onChange={setSelectedSchemaId}
           style={{ width: "100%" }}
+          showSearch={true}
         />
       </div>
       <div style={{ padding: "1em" }}>
@@ -82,7 +117,7 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
           onChange={onNoteHierarchyChange}
         />
       </div>
-      <div>{matchState ? "matched!" : "no match"}</div>
+      <div>{matchState}</div>
     </div>
   );
 }

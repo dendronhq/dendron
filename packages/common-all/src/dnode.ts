@@ -49,7 +49,6 @@ import {
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
-import { debug } from "console";
 
 /**
  * Utilities for dealing with nodes
@@ -439,7 +438,7 @@ export class NoteUtils {
       notePath: noteOpts.fname,
       schemaModDict: engine.schemas,
     });
-    if (maybeMatch) {
+    if (maybeMatch && !maybeMatch.partial) {
       const { schema, schemaModule } = maybeMatch;
       NoteUtils.addSchema({ note, schemaModule, schema });
       const maybeTemplate = schema.data.template;
@@ -1402,6 +1401,10 @@ type SchemaMatchResult = {
   schema: SchemaProps;
   namespace: boolean;
   notePath: string;
+  /**
+   * True if only a partial match.
+   */
+  partial: boolean;
 };
 
 export class SchemaUtils {
@@ -1854,7 +1857,6 @@ export class SchemaUtils {
     notePath: string;
     schemaModDict: SchemaModuleDict;
   }): SchemaMatchResult | undefined {
-    debug;
     const { notePath, schemaModDict } = opts;
     const domainName = DNodeUtils.domainName(notePath);
     const match = schemaModDict[domainName];
@@ -1868,14 +1870,26 @@ export class SchemaUtils {
           notePath,
           namespace: domainSchema.data.namespace || false,
           schemaModule: match,
+          partial: false,
         };
       }
-      return SchemaUtils.matchPathWithSchema({
+      const result = SchemaUtils.matchPathWithSchema({
         notePath,
         matched: "",
         schemaCandidates: [domainSchema],
         schemaModule: match,
       });
+      // If cannot go deeper, return what we have partially
+      if (result === undefined) {
+        return {
+          schema: domainSchema,
+          notePath,
+          namespace: domainSchema.data.namespace || false,
+          schemaModule: match,
+          partial: true,
+        };
+      }
+      return result;
     }
   }
 
@@ -1923,6 +1937,7 @@ export class SchemaUtils {
           schema,
           namespace,
           notePath,
+          partial: false,
         };
       }
 
@@ -1933,13 +1948,27 @@ export class SchemaUtils {
       const nextSchemaCandidates = matchNextNamespace
         ? schema.children.map((id) => schemaModule.schemas[id])
         : [schema];
-      return SchemaUtils.matchPathWithSchema({
+
+      // recursive step
+      const next = SchemaUtils.matchPathWithSchema({
         notePath,
         matched: nextNotePath,
         schemaCandidates: nextSchemaCandidates,
         schemaModule,
         matchNamespace: matchNextNamespace,
       });
+      // If cannot go deeper, return what we have partially
+      if (next === undefined) {
+        // possible bug: next itself is partial
+        return {
+          schemaModule,
+          schema,
+          namespace,
+          notePath,
+          partial: true,
+        };
+      }
+      return next;
     }
     return;
   }
@@ -1972,6 +2001,7 @@ export class SchemaUtils {
         namespace,
         notePath,
         schemaModule,
+        partial: false,
       };
     }
     return;

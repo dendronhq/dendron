@@ -262,7 +262,7 @@ describe("WHEN run 'dendron note move'", () => {
     test("THEN move note within specific vault to new vault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
-          const vault = vaults[0];
+          const vault = vaults[1];
           const otherVault = vaults[2];
           await runCmd({
             wsRoot,

@@ -169,6 +169,18 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             fname: destFname || oldLoc.fname,
             vaultName: destVaultName || oldLoc.vaultName,
           };
+          const destVault = VaultUtils.getVaultByName({vname: destVaultName ? destVaultName: oldLoc.fname, vaults: engine.vaults})
+          const noteExists = NoteUtils.getNoteByFnameFromEngine({
+              fname: destFname || query,
+              engine: engine,
+              vault: destVault || vault,
+          });
+          const isStub = noteExists?.stub;
+          if (noteExists && !isStub) {
+              const vaultName = VaultUtils.getName(noteExists.vault);
+              const errMsg = `${vaultName}/${query} exists`;
+              throw Error(errMsg);
+          };
           const resp = await engine.renameNote({ oldLoc, newLoc });
           return { data: { payload: note.fname, rawData: resp } };
         }

@@ -1273,6 +1273,25 @@ type SchemaMatchResult = {
   schema: SchemaProps;
   namespace: boolean;
   notePath: string;
+<<<<<<< HEAD
+=======
+  /**
+   * True if only a partial match.
+   */
+  partial: boolean;
+};
+
+export class SchemaUtils {
+  /** The props of a template note that will get copied over when the template is applied. */
+  static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
+    "desc",
+    "custom",
+    "color",
+    "tags",
+    "image",
+  ];
+
+>>>>>>> 83ce6420f (feat: Echo case matches)
   /**
    * True if only a partial match.
    */

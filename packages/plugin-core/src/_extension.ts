@@ -26,8 +26,6 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
-  DoctorActionsEnum,
   FileAddWatcher,
   HistoryService,
   InactvieUserMsgStatusEnum,

@@ -525,17 +525,22 @@ export class SegmentClient {
   }
 }
 
+// user props
+type UserProfileProps = {
+  role?: string;
+};
+
 // platform props
 type VSCodeProps = {
   type: AppNames.CODE;
   ideVersion: string;
   ideFlavor: string;
-};
+} & UserProfileProps;
 
 type CLIProps = {
   type: AppNames.CLI;
   cliVersion: string;
-};
+} & UserProfileProps;
 
 // platform identify props
 export type VSCodeIdentifyProps = {

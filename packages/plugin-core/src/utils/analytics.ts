@@ -108,9 +108,11 @@ export class AnalyticsUtils {
     });
   }
 
-  static identify() {
-    const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
-    SegmentUtils.identify(props);
+  static identify(props?: Partial<VSCodeIdentifyProps>) {
+    const defaultProps = AnalyticsUtils.getVSCodeIdentifyProps();
+    // if partial props is passed, fill them with defaults before calling identify.
+    const _props = props ? _.defaults(props, defaultProps) : defaultProps;
+    SegmentUtils.identify(_props);
   }
 
   /**

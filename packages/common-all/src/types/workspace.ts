@@ -30,7 +30,7 @@ export type DVault = {
   /** Name of vault */
   name?: string;
   visibility?: DVaultVisibility;
-  /** Filesystem path to fault */
+  /** Filesystem path to vault */
   fsPath: string;
   /**
    * Indicate the workspace that this vault is part of

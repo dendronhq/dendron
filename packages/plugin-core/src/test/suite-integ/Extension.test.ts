@@ -40,6 +40,7 @@ import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
+import { StartupUtils } from "../../utils/StartupUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
@@ -47,7 +48,7 @@ import { TemplateInitializer } from "../../workspace/templateInitializer";
 import {
   shouldDisplayInactiveUserSurvey,
   shouldDisplayLapsedUserMsg,
-  shouldDisplayMissingDefaultConfigMessage,
+  // shouldDisplayMissingDefaultConfigMessage,
   _activate,
 } from "../../_extension";
 import {
@@ -1232,7 +1233,7 @@ suite("missing default config detection", () => {
       () => {
         test("THEN prompted to add missing defaults", () => {
           const ext = ExtensionProvider.getExtension();
-          const out = shouldDisplayMissingDefaultConfigMessage({
+          const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
             ext,
             extensionInstallStatus: InstallStatus.UPGRADED,
           });
@@ -1244,7 +1245,7 @@ suite("missing default config detection", () => {
     describeMultiWS("AND not missing default key", {}, () => {
       test("THEN not prompted to add missing defaults", () => {
         const ext = ExtensionProvider.getExtension();
-        const out = shouldDisplayMissingDefaultConfigMessage({
+        const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
           ext,
           extensionInstallStatus: InstallStatus.UPGRADED,
         });
@@ -1268,10 +1269,12 @@ suite("missing default config detection", () => {
           const ext = ExtensionProvider.getExtension();
           [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
             (extensionInstallStatus) => {
-              const out = shouldDisplayMissingDefaultConfigMessage({
-                ext,
-                extensionInstallStatus,
-              });
+              const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage(
+                {
+                  ext,
+                  extensionInstallStatus,
+                }
+              );
               expect(out).toBeFalsy();
             }
           );
@@ -1284,7 +1287,7 @@ suite("missing default config detection", () => {
         const ext = ExtensionProvider.getExtension();
         [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
           (extensionInstallStatus) => {
-            const out = shouldDisplayMissingDefaultConfigMessage({
+            const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
               ext,
               extensionInstallStatus,
             });

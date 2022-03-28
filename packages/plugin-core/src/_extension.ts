@@ -90,6 +90,7 @@ import { isAutoCompletable } from "./utils/AutoCompletable";
 import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
+import { StartupUtils } from "./utils/StartupUtils";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -467,12 +468,12 @@ export async function _activate(
 
       // check for missing default config keys and prompt for a backfill.
       if (
-        shouldDisplayMissingDefaultConfigMessage({
+        StartupUtils.shouldDisplayMissingDefaultConfigMessage({
           ext: ws,
           extensionInstallStatus,
         })
       ) {
-        showMissingDefaultConfigMessage({ ext: ws });
+        StartupUtils.showMissingDefaultConfigMessage({ ext: ws });
       }
 
       // Re-use the id for error reporting too:
@@ -856,44 +857,6 @@ export async function showLapsedUserMessage(assetUri: vscode.Uri) {
           await SurveyUtils.showLapsedUserSurvey();
         }
         return;
-      }
-    });
-}
-
-export function shouldDisplayMissingDefaultConfigMessage(opts: {
-  ext: IDendronExtension;
-  extensionInstallStatus: InstallStatus;
-}): boolean {
-  if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
-    const wsRoot = opts.ext.getDWorkspace().wsRoot;
-    const rawConfig = DConfig.getRaw(wsRoot);
-    const resp = ConfigUtils.detectMissingDefaults({ config: rawConfig });
-    return resp.data !== undefined && resp.data.needsBackfill;
-  } else {
-    return false;
-  }
-}
-
-export function showMissingDefaultConfigMessage(opts: {
-  ext: IDendronExtension;
-}) {
-  AnalyticsUtils.track(ConfigEvents.ShowMissingDefaultConfigMessage);
-  const ADD_CONFIG = "Add Missing Configuration";
-  vscode.window
-    .showInformationMessage(
-      "We have detected a missing default configuration. Would you like to add them to dendron.yml?",
-      ADD_CONFIG
-    )
-    .then(async (resp) => {
-      if (resp === ADD_CONFIG) {
-        AnalyticsUtils.track(ConfigEvents.MissingDefaultConfigMessageAccepted);
-        const cmd = new DoctorCommand(opts.ext);
-        await cmd.execute({
-          action: DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS,
-          scope: "workspace",
-        });
-      } else {
-        AnalyticsUtils.track(ConfigEvents.MissingDefaultConfigMessageRejected);
       }
     });
 }

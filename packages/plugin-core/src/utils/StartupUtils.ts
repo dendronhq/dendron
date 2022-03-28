@@ -28,11 +28,10 @@ export class StartupUtils {
   static showMissingDefaultConfigMessage(opts: { ext: IDendronExtension }) {
     AnalyticsUtils.track(ConfigEvents.ShowMissingDefaultConfigMessage);
     const ADD_CONFIG = "Add Missing Configuration";
+    const MESSAGE =
+      "We have detected a missing configuration. This may happen because a new configuration was introduced, or because an existing required configuration has been deleted. Would you like to add them to dendron.yml?";
     vscode.window
-      .showInformationMessage(
-        "We have detected a missing default configuration. Would you like to add them to dendron.yml?",
-        ADD_CONFIG
-      )
+      .showInformationMessage(MESSAGE, ADD_CONFIG)
       .then(async (resp) => {
         if (resp === ADD_CONFIG) {
           AnalyticsUtils.track(

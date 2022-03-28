@@ -525,23 +525,16 @@ export function describeMultiWS(
     }
     let ctx: ExtensionContext;
     before(async () => {
-      try {
-        ctx = opts.ctx ?? setupWorkspaceStubs(opts);
-        if (opts.beforeHook) {
-          await opts.beforeHook({ ctx });
-        }
-
-        const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
-        if (opts.preActivateHook) {
-          await opts.preActivateHook({ ctx, ...out });
-        }
-        await _activate(ctx);
-      } catch (error) {
-        Logger.error({
-          ctx: `${title}: before`,
-          error: new DendronError({ message: "before", payload: error }),
-        });
+      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
+      if (opts.beforeHook) {
+        await opts.beforeHook({ ctx });
       }
+
+      const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
+      if (opts.preActivateHook) {
+        await opts.preActivateHook({ ctx, ...out });
+      }
+      await _activate(ctx);
     });
 
     const result = fn();

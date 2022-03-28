@@ -1,7 +1,6 @@
 import {
   ConfigUtils,
   DENDRON_VSCODE_CONFIG_KEYS,
-  DendronError,
   DEngineClient,
   Disposable,
   DVault,
@@ -531,6 +530,7 @@ export function describeMultiWS(
       }
 
       const out = await setupLegacyWorkspaceMulti({ ...opts, ctx });
+
       if (opts.preActivateHook) {
         await opts.preActivateHook({ ctx, ...out });
       }

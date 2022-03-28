@@ -118,8 +118,7 @@ export class BackgroundSurvey extends DendronQuickPickSurvey {
       });
     }
 
-    const role = maybeOtherResult || result.label;
-    AnalyticsUtils.identify({ role });
+    AnalyticsUtils.identify({ role: result.label });
     AnalyticsUtils.track(SurveyEvents.BackgroundAnswered, {
       results: [result.label], // passing as array because this used to be a multi-select survey
       other: maybeOtherResult,

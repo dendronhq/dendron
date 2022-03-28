@@ -1,6 +1,7 @@
 import {
   ConfigEvents,
   ConfigUtils,
+  ConfirmStatus,
   InstallStatus,
 } from "@dendronhq/common-all";
 import { DConfig, DoctorActionsEnum } from "@dendronhq/engine-server";
@@ -35,7 +36,10 @@ export class StartupUtils {
       .then(async (resp) => {
         if (resp === ADD_CONFIG) {
           AnalyticsUtils.track(
-            ConfigEvents.MissingDefaultConfigMessageAccepted
+            ConfigEvents.MissingDefaultConfigMessageConfirm,
+            {
+              status: ConfirmStatus.accepted,
+            }
           );
           const cmd = new DoctorCommand(opts.ext);
           await cmd.execute({
@@ -44,7 +48,10 @@ export class StartupUtils {
           });
         } else {
           AnalyticsUtils.track(
-            ConfigEvents.MissingDefaultConfigMessageRejected
+            ConfigEvents.MissingDefaultConfigMessageConfirm,
+            {
+              status: ConfirmStatus.rejected,
+            }
           );
         }
       });

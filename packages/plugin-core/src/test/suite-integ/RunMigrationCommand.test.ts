@@ -49,17 +49,17 @@ suite("RunMigrationCommand", function () {
     }
   );
 
-  describeMultiWS(
-    "GIVEN Native workspace",
-    {
-      modConfigCb: (config) => {
-        _.unset(config.commands, "lookup");
-        return config;
+  runTestButSkipForWindows()("", () => {
+    describeMultiWS(
+      "GIVEN Native workspace",
+      {
+        modConfigCb: (config) => {
+          _.unset(config.commands, "lookup");
+          return config;
+        },
+        workspaceType: WorkspaceType.NATIVE,
       },
-      workspaceType: WorkspaceType.NATIVE,
-    },
-    () => {
-      runTestButSkipForWindows()("", () => {
+      () => {
         test("THEN migration runs as expected without looking for workspace config.", async () => {
           const ext = ExtensionProvider.getExtension();
           const cmd = new RunMigrationCommand(ext);
@@ -82,7 +82,7 @@ suite("RunMigrationCommand", function () {
           const lookupConfig = ConfigUtils.getLookup(config);
           expect(lookupConfig.note.selectionMode).toEqual("extract");
         });
-      });
-    }
-  );
+      }
+    );
+  });
 });

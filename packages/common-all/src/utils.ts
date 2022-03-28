@@ -1276,28 +1276,19 @@ export class ConfigUtils {
     needsBackfill: boolean;
     backfilledConfig: IntermediateDendronConfig;
   }> {
-    try {
-      const { config } = opts;
-      const configDeepCopy = _.cloneDeep(config);
-      let { defaultConfig } = opts;
-      if (defaultConfig === undefined) {
-        defaultConfig = ConfigUtils.genDefaultConfig();
-      }
-      const backfilledConfig = _.defaultsDeep(config, defaultConfig);
-      return {
-        data: {
-          needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
-          backfilledConfig,
-        },
-      };
-    } catch (error) {
-      return {
-        error: new DendronError({
-          message: "Failed detecting missing configuration.",
-          payload: error,
-        }),
-      };
+    const { config } = opts;
+    const configDeepCopy = _.cloneDeep(config);
+    let { defaultConfig } = opts;
+    if (defaultConfig === undefined) {
+      defaultConfig = ConfigUtils.genDefaultConfig();
     }
+    const backfilledConfig = _.defaultsDeep(config, defaultConfig);
+    return {
+      data: {
+        needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
+        backfilledConfig,
+      },
+    };
   }
 }
 

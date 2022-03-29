@@ -1087,6 +1087,7 @@ async function _setupCommands({
   }
 
   if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
+    const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
     context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.COPY_NOTE_LINK.key,
@@ -1094,10 +1095,11 @@ async function _setupCommands({
           if (args === undefined) {
             args = {};
           }
-          await new CopyNoteLinkCommand(ws.getEngine()).run(args);
+          await copyNoteLinkCommand.run(args);
         })
       )
     );
+    context.subscriptions.push(copyNoteLinkCommand);
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

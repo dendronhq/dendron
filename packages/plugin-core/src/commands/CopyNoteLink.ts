@@ -32,10 +32,10 @@ type CommandOutput =
     }
   | undefined;
 
-export class CopyNoteLinkCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class CopyNoteLinkCommand
+  extends BasicCommand<CommandOpts, CommandOutput>
+  implements Disposable
+{
   key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
   private engineEvents: EngineEventEmitter;
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
@@ -203,6 +203,10 @@ export class CopyNoteLinkCommand extends BasicCommand<
           }
         );
       await editor.document.save();
+      // Dispose of listener after 1 sec (if not already disposed) in case engine events never arrive
+      setTimeout(() => {
+        this.dispose();
+      }, 1000);
       return;
     } else if (this._onEngineNoteStateChangedDisposable) {
       // If this is not disposed, it means we are still listening on engine state change from previous CopyNoteLink.execute command

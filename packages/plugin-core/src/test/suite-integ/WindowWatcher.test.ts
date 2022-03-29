@@ -4,6 +4,7 @@ import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
@@ -171,6 +172,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            textDocumentService: TextDocumentServiceFactory.create(extension),
             extension,
             windowWatcher,
           });
@@ -209,6 +211,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
+            textDocumentService: TextDocumentServiceFactory.create(extension),
             extension,
             windowWatcher,
           });

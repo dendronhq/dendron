@@ -31,6 +31,7 @@ import {
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { ITextDocumentService } from "./services/TextDocumentService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -79,20 +80,24 @@ export class WorkspaceWatcher {
     (event: TextDocumentChangeEvent) => Promise<void>
   >;
   private _schemaSyncService: ISchemaSyncService;
+  private _textDocumentService: ITextDocumentService;
   private _extension: IDendronExtension;
   private _windowWatcher: WindowWatcher;
 
   constructor({
     schemaSyncService,
+    textDocumentService,
     extension,
     windowWatcher,
   }: {
     schemaSyncService: ISchemaSyncService;
+    textDocumentService: ITextDocumentService;
     extension: IDendronExtension;
     windowWatcher: WindowWatcher;
   }) {
     this._extension = extension;
     this._schemaSyncService = schemaSyncService;
+    this._textDocumentService = textDocumentService;
     this._openedDocuments = new Map();
     this._quickDebouncedOnDidChangeTextDocument = _.debounce(
       this.quickOnDidChangeTextDocument,
@@ -243,7 +248,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  async onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
+  onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -312,16 +317,15 @@ export class WorkspaceWatcher {
     }
 
     const content = event.document.getText();
-    const matchFM = NoteUtils.RE_FM;
-    const matchOuter = content.match(matchFM);
-    if (!matchOuter) {
-      return { changes: [] };
-    }
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
 
-    // update the `updated` time in frontmatter
-    if (match && parseInt(match[1], 10) !== note.updated) {
+    // update the `updated` time in frontmatter if it exists and content has changed
+    if (
+      this._textDocumentService.containsFrontmatter(event.document) &&
+      match &&
+      WorkspaceUtils.noteContentChanged({ content, note })
+    ) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = event.document.positionAt(match.index);
       const endPos = event.document.positionAt(match.index + match[0].length);

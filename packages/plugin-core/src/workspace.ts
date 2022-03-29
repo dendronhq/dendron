@@ -70,6 +70,7 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { ITextDocumentService } from "./services/TextDocumentService";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -141,6 +142,7 @@ export class DendronExtension implements IDendronExtension {
   public port?: number;
   public workspaceService?: WorkspaceService;
   public schemaSyncService: ISchemaSyncService;
+  public textDocumentService: ITextDocumentService;
   public lookupControllerFactory: ILookupControllerV3Factory;
   public noteLookupProviderFactory: INoteLookupProviderFactory;
   public schemaLookupProviderFactory: ISchemaLookupProviderFactory;
@@ -368,7 +370,8 @@ export class DendronExtension implements IDendronExtension {
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
 
     // Instantiate TextDocumentService
-    context.subscriptions.push(TextDocumentServiceFactory.create(this));
+    this.textDocumentService = TextDocumentServiceFactory.create(this);
+    context.subscriptions.push(this.textDocumentService);
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -686,6 +689,7 @@ export class DendronExtension implements IDendronExtension {
     this.windowWatcher = windowWatcher;
     const workspaceWatcher = new WorkspaceWatcher({
       schemaSyncService: this.schemaSyncService,
+      textDocumentService: this.textDocumentService,
       extension: this,
       windowWatcher,
     });

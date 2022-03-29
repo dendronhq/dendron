@@ -102,7 +102,7 @@ publishing:
         - tags
     enableSiteLastModified: true
     siteRootDir: docs
-    siteUrl: 'https://foo.dev.dendron.so'
+    siteUrl: https://foo.dev.dendron.so
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
@@ -130,7 +130,7 @@ publishing:
         editLinkText: Edit this page on Github
         editBranch: main
         editViewMode: edit
-        editRepository: 'https://github.com/kevinslin/dendron-11ty-test'
+        editRepository: https://github.com/kevinslin/dendron-11ty-test
     enableContainers: false
     generateChangelog: false
     enablePrettyLinks: true

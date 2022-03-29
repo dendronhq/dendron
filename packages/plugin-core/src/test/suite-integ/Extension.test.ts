@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   CONSTANTS,
+  InstallStatus,
   isNotUndefined,
   Time,
   VaultUtils,
@@ -8,6 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import { readYAMLAsync, tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
+  DConfig,
   EngineUtils,
   getWSMetaFilePath,
   MetadataService,
@@ -38,6 +40,7 @@ import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
+import { StartupUtils } from "../../utils/StartupUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
@@ -45,6 +48,7 @@ import { TemplateInitializer } from "../../workspace/templateInitializer";
 import {
   shouldDisplayInactiveUserSurvey,
   shouldDisplayLapsedUserMsg,
+  // shouldDisplayMissingDefaultConfigMessage,
   _activate,
 } from "../../_extension";
 import {
@@ -1186,6 +1190,110 @@ describe("shouldDisplayInactiveUserSurvey", () => {
           inactiveUserMsgStatus: "cancelled",
           shouldDisplayMessage: false,
         });
+      });
+    });
+  });
+});
+
+suite("missing default config detection", () => {
+  describeMultiWS(
+    "GIVEN dendron.yml with missing default key",
+    {
+      modConfigCb: (config) => {
+        // @ts-ignore
+        delete config.workspace.workspaceVaultSyncMode;
+        return config;
+      },
+      timeout: 1e5,
+    },
+    () => {
+      test("THEN missing defaults are detected", () => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getRaw(ws.wsRoot);
+        expect(config.workspace?.workspaceVaultSyncMode).toEqual(undefined);
+        const out = ConfigUtils.detectMissingDefaults({ config });
+        expect(out.needsBackfill).toBeTruthy();
+        expect(
+          out.backfilledConfig.workspace.workspaceVaultSyncMode
+        ).toBeTruthy();
+      });
+    }
+  );
+
+  describe("GIVEN upgraded", () => {
+    describeMultiWS(
+      "AND missing default key",
+      {
+        modConfigCb: (config) => {
+          // @ts-ignore
+          delete config.workspace.workspaceVaultSyncMode;
+          return config;
+        },
+      },
+      () => {
+        test("THEN prompted to add missing defaults", () => {
+          const ext = ExtensionProvider.getExtension();
+          const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+            ext,
+            extensionInstallStatus: InstallStatus.UPGRADED,
+          });
+          expect(out).toBeTruthy();
+        });
+      }
+    );
+
+    describeMultiWS("AND not missing default key", {}, () => {
+      test("THEN not prompted to add missing defaults", () => {
+        const ext = ExtensionProvider.getExtension();
+        const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+          ext,
+          extensionInstallStatus: InstallStatus.UPGRADED,
+        });
+        expect(out).toBeFalsy();
+      });
+    });
+  });
+
+  describe("GIVEN not upgraded", () => {
+    describeMultiWS(
+      "AND missing default key",
+      {
+        modConfigCb: (config) => {
+          // @ts-ignore
+          delete config.workspace.workspaceVaultSyncMode;
+          return config;
+        },
+      },
+      () => {
+        test("THEN not prompted to add missing defaults", () => {
+          const ext = ExtensionProvider.getExtension();
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+            (extensionInstallStatus) => {
+              const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage(
+                {
+                  ext,
+                  extensionInstallStatus,
+                }
+              );
+              expect(out).toBeFalsy();
+            }
+          );
+        });
+      }
+    );
+
+    describeMultiWS("AND not missing default key", {}, () => {
+      test("THEN not prompted to add missing defaults", () => {
+        const ext = ExtensionProvider.getExtension();
+        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+          (extensionInstallStatus) => {
+            const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+              ext,
+              extensionInstallStatus,
+            });
+            expect(out).toBeFalsy();
+          }
+        );
       });
     });
   });

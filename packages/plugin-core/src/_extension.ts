@@ -88,6 +88,7 @@ import { isAutoCompletable } from "./utils/AutoCompletable";
 import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
+import { StartupUtils } from "./utils/StartupUtils";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -461,6 +462,16 @@ export async function _activate(
           wsService,
           currentVersion,
         });
+      }
+
+      // check for missing default config keys and prompt for a backfill.
+      if (
+        StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+          ext: ws,
+          extensionInstallStatus,
+        })
+      ) {
+        StartupUtils.showMissingDefaultConfigMessage({ ext: ws });
       }
 
       // Re-use the id for error reporting too:

@@ -1267,6 +1267,26 @@ export class ConfigUtils {
       return { isValid, minCompatClientVersion, minCompatConfigVersion };
     }
   }
+
+  static detectMissingDefaults(opts: {
+    config: Partial<IntermediateDendronConfig>;
+    defaultConfig?: IntermediateDendronConfig;
+  }): {
+    needsBackfill: boolean;
+    backfilledConfig: IntermediateDendronConfig;
+  } {
+    const { config } = opts;
+    const configDeepCopy = _.cloneDeep(config);
+    let { defaultConfig } = opts;
+    if (defaultConfig === undefined) {
+      defaultConfig = ConfigUtils.genDefaultConfig();
+    }
+    const backfilledConfig = _.defaultsDeep(config, defaultConfig);
+    return {
+      needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
+      backfilledConfig,
+    };
+  }
 }
 
 /**

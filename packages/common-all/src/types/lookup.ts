@@ -11,6 +11,7 @@ export enum LookupNoteTypeEnum {
   "journal" = "journal",
   "scratch" = "scratch",
   "task" = "task",
+  "none" = "none",
 }
 
 export type LookupNoteType = keyof typeof LookupNoteTypeEnum;

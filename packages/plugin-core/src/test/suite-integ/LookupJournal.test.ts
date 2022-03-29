@@ -1,4 +1,4 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { LookupNoteTypeEnum, NoteUtils } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
   runJestHarnessV2,
@@ -8,7 +8,6 @@ import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { LookupNoteTypeEnum } from "../../components/lookup/ButtonTypes";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";

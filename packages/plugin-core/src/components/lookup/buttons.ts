@@ -1,11 +1,13 @@
-import { MODIFIER_DESCRIPTIONS } from "@dendronhq/common-all";
+import {
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionType,
+  MODIFIER_DESCRIPTIONS,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import {
   DendronBtn,
   LookupEffectType,
-  LookupNoteType,
-  LookupNoteTypeEnum,
-  LookupSelectionType,
   LookupSplitType,
   LookupFilterType,
 } from "./ButtonTypes";
@@ -28,53 +30,6 @@ export type ButtonCategory =
   | "other";
 
 export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
-
-export function getButtonCategory(button: DendronBtn): ButtonCategory {
-  if (isSelectionBtn(button)) {
-    return "selection";
-  }
-  if (isNoteBtn(button)) {
-    return "note";
-  }
-  if (isSplitButton(button)) {
-    return "split";
-  }
-  if (isFilterButton(button)) {
-    return "filter";
-  }
-  if (isEffectButton(button)) {
-    return "effect";
-  }
-  if (button.type === "other") {
-    return "other";
-  }
-  throw Error(`unknown btn type ${button}`);
-}
-
-function isEffectButton(button: DendronBtn) {
-  return _.includes(
-    ["copyNoteLink", "copyNoteRef", "multiSelect"],
-    button.type
-  );
-}
-function isFilterButton(button: DendronBtn) {
-  return _.includes(["directChildOnly"], button.type);
-}
-
-function isSelectionBtn(button: DendronBtn) {
-  return _.includes(
-    ["selection2link", "selectionExtract", "selection2Items"],
-    button.type
-  );
-}
-
-function isNoteBtn(button: DendronBtn) {
-  return _.includes(["journal", "scratch", "task"], button.type);
-}
-
-function isSplitButton(button: DendronBtn) {
-  return _.includes(["horizontal", "vertical"], button.type);
-}
 
 export class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
@@ -237,7 +192,7 @@ export class VaultSelectButton extends DendronBtn {
       description: "",
       iconOff: "package",
       iconOn: "menu-selection",
-      type: "other" as LookupEffectType,
+      type: "selectVault",
       pressed: opts.pressed,
       canToggle: opts.canToggle,
     });

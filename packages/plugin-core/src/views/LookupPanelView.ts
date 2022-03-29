@@ -2,21 +2,15 @@ import {
   DendronTreeViewKey,
   DMessage,
   LookupModifierStatePayload,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
   LookupViewMessage,
   LookupViewMessageEnum,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { Disposable } from "vscode";
-import {
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
-} from "../components/lookup/ButtonTypes";
-import {
-  ILookupViewModel,
-  NameModifierMode,
-  SelectionMode,
-} from "../components/lookup/LookupViewModel";
+import { ILookupViewModel } from "../components/lookup/LookupViewModel";
 import { VaultSelectionMode } from "../components/lookup/types";
 import { DendronContext } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -136,22 +130,23 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
             switch (type) {
               case LookupSelectionTypeEnum.selection2Items:
                 this._viewModel.selectionState.value =
-                  SelectionMode.selection2Items;
+                  LookupSelectionTypeEnum.selection2Items;
                 break;
 
               case LookupSelectionTypeEnum.selection2link:
                 this._viewModel.selectionState.value =
-                  SelectionMode.selection2Link;
+                  LookupSelectionTypeEnum.selection2link;
                 break;
 
               case LookupSelectionTypeEnum.selectionExtract:
                 this._viewModel.selectionState.value =
-                  SelectionMode.selectionExtract;
+                  LookupSelectionTypeEnum.selectionExtract;
                 break;
 
               // "None" comes back as undefined for the type:
               default:
-                this._viewModel.selectionState.value = SelectionMode.None;
+                this._viewModel.selectionState.value =
+                  LookupSelectionTypeEnum.none;
             }
             break;
           }
@@ -183,25 +178,25 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
               case LookupNoteTypeEnum.journal: {
                 this._viewModel.nameModifierMode.value =
                   this._viewModel.nameModifierMode.value ===
-                  NameModifierMode.Journal
-                    ? NameModifierMode.None
-                    : NameModifierMode.Journal;
+                  LookupNoteTypeEnum.journal
+                    ? LookupNoteTypeEnum.none
+                    : LookupNoteTypeEnum.journal;
                 break;
               }
               case LookupNoteTypeEnum.scratch: {
                 this._viewModel.nameModifierMode.value =
                   this._viewModel.nameModifierMode.value ===
-                  NameModifierMode.Scratch
-                    ? NameModifierMode.None
-                    : NameModifierMode.Scratch;
+                  LookupNoteTypeEnum.scratch
+                    ? LookupNoteTypeEnum.none
+                    : LookupNoteTypeEnum.scratch;
                 break;
               }
               case LookupNoteTypeEnum.task: {
                 this._viewModel.nameModifierMode.value =
                   this._viewModel.nameModifierMode.value ===
-                  NameModifierMode.Task
-                    ? NameModifierMode.None
-                    : NameModifierMode.Task;
+                  LookupNoteTypeEnum.task
+                    ? LookupNoteTypeEnum.none
+                    : LookupNoteTypeEnum.task;
                 break;
               }
               case "horizontal": {
@@ -230,19 +225,20 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
       {
         type: "selection2link",
         pressed:
-          this._viewModel.selectionState.value === SelectionMode.selection2Link,
+          this._viewModel.selectionState.value ===
+          LookupSelectionTypeEnum.selection2link,
       },
       {
         type: "selectionExtract",
         pressed:
           this._viewModel.selectionState.value ===
-          SelectionMode.selectionExtract,
+          LookupSelectionTypeEnum.selectionExtract,
       },
       {
         type: "selection2Items",
         pressed:
           this._viewModel.selectionState.value ===
-          SelectionMode.selection2Items,
+          LookupSelectionTypeEnum.selection2Items,
       },
       {
         type: "directChildOnly",

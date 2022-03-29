@@ -1,5 +1,10 @@
+import {
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+} from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
+import * as vscode from "vscode";
 import {
   CopyNoteLinkBtn,
   DirectChildFilterBtn,
@@ -15,29 +20,26 @@ import {
 } from "../../../../../src/components/lookup/buttons";
 import { LookupControllerV3 } from "../../../../../src/components/lookup/LookupControllerV3";
 import { NoteLookupProviderFactory } from "../../../../../src/components/lookup/LookupProviderV3Factory";
-import {
-  NameModifierMode,
-  SelectionMode,
-} from "../../../../../src/components/lookup/LookupViewModel";
 import { ExtensionProvider } from "../../../../../src/ExtensionProvider";
 import { TwoWayBinding } from "../../../../../src/types/TwoWayBinding";
 import { WSUtilsV2 } from "../../../../../src/WSUtilsV2";
 import { VaultSelectionMode } from "../../../../components/lookup/types";
 import { expect } from "../../../testUtilsv2";
 import { describeMultiWS } from "../../../testUtilsV3";
-import * as vscode from "vscode";
 
 describe(`GIVEN a LookupControllerV3`, () => {
   const viewModel = {
-    selectionState: new TwoWayBinding<SelectionMode>(SelectionMode.None),
+    selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
+      LookupSelectionTypeEnum.none
+    ),
     vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
       VaultSelectionMode.auto
     ),
     isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
     isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
     isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
-    nameModifierMode: new TwoWayBinding<NameModifierMode>(
-      NameModifierMode.None
+    nameModifierMode: new TwoWayBinding<LookupNoteTypeEnum>(
+      LookupNoteTypeEnum.none
     ),
     isSplitHorizontally: new TwoWayBinding<boolean>(false),
   };
@@ -96,13 +98,13 @@ describe(`GIVEN a LookupControllerV3`, () => {
             alwaysShow: true,
           });
 
-          viewModel.nameModifierMode.value = NameModifierMode.Journal;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
 
           const qp = controller.quickPick;
           expect(qp.value.startsWith("foo.journal.")).toBeTruthy();
 
           // Now untoggle the button:
-          viewModel.nameModifierMode.value = NameModifierMode.None;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;
           expect(qp.value).toEqual("foo");
         });
       });
@@ -127,13 +129,13 @@ describe(`GIVEN a LookupControllerV3`, () => {
             alwaysShow: true,
           });
 
-          viewModel.nameModifierMode.value = NameModifierMode.Scratch;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.scratch;
 
           const qp = controller.quickPick;
           expect(qp.value.startsWith("scratch.")).toBeTruthy();
 
           // Now untoggle the button:
-          viewModel.nameModifierMode.value = NameModifierMode.None;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;
           expect(qp.value).toEqual("foo");
         });
       });
@@ -158,13 +160,13 @@ describe(`GIVEN a LookupControllerV3`, () => {
             alwaysShow: true,
           });
 
-          viewModel.nameModifierMode.value = NameModifierMode.Task;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
 
           const qp = controller.quickPick;
           expect(qp.value.startsWith("foo.")).toBeTruthy();
 
           // Now untoggle the button:
-          viewModel.nameModifierMode.value = NameModifierMode.None;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;
           expect(qp.value).toEqual("foo");
         });
       });
@@ -234,11 +236,11 @@ describe(`GIVEN a LookupControllerV3`, () => {
           expect(qp.value).toEqual("foo.foo-body");
 
           // Toggle the journal Button
-          viewModel.nameModifierMode.value = NameModifierMode.Journal;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
           expect(qp.value.startsWith("foo.journal.")).toBeTruthy();
 
           // Now untoggle the button:
-          viewModel.nameModifierMode.value = NameModifierMode.None;
+          viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;
           expect(qp.value).toEqual("foo.foo-body");
         });
       });

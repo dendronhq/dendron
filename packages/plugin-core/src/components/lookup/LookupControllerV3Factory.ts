@@ -1,4 +1,8 @@
-import { DNodeType } from "@dendronhq/common-all";
+import {
+  DNodeType,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { TwoWayBinding } from "../../types/TwoWayBinding";
@@ -9,7 +13,6 @@ import {
   ILookupControllerV3Factory,
   LookupControllerV3CreateOpts,
 } from "./LookupControllerV3Interface";
-import { NameModifierMode, SelectionMode } from "./LookupViewModel";
 import { VaultSelectionMode } from "./types";
 
 export class LookupControllerV3Factory implements ILookupControllerV3Factory {
@@ -45,15 +48,17 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
     const extraButtons = opts?.extraButtons || [];
 
     const viewModel = {
-      selectionState: new TwoWayBinding<SelectionMode>(SelectionMode.None),
+      selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
+        LookupSelectionTypeEnum.none
+      ),
       vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
         VaultSelectionMode.auto
       ),
       isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
       isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
       isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
-      nameModifierMode: new TwoWayBinding<NameModifierMode>(
-        NameModifierMode.None
+      nameModifierMode: new TwoWayBinding<LookupNoteTypeEnum>(
+        LookupNoteTypeEnum.none
       ),
       isSplitHorizontally: new TwoWayBinding<boolean>(false),
     };

@@ -1,32 +1,15 @@
+import { LookupNoteType, LookupSelectionType } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 
 export type LookupFilterType = "directChildOnly";
 
-export enum LookupNoteTypeEnum {
-  "journal" = "journal",
-  "scratch" = "scratch",
-  "task" = "task",
-}
-export type LookupNoteType = LookupNoteTypeEnum;
-
 export enum LookupEffectTypeEnum {
   "copyNoteLink" = "copyNoteLink",
   "copyNoteRef" = "copyNoteRef",
   "multiSelect" = "multiSelect",
 }
-export enum LookupSelectionTypeEnum {
-  "selection2link" = "selection2link",
-  "selectionExtract" = "selectionExtract",
-  "selection2Items" = "selection2Items",
-  "none" = "none",
-}
-export type LookupSelectionType =
-  | "selection2link"
-  | "selectionExtract"
-  | "selection2Items"
-  | "none";
 
 export enum LookupSplitTypeEnum {
   "horizontal" = "horizontal",
@@ -35,6 +18,7 @@ export type LookupSplitType = "horizontal";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
 export type LookupNoteExistBehavior = "open" | "overwrite";
+export type LookupSelectVaultType = "selectVault";
 
 export type ButtonType =
   | LookupEffectType
@@ -42,7 +26,7 @@ export type ButtonType =
   | LookupSelectionType
   | LookupSplitType
   | LookupFilterType
-  | "other";
+  | LookupSelectVaultType;
 
 export type ButtonCategory =
   | "selection"
@@ -50,7 +34,7 @@ export type ButtonCategory =
   | "split"
   | "filter"
   | "effect"
-  | "other";
+  | "selectVault";
 
 export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isSelectionBtn(button)) {
@@ -68,8 +52,8 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isEffectButton(button)) {
     return "effect";
   }
-  if (button.type === "other") {
-    return "other";
+  if (isSelectVaultButton(button)) {
+    return "selectVault";
   }
   throw Error(`unknown btn type ${button}`);
 }
@@ -97,6 +81,10 @@ function isNoteBtn(button: DendronBtn) {
 
 function isSplitButton(button: DendronBtn) {
   return _.includes(["horizontal", "vertical"], button.type);
+}
+
+function isSelectVaultButton(button: DendronBtn) {
+  return _.includes(["selectVault"], button.type);
 }
 
 export type IDendronQuickInputButton = QuickInputButton & {

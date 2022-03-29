@@ -14,6 +14,10 @@ import {
   VSCodeEvents,
   SchemaTemplate,
   getJournalTitle,
+  LookupSelectionTypeEnum,
+  LookupNoteTypeEnum,
+  LookupNoteType,
+  LookupSelectionType,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -37,10 +41,6 @@ import {
   VaultSelectionMode,
 } from "../components/lookup/types";
 import {
-  LookupNoteType,
-  LookupNoteTypeEnum,
-  LookupSelectionType,
-  LookupSelectionTypeEnum,
   LookupSplitType,
   LookupSplitTypeEnum,
   LookupFilterType,

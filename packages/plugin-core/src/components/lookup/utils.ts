@@ -24,8 +24,7 @@ import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getButtonCategory } from "./buttons";
-import { DendronBtn } from "./ButtonTypes";
+import { DendronBtn, getButtonCategory } from "./ButtonTypes";
 import {
   CREATE_NEW_DETAIL_LIST,
   CREATE_NEW_LABEL,

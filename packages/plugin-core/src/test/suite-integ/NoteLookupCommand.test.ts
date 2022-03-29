@@ -4,7 +4,9 @@ import {
   DNodeUtils,
   DVault,
   IntermediateDendronConfig,
+  LookupNoteTypeEnum,
   LookupSelectionModeEnum,
+  LookupSelectionTypeEnum,
   NoteQuickInput,
   NoteUtils,
   SchemaTemplate,
@@ -48,8 +50,6 @@ import {
 } from "../../components/lookup/buttons";
 import {
   DendronBtn,
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
   LookupSplitTypeEnum,
 } from "../../components/lookup/ButtonTypes";
 import { CREATE_NEW_LABEL } from "../../components/lookup/constants";

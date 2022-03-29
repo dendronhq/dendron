@@ -1,4 +1,8 @@
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import {
+  DNodePropsQuickInputV2,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { after, before, describe, it } from "mocha";
 import * as vscode from "vscode";
@@ -15,17 +19,12 @@ import {
   TaskBtn,
   VaultSelectButton,
 } from "../../../../../src/components/lookup/buttons";
-import {
-  ILookupViewModel,
-  NameModifierMode,
-  SelectionMode,
-} from "../../../../../src/components/lookup/LookupViewModel";
+import { ILookupViewModel } from "../../../../../src/components/lookup/LookupViewModel";
 import { LookupV3QuickPickView } from "../../../../../src/components/views/LookupV3QuickPickView";
 import { TwoWayBinding } from "../../../../../src/types/TwoWayBinding";
 import {
   ButtonType,
   DendronBtn,
-  LookupNoteTypeEnum,
 } from "../../../../components/lookup/ButtonTypes";
 import {
   DendronQuickPickerV2,
@@ -63,15 +62,17 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
   ];
 
   const viewModel: ILookupViewModel = {
-    selectionState: new TwoWayBinding<SelectionMode>(SelectionMode.None),
+    selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
+      LookupSelectionTypeEnum.none
+    ),
     vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
       VaultSelectionMode.auto
     ),
     isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
     isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
     isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
-    nameModifierMode: new TwoWayBinding<NameModifierMode>(
-      NameModifierMode.None
+    nameModifierMode: new TwoWayBinding<LookupNoteTypeEnum>(
+      LookupNoteTypeEnum.none
     ),
     isSplitHorizontally: new TwoWayBinding<boolean>(false),
   };
@@ -90,7 +91,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN mode changed to selection2Items`, () => {
     it(`THEN selection2Items button checked and Extract and toLink buttons unchecked`, () => {
-      viewModel.selectionState.value = SelectionMode.selection2Items;
+      viewModel.selectionState.value = LookupSelectionTypeEnum.selection2Items;
       expect(isButtonPressed("selection2Items", qp.buttons)).toBeTruthy();
       expect(isButtonPressed("selectionExtract", qp.buttons)).toBeFalsy();
       expect(isButtonPressed("selection2link", qp.buttons)).toBeFalsy();
@@ -99,7 +100,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN mode changed to selection2Link`, () => {
     it(`THEN selection2Link button checked and Extract and toItems buttons unchecked`, () => {
-      viewModel.selectionState.value = SelectionMode.selection2Link;
+      viewModel.selectionState.value = LookupSelectionTypeEnum.selection2link;
 
       expect(isButtonPressed("selection2Items", qp.buttons)).toBeFalsy();
       expect(isButtonPressed("selectionExtract", qp.buttons)).toBeFalsy();
@@ -109,7 +110,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN mode changed to selection2Extract`, () => {
     it(`THEN selection2Extract button checked and toItems and toLink buttons unchecked`, () => {
-      viewModel.selectionState.value = SelectionMode.selectionExtract;
+      viewModel.selectionState.value = LookupSelectionTypeEnum.selectionExtract;
 
       expect(isButtonPressed("selection2Items", qp.buttons)).toBeFalsy();
       expect(isButtonPressed("selectionExtract", qp.buttons)).toBeTruthy();
@@ -119,7 +120,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN mode changed to None`, () => {
     it(`THEN extract, toItems, toLink buttons all unchecked`, () => {
-      viewModel.selectionState.value = SelectionMode.None;
+      viewModel.selectionState.value = LookupSelectionTypeEnum.none;
 
       expect(isButtonPressed("selection2Items", qp.buttons)).toBeFalsy();
       expect(isButtonPressed("selectionExtract", qp.buttons)).toBeFalsy();
@@ -130,14 +131,14 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
   describe(`WHEN vaultSelection is alwaysPrompt`, () => {
     it(`THEN vaultSelection button is checked`, () => {
       viewModel.vaultSelectionMode.value = VaultSelectionMode.alwaysPrompt;
-      expect(isButtonPressed("other", qp.buttons)).toBeTruthy();
+      expect(isButtonPressed("selectVault", qp.buttons)).toBeTruthy();
     });
   });
 
   describe(`WHEN vaultSelection is smart`, () => {
     it(`THEN vaultSelection button is unchecked`, () => {
       viewModel.vaultSelectionMode.value = VaultSelectionMode.smart;
-      expect(isButtonPressed("other", qp.buttons)).toBeFalsy();
+      expect(isButtonPressed("selectVault", qp.buttons)).toBeFalsy();
     });
   });
 
@@ -211,7 +212,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
   // Name Modifier Options (Journal / Scratch / Task):
   describe(`WHEN name modifier mode changed to Journal`, () => {
     it(`THEN journal button checked and scratch and task buttons unchecked`, () => {
-      viewModel.nameModifierMode.value = NameModifierMode.Journal;
+      viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
       expect(
         isButtonPressed(LookupNoteTypeEnum.journal, qp.buttons)
       ).toBeTruthy();
@@ -224,7 +225,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN name modifier mode changed to Scratch`, () => {
     it(`THEN scratch button checked and journal and task buttons unchecked`, () => {
-      viewModel.nameModifierMode.value = NameModifierMode.Scratch;
+      viewModel.nameModifierMode.value = LookupNoteTypeEnum.scratch;
       expect(
         isButtonPressed(LookupNoteTypeEnum.journal, qp.buttons)
       ).toBeFalsy();
@@ -237,7 +238,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN name modifier mode changed to Task`, () => {
     it(`THEN task button checked and journal and scratch buttons unchecked`, () => {
-      viewModel.nameModifierMode.value = NameModifierMode.Task;
+      viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
       expect(
         isButtonPressed(LookupNoteTypeEnum.journal, qp.buttons)
       ).toBeFalsy();
@@ -250,7 +251,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
 
   describe(`WHEN name modifier mode changed to None`, () => {
     it(`THEN journal, scratch, task buttons all unchecked`, () => {
-      viewModel.nameModifierMode.value = NameModifierMode.None;
+      viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;
       expect(
         isButtonPressed(LookupNoteTypeEnum.journal, qp.buttons)
       ).toBeFalsy();

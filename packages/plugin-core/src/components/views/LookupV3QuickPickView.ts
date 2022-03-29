@@ -2,6 +2,7 @@ import {
   assertUnreachable,
   LookupEvents,
   LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Disposable, QuickInputButton } from "vscode";
@@ -10,13 +11,8 @@ import {
   ButtonType,
   DendronBtn,
   IDendronQuickInputButton,
-  LookupSelectionTypeEnum,
 } from "../lookup/ButtonTypes";
-import {
-  ILookupViewModel,
-  NameModifierMode,
-  SelectionMode,
-} from "../lookup/LookupViewModel";
+import { ILookupViewModel } from "../lookup/LookupViewModel";
 import { DendronQuickPickerV2, VaultSelectionMode } from "../lookup/types";
 
 /**
@@ -59,26 +55,26 @@ export class LookupV3QuickPickView implements Disposable {
     this._disposables.push(
       this._viewState.selectionState.bind(async (newValue) => {
         switch (newValue) {
-          case SelectionMode.selection2Items: {
+          case LookupSelectionTypeEnum.selection2Items: {
             if (ToLinkBtn) ToLinkBtn.pressed = false;
             if (ExtractBtn) ExtractBtn.pressed = false;
             if (ToItemsBtn) ToItemsBtn.pressed = true;
             break;
           }
 
-          case SelectionMode.selection2Link: {
+          case LookupSelectionTypeEnum.selection2link: {
             if (ToLinkBtn) ToLinkBtn.pressed = true;
             if (ExtractBtn) ExtractBtn.pressed = false;
             if (ToItemsBtn) ToItemsBtn.pressed = false;
             break;
           }
-          case SelectionMode.selectionExtract: {
+          case LookupSelectionTypeEnum.selectionExtract: {
             if (ToLinkBtn) ToLinkBtn.pressed = false;
             if (ExtractBtn) ExtractBtn.pressed = true;
             if (ToItemsBtn) ToItemsBtn.pressed = false;
             break;
           }
-          case SelectionMode.None: {
+          case LookupSelectionTypeEnum.none: {
             if (ToLinkBtn) ToLinkBtn.pressed = false;
             if (ExtractBtn) ExtractBtn.pressed = false;
             if (ToItemsBtn) ToItemsBtn.pressed = false;
@@ -98,8 +94,7 @@ export class LookupV3QuickPickView implements Disposable {
       })
     );
 
-    // Vault Selection is mapped to 'other' for some reason; Fix Later.
-    const vaultSelectionBtn = this.getButton("other");
+    const vaultSelectionBtn = this.getButton("selectVault");
     if (vaultSelectionBtn !== undefined) {
       this._disposables.push(
         this._viewState.vaultSelectionMode.bind(async (newValue) => {
@@ -147,25 +142,25 @@ export class LookupV3QuickPickView implements Disposable {
     this._disposables.push(
       this._viewState.nameModifierMode.bind(async (newValue) => {
         switch (newValue) {
-          case NameModifierMode.Journal:
+          case LookupNoteTypeEnum.journal:
             if (journalBtn) journalBtn.pressed = true;
             if (scratchBtn) scratchBtn.pressed = false;
             if (taskBtn) taskBtn.pressed = false;
             break;
 
-          case NameModifierMode.Scratch:
+          case LookupNoteTypeEnum.scratch:
             if (journalBtn) journalBtn.pressed = false;
             if (scratchBtn) scratchBtn.pressed = true;
             if (taskBtn) taskBtn.pressed = false;
             break;
 
-          case NameModifierMode.Task:
+          case LookupNoteTypeEnum.task:
             if (journalBtn) journalBtn.pressed = false;
             if (scratchBtn) scratchBtn.pressed = false;
             if (taskBtn) taskBtn.pressed = true;
             break;
 
-          case NameModifierMode.None:
+          case LookupNoteTypeEnum.none:
             if (journalBtn) journalBtn.pressed = false;
             if (scratchBtn) scratchBtn.pressed = false;
             if (taskBtn) taskBtn.pressed = false;
@@ -231,9 +226,9 @@ export class LookupV3QuickPickView implements Disposable {
         ) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
-            SelectionMode.selection2Items
-              ? SelectionMode.None
-              : SelectionMode.selection2Items;
+            LookupSelectionTypeEnum.selection2Items
+              ? LookupSelectionTypeEnum.none
+              : LookupSelectionTypeEnum.selection2Items;
         }
         break;
 
@@ -241,9 +236,9 @@ export class LookupV3QuickPickView implements Disposable {
         if (this.getButton(LookupSelectionTypeEnum.selection2link)?.canToggle) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
-            SelectionMode.selection2Link
-              ? SelectionMode.None
-              : SelectionMode.selection2Link;
+            LookupSelectionTypeEnum.selection2link
+              ? LookupSelectionTypeEnum.none
+              : LookupSelectionTypeEnum.selection2link;
         }
         break;
 
@@ -253,13 +248,13 @@ export class LookupV3QuickPickView implements Disposable {
         ) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
-            SelectionMode.selectionExtract
-              ? SelectionMode.None
-              : SelectionMode.selectionExtract;
+            LookupSelectionTypeEnum.selectionExtract
+              ? LookupSelectionTypeEnum.none
+              : LookupSelectionTypeEnum.selectionExtract;
         }
         break;
-      case "other": {
-        if (this.getButton("other")?.canToggle) {
+      case "selectVault": {
+        if (this.getButton("selectVault")?.canToggle) {
           this._viewState.vaultSelectionMode.value =
             this._viewState.vaultSelectionMode.value ===
             VaultSelectionMode.alwaysPrompt
@@ -292,27 +287,29 @@ export class LookupV3QuickPickView implements Disposable {
       case LookupNoteTypeEnum.journal: {
         if (this.getButton(LookupNoteTypeEnum.journal)?.canToggle) {
           this._viewState.nameModifierMode.value =
-            this._viewState.nameModifierMode.value === NameModifierMode.Journal
-              ? NameModifierMode.None
-              : NameModifierMode.Journal;
+            this._viewState.nameModifierMode.value ===
+            LookupNoteTypeEnum.journal
+              ? LookupNoteTypeEnum.none
+              : LookupNoteTypeEnum.journal;
         }
         break;
       }
       case LookupNoteTypeEnum.scratch: {
         if (this.getButton(LookupNoteTypeEnum.scratch)?.canToggle) {
           this._viewState.nameModifierMode.value =
-            this._viewState.nameModifierMode.value === NameModifierMode.Scratch
-              ? NameModifierMode.None
-              : NameModifierMode.Scratch;
+            this._viewState.nameModifierMode.value ===
+            LookupNoteTypeEnum.scratch
+              ? LookupNoteTypeEnum.none
+              : LookupNoteTypeEnum.scratch;
         }
         break;
       }
       case LookupNoteTypeEnum.task: {
         if (this.getButton(LookupNoteTypeEnum.task)?.canToggle) {
           this._viewState.nameModifierMode.value =
-            this._viewState.nameModifierMode.value === NameModifierMode.Task
-              ? NameModifierMode.None
-              : NameModifierMode.Task;
+            this._viewState.nameModifierMode.value === LookupNoteTypeEnum.task
+              ? LookupNoteTypeEnum.none
+              : LookupNoteTypeEnum.task;
         }
         break;
       }

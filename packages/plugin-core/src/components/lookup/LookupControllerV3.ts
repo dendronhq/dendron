@@ -33,11 +33,7 @@ import type {
   ShowQuickPickOpts,
 } from "./LookupControllerV3Interface";
 import { ILookupProviderV3 } from "./LookupProviderV3Interface";
-import {
-  ILookupViewModel,
-  NameModifierMode,
-  SelectionMode,
-} from "./LookupViewModel";
+import { ILookupViewModel } from "./LookupViewModel";
 import { NotePickerUtils } from "./NotePickerUtils";
 import { DendronQuickPickerV2, VaultSelectionMode } from "./types";
 import { PickerUtilsV2 } from "./utils";
@@ -89,7 +85,9 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   }
 
   isJournalButtonPressed(): boolean {
-    return this._viewModel.nameModifierMode.value === NameModifierMode.Journal;
+    return (
+      this._viewModel.nameModifierMode.value === LookupNoteTypeEnum.journal
+    );
   }
 
   async show(
@@ -270,15 +268,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       this._disposables.push(
         this._viewModel.selectionState.bind(async (newValue, prevValue) => {
           switch (prevValue) {
-            case SelectionMode.selection2Items: {
+            case LookupSelectionTypeEnum.selection2Items: {
               this.onSelect2ItemsBtnToggled(false);
               break;
             }
-            case SelectionMode.selection2Link: {
+            case LookupSelectionTypeEnum.selection2link: {
               this.onSelection2LinkBtnToggled(false);
               break;
             }
-            case SelectionMode.selectionExtract: {
+            case LookupSelectionTypeEnum.selectionExtract: {
               this.onSelectionExtractBtnToggled(false);
               break;
             }
@@ -287,19 +285,19 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           }
 
           switch (newValue) {
-            case SelectionMode.selection2Items: {
+            case LookupSelectionTypeEnum.selection2Items: {
               this.onSelect2ItemsBtnToggled(true);
               break;
             }
-            case SelectionMode.selection2Link: {
+            case LookupSelectionTypeEnum.selection2link: {
               this.onSelection2LinkBtnToggled(true);
               break;
             }
-            case SelectionMode.selectionExtract: {
+            case LookupSelectionTypeEnum.selectionExtract: {
               this.onSelectionExtractBtnToggled(true);
               break;
             }
-            case SelectionMode.None: {
+            case LookupSelectionTypeEnum.none: {
               break;
             }
             default:
@@ -309,11 +307,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       );
     }
 
-    const vaultSelectionBtn = this.getButton("other");
+    const vaultSelectionBtn = this.getButton("selectVault");
     if (vaultSelectionBtn) {
       this._disposables.push(
         this._viewModel.vaultSelectionMode.bind(async (newValue) => {
-          //TODO: Cheeck if this observes the negative condition correctly
           this.setNextPicker({ quickPick: this.quickPick, mode: newValue });
         })
       );
@@ -367,13 +364,13 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       this._disposables.push(
         this._viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
           switch (prevValue) {
-            case NameModifierMode.Journal:
+            case LookupNoteTypeEnum.journal:
               if (journalBtn) this.onJournalButtonToggled(false);
               break;
-            case NameModifierMode.Scratch:
+            case LookupNoteTypeEnum.scratch:
               if (scratchBtn) this.onScratchButtonToggled(false);
               break;
-            case NameModifierMode.Task:
+            case LookupNoteTypeEnum.task:
               if (taskBtn) this.onTaskButtonToggled(false);
               break;
             default:
@@ -381,16 +378,16 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           }
 
           switch (newValue) {
-            case NameModifierMode.Journal:
+            case LookupNoteTypeEnum.journal:
               if (journalBtn) this.onJournalButtonToggled(true);
               break;
-            case NameModifierMode.Scratch:
+            case LookupNoteTypeEnum.scratch:
               if (scratchBtn) this.onScratchButtonToggled(true);
               break;
-            case NameModifierMode.Task:
+            case LookupNoteTypeEnum.task:
               if (taskBtn) this.onTaskButtonToggled(true);
               break;
-            case NameModifierMode.None:
+            case LookupNoteTypeEnum.none:
               break;
             default:
               assertUnreachable(newValue);
@@ -426,33 +423,36 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       this.getButtonFromArray(LookupSelectionTypeEnum.selection2Items, buttons)
         ?.pressed
     ) {
-      this._viewModel.selectionState.value = SelectionMode.selection2Items;
+      this._viewModel.selectionState.value =
+        LookupSelectionTypeEnum.selection2Items;
     } else if (
       this.getButtonFromArray(LookupSelectionTypeEnum.selection2link, buttons)
         ?.pressed
     ) {
-      this._viewModel.selectionState.value = SelectionMode.selection2Link;
+      this._viewModel.selectionState.value =
+        LookupSelectionTypeEnum.selection2link;
     } else if (
       this.getButtonFromArray(LookupSelectionTypeEnum.selectionExtract, buttons)
         ?.pressed
     ) {
-      this._viewModel.selectionState.value = SelectionMode.selectionExtract;
+      this._viewModel.selectionState.value =
+        LookupSelectionTypeEnum.selectionExtract;
     }
 
     if (this.getButtonFromArray(LookupNoteTypeEnum.scratch, buttons)?.pressed) {
-      this._viewModel.nameModifierMode.value = NameModifierMode.Scratch;
+      this._viewModel.nameModifierMode.value = LookupNoteTypeEnum.scratch;
     } else if (
       this.getButtonFromArray(LookupNoteTypeEnum.journal, buttons)?.pressed
     ) {
-      this._viewModel.nameModifierMode.value = NameModifierMode.Journal;
+      this._viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
     } else if (
       this.getButtonFromArray(LookupNoteTypeEnum.task, buttons)?.pressed
     ) {
-      this._viewModel.nameModifierMode.value = NameModifierMode.Task;
+      this._viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
     }
 
     this._viewModel.vaultSelectionMode.value = this.getButtonFromArray(
-      "other",
+      "selectVault",
       buttons
     )?.pressed
       ? VaultSelectionMode.alwaysPrompt

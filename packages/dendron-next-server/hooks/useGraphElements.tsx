@@ -52,6 +52,12 @@ const getLocalNoteGraphElements = ({
   }
 
   const activeNote = notes[noteActive.id];
+  if (_.isUndefined(activeNote)) {
+    return {
+      nodes: [],
+      edges: {},
+    };
+  }
   const parentNote = activeNote.parent ? notes[activeNote.parent] : undefined;
   const connectedNotes = NoteUtils.getNotesWithLinkTo({
     note: activeNote,
@@ -135,29 +141,31 @@ const getLocalNoteGraphElements = ({
 
   activeNote.children.forEach((child) => {
     const childNote = notes[child];
-    nodes.push({
-      data: {
-        id: child,
-        label: childNote.title,
-        group: "nodes",
-        color: getNoteColor({ fname: childNote.fname, notes }),
-        fname: childNote.fname,
-        stub: _.isUndefined(childNote.stub) ? false : childNote.stub,
-      },
-      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(childNote.vault)}`,
-    });
+    if (childNote) {
+      nodes.push({
+        data: {
+          id: child,
+          label: childNote.title,
+          group: "nodes",
+          color: getNoteColor({ fname: childNote.fname, notes }),
+          fname: childNote.fname,
+          stub: _.isUndefined(childNote.stub) ? false : childNote.stub,
+        },
+        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(childNote.vault)}`,
+      });
 
-    edges.hierarchy.push({
-      data: {
-        group: "edges",
-        id: `${activeNote.id}_${child}`,
-        source: activeNote.id,
-        target: child,
-        fname: activeNote.fname,
-        stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
-      },
-      classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
-    });
+      edges.hierarchy.push({
+        data: {
+          group: "edges",
+          id: `${activeNote.id}_${child}`,
+          source: activeNote.id,
+          target: child,
+          fname: activeNote.fname,
+          stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
+        },
+        classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
+      });
+    }
   });
 
   // Get notes linking to active note
@@ -312,6 +320,7 @@ const getFullNoteGraphElements = ({
     edges.hierarchy.push(
       ...note.children.map((child) => {
         const childNote = notes[child];
+        // eslint-disable-next-line no-nested-ternary
         const isStub = childNote
           ? _.isUndefined(note.stub) && _.isUndefined(childNote.stub)
             ? false
@@ -495,7 +504,7 @@ const getSchemaGraphElements = (
           nodes.push({
             data: {
               id: SUBSCHEMA_ID,
-              label: label,
+              label,
               group: "nodes",
               fname: schema.fname,
             },
@@ -587,7 +596,7 @@ const useGraphElements = ({
 
   // Get new elements if active note changes
   useEffect(() => {
-    if (type === "note" && engine.notes && isLocalGraph) {
+    if (type === "note" && engine.notes && isLocalGraph && noteActive) {
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,

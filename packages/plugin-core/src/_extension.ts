@@ -1078,7 +1078,7 @@ async function _setupCommands({
         DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
         sentryReportingCallback(async () => {
           await new ShowNoteGraphCommand(
-            NoteGraphPanelFactory.create(ws)
+            NoteGraphPanelFactory.create(ws, ws.getEngine())
           ).run();
         })
       )

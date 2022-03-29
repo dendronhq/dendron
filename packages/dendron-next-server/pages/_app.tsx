@@ -93,7 +93,7 @@ function AppVSCode({ Component, pageProps }: any) {
 
     if (msg.type === DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR) {
       const cmsg = msg as OnDidChangeActiveTextEditorMsg;
-      const { sync, note, syncChangedNote } = cmsg.data;
+      const { sync, note, syncChangedNote, activeNote } = cmsg.data;
       if (sync) {
         // skip the initial ?
         logger.info({
@@ -108,8 +108,11 @@ function AppVSCode({ Component, pageProps }: any) {
         await ideDispatch(engineSlice.syncNote({ url, ws, note }));
       }
       logger.info({ ctx, msg: "syncEngine:post" });
-      ideDispatch(ideSlice.actions.setNoteActive(note));
-      logger.info({ ctx, msg: "setNote:post" });
+      logger.info({ ctx, msg: "setNoteActive:pre" });
+      // If activeNote is in the data payload, set that as active note. Otherwise default to changed note
+      const noteToSetActive = activeNote || note;
+      ideDispatch(ideSlice.actions.setNoteActive(noteToSetActive));
+      logger.info({ ctx, msg: "setNoteActive:post" });
     } else if (msg.type === ThemeMessageType.onThemeChange) {
       const cmsg = msg;
       const { theme } = cmsg.data;

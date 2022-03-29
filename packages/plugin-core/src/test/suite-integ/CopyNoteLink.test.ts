@@ -13,11 +13,14 @@ import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  describeSingleWS,
+  toDendronEngineClient,
+} from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import sinon from "sinon";
-import { DendronEngineClient } from "@dendronhq/engine-server";
 
 function openNote(note: NoteProps) {
   return ExtensionProvider.getExtension().wsUtils.openNote(note);
@@ -26,9 +29,9 @@ function openNote(note: NoteProps) {
 suite("CopyNoteLink", function () {
   let copyNoteLinkCommand: CopyNoteLinkCommand;
   beforeEach(() => {
-    const engine = ExtensionProvider.getEngine();
-    const engineClient = engine as unknown as DendronEngineClient;
-    copyNoteLinkCommand = new CopyNoteLinkCommand(engineClient);
+    copyNoteLinkCommand = new CopyNoteLinkCommand(
+      toDendronEngineClient(ExtensionProvider.getEngine())
+    );
   });
 
   describeSingleWS(

@@ -45,9 +45,10 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     type: "nativeview",
   },
   [DendronEditorViewKey.NOTE_GRAPH]: {
-    desc: "TODO",
-    label: "TODO",
-    type: "nativeview",
+    desc: "Note Graph",
+    label: "Note Graph",
+    bundleName: "graphView",
+    type: "webview",
   },
   [DendronEditorViewKey.SCHEMA_GRAPH]: {
     desc: "TODO",

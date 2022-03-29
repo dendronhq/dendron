@@ -1,6 +1,8 @@
 import {
+  DendronEditorViewKey,
   DendronError,
   DMessageEnum,
+  getWebEditorViewEntry,
   GraphViewMessage,
   GraphViewMessageType,
   NoteProps,
@@ -15,6 +17,7 @@ import { Disposable, TextEditor, ViewColumn, window } from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { Logger } from "../../logger";
 import { GraphStyleService } from "../../styles";
+import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 
@@ -29,9 +32,13 @@ export class NoteGraphPanelFactory {
     engineEvents: EngineEventEmitter
   ): vscode.WebviewPanel {
     if (!this._panel) {
+      const { bundleName: name, label } = getWebEditorViewEntry(
+        DendronEditorViewKey.NOTE_GRAPH
+      );
+
       this._panel = window.createWebviewPanel(
-        "dendronIframe", // Identifies the type of the webview. Used internally
-        "Note Graph", // Title of the panel displayed to the user
+        name, // Identifies the type of the webview. Used internally
+        label, // Title of the panel displayed to the user
         {
           viewColumn: ViewColumn.Beside,
           preserveFocus: true,
@@ -40,6 +47,7 @@ export class NoteGraphPanelFactory {
           enableScripts: true,
           retainContextWhenHidden: true,
           enableFindWidget: false,
+          localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
         }
       );
       this._ext = ext;

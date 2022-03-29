@@ -216,7 +216,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       // initialize with current picker items without default items present
       const items: NoteQuickInput[] = [...picker.items];
       let updatedItems = PickerUtilsV2.filterDefaultItems(items);
-      if (token.isCancellationRequested) {
+      if (token?.isCancellationRequested) {
         return;
       }
 
@@ -225,7 +225,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         picker,
         qs: querystring,
       });
-      if (token.isCancellationRequested) {
+      if (token?.isCancellationRequested) {
         return;
       }
 
@@ -266,7 +266,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         msg: "exit",
         queryOrig,
         profile,
-        cancelled: token.isCancellationRequested,
+        cancelled: token?.isCancellationRequested,
       });
       AnalyticsUtils.track(VSCodeEvents.SchemaLookup_Update, {
         duration: profile,

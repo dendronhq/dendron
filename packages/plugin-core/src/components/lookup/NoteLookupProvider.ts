@@ -185,6 +185,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     };
   }
 
+  //  ^hlj1vvw48s2v
   async onUpdatePickerItems(opts: OnUpdatePickerItemsOpts) {
     const { picker, token, fuzzThreshold } = opts;
     const ctx = "updatePickerItems";
@@ -257,7 +258,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // initialize with current picker items without default items present
       const items: NoteQuickInput[] = [...picker.items];
       let updatedItems = PickerUtilsV2.filterDefaultItems(items);
-      if (token.isCancellationRequested) {
+      if (token?.isCancellationRequested) {
         return;
       }
 
@@ -267,7 +268,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         originalQS: queryOrig,
       });
 
-      if (token.isCancellationRequested) {
+      if (token?.isCancellationRequested) {
         return;
       }
 
@@ -364,9 +365,13 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         numberOfExactMatches;
 
       const shouldAddCreateNew =
+        // sometimes lookup is in mode where new notes are not allowed (eg. move an existing note, this option is manually passed in)
         this.opts.allowNewNote &&
+        // notes can't end with dot, invalid note
         !queryOrig.endsWith(".") &&
+        // if you can select mult notes, new note is not valid
         !picker.canSelectMany &&
+        // when you create lookup from selection, new note is not valid
         !transformedQuery.wasMadeFromWikiLink &&
         vaultsHaveSpaceForExactMatch;
 
@@ -417,7 +422,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         msg: "exit",
         queryOrig,
         profile,
-        cancelled: token.isCancellationRequested,
+        cancelled: token?.isCancellationRequested,
       });
       AnalyticsUtils.track(VSCodeEvents.NoteLookup_Update, {
         duration: profile,

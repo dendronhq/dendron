@@ -22,7 +22,6 @@ import {
   LegacyHierarchyConfig,
   NoteProps,
   NotePropsDict,
-  RespV3,
   SEOProps,
 } from "./types";
 import { GithubConfig } from "./types/configs/publishing/github";
@@ -1272,10 +1271,10 @@ export class ConfigUtils {
   static detectMissingDefaults(opts: {
     config: Partial<IntermediateDendronConfig>;
     defaultConfig?: IntermediateDendronConfig;
-  }): RespV3<{
+  }): {
     needsBackfill: boolean;
     backfilledConfig: IntermediateDendronConfig;
-  }> {
+  } {
     const { config } = opts;
     const configDeepCopy = _.cloneDeep(config);
     let { defaultConfig } = opts;
@@ -1284,10 +1283,8 @@ export class ConfigUtils {
     }
     const backfilledConfig = _.defaultsDeep(config, defaultConfig);
     return {
-      data: {
-        needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
-        backfilledConfig,
-      },
+      needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
+      backfilledConfig,
     };
   }
 }

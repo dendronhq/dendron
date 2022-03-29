@@ -1212,9 +1212,9 @@ suite("missing default config detection", () => {
         const config = DConfig.getRaw(ws.wsRoot);
         expect(config.workspace?.workspaceVaultSyncMode).toEqual(undefined);
         const out = ConfigUtils.detectMissingDefaults({ config });
-        expect(out.data?.needsBackfill).toBeTruthy();
+        expect(out.needsBackfill).toBeTruthy();
         expect(
-          out.data?.backfilledConfig.workspace.workspaceVaultSyncMode
+          out.backfilledConfig.workspace.workspaceVaultSyncMode
         ).toBeTruthy();
       });
     }

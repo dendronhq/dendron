@@ -193,11 +193,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const { wsRoot } = engine;
         const rawConfig = DConfig.getRaw(wsRoot);
-        const detectResp = ConfigUtils.detectMissingDefaults({
+        const detectOut = ConfigUtils.detectMissingDefaults({
           config: rawConfig,
         });
-        if (detectResp.data) {
-          const { needsBackfill, backfilledConfig } = detectResp.data;
+        if (detectOut) {
+          const { needsBackfill, backfilledConfig } = detectOut;
           if (needsBackfill) {
             // back up dendron.yml first
             let backupPath: string;

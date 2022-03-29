@@ -18,8 +18,8 @@ export class StartupUtils {
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
       const wsRoot = opts.ext.getDWorkspace().wsRoot;
       const rawConfig = DConfig.getRaw(wsRoot);
-      const resp = ConfigUtils.detectMissingDefaults({ config: rawConfig });
-      return resp.data !== undefined && resp.data.needsBackfill;
+      const out = ConfigUtils.detectMissingDefaults({ config: rawConfig });
+      return out !== undefined && out.needsBackfill;
     } else {
       return false;
     }

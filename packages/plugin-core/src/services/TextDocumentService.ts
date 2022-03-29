@@ -53,7 +53,7 @@ export interface ITextDocumentService extends Disposable {
   ): Promise<NoteProps>;
 
   /**
-   * Returns true if textDocuments contains frontmatter. False otherwise.
+   * Returns true if textDocument contains frontmatter. False otherwise.
    */
   containsFrontmatter(textDocument: TextDocument): boolean;
 }

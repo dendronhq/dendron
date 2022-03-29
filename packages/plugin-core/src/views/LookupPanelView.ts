@@ -18,8 +18,10 @@ import {
   SelectionMode,
 } from "../components/lookup/LookupViewModel";
 import { VaultSelectionMode } from "../components/lookup/types";
+import { DendronContext } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "./utils";
 
 /**
@@ -44,9 +46,12 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
         this
       )
     );
+
+    VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, true);
   }
 
   dispose() {
+    VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, false);
     this._disposables.forEach((value) => value.dispose());
   }
 
@@ -91,7 +96,13 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
       webviewView,
     });
 
-    this._view?.show();
+    // Send the initial state to the view:
+    this.refresh();
+
+    // Set preserveFocus to true - otherwise, this will remove focus from the
+    // lookup quickpick, and the user will not be able to type immediately upon
+    // calling lookup:
+    this._view?.show(true);
   }
 
   async onDidReceiveMessageHandler(msg: LookupViewMessage) {
@@ -121,32 +132,31 @@ export class LookupPanelView implements vscode.WebviewViewProvider, Disposable {
 
             break;
           }
-          default: {
+          case "selection": {
             switch (type) {
               case LookupSelectionTypeEnum.selection2Items:
                 this._viewModel.selectionState.value =
-                  this._viewModel.selectionState.value ===
-                  SelectionMode.selection2Items
-                    ? SelectionMode.None
-                    : SelectionMode.selection2Items;
+                  SelectionMode.selection2Items;
                 break;
 
               case LookupSelectionTypeEnum.selection2link:
                 this._viewModel.selectionState.value =
-                  this._viewModel.selectionState.value ===
-                  SelectionMode.selection2Link
-                    ? SelectionMode.None
-                    : SelectionMode.selection2Link;
+                  SelectionMode.selection2Link;
                 break;
 
               case LookupSelectionTypeEnum.selectionExtract:
                 this._viewModel.selectionState.value =
-                  this._viewModel.selectionState.value ===
-                  SelectionMode.selectionExtract
-                    ? SelectionMode.None
-                    : SelectionMode.selectionExtract;
+                  SelectionMode.selectionExtract;
                 break;
 
+              // "None" comes back as undefined for the type:
+              default:
+                this._viewModel.selectionState.value = SelectionMode.None;
+            }
+            break;
+          }
+          default: {
+            switch (type) {
               case "other": {
                 this._viewModel.vaultSelectionMode.value =
                   this._viewModel.vaultSelectionMode.value ===

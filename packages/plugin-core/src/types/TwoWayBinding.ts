@@ -47,8 +47,8 @@ export class TwoWayBinding<T> {
     thisArg?: any
   ): Disposable {
     return this._emitter.event((data) => {
-      const binded = callback.bind(thisArg);
-      binded(data.newValue, data.previous);
+      const bound = callback.bind(thisArg);
+      bound(data.newValue, data.previous);
     });
   }
 }

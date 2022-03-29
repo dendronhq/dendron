@@ -265,9 +265,6 @@ export class SchemaLookupCommand extends BaseCommand<
       );
     } finally {
       opts.controller.onHide();
-      // if (this._controller) {
-      //   this._controller.onHide();
-      // }
     }
     return opts;
   }

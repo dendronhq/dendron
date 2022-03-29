@@ -268,7 +268,6 @@ export class NoteLookupCommand
       lc.fuzzThreshold = copts.fuzzThreshold;
     }
 
-    VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, true);
     VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
 
     const { quickpick } = await lc.prepareQuickPick({
@@ -279,7 +278,6 @@ export class NoteLookupCommand
       alwaysShow: true,
       onDidHide: () => {
         VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
-        VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, false);
       },
     });
     this._quickPick = quickpick;

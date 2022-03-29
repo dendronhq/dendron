@@ -8,7 +8,7 @@ import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
   shouldBubbleUpCreateNew,
   sortBySimilarity,
-} from "../../components/lookup/LookupProviderV3";
+} from "../../components/lookup/utils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";

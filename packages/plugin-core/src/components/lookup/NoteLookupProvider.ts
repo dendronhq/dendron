@@ -28,8 +28,12 @@ import {
 } from "./LookupProviderV3Interface";
 import { transformQueryString } from "./queryStringTransformer";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
-import { OldNewLocation, PickerUtilsV2 } from "./utils";
-import { sortBySimilarity, shouldBubbleUpCreateNew } from "./LookupProviderV3";
+import {
+  OldNewLocation,
+  PickerUtilsV2,
+  shouldBubbleUpCreateNew,
+  sortBySimilarity,
+} from "./utils";
 
 export class NoteLookupProvider implements ILookupProviderV3 {
   private _onAcceptHooks: OnAcceptHook[];

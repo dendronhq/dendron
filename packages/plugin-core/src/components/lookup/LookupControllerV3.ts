@@ -182,7 +182,6 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       }
 
       Logger.debug({ ctx: "quickpick", msg: "onHide" });
-      this.onHide();
 
       HistoryService.instance().add({
         source: "lookupProvider",
@@ -311,7 +310,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
 
     const vaultSelectionBtn = this.getButton("other");
-    if (vaultSelectionBtn !== undefined) {
+    if (vaultSelectionBtn) {
       this._disposables.push(
         this._viewModel.vaultSelectionMode.bind(async (newValue) => {
           //TODO: Cheeck if this observes the negative condition correctly
@@ -369,28 +368,27 @@ export class LookupControllerV3 implements ILookupControllerV3 {
         this._viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
           switch (prevValue) {
             case NameModifierMode.Journal:
-              this.onJournalButtonToggled(false);
+              if (journalBtn) this.onJournalButtonToggled(false);
               break;
             case NameModifierMode.Scratch:
-              this.onScratchButtonToggled(false);
+              if (scratchBtn) this.onScratchButtonToggled(false);
               break;
             case NameModifierMode.Task:
-              this.onTaskButtonToggled(false);
+              if (taskBtn) this.onTaskButtonToggled(false);
               break;
-
             default:
               break;
           }
 
           switch (newValue) {
             case NameModifierMode.Journal:
-              this.onJournalButtonToggled(true);
+              if (journalBtn) this.onJournalButtonToggled(true);
               break;
             case NameModifierMode.Scratch:
-              this.onScratchButtonToggled(true);
+              if (scratchBtn) this.onScratchButtonToggled(true);
               break;
             case NameModifierMode.Task:
-              this.onTaskButtonToggled(true);
+              if (taskBtn) this.onTaskButtonToggled(true);
               break;
             case NameModifierMode.None:
               break;

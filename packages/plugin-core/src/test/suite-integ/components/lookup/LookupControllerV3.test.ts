@@ -25,6 +25,7 @@ import { WSUtilsV2 } from "../../../../../src/WSUtilsV2";
 import { VaultSelectionMode } from "../../../../components/lookup/types";
 import { expect } from "../../../testUtilsv2";
 import { describeMultiWS } from "../../../testUtilsV3";
+import * as vscode from "vscode";
 
 describe(`GIVEN a LookupControllerV3`, () => {
   const viewModel = {
@@ -41,40 +42,40 @@ describe(`GIVEN a LookupControllerV3`, () => {
     isSplitHorizontally: new TwoWayBinding<boolean>(false),
   };
 
-  const buttons = [
-    VaultSelectButton.create({ pressed: false }),
-    MultiSelectBtn.create({ pressed: false }),
-    CopyNoteLinkBtn.create(false),
-    DirectChildFilterBtn.create(false),
-    SelectionExtractBtn.create(false),
-    Selection2LinkBtn.create(false),
-    Selection2ItemsBtn.create({
-      pressed: false,
-    }),
-    JournalBtn.create({
-      pressed: false,
-    }),
-    ScratchBtn.create({
-      pressed: false,
-    }),
-    TaskBtn.create(false),
-    HorizontalSplitBtn.create(false),
-  ];
-
-  const controller = new LookupControllerV3({
-    nodeType: "note",
-    buttons,
-    disableLookupView: true,
-    title: "Test Quick Pick",
-    viewModel,
-  });
-
   describeMultiWS(
     "GIVEN a LookupControllerV3",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
+      const buttons = [
+        VaultSelectButton.create({ pressed: false }),
+        MultiSelectBtn.create({ pressed: false }),
+        CopyNoteLinkBtn.create(false),
+        DirectChildFilterBtn.create(false),
+        SelectionExtractBtn.create(false),
+        Selection2LinkBtn.create(false),
+        Selection2ItemsBtn.create({
+          pressed: false,
+        }),
+        JournalBtn.create({
+          pressed: false,
+        }),
+        ScratchBtn.create({
+          pressed: false,
+        }),
+        TaskBtn.create(false),
+        HorizontalSplitBtn.create(false),
+      ];
+
+      const controller = new LookupControllerV3({
+        nodeType: "note",
+        buttons,
+        disableLookupView: true,
+        title: "Test Quick Pick",
+        viewModel,
+      });
+
       describe(`WHEN journal mode is toggled`, () => {
         test(`THEN the contents of the quick pick update with 'journal'`, async () => {
           const engine = ExtensionProvider.getEngine();
@@ -165,6 +166,80 @@ describe(`GIVEN a LookupControllerV3`, () => {
           // Now untoggle the button:
           viewModel.nameModifierMode.value = NameModifierMode.None;
           expect(qp.value).toEqual("foo");
+        });
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a LookupControllerV3 with selection2Link enabled at the start",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      const buttons = [
+        VaultSelectButton.create({ pressed: false }),
+        MultiSelectBtn.create({ pressed: false }),
+        CopyNoteLinkBtn.create(false),
+        DirectChildFilterBtn.create(false),
+        SelectionExtractBtn.create(false),
+        Selection2LinkBtn.create(true),
+        Selection2ItemsBtn.create({
+          pressed: false,
+        }),
+        JournalBtn.create({
+          pressed: false,
+        }),
+        ScratchBtn.create({
+          pressed: false,
+        }),
+        TaskBtn.create(false),
+        HorizontalSplitBtn.create(false),
+      ];
+
+      const controller = new LookupControllerV3({
+        nodeType: "note",
+        buttons,
+        disableLookupView: true,
+        title: "Test Quick Pick",
+        viewModel,
+      });
+
+      describe(`WHEN journal mode is toggled on/off when selection2Link is already enabled`, () => {
+        test(`THEN the contents of the quick pick restore to the original selection2Link value properly`, async () => {
+          const engine = ExtensionProvider.getEngine();
+
+          const fooNoteEditor = await WSUtilsV2.instance().openNote(
+            engine.notes["foo"]
+          );
+
+          // selects "foo body"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+
+          const provider = new NoteLookupProviderFactory(
+            ExtensionProvider.getExtension()
+          ).create("test", {
+            allowNewNote: true,
+          });
+
+          controller.prepareQuickPick({
+            placeholder: "foo",
+            provider,
+            initialValue: "foo",
+            nonInteractive: true,
+            alwaysShow: true,
+          });
+
+          const qp = controller.quickPick;
+          expect(qp.value).toEqual("foo.foo-body");
+
+          // Toggle the journal Button
+          viewModel.nameModifierMode.value = NameModifierMode.Journal;
+          expect(qp.value.startsWith("foo.journal.")).toBeTruthy();
+
+          // Now untoggle the button:
+          viewModel.nameModifierMode.value = NameModifierMode.None;
+          expect(qp.value).toEqual("foo.foo-body");
         });
       });
     }

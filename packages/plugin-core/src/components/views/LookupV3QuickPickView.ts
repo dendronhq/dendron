@@ -46,6 +46,7 @@ export class LookupV3QuickPickView implements Disposable {
       this._quickPick.onDidTriggerButton(this.onTriggerButton)
     );
   }
+
   dispose() {
     this._disposables.forEach((callback) => callback.dispose());
   }
@@ -143,42 +144,46 @@ export class LookupV3QuickPickView implements Disposable {
     const scratchBtn = this.getButton(LookupNoteTypeEnum.scratch);
     const taskBtn = this.getButton(LookupNoteTypeEnum.task);
 
-    if (journalBtn && scratchBtn && taskBtn) {
-      this._disposables.push(
-        this._viewState.nameModifierMode.bind(async (newValue) => {
-          switch (newValue) {
-            case NameModifierMode.Journal:
-              journalBtn.pressed = true;
-              scratchBtn.pressed = false;
-              taskBtn.pressed = false;
-              break;
+    this._disposables.push(
+      this._viewState.nameModifierMode.bind(async (newValue) => {
+        switch (newValue) {
+          case NameModifierMode.Journal:
+            if (journalBtn) journalBtn.pressed = true;
+            if (scratchBtn) scratchBtn.pressed = false;
+            if (taskBtn) taskBtn.pressed = false;
+            break;
 
-            case NameModifierMode.Scratch:
-              journalBtn.pressed = false;
-              scratchBtn.pressed = true;
-              taskBtn.pressed = false;
-              break;
+          case NameModifierMode.Scratch:
+            if (journalBtn) journalBtn.pressed = false;
+            if (scratchBtn) scratchBtn.pressed = true;
+            if (taskBtn) taskBtn.pressed = false;
+            break;
 
-            case NameModifierMode.Task:
-              journalBtn.pressed = false;
-              scratchBtn.pressed = false;
-              taskBtn.pressed = true;
-              break;
+          case NameModifierMode.Task:
+            if (journalBtn) journalBtn.pressed = false;
+            if (scratchBtn) scratchBtn.pressed = false;
+            if (taskBtn) taskBtn.pressed = true;
+            break;
 
-            case NameModifierMode.None:
-              journalBtn.pressed = false;
-              scratchBtn.pressed = false;
-              taskBtn.pressed = false;
-              break;
+          case NameModifierMode.None:
+            if (journalBtn) journalBtn.pressed = false;
+            if (scratchBtn) scratchBtn.pressed = false;
+            if (taskBtn) taskBtn.pressed = false;
+            break;
 
-            default:
-              assertUnreachable(newValue);
-          }
+          default:
+            assertUnreachable(newValue);
+        }
 
-          this.updateButtonsOnQuickPick(journalBtn, scratchBtn, taskBtn);
-        })
-      );
-    }
+        const validButtons: DendronBtn[] = [];
+
+        if (journalBtn) validButtons.push(journalBtn);
+        if (scratchBtn) validButtons.push(scratchBtn);
+        if (taskBtn) validButtons.push(taskBtn);
+
+        this.updateButtonsOnQuickPick(...validButtons);
+      })
+    );
 
     const horizontalBtn = this.getButton("horizontal");
     if (horizontalBtn) {
@@ -221,73 +226,101 @@ export class LookupV3QuickPickView implements Disposable {
 
     switch (btnType) {
       case LookupSelectionTypeEnum.selection2Items:
-        this._viewState.selectionState.value =
-          this._viewState.selectionState.value === SelectionMode.selection2Items
-            ? SelectionMode.None
-            : SelectionMode.selection2Items;
+        if (
+          this.getButton(LookupSelectionTypeEnum.selection2Items)?.canToggle
+        ) {
+          this._viewState.selectionState.value =
+            this._viewState.selectionState.value ===
+            SelectionMode.selection2Items
+              ? SelectionMode.None
+              : SelectionMode.selection2Items;
+        }
         break;
 
       case LookupSelectionTypeEnum.selection2link:
-        this._viewState.selectionState.value =
-          this._viewState.selectionState.value === SelectionMode.selection2Link
-            ? SelectionMode.None
-            : SelectionMode.selection2Link;
+        if (this.getButton(LookupSelectionTypeEnum.selection2link)?.canToggle) {
+          this._viewState.selectionState.value =
+            this._viewState.selectionState.value ===
+            SelectionMode.selection2Link
+              ? SelectionMode.None
+              : SelectionMode.selection2Link;
+        }
         break;
 
       case LookupSelectionTypeEnum.selectionExtract:
-        this._viewState.selectionState.value =
-          this._viewState.selectionState.value ===
-          SelectionMode.selectionExtract
-            ? SelectionMode.None
-            : SelectionMode.selectionExtract;
+        if (
+          this.getButton(LookupSelectionTypeEnum.selectionExtract)?.canToggle
+        ) {
+          this._viewState.selectionState.value =
+            this._viewState.selectionState.value ===
+            SelectionMode.selectionExtract
+              ? SelectionMode.None
+              : SelectionMode.selectionExtract;
+        }
         break;
       case "other": {
-        this._viewState.vaultSelectionMode.value =
-          this._viewState.vaultSelectionMode.value ===
-          VaultSelectionMode.alwaysPrompt
-            ? VaultSelectionMode.smart // TODO: This needs to reflect settings.
-            : VaultSelectionMode.alwaysPrompt;
+        if (this.getButton("other")?.canToggle) {
+          this._viewState.vaultSelectionMode.value =
+            this._viewState.vaultSelectionMode.value ===
+            VaultSelectionMode.alwaysPrompt
+              ? VaultSelectionMode.smart
+              : VaultSelectionMode.alwaysPrompt;
+        }
         break;
       }
       case "multiSelect": {
-        this._viewState.isMultiSelectEnabled.value =
-          !this._viewState.isMultiSelectEnabled.value;
+        if (this.getButton("multiSelect")?.canToggle) {
+          this._viewState.isMultiSelectEnabled.value =
+            !this._viewState.isMultiSelectEnabled.value;
+        }
         break;
       }
       case "copyNoteLink": {
-        this._viewState.isCopyNoteLinkEnabled.value =
-          !this._viewState.isCopyNoteLinkEnabled.value;
+        if (this.getButton("copyNoteLink")?.canToggle) {
+          this._viewState.isCopyNoteLinkEnabled.value =
+            !this._viewState.isCopyNoteLinkEnabled.value;
+        }
         break;
       }
       case "directChildOnly": {
-        this._viewState.isApplyDirectChildFilter.value =
-          !this._viewState.isApplyDirectChildFilter.value;
+        if (this.getButton("directChildOnly")?.canToggle) {
+          this._viewState.isApplyDirectChildFilter.value =
+            !this._viewState.isApplyDirectChildFilter.value;
+        }
         break;
       }
       case LookupNoteTypeEnum.journal: {
-        this._viewState.nameModifierMode.value =
-          this._viewState.nameModifierMode.value === NameModifierMode.Journal
-            ? NameModifierMode.None
-            : NameModifierMode.Journal;
+        if (this.getButton(LookupNoteTypeEnum.journal)?.canToggle) {
+          this._viewState.nameModifierMode.value =
+            this._viewState.nameModifierMode.value === NameModifierMode.Journal
+              ? NameModifierMode.None
+              : NameModifierMode.Journal;
+        }
         break;
       }
       case LookupNoteTypeEnum.scratch: {
-        this._viewState.nameModifierMode.value =
-          this._viewState.nameModifierMode.value === NameModifierMode.Scratch
-            ? NameModifierMode.None
-            : NameModifierMode.Scratch;
+        if (this.getButton(LookupNoteTypeEnum.scratch)?.canToggle) {
+          this._viewState.nameModifierMode.value =
+            this._viewState.nameModifierMode.value === NameModifierMode.Scratch
+              ? NameModifierMode.None
+              : NameModifierMode.Scratch;
+        }
         break;
       }
       case LookupNoteTypeEnum.task: {
-        this._viewState.nameModifierMode.value =
-          this._viewState.nameModifierMode.value === NameModifierMode.Task
-            ? NameModifierMode.None
-            : NameModifierMode.Task;
+        if (this.getButton(LookupNoteTypeEnum.task)?.canToggle) {
+          this._viewState.nameModifierMode.value =
+            this._viewState.nameModifierMode.value === NameModifierMode.Task
+              ? NameModifierMode.None
+              : NameModifierMode.Task;
+        }
         break;
       }
       case "horizontal": {
-        this._viewState.isSplitHorizontally.value =
-          !this._viewState.isSplitHorizontally.value;
+        if (this.getButton("horizontal")?.canToggle) {
+          this._viewState.isSplitHorizontally.value =
+            !this._viewState.isSplitHorizontally.value;
+        }
         break;
       }
       default:

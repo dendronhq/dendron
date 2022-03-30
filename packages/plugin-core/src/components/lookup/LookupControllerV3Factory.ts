@@ -5,7 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { IDendronExtension } from "../../dendronExtensionInterface";
-import { TwoWayBinding } from "../../types/TwoWayBinding";
+import { TwoWayBinding } from "../../utils/TwoWayBinding";
 import { VaultSelectButton } from "./buttons";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import {

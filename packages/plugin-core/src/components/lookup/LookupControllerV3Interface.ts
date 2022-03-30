@@ -76,6 +76,12 @@ export interface ILookupControllerV3 {
 
   createCancelSource(): CancellationTokenSource;
 
+  /**
+   * Indicates that the journal button is pressed
+   *
+   * @deprecated - this is a temp solution; remove from interface once there's a
+   * better way to trigger journal button functionality
+   */
   isJournalButtonPressed(): boolean;
 }
 

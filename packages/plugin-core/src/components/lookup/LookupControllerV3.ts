@@ -168,6 +168,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
 
     // Now Create the Views:
     this._disposables.push(
+      // TODO: Maybe cache the view to prevent flicker / improve load time.
       new LookupV3QuickPickView(quickpick, this._viewModel, this._provider.id)
     );
 

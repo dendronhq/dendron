@@ -21,7 +21,7 @@ import {
 } from "../../../../../src/components/lookup/buttons";
 import { ILookupViewModel } from "../../../../../src/components/lookup/LookupViewModel";
 import { LookupV3QuickPickView } from "../../../../../src/components/views/LookupV3QuickPickView";
-import { TwoWayBinding } from "../../../../../src/types/TwoWayBinding";
+import { TwoWayBinding } from "../../../../utils/TwoWayBinding";
 import {
   ButtonType,
   DendronBtn,

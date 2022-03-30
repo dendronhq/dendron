@@ -536,6 +536,10 @@ type UserProfileProps = {
    * The number of notes in the workspace
    */
   numNotes?: number;
+  useCases?: string[];
+  publishingUseCase: string;
+  priorTools?: string[];
+  email?: string;
 };
 
 // platform props

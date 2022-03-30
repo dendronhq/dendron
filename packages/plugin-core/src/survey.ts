@@ -156,8 +156,10 @@ export class UseCaseSurvey extends DendronQuickPickSurvey {
         title: "What do you want to use Dendron for? - Other",
       });
     }
+    const resultsList = results.map((result) => result.label);
+    AnalyticsUtils.identify({ useCases: resultsList });
     AnalyticsUtils.track(SurveyEvents.UseCaseAnswered, {
-      results: results.map((result) => result.label),
+      results: resultsList,
       other: maybeOtherResult,
     });
   }
@@ -193,6 +195,8 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
         title: "Are you coming from an existing tool? - Other",
       });
     }
+    const resultsList = results.map((result) => result.label);
+    AnalyticsUtils.identify({ priorTools: resultsList });
     AnalyticsUtils.track(SurveyEvents.PriorToolsAnswered, {
       results: results.map((result) => result.label),
       other: maybeOtherResult,
@@ -246,7 +250,7 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
         break;
       }
     }
-
+    AnalyticsUtils.identify({ publishingUseCase: answer });
     AnalyticsUtils.track(SurveyEvents.PublishingUseCaseAnswered, {
       answer,
     });
@@ -277,9 +281,8 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
 
 export class NewsletterSubscriptionSurvey extends DendronQuickInputSurvey {
   async onAnswer(result: string) {
-    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionAnswered, {
-      result,
-    });
+    AnalyticsUtils.identify({ email: result });
+    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionAnswered);
     resolve();
   }
 

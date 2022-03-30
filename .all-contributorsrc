@@ -1581,6 +1581,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "gbieging",
+      "name": "gbieging",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14062649?v=4",
+      "profile": "https://github.com/gbieging",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -312,16 +312,17 @@ export class WorkspaceWatcher {
       return;
     }
 
+    // Return undefined if document is missing frontmatter
+    if (!TextDocumentService.containsFrontmatter(event.document)) {
+      return;
+    }
+
     const content = event.document.getText();
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
 
     // update the `updated` time in frontmatter if it exists and content has changed
-    if (
-      TextDocumentService.containsFrontmatter(event.document) &&
-      match &&
-      WorkspaceUtils.noteContentChanged({ content, note })
-    ) {
+    if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = event.document.positionAt(match.index);
       const endPos = event.document.positionAt(match.index + match[0].length);

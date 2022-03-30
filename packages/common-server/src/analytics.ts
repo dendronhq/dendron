@@ -538,7 +538,7 @@ type UserProfileProps = {
   numNotes?: number;
   useCases?: string[];
   useContext?: string;
-  publishingUseCase: string;
+  publishingUseCase?: string;
   priorTools?: string[];
   email?: string;
 };

@@ -497,24 +497,16 @@ suite("TextDocumentService", function testSuite() {
     },
     () => {
       test("WHEN the note has frontmatter, THEN getFrontmatterPosition should return true", async () => {
-        textDocumentService = new TextDocumentService(
-          ExtensionProvider.getExtension(),
-          vscode.workspace.onDidSaveTextDocument
-        );
         const engine = ExtensionProvider.getEngine();
         const alphaNote = engine.notes["alpha"];
         const editor = await ExtensionProvider.getWSUtils().openNote(alphaNote);
-        const hasFrontmatter = textDocumentService?.containsFrontmatter(
+        const hasFrontmatter = TextDocumentService.containsFrontmatter(
           editor.document
         );
         expect(hasFrontmatter).toBeTruthy();
       });
 
       test("WHEN frontmatter is removed, THEN getFrontmatterPosition should return false", async () => {
-        textDocumentService = new TextDocumentService(
-          ExtensionProvider.getExtension(),
-          vscode.workspace.onDidSaveTextDocument
-        );
         const engine = ExtensionProvider.getEngine();
         const alphaNote = engine.notes["alpha"];
 
@@ -528,7 +520,7 @@ suite("TextDocumentService", function testSuite() {
           );
         });
         await editor.document.save();
-        const hasFrontmatter = textDocumentService?.containsFrontmatter(
+        const hasFrontmatter = TextDocumentService.containsFrontmatter(
           editor.document
         );
         expect(hasFrontmatter).toBeFalsy();

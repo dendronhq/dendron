@@ -51,11 +51,6 @@ export interface ITextDocumentService extends Disposable {
     note: NoteProps,
     textDocument: TextDocument
   ): Promise<NoteProps>;
-
-  /**
-   * Returns true if textDocument contains frontmatter. False otherwise.
-   */
-  containsFrontmatter(textDocument: TextDocument): boolean;
 }
 
 /**
@@ -257,7 +252,7 @@ export class TextDocumentService implements ITextDocumentService {
     const ctx = "TextDocumentService:applyTextDocument";
     const uri = textDocument.uri;
 
-    if (!this.containsFrontmatter(textDocument)) {
+    if (!TextDocumentService.containsFrontmatter(textDocument)) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
       return note;
     }
@@ -283,7 +278,10 @@ export class TextDocumentService implements ITextDocumentService {
     });
   }
 
-  public containsFrontmatter(textDocument: TextDocument) {
+  /**
+   * Returns true if textDocument contains frontmatter. False otherwise.
+   */
+  public static containsFrontmatter(textDocument: TextDocument) {
     const content = textDocument.getText();
     const matchFM = NoteUtils.RE_FM;
     const maybeMatch = content.match(matchFM);

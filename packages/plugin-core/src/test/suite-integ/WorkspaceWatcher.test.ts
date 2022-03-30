@@ -28,7 +28,6 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockPreviewProxy } from "../MockPreviewProxy";
-import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -126,7 +125,6 @@ suite("WorkspaceWatcher", function () {
 
         watcher = new WorkspaceWatcher({
           schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
-          textDocumentService: TextDocumentServiceFactory.create(extension),
           extension,
           windowWatcher,
         });
@@ -178,7 +176,6 @@ suite("WorkspaceWatcher", function () {
         });
         watcher = new WorkspaceWatcher({
           schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
-          textDocumentService: TextDocumentServiceFactory.create(extension),
           extension,
           windowWatcher,
         });
@@ -228,7 +225,6 @@ suite("WorkspaceWatcher", function () {
         });
         watcher = new WorkspaceWatcher({
           schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
-          textDocumentService: TextDocumentServiceFactory.create(extension),
           extension,
           windowWatcher,
         });
@@ -255,7 +251,6 @@ suite("WorkspaceWatcher", function () {
         });
         watcher = new WorkspaceWatcher({
           schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
-          textDocumentService: TextDocumentServiceFactory.create(extension),
           extension,
           windowWatcher,
         });
@@ -309,7 +304,6 @@ suite("WorkspaceWatcher", function () {
 
       workspaceWatcher = new WorkspaceWatcher({
         schemaSyncService: ext.schemaSyncService,
-        textDocumentService: TextDocumentServiceFactory.create(ext),
         extension: ext,
         windowWatcher,
       });

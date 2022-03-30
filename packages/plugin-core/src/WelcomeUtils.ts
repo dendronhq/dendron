@@ -39,7 +39,7 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            AnalyticsUtils.track(TutorialEvents.ClickStart);
+            await AnalyticsUtils.trackSync(TutorialEvents.ClickStart);
             // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
             const { filePath } =
               FileUtils.genFilePathWithSuffixThatDoesNotExist({

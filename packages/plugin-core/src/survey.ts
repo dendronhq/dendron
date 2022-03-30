@@ -1,4 +1,4 @@
-import { getStage, SurveyEvents } from "@dendronhq/common-all";
+import { ConfirmStatus, getStage, SurveyEvents } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
 import _ from "lodash";
@@ -9,6 +9,7 @@ import { resolve } from "path";
 import { VSCodeUtils } from "./vsCodeUtils";
 import {
   InactvieUserMsgStatusEnum,
+  InitialSurveyStatusEnum,
   MetadataService,
 } from "@dendronhq/engine-server";
 
@@ -102,6 +103,67 @@ export class DendronQuickPickSurvey {
     }
 
     return results;
+  }
+}
+
+export class ContextSurvey extends DendronQuickPickSurvey {
+  async onAnswer(result: vscode.QuickPickItem) {
+    let maybeOtherResult: string | undefined;
+    let answer: string | undefined;
+    switch (result.label) {
+      case "For work": {
+        answer = "work";
+        break;
+      }
+      case "For personal use": {
+        answer = "use";
+        break;
+      }
+      case "All of the above": {
+        answer = "all";
+        break;
+      }
+      case "Other": {
+        answer = "other";
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    if (answer === "other") {
+      maybeOtherResult = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: "Type anything that applies.",
+        prompt:
+          'You have checked "Other". Please describe what other context you intend to use Dendron.',
+        title: "In what context do you intend to use Dendron? - Other",
+      });
+    }
+
+    AnalyticsUtils.identify({ useContext: answer });
+    AnalyticsUtils.track(SurveyEvents.ContextSurveyConfirm, {
+      status: ConfirmStatus.accepted,
+      result: answer,
+      other: maybeOtherResult,
+    });
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.ContextSurveyConfirm, {
+      status: ConfirmStatus.rejected,
+    });
+  }
+
+  static create() {
+    const title = "In what context do you intend to use Dendron?";
+    const choices = [
+      { label: "For work" },
+      { label: "For personal use" },
+      { label: "All of the above" },
+      { label: "Other" },
+    ];
+    return new ContextSurvey({ title, choices, canPickMany: false });
   }
 }
 
@@ -483,6 +545,7 @@ export class SurveyUtils {
       )
       .then(async (resp) => {
         if (resp?.title === "Proceed") {
+          const contextSurvey = ContextSurvey.create();
           const backgroundSurvey = BackgroundSurvey.create();
           const useCaseSurvey = UseCaseSurvey.create();
           const publishingUseCaseSurvey = PublishingUseCaseSurvey.create();
@@ -490,17 +553,19 @@ export class SurveyUtils {
           const newsletterSubscritionSurvey =
             NewsletterSubscriptionSurvey.create();
 
-          const backgroundResults = await backgroundSurvey.show(1, 5);
-          const useCaseResults = await useCaseSurvey.show(2, 5);
+          const contextResults = await contextSurvey.show(1, 6);
+          const backgroundResults = await backgroundSurvey.show(2, 6);
+          const useCaseResults = await useCaseSurvey.show(3, 6);
           const publishingUseCaseResults = await publishingUseCaseSurvey.show(
-            3,
-            5
+            4,
+            6
           );
-          const priorToolsResults = await priorToolSurvey.show(4, 5);
+          const priorToolsResults = await priorToolSurvey.show(5, 6);
           const newsletterSubscriptionResults =
-            await newsletterSubscritionSurvey.show(5, 5);
+            await newsletterSubscritionSurvey.show(6, 6);
 
           const answerCount = [
+            contextResults,
             backgroundResults,
             useCaseResults,
             publishingUseCaseResults,
@@ -510,14 +575,18 @@ export class SurveyUtils {
           AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
             answerCount,
           });
-          await StateService.instance().updateGlobalState(
-            GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
-            "submitted"
+
+          MetadataService.instance().setInitialSurveyStatus(
+            InitialSurveyStatusEnum.submitted
           );
+
           vscode.window.showInformationMessage(
             "Survey submitted! Thanks for helping us make Dendron better 🌱"
           );
         } else {
+          MetadataService.instance().setInitialSurveyStatus(
+            InitialSurveyStatusEnum.cancelled
+          );
           vscode.window.showInformationMessage("Survey cancelled.");
           AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
         }

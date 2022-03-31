@@ -238,6 +238,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     skipOpenWs: true,
     ...setupWsOverride,
     workspaceInitializer: new BlankInitializer(),
+    selfContained: false,
   });
 
   await WorkspaceUtils.updateCodeWorkspaceSettings({

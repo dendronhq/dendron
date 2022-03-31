@@ -352,7 +352,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
 
     const workspaceDir = path.join(wsRoot, workspace.name);
-    fs.ensureDir(workspaceDir);
+    await fs.ensureDir(workspaceDir);
     await GitUtils.addToGitignore({
       addPath: ".dendron.cache.*",
       root: workspaceDir,

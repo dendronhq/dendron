@@ -10,7 +10,6 @@ import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
 import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
 import { ConvertLinkCommand } from "./ConvertLink";
-import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
@@ -88,7 +87,6 @@ const ALL_COMMANDS = [
   ConfigureExportPodV2,
   ConfigureGraphStylesCommand,
   ContributeCommand,
-  CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,
   CopyToClipboardCommand,

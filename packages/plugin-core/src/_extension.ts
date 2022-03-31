@@ -44,6 +44,7 @@ import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
+import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
@@ -1094,6 +1095,22 @@ async function _setupCommands({
         })
       )
     );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
+    const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.COPY_NOTE_LINK.key,
+        sentryReportingCallback(async (args) => {
+          if (args === undefined) {
+            args = {};
+          }
+          await copyNoteLinkCommand.run(args);
+        })
+      )
+    );
+    context.subscriptions.push(copyNoteLinkCommand);
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

@@ -72,6 +72,7 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -654,7 +655,10 @@ export function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
 export function subscribeToEngineStateChange(
   callback: (noteChangeEntries: NoteChangeEntry[]) => void
 ): Disposable {
-  const engine = ExtensionProvider.getEngine();
-  const engineClient = engine as unknown as DendronEngineClient;
+  const engineClient = toDendronEngineClient(ExtensionProvider.getEngine());
   return engineClient.onEngineNoteStateChanged(callback);
+}
+
+export function toDendronEngineClient(engine: IEngineAPIService) {
+  return engine as unknown as DendronEngineClient;
 }

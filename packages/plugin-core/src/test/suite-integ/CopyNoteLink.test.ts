@@ -4,20 +4,20 @@ import {
   AssertUtils,
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { beforeEach, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { expect, LocationTestUtils } from "../testUtilsv2";
 import {
-  expect,
-  LocationTestUtils,
-  runMultiVaultTest,
-  runSingleVaultTest,
-} from "../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../testUtilsV3";
+  describeMultiWS,
+  describeSingleWS,
+  toDendronEngineClient,
+} from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import sinon from "sinon";
@@ -27,448 +27,400 @@ function openNote(note: NoteProps) {
 }
 
 suite("CopyNoteLink", function () {
-  const ctx = setupBeforeAfter(this, {});
-
-  describe("single", () => {
-    test("basic", (done) => {
-      runSingleVaultTest({
-        ctx,
-        onInit: async ({ wsRoot, vault }) => {
-          const notePath = path.join(vault2Path({ vault, wsRoot }), "foo.md");
-          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual("[[Foo|foo]]");
-          done();
-        },
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      });
-    });
-
-    test("with a header that's a link", (done) => {
-      let noteWithLink: NoteProps;
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[0],
-            wsRoot,
-            body: "## [[Foo Bar|foo.bar]]",
-          });
-        },
-        onInit: async () => {
-          // Open and select the header
-          const editor = await openNote(noteWithLink);
-          const start = LocationTestUtils.getPresetWikiLinkPosition();
-          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
-          editor.selection = new vscode.Selection(start, end);
-          // generate a wikilink for it
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual(`[[Foo Bar|${noteWithLink.fname}#foo-bar]]`);
-          done();
-        },
-      });
-    });
-
-    test("with a header link containing unicode characters", (done) => {
-      let noteWithLink: NoteProps;
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[0],
-            wsRoot,
-            body: "## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum",
-          });
-        },
-        onInit: async () => {
-          // Open and select the header
-          const editor = await openNote(noteWithLink);
-          const start = LocationTestUtils.getPresetWikiLinkPosition();
-          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
-          editor.selection = new vscode.Selection(start, end);
-          // generate a wikilink for it
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual(
-            `[[Lörem Foo：Bar🙂Baz Ipsum|test#lörem-foobarbaz-ipsum]]`
-          );
-          done();
-        },
-      });
-    });
-
-    test("with anchor", (done) => {
-      let noteWithTarget: NoteProps;
-
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create(
-            {
-              wsRoot,
-              vault: vaults[0],
-            }
-          );
-          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        onInit: async () => {
-          const editor = await openNote(noteWithTarget);
-          const pos = LocationTestUtils.getPresetWikiLinkPosition();
-          const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
-            char: 12,
-          });
-          editor.selection = new vscode.Selection(pos, pos2);
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual(`[[H1|${noteWithTarget.fname}#h1]]`);
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
-          );
-          const link2 = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link2).toEqual(`[[H2|${noteWithTarget.fname}#h2]]`);
-          done();
-        },
-      });
-    });
-
-    test("existing block anchor", (done) => {
-      let note: NoteProps;
-
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          note = await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        onInit: async () => {
-          const editor = await openNote(note);
-          const cmd = new CopyNoteLinkCommand();
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
-          );
-          const link = (await cmd.execute({})).link;
-          const body = editor.document.getText();
-
-          // check that the link looks like what we expect
-          expect(link).toEqual("[[Anchor Target|anchor-target#^block-id]]");
-
-          // should not have inserted any more anchors into the note
-          AssertUtils.assertTimesInString({
-            body,
-            match: [[1, "^"]],
-          });
-
-          done();
-        },
-      });
-    });
-
-    test("doesn't confuse a footnote for a block anchor", (done) => {
-      let note: NoteProps;
-
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          note = await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[0],
-            wsRoot,
-            body: "Sapiente accusantium omnis quia. [^est]\n\n[^est]: Quia iure tempore eum.",
-          });
-        },
-        onInit: async () => {
-          const editor = await openNote(note);
-          const cmd = new CopyNoteLinkCommand();
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition(),
-            LocationTestUtils.getPresetWikiLinkPosition({ char: 10 })
-          );
-          const link = (await cmd.execute({})).link;
-          const body = editor.document.getText();
-
-          // check that the link looks like what we expect
-          expect(link).toNotEqual("[[Test|test#^est]]");
-          const anchor = getAnchorFromLink(link);
-
-          // check that the anchor has been inserted into the note
-          AssertUtils.assertTimesInString({
-            body,
-            match: [[1, anchor]],
-          });
-
-          done();
-        },
-      });
-    });
-
-    test("generated block anchor", (done) => {
-      let note: NoteProps;
-
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          note = await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        onInit: async () => {
-          const editor = await openNote(note);
-          const cmd = new CopyNoteLinkCommand();
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 12, char: 12 })
-          );
-          const link = (await cmd.execute({})).link;
-          const body = editor.document.getText();
-
-          // check that the link looks like what we expect
-          const anchor = getAnchorFromLink(link);
-
-          // check that the anchor has been inserted into the note
-          AssertUtils.assertTimesInString({
-            body,
-            match: [
-              [1, anchor],
-              [1, anchor],
-            ],
-          });
-
-          done();
-        },
-      });
-    });
-
-    test("tag note", (done) => {
-      let noteWithLink: NoteProps;
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "tags.foo.bar",
-            vault: vaults[0],
-            wsRoot,
-            body: "## [[Foo Bar|foo.bar]]",
-          });
-        },
-        onInit: async () => {
-          // Open and select the header
-          const editor = await openNote(noteWithLink);
-          const start = LocationTestUtils.getPresetWikiLinkPosition();
-          const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
-          editor.selection = new vscode.Selection(start, end);
-          // generate a wikilink for it
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual(`#foo.bar`);
-          done();
-        },
-      });
-    });
+  let copyNoteLinkCommand: CopyNoteLinkCommand;
+  beforeEach(() => {
+    copyNoteLinkCommand = new CopyNoteLinkCommand(
+      toDendronEngineClient(ExtensionProvider.getEngine())
+    );
   });
 
-  function getAnchorFromLink(link: string): string {
-    const anchors = link.match(/\^[a-z0-9A-Z-_]+/g);
-    expect(anchors).toBeTruthy();
-    expect(anchors!.length).toEqual(1);
-    expect(anchors![0].length > 0).toBeTruthy();
-    return anchors![0];
-  }
-
-  describe("multi", () => {
-    test("basic", (done) => {
-      runMultiVaultTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                true
-              );
-              return config;
-            },
-            { wsRoot }
-          );
-          const notePath = path.join(
-            vault2Path({ vault: vaults[0], wsRoot }),
-            "foo.md"
-          );
-          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual("[[Foo|dendron://main/foo]]");
-          done();
-        },
-        preSetupHook: ENGINE_HOOKS.setupBasic,
+  describeSingleWS(
+    "GIVEN a basic setup on a single vault workspace",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const notePath = path.join(
+          vault2Path({ vault: vaults[0], wsRoot }),
+          "foo.md"
+        );
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual("[[Foo|foo]]");
       });
-    });
 
-    test("with anchor", (done) => {
-      let noteWithTarget: NoteProps;
-      let noteWithAnchor: NoteProps;
+      test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const testNote = engine.notes["foo"];
+        // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+        const disposable = vscode.workspace.onDidSaveTextDocument(
+          (textDocument) => {
+            testAssertsInsideCallback(() => {
+              expect(
+                textDocument.getText().includes("id: barbar")
+              ).toBeTruthy();
+              disposable.dispose();
+            }, done);
+          }
+        );
 
-      runMultiVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create(
-            {
-              wsRoot,
-              vault: vaults[0],
-            }
-          );
-          noteWithAnchor = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+        ExtensionProvider.getWSUtils()
+          .openNote(testNote)
+          .then(async (editor) => {
+            editor
+              .edit(async (editBuilder) => {
+                // Replace id of frontmatter
+                const startPos = new vscode.Position(1, 4);
+                const endPos = new vscode.Position(1, 7);
+
+                editBuilder.replace(
+                  new vscode.Range(startPos, endPos),
+                  "barbar"
+                );
+              })
+              .then(async () => {
+                copyNoteLinkCommand.run();
+              });
+          });
+      });
+
+      test("WHEN the editor is selecting a header, THEN CopyNoteLink should return a link with that header", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "testHeader",
+          vault: vaults[0],
+          wsRoot,
+          body: "## [[Foo Bar|foo.bar]]",
+          engine,
+        });
+        // Open and select the header
+        const editor = await openNote(noteWithLink);
+        const start = LocationTestUtils.getPresetWikiLinkPosition();
+        const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
+        editor.selection = new vscode.Selection(start, end);
+        // generate a wikilink for it
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual(`[[Foo Bar|${noteWithLink.fname}#foo-bar]]`);
+      });
+
+      test("WHEN the editor is selecting a header with unicode characters, THEN CopyNoteLink should return a link with that header", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "testUnicode",
+          vault: vaults[0],
+          wsRoot,
+          body: "## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum",
+          engine,
+        });
+        // Open and select the header
+        const editor = await openNote(noteWithLink);
+        const start = LocationTestUtils.getPresetWikiLinkPosition();
+        const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
+        editor.selection = new vscode.Selection(start, end);
+        // generate a wikilink for it
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual(
+          `[[Lörem Foo：Bar🙂Baz Ipsum|testUnicode#lörem-foobarbaz-ipsum]]`
+        );
+      });
+
+      test("WHEN the editor is selecting an anchor, THEN CopyNoteLink should return a link with that anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const noteWithTarget =
+          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.createWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            engine,
+          });
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.createWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          engine,
+        });
+
+        const editor = await openNote(noteWithTarget);
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
+          char: 12,
+        });
+        editor.selection = new vscode.Selection(pos, pos2);
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual(`[[H1|${noteWithTarget.fname}#h1]]`);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
+        );
+        const link2 = (await copyNoteLinkCommand.run())?.link;
+        expect(link2).toEqual(`[[H2|${noteWithTarget.fname}#h2]]`);
+      });
+
+      test("WHEN the editor is selecting a block anchor, THEN CopyNoteLink should return a link with that block anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const note =
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            engine,
+          });
+
+        const editor = await openNote(note);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
+        );
+        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const body = editor.document.getText();
+
+        // check that the link looks like what we expect
+        expect(link).toEqual("[[Anchor Target|anchor-target#^block-id]]");
+
+        // should not have inserted any more anchors into the note
+        AssertUtils.assertTimesInString({
+          body,
+          match: [[1, "^"]],
+        });
+      });
+
+      test("WHEN the editor is selecting a footnote, THEN CopyNoteLink should not confuse it for a block anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const note = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "testFootnote",
+          vault: vaults[0],
+          wsRoot,
+          body: "Sapiente accusantium omnis quia. [^est]\n\n[^est]: Quia iure tempore eum.",
+          engine,
+        });
+
+        const editor = await openNote(note);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition(),
+          LocationTestUtils.getPresetWikiLinkPosition({ char: 10 })
+        );
+        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const body = editor.document.getText();
+
+        // check that the link looks like what we expect
+        expect(link).toNotEqual("[[testFootnote|testFootnote#^est]]");
+        const anchor = getAnchorFromLink(link!);
+
+        // check that the anchor has been inserted into the note
+        await AssertUtils.assertTimesInString({
+          body,
+          match: [[1, anchor]],
+        });
+      });
+
+      test("WHEN the note has a block anchor target, THEN CopyNoteLink should generate block anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const note =
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            engine,
+            fname: "generateBlockAnchorSingle",
+          });
+
+        const editor = await openNote(note);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 12, char: 12 })
+        );
+        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const body = editor.document.getText();
+
+        // check that the link looks like what we expect
+        const anchor = getAnchorFromLink(link!);
+
+        // check that the anchor has been inserted into the note
+        await AssertUtils.assertTimesInString({
+          body,
+          match: [[1, anchor]],
+        });
+      });
+
+      test("WHEN the editor is selecting a header of a tag note, THEN CopyNoteLink should return a link with that header", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "tags.foo.bar",
+          vault: vaults[0],
+          wsRoot,
+          body: "## [[Foo Bar|foo.bar]]",
+          engine,
+        });
+
+        const editor = await openNote(noteWithLink);
+        const start = LocationTestUtils.getPresetWikiLinkPosition();
+        const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
+        editor.selection = new vscode.Selection(start, end);
+        // generate a wikilink for it
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual(`#foo.bar`);
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic setup on a multivault workspace with enableXVaultWikiLink enabled",
+    {
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
+        return config;
+      },
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const notePath = path.join(
+          vault2Path({ vault: vaults[0], wsRoot }),
+          "foo.md"
+        );
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual("[[Foo|dendron://vault1/foo]]");
+      });
+
+      test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const testNote = engine.notes["foo"];
+        // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+        const disposable = vscode.workspace.onDidSaveTextDocument(
+          (textDocument) => {
+            testAssertsInsideCallback(() => {
+              expect(
+                textDocument.getText().includes("id: barbar")
+              ).toBeTruthy();
+              disposable.dispose();
+            }, done);
+          }
+        );
+
+        ExtensionProvider.getWSUtils()
+          .openNote(testNote)
+          .then(async (editor) => {
+            editor
+              .edit(async (editBuilder) => {
+                // Replace id of frontmatter
+                const startPos = new vscode.Position(1, 4);
+                const endPos = new vscode.Position(1, 7);
+
+                editBuilder.replace(
+                  new vscode.Range(startPos, endPos),
+                  "barbar"
+                );
+              })
+              .then(async () => {
+                copyNoteLinkCommand.run();
+              });
+          });
+      });
+
+      test("WHEN the editor is selecting an anchor, THEN CopyNoteLink should return a link with that anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const noteWithTarget =
+          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.createWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            engine,
+          });
+        const noteWithAnchor =
+          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.createWithEngine({
             wsRoot,
             vault: vaults[1],
+            engine,
           });
-        },
-        onInit: async ({ wsRoot }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                true
-              );
-              return config;
-            },
-            { wsRoot }
-          );
 
-          const editor = await openNote(noteWithTarget);
-          const pos = LocationTestUtils.getPresetWikiLinkPosition();
-          const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
-            char: 12,
-          });
-          editor.selection = new vscode.Selection(pos, pos2);
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link).toEqual(
-            `[[H1|dendron://main/${noteWithTarget.fname}#h1]]`
-          );
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
-          );
-          const link2 = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link2).toEqual(
-            `[[H2|dendron://main/${noteWithTarget.fname}#h2]]`
-          );
+        const editor = await openNote(noteWithTarget);
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
+          char: 12,
+        });
+        editor.selection = new vscode.Selection(pos, pos2);
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual(
+          `[[H1|dendron://vault1/${noteWithTarget.fname}#h1]]`
+        );
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
+        );
+        const link2 = (await copyNoteLinkCommand.run())?.link;
+        expect(link2).toEqual(
+          `[[H2|dendron://vault1/${noteWithTarget.fname}#h2]]`
+        );
 
-          await openNote(noteWithAnchor);
-          const link3 = (await new CopyNoteLinkCommand().run())?.link;
-          expect(link3).toEqual(
-            `[[Beta|dendron://other/${noteWithAnchor.fname}]]`
-          );
-          done();
-        },
+        await openNote(noteWithAnchor);
+        const link3 = (await copyNoteLinkCommand.run())?.link;
+        expect(link3).toEqual(
+          `[[Beta|dendron://vault2/${noteWithAnchor.fname}]]`
+        );
       });
-    });
 
-    test("existing block anchor", (done) => {
-      let note: NoteProps;
-
-      runMultiVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          note = await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+      test("WHEN the editor is selecting a block anchor, THEN CopyNoteLink should return a link with that block anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const note =
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
             vault: vaults[0],
-          });
-        },
-        onInit: async ({ wsRoot }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                true
-              );
-              return config;
-            },
-            { wsRoot }
-          );
-          const editor = await openNote(note);
-          const cmd = new CopyNoteLinkCommand();
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
-          );
-          const link = (await cmd.execute({})).link;
-          const body = editor.document.getText();
-
-          // check that the link looks like what we expect
-          expect(link).toEqual(
-            "[[Anchor Target|dendron://main/anchor-target#^block-id]]"
-          );
-
-          // should not have inserted any more anchors into the note
-          AssertUtils.assertTimesInString({
-            body,
-            match: [[1, "^"]],
+            engine,
           });
 
-          done();
-        },
+        const editor = await openNote(note);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
+        );
+        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const body = editor.document.getText();
+
+        // check that the link looks like what we expect
+        expect(link).toEqual(
+          "[[Anchor Target|dendron://vault1/anchor-target#^block-id]]"
+        );
+
+        // should not have inserted any more anchors into the note
+        AssertUtils.assertTimesInString({
+          body,
+          match: [[1, "^"]],
+        });
       });
-    });
 
-    test("generated block anchor", (done) => {
-      let note: NoteProps;
-
-      runMultiVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          note = await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+      test("WHEN the note has a block anchor target, THEN CopyNoteLink should generate block anchor", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const note =
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
             vault: vaults[0],
-          });
-        },
-        onInit: async ({ wsRoot }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                true
-              );
-              return config;
-            },
-            { wsRoot }
-          );
-          const editor = await openNote(note);
-          const cmd = new CopyNoteLinkCommand();
-          editor.selection = new vscode.Selection(
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
-            LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 12 })
-          );
-          const link = (await cmd.execute({})).link;
-          const body = editor.document.getText();
-
-          // check that the link looks like what we expect
-          const anchor = getAnchorFromLink(link);
-          expect(
-            link.startsWith("[[Anchor Target|dendron://main/anchor-target#^")
-          ).toBeTruthy();
-
-          // check that the anchor has been inserted into the note
-          AssertUtils.assertTimesInString({
-            body,
-            match: [[1, anchor]],
+            engine,
+            fname: "generateBlockAnchorMulti",
           });
 
-          done();
-        },
+        const editor = await openNote(note);
+        editor.selection = new vscode.Selection(
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
+          LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 12 })
+        );
+        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const body = editor.document.getText();
+
+        // check that the link looks like what we expect
+        const anchor = getAnchorFromLink(link!);
+        expect(
+          link!.startsWith(`[[${note.fname}|dendron://vault1/${note.fname}#^`)
+        ).toBeTruthy();
+
+        // check that the anchor has been inserted into the note
+        AssertUtils.assertTimesInString({
+          body,
+          match: [[1, anchor]],
+        });
       });
-    });
-  });
+    }
+  );
 
-  describeSingleWS("WHEN in a non-note file", { ctx }, () => {
+  describeSingleWS("WHEN in a non-note file", {}, () => {
     test("THEN creates a link to that file", async () => {
       const { wsRoot } = ExtensionProvider.getDWorkspace();
       const fsPath = path.join(wsRoot, "test.js");
@@ -477,7 +429,7 @@ suite("CopyNoteLink", function () {
         "const x = 'Pariatur officiis voluptatem molestiae.'"
       );
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-      const link = (await new CopyNoteLinkCommand().run())?.link;
+      const link = (await copyNoteLinkCommand.run())?.link;
       expect(link).toEqual("[[test.js]]");
     });
 
@@ -487,7 +439,7 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(wsRoot, ".config.yaml");
         await fs.writeFile(fsPath, "x: 1");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await new CopyNoteLinkCommand().run())?.link;
+        const link = (await copyNoteLinkCommand.run())?.link;
         expect(link).toEqual("[[.config.yaml]]");
       });
     });
@@ -507,7 +459,7 @@ suite("CopyNoteLink", function () {
           "x = 'Pariatur officiis voluptatem molestiae.'"
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await new CopyNoteLinkCommand().run())?.link;
+        const link = (await copyNoteLinkCommand.run())?.link;
         expect(link).toEqual(path.join("[[assets", "test.py]]"));
       });
     });
@@ -519,7 +471,7 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(path.join(wsRoot, vaultPath), "test.rs");
         await fs.writeFile(fsPath, "let x = 123;");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await new CopyNoteLinkCommand().run())?.link;
+        const link = (await copyNoteLinkCommand.run())?.link;
         expect(link).toEqual(path.join(`[[${vaultPath}`, "test.rs]]"));
       });
     });
@@ -532,7 +484,7 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(dirPath, "test.clj");
         await fs.writeFile(fsPath, "(set! x 1)");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await new CopyNoteLinkCommand().run())?.link;
+        const link = (await copyNoteLinkCommand.run())?.link;
         expect(link).toEqual(path.join("[[src", "clj", "test.clj]]"));
       });
     });
@@ -542,7 +494,6 @@ suite("CopyNoteLink", function () {
     describeSingleWS(
       "AND there's an existing block anchor",
       {
-        ctx,
         modConfigCb: (config) => {
           ConfigUtils.setNonNoteLinkAnchorType(config, "block");
           return config;
@@ -551,7 +502,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection(" ^my-block-anchor");
-          const link = (await new CopyNoteLinkCommand().run())?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(
             await linkHasAnchor(
               "block",
@@ -567,7 +518,6 @@ suite("CopyNoteLink", function () {
     describeSingleWS(
       "AND config is set to line anchor",
       {
-        ctx,
         modConfigCb: (config) => {
           ConfigUtils.setNonNoteLinkAnchorType(config, "line");
           return config;
@@ -576,7 +526,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a line anchor", async () => {
           await prepFileAndSelection();
-          const link = (await new CopyNoteLinkCommand().run())?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           // Link should contain an anchor
           expect(
             await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -588,7 +538,6 @@ suite("CopyNoteLink", function () {
     describeSingleWS(
       "AND config is set to block anchor",
       {
-        ctx,
         modConfigCb: (config) => {
           ConfigUtils.setNonNoteLinkAnchorType(config, "block");
           return config;
@@ -597,7 +546,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection();
-          const link = (await new CopyNoteLinkCommand().run())?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(
             await linkHasAnchor("block", ["src", "test.hs"], link)
           ).toBeTruthy();
@@ -605,27 +554,20 @@ suite("CopyNoteLink", function () {
       }
     );
 
-    describeSingleWS(
-      "AND config is set unset",
-      {
-        ctx,
-      },
-      () => {
-        test("THEN creates a link to that file with a block anchor", async () => {
-          await prepFileAndSelection();
-          const link = (await new CopyNoteLinkCommand().run())?.link;
-          expect(
-            await linkHasAnchor("block", ["src", "test.hs"], link)
-          ).toBeTruthy();
-        });
-      }
-    );
+    describeSingleWS("AND config is set unset", {}, () => {
+      test("THEN creates a link to that file with a block anchor", async () => {
+        await prepFileAndSelection();
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(
+          await linkHasAnchor("block", ["src", "test.hs"], link)
+        ).toBeTruthy();
+      });
+    });
 
     describe("AND config is set to prompt", () => {
       describeSingleWS(
         "AND user picks line in the prompt",
         {
-          ctx,
           modConfigCb: (config) => {
             ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
             return config;
@@ -637,7 +579,7 @@ suite("CopyNoteLink", function () {
             const pick = sinon
               .stub(vscode.window, "showQuickPick")
               .resolves({ label: "line" });
-            const link = (await new CopyNoteLinkCommand().run())?.link;
+            const link = (await copyNoteLinkCommand.run())?.link;
             expect(pick.calledOnce).toBeTruthy();
             expect(
               await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -649,7 +591,6 @@ suite("CopyNoteLink", function () {
       describeSingleWS(
         "AND user picks block in the prompt",
         {
-          ctx,
           modConfigCb: (config) => {
             ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
             return config;
@@ -661,7 +602,7 @@ suite("CopyNoteLink", function () {
             const pick = sinon
               .stub(vscode.window, "showQuickPick")
               .resolves({ label: "block" });
-            const link = (await new CopyNoteLinkCommand().run())?.link;
+            const link = (await copyNoteLinkCommand.run())?.link;
             expect(pick.calledOnce).toBeTruthy();
             expect(
               await linkHasAnchor("block", ["src", "test.hs"], link)
@@ -673,7 +614,6 @@ suite("CopyNoteLink", function () {
       describeSingleWS(
         "AND user cancels the prompt",
         {
-          ctx,
           modConfigCb: (config) => {
             ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
             return config;
@@ -685,7 +625,7 @@ suite("CopyNoteLink", function () {
             const pick = sinon
               .stub(vscode.window, "showQuickPick")
               .resolves(undefined);
-            const link = (await new CopyNoteLinkCommand().run())?.link;
+            const link = (await copyNoteLinkCommand.run())?.link;
             expect(pick.calledOnce).toBeTruthy();
             expect(
               await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -696,6 +636,14 @@ suite("CopyNoteLink", function () {
     });
   });
 });
+
+function getAnchorFromLink(link: string): string {
+  const anchors = link.match(/\^[a-z0-9A-Z-_]+/g);
+  expect(anchors).toBeTruthy();
+  expect(anchors!.length).toEqual(1);
+  expect(anchors![0].length > 0).toBeTruthy();
+  return anchors![0];
+}
 
 async function prepFileAndSelection(appendText?: string) {
   const { wsRoot } = ExtensionProvider.getDWorkspace();

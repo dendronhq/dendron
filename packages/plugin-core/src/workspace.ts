@@ -69,6 +69,7 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { CalendarViewV2 } from "./views/CalendarViewV2";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -511,7 +512,8 @@ export class DendronExtension implements IDendronExtension {
           )
         );
 
-        const calendarView = new CalendarView(this);
+        const calendarView = new CalendarViewV2(this);
+        this.treeViews[DendronTreeViewKey.CALENDAR_VIEW] = calendarView;
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,

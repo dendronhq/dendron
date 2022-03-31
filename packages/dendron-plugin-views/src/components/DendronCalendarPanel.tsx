@@ -63,7 +63,7 @@ function getMaybeDatePortion({ fname }: NoteProps, journalName: string) {
 
 const today = luxonGenerateConfig.getNow();
 
-export function DendronCalendarPanel({ ide, engine }: DendronProps) {
+export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
   // --- init
   const ctx = "CalendarView";
   const logger = createLogger("calendarView");
@@ -169,6 +169,7 @@ export function DendronCalendarPanel({ ide, engine }: DendronProps) {
   >(
     (date, mode) => {
       logger.info({ ctx: "onSelect", date });
+      debugger;
       const dateKey = getDateKey(date, mode);
       const selectedNote = dateKey
         ? _.first(groupedDailyNotes[dateKey])
@@ -299,27 +300,27 @@ export function DendronCalendarPanel({ ide, engine }: DendronProps) {
   );
 }
 
-function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
-  const logger = createLogger("calendarViewContainer");
+// function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
+//   const logger = createLogger("calendarViewContainer");
 
-  const didNotesLengthChanged =
-    Object.keys(prevProps.engine.notes || {}).length !==
-    Object.keys(nextProps.engine.notes || {}).length;
+//   const didNotesLengthChanged =
+//     Object.keys(prevProps.engine.notes || {}).length !==
+//     Object.keys(nextProps.engine.notes || {}).length;
 
-  const isDiff = _.some([
-    // active note changed
-    prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
-    // engine initialized for first time
-    _.isUndefined(prevProps.engine.notes) || didNotesLengthChanged,
-    // engine just went from pending to loading
-    prevProps.engine.loading === "pending" &&
-      nextProps.engine.loading === "idle",
-  ]);
-  logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
-  return !isDiff;
-}
-const DendronCalendarPanelContainer = React.memo(
-  DendronCalendarPanel,
-  areEqual
-);
-export default DendronCalendarPanelContainer;
+//   const isDiff = _.some([
+//     // active note changed
+//     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
+//     // engine initialized for first time
+//     _.isUndefined(prevProps.engine.notes) || didNotesLengthChanged,
+//     // engine just went from pending to loading
+//     prevProps.engine.loading === "pending" &&
+//       nextProps.engine.loading === "idle",
+//   ]);
+//   logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
+//   return !isDiff;
+// }
+// const DendronCalendarPanelContainer = React.memo(
+//   DendronCalendarPanel,
+//   areEqual
+// );
+// export default DendronCalendarPanelContainer;

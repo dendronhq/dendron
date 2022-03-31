@@ -26,6 +26,9 @@ export class CalendarViewV2 implements vscode.WebviewViewProvider {
   private _extension: IDendronExtension;
   constructor(extension: IDendronExtension) {
     this._extension = extension;
+    this._extension.context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+    );
   }
 
   public postMessage(msg: DMessage) {
@@ -87,15 +90,16 @@ export class CalendarViewV2 implements vscode.WebviewViewProvider {
   }
 
   async onActiveTextEditorChangeHandler() {
-    const document = VSCodeUtils.getActiveTextEditor()?.document;
-    if (document) {
-      this.openTextDocument(document);
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (editor?.document) {
+      this.onOpenTextDocument(editor);
     } else {
       this.refresh(); // call refresh without note so that `noteActive` gets unset.
     }
   }
 
-  openTextDocument(document: vscode.TextDocument) {
+  onOpenTextDocument(editor: vscode.TextEditor | undefined) {
+    const document = editor?.document;
     if (_.isUndefined(document) || _.isUndefined(this._view)) {
       return;
     }

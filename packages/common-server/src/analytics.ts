@@ -527,7 +527,15 @@ export class SegmentClient {
 
 // user props
 type UserProfileProps = {
+  /**
+   * User Role (Developer, Researcher, etc.)
+   */
   role?: string;
+
+  /**
+   * The number of notes in the workspace
+   */
+  numNotes?: number;
 };
 
 // platform props

@@ -632,7 +632,7 @@ export async function _activate(
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
       );
-      AnalyticsUtils.identify();
+      AnalyticsUtils.identify({ numNotes });
       AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
         duration: durationReloadWorkspace,
         noCaching: dendronConfig.noCaching || false,

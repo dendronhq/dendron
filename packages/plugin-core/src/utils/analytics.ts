@@ -62,9 +62,11 @@ export class AnalyticsUtils {
   static getCommonTrackProps() {
     const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
     const vscodeSessionId = vscode.env.sessionId;
+    const appVersion = VersionProvider.version();
     return {
       firstWeekSinceInstall,
       vscodeSessionId,
+      appVersion,
     };
   }
 

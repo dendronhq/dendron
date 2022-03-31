@@ -20,6 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
+  CommentJSONValue,
   FileUtils,
   findDownTo,
   findUpTo,
@@ -51,12 +52,24 @@ export class WorkspaceUtils {
     wsRoot: string
   ): Promise<RespV3<WorkspaceSettings>> {
     const wsConfigPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
-    const wsConfig = await readJSONWithComments(wsConfigPath);
+    let wsConfig: CommentJSONValue;
+    try {
+      wsConfig = await readJSONWithComments(wsConfigPath);
+    } catch (err) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.DOES_NOT_EXIST,
+          message: `Missing code-workspace file ${wsConfigPath}`,
+          payload: err,
+        }),
+      };
+    }
+
     if (!this.isWorkspaceConfig(wsConfig)) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.INVALID_CONFIG,
-          message: `Bad or missing code-workspace file ${wsConfigPath}`,
+          message: `Bad code-workspace file ${wsConfigPath}`,
         }),
       };
     } else {

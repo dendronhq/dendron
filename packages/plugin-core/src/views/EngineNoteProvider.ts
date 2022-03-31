@@ -4,6 +4,7 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  TreeUtils,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -86,14 +87,15 @@ export class EngineNoteProvider
         return Promise.resolve([]);
       }
       if (noteProps) {
-        const childrenIds = noteProps.children;
+        const childrenIds = TreeUtils.sortNotesAtLevel({
+          noteIds: noteProps.children,
+          noteDict: engine.notes,
+        });
 
         const childrenNoteProps = childrenIds.map((id) => {
           return engine.notes[id];
         });
 
-        // Sort the listing order by title:
-        _.sortBy(childrenNoteProps, (props) => props.title);
         return Promise.resolve(childrenNoteProps);
       } else {
         Logger.info({ ctx, msg: "reconstructing tree: enter" });
@@ -160,9 +162,10 @@ export class EngineNoteProvider
     const ctx = "parseTree";
     const tn = this.createTreeNote(note);
     this._tree[note.id] = tn;
-    const children = note.children;
-    _.sortBy(children, (id) => ndict[id].title);
-
+    const children = TreeUtils.sortNotesAtLevel({
+      noteIds: note.children,
+      noteDict: ndict,
+    });
     tn.children = await Promise.all(
       children.map(async (c) => {
         const childNote = ndict[c];

@@ -8,12 +8,10 @@ import {
   VaultUtils,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
-
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { useWorkspaceProps } from ".";
 import { GraphUtils } from "../components/graph";
 
 import {
@@ -550,17 +548,18 @@ const useGraphElements = ({
   engine,
   config,
   noteActive,
+  wsRoot,
 }: {
   type: "note" | "schema";
   engine: engineSlice.EngineState;
   config: GraphConfig;
   noteActive?: NoteProps | undefined;
+  wsRoot: string;
 }) => {
   const [elements, setElements] = useState<GraphElements>({
     nodes: [],
     edges: {},
   });
-  const [workspace] = useWorkspaceProps();
   const logger = createLogger("useGraphElements");
   logger.log({ msg: "enter", activeNoteId: noteActive?.id });
   const [noteCount, setNoteCount] = useState(0);
@@ -584,7 +583,7 @@ const useGraphElements = ({
         setElements(
           getFullNoteGraphElements({
             notes: engine.notes,
-            wsRoot: workspace.ws,
+            wsRoot,
             vaults: engine.vaults,
             noteActive,
           })
@@ -599,7 +598,7 @@ const useGraphElements = ({
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,
-          wsRoot: workspace.ws,
+          wsRoot,
           vaults: engine.vaults,
           noteActive,
         })

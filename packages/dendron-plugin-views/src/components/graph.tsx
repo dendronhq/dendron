@@ -1,9 +1,8 @@
-import { createLogger, postVSCodeMessage } from "@dendronhq/common-frontend";
+import { createLogger } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
-import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./graph-filter-view";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
@@ -19,6 +18,7 @@ import { DendronProps } from "../types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 import { Button, Space, Spin, Typography } from "antd";
 import { useCurrentTheme, useWorkspaceProps } from "../hooks";
+import { postVSCodeMessage } from "../utils/vscode";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -326,9 +326,6 @@ export default function Graph({
 
   return (
     <>
-      <Head>
-        <title>{_.capitalize(type)} Graph</title>
-      </Head>
       <div
         style={{
           width: "100vw",

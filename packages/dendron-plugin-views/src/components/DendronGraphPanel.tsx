@@ -3,7 +3,7 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
 } from "@dendronhq/common-all";
-import { createLogger, postVSCodeMessage } from "@dendronhq/common-frontend";
+import { createLogger } from "@dendronhq/common-frontend";
 import { useEffect, useState } from "react";
 import useGraphElements from "../hooks/useGraphElements";
 import { DendronComponent } from "../types";
@@ -11,19 +11,21 @@ import { graphConfig, GraphConfig } from "../utils/graph";
 import Graph from "./graph";
 import { EventHandler } from "cytoscape";
 import _ from "lodash";
+import { postVSCodeMessage } from "../utils/vscode";
 
 const DendronGraphPanel: DendronComponent = (props) => {
   const ctx = "DendronNoteGraphView";
   const logger = createLogger("DendronNoteGraphView");
-  logger.info({
-    ctx,
-    msg: "enter",
-    props,
-  });
   //const { useEngine } = engineHooks;
   const { workspace, ide, engine } = props;
   // useEngine({ engineState: engine, opts: {url: workspace.url, ws: workspace.ws} });
   let noteActive = props.ide.noteActive;
+  logger.info({
+    ctx,
+    msg: "enter",
+    activeNoteId: noteActive ? noteActive.id : "no active note found",
+  });
+
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
   const elements = useGraphElements({
@@ -31,6 +33,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
     engine,
     config,
     noteActive,
+    wsRoot: workspace.ws,
   });
   useEffect(() => {
     if (!_.isUndefined(elements)) {

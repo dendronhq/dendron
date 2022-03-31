@@ -34,6 +34,11 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   const ideDispatch = ideHooks.useIDEAppDispatch();
   const [workspace] = useWorkspaceProps();
   const logger = createLogger("DendronApp");
+  const { useEngine } = engineHooks;
+  useEngine({
+    engineState: engine,
+    opts: { url: workspace.url, ws: workspace.ws },
+  });
 
   logger.info({ ctx, msg: "enter", workspace });
 
@@ -44,7 +49,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   };
 
   // === Hooks
-  // run once
+  // run once: ComponentDidMount
   React.useEffect(() => {
     setLogLevel(LOG_LEVEL.INFO);
     // tell vscode that the client is ready

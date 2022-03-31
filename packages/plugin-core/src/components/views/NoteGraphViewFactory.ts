@@ -2,6 +2,7 @@ import {
   DendronEditorViewKey,
   DendronError,
   DMessageEnum,
+  DMessageSource,
   getWebEditorViewEntry,
   GraphViewMessage,
   GraphViewMessageType,
@@ -162,7 +163,7 @@ export class NoteGraphPanelFactory {
           syncChangedNote: true,
           activeNote: this._ext.wsUtils.getActiveNote(),
         },
-        source: "vscode",
+        source: DMessageSource.vscode,
       } as OnDidChangeActiveTextEditorMsg);
     }
   }

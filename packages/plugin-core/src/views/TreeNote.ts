@@ -34,9 +34,10 @@ export class TreeNote extends vscode.TreeItem {
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
-    if (DNodeUtils.isRoot(note)) {
-      this.label = `root (${VaultUtils.getName(note.vault)})`;
-    }
+
+    this.label = DNodeUtils.isRoot(note)
+      ? `root (${VaultUtils.getName(note.vault)})`
+      : this.note.title;
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
       title: "",

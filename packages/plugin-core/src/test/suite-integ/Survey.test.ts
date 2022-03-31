@@ -54,7 +54,6 @@ suite("SurveyUtils", function () {
           test("THEN showInitialSurvey is called", async () => {
             const tutorialInitializer = new TutorialInitializer();
             const ws = ExtensionProvider.getDWorkspace();
-            // MetadataService.instance().setInitialSurveyStatus(InitialSurveyStatusEnum)
             expect(
               MetadataService.instance().getMeta().initialSurveyStatus
             ).toEqual(undefined);

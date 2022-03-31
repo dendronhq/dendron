@@ -637,7 +637,7 @@ export async function _activate(
       const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
       const siteUrl = publishigConfig.siteUrl;
 
-      const trackProps = {
+      AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
         duration: durationReloadWorkspace,
         noCaching: dendronConfig.noCaching || false,
         numNotes,
@@ -649,12 +649,8 @@ export async function _activate(
         numSelfContainedVaults: ws
           .getDWorkspace()
           .vaults.filter(VaultUtils.isSelfContained).length,
-      };
-      if (siteUrl !== undefined) {
-        _.set(trackProps, "siteUrl", siteUrl);
-      }
-
-      AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
+        hasSiteUrl: siteUrl !== undefined,
+      });
 
       // on first install, warn if extensions are incompatible ^dlx35gstwsun
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

@@ -107,30 +107,16 @@ export class DendronQuickPickSurvey {
 }
 
 export class ContextSurvey extends DendronQuickPickSurvey {
+  static CHOICES: { [index: string]: string } = {
+    "For work": "work",
+    "For personal use": "personal",
+    "All of the above": "all",
+    Other: "other",
+  };
+
   async onAnswer(result: vscode.QuickPickItem) {
     let maybeOtherResult: string | undefined;
-    let answer: string | undefined;
-    switch (result.label) {
-      case "For work": {
-        answer = "work";
-        break;
-      }
-      case "For personal use": {
-        answer = "use";
-        break;
-      }
-      case "All of the above": {
-        answer = "all";
-        break;
-      }
-      case "Other": {
-        answer = "other";
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+    const answer = ContextSurvey.CHOICES[result.label];
     if (answer === "other") {
       maybeOtherResult = await vscode.window.showInputBox({
         ignoreFocusOut: true,
@@ -157,12 +143,9 @@ export class ContextSurvey extends DendronQuickPickSurvey {
 
   static create() {
     const title = "In what context do you intend to use Dendron?";
-    const choices = [
-      { label: "For work" },
-      { label: "For personal use" },
-      { label: "All of the above" },
-      { label: "Other" },
-    ];
+    const choices = Object.keys(ContextSurvey.CHOICES).map((key) => {
+      return { label: key };
+    });
     return new ContextSurvey({ title, choices, canPickMany: false });
   }
 }
@@ -288,30 +271,17 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
 }
 
 export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
+  static CHOICES: { [index: string]: string } = {
+    "Yes, publishing is a very important use case for me.": "yes/important",
+    "Yes, but I would only like to publish my notes to people I choose to.":
+      "yes/restricted",
+    "I haven't considered publishing my notes, but I am willing to try if it's easy.":
+      "curious",
+    "No, I do not wish to publish my notes.": "no",
+  };
+
   async onAnswer(result: vscode.QuickPickItem) {
-    const label = result.label;
-    let answer: string | undefined;
-    switch (label) {
-      case "Yes, publishing is a very important use case for me.": {
-        answer = "yes/important";
-        break;
-      }
-      case "Yes, but I would only like to publish my notes to people I choose to.": {
-        answer = "yes/restricted";
-        break;
-      }
-      case "I haven't considered publishing my notes, but I am willing to try if it's easy.": {
-        answer = "curious";
-        break;
-      }
-      case "No, I do not wish to publish my notes.": {
-        answer = "no";
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+    const answer = PublishingUseCaseSurvey.CHOICES[result.label];
     AnalyticsUtils.identify({ publishingUseCase: answer });
     AnalyticsUtils.track(SurveyEvents.PublishingUseCaseAnswered, {
       answer,
@@ -325,18 +295,9 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
   static create() {
     const title =
       "Dendron lets you easily publish your notes. Do you have any plans to publish your notes?";
-    const choices = [
-      { label: "Yes, publishing is a very important use case for me." },
-      {
-        label:
-          "Yes, but I would only like to publish my notes to people I choose to.",
-      },
-      {
-        label:
-          "I haven't considered publishing my notes, but I am willing to try if it's easy.",
-      },
-      { label: "No, I do not wish to publish my notes." },
-    ];
+    const choices = Object.keys(PublishingUseCaseSurvey.CHOICES).map((key) => {
+      return { label: key };
+    });
     return new PublishingUseCaseSurvey({ title, choices, canPickMany: false });
   }
 }

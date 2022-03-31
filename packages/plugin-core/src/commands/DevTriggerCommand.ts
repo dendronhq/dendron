@@ -1,4 +1,5 @@
 import { DENDRON_COMMANDS } from "../constants";
+import { SurveyUtils } from "../survey";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -26,5 +27,6 @@ export class DevTriggerCommand extends BasicCommand<
   async execute() {
     // Place to add some temporary piece of code for development.
     // Please remember to remove the added code prior to pushing.
+    await SurveyUtils.showInitialSurvey();
   }
 }

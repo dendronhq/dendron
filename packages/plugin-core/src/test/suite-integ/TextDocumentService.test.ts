@@ -481,4 +481,50 @@ suite("TextDocumentService", function testSuite() {
       }
     );
   });
+
+  describeSingleWS(
+    "Given a note with frontmatter",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault,
+          fname: "alpha",
+          body: "First Line\n",
+        });
+      },
+    },
+    () => {
+      test("WHEN the note has frontmatter, THEN getFrontmatterPosition should return true", async () => {
+        const engine = ExtensionProvider.getEngine();
+        const alphaNote = engine.notes["alpha"];
+        const editor = await ExtensionProvider.getWSUtils().openNote(alphaNote);
+        const hasFrontmatter = TextDocumentService.containsFrontmatter(
+          editor.document
+        );
+        expect(hasFrontmatter).toBeTruthy();
+      });
+
+      test("WHEN frontmatter is removed, THEN getFrontmatterPosition should return false", async () => {
+        const engine = ExtensionProvider.getEngine();
+        const alphaNote = engine.notes["alpha"];
+
+        const editor = await ExtensionProvider.getWSUtils().openNote(alphaNote);
+        editor.edit((editBuilder) => {
+          editBuilder.delete(
+            new vscode.Range(
+              new vscode.Position(0, 0),
+              new vscode.Position(1, 0)
+            )
+          );
+        });
+        await editor.document.save();
+        const hasFrontmatter = TextDocumentService.containsFrontmatter(
+          editor.document
+        );
+        expect(hasFrontmatter).toBeFalsy();
+      });
+    }
+  );
 });

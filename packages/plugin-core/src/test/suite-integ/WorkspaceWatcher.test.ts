@@ -17,9 +17,7 @@ import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
   describeSingleWS,
-  runLegacyMultiWorkspaceTest,
   runSuiteButSkipForWindows,
-  setupBeforeAfter,
 } from "../testUtilsV3";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { Position } from "vscode";
@@ -30,7 +28,6 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockPreviewProxy } from "../MockPreviewProxy";
-import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -66,13 +63,10 @@ const doesSchemaExist = (schemaId: string) => {
 runSuiteButSkipForWindows()(
   "WorkspaceWatcher schema update tests",
   function () {
-    const ctx = setupBeforeAfter(this);
-
     describeMultiWS(
       "WHEN setup with schema",
       {
         preSetupHook: ENGINE_HOOKS.setupInlineSchema,
-        ctx,
       },
       () => {
         test("AND new schema is schema file saved THEN schema is updated in engine.", async () => {
@@ -110,111 +104,190 @@ runSuiteButSkipForWindows()(
   }
 );
 
-suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
+suite("WorkspaceWatcher", function () {
   let watcher: WorkspaceWatcher;
 
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+  describeSingleWS(
+    "GIVEN a basic setup on a single vault workspace",
+    {
+      postSetupHook: setupBasic,
+    },
+    () => {
+      test("WHEN user renames a file outside of dendron rename command, THEN all of its references are also updated", (done) => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const previewProxy = new MockPreviewProxy();
+        const extension = ExtensionProvider.getExtension();
 
-  describe("WHEN user renames a file outside of dendron rename command", () => {
-    test("THEN all of its references are also updated", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: setupBasic,
-        onInit: async ({ vaults, wsRoot, engine }) => {
-          const previewProxy = new MockPreviewProxy();
-          const extension = ExtensionProvider.getExtension();
+        const windowWatcher = new WindowWatcher({
+          extension,
+          previewProxy,
+        });
 
-          const windowWatcher = new WindowWatcher({
-            extension,
-            previewProxy,
-          });
-
-          watcher = new WorkspaceWatcher({
-            schemaSyncService:
-              ExtensionProvider.getExtension().schemaSyncService,
-            extension,
-            windowWatcher,
-          });
-          const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
-          const oldUri = vscode.Uri.file(oldPath);
-          const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
-          const newUri = vscode.Uri.file(newPath);
-          const args: vscode.FileWillRenameEvent = {
-            files: [
-              {
-                oldUri,
-                newUri,
-              },
-            ],
-            // eslint-disable-next-line no-undef
-            waitUntil: (_args: Thenable<any>) => {
-              _args.then(() => {
-                const reference = NoteUtils.getNoteOrThrow({
-                  fname: "foo.one",
-                  vault: vaults[0],
-                  wsRoot,
-                  notes: engine.notes,
-                });
-                expect(reference.body).toEqual(`[[newfile]]\n`);
-                done();
-              });
+        watcher = new WorkspaceWatcher({
+          schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
+          extension,
+          windowWatcher,
+        });
+        const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
+        const oldUri = vscode.Uri.file(oldPath);
+        const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
+        const newUri = vscode.Uri.file(newPath);
+        const args: vscode.FileWillRenameEvent = {
+          files: [
+            {
+              oldUri,
+              newUri,
             },
-          };
-
-          watcher.onWillRenameFiles(args);
-        },
-      });
-    });
-    test("THEN the title of fileName is also updated", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        postSetupHook: setupBasic,
-        onInit: async ({ vaults, wsRoot, engine }) => {
-          const previewProxy = new MockPreviewProxy();
-          const extension = ExtensionProvider.getExtension();
-
-          const windowWatcher = new WindowWatcher({
-            extension,
-            previewProxy,
-          });
-          watcher = new WorkspaceWatcher({
-            schemaSyncService:
-              ExtensionProvider.getExtension().schemaSyncService,
-            extension,
-            windowWatcher,
-          });
-          const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
-          const oldUri = vscode.Uri.file(oldPath);
-          const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
-          const newUri = vscode.Uri.file(newPath);
-          const args: vscode.FileRenameEvent = {
-            files: [
-              {
-                oldUri,
-                newUri,
-              },
-            ],
-          };
-          const edit = new vscode.WorkspaceEdit();
-          edit.renameFile(oldUri, newUri);
-          const success = await vscode.workspace.applyEdit(edit);
-          if (success) {
-            await watcher.onDidRenameFiles(args);
-            const newFile = NoteUtils.getNoteOrThrow({
-              fname: "newfile",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
+          ],
+          // eslint-disable-next-line no-undef
+          waitUntil: (_args: Thenable<any>) => {
+            _args.then(() => {
+              const reference = NoteUtils.getNoteOrThrow({
+                fname: "foo.one",
+                vault: vaults[0],
+                wsRoot,
+                notes: engine.notes,
+              });
+              expect(reference.body).toEqual(`[[newfile]]\n`);
+              done();
             });
-            expect(newFile.title).toEqual(`Newfile`);
-            done();
-          }
-        },
+          },
+        };
+
+        watcher.onWillRenameFiles(args);
       });
-    });
-  });
+    }
+  );
+
+  describeSingleWS(
+    "GIVEN a basic setup on a single vault workspace",
+    {
+      postSetupHook: setupBasic,
+    },
+    () => {
+      test("WHEN user renames a file outside of dendron rename command, THEN the title of fileName is also updated", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const previewProxy = new MockPreviewProxy();
+        const extension = ExtensionProvider.getExtension();
+
+        const windowWatcher = new WindowWatcher({
+          extension,
+          previewProxy,
+        });
+        watcher = new WorkspaceWatcher({
+          schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
+          extension,
+          windowWatcher,
+        });
+        const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
+        const oldUri = vscode.Uri.file(oldPath);
+        const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
+        const newUri = vscode.Uri.file(newPath);
+        const args: vscode.FileRenameEvent = {
+          files: [
+            {
+              oldUri,
+              newUri,
+            },
+          ],
+        };
+        const edit = new vscode.WorkspaceEdit();
+        edit.renameFile(oldUri, newUri);
+        const success = await vscode.workspace.applyEdit(edit);
+        if (success) {
+          await watcher.onDidRenameFiles(args);
+          const newFile = NoteUtils.getNoteOrThrow({
+            fname: "newfile",
+            vault: vaults[0],
+            wsRoot,
+            notes: engine.notes,
+          });
+          expect(newFile.title).toEqual(`Newfile`);
+        }
+      });
+    }
+  );
+
+  describeSingleWS(
+    "GIVEN a basic setup on a single vault workspace",
+    {
+      postSetupHook: setupBasic,
+    },
+    () => {
+      test("WHEN user saves a file and content has not changed, THEN updated timestamp in frontmatter is not updated", async () => {
+        const engine = ExtensionProvider.getEngine();
+        const previewProxy = new MockPreviewProxy();
+        const extension = ExtensionProvider.getExtension();
+
+        const windowWatcher = new WindowWatcher({
+          extension,
+          previewProxy,
+        });
+        watcher = new WorkspaceWatcher({
+          schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
+          extension,
+          windowWatcher,
+        });
+        const fooNote = engine.notes["foo.one"];
+        const updatedBefore = fooNote.updated;
+        const editor = await ExtensionProvider.getWSUtils().openNote(fooNote);
+        const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
+          document: editor.document,
+        };
+        const changes = watcher.onWillSaveTextDocument(vscodeEvent);
+        expect(changes).toBeTruthy();
+        expect(changes?.changes.length).toEqual(0);
+        expect(fooNote.updated).toEqual(updatedBefore);
+      });
+
+      test("WHEN user saves a file and content has changed, THEN updated timestamp in frontmatter is updated", (done) => {
+        const engine = ExtensionProvider.getEngine();
+        const previewProxy = new MockPreviewProxy();
+        const extension = ExtensionProvider.getExtension();
+
+        const windowWatcher = new WindowWatcher({
+          extension,
+          previewProxy,
+        });
+        watcher = new WorkspaceWatcher({
+          schemaSyncService: ExtensionProvider.getExtension().schemaSyncService,
+          extension,
+          windowWatcher,
+        });
+        const fooNote = engine.notes["foo.one"];
+        const bodyBefore = fooNote.body;
+        const updatedBefore = fooNote.updated;
+        const textToAppend = "new text here";
+        ExtensionProvider.getWSUtils()
+          .openNote(fooNote)
+          .then((editor) => {
+            editor.edit((editBuilder) => {
+              const line = editor.document.getText().split("\n").length;
+              editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+            });
+            editor.document.save().then(() => {
+              const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
+                document: editor.document,
+                // eslint-disable-next-line no-undef
+                waitUntil: (_args: Thenable<any>) => {
+                  _args.then(() => {
+                    // Engine note body hasn't been updated yet
+                    expect(engine.notes["foo.one"].body).toEqual(bodyBefore);
+                    expect(engine.notes["foo.one"].updated).toNotEqual(
+                      updatedBefore
+                    );
+                    done();
+                  });
+                },
+              };
+              const changes = watcher.onWillSaveTextDocument(vscodeEvent);
+              expect(changes).toBeTruthy();
+              expect(changes?.changes.length).toEqual(1);
+            });
+          });
+      });
+    }
+  );
 
   describe("GIVEN the user opening a file", () => {
     let ext: IDendronExtension;
@@ -222,14 +295,15 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
     beforeEach(async () => {
       ext = ExtensionProvider.getExtension();
+      const previewProxy = new MockPreviewProxy();
 
       const windowWatcher = new WindowWatcher({
         extension: ext,
-        previewProxy: PreviewPanelFactory.create(this),
+        previewProxy,
       });
 
       workspaceWatcher = new WorkspaceWatcher({
-        schemaSyncService: this.schemaSyncService,
+        schemaSyncService: ext.schemaSyncService,
         extension: ext,
         windowWatcher,
       });
@@ -240,12 +314,11 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
     });
     describeSingleWS(
       "AND WHEN user opens non dendron file for the first time",
-      { ctx },
+      {},
       () => {
         test("THEN do not affect frontmatter", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           await FileTestUtils.createFiles(wsRoot, [{ path: "sample" }]);
-          const wsutils = new WSUtilsV2(ext);
           const notePath = path.join(wsRoot, "sample");
           const editor = await VSCodeUtils.openFileInEditor(
             vscode.Uri.file(notePath)
@@ -259,10 +332,10 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
     describeSingleWS(
       "AND WHEN user opens non dendron markdown file for the first time",
-      { ctx },
+      {},
       () => {
         test("THEN do not affect frontmatter", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           await FileTestUtils.createFiles(wsRoot, [{ path: "sample.md" }]);
           const notePath = path.join(wsRoot, "sample.md");
           const editor = await VSCodeUtils.openFileInEditor(
@@ -277,7 +350,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
     describeSingleWS(
       "WHEN user opens dendron note for the first time",
-      { ctx },
+      {},
       () => {
         let note: NoteProps;
         before(async () => {
@@ -290,7 +363,6 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
           });
         });
         test("THEN the cursor moves past the frontmatter", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
           const ext = ExtensionProvider.getExtension();
           const wsutils = new WSUtilsV2(ext);
           const editor = await wsutils.openNote(note);
@@ -311,7 +383,7 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
 
     describeSingleWS(
       "WHEN the user opens the file through the search",
-      { ctx },
+      {},
       () => {
         let note: NoteProps;
         before(async () => {
@@ -324,7 +396,6 @@ suite("WorkspaceWatcher: GIVEN the dendron extension is running", function () {
           });
         });
         test("THEN the cursor moves past the frontmatter", async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
           const stubTimeout = sinon.stub(Wrap, "setTimeout");
           const editor = await WSUtils.openNote(note);
           // pre-move the selection, like what would happen when opening through the serach

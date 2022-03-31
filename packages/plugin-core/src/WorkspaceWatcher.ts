@@ -31,6 +31,7 @@ import {
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { TextDocumentService } from "./services/TextDocumentService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -243,7 +244,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  async onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
+  onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -311,17 +312,17 @@ export class WorkspaceWatcher {
       return;
     }
 
-    const content = event.document.getText();
-    const matchFM = NoteUtils.RE_FM;
-    const matchOuter = content.match(matchFM);
-    if (!matchOuter) {
-      return { changes: [] };
+    // Return undefined if document is missing frontmatter
+    if (!TextDocumentService.containsFrontmatter(event.document)) {
+      return;
     }
+
+    const content = event.document.getText();
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
 
-    // update the `updated` time in frontmatter
-    if (match && parseInt(match[1], 10) !== note.updated) {
+    // update the `updated` time in frontmatter if it exists and content has changed
+    if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = event.document.positionAt(match.index);
       const endPos = event.document.positionAt(match.index + match[0].length);

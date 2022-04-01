@@ -80,7 +80,7 @@ function AppVSCode({ Component, pageProps }: any) {
   }, []);
 
   // query only has ws and port properties. To intitalize engine with useEngine, we require url as well.
-  query.url = `http://localhost:${query.port}`;
+  query.url = workspaceOpts?.url;
   useEngine({ engineState: engine, opts: query });
 
   // --- effects

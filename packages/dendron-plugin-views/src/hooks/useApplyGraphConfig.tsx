@@ -1,6 +1,6 @@
 import cytoscape from "cytoscape";
 import { useEffect, useState } from "react";
-import { getEulerConfig, GraphUtils } from "../components/graph";
+import { getEulerConfig, GraphUtils } from "../components/Graph";
 import { GraphConfig, GraphElements } from "../utils/graph";
 import _ from "lodash";
 

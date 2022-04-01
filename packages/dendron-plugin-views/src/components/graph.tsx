@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import AntThemes from "../styles/theme-antd";
-import GraphFilterView from "./graph-filter-view";
+import GraphFilterView from "./GraphFilterView";
 import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
 import {
   ConfigUtils,

@@ -18,8 +18,9 @@ export const useCurrentTheme = () => {
   );
   React.useEffect(() => {
     // @ts-ignore
-    setCurrentTheme(window.currentTheme);
-  }, [setCurrentTheme, currentTheme]);
+    window.currentTheme && setCurrentTheme(window.currentTheme);
+    // @ts-ignore
+  }, [window.currentTheme]);
   return { currentTheme, setCurrentTheme };
 };
 

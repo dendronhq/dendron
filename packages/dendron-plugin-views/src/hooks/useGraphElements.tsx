@@ -12,7 +12,7 @@ import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { GraphUtils } from "../components/graph";
+import { GraphUtils } from "../components/Graph";
 
 import {
   GraphConfig,

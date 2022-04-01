@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import useGraphElements from "../hooks/useGraphElements";
 import { DendronComponent } from "../types";
 import { graphConfig, GraphConfig } from "../utils/graph";
-import Graph from "./graph";
+import Graph from "./Graph";
 import { EventHandler } from "cytoscape";
 import _ from "lodash";
 import { postVSCodeMessage } from "../utils/vscode";

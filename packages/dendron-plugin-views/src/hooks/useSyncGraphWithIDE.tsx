@@ -1,7 +1,7 @@
 import { createLogger, engineSliceUtils } from "@dendronhq/common-frontend";
 import cytoscape from "cytoscape";
 import { useEffect, useState } from "react";
-import { GraphUtils } from "../components/graph";
+import { GraphUtils } from "../components/Graph";
 import { GraphConfig } from "../utils/graph";
 import { DendronProps } from "../types";
 

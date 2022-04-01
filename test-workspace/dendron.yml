@@ -32,6 +32,7 @@ workspace:
         -
             fsPath: vault2
             visibility: private
+            siteUrl: "https://vault2.com"
         -
             fsPath: vault
         -

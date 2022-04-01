@@ -23,6 +23,7 @@ enum SiteEvents {
   UPDATE_STOP = "siteUpdateStop",
   VISIT_SITE = "siteVisit",
 }
+
 enum SubscriptionEvents {
   CREATED = "subscriptionCreated",
 }
@@ -525,17 +526,38 @@ export class SegmentClient {
   }
 }
 
-// user props
+/**
+ * User Profile.
+ */
 type UserProfileProps = {
-  /**
-   * User Role (Developer, Researcher, etc.)
-   */
-  role?: string;
-
   /**
    * The number of notes in the workspace
    */
   numNotes?: number;
+  /**
+   * The role of user. Retrieved from initial survey.
+   */
+  role?: string;
+  /**
+   * The use case of Dendron for the user. Retrieved from initial survey.
+   */
+  useCases?: string[];
+  /**
+   * The context Dendron is used for the user. Retrieved from initial survey.
+   */
+  useContext?: string;
+  /**
+   * Whether the user has intent for publishing. If so, how. Retrieved from initial survey.
+   */
+  publishingUseCase?: string;
+  /**
+   * Prior tools the user has used before Dendron. Retrieved from initial survey.
+   */
+  priorTools?: string[];
+  /**
+   * Email of user. Retrieved from initial survey.
+   */
+  email?: string;
 };
 
 // platform props

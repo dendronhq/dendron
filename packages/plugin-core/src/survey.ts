@@ -1,4 +1,4 @@
-import { getStage, SurveyEvents } from "@dendronhq/common-all";
+import { ConfirmStatus, getStage, SurveyEvents } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "./utils/analytics";
 import * as vscode from "vscode";
 import _ from "lodash";
@@ -9,6 +9,7 @@ import { resolve } from "path";
 import { VSCodeUtils } from "./vsCodeUtils";
 import {
   InactvieUserMsgStatusEnum,
+  InitialSurveyStatusEnum,
   MetadataService,
 } from "@dendronhq/engine-server";
 
@@ -105,6 +106,50 @@ export class DendronQuickPickSurvey {
   }
 }
 
+export class ContextSurvey extends DendronQuickPickSurvey {
+  static CHOICES: { [index: string]: string } = {
+    "For work": "work",
+    "For personal use": "personal",
+    "All of the above": "all",
+    Other: "other",
+  };
+
+  async onAnswer(result: vscode.QuickPickItem) {
+    let maybeOtherResult: string | undefined;
+    const answer = ContextSurvey.CHOICES[result.label];
+    if (answer === "other") {
+      maybeOtherResult = await vscode.window.showInputBox({
+        ignoreFocusOut: true,
+        placeHolder: "Type anything that applies.",
+        prompt:
+          'You have checked "Other". Please describe what other context you intend to use Dendron.',
+        title: "In what context do you intend to use Dendron? - Other",
+      });
+    }
+
+    AnalyticsUtils.identify({ useContext: answer });
+    AnalyticsUtils.track(SurveyEvents.ContextSurveyConfirm, {
+      status: ConfirmStatus.accepted,
+      result: answer,
+      other: maybeOtherResult,
+    });
+  }
+
+  onReject() {
+    AnalyticsUtils.track(SurveyEvents.ContextSurveyConfirm, {
+      status: ConfirmStatus.rejected,
+    });
+  }
+
+  static create() {
+    const title = "In what context do you intend to use Dendron?";
+    const choices = Object.keys(ContextSurvey.CHOICES).map((key) => {
+      return { label: key };
+    });
+    return new ContextSurvey({ title, choices, canPickMany: false });
+  }
+}
+
 export class BackgroundSurvey extends DendronQuickPickSurvey {
   async onAnswer(result: vscode.QuickPickItem) {
     let maybeOtherResult: string | undefined;
@@ -156,8 +201,10 @@ export class UseCaseSurvey extends DendronQuickPickSurvey {
         title: "What do you want to use Dendron for? - Other",
       });
     }
+    const resultsList = results.map((result) => result.label);
+    AnalyticsUtils.identify({ useCases: resultsList });
     AnalyticsUtils.track(SurveyEvents.UseCaseAnswered, {
-      results: results.map((result) => result.label),
+      results: resultsList,
       other: maybeOtherResult,
     });
   }
@@ -193,6 +240,8 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
         title: "Are you coming from an existing tool? - Other",
       });
     }
+    const resultsList = results.map((result) => result.label);
+    AnalyticsUtils.identify({ priorTools: resultsList });
     AnalyticsUtils.track(SurveyEvents.PriorToolsAnswered, {
       results: results.map((result) => result.label),
       other: maybeOtherResult,
@@ -222,31 +271,18 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
 }
 
 export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
-  async onAnswer(result: vscode.QuickPickItem) {
-    const label = result.label;
-    let answer: string | undefined;
-    switch (label) {
-      case "Yes, publishing is a very important use case for me.": {
-        answer = "yes/important";
-        break;
-      }
-      case "Yes, but I would only like to publish my notes to people I choose to.": {
-        answer = "yes/restricted";
-        break;
-      }
-      case "I haven't considered publishing my notes, but I am willing to try if it's easy.": {
-        answer = "curious";
-        break;
-      }
-      case "No, I do not wish to publish my notes.": {
-        answer = "no";
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+  static CHOICES: { [index: string]: string } = {
+    "Yes, publishing is a very important use case for me.": "yes/important",
+    "Yes, but I would only like to publish my notes to people I choose to.":
+      "yes/restricted",
+    "I haven't considered publishing my notes, but I am willing to try if it's easy.":
+      "curious",
+    "No, I do not wish to publish my notes.": "no",
+  };
 
+  async onAnswer(result: vscode.QuickPickItem) {
+    const answer = PublishingUseCaseSurvey.CHOICES[result.label];
+    AnalyticsUtils.identify({ publishingUseCase: answer });
     AnalyticsUtils.track(SurveyEvents.PublishingUseCaseAnswered, {
       answer,
     });
@@ -259,27 +295,17 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
   static create() {
     const title =
       "Dendron lets you easily publish your notes. Do you have any plans to publish your notes?";
-    const choices = [
-      { label: "Yes, publishing is a very important use case for me." },
-      {
-        label:
-          "Yes, but I would only like to publish my notes to people I choose to.",
-      },
-      {
-        label:
-          "I haven't considered publishing my notes, but I am willing to try if it's easy.",
-      },
-      { label: "No, I do not wish to publish my notes." },
-    ];
+    const choices = Object.keys(PublishingUseCaseSurvey.CHOICES).map((key) => {
+      return { label: key };
+    });
     return new PublishingUseCaseSurvey({ title, choices, canPickMany: false });
   }
 }
 
 export class NewsletterSubscriptionSurvey extends DendronQuickInputSurvey {
   async onAnswer(result: string) {
-    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionAnswered, {
-      result,
-    });
+    AnalyticsUtils.identify({ email: result });
+    AnalyticsUtils.track(SurveyEvents.NewsletterSubscriptionAnswered);
     resolve();
   }
 
@@ -480,6 +506,7 @@ export class SurveyUtils {
       )
       .then(async (resp) => {
         if (resp?.title === "Proceed") {
+          const contextSurvey = ContextSurvey.create();
           const backgroundSurvey = BackgroundSurvey.create();
           const useCaseSurvey = UseCaseSurvey.create();
           const publishingUseCaseSurvey = PublishingUseCaseSurvey.create();
@@ -487,17 +514,19 @@ export class SurveyUtils {
           const newsletterSubscritionSurvey =
             NewsletterSubscriptionSurvey.create();
 
-          const backgroundResults = await backgroundSurvey.show(1, 5);
-          const useCaseResults = await useCaseSurvey.show(2, 5);
+          const contextResults = await contextSurvey.show(1, 6);
+          const backgroundResults = await backgroundSurvey.show(2, 6);
+          const useCaseResults = await useCaseSurvey.show(3, 6);
           const publishingUseCaseResults = await publishingUseCaseSurvey.show(
-            3,
-            5
+            4,
+            6
           );
-          const priorToolsResults = await priorToolSurvey.show(4, 5);
+          const priorToolsResults = await priorToolSurvey.show(5, 6);
           const newsletterSubscriptionResults =
-            await newsletterSubscritionSurvey.show(5, 5);
+            await newsletterSubscritionSurvey.show(6, 6);
 
           const answerCount = [
+            contextResults,
             backgroundResults,
             useCaseResults,
             publishingUseCaseResults,
@@ -507,14 +536,18 @@ export class SurveyUtils {
           AnalyticsUtils.track(SurveyEvents.InitialSurveyAccepted, {
             answerCount,
           });
-          await StateService.instance().updateGlobalState(
-            GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED,
-            "submitted"
+
+          MetadataService.instance().setInitialSurveyStatus(
+            InitialSurveyStatusEnum.submitted
           );
+
           vscode.window.showInformationMessage(
             "Survey submitted! Thanks for helping us make Dendron better 🌱"
           );
         } else {
+          MetadataService.instance().setInitialSurveyStatus(
+            InitialSurveyStatusEnum.cancelled
+          );
           vscode.window.showInformationMessage("Survey cancelled.");
           AnalyticsUtils.track(SurveyEvents.InitialSurveyRejected);
         }

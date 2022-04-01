@@ -36,6 +36,7 @@ export const initNotes = createAsyncThunk(
     const data = resp.data!;
     logger.info({ state: "pre:setNotes" });
     dispatch(setFromInit(data));
+    dispatch(setError(undefined));
     logger.info({ state: "post:setNotes" });
     return resp;
   }
@@ -64,6 +65,7 @@ export const syncConfig = createAsyncThunk(
     const data = resp.data!;
     logger.info({ state: "pre:setConfig" });
     dispatch(setConfig(data));
+    dispatch(setError(undefined));
     logger.info({ state: "post:setConfig" });
     return resp;
   }
@@ -93,6 +95,7 @@ export const syncNote = createAsyncThunk(
     logger.info({ state: "pre:setNotes" });
     if (data?.length) {
       dispatch(updateNote(data[0]));
+      dispatch(setError(undefined));
     }
     logger.info({ state: "post:setNotes" });
     return resp;
@@ -124,6 +127,7 @@ export const renderNote = createAsyncThunk(
     }
     const data = resp.data!;
     dispatch(setRenderNote({ id, body: data }));
+    dispatch(setError(undefined));
     return resp;
   }
 );

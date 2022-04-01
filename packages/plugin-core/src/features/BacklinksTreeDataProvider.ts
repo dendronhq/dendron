@@ -1,6 +1,8 @@
 import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
-import path from "path";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
+import * as Sentry from "@sentry/node";
 import _, { Dictionary } from "lodash";
+import path from "path";
 import {
   Disposable,
   Event,
@@ -13,17 +15,16 @@ import {
   Uri,
   window,
 } from "vscode";
+import { DendronContext, ICONS } from "../constants";
+import { Logger } from "../logger";
+import { BacklinkSortOrder } from "../types";
 import {
   containsMarkdownExt,
   findReferences,
   FoundRefT,
   sortPaths,
 } from "../utils/md";
-import { EngineEventEmitter } from "@dendronhq/engine-server";
-import { DendronContext, ICONS } from "../constants";
-import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { BacklinkSortOrder } from "../types";
 import { Backlink, BacklinkFoundRef } from "./Backlink";
 
 export default class BacklinksTreeDataProvider
@@ -99,15 +100,29 @@ export default class BacklinksTreeDataProvider
     this._onDidChangeTreeDataEmitter.fire();
   }, 250);
 
+  // This fn is invoked by vscode as part of the TreeDataProvider interface, so
+  // report errors to Sentry in the catch block
   public getTreeItem(element: Backlink) {
-    return element;
+    try {
+      return element;
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 
+  // This fn is invoked by vscode as part of the TreeDataProvider interface, so
+  // report errors to Sentry in the catch block
   public getParent(element: Backlink): ProviderResult<Backlink> {
-    if (element.parentBacklink) {
-      return element.parentBacklink;
-    } else {
-      return undefined;
+    try {
+      if (element.parentBacklink) {
+        return element.parentBacklink;
+      } else {
+        return undefined;
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
     }
   }
 
@@ -122,38 +137,45 @@ export default class BacklinksTreeDataProvider
     this.refreshBacklinks();
   }
 
+  // This fn is invoked by vscode as part of the TreeDataProvider interface, so
+  // report errors to Sentry in the catch block
   public async getChildren(element?: Backlink) {
-    const fsPath = window.activeTextEditor?.document.uri.fsPath;
+    try {
+      const fsPath = window.activeTextEditor?.document.uri.fsPath;
 
-    if (!element) {
-      // Root case, branch will get top level backlinks.
-      // Top level children/1st-level children.
-      if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
-        return [];
-      }
-      return this.pathsToBacklinkSourceTreeItems(
-        fsPath,
-        this._isLinkCandidateEnabled,
-        this._sortOrder
-      );
-    } else if (element.label === "Linked" || element.label === "Candidates") {
-      // 3rd-level children.
-      const refs = element?.refs;
-      if (!refs) {
-        return [];
-      }
+      if (!element) {
+        // Root case, branch will get top level backlinks.
+        // Top level children/1st-level children.
+        if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
+          return [];
+        }
+        return this.pathsToBacklinkSourceTreeItems(
+          fsPath,
+          this._isLinkCandidateEnabled,
+          this._sortOrder
+        );
+      } else if (element.label === "Linked" || element.label === "Candidates") {
+        // 3rd-level children.
+        const refs = element?.refs;
+        if (!refs) {
+          return [];
+        }
 
-      if (!this._isLinkCandidateEnabled && element.label === "Candidates") {
-        return [];
+        if (!this._isLinkCandidateEnabled && element.label === "Candidates") {
+          return [];
+        }
+        return this.refsToBacklinkTreeItems(refs, fsPath!, element);
+      } else {
+        // 2nd-level children.
+        const refs = element?.refs;
+        if (!refs) {
+          return [];
+        }
+        return this.getSecondLevelRefsToBacklinks(refs);
       }
-      return this.refsToBacklinkTreeItems(refs, fsPath!, element);
-    } else {
-      // 2nd-level children.
-      const refs = element?.refs;
-      if (!refs) {
-        return [];
-      }
-      return this.getSecondLevelRefsToBacklinks(refs);
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
     }
   }
 

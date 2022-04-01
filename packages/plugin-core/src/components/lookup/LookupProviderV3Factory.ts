@@ -4,7 +4,8 @@ import {
   INoteLookupProviderFactory,
   ISchemaLookupProviderFactory,
 } from "./LookupProviderV3Interface";
-import { NoteLookupProvider, SchemaLookupProvider } from "./LookupProviderV3";
+import { SchemaLookupProvider } from "./SchemaLookupProvider";
+import { NoteLookupProvider } from "./NoteLookupProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 
 export class NoteLookupProviderFactory implements INoteLookupProviderFactory {

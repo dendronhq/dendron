@@ -4,11 +4,13 @@ import {
   DNodeUtils,
   DVault,
   IntermediateDendronConfig,
+  LookupNoteTypeEnum,
   LookupSelectionModeEnum,
+  LookupSelectionTypeEnum,
   NoteQuickInput,
   NoteUtils,
-  SchemaUtils,
   SchemaTemplate,
+  SchemaUtils,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -16,8 +18,8 @@ import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV4,
   FileTestUtils,
-  NOTE_PRESETS_V4,
   NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import {
@@ -46,19 +48,17 @@ import {
   SelectionExtractBtn,
   TaskBtn,
 } from "../../components/lookup/buttons";
-import { DendronBtn } from "../../components/lookup/ButtonTypes";
-import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
 import {
-  DendronQuickPickerV2,
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
+  DendronBtn,
   LookupSplitTypeEnum,
-} from "../../components/lookup/types";
+} from "../../components/lookup/ButtonTypes";
+import { CREATE_NEW_LABEL } from "../../components/lookup/constants";
+import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
+import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import {
   createNoActiveItem,
   PickerUtilsV2,
 } from "../../components/lookup/utils";
-import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
 import { CONFIG } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
@@ -259,6 +259,7 @@ suite("NoteLookupCommand", function () {
             expect(
               HistoryService.instance().subscribersv2.lookupProvider.length
             ).toEqual(0);
+            cmd.cleanUp();
             done();
           }, 1000);
           // await out;
@@ -292,6 +293,7 @@ suite("NoteLookupCommand", function () {
               _.find(opts.quickpick.selectedItems, { fname: "foo" })
             )
           ).toBeTruthy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -311,6 +313,7 @@ suite("NoteLookupCommand", function () {
             initialValue: "*",
           }))!;
           expect(opts.quickpick.selectedItems.length).toEqual(6);
+          cmd.cleanUp();
           done();
         },
       });
@@ -334,6 +337,7 @@ suite("NoteLookupCommand", function () {
 
           // Check that its not just create new in the quick pick.
           expect(opts.quickpick.selectedItems.length > 1).toBeTruthy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -360,6 +364,7 @@ suite("NoteLookupCommand", function () {
             moduleId: "foo",
             schemaId: "foo",
           });
+          cmd.cleanUp();
           done();
         },
       });
@@ -386,6 +391,8 @@ suite("NoteLookupCommand", function () {
             moduleId: "foo",
             schemaId: "ch1",
           });
+
+          cmd.cleanUp();
           done();
         },
       });
@@ -424,6 +431,7 @@ suite("NoteLookupCommand", function () {
             _.find(opts.quickpick.selectedItems, { fname: "foo.ch2" })
           ).toEqual(undefined);
           expect(_.isUndefined(opts.quickpick.filterMiddleware)).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -440,6 +448,7 @@ suite("NoteLookupCommand", function () {
           const opts = (await cmd.run({ noConfirm: true }))!;
           expect(opts.quickpick.value).toEqual("foo");
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
+          cmd.cleanUp();
           done();
         },
       });
@@ -465,7 +474,7 @@ suite("NoteLookupCommand", function () {
           await provider.onUpdatePickerItems({
             picker: quickpick,
             token: controller.cancelToken.token,
-            fuzzThreshold: controller.fuzzThreshold,
+            // fuzzThreshold: controller.fuzzThreshold,
           });
           const schemaItem = _.pick(
             _.find(quickpick.items, { fname: "foo.ch1" }),
@@ -475,6 +484,7 @@ suite("NoteLookupCommand", function () {
             fname: "foo.ch1",
             schemaStub: true,
           });
+          cmd.cleanUp();
           done();
         },
       });
@@ -518,7 +528,7 @@ suite("NoteLookupCommand", function () {
         }))!;
 
         assertions(out);
-
+        cmd.cleanUp();
         done();
       },
     });
@@ -894,6 +904,8 @@ suite("NoteLookupCommand", function () {
             vault: vaults[0],
           });
           expect(_.trim(newNote?.body)).toEqual("food ch2 template");
+
+          cmd.cleanUp();
         });
       }
     );
@@ -945,6 +957,8 @@ suite("NoteLookupCommand", function () {
           expect(_.trim(newNote?.body)).toEqual(
             "food ch2 template in vaultThree"
           );
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1003,6 +1017,7 @@ suite("NoteLookupCommand", function () {
           });
           expect(showQuickPick.calledOnce).toBeFalsy();
           expect(_.trim(newNote?.body)).toEqual("food ch2 template");
+          cmd.cleanUp();
         });
       }
     );
@@ -1074,6 +1089,8 @@ suite("NoteLookupCommand", function () {
                 "food ch2 template in vault 2"
               );
             });
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1138,6 +1155,8 @@ suite("NoteLookupCommand", function () {
               expect(showQuickPick.calledOnce).toBeTruthy();
               expect(_.trim(newNote?.body)).toEqual("");
             });
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1177,6 +1196,8 @@ suite("NoteLookupCommand", function () {
           expect(warningMsg).toEqual(
             `Warning: Problem with food schema. No vault found for missingVault`
           );
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1216,6 +1237,8 @@ suite("NoteLookupCommand", function () {
           expect(warningMsg).toEqual(
             `Warning: Problem with food schema. No note found for blah`
           );
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1244,6 +1267,8 @@ suite("NoteLookupCommand", function () {
           expect(warningMsg).toEqual(
             "Warning: Problem with food schema. No note found for food.missing"
           );
+
+          cmd.cleanUp();
         });
       }
     );
@@ -1266,6 +1291,7 @@ suite("NoteLookupCommand", function () {
           const newNote = WSUtils.getNoteFromDocument(document!);
           expect(newNote?.fname).toEqual("foo.ch1");
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1303,6 +1329,7 @@ suite("NoteLookupCommand", function () {
           const newNote = WSUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("Template text");
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1330,6 +1357,7 @@ suite("NoteLookupCommand", function () {
             cancellationToken: controller.cancelToken,
           })();
           expect(spyFetchPickerResultsNoInput.calledOnce).toBeTruthy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1352,6 +1380,7 @@ suite("NoteLookupCommand", function () {
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1367,6 +1396,8 @@ suite("NoteLookupCommand", function () {
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
+
+          cmd.cleanUp();
           done();
         },
       });
@@ -1384,6 +1415,8 @@ suite("NoteLookupCommand", function () {
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "foo" });
           expect(promptVaultSpy.calledOnce).toBeFalsy();
+
+          cmd.cleanUp();
           done();
         },
       });
@@ -1401,6 +1434,8 @@ suite("NoteLookupCommand", function () {
           const promptVaultSpy = stubVaultPick(vaults);
           await cmd.run({ noConfirm: true, initialValue: "gamma" });
           expect(promptVaultSpy.calledOnce).toBeTruthy();
+
+          cmd.cleanUp();
           done();
         },
       });
@@ -1441,6 +1476,7 @@ suite("NoteLookupCommand", function () {
           const titleOverride = today.split(".").join("-");
           expect(note!.title).toEqual(titleOverride);
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1473,6 +1509,7 @@ suite("NoteLookupCommand", function () {
             out.quickpick.value.startsWith(`scratch.${todayFormatted}.`)
           ).toBeTruthy();
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1506,6 +1543,7 @@ suite("NoteLookupCommand", function () {
 
           expect(scratch1Name).toNotEqual(scratch2Name);
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1530,6 +1568,7 @@ suite("NoteLookupCommand", function () {
 
           expect(out.quickpick.value.startsWith(`foo`)).toBeTruthy();
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1567,6 +1606,7 @@ suite("NoteLookupCommand", function () {
           const titleOverride = today.split(".").join("-");
           expect(note!.title).toEqual(titleOverride);
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -1588,23 +1628,15 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.journal,
           });
 
-          let { journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
+          const { journalBtn, scratchBtn } = getNoteTypeButtons(
+            controller.quickPick.buttons
           );
 
           expect(journalBtn.pressed).toBeTruthy();
           expect(scratchBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value.startsWith("foo.journal."));
+          expect(controller.quickPick.value.startsWith("foo.journal."));
 
-          await controller.onTriggerButton(journalBtn);
-
-          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -1626,23 +1658,15 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.scratch,
           });
 
-          let { journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
+          const { journalBtn, scratchBtn } = getNoteTypeButtons(
+            controller.quickPick.buttons
           );
 
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeTruthy();
-          expect(controller.quickpick.value.startsWith("scratch."));
+          expect(controller.quickPick.value.startsWith("scratch."));
 
-          await controller.onTriggerButton(scratchBtn);
-
-          ({ journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -1664,85 +1688,16 @@ suite("NoteLookupCommand", function () {
             noteType: LookupNoteTypeEnum.task,
           });
 
-          let { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
+          const { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
+            controller.quickPick.buttons
           );
 
           expect(journalBtn.pressed).toBeFalsy();
           expect(scratchBtn.pressed).toBeFalsy();
           expect(taskBtn.pressed).toBeTruthy();
-          expect(controller.quickpick.value.startsWith("task."));
+          expect(controller.quickPick.value.startsWith("task."));
 
-          await controller.onTriggerButton(taskBtn);
-
-          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(taskBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
-          done();
-        },
-      });
-    });
-
-    test("scratch, journal, and task modifiers toggle each other off when triggered", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          await WSUtils.openNote(engine.notes["foo"]);
-
-          const cmd = new NoteLookupCommand();
-          stubVaultPick(vaults);
-
-          const { controller } = await cmd.gatherInputs({
-            noteType: LookupNoteTypeEnum.journal,
-          });
-
-          let { journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(journalBtn.pressed).toBeTruthy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(taskBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value.startsWith("foo.journal."));
-
-          await controller.onTriggerButton(scratchBtn);
-
-          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeTruthy();
-          expect(taskBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value.startsWith("scratch."));
-
-          await controller.onTriggerButton(taskBtn);
-
-          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(taskBtn.pressed).toBeTruthy();
-          expect(controller.quickpick.value.startsWith("task."));
-
-          await controller.onTriggerButton(taskBtn);
-
-          ({ journalBtn, scratchBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          ));
-          expect(journalBtn.pressed).toBeFalsy();
-          expect(scratchBtn.pressed).toBeFalsy();
-          expect(taskBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -1770,6 +1725,7 @@ suite("NoteLookupCommand", function () {
             getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1791,6 +1747,7 @@ suite("NoteLookupCommand", function () {
             getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1810,6 +1767,7 @@ suite("NoteLookupCommand", function () {
             getSelectionTypeButtons(gatherOut.quickpick.buttons);
           expect(selection2linkBtn.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1858,6 +1816,7 @@ suite("NoteLookupCommand", function () {
           // const oldNote = engine.notes["foo"];
           // expect(oldNote.links.length).toEqual(1);
           // expect(oldNote.links[0].value).toEqual("foo.foo-body");
+          cmd.cleanUp();
           done();
         },
       });
@@ -1882,23 +1841,14 @@ suite("NoteLookupCommand", function () {
             selectionType: "selection2link",
           });
 
-          let { selection2linkBtn, selectionExtractBtn } =
-            getSelectionTypeButtons(controller.quickpick.buttons);
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickPick.buttons);
 
           expect(selection2linkBtn?.pressed).toBeTruthy();
           expect(selectionExtractBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo.foo-body");
+          expect(controller.quickPick.value).toEqual("foo.foo-body");
 
-          await controller.onTriggerButton(selection2linkBtn);
-
-          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          ));
-
-          expect(selection2linkBtn.pressed).toBeFalsy();
-          expect(selectionExtractBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -1935,6 +1885,7 @@ suite("NoteLookupCommand", function () {
           // should remove selection
           const changedText = fooNoteEditor.document.getText();
           expect(changedText.includes("foo body")).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -1979,6 +1930,7 @@ suite("NoteLookupCommand", function () {
             changedText.includes(`![[${newNote?.title}|${newNote?.fname}]]`)
           ).toBeTruthy();
           expect(changedText.includes("foo body")).toBeFalsy();
+          cmd.cleanUp();
           done();
         },
       });
@@ -2018,6 +1970,7 @@ suite("NoteLookupCommand", function () {
             uri
           )) as vscode.TextEditor;
           expect(nonVaultFileEditor.document.getText()).toEqual(extBody);
+          cmd.cleanUp();
           done();
         },
       });
@@ -2042,72 +1995,13 @@ suite("NoteLookupCommand", function () {
             selectionType: "selectionExtract",
           });
 
-          let { selection2linkBtn, selectionExtractBtn } =
-            getSelectionTypeButtons(controller.quickpick.buttons);
+          const { selection2linkBtn, selectionExtractBtn } =
+            getSelectionTypeButtons(controller.quickPick.buttons);
 
           expect(selection2linkBtn?.pressed).toBeFalsy();
           expect(selectionExtractBtn.pressed).toBeTruthy();
 
-          await controller.onTriggerButton(selectionExtractBtn);
-
-          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          ));
-
-          expect(selection2linkBtn.pressed).toBeFalsy();
-          expect(selectionExtractBtn.pressed).toBeFalsy();
-
-          done();
-        },
-      });
-    });
-
-    test("selection2link and selectionExtract modifiers toggle each other off when triggered", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const cmd = new NoteLookupCommand();
-          stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
-          fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-          const { text } = VSCodeUtils.getSelection();
-          expect(text).toEqual("foo body");
-
-          const { controller } = await cmd.gatherInputs({
-            selectionType: "selection2link",
-          });
-
-          let { selection2linkBtn, selectionExtractBtn } =
-            getSelectionTypeButtons(controller.quickpick.buttons);
-
-          expect(selection2linkBtn?.pressed).toBeTruthy();
-          expect(selectionExtractBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo.foo-body");
-
-          await controller.onTriggerButton(selectionExtractBtn);
-
-          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          ));
-
-          expect(selection2linkBtn.pressed).toBeFalsy();
-          expect(selectionExtractBtn.pressed).toBeTruthy();
-          expect(controller.quickpick.value).toEqual("foo");
-
-          await controller.onTriggerButton(selectionExtractBtn);
-
-          ({ selection2linkBtn, selectionExtractBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          ));
-
-          expect(selection2linkBtn.pressed).toBeFalsy();
-          expect(selectionExtractBtn.pressed).toBeFalsy();
-          expect(controller.quickpick.value).toEqual("foo");
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -2143,6 +2037,7 @@ suite("NoteLookupCommand", function () {
           const fooChildEditor = VSCodeUtils.getActiveTextEditor();
           expect(fooChildEditor!.viewColumn).toEqual(3);
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -2162,20 +2057,13 @@ suite("NoteLookupCommand", function () {
             splitType: "horizontal",
           });
 
-          let { horizontalSplitBtn } = getSplitTypeButtons(
-            controller.quickpick.buttons
+          const { horizontalSplitBtn } = getSplitTypeButtons(
+            controller.quickPick.buttons
           );
 
           expect(horizontalSplitBtn?.pressed).toBeTruthy();
 
-          await controller.onTriggerButton(horizontalSplitBtn);
-
-          ({ horizontalSplitBtn } = getSplitTypeButtons(
-            controller.quickpick.buttons
-          ));
-
-          expect(horizontalSplitBtn.pressed).toBeFalsy();
-
+          cmd.cleanUp();
           done();
         },
       });
@@ -2199,6 +2087,7 @@ suite("NoteLookupCommand", function () {
           expect(content).toEqual("[[Foo|foo]]");
           expect(!_.isUndefined(out?.quickpick.copyNoteLinkFunc)).toBeTruthy();
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -2221,7 +2110,7 @@ suite("NoteLookupCommand", function () {
         noteType: LookupNoteTypeEnum.journal,
         selectionType: LookupSelectionTypeEnum.selection2link,
       });
-      return { controller };
+      return { controller, cmd };
     };
 
     test("journal and selection2link both applied", (done) => {
@@ -2231,14 +2120,17 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
+          const { controller, cmd } = await prepareCommandFunc({
+            vaults,
+            engine,
+          });
 
           const { journalBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
+            controller.quickPick.buttons
           );
 
           const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
+            controller.quickPick.buttons
           );
 
           expect(journalBtn.pressed).toBeTruthy();
@@ -2246,604 +2138,349 @@ suite("NoteLookupCommand", function () {
 
           const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
           const today = Time.now().toFormat(dateFormat);
-          expect(controller.quickpick.value).toEqual(
+          expect(controller.quickPick.value).toEqual(
             `foo.journal.${today}.foo-body`
           );
 
+          cmd.cleanUp();
           done();
         },
       });
     });
 
-    test("toggling journal modifier off will only leave selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { journalBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(journalBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(journalBtn);
-          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
-
-          done();
-        },
-      });
-    });
-
-    test("toggling selection2link modifier off will only leave journal modifier applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { journalBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(journalBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(selection2linkBtn);
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-          const today = Time.now().toFormat(dateFormat);
-          expect(controller.quickpick.value).toEqual(`foo.journal.${today}`);
-
-          done();
-        },
-      });
-    });
-
-    test("applying scratch strips journal modifier, and keeps selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(journalBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(scratchBtn);
-          const dateFormat = DendronExtension.configuration().get<string>(
-            CONFIG["DEFAULT_SCRATCH_DATE_FORMAT"].key
-          ) as string;
-          const today = Time.now().toFormat(dateFormat);
-          const todayFormatted = today.split(".").slice(0, -1).join(".");
-          const quickpickValue = controller.quickpick.value;
-          expect(
-            quickpickValue.startsWith(`scratch.${todayFormatted}`)
-          ).toBeTruthy();
-          expect(quickpickValue.endsWith(`.foo-body`)).toBeTruthy();
-
-          done();
-        },
-      });
-    });
-  });
-
-  describe("scratch + selection2link interactions", () => {
-    const prepareCommandFunc = async ({ vaults, engine }: any) => {
-      const cmd = new NoteLookupCommand();
-      stubVaultPick(vaults);
-
-      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
-      // selects "foo body"
-      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-      const { text } = VSCodeUtils.getSelection();
-      expect(text).toEqual("foo body");
-
-      const { controller } = await cmd.gatherInputs({
-        noteType: LookupNoteTypeEnum.scratch,
-        selectionType: LookupSelectionTypeEnum.selection2link,
-      });
-      return { controller };
-    };
-
-    test("scratch and selection2link both applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(scratchBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          const todayFormatted = getTodayInScratchDateFormat();
-          const quickpickValue = controller.quickpick.value;
-          expect(
-            quickpickValue.startsWith(`scratch.${todayFormatted}`)
-          ).toBeTruthy();
-          expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
-
-          done();
-        },
-      });
-    });
-
-    test("toggling scratch modifier off will only leave selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(scratchBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(scratchBtn);
-          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
-
-          done();
-        },
-      });
-    });
-
-    test("toggling selection2link modifier off will only leave scratch modifier applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(scratchBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(selection2linkBtn);
-          const todayFormatted = getTodayInScratchDateFormat();
-          const quickpickValue = controller.quickpick.value;
-          expect(
-            quickpickValue.startsWith(`scratch.${todayFormatted}`)
-          ).toBeTruthy();
-          expect(quickpickValue.endsWith(".foo-body")).toBeFalsy();
-
-          done();
-        },
-      });
-    });
-
-    test("applying journal strips scratch modifier, and keeps selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { journalBtn, scratchBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(scratchBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(journalBtn);
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-          const today = Time.now().toFormat(dateFormat);
-          const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
-
-          done();
-        },
-      });
-    });
-  });
-
-  describe("task + selection2link interactions", () => {
-    const prepareCommandFunc = async ({ vaults, engine }: any) => {
-      const cmd = new NoteLookupCommand();
-      stubVaultPick(vaults);
-
-      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
-      // selects "foo body"
-      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-      const { text } = VSCodeUtils.getSelection();
-      expect(text).toEqual("foo body");
-
-      const { controller } = await cmd.gatherInputs({
-        noteType: LookupNoteTypeEnum.task,
-        selectionType: LookupSelectionTypeEnum.selection2link,
-      });
-      return { controller };
-    };
-
-    test("task and selection2link both applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(taskBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
-          expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
-
-          done();
-        },
-      });
-    });
-
-    test("toggling task modifier off will only leave selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(taskBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(taskBtn);
-          expect(controller.quickpick.value).toEqual(`foo.foo-body`);
-
-          done();
-        },
-      });
-    });
-
-    test("toggling selection2link modifier off will only leave task modifier applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { taskBtn } = getNoteTypeButtons(controller.quickpick.buttons);
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(taskBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(selection2linkBtn);
-          const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue.startsWith(`foo`)).toBeTruthy();
-          expect(quickpickValue.endsWith("foo-body")).toBeFalsy();
-
-          done();
-        },
-      });
-    });
-
-    test("applying journal strips task modifier, and keeps selection2link applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ vaults, engine }) => {
-          const { controller } = await prepareCommandFunc({ vaults, engine });
-
-          const { journalBtn, taskBtn } = getNoteTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          const { selection2linkBtn } = getSelectionTypeButtons(
-            controller.quickpick.buttons
-          );
-
-          expect(taskBtn.pressed).toBeTruthy();
-          expect(selection2linkBtn.pressed).toBeTruthy();
-
-          await controller.onTriggerButton(journalBtn);
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-          const today = Time.now().toFormat(dateFormat);
-          const quickpickValue = controller.quickpick.value;
-          expect(quickpickValue).toEqual(`foo.journal.${today}.foo-body`);
-
-          done();
-        },
-      });
-    });
-  });
-
-  describe("note modifiers + selectionExtract interactions", () => {
-    const prepareCommandFunc = async ({ vaults, engine, noteType }: any) => {
-      const cmd = new NoteLookupCommand();
-      stubVaultPick(vaults);
-
-      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
-      // selects "foo body"
-      fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
-      const { text } = VSCodeUtils.getSelection();
-      expect(text).toEqual("foo body");
-
-      const cmdOut = await cmd.run({
-        noteType,
-        selectionType: LookupSelectionTypeEnum.selectionExtract,
-        noConfirm: true,
-      });
-      return { cmdOut, selectedText: text };
-    };
-
-    test("journal + selectionExtract both applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          const { selectedText } = await prepareCommandFunc({
-            vaults,
-            engine,
-            noteType: LookupNoteTypeEnum.journal,
-          });
-
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
-          const today = Time.now().toFormat(dateFormat);
-          const newNote = NoteUtils.getNoteOrThrow({
-            fname: `foo.journal.${today}`,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-
-          expect(newNote.body.trim()).toEqual(selectedText);
-
-          done();
-        },
-      });
-    });
-
-    test("scratch + selectionExtract both applied", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-        },
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          const { cmdOut, selectedText } = await prepareCommandFunc({
-            vaults,
-            engine,
-            noteType: LookupNoteTypeEnum.scratch,
-          });
-
-          const newNote = NoteUtils.getNoteOrThrow({
-            fname: cmdOut!.quickpick.value,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          expect(newNote.body.trim()).toEqual(selectedText);
-
-          done();
-        },
-      });
-    });
-  });
-
-  describe("multiselect interactions", () => {
-    // TODO: there's gotta be a better way to mock this.
-    const prepareCommandFunc = async ({
-      wsRoot,
-      vaults,
-      engine,
-      opts,
-    }: any) => {
-      const cmd = new NoteLookupCommand();
-      const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map(
-        (fname) => engine.notes[fname]
-      );
-      const selectedItems = notesToSelect.map((note) => {
-        return DNodeUtils.enhancePropForQuickInputV3({
-          props: note,
-          schemas: engine.schemas,
-          wsRoot,
-          vaults,
+    describe("scratch + selection2link interactions", () => {
+      const prepareCommandFunc = async ({ vaults, engine }: any) => {
+        const cmd = new NoteLookupCommand();
+        stubVaultPick(vaults);
+
+        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+
+        // selects "foo body"
+        fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+        const { text } = VSCodeUtils.getSelection();
+        expect(text).toEqual("foo body");
+
+        const { controller } = await cmd.gatherInputs({
+          noteType: LookupNoteTypeEnum.scratch,
+          selectionType: LookupSelectionTypeEnum.selection2link,
         });
-      }) as NoteQuickInput[];
+        return { controller, cmd };
+      };
 
-      const runOpts = {
-        multiSelect: true,
-        noConfirm: true,
-        copyNoteLink: opts.copyLink ? true : undefined,
-      } as CommandRunOpts;
+      test("scratch and selection2link both applied", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async ({ vaults, engine }) => {
+            const { controller, cmd } = await prepareCommandFunc({
+              vaults,
+              engine,
+            });
 
-      if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
+            const { scratchBtn } = getNoteTypeButtons(
+              controller.quickPick.buttons
+            );
 
-      const gatherOut = await cmd.gatherInputs(runOpts);
+            const { selection2linkBtn } = getSelectionTypeButtons(
+              controller.quickPick.buttons
+            );
 
-      const mockQuickPick = createMockQuickPick({
-        value: "",
-        selectedItems,
-        canSelectMany: true,
-        buttons: gatherOut.quickpick.buttons,
-      });
+            expect(scratchBtn.pressed).toBeTruthy();
+            expect(selection2linkBtn.pressed).toBeTruthy();
 
-      mockQuickPick.showNote = gatherOut.quickpick.showNote;
-      mockQuickPick.copyNoteLinkFunc = gatherOut.quickpick.copyNoteLinkFunc;
+            const todayFormatted = getTodayInScratchDateFormat();
+            const quickpickValue = controller.quickPick.value;
+            expect(
+              quickpickValue.startsWith(`scratch.${todayFormatted}`)
+            ).toBeTruthy();
+            expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
 
-      sinon.stub(cmd, "enrichInputs").returns(
-        Promise.resolve({
-          quickpick: mockQuickPick,
-          controller: gatherOut.controller,
-          provider: gatherOut.provider,
-          selectedItems,
-        })
-      );
-      return { cmd };
-    };
-
-    test("split + multiselect: should have n+1 columns", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-          await NoteTestUtilsV4.createNote({
-            fname: "lorem",
-            vault: vaults[0],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "ipsum",
-            vault: vaults[0],
-            wsRoot,
-          });
-        },
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // make clean slate.
-          VSCodeUtils.closeAllEditors();
-
-          await WSUtils.openNote(engine.notes["foo"]);
-          const { cmd } = await prepareCommandFunc({
-            wsRoot,
-            vaults,
-            engine,
-            opts: { split: true },
-          });
-
-          await cmd!.run({
-            multiSelect: true,
-            splitType: LookupSplitTypeEnum.horizontal,
-            noConfirm: true,
-          });
-          const editor = VSCodeUtils.getActiveTextEditor();
-          // one open, lookup with 2 selected. total 3 columns.
-          expect(editor?.viewColumn).toEqual(5);
-          sinon.restore();
-          done();
-        },
+            cmd.cleanUp();
+            done();
+          },
+        });
       });
     });
 
-    test("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-          await NoteTestUtilsV4.createNote({
-            fname: "lorem",
-            vault: vaults[0],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "ipsum",
-            vault: vaults[0],
-            wsRoot,
-          });
-        },
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // make clean slate.
-          VSCodeUtils.closeAllEditors();
+    describe("task + selection2link interactions", () => {
+      const prepareCommandFunc = async ({ vaults, engine }: any) => {
+        const cmd = new NoteLookupCommand();
+        stubVaultPick(vaults);
 
-          await WSUtils.openNote(engine.notes["foo"]);
+        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
 
-          const { cmd } = await prepareCommandFunc({
+        // selects "foo body"
+        fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+        const { text } = VSCodeUtils.getSelection();
+        expect(text).toEqual("foo body");
+
+        const { controller } = await cmd.gatherInputs({
+          noteType: LookupNoteTypeEnum.task,
+          selectionType: LookupSelectionTypeEnum.selection2link,
+        });
+        return { controller, cmd };
+      };
+
+      test("task and selection2link both applied", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async ({ vaults, engine }) => {
+            const { controller } = await prepareCommandFunc({
+              vaults,
+              engine,
+            });
+
+            const { taskBtn } = getNoteTypeButtons(
+              controller.quickPick.buttons
+            );
+
+            const { selection2linkBtn } = getSelectionTypeButtons(
+              controller.quickPick.buttons
+            );
+
+            expect(taskBtn.pressed).toBeTruthy();
+            expect(selection2linkBtn.pressed).toBeTruthy();
+
+            const quickpickValue = controller.quickPick.value;
+            expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
+            expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
+
+            controller.onHide();
+            done();
+          },
+        });
+      });
+    });
+
+    describe("note modifiers + selectionExtract interactions", () => {
+      const prepareCommandFunc = async ({ vaults, engine, noteType }: any) => {
+        const cmd = new NoteLookupCommand();
+        stubVaultPick(vaults);
+
+        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+
+        // selects "foo body"
+        fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
+        const { text } = VSCodeUtils.getSelection();
+        expect(text).toEqual("foo body");
+
+        const cmdOut = await cmd.run({
+          noteType,
+          selectionType: LookupSelectionTypeEnum.selectionExtract,
+          noConfirm: true,
+        });
+        return { cmdOut, selectedText: text, cmd };
+      };
+
+      test("journal + selectionExtract both applied", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async ({ wsRoot, vaults, engine }) => {
+            const { selectedText, cmd } = await prepareCommandFunc({
+              vaults,
+              engine,
+              noteType: LookupNoteTypeEnum.journal,
+            });
+
+            const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+            const today = Time.now().toFormat(dateFormat);
+            const newNote = NoteUtils.getNoteOrThrow({
+              fname: `foo.journal.${today}`,
+              notes: engine.notes,
+              vault: vaults[0],
+              wsRoot,
+            });
+
+            expect(newNote.body.trim()).toEqual(selectedText);
+
+            cmd.cleanUp();
+            done();
+          },
+        });
+      });
+
+      test("scratch + selectionExtract both applied", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          },
+          onInit: async ({ wsRoot, vaults, engine }) => {
+            const { cmdOut, selectedText, cmd } = await prepareCommandFunc({
+              vaults,
+              engine,
+              noteType: LookupNoteTypeEnum.scratch,
+            });
+
+            const newNote = NoteUtils.getNoteOrThrow({
+              fname: cmdOut!.quickpick.value,
+              notes: engine.notes,
+              vault: vaults[0],
+              wsRoot,
+            });
+            expect(newNote.body.trim()).toEqual(selectedText);
+
+            cmd.cleanUp();
+            done();
+          },
+        });
+      });
+    });
+
+    describe("multiselect interactions", () => {
+      // TODO: there's gotta be a better way to mock this.
+      const prepareCommandFunc = async ({
+        wsRoot,
+        vaults,
+        engine,
+        opts,
+      }: any) => {
+        const cmd = new NoteLookupCommand();
+        const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map(
+          (fname) => engine.notes[fname]
+        );
+        const selectedItems = notesToSelect.map((note) => {
+          return DNodeUtils.enhancePropForQuickInputV3({
+            props: note,
+            schemas: engine.schemas,
             wsRoot,
             vaults,
-            engine,
-            opts: { copyLink: true },
           });
+        }) as NoteQuickInput[];
 
-          await cmd.run({
-            multiSelect: true,
-            noConfirm: true,
-            copyNoteLink: true,
-          });
+        const runOpts = {
+          multiSelect: true,
+          noConfirm: true,
+          copyNoteLink: opts.copyLink ? true : undefined,
+        } as CommandRunOpts;
 
-          const content = await clipboard.readText();
+        if (opts.split) runOpts.splitType = LookupSplitTypeEnum.horizontal;
 
-          expect(content).toEqual(
-            [
-              "[[Ch1|foo.ch1]]",
-              "[[Bar|bar]]",
-              "[[Lorem|lorem]]",
-              "[[Ipsum|ipsum]]",
-            ].join("\n")
-          );
-          done();
-        },
+        const gatherOut = await cmd.gatherInputs(runOpts);
+
+        const mockQuickPick = createMockQuickPick({
+          value: "",
+          selectedItems,
+          canSelectMany: true,
+          buttons: gatherOut.quickpick.buttons,
+        });
+
+        mockQuickPick.showNote = gatherOut.quickpick.showNote;
+        mockQuickPick.copyNoteLinkFunc = gatherOut.quickpick.copyNoteLinkFunc;
+
+        sinon.stub(cmd, "enrichInputs").returns(
+          Promise.resolve({
+            quickpick: mockQuickPick,
+            controller: gatherOut.controller,
+            provider: gatherOut.provider,
+            selectedItems,
+          })
+        );
+        return { cmd };
+      };
+
+      test("split + multiselect: should have n+1 columns", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+            await NoteTestUtilsV4.createNote({
+              fname: "lorem",
+              vault: vaults[0],
+              wsRoot,
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "ipsum",
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          onInit: async ({ wsRoot, vaults, engine }) => {
+            // make clean slate.
+            VSCodeUtils.closeAllEditors();
+
+            await WSUtils.openNote(engine.notes["foo"]);
+            const { cmd } = await prepareCommandFunc({
+              wsRoot,
+              vaults,
+              engine,
+              opts: { split: true },
+            });
+
+            await cmd.run({
+              multiSelect: true,
+              splitType: LookupSplitTypeEnum.horizontal,
+              noConfirm: true,
+            });
+            const editor = VSCodeUtils.getActiveTextEditor();
+            // one open, lookup with 2 selected. total 3 columns.
+            expect(editor?.viewColumn).toEqual(5);
+            sinon.restore();
+
+            cmd.cleanUp();
+            done();
+          },
+        });
+      });
+
+      test("copyNoteLink + multiselect: should copy link of all selected notes", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+            await NoteTestUtilsV4.createNote({
+              fname: "lorem",
+              vault: vaults[0],
+              wsRoot,
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "ipsum",
+              vault: vaults[0],
+              wsRoot,
+            });
+          },
+          onInit: async ({ wsRoot, vaults, engine }) => {
+            // make clean slate.
+            VSCodeUtils.closeAllEditors();
+
+            await WSUtils.openNote(engine.notes["foo"]);
+
+            const { cmd } = await prepareCommandFunc({
+              wsRoot,
+              vaults,
+              engine,
+              opts: { copyLink: true },
+            });
+
+            await cmd.run({
+              multiSelect: true,
+              noConfirm: true,
+              copyNoteLink: true,
+            });
+
+            const content = await clipboard.readText();
+
+            expect(content).toEqual(
+              [
+                "[[Ch1|foo.ch1]]",
+                "[[Bar|bar]]",
+                "[[Lorem|lorem]]",
+                "[[Ipsum|ipsum]]",
+              ].join("\n")
+            );
+
+            cmd.cleanUp();
+            done();
+          },
+        });
       });
     });
   });
@@ -2883,6 +2520,7 @@ suite("stateService", function () {
           expect(_.isUndefined(metaData.firstLookupTime)).toBeFalsy();
           expect(_.isUndefined(metaData.lastLookupTime)).toBeFalsy();
 
+          cmd.cleanUp();
           done();
         },
       });
@@ -2917,6 +2555,7 @@ suite("stateService", function () {
           expect(metaData.firstLookupTime).toEqual(firstLookupTime);
           expect(metaData.lastLookupTime).toNotEqual(lastLookupTime);
 
+          cmd.cleanUp();
           done();
         },
       });

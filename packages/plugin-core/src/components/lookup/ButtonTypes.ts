@@ -1,14 +1,24 @@
+import { LookupNoteType, LookupSelectionType } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
-import {
-  DendronQuickPickerV2,
-  LookupEffectType,
-  LookupFilterType,
-  LookupNoteType,
-  LookupSelectionType,
-  LookupSplitType,
-} from "./types";
+
+export type LookupFilterType = "directChildOnly";
+
+export enum LookupEffectTypeEnum {
+  "copyNoteLink" = "copyNoteLink",
+  "copyNoteRef" = "copyNoteRef",
+  "multiSelect" = "multiSelect",
+}
+
+export enum LookupSplitTypeEnum {
+  "horizontal" = "horizontal",
+}
+export type LookupSplitType = "horizontal";
+
+export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
+export type LookupNoteExistBehavior = "open" | "overwrite";
+export type LookupSelectVaultType = "selectVault";
 
 export type ButtonType =
   | LookupEffectType
@@ -16,7 +26,7 @@ export type ButtonType =
   | LookupSelectionType
   | LookupSplitType
   | LookupFilterType
-  | "other";
+  | LookupSelectVaultType;
 
 export type ButtonCategory =
   | "selection"
@@ -24,9 +34,7 @@ export type ButtonCategory =
   | "split"
   | "filter"
   | "effect"
-  | "other";
-
-export type ButtonHandleOpts = { quickPick: DendronQuickPickerV2 };
+  | "selectVault";
 
 export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isSelectionBtn(button)) {
@@ -44,8 +52,8 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isEffectButton(button)) {
     return "effect";
   }
-  if (button.type === "other") {
-    return "other";
+  if (isSelectVaultButton(button)) {
+    return "selectVault";
   }
   throw Error(`unknown btn type ${button}`);
 }
@@ -75,11 +83,14 @@ function isSplitButton(button: DendronBtn) {
   return _.includes(["horizontal", "vertical"], button.type);
 }
 
+function isSelectVaultButton(button: DendronBtn) {
+  return _.includes(["selectVault"], button.type);
+}
+
 export type IDendronQuickInputButton = QuickInputButton & {
   type: ButtonType;
   description: string;
   pressed: boolean;
-  onLookup: (payload: any) => Promise<void>;
 };
 
 type DendronBtnCons = {
@@ -96,10 +107,20 @@ export class DendronBtn implements IDendronQuickInputButton {
   public iconPathPressed: ThemeIcon;
   public type: ButtonType;
   public description: string;
-  public pressed: boolean;
+  private _pressed: boolean;
   public canToggle: boolean;
   public title: string;
   public opts: DendronBtnCons;
+
+  public get pressed() {
+    return this._pressed;
+  }
+
+  public set pressed(isPressed: boolean) {
+    if (this.canToggle) {
+      this._pressed = isPressed;
+    }
+  }
 
   onLookup = async (_payload: any) => {
     return;
@@ -111,7 +132,7 @@ export class DendronBtn implements IDendronQuickInputButton {
     this.iconPathPressed = new vscode.ThemeIcon(iconOn);
     this.type = type;
     this.description = description;
-    this.pressed = pressed || false;
+    this._pressed = pressed || false;
     this.title = title;
     this.canToggle = _.isUndefined(opts.canToggle) ? true : opts.canToggle;
     this.opts = opts;
@@ -120,15 +141,8 @@ export class DendronBtn implements IDendronQuickInputButton {
   clone(): DendronBtn {
     return new DendronBtn({
       ...this.opts,
+      pressed: this._pressed,
     });
-  }
-
-  async onEnable(_opts: ButtonHandleOpts): Promise<void> {
-    return undefined;
-  }
-
-  async onDisable(_opts: ButtonHandleOpts): Promise<void> {
-    return undefined;
   }
 
   get iconPath() {

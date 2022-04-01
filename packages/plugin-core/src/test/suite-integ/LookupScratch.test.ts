@@ -1,5 +1,7 @@
 import {
   ConfigUtils,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
   NoteAddBehaviorEnum,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -7,10 +9,6 @@ import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import {
-  LookupNoteTypeEnum,
-  LookupSelectionTypeEnum,
-} from "../../components/lookup/types";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import {

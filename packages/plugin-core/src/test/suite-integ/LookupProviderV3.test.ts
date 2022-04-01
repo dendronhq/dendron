@@ -8,7 +8,7 @@ import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
   shouldBubbleUpCreateNew,
   sortBySimilarity,
-} from "../../components/lookup/LookupProviderV3";
+} from "../../components/lookup/utils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
@@ -187,6 +187,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
 
       test("THEN quickpick is populated with normal query results.", async () => {
@@ -222,6 +224,8 @@ suite("selection2Items", () => {
           (item) => item.label
         );
         expect(expectedItemLabels.sort()).toEqual(actualItemLabels?.sort());
+
+        cmd.cleanUp();
       });
 
       test("THEN if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.", async () => {
@@ -247,6 +251,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
 
       test("THEN if selection contains links that point to same note, correctly dedupes them", async () => {
@@ -272,6 +278,8 @@ suite("selection2Items", () => {
         );
 
         expect(expectedItemLabels).toEqual(actualItemLabels);
+
+        cmd.cleanUp();
       });
     }
   );

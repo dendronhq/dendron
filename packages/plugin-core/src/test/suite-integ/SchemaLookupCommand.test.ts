@@ -36,6 +36,7 @@ suite("SchemaLookupCommand", function () {
           const fileName = editor!.document.fileName;
           const basename = path.basename(fileName, ".yml");
           expect(basename).toEqual("foo.schema");
+          cmd.cleanUp();
           done();
         },
       });
@@ -57,6 +58,7 @@ suite("SchemaLookupCommand", function () {
           expect(infoMsg).toEqual(
             "It looks like you are trying to create a multi-level [schema](https://wiki.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html). This is not supported. If you are trying to create a note instead, run the `> Note Lookup` command or click on `Note Lookup`"
           );
+          cmd.cleanUp();
         });
       }
     );
@@ -75,6 +77,7 @@ suite("SchemaLookupCommand", function () {
               initialValue: "*",
             })) as CommandOutput;
             expect(quickpick.selectedItems.length).toEqual(2);
+            cmd.cleanUp();
             done();
           },
         });
@@ -119,6 +122,7 @@ suite("SchemaLookupCommand", function () {
           expect(basename).toEqual("baz.schema");
           const bazSchemaModule = engine.schemas["baz"];
           expect(bazSchemaModule.vault.fsPath).toEqual(fooNote.vault.fsPath);
+          cmd.cleanUp();
           done();
         },
       });
@@ -139,6 +143,7 @@ suite("SchemaLookupCommand", function () {
           const selectedItems = enrichOut?.quickpick.selectedItems;
           const selectedItemIds = selectedItems?.map((item) => item.id);
           expect(selectedItemIds).toEqual(_.keys(engine.schemas));
+          cmd.cleanUp();
           done();
         },
       });

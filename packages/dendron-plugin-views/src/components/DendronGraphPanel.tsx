@@ -1,14 +1,14 @@
 import {
   DMessageSource,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
 } from "@dendronhq/common-all";
 import { createLogger, engineHooks } from "@dendronhq/common-frontend";
 import { useEffect, useState } from "react";
 import useGraphElements from "../hooks/useGraphElements";
 import { DendronComponent } from "../types";
 import { graphConfig, GraphConfig } from "../utils/graph";
-import Graph from "./Graph";
+import Graph from "./graph";
 import { EventHandler } from "cytoscape";
 import _ from "lodash";
 import { postVSCodeMessage } from "../utils/vscode";
@@ -66,7 +66,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
     if (!isNode || !engine.notes) return;
     noteActive = engine.notes[id];
     postVSCodeMessage({
-      type: GraphViewMessageType.onSelect,
+      type: GraphViewMessageEnum.onSelect,
       data: { id },
       source: DMessageSource.webClient,
     } as GraphViewMessage);

@@ -44,7 +44,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   };
 
   // === Hooks
-  // run once: ComponentDidMount
+  // run once
   React.useEffect(() => {
     setLogLevel(LOG_LEVEL.INFO);
     // tell vscode that the client is ready

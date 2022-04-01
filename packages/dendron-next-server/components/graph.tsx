@@ -16,7 +16,7 @@ import {
   ConfigUtils,
   DMessageSource,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
@@ -245,7 +245,7 @@ export default function Graph({
     logger.log("Requesting graph style...");
     // Get graph style
     postVSCodeMessage({
-      type: GraphViewMessageType.onRequestGraphStyle,
+      type: GraphViewMessageEnum.onRequestGraphStyle,
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);

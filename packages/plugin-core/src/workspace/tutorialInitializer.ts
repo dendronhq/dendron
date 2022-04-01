@@ -7,6 +7,10 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import {
+  InitialSurveyStatusEnum,
+  MetadataService,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
@@ -101,10 +105,25 @@ export class TutorialInitializer
       WORKSPACE_ACTIVATION_CONTEXT.NORMAL
     );
 
-    const initialSurveySubmitted = await StateService.instance().getGlobalState(
-      GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
-    );
+    // backfill global state to metadata
+    // this should be removed once we have sufficiently waited it out
+    const initialSurveyGlobalState =
+      await StateService.instance().getGlobalState(
+        GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
+      );
 
+    if (
+      initialSurveyGlobalState === "submitted" &&
+      MetadataService.instance().getMeta().initialSurveyStatus === undefined
+    ) {
+      MetadataService.instance().setInitialSurveyStatus(
+        InitialSurveyStatusEnum.submitted
+      );
+    }
+
+    const metaData = MetadataService.instance().getMeta();
+    const initialSurveySubmitted =
+      metaData.initialSurveyStatus === InitialSurveyStatusEnum.submitted;
     if (!initialSurveySubmitted) {
       await SurveyUtils.showInitialSurvey();
     }

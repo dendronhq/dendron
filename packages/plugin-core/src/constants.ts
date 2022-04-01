@@ -790,6 +790,7 @@ export enum GLOBAL_STATE {
    */
   MRUDocs = "MRUDocs",
   /**
+   * @deprecated
    * Checks if initial survey was prompted and submitted.
    */
   INITIAL_SURVEY_SUBMITTED = "dendron.initial_survey_submitted",

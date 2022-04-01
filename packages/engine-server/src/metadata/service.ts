@@ -25,6 +25,10 @@ type Metadata = Partial<{
    */
   inactiveUserMsgStatus: InactvieUserMsgStatusEnum;
   /**
+   * The status of initial survey.
+   */
+  initialSurveyStatus: InitialSurveyStatusEnum;
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
@@ -39,6 +43,11 @@ type Metadata = Partial<{
 }>;
 
 export enum InactvieUserMsgStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
+
+export enum InitialSurveyStatusEnum {
   submitted = "submitted",
   cancelled = "cancelled",
 }
@@ -118,5 +127,9 @@ export class MetadataService {
 
   setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
     return this.setMeta("inactiveUserMsgStatus", value);
+  }
+
+  setInitialSurveyStatus(value: InitialSurveyStatusEnum) {
+    return this.setMeta("initialSurveyStatus", value);
   }
 }

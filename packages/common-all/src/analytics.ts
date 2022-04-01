@@ -70,6 +70,7 @@ export enum SurveyEvents {
   InitialSurveyPrompted = "Initial_Survey_Prompted",
   InitialSurveyAccepted = "Initial_Survey_Accepted",
   InitialSurveyRejected = "Initial_Survey_Rejected",
+  ContextSurveyConfirm = "contextSurveyConfirm",
   BackgroundAnswered = "Background_Answered",
   BackgroundRejected = "Background_Rejected",
   UseCaseAnswered = "Use_Case_Answered",

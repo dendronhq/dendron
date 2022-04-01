@@ -3,7 +3,7 @@ import {
   GraphViewMessage,
   GraphViewMessageType,
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-frontend";
+import { createLogger, engineHooks } from "@dendronhq/common-frontend";
 import { useEffect, useState } from "react";
 import useGraphElements from "../hooks/useGraphElements";
 import { DendronComponent } from "../types";
@@ -14,14 +14,16 @@ import _ from "lodash";
 import { postVSCodeMessage } from "../utils/vscode";
 
 const DendronGraphPanel: DendronComponent = (props) => {
-  const ctx = "DendronNoteGraphView";
   const logger = createLogger("DendronNoteGraphView");
-  //const { useEngine } = engineHooks;
   const { workspace, ide, engine } = props;
-  // useEngine({ engineState: engine, opts: {url: workspace.url, ws: workspace.ws} });
+  const { useEngine } = engineHooks;
+  // initialize engine
+  useEngine({
+    engineState: engine,
+    opts: { url: workspace.url, ws: workspace.ws },
+  });
   let noteActive = props.ide.noteActive;
   logger.info({
-    ctx,
     msg: "enter",
     activeNoteId: noteActive ? noteActive.id : "no active note found",
   });

@@ -22,7 +22,7 @@ import {
 } from "../testUtilsV3";
 
 const ROOT_URL = "https://dendron.so";
-const SEED_URL = "https://foo.com";
+const ASSET_PREFIX = "aprefix";
 function setupConfig(config: IntermediateDendronConfig) {
   config = ConfigUtils.genDefaultConfig();
   config.publishing.siteUrl = ROOT_URL;
@@ -112,38 +112,30 @@ suite("GIVEN CopyNoteUrlV2", function () {
     );
   });
 
-  describe.skip("AND WHEN seed url set", () => {
+  describe("AND WHEN asset prefix set", () => {
     describeMultiWS(
       "",
       {
-        modConfigCb,
+        modConfigCb: (config) => {
+          config = setupConfig(config);
+          config.publishing.assetsPrefix = "/" + ASSET_PREFIX;
+          return config;
+        },
         postSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
         },
       },
       () => {
-        test("THEN create link from seed url", async () => {
-          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
-          await TestSeedUtils.addSeed2WS({
-            wsRoot,
-            engine,
-            modifySeed: (seed) => {
-              seed.site = {
-                url: SEED_URL,
-              };
-              return seed;
-            },
-          });
-          const seedId = TestSeedUtils.defaultSeedId();
-          const vault = VaultUtils.getVaultByName({
-            vaults: engine.vaults,
-            vname: seedId,
-          })!;
-
+        test("THEN create link with prefix", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[0];
           const fname = "foo";
           await WSUtils.openNoteByPath({ vault, fname });
           const link = await new CopyNoteURLCommand().execute();
-          const url = _.join([SEED_URL, "notes", `${fname}`], "/");
+          const url = _.join(
+            [ROOT_URL, ASSET_PREFIX, "notes", `${fname}`],
+            "/"
+          );
           expect(link).toEqual(url);
         });
       }
@@ -151,7 +143,7 @@ suite("GIVEN CopyNoteUrlV2", function () {
   });
 });
 
-suite("CopyNoteUrl", function () {
+suite("CopyNoteUrl with seed", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
 
   test("with seed site url override", (done) => {

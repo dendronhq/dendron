@@ -90,6 +90,7 @@ export const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
   };
 };
 
+// presets are documented in [[Presets|dendron://dendron.docs/pkg.common-test-utils.ref.presets]] for easy refeerence
 export const NOTE_PRESETS_V4 = {
   NOTE_EMPTY: CreateNoteFactory({ fname: "empty", body: "" }),
   /**
@@ -173,10 +174,12 @@ export const NOTE_PRESETS_V4 = {
     fname: "fm-variables",
     body: "Title is {{ fm.title }}",
   }),
+  //  ^ar2re45pswxu
   NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-note-ref",
     body: "![[simple-note-ref.one]]",
   }),
+  // ^zp9pa2jancj0
   NOTE_WITH_NOTE_REF_SIMPLE_TARGET: CreateNoteFactory({
     fname: "simple-note-ref.one",
     body: ["# Header ", "body text"].join("\n"),

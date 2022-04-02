@@ -1094,10 +1094,7 @@ export class NoteUtils {
     noteRaw: NoteProps;
     noteHydrated: NoteProps;
   }) {
-    const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
-    if (noteHydrated) {
-      noteRaw.links = noteHydrated.links;
-    }
+    const hydrateProps = _.pick(noteHydrated, ["parent", "children", "links"]);
     return { ...noteRaw, ...hydrateProps };
   }
 
@@ -1124,7 +1121,6 @@ export class NoteUtils {
     // Links have to be updated even with frontmatter only changes
     // because `tags` in frontmatter adds new links
     const links = await engine.getLinks({ note, type: "regular" });
-    debugger;
     if (!links.data) {
       throw new DendronError({
         message: "Unable to calculate the links in note",

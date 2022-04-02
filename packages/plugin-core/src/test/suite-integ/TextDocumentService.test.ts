@@ -386,12 +386,98 @@ suite("TextDocumentService", function testSuite() {
     );
 
     describeSingleWS(
-      "WHEN the original note contains backlinks",
+      "WHEN the original note contains wikilink and backlink",
+      {
+        postSetupHook: ENGINE_HOOKS.setupLinks,
+      },
+      () => {
+        test("THEN the wikilink and backlink should remain unchanged", async () => {
+          textDocumentService = new TextDocumentService(
+            ExtensionProvider.getExtension(),
+            vscode.workspace.onDidSaveTextDocument
+          );
+          const engine = ExtensionProvider.getEngine();
+          const fname = "alpha";
+          const testNoteProps = engine.notes[fname];
+          const editor = await ExtensionProvider.getWSUtils().openNote(
+            testNoteProps
+          );
+
+          const textToAppend = "new text here";
+          editor.edit((editBuilder) => {
+            const line = editor.document.getText().split("\n").length;
+            editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+          });
+          await editor.document.save();
+
+          const { onDidSave } =
+            textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          const updatedNote = await onDidSave(editor.document);
+
+          expect(updatedNote?.links).toEqual(testNoteProps.links);
+          expect(engine.notes[fname].links).toEqual(testNoteProps.links);
+          expect(updatedNote?.links).toEqual([
+            {
+              alias: "beta",
+              from: {
+                fname: "alpha",
+                id: "alpha",
+                vaultName: "vault",
+              },
+              position: {
+                end: {
+                  column: 9,
+                  line: 1,
+                  offset: 8,
+                },
+                indent: [],
+                start: {
+                  column: 1,
+                  line: 1,
+                  offset: 0,
+                },
+              },
+              sameFile: false,
+              to: {
+                fname: "beta",
+              },
+              type: "wiki",
+              value: "beta",
+              xvault: false,
+            },
+            {
+              alias: "alpha",
+              from: {
+                fname: "beta",
+                vaultName: "vault",
+              },
+              position: {
+                end: {
+                  column: 13,
+                  line: 1,
+                  offset: 12,
+                },
+                indent: [],
+                start: {
+                  column: 1,
+                  line: 1,
+                  offset: 0,
+                },
+              },
+              type: "backlink",
+              value: "alpha",
+            },
+          ]);
+        });
+      }
+    );
+    describeSingleWS(
+      "WHEN the original note contains only backlink",
       {
         postSetupHook: ENGINE_HOOKS.setupRefs,
       },
       () => {
-        test("THEN the backlinks should remain unchanged", async () => {
+        test("THEN the backlink should remain unchanged", async () => {
           textDocumentService = new TextDocumentService(
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
@@ -417,6 +503,27 @@ suite("TextDocumentService", function testSuite() {
           expect(engine.notes["simple-note-ref.one"].links).toEqual(
             testNoteProps.links
           );
+          expect(updatedNote?.links[0]).toEqual({
+            from: {
+              fname: "simple-note-ref",
+              vaultName: "vault",
+            },
+            position: {
+              end: {
+                column: 25,
+                line: 1,
+                offset: 24,
+              },
+              indent: [],
+              start: {
+                column: 1,
+                line: 1,
+                offset: 0,
+              },
+            },
+            type: "backlink",
+            value: "simple-note-ref.one",
+          });
         });
       }
     );

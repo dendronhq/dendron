@@ -99,7 +99,13 @@ export class TextDocumentService implements ITextDocumentService {
       vault,
       calculateHash: true,
     });
-    note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: oldNote });
+    note = NoteUtils.hydrate({
+      noteRaw: note,
+      noteHydrated: oldNote,
+      opts: {
+        keepBackLinks: true,
+      },
+    });
     note = await NoteUtils.updateNoteMetadata({
       note,
       fmChangeOnly,

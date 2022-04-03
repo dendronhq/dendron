@@ -1124,6 +1124,7 @@ export class NoteUtils {
 
   /**
    * Update note metadata (eg. links and anchors)
+   * Calculate note metadata based on contents of the notes
    */
   static async updateNoteMetadata({
     note,

@@ -174,6 +174,13 @@ export const NOTE_PRESETS_V4 = {
     fname: "fm-variables",
     body: "Title is {{ fm.title }}",
   }),
+  NOTE_WITH_FM_TAG: CreateNoteFactory({
+    fname: "fm-tag",
+    props: {
+      tags: "foo",
+    },
+    body: "",
+  }),
   //  ^ar2re45pswxu
   NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-note-ref",

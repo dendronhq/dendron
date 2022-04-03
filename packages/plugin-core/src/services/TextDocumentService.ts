@@ -99,6 +99,8 @@ export class TextDocumentService implements ITextDocumentService {
       vault,
       calculateHash: true,
     });
+    // when the note changes, other notes that link to this note should still be valid
+    // hence we keep backlinks when hydrating
     note = NoteUtils.hydrate({
       noteRaw: note,
       noteHydrated: oldNote,

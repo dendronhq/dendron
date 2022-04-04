@@ -206,6 +206,7 @@ const useApplyGraphConfig = ({
 
   useEffect(() => {
     applyConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 };
 

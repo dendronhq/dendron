@@ -243,6 +243,7 @@ export default function Graph({
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -261,6 +262,7 @@ export default function Graph({
     }
 
     renderGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphRef, elements, ide.graphStyles]);
 
   useEffect(() => {
@@ -290,6 +292,7 @@ export default function Graph({
         ...vaultConfigObject,
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engine.vaults]);
 
   const updateConfigField = (key: string, value: string | number | boolean) => {

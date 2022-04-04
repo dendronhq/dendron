@@ -20,6 +20,7 @@ export const useCurrentTheme = () => {
     // @ts-ignore
     window.currentTheme && setCurrentTheme(window.currentTheme);
     // @ts-ignore
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [window.currentTheme]);
   return { currentTheme, setCurrentTheme };
 };

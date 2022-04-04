@@ -385,7 +385,7 @@ const getFullNoteGraphElements = ({
           return;
         }
 
-        logger.log(
+        logger.debug(
           `Link from ${note.fname} to ${to.fname}: ${
             _.isUndefined(note.stub) && _.isUndefined(to.stub)
               ? false
@@ -436,8 +436,7 @@ const getSchemaGraphElements = (
 
   if (_.isUndefined(vaults)) return { nodes, edges };
 
-  // const linkChildren => {
-
+  // eslint-disable-next-line array-callback-return
   vaults.map((vault) => {
     const vaultName = VaultUtils.getName(vault);
     const VAULT_ID = `${vaultName}`;
@@ -590,6 +589,7 @@ const useGraphElements = ({
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engine.notes, isLocalGraph, noteActive]);
 
   // Get new elements if active note changes
@@ -604,6 +604,7 @@ const useGraphElements = ({
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteActive, engine.notes, isLocalGraph]);
 
   // Prevent unnecessary parsing if no schemas have been added/deleted

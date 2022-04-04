@@ -206,7 +206,7 @@ function MenuItemTitle(props: Partial<NoteData> & { menu: DataNode }) {
   const { getNoteUrl } = useDendronRouter();
 
   return (
-    <Typography.Text>
+    <Typography.Text ellipsis={{ tooltip: props.menu.title }}>
       <Link
         href={getNoteUrl(props.menu.key as string, {
           noteIndex: props.noteIndex!,

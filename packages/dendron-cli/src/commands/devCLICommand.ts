@@ -359,8 +359,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       );
       await new Promise((r) => setTimeout(r, 120000));
     } else {
-      this.print("sleeping 5s for remote npm registry to have packages ready");
-      await new Promise((r) => setTimeout(r, 50000));
+      this.print("sleeping 3s for remote npm registry to have packages ready");
+      await new Promise((r) => setTimeout(r, 30000));
     }
 
     this.print("install deps...");

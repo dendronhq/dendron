@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.89.0 (2022-04-05)
+
+**Note:** Version bump only for package @dendronhq/nextjs-template
+
+
+
+
+
 # 0.88.0 (2022-03-29)
 
 **Note:** Version bump only for package @dendronhq/nextjs-template

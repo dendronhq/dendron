@@ -3,6 +3,19 @@ import { Node as UnistNode } from "unist";
 import { checkString } from ".";
 
 export class TestUnifiedUtils {
+  /**
+   * Check if a link is private
+   *
+   * NOTE: by default, the `value` is capitalized
+   *
+   * Private links generate the following HTML
+   * <a href=\"/notes/beta\">Beta</a> <a title=\"Private\"
+   *   style=\"color: brown\" href=\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\" target=\"_blank\">
+   *  ${value}(Private)
+   * </a>
+   *
+   * @param link: name of link
+   */
   static verifyPrivateLink = ({
     contents,
     value,

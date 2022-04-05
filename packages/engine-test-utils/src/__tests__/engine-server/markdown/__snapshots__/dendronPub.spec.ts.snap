@@ -1,27 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GIVEN dendronPub WHEN inside note ref AND noteRef link THEN noteRef link is blank 1`] = `
-VFile {
-  "contents": "<h1 id=\\"gamma\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#gamma\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Gamma</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Alpha</span></div>
-<a href=\\"alpha\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">Beta (Private)</a></p>
-</div></div><p></p><p></p>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`dendronPub enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
 VFile {
   "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -42,7 +21,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
 VFile {
   "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
 <p></p><p></p><p>bar body</p><p></p><p></p>",
@@ -53,7 +32,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs config.enablePrettyRef: false 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><p>bar body</p><p></p><p></p>
@@ -69,7 +48,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs config.enablePrettyRef: true 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.enablePrettyRef: true 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -95,7 +74,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p></p><p></p><p>bar body</p><p></p><p></p>
@@ -111,7 +90,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs config.publishing.enablePrettyRef: true 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: true 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -137,7 +116,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs enablePrettyRef defaults to true in both cases 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs enablePrettyRef defaults to true in both cases 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -163,7 +142,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub enablePrettyRefs enablePrettyRef defaults to true in both cases 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs enablePrettyRef defaults to true in both cases 2`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -189,7 +168,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PREVIEW 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>",
@@ -200,7 +179,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PUBLISHING 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PUBLISHING 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>",
@@ -211,7 +190,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PREVIEW 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has no fm tags</p>",
@@ -222,7 +201,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PUBLISHING 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PUBLISHING 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has no fm tags</p>",
@@ -233,7 +212,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -250,7 +229,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PREVIEW 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -267,7 +246,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>
@@ -284,7 +263,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>
@@ -301,7 +280,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -317,7 +296,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PREVIEW 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -333,7 +312,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>
@@ -349,7 +328,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 2`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>
@@ -365,7 +344,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PREVIEW 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PREVIEW 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\">Fmtags</h1>
 <p>has fm tags</p>
@@ -382,7 +361,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PUBLISHING 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PUBLISHING 1`] = `
 VFile {
   "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
 <p>has fm tags</p>
@@ -399,7 +378,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub in IMPORT mode 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) in IMPORT mode 1`] = `
 VFile {
   "contents": "Testing publishing in IMPORT mode
 
@@ -411,7 +390,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference WHEN refs are back to back THEN render all 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference WHEN refs are back to back THEN render all 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -442,7 +421,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference WHEN refs are right on the next line THEN render all 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference WHEN refs are right on the next line THEN render all 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -485,7 +464,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference assume vault 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference assume vault 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -506,7 +485,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference basic 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference basic 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -527,7 +506,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference fail: ambiguous 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference fail: ambiguous 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
@@ -540,7 +519,7 @@ Error rendering note reference. There are multiple notes with the name dupe. Ple
 }
 `;
 
-exports[`dendronPub note reference fail: wildcard no match 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference fail: wildcard no match 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
@@ -553,7 +532,7 @@ Error rendering note reference. There are no matches for \`baz.*\`.
 }
 `;
 
-exports[`dendronPub note reference fail: with vault prefix 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference fail: with vault prefix 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
@@ -566,7 +545,7 @@ No note with name bar found in vault vault2
 }
 `;
 
-exports[`dendronPub note reference nonexistent 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference nonexistent 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
@@ -579,7 +558,7 @@ No note with name bar found
 }
 `;
 
-exports[`dendronPub note reference ok: ambiguous but duplicateNoteBehavior set 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference ok: ambiguous but duplicateNoteBehavior set 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -600,7 +579,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference ok: wildcard 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference ok: wildcard 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -631,7 +610,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference ok: wildcard 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference ok: wildcard 2`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -662,7 +641,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference ok: with vault prefix 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference ok: with vault prefix 1`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -683,7 +662,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub note reference ok: with vault prefix 2`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) note reference ok: with vault prefix 2`] = `
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><p></p><div class=\\"portal-container\\">
@@ -704,7 +683,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub prefix imagePrefix 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) prefix imagePrefix 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p><img src=\\"image-url.jpg\\" alt=\\"alt-text\\"></p>
@@ -720,7 +699,7 @@ VFile {
 }
 `;
 
-exports[`dendronPub prefix imagePrefix with forward slash 1`] = `
+exports[`GIVEN dendronPub (old tests - need to be migrated) prefix imagePrefix with forward slash 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
 <p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>

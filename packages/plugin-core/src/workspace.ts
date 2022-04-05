@@ -547,6 +547,7 @@ export class DendronExtension implements IDendronExtension {
     });
   }
 
+  // ^6fjseznl6au4
   async setupTraits() {
     // Register any User Defined Note Traits
     const userTraitsPath = getDWorkspace().wsRoot

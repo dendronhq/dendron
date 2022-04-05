@@ -1,4 +1,11 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  IntermediateDendronConfig,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -8,6 +15,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   MarkdownExportPodV2,
+  MarkdownExportReturnType,
   PodExportScope,
   RunnableMarkdownV2PodConfig,
 } from "@dendronhq/pods-core";
@@ -16,40 +24,225 @@ import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
+import { checkString } from "../../../utils";
 
-/**
- * MarkdownExportPod
- */
+const setupPod = (setupOpts: {
+  opts: RunEngineTestFunctionOpts;
+  fname: string;
+  podConfigOpts?: Partial<RunnableMarkdownV2PodConfig>;
+  publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
+}) => {
+  const { opts, fname, podConfigOpts } = setupOpts;
+  const config = opts.engine.config;
+  if (config.publishing) {
+    config.publishing.siteUrl = "https://foo.com";
+  }
+  _.mergeWith(config.publishing, setupOpts.publishConfigOverride);
+  const podConfig: RunnableMarkdownV2PodConfig = {
+    exportScope: PodExportScope.Note,
+    destination: "clipboard",
+    ...podConfigOpts,
+  };
+
+  const pod = new MarkdownExportPodV2({
+    podConfig,
+    engine: opts.engine,
+    dendronConfig: config,
+  });
+  const props = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    vault: opts.vaults[0],
+    engine: opts.engine,
+  }) as NoteProps;
+  return { pod, props };
+};
+
+function runPod({
+  engineOpts,
+  podOpts,
+  publishConfigOverride,
+}: {
+  engineOpts: RunEngineTestFunctionOpts;
+  podOpts: { fname: string; podConfigOpts: any };
+  publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
+}) {
+  const { props, pod } = setupPod({
+    opts: engineOpts,
+    ...podOpts,
+    publishConfigOverride,
+  });
+  return pod.exportNotes([props]);
+}
+
+function verifyWikiLink(resp: MarkdownExportReturnType, match: string) {
+  const data = resp.data?.exportedNotes! as string;
+  return checkString(data, match);
+}
+
+function addVaultSiteUrlOverride(engine: DEngineClient) {
+  engine.vaults[0].siteUrl = SITE_URL_VAULT;
+}
+
+const NOTE_REG = "parent";
+const NOTE_WITH_LINK_TO_INDEX = "noteWithLinkToIndex";
+const SITE_URL_VAULT = "https://bar.com";
+
+async function preSetupHook({ wsRoot, vaults }: WorkspaceOpts) {
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    wsRoot,
+    vault: vaults[0],
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent",
+    body: ["![[foo]]", "[[foo]]"].join("\n"),
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: NOTE_WITH_LINK_TO_INDEX,
+    body: "[[root]]",
+  });
+}
+
+describe("GIVEN exporting markdown with siteUrl set somewhere", () => {
+  const podConfigOpts = { wikiLinkToURL: true };
+
+  describe("AND WHEN siteUrl ONLY set on config", () => {
+    describe("WHEN run md export pod", () => {
+      describe("AND WHEN exporting nonIndex note", () => {
+        test("THEN note url should match siteUrl with note id", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_REG },
+              });
+              await verifyWikiLink(result, "[Foo](https://foo.com/notes/foo)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+      describe("AND WHEN exporting index note", () => {
+        test("THEN note url should match siteUrl", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_WITH_LINK_TO_INDEX },
+              });
+              await verifyWikiLink(result, "(https://foo.com)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+    });
+  });
+
+  describe("AND WHEN siteUrl ONLY set on vault", () => {
+    describe("WHEN run md export pod", () => {
+      describe("AND WHEN exporting nonIndex note", () => {
+        test("THEN note url should match siteUrl with note id", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              addVaultSiteUrlOverride(opts.engine);
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_REG },
+                publishConfigOverride: {
+                  siteUrl: undefined,
+                },
+              });
+
+              await verifyWikiLink(result, "(https://bar.com/notes/foo)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+      describe("AND WHEN exporting index note", () => {
+        test("THEN note url should match siteUrl", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              addVaultSiteUrlOverride(opts.engine);
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_WITH_LINK_TO_INDEX },
+                publishConfigOverride: {
+                  siteUrl: undefined,
+                },
+              });
+
+              await verifyWikiLink(result, "(https://bar.com)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+    });
+  });
+
+  describe("AND WHEN siteUrl ONLY set on vault AND site config", () => {
+    describe("WHEN run md export pod", () => {
+      describe("AND WHEN exporting nonIndex note", () => {
+        test("THEN note url should match vault siteUrl with note id", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              addVaultSiteUrlOverride(opts.engine);
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_REG },
+              });
+
+              await verifyWikiLink(result, "(https://bar.com/notes/foo)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+      describe("AND WHEN exporting index note", () => {
+        test("THEN note url should match vault siteUrl", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              addVaultSiteUrlOverride(opts.engine);
+              const result = await runPod({
+                engineOpts: opts,
+                podOpts: { podConfigOpts, fname: NOTE_WITH_LINK_TO_INDEX },
+              });
+
+              await verifyWikiLink(result, "(https://bar.com)");
+            },
+            {
+              expect,
+              preSetupHook,
+            }
+          );
+        });
+      });
+    });
+  });
+});
+
 describe("GIVEN a Markdown Export Pod with a particular config", () => {
   describe("When the destination is clipboard", () => {
-    const setupPod = (setupOpts: {
-      opts: RunEngineTestFunctionOpts;
-      fname: string;
-      podConfigOpts?: Partial<RunnableMarkdownV2PodConfig>;
-    }) => {
-      const { opts, fname, podConfigOpts } = setupOpts;
-      const config = opts.engine.config;
-      if (config.publishing) {
-        config.publishing.siteUrl = "https://foo.com";
-      }
-      const podConfig: RunnableMarkdownV2PodConfig = {
-        exportScope: PodExportScope.Note,
-        destination: "clipboard",
-        ...podConfigOpts,
-      };
-
-      const pod = new MarkdownExportPodV2({
-        podConfig,
-        engine: opts.engine,
-        dendronConfig: config,
-      });
-      const props = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        vault: opts.vaults[0],
-        engine: opts.engine,
-      }) as NoteProps;
-      return { pod, props };
-    };
     describe("WHEN exporting a note", () => {
       test("THEN expect wikilinks to be converted", async () => {
         await runEngineTestV5(
@@ -162,6 +355,49 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
     });
 
     describe("AND WHEN wikilinkToURL is set to true", () => {
+      describe("AND WHEN assetPrefix is set", () => {
+        test("THEN expect assetPrefix to be in url", async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              const { props, pod } = setupPod({
+                opts,
+                fname: "parent",
+                podConfigOpts: { wikiLinkToURL: true },
+                publishConfigOverride: {
+                  assetsPrefix: "/prefix",
+                },
+              });
+              const result = await pod.exportNotes([props]);
+              const data = result.data?.exportedNotes!;
+              expect(_.isString(data)).toBeTruthy();
+              if (_.isString(data)) {
+                expect(data).toContain(
+                  "[Foo](https://foo.com/prefix/notes/foo)"
+                );
+                expect(data).toContain("foo body");
+                expect(data).not.toContain("[foo](/notes/foo)");
+                expect(data).not.toContain("![[foo]]");
+              }
+            },
+            {
+              expect,
+              preSetupHook: async ({ wsRoot, vaults }) => {
+                await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+                  wsRoot,
+                  vault: vaults[0],
+                });
+                await NoteTestUtilsV4.createNote({
+                  wsRoot,
+                  vault: vaults[0],
+                  fname: "parent",
+                  body: ["![[foo]]", "[[foo]]"].join("\n"),
+                });
+              },
+            }
+          );
+        });
+      });
+
       test("THEN expect wikilinks to update with note URL and ref links to be resolved", async () => {
         await runEngineTestV5(
           async (opts) => {
@@ -174,7 +410,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).toContain("foo body");
               expect(data).not.toContain("[foo](/notes/foo)");
               expect(data).not.toContain("![[foo]]");
@@ -209,7 +445,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).not.toContain("![[alpha]]");
               expect(data).not.toContain("[foo](/notes/foo)");
             }
@@ -249,7 +485,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const data = result.data?.exportedNotes!;
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
-              expect(data).toContain("[Foo](https://foo.com/notes/foo.html)");
+              expect(data).toContain("[Foo](https://foo.com/notes/foo)");
               expect(data).not.toContain("[foo](/notes/foo)");
               expect(data).not.toContain("![[alpha]]");
             }

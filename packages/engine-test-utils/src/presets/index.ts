@@ -30,7 +30,7 @@ export async function callSetupHook(
 ) {
   const { workspaceType, vaults, wsRoot, withVaultPrefix } = opts;
   const isMultiVault = workspaceType !== "single";
-  let cVaults = isMultiVault ? vaults : [vaults[0], vaults[0]];
+  const cVaults = isMultiVault ? vaults : [vaults[0], vaults[0]];
 
   // WITH LINKS
   if (key === SETUP_HOOK_KEYS.WITH_LINKS) {

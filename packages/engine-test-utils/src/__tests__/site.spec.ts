@@ -1,13 +1,13 @@
 import {
+  ConfigUtils,
   DendronSiteFM,
   DuplicateNoteActionEnum,
   DVault,
   DVaultVisibility,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   WorkspaceOpts,
-  ConfigUtils,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -15,7 +15,7 @@ import {
   NoteTestUtilsV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { MDUtilsV4, SiteUtils } from "@dendronhq/engine-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { TestConfigUtils } from "../config";
@@ -24,15 +24,8 @@ import {
   createEngineFromServer,
   createSiteConfig,
   runEngineTestV5,
-  testWithEngine,
 } from "../engine";
-import {
-  callSetupHook,
-  ENGINE_HOOKS,
-  ENGINE_HOOKS_MULTI,
-  SETUP_HOOK_KEYS,
-} from "../presets";
-import { checkString, TestUnifiedUtils } from "../utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../presets";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine: createEngineFromEngine,
@@ -93,126 +86,6 @@ describe("SiteUtils", () => {
 
   beforeEach(() => {
     siteRootDir = tmpDir().name;
-  });
-
-  describe("xvault links", () => {
-    testWithEngine(
-      "can publish all",
-      async ({ engine, wsRoot, vaults }) => {
-        const noteIndex = engine.notes["alpha"];
-        const config = TestConfigUtils.withConfig(
-          (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-            ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
-                siteHierarchies: ["alpha", "beta"],
-                siteRootDir,
-                siteNotesDir: "docs",
-                ...dupNote(vaults[1]),
-              })
-            );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
-          },
-          {
-            wsRoot,
-          }
-        );
-        const { notes } = await SiteUtils.filterByConfig({
-          engine,
-          config,
-        });
-        const alpha = notes["alpha"];
-        const beta = notes["beta"];
-        const resp = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "alpha",
-          vault: vaults[0],
-          noteIndex,
-        }).process(alpha.body);
-        await checkString(
-          resp.contents as string,
-          "https://localhost:8080/docs/beta.html"
-        );
-        const resp2 = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "beta",
-          vault: vaults[0],
-          noteIndex,
-        }).process(beta.body);
-        await checkString(resp2.contents as string, "https://localhost:8080");
-      },
-      {
-        preSetupHook: (opts) =>
-          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
-            workspaceType: "multi",
-            ...opts,
-            withVaultPrefix: true,
-          }),
-      }
-    );
-
-    testWithEngine(
-      "can publish alpha",
-      async ({ engine, wsRoot, vaults }) => {
-        const noteIndex = engine.notes["alpha"];
-        const config = TestConfigUtils.withConfig(
-          (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-            ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
-                siteHierarchies: ["alpha"],
-                siteRootDir,
-                ...dupNote(vaults[1]),
-              })
-            );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
-          },
-          {
-            wsRoot,
-          }
-        );
-        const { notes } = await SiteUtils.filterByConfig({
-          engine,
-          config,
-        });
-        const alpha = notes["alpha"];
-        expect(_.values(notes)).toEqual([alpha]);
-        const resp = await MDUtilsV4.procHTML({
-          config,
-          engine,
-          fname: "alpha",
-          vault: vaults[0],
-          noteIndex,
-        }).process(alpha.body);
-        // beta not published
-        await TestUnifiedUtils.verifyPrivateLink({
-          contents: resp.contents as string,
-          value: "Beta",
-        });
-      },
-      {
-        preSetupHook: (opts) =>
-          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
-            workspaceType: "multi",
-            ...opts,
-            withVaultPrefix: true,
-          }),
-      }
-    );
   });
 
   describe("gen", () => {

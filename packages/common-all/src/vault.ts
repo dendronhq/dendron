@@ -42,6 +42,10 @@ export class VaultUtils {
     return vault.selfContained === true;
   }
 
+  static isRemote(vault: DVault): boolean {
+    return vault.remote !== undefined;
+  }
+
   /**
    * Path of vault relative to workspace root
    * @param vault

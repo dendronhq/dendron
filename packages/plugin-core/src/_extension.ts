@@ -496,6 +496,8 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
+      // Start early to do this in background while Dendron initializes
+      const numContributors = wsService.getAllReposNumContributors();
 
       // check for vaults with same name
       const vaults = ConfigUtils.getVaults(dendronConfig);
@@ -649,6 +651,9 @@ export async function _activate(
         numSelfContainedVaults: ws
           .getDWorkspace()
           .vaults.filter(VaultUtils.isSelfContained).length,
+        numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
+          .length,
+        numContributors: await numContributors,
       };
 
       if (siteUrl !== undefined) {

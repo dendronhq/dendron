@@ -118,17 +118,13 @@ export class FileWatcher {
       note = file2Note(fsPath, vault);
 
       // check if note exist as
-      const maybeNote = NoteUtils.getNoteByFnameV5({
+      const maybeNote = NoteUtils.getNoteByFnameFromEngine({
         fname,
         vault,
-        notes: engine.notes,
-        wsRoot,
-      }) as NoteProps;
+        engine,
+      });
       if (maybeNote) {
-        note = {
-          ...note,
-          ..._.pick(maybeNote, ["children", "parent"]),
-        } as NoteProps;
+        note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
         delete note["stub"];
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.

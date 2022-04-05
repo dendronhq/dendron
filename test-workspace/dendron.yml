@@ -52,7 +52,7 @@ workspace:
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     workspaceVaultSyncMode: noCommit
-    enableAutoFoldFrontmatter: true
+    enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
     maxNoteLength: 204800
     task:

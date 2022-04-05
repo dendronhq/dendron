@@ -53,7 +53,7 @@ export const useRenderedNoteBody = ({
     id: undefined,
     contentHash: undefined,
   };
-  const noteContent = engine.notesRendered[noteId || ""];
+  const noteContent = noteId ? engine.notesRendered[noteId] : undefined;
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
 

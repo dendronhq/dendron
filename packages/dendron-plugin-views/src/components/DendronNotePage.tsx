@@ -110,6 +110,14 @@ const DendronNotePage: DendronComponent = (props) => {
   const { currentTheme: themeType } = useCurrentTheme();
   useMermaid({ config, themeType, mermaid, noteRenderedBody });
 
+  if (props.engine.error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <div>{props.engine.error}</div>
+      </div>
+    );
+  }
   if (!noteRenderedBody || !config) {
     return <div>Loading...</div>;
   }

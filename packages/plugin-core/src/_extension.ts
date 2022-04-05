@@ -653,7 +653,7 @@ export async function _activate(
           .vaults.filter(VaultUtils.isSelfContained).length,
         numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
           .length,
-        numContributors: await numContributors,
+        numContributors: _.max(await numContributors),
       };
 
       if (siteUrl !== undefined) {

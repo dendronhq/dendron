@@ -1086,7 +1086,6 @@ export class NoteUtils {
    * By default, include the following properties:
    *  - parent
    *  - children
-   *  - backLinks
    * @param noteRaw - note for other fields
    * @param noteHydrated - note to get metadata properties from
    * @returns Merged Note object

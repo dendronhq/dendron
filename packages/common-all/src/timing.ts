@@ -3,7 +3,7 @@ const NANOS_IN_MILLI_SEC = 1000000;
 
 /** Return current nanoseconds. */
 export const nanos = () => {
-  let hrTime = process.hrtime();
+  const hrTime = process.hrtime();
   return hrTime[0] * NANOS_IN_SECOND + hrTime[1];
 };
 
@@ -18,3 +18,13 @@ export const nanosToMillis = (nanos: number) => {
 export const milliseconds = () => {
   return new Date().getTime();
 };
+
+export class TimeUtils {
+  static async sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ sleep: ms });
+      }, ms);
+    });
+  }
+}

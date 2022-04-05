@@ -72,6 +72,7 @@ import {
   describeMultiWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
+  waitInMilliseconds,
   withConfig,
 } from "../testUtilsV3";
 
@@ -217,14 +218,6 @@ function getSplitTypeButtons(
     buttons
   ) as vscode.QuickInputButton[] & DendronBtn[];
   return { horizontalSplitBtn };
-}
-
-async function wait1Second(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, 1000);
-  });
 }
 
 suite("NoteLookupCommand", function () {
@@ -1538,7 +1531,7 @@ suite("NoteLookupCommand", function () {
           };
 
           const scratch1Name = await createScratch();
-          await wait1Second();
+          await waitInMilliseconds(1000);
           const scratch2Name = await createScratch();
 
           expect(scratch1Name).toNotEqual(scratch2Name);

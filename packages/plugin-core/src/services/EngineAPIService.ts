@@ -308,4 +308,8 @@ export class EngineAPIService
   getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return this._internalEngine.getAnchors(opts);
   }
+
+  getEngineEmitter(): EngineEventEmitter {
+    return this._engineEvents;
+  }
 }

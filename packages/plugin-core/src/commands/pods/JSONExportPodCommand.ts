@@ -30,10 +30,8 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
   JSONExportReturnType
 > {
   public key = "dendron.jsonexportv2";
-  private extension: IDendronExtension;
   public constructor(extension: IDendronExtension) {
-    super(new QuickPickHierarchySelector());
-    this.extension = extension;
+    super(new QuickPickHierarchySelector(), extension);
   }
 
   public async gatherInputs(

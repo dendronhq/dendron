@@ -36,11 +36,9 @@ export class AirtableExportPodCommand extends BaseExportPodCommand<
   AirtableExportReturnType
 > {
   public key = "dendron.airtableexport";
-  private extension: IDendronExtension;
 
   public constructor(extension: IDendronExtension) {
-    super(new QuickPickHierarchySelector());
-    this.extension = extension;
+    super(new QuickPickHierarchySelector(), extension);
   }
 
   public createPod(

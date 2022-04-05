@@ -38,6 +38,7 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
@@ -120,4 +121,6 @@ export interface IEngineAPIService {
     opts: Optional<GetLinksRequest, "ws">
   ) => Promise<GetNoteLinksPayload>;
   getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
+
+  getEngineEmitter(): EngineEventEmitter;
 }

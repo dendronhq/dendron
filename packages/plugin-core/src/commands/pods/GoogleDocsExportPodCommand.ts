@@ -37,11 +37,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
   GoogleDocsExportReturnType
 > {
   public key = "dendron.googledocsexport";
-  private extension: IDendronExtension;
 
   public constructor(extension: IDendronExtension) {
-    super(new QuickPickHierarchySelector());
-    this.extension = extension;
+    super(new QuickPickHierarchySelector(), extension);
   }
 
   public createPod(

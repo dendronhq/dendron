@@ -1098,26 +1098,18 @@ export class NoteUtils {
     noteRaw: NoteProps;
     noteHydrated: NoteProps;
     opts?: Partial<{
-      keepAllLinks: boolean;
       keepBackLinks: boolean;
-      keepAnchors: boolean;
     }>;
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
 
     // check if we hydrate with links
-    if (opts?.keepAllLinks) {
-      noteRaw.links = noteHydrated.links;
-    } else if (opts?.keepBackLinks) {
-      noteRaw.links = noteRaw.links.concat(
-        noteHydrated.links.filter((link) => link.type === "backlink")
+    if (opts?.keepBackLinks) {
+      noteRaw.links = noteHydrated.links.filter(
+        (link) => link.type === "backlink"
       );
     }
 
-    // check if we hydrate with anchors
-    if (opts?.keepAnchors) {
-      noteRaw.anchors = noteHydrated.anchors;
-    }
     return { ...noteRaw, ...hydrateProps };
   }
 

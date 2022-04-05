@@ -1,9 +1,7 @@
 import {
-  DendronError,
   DEngineClient,
   DNoteAnchorBasic,
   ErrorFactory,
-  ERROR_STATUS,
   isWebUri,
   NoteProps,
   NoteUtils,
@@ -16,14 +14,9 @@ import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { QuickPickUtil } from "../../utils/quickPick";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import open from "open";
-import textextensionslist from "textextensions";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-
-const TEXT_EXTENSIONS: ReadonlySet<string> = new Set(
-  textextensionslist.map((s) => s.toLowerCase())
-);
+import { PluginFileUtils, TEXT_EXTENSIONS } from "../../utils/files";
 
 export enum LinkType {
   WIKI = "WIKI",
@@ -242,13 +235,5 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
 }
 
 export class ShowPreviewAssetOpener {
-  static async openWithDefaultApp(filePath: string) {
-    await open(filePath).catch((err) => {
-      const error = DendronError.createFromStatus({
-        status: ERROR_STATUS.UNKNOWN,
-        innerError: err,
-      });
-      Logger.error({ error });
-    });
-  }
+  static openWithDefaultApp = PluginFileUtils.openWithDefaultApp;
 }

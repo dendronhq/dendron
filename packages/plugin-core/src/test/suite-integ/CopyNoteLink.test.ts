@@ -27,19 +27,19 @@ function openNote(note: NoteProps) {
 }
 
 suite("CopyNoteLink", function () {
-  let copyNoteLinkCommand: CopyNoteLinkCommand;
-  beforeEach(() => {
-    copyNoteLinkCommand = new CopyNoteLinkCommand(
-      toDendronEngineClient(ExtensionProvider.getEngine())
-    );
-  });
-
   describeSingleWS(
     "GIVEN a basic setup on a single vault workspace",
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
+      let copyNoteLinkCommand: CopyNoteLinkCommand;
+      beforeEach(() => {
+        copyNoteLinkCommand = new CopyNoteLinkCommand(
+          toDendronEngineClient(ExtensionProvider.getEngine())
+        );
+      });
+
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const notePath = path.join(
@@ -271,6 +271,13 @@ suite("CopyNoteLink", function () {
       postSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
+      let copyNoteLinkCommand: CopyNoteLinkCommand;
+      beforeEach(() => {
+        copyNoteLinkCommand = new CopyNoteLinkCommand(
+          toDendronEngineClient(ExtensionProvider.getEngine())
+        );
+      });
+
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const notePath = path.join(
@@ -421,6 +428,13 @@ suite("CopyNoteLink", function () {
   );
 
   describeSingleWS("WHEN in a non-note file", {}, () => {
+    let copyNoteLinkCommand: CopyNoteLinkCommand;
+    beforeEach(() => {
+      copyNoteLinkCommand = new CopyNoteLinkCommand(
+        toDendronEngineClient(ExtensionProvider.getEngine())
+      );
+    });
+
     test("THEN creates a link to that file", async () => {
       const { wsRoot } = ExtensionProvider.getDWorkspace();
       const fsPath = path.join(wsRoot, "test.js");
@@ -502,7 +516,11 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection(" ^my-block-anchor");
-          const link = (await copyNoteLinkCommand.run())?.link;
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
           expect(
             await linkHasAnchor(
               "block",
@@ -526,7 +544,11 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a line anchor", async () => {
           await prepFileAndSelection();
-          const link = (await copyNoteLinkCommand.run())?.link;
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
           // Link should contain an anchor
           expect(
             await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -546,7 +568,11 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection();
-          const link = (await copyNoteLinkCommand.run())?.link;
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
           expect(
             await linkHasAnchor("block", ["src", "test.hs"], link)
           ).toBeTruthy();
@@ -557,83 +583,97 @@ suite("CopyNoteLink", function () {
     describeSingleWS("AND config is set unset", {}, () => {
       test("THEN creates a link to that file with a block anchor", async () => {
         await prepFileAndSelection();
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(
           await linkHasAnchor("block", ["src", "test.hs"], link)
         ).toBeTruthy();
       });
     });
 
-    describe("AND config is set to prompt", () => {
-      describeSingleWS(
-        "AND user picks line in the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a link anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves({ label: "line" });
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("line", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
+      },
+      () => {
+        test("WHEN user picks line in the prompt, THEN CopyNoteLinkCommand generates a link anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves({ label: "line" });
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("line", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
 
-      describeSingleWS(
-        "AND user picks block in the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a block anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves({ label: "block" });
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("block", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
+      },
+      () => {
+        test("WHEN user picks block in the prompt, THEN CopyNoteLinkCommand generates a block anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves({ label: "block" });
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("block", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
 
-      describeSingleWS(
-        "AND user cancels the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a line anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves(undefined);
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("line", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
-    });
+      },
+      () => {
+        test("WHEN user cancels the prompt, THEN CopyNoteLinkCommand generates a line anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves(undefined);
+          const link = (
+            await new CopyNoteLinkCommand(
+              toDendronEngineClient(ExtensionProvider.getEngine())
+            ).run()
+          )?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("line", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
   });
 });
 

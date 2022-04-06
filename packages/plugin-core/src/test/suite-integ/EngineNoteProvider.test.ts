@@ -14,7 +14,6 @@ import {
   describeMultiWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
-  testAsyncWithCallback,
 } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
 
@@ -126,71 +125,55 @@ suite("EngineNoteProvider Tests", function testSuite() {
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
       },
       () => {
-        testAsyncWithCallback(
-          "THEN the tree data is correct",
-          {},
-          async (done) => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+        test("THEN the tree data is correct", async () => {
+          const mockEvents = new MockEngineEvents();
+          const provider = new EngineNoteProvider(mockEvents);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-
-            // 3 Vaults hence 3 root nodes
-            expect(props.length === 3);
-
-            // Also check some children:
-
-            // tracking errors to avoid calling done twice.
-            let error: DendronError | undefined;
-            props.forEach((props) => {
-              switch (props.vault.fsPath) {
-                case "vault1": {
-                  if (
-                    props.children.length !== 1 ||
-                    props.children[0] !== "foo"
-                  ) {
-                    error = new DendronError({
-                      message: "Note children in vault1 incorrect!",
-                    });
-                    done(error);
-                  }
-                  break;
-                }
-                case "vault2": {
-                  if (
-                    props.children.length !== 1 ||
-                    props.children[0] !== "bar"
-                  ) {
-                    error = new DendronError({
-                      message: "Note children in vault2 incorrect!",
-                    });
-                    done(error);
-                  }
-                  break;
-                }
-                case "vault3": {
-                  if (props.children.length !== 0) {
-                    error = new DendronError({
-                      message: "Note children in vault3 incorrect!",
-                    });
-                    done(error);
-                  }
-                  break;
-                }
-                default: {
-                  error = new DendronError({
-                    message: "Note with unexpected vault found!",
+          const res = await (provider.getChildren() as Promise<NoteProps[]>);
+          // 3 Vaults hence 3 root nodes
+          expect(res.length === 3);
+          // Also check some children:
+          res.forEach((props) => {
+            switch (props.vault.fsPath) {
+              case "vault1": {
+                if (
+                  props.children.length !== 1 ||
+                  props.children[0] !== "foo"
+                ) {
+                  throw new DendronError({
+                    message: "Note children in vault1 incorrect!",
                   });
-                  done(error);
                 }
+                break;
               }
-            });
-
-            if (!error) done();
-          }
-        );
+              case "vault2": {
+                if (
+                  props.children.length !== 1 ||
+                  props.children[0] !== "bar"
+                ) {
+                  throw new DendronError({
+                    message: "Note children in vault2 incorrect!",
+                  });
+                }
+                break;
+              }
+              case "vault3": {
+                if (props.children.length !== 0) {
+                  throw new DendronError({
+                    message: "Note children in vault3 incorrect!",
+                  });
+                }
+                break;
+              }
+              default: {
+                throw new DendronError({
+                  message: "Note with unexpected vault found!",
+                });
+              }
+            }
+            // return;
+          });
+        });
       }
     );
 
@@ -237,30 +220,24 @@ suite("EngineNoteProvider Tests", function testSuite() {
           },
         },
         () => {
-          testAsyncWithCallback(
-            "THEN tree item sort order is correct",
-            {},
-            async (done) => {
-              const mockEvents = new MockEngineEvents();
-              const provider = new EngineNoteProvider(mockEvents);
+          test("THEN tree item sort order is correct", async () => {
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
 
-              const props = await (provider.getChildren() as Promise<
-                NoteProps[]
-              >);
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
 
-              const vault1RootProps = props[0];
-              const children = await provider.getChildren(vault1RootProps);
-              expect(children?.map((child) => child.title)).toEqual([
-                "Zebra", // nav_order: 1
-                "Aardvark", // uppercase alphabets comes before underscore alphabets
-                "_underscore", // underscore comes before lowercase alphabets
-                "aaron",
-                "Tags", // tags come last.
-              ]);
-
-              done();
-            }
-          );
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(children?.map((child) => child.title)).toEqual([
+              "Zebra", // nav_order: 1
+              "Aardvark", // uppercase alphabets comes before underscore alphabets
+              "_underscore", // underscore comes before lowercase alphabets
+              "aaron",
+              "Tags", // tags come last.
+            ]);
+          });
         }
       );
 
@@ -286,30 +263,24 @@ suite("EngineNoteProvider Tests", function testSuite() {
           },
         },
         () => {
-          testAsyncWithCallback(
-            "THEN tag hierarchy nav_order is respected",
-            {},
-            async (done) => {
-              const mockEvents = new MockEngineEvents();
-              const provider = new EngineNoteProvider(mockEvents);
+          test("THEN tag hierarchy nav_order is respected", async () => {
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
 
-              const props = await (provider.getChildren() as Promise<
-                NoteProps[]
-              >);
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
 
-              const vault1RootProps = props[0];
-              const children = await provider.getChildren(vault1RootProps);
-              expect(children?.map((child) => child.title)).toEqual([
-                "Zebra", // nav_order: 1
-                "Tags", // nav_order respected
-                "Aardvark", // uppercase alphabets comes before underscore alphabets
-                "_underscore", // underscore comes before lowercase alphabets
-                "aaron",
-              ]);
-
-              done();
-            }
-          );
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(children?.map((child) => child.title)).toEqual([
+              "Zebra", // nav_order: 1
+              "Tags", // nav_order respected
+              "Aardvark", // uppercase alphabets comes before underscore alphabets
+              "_underscore", // underscore comes before lowercase alphabets
+              "aaron",
+            ]);
+          });
         }
       );
     });

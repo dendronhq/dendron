@@ -276,7 +276,7 @@ export type DendronConfig = {
   useKatex?: boolean;
 
   /**
-   * Shouldd show hierarchy
+   * Should show hierarchy
    */
   hierarchyDisplay?: boolean;
 

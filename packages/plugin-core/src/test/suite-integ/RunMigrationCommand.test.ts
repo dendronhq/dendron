@@ -1,5 +1,9 @@
 import _ from "lodash";
-import { ConfigUtils, WorkspaceType } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import sinon from "sinon";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
 import { CONFIG } from "../../constants";
@@ -30,7 +34,9 @@ suite("RunMigrationCommand", function () {
 
         // testing for explicitly delete key.
         const { wsRoot } = ext.getDWorkspace();
-        const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const rawConfig = (await DConfig.getRaw(
+          wsRoot
+        )) as IntermediateDendronConfig;
         expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
 
         sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
@@ -62,7 +68,9 @@ suite("RunMigrationCommand", function () {
           expect(ext.type).toEqual(WorkspaceType.NATIVE);
           // testing for explicitly delete key.
           const { wsRoot } = ext.getDWorkspace();
-          const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          const rawConfig = (await DConfig.getRaw(
+            wsRoot
+          )) as IntermediateDendronConfig;
           expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
 
           sinon.stub(cmd, "gatherInputs").resolves({ version: "0.83.0" });

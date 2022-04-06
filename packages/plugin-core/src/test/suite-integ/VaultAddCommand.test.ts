@@ -585,22 +585,8 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const tmpVaultPath = "tmp";
         remoteDir = path.join(wsRoot, tmpVaultPath);
+        await createSelfContainedVaultWithGit(remoteDir);
         vaultName = path.basename(remoteDir);
-        const ws = new WorkspaceService({ wsRoot });
-        // Create a vault inside the WS but don't add it to the WS. This is a
-        // workaround because we can't create a vault without a workspace yet.
-        await ws.createSelfContainedVault({
-          vault: {
-            fsPath: tmpVaultPath,
-            selfContained: true,
-          },
-          addToConfig: false,
-          addToCodeWorkspace: false,
-        });
-        const git = new Git({ localUrl: remoteDir });
-        await git.init();
-        await git.addAll();
-        await git.commit({ msg: "start" });
 
         sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
         sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);

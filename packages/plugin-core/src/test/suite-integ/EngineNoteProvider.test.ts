@@ -2,6 +2,7 @@ import {
   DendronError,
   NoteChangeEntry,
   NoteProps,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
@@ -193,134 +194,124 @@ suite("EngineNoteProvider Tests", function testSuite() {
       }
     );
 
-    describeMultiWS(
-      "WHEN the engine note provider is providing tree data on the root node with children",
-      {
-        preSetupHook: async (opts) => {
-          const { vaults, wsRoot } = opts;
-          const vault = vaults[0];
-          await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "zebra",
-            custom: {
-              nav_order: 1,
-            },
-          });
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "tags.aa-battery",
-          });
+    describe("WHEN the engine note provider is providing tree data on the root node with children", function () {
+      const preSetupHookFunc = async (
+        opts: WorkspaceOpts & { extra?: any }
+      ) => {
+        const { vaults, wsRoot } = opts;
+        const vault = vaults[0];
+        await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
+          wsRoot,
+          vault,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
+          wsRoot,
+          vault,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
+          wsRoot,
+          vault,
+        });
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vaults[0],
+          fname: "zebra",
+          custom: {
+            nav_order: 1,
+          },
+        });
+      };
+
+      describeMultiWS(
+        "AND tags hierarchy doesn't specify nav_order",
+        {
+          preSetupHook: async (opts) => {
+            const { vaults, wsRoot } = opts;
+            const vault = vaults[0];
+            await preSetupHookFunc(opts);
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault,
+              fname: "tags.aa-battery",
+            });
+          },
         },
-      },
-      () => {
-        testAsyncWithCallback(
-          "THEN tree item sort order is correct",
-          {},
-          async (done) => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+        () => {
+          testAsyncWithCallback(
+            "THEN tree item sort order is correct",
+            {},
+            async (done) => {
+              const mockEvents = new MockEngineEvents();
+              const provider = new EngineNoteProvider(mockEvents);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+              const props = await (provider.getChildren() as Promise<
+                NoteProps[]
+              >);
 
-            const vault1RootProps = props[0];
-            const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
-              "Zebra", // nav_order: 1
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
-              "aaron",
-              "Tags", // tags come last.
-            ]);
+              const vault1RootProps = props[0];
+              const children = await provider.getChildren(vault1RootProps);
+              expect(children?.map((child) => child.title)).toEqual([
+                "Zebra", // nav_order: 1
+                "Aardvark", // uppercase alphabets comes before underscore alphabets
+                "_underscore", // underscore comes before lowercase alphabets
+                "aaron",
+                "Tags", // tags come last.
+              ]);
 
-            done();
-          }
-        );
-      }
-    );
+              done();
+            }
+          );
+        }
+      );
 
-    describeMultiWS(
-      "WHEN the engine note provider is providing tree data on the root node with children",
-      {
-        preSetupHook: async (opts) => {
-          const { vaults, wsRoot } = opts;
-          const vault = vaults[0];
-          await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
-            wsRoot,
-            vault,
-          });
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "zebra",
-            custom: {
-              nav_order: 1,
-            },
-          });
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "tags",
-            custom: {
-              nav_order: 1.2,
-            },
-          });
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "tags.aa-battery",
-          });
+      describeMultiWS(
+        "AND tags hierarchy doesn't specify nav_order",
+        {
+          preSetupHook: async (opts) => {
+            const { wsRoot, vaults } = opts;
+            await preSetupHookFunc(opts);
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "tags",
+              custom: {
+                nav_order: 1.2,
+              },
+            });
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "tags.aa-battery",
+            });
+          },
         },
-      },
-      () => {
-        testAsyncWithCallback(
-          "THEN tag hierarchy nav_order is respected",
-          {},
-          async (done) => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+        () => {
+          testAsyncWithCallback(
+            "THEN tag hierarchy nav_order is respected",
+            {},
+            async (done) => {
+              const mockEvents = new MockEngineEvents();
+              const provider = new EngineNoteProvider(mockEvents);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+              const props = await (provider.getChildren() as Promise<
+                NoteProps[]
+              >);
 
-            const vault1RootProps = props[0];
-            const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
-              "Zebra", // nav_order: 1
-              "Tags", // nav_order respected
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
-              "aaron",
-            ]);
+              const vault1RootProps = props[0];
+              const children = await provider.getChildren(vault1RootProps);
+              expect(children?.map((child) => child.title)).toEqual([
+                "Zebra", // nav_order: 1
+                "Tags", // nav_order respected
+                "Aardvark", // uppercase alphabets comes before underscore alphabets
+                "_underscore", // underscore comes before lowercase alphabets
+                "aaron",
+              ]);
 
-            done();
-          }
-        );
-      }
-    );
+              done();
+            }
+          );
+        }
+      );
+    });
   });
 });

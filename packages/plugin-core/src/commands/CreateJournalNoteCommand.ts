@@ -47,7 +47,6 @@ export class CreateJournalNoteCommand extends BasicCommand<
         CopyNoteLinkBtn.create(false),
         HorizontalSplitBtn.create(false),
       ],
-      disableLookupView: true,
       title: "Create Journal Note",
     };
     const controller = this.extension.lookupControllerFactory.create(opts);

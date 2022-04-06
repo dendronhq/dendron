@@ -256,6 +256,7 @@ export class SegmentClient {
       this._anonymousId = genUUID();
       fs.writeFileSync(uuidPath, this._anonymousId);
     }
+    this.logger.info({ msg: "anonymous id", anonymousId: this._anonymousId });
   }
 
   identifyAnonymous(props?: { [key: string]: any }, opts?: SegmentExtraArg) {

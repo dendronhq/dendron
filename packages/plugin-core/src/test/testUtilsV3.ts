@@ -41,7 +41,17 @@ import {
 } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { after, afterEach, before, beforeEach, describe } from "mocha";
+import {
+  after,
+  afterEach,
+  before,
+  beforeEach,
+  describe,
+  Done,
+  ExclusiveTestFunction,
+  PendingTestFunction,
+  Test,
+} from "mocha";
 import os from "os";
 import sinon from "sinon";
 import {
@@ -661,4 +671,52 @@ export function subscribeToEngineStateChange(
 
 export function toDendronEngineClient(engine: IEngineAPIService) {
   return engine as unknown as DendronEngineClient;
+}
+
+/**
+ * Use this wrapper in `describleMulti/SingleWS` to run an async test function,
+ * but explicitly resolve it with a callback.
+ * This is needed becasue mocha doesn't allow overspecifying test resolution,
+ * but we need to do it in some situations.
+ * e.g.)
+ *
+ * describeMultiWS(
+ *   "WHEN doing something",
+ *   ...,
+ *   () => {
+ *     testAsyncWithCallback(
+ *      "THEN something happens",
+ *      { mode: "only" }, // you can omit "mode" here
+ *      async (done) => {
+ *        // do something async and call done.
+ *      }
+ *     )
+ *   }
+ * )
+ *
+ * @param title title of the test function
+ * @param opts.mode optionally mark it as skip or only
+ * @param fn async test function that needs to be resolved with a callback
+ * @returns mocha.Test
+ */
+export function testAsyncWithCallback(
+  title: string,
+  opts: { mode?: "only" | "skip" },
+  fn: (done: Done) => Promise<void>
+): Test {
+  let testFunc: Test | ExclusiveTestFunction | PendingTestFunction;
+
+  const { mode } = opts;
+
+  if (mode) {
+    testFunc = mode === "only" ? test.only : test.skip;
+  } else {
+    testFunc = test;
+  }
+
+  return testFunc(title, (done) => {
+    (async () => {
+      await fn(done);
+    })();
+  });
 }

@@ -17,7 +17,6 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandInput = {
   rootDirRaw: string;

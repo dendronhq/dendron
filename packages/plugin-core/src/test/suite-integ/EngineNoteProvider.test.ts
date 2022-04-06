@@ -129,11 +129,11 @@ suite("EngineNoteProvider Tests", function testSuite() {
           const mockEvents = new MockEngineEvents();
           const provider = new EngineNoteProvider(mockEvents);
 
-          const res = await (provider.getChildren() as Promise<NoteProps[]>);
+          const props = await (provider.getChildren() as Promise<NoteProps[]>);
           // 3 Vaults hence 3 root nodes
-          expect(res.length === 3);
+          expect(props.length === 3);
           // Also check some children:
-          res.forEach((props) => {
+          props.forEach((props) => {
             switch (props.vault.fsPath) {
               case "vault1": {
                 if (
@@ -171,7 +171,6 @@ suite("EngineNoteProvider Tests", function testSuite() {
                 });
               }
             }
-            // return;
           });
         });
       }

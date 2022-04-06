@@ -124,10 +124,20 @@ export class TreeUtils {
       // Sort by titles
       (noteId) => noteDict[noteId]?.title,
       // If titles are identical, sort by last updated date
-      (noteId) => noteDict[noteId]?.updated,
-      // Put tags last
-      (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE)
+      (noteId) => noteDict[noteId]?.updated
     );
+    // bubble down tags hierarchy if nav_order is not set
+    const maybeTagsHierarchy = out.find(
+      (noteId) => noteDict[noteId].fname === TAGS_HIERARCHY_BASE
+    );
+    if (
+      maybeTagsHierarchy &&
+      noteDict[maybeTagsHierarchy].custom?.nav_order === undefined
+    ) {
+      const idx = out.indexOf(maybeTagsHierarchy);
+      out.splice(idx, 1);
+      out.push(maybeTagsHierarchy);
+    }
     if (reverse) {
       return _.reverse(out);
     }

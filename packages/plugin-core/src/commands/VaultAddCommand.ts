@@ -373,10 +373,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
                 };
               }
               if (seed?.site) {
-                vault.publish = {
-                  index: seed.site.index,
-                  url: seed.site.url,
-                };
+                vault.siteUrl = seed.site.url;
+                vault.siteIndex = seed.site.index;
               }
               return vault;
             }

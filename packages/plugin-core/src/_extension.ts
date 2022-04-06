@@ -10,6 +10,7 @@ import {
   DendronError,
   ExtensionEvents,
   getStage,
+  GitEvents,
   InstallStatus,
   MigrationEvents,
   NativeWorkspaceEvents,
@@ -496,9 +497,6 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
-      // Start early to do this in background while Dendron initializes
-      const numContributors = wsService.getAllReposNumContributors();
-
       // check for vaults with same name
       const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
@@ -653,8 +651,22 @@ export async function _activate(
           .vaults.filter(VaultUtils.isSelfContained).length,
         numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
           .length,
-        numContributors: _.max(await numContributors),
       };
+
+      // Track contributors to repositories, but do so in the background so
+      // initialization isn't delayed.
+      const startGetAllReposNumContributors = process.hrtime();
+      wsService
+        .getAllReposNumContributors()
+        .then((numContributors) => {
+          AnalyticsUtils.track(GitEvents.ContributorsFound, {
+            maxNumContributors: _.max(numContributors),
+            duration: getDurationMilliseconds(startGetAllReposNumContributors),
+          });
+        })
+        .catch((err) => {
+          Sentry.captureException(err);
+        });
 
       if (siteUrl !== undefined) {
         _.set(trackProps, "siteUrl", siteUrl);

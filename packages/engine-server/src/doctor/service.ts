@@ -192,7 +192,7 @@ export class DoctorService implements Disposable {
     switch (action) {
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const { wsRoot } = engine;
-        const rawConfig = DConfig.getRaw(wsRoot);
+        const rawConfig = await DConfig.getRaw(wsRoot);
         const detectOut = ConfigUtils.detectMissingDefaults({
           config: rawConfig,
         });

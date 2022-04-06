@@ -11,13 +11,13 @@ import * as vscode from "vscode";
 import { DoctorCommand } from "../commands/Doctor";
 
 export class StartupUtils {
-  static shouldDisplayMissingDefaultConfigMessage(opts: {
+  static async shouldDisplayMissingDefaultConfigMessage(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
-  }): boolean {
+  }): Promise<boolean> {
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
       const wsRoot = opts.ext.getDWorkspace().wsRoot;
-      const rawConfig = DConfig.getRaw(wsRoot);
+      const rawConfig = await DConfig.getRaw(wsRoot);
       const out = ConfigUtils.detectMissingDefaults({ config: rawConfig });
       return out !== undefined && out.needsBackfill;
     } else {

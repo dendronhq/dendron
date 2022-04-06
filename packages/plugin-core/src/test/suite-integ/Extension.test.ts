@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   ConfigUtils,
   CONSTANTS,
   InstallStatus,
@@ -1203,9 +1204,9 @@ suite("missing default config detection", () => {
       timeout: 1e5,
     },
     () => {
-      test("THEN missing defaults are detected", () => {
+      test("THEN missing defaults are detected", async () => {
         const ws = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(ws.wsRoot);
+        const config = await DConfig.getRaw(ws.wsRoot);
         expect(config.workspace?.workspaceVaultSyncMode).toEqual(undefined);
         const out = ConfigUtils.detectMissingDefaults({ config });
         expect(out.needsBackfill).toBeTruthy();
@@ -1227,24 +1228,27 @@ suite("missing default config detection", () => {
         },
       },
       () => {
-        test("THEN prompted to add missing defaults", () => {
+        test("THEN prompted to add missing defaults", async () => {
           const ext = ExtensionProvider.getExtension();
-          const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-            ext,
-            extensionInstallStatus: InstallStatus.UPGRADED,
-          });
+          const out =
+            await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+              ext,
+              extensionInstallStatus: InstallStatus.UPGRADED,
+            });
           expect(out).toBeTruthy();
         });
       }
     );
 
     describeMultiWS("AND not missing default key", {}, () => {
-      test("THEN not prompted to add missing defaults", () => {
+      test("THEN not prompted to add missing defaults", async () => {
         const ext = ExtensionProvider.getExtension();
-        const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-          ext,
-          extensionInstallStatus: InstallStatus.UPGRADED,
-        });
+        const out = await StartupUtils.shouldDisplayMissingDefaultConfigMessage(
+          {
+            ext,
+            extensionInstallStatus: InstallStatus.UPGRADED,
+          }
+        );
         expect(out).toBeFalsy();
       });
     });
@@ -1261,16 +1265,16 @@ suite("missing default config detection", () => {
         },
       },
       () => {
-        test("THEN not prompted to add missing defaults", () => {
+        test("THEN not prompted to add missing defaults", async () => {
           const ext = ExtensionProvider.getExtension();
-          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-            (extensionInstallStatus) => {
-              const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage(
-                {
+          asyncLoopOneAtATime(
+            [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+            async (extensionInstallStatus) => {
+              const out =
+                await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
                   ext,
                   extensionInstallStatus,
-                }
-              );
+                });
               expect(out).toBeFalsy();
             }
           );
@@ -1279,14 +1283,16 @@ suite("missing default config detection", () => {
     );
 
     describeMultiWS("AND not missing default key", {}, () => {
-      test("THEN not prompted to add missing defaults", () => {
+      test("THEN not prompted to add missing defaults", async () => {
         const ext = ExtensionProvider.getExtension();
-        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-          (extensionInstallStatus) => {
-            const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-              ext,
-              extensionInstallStatus,
-            });
+        await asyncLoopOneAtATime(
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+          async (extensionInstallStatus) => {
+            const out =
+              await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+                ext,
+                extensionInstallStatus,
+              });
             expect(out).toBeFalsy();
           }
         );

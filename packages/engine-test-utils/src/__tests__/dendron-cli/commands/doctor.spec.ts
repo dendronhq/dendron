@@ -819,7 +819,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
     test("THEN adds missing default and create backup", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = await DConfig.getRaw(wsRoot);
           expect(rawConfigBefore.workspace?.workspaceVaultSyncMode).toBeFalsy();
           const out = await runDoctor({
             wsRoot,
@@ -829,7 +829,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
           expect(out.resp.backupPath).toBeTruthy();
           const backupPathExists = await fs.pathExists(out.resp.backupPath);
           expect(backupPathExists).toBeTruthy();
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = await DConfig.getRaw(wsRoot);
           const defaultConfig = ConfigUtils.genDefaultConfig();
           expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(
             defaultConfig.workspace.workspaceVaultSyncMode
@@ -851,7 +851,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
     test("THEN doesn't add missing default", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = await DConfig.getRaw(wsRoot);
           expect(
             rawConfigBefore.workspace?.workspaceVaultSyncMode
           ).toBeTruthy();
@@ -861,7 +861,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
             action,
           });
           expect(out).toEqual({ exit: true });
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = await DConfig.getRaw(wsRoot);
           expect(rawConfigBefore).toEqual(rawConfig);
 
           const backupService = new BackupService({ wsRoot });

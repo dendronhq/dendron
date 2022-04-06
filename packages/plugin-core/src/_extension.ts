@@ -467,7 +467,7 @@ export async function _activate(
 
       // check for missing default config keys and prompt for a backfill.
       if (
-        StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+        await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
           ext: ws,
           extensionInstallStatus,
         })

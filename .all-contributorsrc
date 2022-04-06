@@ -1590,6 +1590,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "oolonek",
+      "name": "oolonek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2760049?v=4",
+      "profile": "https://github.com/oolonek",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

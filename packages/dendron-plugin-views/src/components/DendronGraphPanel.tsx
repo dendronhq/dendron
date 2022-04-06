@@ -17,7 +17,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
   const logger = createLogger("DendronNoteGraphView");
   const { workspace, ide, engine } = props;
   const { useEngine } = engineHooks;
-  // initialize engine
+  // initialize engine. This is necessary because graph view require full note state.
   useEngine({
     engineState: engine,
     opts: { url: workspace.url, ws: workspace.ws },

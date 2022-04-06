@@ -327,6 +327,15 @@ export default function Graph({
   const showNoteGraphMessage =
     type === "note" && !ide.noteActive && GraphUtils.isLocalGraph(config);
 
+  if (engine.error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <div>{engine.error}</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div

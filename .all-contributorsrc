@@ -1599,6 +1599,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "Mettcon",
+      "name": "Mettcon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14955363?v=4",
+      "profile": "https://github.com/Mettcon",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

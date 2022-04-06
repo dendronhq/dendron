@@ -39,7 +39,7 @@
         },
         "hierarchyDisplay": {
           "type": "boolean",
-          "description": "Shoud show hierarchy"
+          "description": "Shouldd show hierarchy"
         },
         "hierarchyDisplayTitle": {
           "type": "string",

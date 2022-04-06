@@ -1,15 +1,14 @@
 import {
   ConfigUtils,
-  GithubEditViewModeEnum,
   RESERVED_KEYS,
   VaultUtils,
+  GithubEditViewModeEnum,
 } from "@dendronhq/common-all";
-import { runEngineTestV5, testWithEngine } from "../../engine";
-
-import { ENGINE_HOOKS } from "../../presets";
 import { GitUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
+import { runEngineTestV5, testWithEngine } from "../../engine";
+import { ENGINE_HOOKS } from "../../presets";
 
 describe("GitUtils", () => {
   describe("getGithubEditUrl", () => {

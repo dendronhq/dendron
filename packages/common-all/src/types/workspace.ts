@@ -1,8 +1,8 @@
-import { DEngineClient } from "./typesv2";
-import { DHookDict } from "./hooks";
-import { IntermediateDendronConfig } from "./intermediateConfigs";
-import { SeedSite } from "./seed";
 import { URI } from "vscode-uri";
+import { DHookDict } from "./hooks";
+import { SeedSite } from "./seed";
+import { DEngineClient } from "./typesv2";
+import { IntermediateDendronConfig } from "./intermediateConfigs";
 
 // === Primitives
 export type DPermission = {

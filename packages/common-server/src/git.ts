@@ -1,25 +1,24 @@
 import {
   CONSTANTS,
-  ConfigUtils,
+  IntermediateDendronConfig,
+  DendronError,
   DVault,
   DWorkspace,
-  DendronError,
-  FOLDERS,
-  IntermediateDendronConfig,
   NoteProps,
   RESERVED_KEYS,
   VaultUtils,
+  ConfigUtils,
+  FOLDERS,
 } from "@dendronhq/common-all";
+import execa from "execa";
+import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
 import simpleGit, {
   SimpleGit,
   ResetMode as SimpleGitResetMode,
 } from "simple-git";
-
-import _ from "lodash";
-import execa from "execa";
-import fs from "fs-extra";
 import { parse } from "url";
-import path from "path";
 import { readYAMLAsync } from ".";
 import { vault2Path } from "./filesv2";
 

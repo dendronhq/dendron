@@ -1,25 +1,24 @@
-import { BackupKeyEnum, BackupService } from "./backup";
 import {
-  CONSTANTS,
-  CleanDendronPublishingConfig,
   CleanDendronSiteConfig,
-  ConfigUtils,
-  DeepPartial,
+  CONSTANTS,
+  IntermediateDendronConfig,
   DendronError,
-  DendronPublishingConfig,
   DendronSiteConfig,
   ERROR_STATUS,
-  GithubEditViewModeEnum,
-  IntermediateDendronConfig,
-  StrictConfigV5,
-  configIsV4,
   getStage,
+  ConfigUtils,
+  DendronPublishingConfig,
+  GithubEditViewModeEnum,
+  CleanDendronPublishingConfig,
+  configIsV4,
+  StrictConfigV5,
+  DeepPartial,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
-
-import _ from "lodash";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
+import { BackupKeyEnum, BackupService } from "./backup";
 
 export class DConfig {
   static configPath(configRoot: string): string {

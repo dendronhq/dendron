@@ -1,21 +1,20 @@
+import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   NoteTestUtilsV4,
   PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
+import fs from "fs-extra";
 import { afterEach, beforeEach, describe } from "mocha";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-
-import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
+import path from "path";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { expect } from "../testUtilsv2";
-import fs from "fs-extra";
-import { getEngine } from "../../workspace";
-import path from "path";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
-import { vault2Path } from "@dendronhq/common-server";
+import { getEngine } from "../../workspace";
+import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
+import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
+import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 
 suite("RefactorHierarchy", function () {
   const ctx = setupBeforeAfter(this, {

@@ -664,15 +664,25 @@ export function toDendronEngineClient(engine: IEngineAPIService) {
   return engine as unknown as DendronEngineClient;
 }
 
-export async function createSelfContainedVaultWithGit(dir: string) {
-  const add = new VaultAddCommand();
-  await add.execute({
-    path: dir,
-    type: "local",
-    isSelfContained: true,
+export async function createWorkspaceWithGit(
+  dir: string,
+  opts?: Partial<SetupWorkspaceOpts>
+) {
+  await fs.ensureDir(dir);
+  const setup = new SetupWorkspaceCommand();
+  await setup.execute({
+    rootDirRaw: dir,
+    skipOpenWs: true,
+    selfContained: false,
+    workspaceInitializer: new BlankInitializer(),
+    ...opts,
   });
   const git = new Git({ localUrl: dir });
   await git.init();
-  await git.addAll();
+  await git.add(".");
   await git.commit({ msg: "testUtilsV3" });
+}
+
+export async function createSelfContainedVaultWithGit(dir: string) {
+  return createWorkspaceWithGit(dir, { selfContained: true });
 }

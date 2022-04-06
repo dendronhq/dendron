@@ -35,6 +35,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
   createSelfContainedVaultWithGit,
+  createWorkspaceWithGit,
   describeSingleWS,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -468,6 +469,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
             path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
           )
         ).toBeTruthy();
+        expect(
+          await fs.pathExists(path.join(vaultPath, FOLDERS.NOTES))
+        ).toBeTruthy();
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
@@ -626,6 +630,77 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         expect(vault?.fsPath).toEqual(
           path.join(FOLDERS.DEPENDENCIES, vaultName)
         );
+      });
+
+      test("THEN the notes in this vault are accessible", async () => {
+        // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
+        await new ReloadIndexCommand().run();
+        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = VaultUtils.getVaultByName({
+          vaults,
+          vname: vaultName,
+        });
+        expect(vault).toBeTruthy();
+        const note = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vault!,
+          engine,
+        });
+        expect(note).toBeTruthy();
+        expect(note?.vault.name).toEqual(vaultName);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN creating and adding a remote workspace vault",
+    { modConfigCb: enableSelfCOntainedVaults },
+    () => {
+      let vaultName: string;
+      let remoteDir: string;
+      before(async () => {
+        // Create a self contained vault outside the current workspace
+        remoteDir = tmpDir().name;
+        await createWorkspaceWithGit(remoteDir);
+        vaultName = path.basename(remoteDir);
+
+        sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
+        sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);
+        sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
+
+        await new VaultAddCommand().run();
+      });
+
+      test("THEN the vault is under `dependencies/remote`, and is a workspace vault", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        // It's kinda hard to mock git cloning from a remote here, so the remote
+        // we're using is a directory. Because of that, the name of the vault
+        // will fall back to the directory name.
+        const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
+        expect(await fs.pathExists(vaultPath)).toBeTruthy();
+        expect(
+          await readYAMLAsync(
+            path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
+          )
+        ).toBeTruthy();
+        expect(
+          await fs.pathExists(path.join(vaultPath, FOLDERS.NOTES))
+        ).toBeFalsy();
+      });
+
+      test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getOrCreate(wsRoot);
+        const vault = VaultUtils.getVaultByName({
+          vaults: ConfigUtils.getVaults(config),
+          vname: vaultName,
+        });
+        expect(vault?.selfContained).toBeTruthy();
+        expect(vault?.name).toEqual(vaultName);
+        expect(vault?.fsPath).toEqual(
+          path.join(FOLDERS.DEPENDENCIES, vaultName)
+        );
+        expect(vault?.remote?.url).toEqual(remoteDir);
       });
 
       test("THEN the notes in this vault are accessible", async () => {

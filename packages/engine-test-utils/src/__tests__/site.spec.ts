@@ -1,31 +1,32 @@
 import {
+  AssertUtils,
+  NoteTestUtilsV4,
+  SetupHookFunction,
+} from "@dendronhq/common-test-utils";
+import {
   ConfigUtils,
-  DendronSiteFM,
-  DuplicateNoteActionEnum,
   DVault,
   DVaultVisibility,
+  DendronSiteFM,
+  DuplicateNoteActionEnum,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir, vault2Path } from "@dendronhq/common-server";
-import {
-  AssertUtils,
-  NoteTestUtilsV4,
-  SetupHookFunction,
-} from "@dendronhq/common-test-utils";
-import { SiteUtils } from "@dendronhq/engine-server";
-import fs from "fs-extra";
-import _ from "lodash";
-import { TestConfigUtils } from "../config";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../presets";
 import {
   createEngineFromEngine,
   createEngineFromServer,
   createSiteConfig,
   runEngineTestV5,
 } from "../engine";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../presets";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
+
+import { SiteUtils } from "@dendronhq/engine-server";
+import { TestConfigUtils } from "../config";
+import _ from "lodash";
+import fs from "fs-extra";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine: createEngineFromEngine,
@@ -453,7 +454,7 @@ describe("SiteUtils", () => {
       );
     });
 
-    test("one hiearchy", async () => {
+    test("one hierarchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -497,7 +498,7 @@ describe("SiteUtils", () => {
     });
 
     // TODO
-    test.skip("one hiearchy, dups with list override", async () => {
+    test.skip("one hierarchy, dups with list override", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -559,7 +560,7 @@ describe("SiteUtils", () => {
       );
     });
 
-    test("mult hiearchy", async () => {
+    test("mult hierarchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -603,7 +604,7 @@ describe("SiteUtils", () => {
     });
 
     // TODO: fix
-    test.skip("mult hiearchy, diff publishByDefault", async () => {
+    test.skip("mult hierarchy, diff publishByDefault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const config = TestConfigUtils.withConfig(

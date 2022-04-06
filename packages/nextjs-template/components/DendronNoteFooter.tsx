@@ -1,3 +1,4 @@
+import { Col, Row, Typography } from "antd";
 /* eslint-disable */
 import {
   ConfigUtils,
@@ -8,12 +9,12 @@ import {
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Row, Col, Typography } from "antd";
+import { useDendronRouter, useNoteActive } from "../utils/hooks";
+
+import React from "react";
 import _ from "lodash";
 import path from "path";
-import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
-import { useDendronRouter, useNoteActive } from "../utils/hooks";
 
 const { Text, Link } = Typography;
 
@@ -25,8 +26,8 @@ const ms2ShortDate = (ts: number) => {
 const formatString = (opts: { txt: string; note: NoteProps }) => {
   const { txt, note } = opts;
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
-  const noteHiearchy = note.fname.replace(/\./g, "/");
-  return _.template(txt)({ noteHiearchy });
+  const noteHierarchy = note.fname.replace(/\./g, "/");
+  return _.template(txt)({ noteHierarchy });
 };
 
 class GitUtils {

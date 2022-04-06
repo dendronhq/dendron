@@ -1,8 +1,8 @@
-import { URI } from "vscode-uri";
-import { DHookDict } from "./hooks";
-import { SeedSite } from "./seed";
 import { DEngineClient } from "./typesv2";
+import { DHookDict } from "./hooks";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
+import { SeedSite } from "./seed";
+import { URI } from "vscode-uri";
 
 // === Primitives
 export type DPermission = {
@@ -276,7 +276,7 @@ export type DendronConfig = {
   useKatex?: boolean;
 
   /**
-   * Shoud show hiearchy
+   * Shoud show hierarchy
    */
   hierarchyDisplay?: boolean;
 

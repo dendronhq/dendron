@@ -12243,7 +12243,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- handle single hiearchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
+- handle single hierarchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
 
 ## 0.20.1-alpha.13 (2020-12-21)
 
@@ -12553,7 +12553,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- handle single hiearchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
+- handle single hierarchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
 
 ## [0.20.1-alpha.13](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.12...v0.20.1-alpha.13) (2020-12-21)
 

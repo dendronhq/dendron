@@ -1,24 +1,25 @@
+import { BackupKeyEnum, BackupService } from "./backup";
 import {
-  CleanDendronSiteConfig,
   CONSTANTS,
-  IntermediateDendronConfig,
+  CleanDendronPublishingConfig,
+  CleanDendronSiteConfig,
+  ConfigUtils,
+  DeepPartial,
   DendronError,
+  DendronPublishingConfig,
   DendronSiteConfig,
   ERROR_STATUS,
-  getStage,
-  ConfigUtils,
-  DendronPublishingConfig,
   GithubEditViewModeEnum,
-  CleanDendronPublishingConfig,
-  configIsV4,
+  IntermediateDendronConfig,
   StrictConfigV5,
-  DeepPartial,
+  configIsV4,
+  getStage,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
-import fs from "fs-extra";
+
 import _ from "lodash";
+import fs from "fs-extra";
 import path from "path";
-import { BackupKeyEnum, BackupService } from "./backup";
 
 export class DConfig {
   static configPath(configRoot: string): string {
@@ -103,7 +104,7 @@ export class DConfig {
     if (_.size(siteHierarchies) < 1) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_CONFIG,
-        message: `siteHiearchies must have at least one hiearchy`,
+        message: `siteHiearchies must have at least one hierarchy`,
       });
     }
     siteIndex = this.getSiteIndex(config);
@@ -154,7 +155,7 @@ export class DConfig {
     if (_.size(siteHierarchies) < 1) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_CONFIG,
-        message: `siteHiearchies must have at least one hiearchy`,
+        message: `siteHiearchies must have at least one hierarchy`,
       });
     }
     siteIndex = this.getSiteIndex(config);

@@ -1,14 +1,15 @@
 import {
   ConfigUtils,
+  GithubEditViewModeEnum,
   RESERVED_KEYS,
   VaultUtils,
-  GithubEditViewModeEnum,
 } from "@dendronhq/common-all";
+import { runEngineTestV5, testWithEngine } from "../../engine";
+
+import { ENGINE_HOOKS } from "../../presets";
 import { GitUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { runEngineTestV5, testWithEngine } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
 
 describe("GitUtils", () => {
   describe("getGithubEditUrl", () => {
@@ -60,7 +61,7 @@ describe("GitUtils", () => {
       ConfigUtils.setGithubProp(config, "editBranch", "main");
       ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
       const note = engine.notes["foo.ch1"];
-      note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHiearchy }}.md";
+      note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHierarchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/foo/ch1.md"
       );

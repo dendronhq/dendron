@@ -18,8 +18,10 @@ export const useCurrentTheme = () => {
   );
   React.useEffect(() => {
     // @ts-ignore
-    setCurrentTheme(window.currentTheme);
-  }, [setCurrentTheme, currentTheme]);
+    window.currentTheme && setCurrentTheme(window.currentTheme);
+    // @ts-ignore
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [window.currentTheme]);
   return { currentTheme, setCurrentTheme };
 };
 

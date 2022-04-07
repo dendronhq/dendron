@@ -1,38 +1,42 @@
-import { createLogger, postVSCodeMessage } from "@dendronhq/common-frontend";
-import _ from "lodash";
-import React, { useEffect, useState } from "react";
-import { EventHandler } from "cytoscape";
 import {
   DMessageSource,
   GraphViewMessage,
   GraphViewMessageEnum,
-  NoteProps,
 } from "@dendronhq/common-all";
-import Graph from "../../components/graph";
-import { graphConfig, GraphConfig } from "../../lib/graph";
-import useGraphElements from "../../hooks/useGraphElements";
-import { DendronProps } from "../../lib/types";
+import { createLogger, engineHooks } from "@dendronhq/common-frontend";
+import { useEffect, useState } from "react";
+import useGraphElements from "../hooks/useGraphElements";
+import { DendronComponent } from "../types";
+import { graphConfig, GraphConfig } from "../utils/graph";
+import Graph from "./graph";
+import { EventHandler } from "cytoscape";
+import _ from "lodash";
+import { postVSCodeMessage } from "../utils/vscode";
 
-export default function FullNoteGraph({ engine, ide }: DendronProps) {
+const DendronGraphPanel: DendronComponent = (props) => {
+  const logger = createLogger("DendronNoteGraphView");
+  const { workspace, ide, engine } = props;
+  const { useEngine } = engineHooks;
+  // initialize engine. This is necessary because graph view require full note state.
+  useEngine({
+    engineState: engine,
+    opts: { url: workspace.url, ws: workspace.ws },
+  });
+  let noteActive = props.ide.noteActive;
+  logger.info({
+    msg: "enter",
+    activeNoteId: noteActive ? noteActive.id : "no active note found",
+  });
+
   const [config, setConfig] = useState<GraphConfig>(graphConfig.note);
 
-  const [activeNote, setActiveNote] = useState<NoteProps>();
-  const [disregardActiveNote, setDisregardActiveNote] = useState(false);
   const elements = useGraphElements({
     type: "note",
     engine,
     config,
-    noteActive: activeNote,
+    noteActive,
+    wsRoot: workspace.ws,
   });
-
-  useEffect(() => {
-    if (!ide.noteActive) setActiveNote(undefined);
-    else if (ide.noteActive && !disregardActiveNote)
-      setActiveNote(ide.noteActive);
-    else if (disregardActiveNote) setDisregardActiveNote(false);
-  }, [ide.noteActive]);
-
-  // Update config
   useEffect(() => {
     if (!_.isUndefined(elements)) {
       setConfig((c) => ({
@@ -60,13 +64,7 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
 
     const isNode = !source;
     if (!isNode || !engine.notes) return;
-
-    // The ShowNoteGraph command sets the active text editor to the first window when opening a note.
-    // This causes the active note to change unexpectedly, causing a jarring graph render.
-    // This flag allows the note graph to ignore that first unwanted change
-    setDisregardActiveNote(true);
-
-    setActiveNote(engine.notes[id]);
+    noteActive = engine.notes[id];
     postVSCodeMessage({
       type: GraphViewMessageEnum.onSelect,
       data: { id },
@@ -83,6 +81,8 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
       engine={engine}
       ide={ide}
       type="note"
+      workspace={workspace}
     />
   );
-}
+};
+export default DendronGraphPanel;

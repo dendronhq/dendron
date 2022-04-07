@@ -1,17 +1,11 @@
-import {
-  createLogger,
-  engineSlice,
-  postVSCodeMessage,
-} from "@dendronhq/common-frontend";
+import { createLogger } from "@dendronhq/common-frontend";
 import _ from "lodash";
-import React, { Children, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
-import { useThemeSwitcher } from "react-css-theme-switcher";
-import Head from "next/head";
 import AntThemes from "../styles/theme-antd";
-import GraphFilterView from "./graph-filter-view";
-import { GraphConfig, GraphConfigItem, GraphElements } from "../lib/graph";
+import GraphFilterView from "./GraphFilterView";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
 import {
   ConfigUtils,
   DMessageSource,
@@ -20,9 +14,11 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
-import { DendronProps } from "../lib/types";
+import { DendronProps } from "../types";
 import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
-import { Button, Space, Spin, Typography, Select, Switch } from "antd";
+import { Button, Space, Spin, Typography } from "antd";
+import { useCurrentTheme, useWorkspaceProps } from "../hooks";
+import { postVSCodeMessage } from "../utils/vscode";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -32,7 +28,6 @@ export class GraphUtils {
 }
 
 const getCytoscapeStyle = (
-  themes: any,
   theme: string | undefined,
   customCSS: string | undefined
 ) => {
@@ -136,16 +131,16 @@ export default function Graph({
 }) {
   const logger = createLogger("Graph");
   const graphRef = useRef<HTMLDivElement>(null);
-  const { themes, currentTheme } = useThemeSwitcher();
+  const { currentTheme } = useCurrentTheme();
   const [cy, setCy] = useState<Core>();
   const [isReady, setIsReady] = useState(false);
-  const [shouldBlockRender, setShouldBlockRender] = useState(false);
-
+  const [workspace] = useWorkspaceProps();
   useSyncGraphWithIDE({
     graph: cy,
     engine,
     ide,
     config,
+    workspace,
   });
 
   // On config update, handle graph changes
@@ -167,6 +162,7 @@ export default function Graph({
     val: boolean | undefined;
     update: (val: boolean) => void;
   }) => <Button onClick={() => update(!val)}>{children(val)}</Button>;
+
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
       logger.log("Rendering graph...");
@@ -189,11 +185,9 @@ export default function Graph({
       cytoscape.use(euler);
 
       const style = getCytoscapeStyle(
-        themes,
-        currentTheme,
+        currentTheme || "light",
         ide.graphStyles
       ) as any;
-
       const defaultConfig = ConfigUtils.genDefaultConfig();
 
       const network = cytoscape({
@@ -249,6 +243,7 @@ export default function Graph({
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -267,6 +262,7 @@ export default function Graph({
     }
 
     renderGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphRef, elements, ide.graphStyles]);
 
   useEffect(() => {
@@ -296,6 +292,7 @@ export default function Graph({
         ...vaultConfigObject,
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engine.vaults]);
 
   const updateConfigField = (key: string, value: string | number | boolean) => {
@@ -330,11 +327,17 @@ export default function Graph({
   const showNoteGraphMessage =
     type === "note" && !ide.noteActive && GraphUtils.isLocalGraph(config);
 
+  if (engine.error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <div>{engine.error}</div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <Head>
-        <title>{_.capitalize(type)} Graph</title>
-      </Head>
       <div
         style={{
           width: "100vw",

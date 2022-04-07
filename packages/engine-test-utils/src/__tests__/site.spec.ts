@@ -453,7 +453,7 @@ describe("SiteUtils", () => {
       );
     });
 
-    test("one hiearchy", async () => {
+    test("one hierarchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -497,7 +497,7 @@ describe("SiteUtils", () => {
     });
 
     // TODO
-    test.skip("one hiearchy, dups with list override", async () => {
+    test.skip("one hierarchy, dups with list override", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -559,7 +559,7 @@ describe("SiteUtils", () => {
       );
     });
 
-    test("mult hiearchy", async () => {
+    test("mult hierarchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const config = TestConfigUtils.withConfig(
@@ -603,7 +603,7 @@ describe("SiteUtils", () => {
     });
 
     // TODO: fix
-    test.skip("mult hiearchy, diff publishByDefault", async () => {
+    test.skip("mult hierarchy, diff publishByDefault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const config = TestConfigUtils.withConfig(

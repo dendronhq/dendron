@@ -130,7 +130,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 - export your knowledge base as a static (nextjs) site
 - lookup locally and share globally with generated links
-- manage what you publish using fine grained permissions on a per vault, per hiearchy and per note basis
+- manage what you publish using fine grained permissions on a per vault, per hierarchy and per note basis
 
 <a href="https://www.loom.com/share/727537e0fd49481cac2accc2b3362fa3">
     <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/727537e0fd49481cac2accc2b3362fa3.gif">

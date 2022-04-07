@@ -23,13 +23,8 @@ import BacklinksTreeDataProvider from "../../features/BacklinksTreeDataProvider"
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Backlink } from "../../features/Backlink";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { expect, runMultiVaultTest } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  describeSingleWS,
-  setupBeforeAfter,
-} from "../testUtilsV3";
-import { WSUtils } from "../../WSUtils";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { BacklinkSortOrder } from "../../types";
 import { MockEngineEvents } from "./MockEngineEvents";
 
@@ -453,56 +448,6 @@ suite("BacklinksTreeDataProvider", function () {
       });
     }
   );
-
-  test("link candidates should only work within a vault", (done) => {
-    let alpha: NoteProps;
-    let gamma: NoteProps;
-    const ctx2 = setupBeforeAfter(this, {
-      beforeHook: () => {
-        VSCodeUtils.closeAllEditors();
-      },
-      afterHook: () => {
-        VSCodeUtils.closeAllEditors();
-      },
-    });
-    runMultiVaultTest({
-      ctx: ctx2,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        alpha = await NoteTestUtilsV4.createNote({
-          fname: "alpha",
-          body: `gamma`,
-          vault: vaults[0],
-          wsRoot,
-        });
-        gamma = await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
-          wsRoot,
-          vault: vaults[1],
-        });
-      },
-      onInit: async ({ wsRoot }) => {
-        TestConfigUtils.withConfig(
-          (config) => {
-            config.dev = {
-              enableLinkCandidates: true,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
-
-        await WSUtils.openNote(alpha);
-        const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
-        expect(alphaOut).toEqual([]);
-        expect(alpha.links).toEqual([]);
-
-        await WSUtils.openNote(gamma);
-        const gammaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
-        expect(gammaOut).toEqual([]);
-        expect(gamma.links).toEqual([]);
-        done();
-      },
-    });
-  });
 
   describeSingleWS(
     "GIVEN a single vault workspace with links and link candidates",

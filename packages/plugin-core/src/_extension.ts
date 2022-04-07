@@ -17,6 +17,7 @@ import {
   NativeWorkspaceEvents,
   SurveyEvents,
   Time,
+  TutorialEvents,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -439,8 +440,19 @@ export async function _activate(
           ? wsService.getCodeWorkspaceSettingsSync()
           : undefined;
 
-      // // initialize Segment client
+      // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
+
+      const welcomeClicked = MetadataService.instance().getWelcomeClicked();
+      // check if we have a welcome click message
+      if (welcomeClicked) {
+        AnalyticsUtils.trackSync({
+          event: TutorialEvents.ClickStart,
+          timestamp: welcomeClicked,
+        }).then(() => {
+          MetadataService.instance().deleteMeta("welcomeClicked");
+        });
+      }
 
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({

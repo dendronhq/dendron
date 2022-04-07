@@ -1,15 +1,10 @@
-import {
-  AsyncUtils,
-  TimeUtils,
-  TutorialEvents,
-  WorkspaceType,
-} from "@dendronhq/common-all";
+import { Time, TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
 import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
+import { MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
-import { Logger } from "./logger";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
@@ -45,17 +40,10 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            const resp = await AsyncUtils.awaitWithLimit(
-              { limitMs: 8000 },
-              () => AnalyticsUtils.trackSync(TutorialEvents.ClickStart)
+            MetadataService.instance().setMeta(
+              "welcomeClicked",
+              Time.now().toMillis()
             );
-            if (resp.error) {
-              // TODO: write failure into log on next startup so we know when this fails
-              Logger.error({
-                ctx: "WelcomeUtils.initializeWorkspace",
-                msg: "clickStart exceed 3s",
-              });
-            }
             // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
             const { filePath } =
               FileUtils.genFilePathWithSuffixThatDoesNotExist({

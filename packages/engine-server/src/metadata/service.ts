@@ -1,5 +1,6 @@
 import { Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
+import _ from "lodash";
 import os from "os";
 import path from "path";
 
@@ -40,6 +41,10 @@ type Metadata = Partial<{
    * When the user last used lookup
    */
   lastLookupTime: number;
+  /**
+   * Time when the welcome button was clicked
+   */
+  welcomeClicked: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -82,6 +87,15 @@ export class MetadataService {
       return {};
     }
     return fs.readJSONSync(MetadataService.metaFilePath()) as Metadata;
+  }
+
+  getWelcomeClicked(): Date | false {
+    const welcomeClicked =
+      MetadataService.instance().getMeta()["welcomeClicked"];
+    if (_.isNumber(welcomeClicked)) {
+      return Time.DateTime.fromMillis(welcomeClicked).toJSDate();
+    }
+    return false;
   }
 
   setMeta(key: keyof Metadata, value: any) {

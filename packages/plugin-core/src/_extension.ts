@@ -4,6 +4,7 @@ import {
   SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
+  assertUnreachable,
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
@@ -24,6 +25,7 @@ import {
   getOS,
   initializeSentry,
   SegmentClient,
+  SegmentUtils,
 } from "@dendronhq/common-server";
 import {
   FileAddWatcher,
@@ -43,6 +45,10 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import {
+  UpgradeToastOrViewTestEnum,
+  UPGRADE_TOAST_OR_VIEW_TEST,
+} from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
@@ -796,25 +802,81 @@ async function showWelcomeOrWhatsNew({
         previousExtensionVersion,
       });
       await StateService.instance().setGlobalVersion(version);
+
+      const toastOrView = UPGRADE_TOAST_OR_VIEW_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
+        toastOrView,
       });
-      vscode.window
-        .showInformationMessage(
-          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
-          "See what changed"
-        )
-        .then((resp) => {
-          if (resp === "See what changed") {
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
-              )
-            );
+
+      switch (toastOrView) {
+        case UpgradeToastOrViewTestEnum.upgradeToast: {
+          vscode.window
+            .showInformationMessage(
+              `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+              "See what changed"
+            )
+            .then((resp) => {
+              if (resp === "See what changed") {
+                AnalyticsUtils.track(
+                  VSCodeEvents.UpgradeSeeWhatsChangedClicked,
+                  {
+                    previousVersion: previousExtensionVersion,
+                    duration: getDurationMilliseconds(start),
+                  }
+                );
+                vscode.commands.executeCommand(
+                  "vscode.open",
+                  vscode.Uri.parse(
+                    "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
+                  )
+                );
+              }
+            });
+          break;
+        }
+        case UpgradeToastOrViewTestEnum.upgradeView: {
+          const panel = vscode.window.createWebviewPanel(
+            "releaseNotes",
+            "Release Notes",
+            vscode.ViewColumn.One,
+            {}
+          );
+
+          const html = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>"Release Notes"</title>
+        <style>
+          html, body, iframe {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
           }
-        });
+        </style>
+      </head>
+      <body>
+        <iframe id="iframeView" src="https://wiki.dendron.so/notes/wog4e1u144pyb72bhvhsmju/"></iframe>
+      </body>
+      
+      </html>`;
+
+          panel.webview.html = html;
+          panel.reveal();
+          break;
+        }
+        default:
+          assertUnreachable(toastOrView);
+      }
       break;
     }
     default:

@@ -436,11 +436,10 @@ suite("BacklinksTreeDataProvider", function () {
       },
     },
     () => {
-      test.only("THEN link candidates should only work within a vault", async () => {
+      test("THEN link candidates should only work within a vault", async () => {
         const engine = ExtensionProvider.getEngine();
 
         const alpha = engine.notes["alpha"];
-        debugger;
         await ExtensionProvider.getWSUtils().openNote(alpha);
         const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
         expect(alphaOut).toEqual([]);

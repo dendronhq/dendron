@@ -247,4 +247,19 @@ export const NOTE_PRESETS_V4 = {
     fname: "footag",
     body: "#foobar",
   }),
+  NOTE_WITH_LOWER_CASE_TITLE: CreateNoteFactory({
+    fname: "aaron",
+    body: "aaron",
+    props: {
+      title: "aaron",
+    },
+  }),
+  NOTE_WITH_UPPER_CASE_TITLE: CreateNoteFactory({
+    fname: "Aardvark",
+    body: "aardvark",
+  }),
+  NOTE_WITH_UNDERSCORE_TITLE: CreateNoteFactory({
+    fname: "_underscore",
+    body: "underscore",
+  }),
 };

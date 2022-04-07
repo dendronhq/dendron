@@ -12,7 +12,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { afterEach, beforeEach, describe, test } from "mocha";
+import { afterEach, beforeEach, test } from "mocha";
 import path from "path";
 import sinon from "sinon";
 
@@ -23,11 +23,10 @@ import BacklinksTreeDataProvider from "../../features/BacklinksTreeDataProvider"
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Backlink } from "../../features/Backlink";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest } from "../testUtilsv2";
 import {
   describeMultiWS,
-  runLegacyMultiWorkspaceTest,
+  describeSingleWS,
   setupBeforeAfter,
 } from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
@@ -42,7 +41,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
   const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
     mockEvents,
-    getDWorkspace().config.dev?.enableLinkCandidates
+    ExtensionProvider.getDWorkspace().config.dev?.enableLinkCandidates
   );
 
   if (sortOrder) {
@@ -137,24 +136,22 @@ function assertAreEqual(actual: ProviderResult<Backlink>, expected: Backlink) {
 }
 
 suite("BacklinksTreeDataProvider", function () {
-  const ctx = setupBeforeAfter(this, {
+  /*const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       VSCodeUtils.closeAllEditors();
     },
     afterHook: () => {
       VSCodeUtils.closeAllEditors();
     },
-  });
+  });*/
   // Set test timeout to 3 seconds
   this.timeout(3000);
 
-  test("basics", (done) => {
-    let noteWithTarget: NoteProps;
-
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+  describeSingleWS(
+    "GIVEN a single vault workspace with two notes (target, link)",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           wsRoot,
           vault: vaults[0],
         });
@@ -163,8 +160,11 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
         });
       },
-      onInit: async ({ wsRoot, vaults }) => {
-        await WSUtils.openNote(noteWithTarget);
+    },
+    () => {
+      test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        await ExtensionProvider.getWSUtils().openNote(engine.notes["alpha"]);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
@@ -173,28 +173,9 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
 
-  test("validate get parent works", (done) => {
-    let noteWithTarget: NoteProps;
-
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-          wsRoot,
-          vault: vaults[0],
-        });
-        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
-          wsRoot,
-          vault: vaults[0],
-        });
-      },
-      onInit: async () => {
-        await WSUtils.openNote(noteWithTarget);
+      test("THEN validate get parent works", async () => {
         const { out: backlinks, provider } = await getRootChildrenBacklinks();
         const parentBacklink = backlinks[0];
 
@@ -221,31 +202,14 @@ suite("BacklinksTreeDataProvider", function () {
           const foundParent = provider.getParent(backlink);
           assertAreEqual(foundParent, parentBacklinkForAssert);
         });
+      });
 
-        done();
-      },
-    });
-  });
-
-  test("from cache", (done) => {
-    let noteWithTarget: NoteProps;
-
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-          wsRoot,
-          vault: vaults[0],
-        });
-        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
-          wsRoot,
-          vault: vaults[0],
-        });
-      },
-      onInit: async ({ wsRoot, vaults }) => {
+      test("THEN calculating backlinks from cache returns same number of backlinks", async () => {
         // re-initialize engine from cache
         await new ReloadIndexCommand().run();
-        await WSUtils.openNote(noteWithTarget);
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        await ExtensionProvider.getWSUtils().openNote(engine.notes["alpha"]);
+
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
@@ -254,110 +218,107 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  describe("GIVEN backlink candidates", () => {
-    describeMultiWS(
-      "WHEN there is one note with the candidate word",
-      {
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        modConfigCb: (config) => {
-          config.dev = {
-            enableLinkCandidates: true,
-          };
-          return config;
-        },
+  describeMultiWS(
+    "WHEN there is one note with the candidate word",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
       },
-      () => {
-        test("THEN finds the backlink candidate for that note", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-          const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot })
-            .dev?.enableLinkCandidates;
-          expect(isLinkCandidateEnabled).toBeTruthy();
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN finds the backlink candidate for that note", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+          ?.enableLinkCandidates;
+        expect(isLinkCandidateEnabled).toBeTruthy();
 
-          const noteWithTarget = NoteUtils.getNoteByFnameFromEngine({
+        const noteWithTarget = NoteUtils.getNoteByFnameFromEngine({
+          fname: "alpha",
+          engine,
+          vault: vaults[0],
+        });
+        await checkNoteBacklinks({ wsRoot, vaults, noteWithTarget });
+      });
+    }
+  );
+
+  describeMultiWS(
+    "WHEN there are multiple notes with the candidate word",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        // Create 2 notes with the same name
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+          genRandomId: true,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+          genRandomId: true,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN finds the backlink candidate for all notes", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+          ?.enableLinkCandidates;
+        expect(isLinkCandidateEnabled).toBeTruthy();
+
+        // Check the backlinks for both notes
+        await checkNoteBacklinks({
+          wsRoot,
+          vaults,
+          noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
             fname: "alpha",
             engine,
             vault: vaults[0],
-          });
-          checkNoteBacklinks({ wsRoot, vaults, noteWithTarget });
+          }),
         });
-      }
-    );
-
-    describeMultiWS(
-      "WHEN there are multiple notes with the candidate word",
-      {
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          // Create 2 notes with the same name
-          await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-            wsRoot,
+        await checkNoteBacklinks({
+          wsRoot,
+          vaults,
+          noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
+            fname: "alpha",
+            engine,
             vault: vaults[1],
-          });
-          await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        modConfigCb: (config) => {
-          config.dev = {
-            enableLinkCandidates: true,
-          };
-          return config;
-        },
-      },
-      () => {
-        test("THEN finds the backlink candidate for all notes", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-          const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot })
-            .dev?.enableLinkCandidates;
-          expect(isLinkCandidateEnabled).toBeTruthy();
-
-          // Check the backlinks for both notes
-          checkNoteBacklinks({
-            wsRoot,
-            vaults,
-            noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
-              fname: "alpha",
-              engine,
-              vault: vaults[0],
-            }),
-          });
-          checkNoteBacklinks({
-            wsRoot,
-            vaults,
-            noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
-              fname: "alpha",
-              engine,
-              vault: vaults[1],
-            }),
-          });
+          }),
         });
-      }
-    );
-  });
+      });
+    }
+  );
 
-  test("Backlink sorting", (done) => {
-    runMultiVaultTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN a multi vault workspace with notes referencing each other across vaults",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: "alpha",
@@ -386,7 +347,16 @@ suite("BacklinksTreeDataProvider", function () {
           },
         });
       },
-      onInit: async ({ wsRoot, vaults }) => {
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN backlink sort order is correct", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         function buildVault1Path(fileName: string) {
           return vscode.Uri.file(
             path.join(wsRoot, vaults[1].fsPath, fileName)
@@ -426,32 +396,11 @@ suite("BacklinksTreeDataProvider", function () {
           ).toEqual(buildVault1Path("beta.md"));
           expect(out.length).toEqual(2);
         }
+      });
 
-        done();
-      },
-    });
-  });
-
-  test("multi", (done) => {
-    runMultiVaultTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        await NoteTestUtilsV4.createNote({
-          fname: "alpha",
-          body: `[[beta]]`,
-          vault: vaults[0],
-          wsRoot,
-        });
-        await NoteTestUtilsV4.createNote({
-          fname: "beta",
-          body: `[[alpha]]`,
-          vault: vaults[1],
-          wsRoot,
-        });
-      },
-      onInit: async ({ wsRoot, vaults }) => {
-        const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
-        await VSCodeUtils.openFileInEditor(Uri.file(notePath));
+      test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        await ExtensionProvider.getWSUtils().openNote(engine.notes["alpha"]);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[1].fsPath, "beta.md")
@@ -459,17 +408,66 @@ suite("BacklinksTreeDataProvider", function () {
         expect(
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
-        expect(out.length).toEqual(1);
-        done();
+        expect(out.length).toEqual(2);
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a multi vault workspace with two notes in different vaults",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: `gamma`,
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK_CANDIDATE_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+        });
       },
-    });
-  });
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test.only("THEN link candidates should only work within a vault", async () => {
+        const engine = ExtensionProvider.getEngine();
+
+        const alpha = engine.notes["alpha"];
+        debugger;
+        await ExtensionProvider.getWSUtils().openNote(alpha);
+        const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
+        expect(alphaOut).toEqual([]);
+        expect(alpha.links).toEqual([]);
+
+        const gamma = engine.notes["gamma"];
+        await ExtensionProvider.getWSUtils().openNote(gamma);
+        const gammaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
+        expect(gammaOut).toEqual([]);
+        expect(gamma.links).toEqual([]);
+      });
+    }
+  );
 
   test("link candidates should only work within a vault", (done) => {
     let alpha: NoteProps;
     let gamma: NoteProps;
+    const ctx2 = setupBeforeAfter(this, {
+      beforeHook: () => {
+        VSCodeUtils.closeAllEditors();
+      },
+      afterHook: () => {
+        VSCodeUtils.closeAllEditors();
+      },
+    });
     runMultiVaultTest({
-      ctx,
+      ctx: ctx2,
       preSetupHook: async ({ wsRoot, vaults }) => {
         alpha = await NoteTestUtilsV4.createNote({
           fname: "alpha",
@@ -494,6 +492,10 @@ suite("BacklinksTreeDataProvider", function () {
         );
 
         await WSUtils.openNote(alpha);
+        const engine = ExtensionProvider.getEngine();
+        debugger;
+
+        //const alpha = engine.notes["alpha"];
         const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
         expect(alphaOut).toEqual([]);
         expect(alpha.links).toEqual([]);
@@ -507,12 +509,11 @@ suite("BacklinksTreeDataProvider", function () {
     });
   });
 
-  test("links and link candidates to correct subtree", (done) => {
-    let alpha: NoteProps;
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        alpha = await NoteTestUtilsV4.createNote({
+  describeSingleWS(
+    "GIVEN a single vault workspace with links and link candidates",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
           fname: "alpha",
           body: "this note has both links and candidates to it.",
           vault: vaults[0],
@@ -525,19 +526,20 @@ suite("BacklinksTreeDataProvider", function () {
           wsRoot,
         });
       },
-      onInit: async ({ wsRoot }) => {
-        TestConfigUtils.withConfig(
-          (config) => {
-            config.dev = {
-              enableLinkCandidates: true,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN links and link candidates should have correct subtree", async () => {
+        const engine = ExtensionProvider.getEngine();
 
         await new ReloadIndexCommand().execute();
-        await WSUtils.openNote(alpha);
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out, provider } = await getRootChildrenBacklinks();
         const outObj = backlinksToPlainObject(out) as any;
 
@@ -569,57 +571,55 @@ suite("BacklinksTreeDataProvider", function () {
         const candidate = await provider.getChildren(out[0].children![1]);
         expect(candidate![0].label).toEqual("alpha");
         expect(candidate![0].refs).toEqual(undefined);
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
-
-  test("candidates subtree doesn't show up if feature flag was not enabled", (done) => {
-    let alpha: NoteProps;
-    let beta: NoteProps;
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        alpha = await NoteTestUtilsV4.createNote({
+  describeSingleWS(
+    "GIVEN a single vault workspace with links and feature flag was not enabled",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
           fname: "alpha",
           body: "[[beta]] beta",
           vault: vaults[0],
           wsRoot,
         });
-        beta = await NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           fname: "beta",
           body: "alpha",
           vault: vaults[0],
           wsRoot,
         });
       },
-      onInit: async () => {
+    },
+    () => {
+      test("THEN candidates subtree doesn't show up", async () => {
+        const engine = ExtensionProvider.getEngine();
+
         await new ReloadIndexCommand().execute();
-        await WSUtils.openNote(alpha);
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
 
         const { out: alphaOut } = await getRootChildrenBacklinks();
         const alphaOutObj = backlinksToPlainObject(alphaOut) as any;
         expect(_.isEmpty(alphaOutObj)).toBeTruthy();
 
-        await WSUtils.openNote(beta);
+        const beta = engine.notes["beta"];
+        await ExtensionProvider.getWSUtils().openNote(beta);
         const { out: betaOut } = await getRootChildrenBacklinks();
         const betaOutObj = backlinksToPlainObject(betaOut) as any;
         expect(betaOutObj[0].children.length).toEqual(1);
         expect(betaOutObj[0].children[0].label).toEqual("Linked");
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
-
-  test("multi backlink items display correctly", (done) => {
-    let alpha: NoteProps;
-
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        alpha = await NoteTestUtilsV4.createNote({
+  describeSingleWS(
+    "GIVEN a single vault workspace and a note with many links",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
           fname: "alpha",
           body: "this note has many links and candidates to it.",
           vault: vaults[0],
@@ -632,21 +632,22 @@ suite("BacklinksTreeDataProvider", function () {
           wsRoot,
         });
       },
-      onInit: async ({ wsRoot }) => {
-        TestConfigUtils.withConfig(
-          (config) => {
-            config.dev = {
-              enableLinkCandidates: true,
-            };
-            return config;
-          },
-          { wsRoot }
-        );
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN multi backlink items are displayed correctly", async () => {
+        const engine = ExtensionProvider.getEngine();
 
         // need this until we move it out of the feature flag.
         await new ReloadIndexCommand().execute();
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
 
-        await WSUtils.openNote(alpha);
         const { out } = await getRootChildrenBacklinks();
         const outObj = backlinksToPlainObject(out) as any;
 
@@ -666,15 +667,13 @@ suite("BacklinksTreeDataProvider", function () {
         const candidateSubTreeItem = sourceTreeItem.children[1];
         expect(candidateSubTreeItem.label).toEqual("Candidates");
         expect(candidateSubTreeItem.refs.length).toEqual(5);
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
-
-  test("xvault link", (done) => {
-    runMultiVaultTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN a multi vault workspace with xvault links",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: "alpha",
@@ -689,9 +688,19 @@ suite("BacklinksTreeDataProvider", function () {
           wsRoot,
         });
       },
-      onInit: async ({ wsRoot, vaults }) => {
-        const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
-        await VSCodeUtils.openFileInEditor(Uri.file(notePath));
+      modConfigCb: (config) => {
+        config.dev = {
+          enableLinkCandidates: true,
+        };
+        return config;
+      },
+    },
+    () => {
+      test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           path.join(wsRoot, vaults[1].fsPath, "beta.md")
@@ -700,34 +709,34 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("with anchor", (done) => {
-    let noteWithTarget: NoteProps;
-    let noteWithLink: NoteProps;
-
-    runMultiVaultTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
+  describeSingleWS(
+    "GIVEN a single vault workspace and anchor notes",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
           wsRoot,
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
           wsRoot,
           vault: vaults[0],
         });
       },
-      onInit: async () => {
-        await WSUtils.openNote(noteWithTarget);
+    },
+    () => {
+      test("THEN BacklinksTreeDataProvider calculates correct number of links", async () => {
+        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
-            note: noteWithLink,
-            wsRoot: getDWorkspace().wsRoot,
+            note: engine.notes["beta"],
+            wsRoot,
           })
         ).path;
 
@@ -735,29 +744,29 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("with alias", (done) => {
-    let noteWithTarget: NoteProps;
-    let noteWithLink: NoteProps;
-
-    runMultiVaultTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+  describeSingleWS(
+    "GIVEN a single vault workspace and alias notes",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           wsRoot,
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ALIAS_LINK.create({
+        await NOTE_PRESETS_V4.NOTE_WITH_ALIAS_LINK.create({
           wsRoot,
           vault: vaults[0],
         });
       },
-      onInit: async ({ wsRoot }) => {
-        await WSUtils.openNote(noteWithTarget);
+    },
+    () => {
+      test("THEN BacklinksTreeDataProvider calculates correct number of links", async () => {
+        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const alpha = engine.notes["alpha"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         // assert.strictEqual(
         //   out[0].command.arguments[0].path.toLowerCase() as string,
@@ -765,7 +774,7 @@ suite("BacklinksTreeDataProvider", function () {
         // );
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
-            note: noteWithLink,
+            note: engine.notes["beta"],
             wsRoot,
           })
         ).path;
@@ -773,35 +782,36 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("with hashtag", (done) => {
-    let noteTarget: NoteProps;
-    let noteWithLink: NoteProps;
-    runMultiVaultTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        noteTarget = await NoteTestUtilsV4.createNote({
+  describeSingleWS(
+    "GIVEN a single vault workspace and hashtags",
+    {
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           vault: vaults[0],
           fname: "tags.my.test-0.tag",
         });
-        noteWithLink = await NoteTestUtilsV4.createNote({
+        await NoteTestUtilsV4.createNote({
           wsRoot,
           vault: vaults[0],
           fname: "test",
           body: "#my.test-0.tag",
         });
       },
-      onInit: async ({ wsRoot }) => {
-        await WSUtils.openNote(noteTarget);
+    },
+    () => {
+      test("THEN BacklinksTreeDataProvider calculates correct number of links", async () => {
+        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const alpha = engine.notes["tags.my.test-0.tag"];
+        await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
-            note: noteWithLink,
+            note: engine.notes["test"],
             wsRoot,
           })
         ).path;
@@ -809,15 +819,13 @@ suite("BacklinksTreeDataProvider", function () {
           out[0].command.arguments[0].path.toLowerCase() as string
         ).toEqual(expectedPath.toLowerCase());
         expect(out.length).toEqual(1);
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
   describeMultiWS(
-    "WHEN a workspace exists",
+    "WHEN a basic workspace exists",
     {
-      ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {

@@ -1,3 +1,4 @@
+import { DendronServerError } from "@dendronhq/common-all";
 import _ from "lodash";
 import SparkMD5 from "spark-md5";
 
@@ -34,13 +35,23 @@ const MAX_B16_INT = 0xffffffff;
  *
  * EXAMPLE_TEST.getUserGroup("anonymous user UUID");
  * ```
+ CURRENT_AB_TESTS|* ^85lbm3148c1a
  */
 export class ABTest<GroupNames> {
-  public name: string;
+  private _name: string;
+  public get name(): string {
+    return this._name;
+  }
   private groups: ABTestGroup<GroupNames>[];
 
   constructor(name: string, groups: ABTestGroup<GroupNames>[]) {
-    this.name = name;
+    this._name = name;
+
+    if (groups.length < 2)
+      throw new DendronServerError({
+        message:
+          "An A/B test is created with less than 2 groups. Each test must have at least 2.",
+      });
 
     const sumWeights = _.sumBy(groups, (group) => group.weight);
     this.groups = groups.map((group) => {
@@ -50,7 +61,7 @@ export class ABTest<GroupNames> {
 
   /** Given the user ID, find which group of the AB test the user belongs to. */
   public getUserGroup(userId: string) {
-    const hash = SparkMD5.hash(`${this.name}:${userId}`);
+    const hash = SparkMD5.hash(`${this._name}:${userId}`);
     const hashedInt = parseInt(`0x${hash.slice(0, 8)}`, 16);
     const userRandom = hashedInt / MAX_B16_INT;
 

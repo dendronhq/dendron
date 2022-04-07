@@ -46,7 +46,7 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CURRENT_AB_TESTS,
-  UpgradeToastOrViewTestEnum,
+  UpgradeToastOrViewTestGroups,
   UPGRADE_TOAST_OR_VIEW_TEST,
 } from "./abTests";
 import { ALL_COMMANDS } from "./commands";
@@ -826,7 +826,7 @@ async function showWelcomeOrWhatsNew({
       });
 
       switch (toastOrView) {
-        case UpgradeToastOrViewTestEnum.upgradeToast: {
+        case UpgradeToastOrViewTestGroups.upgradeToast: {
           vscode.window
             .showInformationMessage(
               `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
@@ -851,7 +851,7 @@ async function showWelcomeOrWhatsNew({
             });
           break;
         }
-        case UpgradeToastOrViewTestEnum.upgradeView: {
+        case UpgradeToastOrViewTestGroups.upgradeView: {
           showUpgradeView();
           break;
         }

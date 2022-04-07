@@ -14,6 +14,7 @@ export enum VSCodeEvents {
   TreeView_Ready = "TreeView_Ready",
   Upgrade = "Upgrade",
   UpgradeSeeWhatsChangedClicked = "UpgradeSeeWhatsChangedClicked",
+  UpgradeViewClosed = "UpgradeViewClosed",
   DisableTelemetry = "DisableTelemetry",
   EnableTelemetry = "EnableTelemetry",
   Uninstall = "Uninstall",

@@ -1,6 +1,6 @@
 import { DendronProps } from "../types";
-import { TreeSelect, Input } from "antd";
-import { useCallback, useEffect, useState } from "react";
+import { Select, Input, Card, Badge, Tag } from "antd";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import {
   SchemaModuleDict,
   SchemaModuleProps,
@@ -8,50 +8,67 @@ import {
   SchemaPropsDict,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import { DefaultOptionType } from "rc-tree-select/lib/TreeSelect";
+import Ribbon from "antd/lib/badge/Ribbon";
 
-function traverseSchemaNode(
-  node: SchemaProps,
-  schemas: SchemaPropsDict,
-  prefix: string,
-  module: string
-): DefaultOptionType {
-  const title = (prefix === "" ? "" : prefix + ".") + node.id;
-  return {
-    title,
-    value: `${module}.${node.id}`,
-    children: node.children.map((child) =>
-      traverseSchemaNode(schemas[child], schemas, title, module)
-    ),
-  };
-}
-
-function treeDataFromSchema(modules: SchemaModuleDict): DefaultOptionType[] {
-  return Object.entries(modules).map(([domain, module]) =>
-    traverseSchemaNode(module.root, module.schemas, "", domain)
+const SchemaBox = ({
+  schema,
+  childSchemas,
+  partial,
+  inner,
+}: {
+  schema: SchemaProps;
+  childSchemas: SchemaProps[];
+  partial: boolean;
+  inner: boolean;
+}) => {
+  const { namespace } = schema.data;
+  const card = (
+    <Card
+      title={schema.title}
+      color={schema.color}
+      type={inner ? "inner" : undefined}
+    >
+      {schema.data.template && <div>template: {schema.data.template.id}</div>}
+      {schema.data.pattern && <div>pattern: {schema.data.pattern}</div>}
+      {schema.desc !== "" && <div>description: {schema.desc}</div>}
+      {childSchemas.length > 0 && (
+        <div>
+          <h3>Children</h3>
+          {childSchemas.map((child) => (
+            <SchemaBox
+              key={child.id}
+              schema={child}
+              childSchemas={[]}
+              inner={true}
+              partial={false}
+            />
+          ))}
+        </div>
+      )}
+    </Card>
   );
-}
-
-type valueToSchemaModule = {
-  [value: string]: { schema: string; module: string };
+  if (inner) {
+    return card;
+  }
+  return (
+    <Ribbon
+      color={partial ? "gold" : namespace ? "gray" : "green"}
+      text={
+        partial
+          ? "partial match"
+          : namespace
+          ? "namespace match"
+          : "exact match"
+      }
+    >
+      {card}
+    </Ribbon>
+  );
 };
-function mapValuesToSchemas(schemas: SchemaModuleDict): valueToSchemaModule {
-  const valueMap: valueToSchemaModule = {};
-  Object.entries(schemas).forEach(([domain, module]) => {
-    Object.values(module.schemas).forEach((schema) => {
-      valueMap[`${domain}.${schema.id}`] = {
-        schema: schema.id,
-        module: domain,
-      };
-    });
-  });
-  return valueMap;
-}
 
 export default function DendronSchemaPage({ engine }: DendronProps) {
-  const [selectedSchemaId, setSelectedSchemaId] = useState<string | null>(null);
-  const [matchState, setMatchState] = useState<string>("");
-  const [noteHierarchy, setNoteHierarchy] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [inputtedHierarchy, setInputtedHierarchy] = useState<string>("");
   useEffect(() => {
     window.postMessage({
       type: "onDidChangeActiveTextEditor",
@@ -60,64 +77,71 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
     });
   }, []);
   useEffect(() => {
-    const schemaKeys = Object.keys(engine.schemas);
-    if (selectedSchemaId === null && schemaKeys.length > 0) {
-      setSelectedSchemaId(schemaKeys[0]);
+    const schemas = Object.keys(engine.schemas);
+    if (selectedDomain === null && schemas.length > 0) {
+      setSelectedDomain(schemas[0]);
     }
-  }, [engine.schemas, selectedSchemaId]);
-  const onNoteHierarchyChange = useCallback(
-    (e) => {
-      const { value } = e.target;
-      setNoteHierarchy(value);
-      if (selectedSchemaId !== null) {
-        // should this be memoized somehow?
-        const schemaMap = mapValuesToSchemas(engine.schemas);
-        const schemaValue = schemaMap[selectedSchemaId];
-        const schemaModule = engine.schemas[schemaValue.module];
-        const selectedSchema = schemaModule.schemas[schemaValue.schema];
-        const match = SchemaUtils.matchPath({
-          notePath: value,
-          schemaModDict: engine.schemas,
-        });
-        if (match) {
-          const matchedModule = match.schemaModule;
-          const matchedSchema = match.schema;
-          if (match.partial) {
-            setMatchState(`partially matched to ${match.schema.id}`);
-          } else if (matchedSchema.id === selectedSchema.id) {
-            setMatchState(`matched with ${match.schema.id}`);
-          } else {
-            setMatchState(`matched to another schema ${matchedSchema.id}`);
-          }
-        } else {
-          setMatchState("no match");
-        }
-        // match less than schema
-        // match more than schema?
-      }
-    },
-    [selectedSchemaId, engine.schemas]
-  );
+  }, [engine.schemas, selectedDomain]);
+  // next schemas at the level - show possibilities
+  // show the pattern field or id - literal pattern - namespace = * for child
+  // custom title; id; pattern
+  // autocomplete
+  const schemaModule =
+    selectedDomain !== null ? engine.schemas[selectedDomain] : null;
+  const match =
+    schemaModule !== null
+      ? SchemaUtils.matchPathWithSchema({
+          notePath: `${selectedDomain}.${inputtedHierarchy}`,
+          matched: "",
+          schemaCandidates: [schemaModule.schemas[schemaModule.root.id]],
+          schemaModule,
+        })
+      : undefined;
+  const schemaValues = Object.entries(engine.schemas).map(([id, schema]) => ({
+    value: id,
+    label: schema.root.fname,
+  }));
   return (
     <div>
       <h1>Schemas</h1>
+      <div>select a schema file</div>
       <div style={{ padding: "1em" }}>
-        <TreeSelect
-          treeData={treeDataFromSchema(engine.schemas)}
-          value={selectedSchemaId}
-          onChange={setSelectedSchemaId}
+        <Select
+          value={selectedDomain}
+          options={schemaValues}
+          onChange={setSelectedDomain}
           style={{ width: "100%" }}
           showSearch={true}
         />
       </div>
-      <div style={{ padding: "1em" }}>
-        <Input
-          placeholder="type a note hierarchy"
-          value={noteHierarchy}
-          onChange={onNoteHierarchyChange}
-        />
-      </div>
-      <div>{matchState}</div>
+      {schemaModule !== null && (
+        <div style={{ padding: "1em" }}>
+          <h2>{schemaModule.schemas[schemaModule.root.id].title}</h2>
+          <div style={{ margin: "1em" }}>
+            <Input
+              placeholder={`type a schema hierarchy under ${selectedDomain}`}
+              size="large"
+              value={inputtedHierarchy}
+              onChange={(e) => setInputtedHierarchy(e.target.value)}
+              addonBefore={`${selectedDomain}.`}
+            />
+          </div>
+          {match !== undefined ? (
+            <SchemaBox
+              schema={match.schema}
+              childSchemas={match.schema.children.map(
+                (childId) => schemaModule.schemas[childId]
+              )}
+              partial={match.partial}
+              inner={false}
+            />
+          ) : (
+            <div>
+              no matches found for {selectedDomain}.{inputtedHierarchy}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

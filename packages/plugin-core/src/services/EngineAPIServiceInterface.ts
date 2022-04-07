@@ -51,6 +51,7 @@ export interface IEngineAPIService {
   configRoot: string;
   config: IntermediateDendronConfig;
   hooks: DHookDict;
+  engineEventEmitter: EngineEventEmitter;
 
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 
@@ -121,6 +122,4 @@ export interface IEngineAPIService {
     opts: Optional<GetLinksRequest, "ws">
   ) => Promise<GetNoteLinksPayload>;
   getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
-
-  getEngineEmitter(): EngineEventEmitter;
 }

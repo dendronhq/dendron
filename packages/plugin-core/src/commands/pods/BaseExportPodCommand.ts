@@ -277,14 +277,14 @@ export abstract class BaseExportPodCommand<
       const fname = NoteUtils.uri2Fname(editor.document.uri);
       this._onEngineNoteStateChangedDisposable = this.extension
         .getEngine()
-        .getEngineEmitter()
-        .onEngineNoteStateChanged(
+        .engineEventEmitter.onEngineNoteStateChanged(
           async (noteChangeEntries: NoteChangeEntry[]) => {
             const updateNoteEntries = noteChangeEntries.filter(
               (entry) => entry.note.fname === fname && entry.status === "update"
             );
             // Received event from engine about successful save
             if (updateNoteEntries.length > 0) {
+              this.dispose();
               const savedNote = updateNoteEntries[0].note;
               // Remove notes that match saved note as they contain old content
               const filteredPayload = opts.payload.filter(
@@ -294,15 +294,19 @@ export abstract class BaseExportPodCommand<
                 ...opts,
                 payload: filteredPayload.concat(savedNote),
               });
-              this.dispose();
             }
           }
         );
       await editor.document.save();
-      // Dispose of listener after 1 sec (if not already disposed) in case engine events never arrive
+      // Dispose of listener after 3 sec (if not already disposed) in case engine events never arrive
       setTimeout(() => {
+        if (this._onEngineNoteStateChangedDisposable) {
+          vscode.window.showErrorMessage(
+            `Unable to run export. Please save file and try again.`
+          );
+        }
         this.dispose();
-      }, 1000);
+      }, 3000);
 
       return true;
     } else {

@@ -10,7 +10,6 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { EngineEventEmitter, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -36,7 +35,6 @@ export class NoteGraphPanelFactory {
     ext: DendronExtension,
     engineEvents: EngineEventEmitter
   ): vscode.WebviewPanel {
-    const start = process.hrtime();
     if (!this._panel) {
       const { bundleName: name, label } = getWebEditorViewEntry(
         DendronEditorViewKey.NOTE_GRAPH
@@ -86,7 +84,7 @@ export class NoteGraphPanelFactory {
               column: ViewColumn.One,
             });
             AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
-              message: GraphViewMessageType.onSelect,
+              message: GraphViewMessageEnum.onSelect,
             });
             break;
           }
@@ -153,10 +151,6 @@ export class NoteGraphPanelFactory {
         if (this._onEngineNoteStateChangedDisposable) {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
-        const profile = getDurationMilliseconds(start);
-        AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
-          timespan: profile,
-        });
       });
     }
     return this._panel;

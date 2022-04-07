@@ -10,35 +10,57 @@ import {
 } from "@dendronhq/common-all";
 import Ribbon from "antd/lib/badge/Ribbon";
 
+function generatePath(module: SchemaModuleProps, schema: SchemaProps): string {
+  const partString = schema.data.pattern
+    ? `${schema.id}.${schema.data.pattern}`
+    : schema.data.namespace
+    ? `${schema.id}.*`
+    : schema.id;
+  if (schema.parent && schema.parent !== "root") {
+    return (
+      generatePath(module, module.schemas[schema.parent]) + "." + partString
+    );
+  }
+  return partString;
+}
+
 const SchemaBox = ({
   schema,
-  childSchemas,
+  schemaModule,
   partial,
   inner,
 }: {
   schema: SchemaProps;
-  childSchemas: SchemaProps[];
+  schemaModule: SchemaModuleProps;
   partial: boolean;
   inner: boolean;
 }) => {
   const { namespace } = schema.data;
   const card = (
     <Card
-      title={schema.title}
+      title={
+        <span>
+          {schema.title}
+          <span style={{ color: "#a9a9a9" }}>
+            {" "}
+            ({generatePath(schemaModule, schema)})
+          </span>
+        </span>
+      }
       color={schema.color}
       type={inner ? "inner" : undefined}
     >
       {schema.data.template && <div>template: {schema.data.template.id}</div>}
       {schema.data.pattern && <div>pattern: {schema.data.pattern}</div>}
       {schema.desc !== "" && <div>description: {schema.desc}</div>}
-      {childSchemas.length > 0 && (
+      {!inner && schema.children.length > 0 && (
         <div>
           <h3>Children</h3>
-          {childSchemas.map((child) => (
+          {schema.children.map((child) => (
             <SchemaBox
-              key={child.id}
-              schema={child}
-              childSchemas={[]}
+              key={child}
+              schema={schemaModule.schemas[child]}
+              schemaModule={schemaModule}
               inner={true}
               partial={false}
             />
@@ -116,7 +138,6 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
       </div>
       {schemaModule !== null && (
         <div style={{ padding: "1em" }}>
-          <h2>{schemaModule.schemas[schemaModule.root.id].title}</h2>
           <div style={{ margin: "1em" }}>
             <Input
               placeholder={`type a schema hierarchy under ${selectedDomain}`}
@@ -129,9 +150,7 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
           {match !== undefined ? (
             <SchemaBox
               schema={match.schema}
-              childSchemas={match.schema.children.map(
-                (childId) => schemaModule.schemas[childId]
-              )}
+              schemaModule={schemaModule}
               partial={match.partial}
               inner={false}
             />

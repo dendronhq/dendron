@@ -491,10 +491,6 @@ suite("BacklinksTreeDataProvider", function () {
         );
 
         await WSUtils.openNote(alpha);
-        const engine = ExtensionProvider.getEngine();
-        debugger;
-
-        //const alpha = engine.notes["alpha"];
         const alphaOut = (await getRootChildrenBacklinksAsPlainObject()).out;
         expect(alphaOut).toEqual([]);
         expect(alpha.links).toEqual([]);

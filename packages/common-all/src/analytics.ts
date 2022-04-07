@@ -98,6 +98,10 @@ export enum SurveyEvents {
   InactiveUserSurveyPromptReason = "Inactive_User_Prompt_Reason",
 }
 
+export enum GitEvents {
+  ContributorsFound = "ContributorsFound",
+}
+
 export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
@@ -134,6 +138,7 @@ export enum AppNames {
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
+  GitEvents,
   TutorialEvents,
   ExtensionEvents,
   SurveyEvents,

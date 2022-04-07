@@ -7,7 +7,7 @@ import {
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
@@ -33,13 +33,6 @@ suite("CopyNoteLink", function () {
       postSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
-      let copyNoteLinkCommand: CopyNoteLinkCommand;
-      beforeEach(() => {
-        copyNoteLinkCommand = new CopyNoteLinkCommand(
-          toDendronEngineClient(ExtensionProvider.getEngine())
-        );
-      });
-
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const notePath = path.join(
@@ -47,7 +40,11 @@ suite("CopyNoteLink", function () {
           "foo.md"
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual("[[Foo|foo]]");
       });
 
@@ -81,7 +78,9 @@ suite("CopyNoteLink", function () {
                 );
               })
               .then(async () => {
-                copyNoteLinkCommand.run();
+                new CopyNoteLinkCommand(
+                  toDendronEngineClient(ExtensionProvider.getEngine())
+                ).run();
               });
           });
       });
@@ -101,7 +100,11 @@ suite("CopyNoteLink", function () {
         const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
         editor.selection = new vscode.Selection(start, end);
         // generate a wikilink for it
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(`[[Foo Bar|${noteWithLink.fname}#foo-bar]]`);
       });
 
@@ -120,7 +123,11 @@ suite("CopyNoteLink", function () {
         const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
         editor.selection = new vscode.Selection(start, end);
         // generate a wikilink for it
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(
           `[[Lörem Foo：Bar🙂Baz Ipsum|testUnicode#lörem-foobarbaz-ipsum]]`
         );
@@ -146,13 +153,21 @@ suite("CopyNoteLink", function () {
           char: 12,
         });
         editor.selection = new vscode.Selection(pos, pos2);
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(`[[H1|${noteWithTarget.fname}#h1]]`);
         editor.selection = new vscode.Selection(
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
         );
-        const link2 = (await copyNoteLinkCommand.run())?.link;
+        const link2 = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link2).toEqual(`[[H2|${noteWithTarget.fname}#h2]]`);
       });
 
@@ -170,7 +185,11 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
         );
-        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).execute({})
+        )?.link;
         const body = editor.document.getText();
 
         // check that the link looks like what we expect
@@ -198,7 +217,11 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition(),
           LocationTestUtils.getPresetWikiLinkPosition({ char: 10 })
         );
-        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).execute({})
+        )?.link;
         const body = editor.document.getText();
 
         // check that the link looks like what we expect
@@ -227,7 +250,11 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 12, char: 12 })
         );
-        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).execute({})
+        )?.link;
         const body = editor.document.getText();
 
         // check that the link looks like what we expect
@@ -255,7 +282,11 @@ suite("CopyNoteLink", function () {
         const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
         editor.selection = new vscode.Selection(start, end);
         // generate a wikilink for it
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(`#foo.bar`);
       });
     }
@@ -271,13 +302,6 @@ suite("CopyNoteLink", function () {
       postSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {
-      let copyNoteLinkCommand: CopyNoteLinkCommand;
-      beforeEach(() => {
-        copyNoteLinkCommand = new CopyNoteLinkCommand(
-          toDendronEngineClient(ExtensionProvider.getEngine())
-        );
-      });
-
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const notePath = path.join(
@@ -285,7 +309,11 @@ suite("CopyNoteLink", function () {
           "foo.md"
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual("[[Foo|dendron://vault1/foo]]");
       });
 
@@ -319,7 +347,9 @@ suite("CopyNoteLink", function () {
                 );
               })
               .then(async () => {
-                copyNoteLinkCommand.run();
+                new CopyNoteLinkCommand(
+                  toDendronEngineClient(ExtensionProvider.getEngine())
+                ).run();
               });
           });
       });
@@ -345,7 +375,11 @@ suite("CopyNoteLink", function () {
           char: 12,
         });
         editor.selection = new vscode.Selection(pos, pos2);
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(
           `[[H1|dendron://vault1/${noteWithTarget.fname}#h1]]`
         );
@@ -353,13 +387,21 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
         );
-        const link2 = (await copyNoteLinkCommand.run())?.link;
+        const link2 = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link2).toEqual(
           `[[H2|dendron://vault1/${noteWithTarget.fname}#h2]]`
         );
 
         await openNote(noteWithAnchor);
-        const link3 = (await copyNoteLinkCommand.run())?.link;
+        const link3 = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link3).toEqual(
           `[[Beta|dendron://vault2/${noteWithAnchor.fname}]]`
         );
@@ -379,7 +421,11 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 10 })
         );
-        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).execute({})
+        )?.link;
         const body = editor.document.getText();
 
         // check that the link looks like what we expect
@@ -409,7 +455,11 @@ suite("CopyNoteLink", function () {
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 10, char: 12 })
         );
-        const link = (await copyNoteLinkCommand.execute({}))?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).execute({})
+        )?.link;
         const body = editor.document.getText();
 
         // check that the link looks like what we expect
@@ -428,13 +478,6 @@ suite("CopyNoteLink", function () {
   );
 
   describeSingleWS("WHEN in a non-note file", {}, () => {
-    let copyNoteLinkCommand: CopyNoteLinkCommand;
-    beforeEach(() => {
-      copyNoteLinkCommand = new CopyNoteLinkCommand(
-        toDendronEngineClient(ExtensionProvider.getEngine())
-      );
-    });
-
     test("THEN creates a link to that file", async () => {
       const { wsRoot } = ExtensionProvider.getDWorkspace();
       const fsPath = path.join(wsRoot, "test.js");
@@ -443,7 +486,11 @@ suite("CopyNoteLink", function () {
         "const x = 'Pariatur officiis voluptatem molestiae.'"
       );
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-      const link = (await copyNoteLinkCommand.run())?.link;
+      const link = (
+        await new CopyNoteLinkCommand(
+          toDendronEngineClient(ExtensionProvider.getEngine())
+        ).run()
+      )?.link;
       expect(link).toEqual("[[test.js]]");
     });
 
@@ -453,7 +500,11 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(wsRoot, ".config.yaml");
         await fs.writeFile(fsPath, "x: 1");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual("[[.config.yaml]]");
       });
     });
@@ -473,7 +524,11 @@ suite("CopyNoteLink", function () {
           "x = 'Pariatur officiis voluptatem molestiae.'"
         );
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(path.join("[[assets", "test.py]]"));
       });
     });
@@ -485,7 +540,11 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(path.join(wsRoot, vaultPath), "test.rs");
         await fs.writeFile(fsPath, "let x = 123;");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(path.join(`[[${vaultPath}`, "test.rs]]"));
       });
     });
@@ -498,7 +557,11 @@ suite("CopyNoteLink", function () {
         const fsPath = path.join(dirPath, "test.clj");
         await fs.writeFile(fsPath, "(set! x 1)");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
-        const link = (await copyNoteLinkCommand.run())?.link;
+        const link = (
+          await new CopyNoteLinkCommand(
+            toDendronEngineClient(ExtensionProvider.getEngine())
+          ).run()
+        )?.link;
         expect(link).toEqual(path.join("[[src", "clj", "test.clj]]"));
       });
     });

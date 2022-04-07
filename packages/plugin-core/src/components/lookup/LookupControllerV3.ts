@@ -64,7 +64,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     nodeType: DNodeType;
     buttons: DendronBtn[];
     fuzzThreshold?: number;
-    disableLookupView?: boolean;
+    enableLookupView?: boolean;
     title?: string;
     viewModel: ILookupViewModel;
   }) {
@@ -79,7 +79,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     this._title = opts.title;
 
     this._viewModel = opts.viewModel;
-    if (!opts.disableLookupView) {
+    if (opts.enableLookupView) {
       this._disposables.push(new LookupPanelView(this._viewModel));
     }
   }

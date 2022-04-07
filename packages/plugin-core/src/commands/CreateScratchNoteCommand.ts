@@ -49,7 +49,6 @@ export class CreateScratchNoteCommand extends BasicCommand<
         CopyNoteLinkBtn.create(false),
         HorizontalSplitBtn.create(false),
       ],
-      disableLookupView: true,
       title: "Create Scratch Note",
     };
     const controller = this.extension.lookupControllerFactory.create(opts);

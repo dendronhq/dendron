@@ -256,6 +256,7 @@ export class NoteLookupCommand
             copts.splitType === LookupSplitTypeEnum.horizontal
           ),
         ],
+        enableLookupView: true,
       });
     }
     this._provider = extension.noteLookupProviderFactory.create("lookup", {

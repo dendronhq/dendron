@@ -73,7 +73,6 @@ describe(`GIVEN a LookupControllerV3`, () => {
       const controller = new LookupControllerV3({
         nodeType: "note",
         buttons,
-        disableLookupView: true,
         title: "Test Quick Pick",
         viewModel,
       });
@@ -202,7 +201,6 @@ describe(`GIVEN a LookupControllerV3`, () => {
       const controller = new LookupControllerV3({
         nodeType: "note",
         buttons,
-        disableLookupView: true,
         title: "Test Quick Pick",
         viewModel,
       });

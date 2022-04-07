@@ -131,14 +131,6 @@ function assertAreEqual(actual: ProviderResult<Backlink>, expected: Backlink) {
 }
 
 suite("BacklinksTreeDataProvider", function () {
-  /*const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      VSCodeUtils.closeAllEditors();
-    },
-    afterHook: () => {
-      VSCodeUtils.closeAllEditors();
-    },
-  });*/
   // Set test timeout to 3 seconds
   this.timeout(3000);
 

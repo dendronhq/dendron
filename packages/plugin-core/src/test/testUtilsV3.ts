@@ -72,7 +72,6 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
-import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -671,8 +670,8 @@ export function subscribeToEngineStateChange(
   return engineClient.onEngineNoteStateChanged(callback);
 }
 
-export function toDendronEngineClient(engine: IEngineAPIService) {
-  return engine as unknown as DendronEngineClient;
+export function toDendronEngineClient(engine: DEngineClient) {
+  return engine as DendronEngineClient;
 }
 
 export async function waitInMilliseconds(milliseconds: number): Promise<void> {

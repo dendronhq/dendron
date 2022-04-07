@@ -16,7 +16,7 @@ import { QuickPickUtil } from "../../utils/quickPick";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { PluginFileUtils, TEXT_EXTENSIONS } from "../../utils/files";
+import { PluginFileUtils } from "../../utils/files";
 
 export enum LinkType {
   WIKI = "WIKI",
@@ -97,11 +97,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       })) || {};
     if (fullPath) {
       // Found a matching non-note file.
-      // get the extension, or if there is no extension try the file name in case it's Makefile or something well known
-      const extension = (
-        path.extname(fullPath).slice(1, undefined) || path.basename(fullPath)
-      ).toLowerCase();
-      if (TEXT_EXTENSIONS.has(extension)) {
+      if (PluginFileUtils.isTextFileExtension(path.extname(fullPath))) {
         // If it's a text file, open it inside VSCode.
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(fullPath),

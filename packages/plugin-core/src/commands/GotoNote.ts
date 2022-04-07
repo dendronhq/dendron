@@ -17,7 +17,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
-import { PluginFileUtils, TEXT_EXTENSIONS } from "../utils/files";
+import { PluginFileUtils } from "../utils/files";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
@@ -266,7 +266,7 @@ export class GotoNoteCommand extends BasicCommand<
     // Non-note files use `qs` for full path, and set vault to null
     if (opts.kind === TargetKind.NON_NOTE && qs) {
       let type: GotoFileType;
-      if (TEXT_EXTENSIONS.has(path.extname(qs).slice(1, undefined))) {
+      if (PluginFileUtils.isTextFileExtension(path.extname(qs))) {
         // Text file, open inside of VSCode
         type = GotoFileType.TEXT;
         const editor = await VSCodeUtils.openFileInEditor(

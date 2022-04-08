@@ -14,7 +14,7 @@ export class PluginFileUtils {
         status: ERROR_STATUS.UNKNOWN,
         innerError: err,
       });
-      Logger.error({ error });
+      Logger.warn({ ctx: "PluginFileUtils.openWithDefaultApp", error });
     });
   }
 }

@@ -14,7 +14,7 @@ import { getReferenceAtPosition } from "../../utils/md";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 const getReference = async ({
   editor,
@@ -37,10 +37,6 @@ const getReference = async ({
 };
 
 suite("ConvertLink", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
   let activeNote: NoteProps;
   let activeNoteCreateOpts: CreateNoteOptsV4;
   let anotherNote: NoteProps;
@@ -51,7 +47,6 @@ suite("ConvertLink", function () {
   describeMultiWS(
     "GIVEN note with broken links",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { vaults, wsRoot } = opts;
         activeNoteCreateOpts = {
@@ -245,7 +240,6 @@ suite("ConvertLink", function () {
   describeMultiWS(
     "GIVEN note with valid links",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { vaults, wsRoot } = opts;
         activeNoteCreateOpts = {

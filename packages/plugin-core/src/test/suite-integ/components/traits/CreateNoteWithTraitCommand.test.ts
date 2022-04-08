@@ -1,21 +1,16 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
-import vscode from "vscode";
 import { CreateNoteWithTraitCommand } from "../../../../commands/CreateNoteWithTraitCommand";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { getDWorkspace } from "../../../../workspace";
 import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
+import { describeSingleWS } from "../../../testUtilsV3";
 import { TestTrait } from "./TestTrait";
 
 suite("CreateNoteWithTraitCommand tests", () => {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    noSetTimeout: true,
-  });
-
-  describeSingleWS("GIVEN a Note Trait", { ctx }, () => {
+  describeSingleWS("GIVEN a Note Trait", {}, (ctx) => {
     describe(`WHEN creating a note with that trait applied`, () => {
       beforeEach(() => {
         VSCodeUtils.closeAllEditors();

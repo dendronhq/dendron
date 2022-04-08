@@ -8,10 +8,6 @@ import { expect } from "../../../testUtilsv2";
 import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
 
 suite("CommandRegistrar tests", () => {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    noSetTimeout: true,
-  });
-
   describe(`GIVEN a Command Registrar`, () => {
     const traitId = genUUID();
     const trait: NoteTrait = {
@@ -20,8 +16,8 @@ suite("CommandRegistrar tests", () => {
 
     describeSingleWS(
       "WHEN registering a command for a new trait",
-      { ctx },
-      () => {
+      {},
+      (ctx) => {
         let _registrar: CommandRegistrar | undefined;
         afterEach(() => {
           _registrar?.unregisterTrait(trait);
@@ -51,7 +47,7 @@ suite("CommandRegistrar tests", () => {
       }
     );
 
-    describeSingleWS("WHEN unregistering a command", { ctx }, () => {
+    describeSingleWS("WHEN unregistering a command", {}, (ctx) => {
       let _registrar: CommandRegistrar | undefined;
 
       test("THEN the command has been unregistered", async () => {

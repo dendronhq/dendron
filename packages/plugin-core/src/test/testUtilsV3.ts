@@ -572,7 +572,7 @@ export function describeSingleWS(
      */
     timeout?: number;
   },
-  fn: () => void
+  fn: (ctx: ExtensionContext) => void
 ) {
   describe(title, function () {
     if (opts.timeout) {
@@ -585,7 +585,7 @@ export function describeSingleWS(
       await _activate(ctx);
     });
 
-    const result = fn();
+    const result = fn(ctx);
     assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers

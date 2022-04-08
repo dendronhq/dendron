@@ -136,7 +136,7 @@ function assertAreEqual(actual: ProviderResult<Backlink>, expected: Backlink) {
   expect(plainActual).toEqual(plainExpected);
 }
 
-suite("BacklinksTreeDataProvider", function () {
+suite.skip("BacklinksTreeDataProvider", function () {
   const ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       VSCodeUtils.closeAllEditors();

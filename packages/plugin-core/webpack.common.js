@@ -62,14 +62,25 @@ const config = {
     ...(process.env.SKIP_SENTRY
       ? []
       : [
+          // Upload one set of source maps to associate it with the vscode@ prefixed client release:
           // @ts-ignore
           new SentryWebpackPlugin({
             authToken: process.env.SENTRY_AUTH_TOKEN,
             org: "dendron",
             project: "dendron",
-            release: process.env.DENDRON_RELEASE_VERSION,
+            release: "vscode@" + process.env.DENDRON_RELEASE_VERSION,
 
             // other SentryWebpackPlugin configuration
+            include: ".",
+            ignore: ["node_modules", "webpack.*.js"],
+          }),
+          // Upload a second set of source maps to associate it with the express@ prefixed client release:
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: "express@" + process.env.DENDRON_RELEASE_VERSION,
             include: ".",
             ignore: ["node_modules", "webpack.*.js"],
           }),

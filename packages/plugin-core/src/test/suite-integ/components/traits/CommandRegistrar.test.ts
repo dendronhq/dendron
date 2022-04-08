@@ -1,11 +1,11 @@
 import { genUUID, NoteTrait } from "@dendronhq/common-all";
 import { afterEach, describe } from "mocha";
-import { ExtensionProvider } from "../../../../ExtensionProvider";
 import vscode from "vscode";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 import { CommandRegistrar } from "../../../../services/CommandRegistrar";
 import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
+import { describeSingleWS } from "../../../testUtilsV3";
 
 suite("CommandRegistrar tests", () => {
   describe(`GIVEN a Command Registrar`, () => {

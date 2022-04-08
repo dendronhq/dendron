@@ -857,10 +857,6 @@ suite("WHEN migrate config", function () {
   let confirmationSpy: sinon.SinonSpy;
   let mockHomeDirStub: sinon.SinonStub;
 
-  const ctx: ExtensionContext = setupBeforeAfter(this, {
-    noSetInstallStatus: true,
-  });
-
   async function beforeSetup({ version }: { version: string }) {
     mockHomeDirStub = TestEngineUtils.mockHomeDir();
     DendronExtension.version = () => version;
@@ -882,7 +878,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.83.0 and config is legacy",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 4;
         return config;
@@ -908,7 +903,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.83.0 and config is up to date",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 5;
         return config;
@@ -934,7 +928,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.84.0 and config is legacy",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 4;
         return config;
@@ -960,7 +953,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.84.0 and config is up to date",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 5;
         return config;

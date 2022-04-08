@@ -360,9 +360,22 @@ export function setupBeforeAfter(
 
     // workspace has not upgraded
     if (!opts?.noSetInstallStatus) {
-      sinon
-        .stub(VSCodeUtils, "getInstallStatusForExtension")
-        .returns(InstallStatus.NO_CHANGE);
+      // try to remove any existing stub in case it exists
+      // this is because we have tests that call `setupBeforeAfter` as well as
+      // in describeMultiWS > [[../packages/plugin-core/src/test/testUtilsV3.ts#^lk3whwd4kh4k]]
+      // TODO: keep in place until we completely remove `setupBeforeAndAfter`
+      try {
+        // @ts-ignore
+        sinon
+          .stub(VSCodeUtils, "getInstallStatusForExtension")
+          .returns(InstallStatus.NO_CHANGE);
+      } catch (e) {
+        // eat it.
+        sinon.restore();
+        sinon
+          .stub(VSCodeUtils, "getInstallStatusForExtension")
+          .returns(InstallStatus.NO_CHANGE);
+      }
     }
 
     sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());

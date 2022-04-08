@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   DendronError,
   DVault,
   DWorkspace,
@@ -307,14 +308,26 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const wsService = new WorkspaceService({ wsRoot });
 
         if (workspace) {
-          // TODO: To be implemented for backwards compatibility until workspace vaults are phased out
-          throw new DendronError({
-            message:
-              "Adding a workspace vault while self contained vaults is enabled is not yet supported. Please disable self contained vaults temporarily to add this vault.",
-          });
+          // This is a backwards-compatibility fix until workspace vaults are
+          // deprecated. If what we cloned was a workspace, then move it where
+          // Dendron expects it, because we can't override the path.
+          const clonedWSPath = path.join(wsRoot, workspace.name);
+          await fs.move(localUrl, clonedWSPath);
+          // Because we moved the workspace, we also have to recompute the vaults config.
+          workspace.vaults = (
+            await GitUtils.getVaultsFromRepo({
+              repoPath: clonedWSPath,
+              repoUrl: remoteUrl,
+              wsRoot,
+            })
+          ).vaults;
+          // Then handle the workspace vault as usual, without self contained vault stuff
+          await wsService.addWorkspace({ workspace });
+          await this.addWorkspaceToWorkspace(workspace);
         } else {
-          // Some things, like updating config, can't be parallelized so needs to be done one at a time
-          for (const vault of vaults) {
+          // Some things, like updating config, can't be parallelized so needs
+          // to be done one at a time
+          asyncLoopOneAtATime(vaults, async (vault) => {
             if (VaultUtils.isSelfContained(vault)) {
               // eslint-disable-next-line no-await-in-loop
               await wsService.createSelfContainedVault({
@@ -328,7 +341,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             // eslint-disable-next-line no-await-in-loop
             await this.addVaultToWorkspace(vault);
             progress.report({ increment });
-          }
+          });
         }
         wsService.dispose();
         return { vaults, workspace };

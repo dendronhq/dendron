@@ -1,6 +1,5 @@
 import {
   assert,
-  milliseconds,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
 } from "@dendronhq/common-all";
@@ -23,24 +22,8 @@ import {
   describeSingleWS,
   describeMultiWS,
   subscribeToEngineStateChange,
+  waitInMilliseconds,
 } from "../testUtilsV3";
-
-async function wait1Millisecond(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, 1);
-  });
-}
-
-/**
- * Returns current milliseconds and waits 1 millisecond to ensure
- * subsequent calls to this function will return different milliseconds. */
-async function millisNowAndWait1Milli(): Promise<number> {
-  const millis = milliseconds();
-  await wait1Millisecond();
-  return millis;
-}
 
 async function openAndEdit(fname: string) {
   const engine = ExtensionProvider.getEngine();
@@ -216,7 +199,7 @@ suite("TextDocumentService", function testSuite() {
               });
             });
           // Small sleep to ensure callback doesn't fire.
-          millisNowAndWait1Milli().then(() => done());
+          waitInMilliseconds(10).then(() => done());
         });
       }
     );

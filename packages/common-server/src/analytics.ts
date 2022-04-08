@@ -536,6 +536,10 @@ type UserProfileProps = {
    */
   numNotes?: number;
   /**
+   * The current A/B test groups the user is participating in
+   */
+  splitTests?: string[];
+  /**
    * The role of user. Retrieved from initial survey.
    */
   role?: string;

@@ -594,11 +594,23 @@ export class DendronEngineV2 implements DEngine {
     // Either we don't have have the cached preview or the version that is
     // cached has gotten stale, hence we will re-render the note and cache
     // the new value.
-    const data = await this._renderNote({
-      note,
-      flavor: flavor || ProcFlavor.PREVIEW,
-      dest: dest || DendronASTDest.HTML,
-    });
+    let data: string;
+    try {
+      data = await this._renderNote({
+        note,
+        flavor: flavor || ProcFlavor.PREVIEW,
+        dest: dest || DendronASTDest.HTML,
+      });
+    } catch (error) {
+      return ResponseUtil.createUnhappyResponse({
+        error: new DendronError({
+          message: `Unable to render note ${note.fname} in ${VaultUtils.getName(
+            note.vault
+          )}`,
+          payload: error,
+        }),
+      });
+    }
 
     this.renderedCache.set(id, {
       updated: note.updated,

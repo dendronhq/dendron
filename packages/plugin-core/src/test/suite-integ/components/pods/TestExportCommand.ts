@@ -10,6 +10,7 @@ import {
 import { HierarchySelector } from "../../../../../src/components/lookup/HierarchySelector";
 import { BaseExportPodCommand } from "../../../../../src/commands/pods/BaseExportPodCommand";
 import { ExtensionProvider } from "../../../../ExtensionProvider";
+import { IDendronExtension } from "../../../../dendronExtensionInterface";
 
 /**
  * Test implementation of BaseExportPodCommand. For testing purposes only.
@@ -21,19 +22,21 @@ export class TestExportPodCommand extends BaseExportPodCommand<
   public key = "dendron.testexport";
 
   /**
-   * Hardcoded to return the 'foo' Hierarchy and vault[0] from ENGINE_HOOKS.setupBasic 
+   * Hardcoded to return the 'foo' Hierarchy and vault[0] from ENGINE_HOOKS.setupBasic
    */
   static mockedSelector: HierarchySelector = {
-    getHierarchy(): Promise<{hierarchy: string, vault: DVault} | undefined> {
-      return new Promise<{hierarchy: string, vault: DVault} | undefined>((resolve) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
-        resolve({hierarchy: "foo", vault: vaults[0] });
-      });
+    getHierarchy(): Promise<{ hierarchy: string; vault: DVault } | undefined> {
+      return new Promise<{ hierarchy: string; vault: DVault } | undefined>(
+        (resolve) => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          resolve({ hierarchy: "foo", vault: vaults[0] });
+        }
+      );
     },
   };
 
-  public constructor() {
-    super(TestExportPodCommand.mockedSelector);
+  public constructor(extension: IDendronExtension) {
+    super(TestExportPodCommand.mockedSelector, extension);
   }
 
   /**

@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-168-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-172-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -139,7 +139,7 @@ Dendron has hundreds of features. The following is a list of highlights.
 
 - export your knowledge base as a static (nextjs) site
 - lookup locally and share globally with generated links
-- manage what you publish using fine grained permissions on a per vault, per hiearchy and per note basis
+- manage what you publish using fine grained permissions on a per vault, per hierarchy and per note basis
 
 <a href="https://www.loom.com/share/727537e0fd49481cac2accc2b3362fa3">
     <img style="" src="https://org-dendron-public-assets.s3.amazonaws.com/images/727537e0fd49481cac2accc2b3362fa3.gif">
@@ -415,6 +415,12 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/nickolay-kondratyev"><img src="https://avatars.githubusercontent.com/u/4050134?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nickolay Kondratyev</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Anickolay-kondratyev" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/mysoonyu"><img src="https://avatars.githubusercontent.com/u/64881900?v=4?s=100" width="100px;" alt=""/><br /><sub><b>mysoonyu</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Amysoonyu" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/gbieging"><img src="https://avatars.githubusercontent.com/u/14062649?v=4?s=100" width="100px;" alt=""/><br /><sub><b>gbieging</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Agbieging" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/oolonek"><img src="https://avatars.githubusercontent.com/u/2760049?v=4?s=100" width="100px;" alt=""/><br /><sub><b>oolonek</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aoolonek" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/Mettcon"><img src="https://avatars.githubusercontent.com/u/14955363?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mettcon</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AMettcon" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/LamentConfiguration"><img src="https://avatars.githubusercontent.com/u/15186074?v=4?s=100" width="100px;" alt=""/><br /><sub><b>LamentConfiguration</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ALamentConfiguration" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/irishandyb"><img src="https://avatars.githubusercontent.com/u/23081516?v=4?s=100" width="100px;" alt=""/><br /><sub><b>irishandyb</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Airishandyb" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

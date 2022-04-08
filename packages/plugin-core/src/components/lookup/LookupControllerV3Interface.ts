@@ -120,9 +120,9 @@ export type LookupControllerV3CreateOpts = {
    */
   fuzzThreshold?: number;
   /**
-   * disable lookup view
+   * enable lookup view - false by default or if undefined
    */
-  disableLookupView?: boolean;
+  enableLookupView?: boolean;
   /**
    * optional custom title of quickpic
    */

@@ -41,6 +41,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "execa": "^5.0.0",
     "husky": "^4.2.5",
+    "jest": "26.6.0",
     "lerna": "^3.19.0",
     "lint-staged": ">=10",
     "lodash": "^4.17.15",

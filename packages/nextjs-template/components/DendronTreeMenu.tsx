@@ -4,6 +4,7 @@ import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
 import { Typography } from "antd";
 import _ from "lodash";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useCallback, useEffect, useState } from "react";
 import { useCombinedSelector } from "../features";
@@ -99,6 +100,7 @@ export default function DendronTreeMenu(
 
   return (
     <MenuView
+      {...props}
       roots={roots}
       expandKeys={expandKeys}
       onSelect={onSelect}
@@ -116,6 +118,7 @@ function MenuView({
   onExpand,
   collapsed,
   activeNote,
+  noteIndex,
 }: {
   roots: DataNode[];
   expandKeys: string[];
@@ -123,7 +126,7 @@ function MenuView({
   onExpand: (noteId: string) => void;
   collapsed: boolean;
   activeNote: string | undefined;
-}) {
+} & Partial<NoteData>) {
   const ExpandIcon = useCallback(
     ({ isOpen, ...rest }: { isOpen: boolean }) => {
       const UncollapsedIcon = isOpen ? UpOutlined : DownOutlined;
@@ -151,14 +154,7 @@ function MenuView({
             menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
           }
           key={menu.key}
-          title={
-            <Typography.Text
-              style={{ width: "100%" }}
-              ellipsis={{ tooltip: menu.title }}
-            >
-              {menu.title}
-            </Typography.Text>
-          }
+          title={<MenuItemTitle menu={menu} noteIndex={noteIndex!} />}
           onTitleClick={(event) => {
             const target = event.domEvent.target as HTMLElement;
             const isArrow = target.dataset.expandedicon;
@@ -177,12 +173,7 @@ function MenuView({
     }
     return (
       <MenuItem key={menu.key} icon={menu.icon}>
-        <Typography.Text
-          style={{ width: "100%" }}
-          ellipsis={{ tooltip: menu.title }}
-        >
-          {menu.title}
-        </Typography.Text>
+        <MenuItemTitle menu={menu} noteIndex={noteIndex!} />
       </MenuItem>
     );
   };
@@ -200,7 +191,6 @@ function MenuView({
         openKeys: expandKeys,
         selectedKeys: expandKeys,
       })}
-      onClick={({ key }) => onSelect(key as string)}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
@@ -209,5 +199,21 @@ function MenuView({
         return createMenu(menu);
       })}
     </Menu>
+  );
+}
+
+function MenuItemTitle(props: Partial<NoteData> & { menu: DataNode }) {
+  const { getNoteUrl } = useDendronRouter();
+
+  return (
+    <Typography.Text ellipsis={{ tooltip: props.menu.title }}>
+      <Link
+        href={getNoteUrl(props.menu.key as string, {
+          noteIndex: props.noteIndex!,
+        })}
+      >
+        {props.menu.title}
+      </Link>
+    </Typography.Text>
   );
 }

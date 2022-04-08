@@ -10,7 +10,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -26,7 +26,7 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

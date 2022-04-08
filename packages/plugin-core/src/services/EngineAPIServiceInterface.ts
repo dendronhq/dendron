@@ -38,6 +38,7 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
+import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
@@ -50,6 +51,7 @@ export interface IEngineAPIService {
   configRoot: string;
   config: IntermediateDendronConfig;
   hooks: DHookDict;
+  engineEventEmitter: EngineEventEmitter;
 
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 

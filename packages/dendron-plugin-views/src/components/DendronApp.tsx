@@ -111,8 +111,10 @@ export type DendronAppProps = {
 };
 
 function DendronApp(props: DendronAppProps) {
-  const opts = _.defaults(props.opts, { padding: "33px" });
-
+  // fix regression for scroll in graph view
+  const opts = _.defaults(props.opts, {
+    padding: props.Component.name === "DendronGraphPanel" ? "0px" : "33px",
+  });
   return (
     <Provider store={combinedStore}>
       <Layout style={{ padding: opts.padding }}>

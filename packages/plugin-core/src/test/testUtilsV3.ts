@@ -662,3 +662,11 @@ export function subscribeToEngineStateChange(
 export function toDendronEngineClient(engine: IEngineAPIService) {
   return engine as unknown as DendronEngineClient;
 }
+
+export async function waitInMilliseconds(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, milliseconds);
+  });
+}

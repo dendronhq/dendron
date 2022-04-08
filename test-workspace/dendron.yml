@@ -32,6 +32,7 @@ workspace:
         -
             fsPath: vault2
             visibility: private
+            siteUrl: "https://vault2.com"
         -
             fsPath: vault
         -
@@ -51,7 +52,7 @@ workspace:
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     workspaceVaultSyncMode: noCommit
-    enableAutoFoldFrontmatter: true
+    enableAutoFoldFrontmatter: false
     maxPreviewsCached: 10
     maxNoteLength: 204800
     task:

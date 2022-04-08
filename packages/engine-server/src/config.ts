@@ -103,7 +103,7 @@ export class DConfig {
     if (_.size(siteHierarchies) < 1) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_CONFIG,
-        message: `siteHiearchies must have at least one hiearchy`,
+        message: `siteHiearchies must have at least one hierarchy`,
       });
     }
     siteIndex = this.getSiteIndex(config);
@@ -154,7 +154,7 @@ export class DConfig {
     if (_.size(siteHierarchies) < 1) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_CONFIG,
-        message: `siteHiearchies must have at least one hiearchy`,
+        message: `siteHiearchies must have at least one hierarchy`,
       });
     }
     siteIndex = this.getSiteIndex(config);

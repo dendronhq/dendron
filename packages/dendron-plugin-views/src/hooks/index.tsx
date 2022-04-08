@@ -18,8 +18,10 @@ export const useCurrentTheme = () => {
   );
   React.useEffect(() => {
     // @ts-ignore
-    setCurrentTheme(window.currentTheme);
-  }, [setCurrentTheme, currentTheme]);
+    window.currentTheme && setCurrentTheme(window.currentTheme);
+    // @ts-ignore
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [window.currentTheme]);
   return { currentTheme, setCurrentTheme };
 };
 
@@ -53,7 +55,7 @@ export const useRenderedNoteBody = ({
     id: undefined,
     contentHash: undefined,
   };
-  const noteContent = engine.notesRendered[noteId || ""];
+  const noteContent = noteId ? engine.notesRendered[noteId] : undefined;
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
 

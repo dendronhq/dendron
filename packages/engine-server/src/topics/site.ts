@@ -19,6 +19,8 @@ import {
   ConfigUtils,
   DendronPublishingConfig,
   configIsV4,
+  isBlockAnchor,
+  getSlugger,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -179,7 +181,7 @@ export class SiteUtils {
     // async pass to process all notes
     const domainsAndhiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
-        const out = await SiteUtils.filterByHiearchy({
+        const out = await SiteUtils.filterByHierarchy({
           domain,
           config,
           engine,
@@ -201,7 +203,7 @@ export class SiteUtils {
       domains.push(domain);
       hiearchiesToPublish.push(notes);
     });
-    // if single hiearchy, domain includes all immediate children
+    // if single hierarchy, domain includes all immediate children
     if (
       !opts.noExpandSingleDomain &&
       siteHierarchies.length === 1 &&
@@ -231,9 +233,9 @@ export class SiteUtils {
   }
 
   /**
-   * Filter notes to be published using hiearchy
+   * Filter notes to be published using hierarchy
    */
-  static async filterByHiearchy(opts: {
+  static async filterByHierarchy(opts: {
     domain: string;
     config: IntermediateDendronConfig;
     engine: DEngineClient;
@@ -241,12 +243,12 @@ export class SiteUtils {
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     const logger = createLogger(LOGGER_NAME);
-    logger.info({ ctx: "filterByHiearchy:enter", domain, config });
+    logger.info({ ctx: "filterByHierarchy:enter", domain, config });
     const hConfig = this.getConfigForHierarchy({
       config,
       noteOrName: domain,
     });
-    const notesForHiearchy = _.clone(engine.notes);
+    const notesForHierarchy = _.clone(engine.notes);
 
     // get the domain note
     const notes = NoteUtils.getNotesByFnameFromEngine({
@@ -254,7 +256,7 @@ export class SiteUtils {
       engine,
     });
     logger.info({
-      ctx: "filterByHiearchy:candidates",
+      ctx: "filterByHierarchy:candidates",
       domain,
       hConfig,
       notes: notes.map((ent) => ent.id),
@@ -272,12 +274,12 @@ export class SiteUtils {
         config,
         fname: domain,
         noteCandidates: notes,
-        noteDict: notesForHiearchy,
+        noteDict: notesForHierarchy,
       });
       // no note found
     } else if (notes.length < 1) {
       logger.error({
-        ctx: "filterByHiearchy",
+        ctx: "filterByHierarchy",
         msg: "note not found",
         domain,
       });
@@ -311,7 +313,7 @@ export class SiteUtils {
     }
 
     logger.info({
-      ctx: "filterByHiearchy",
+      ctx: "filterByHierarchy",
       domainNote: NoteUtils.toNoteLoc(domainNote),
     });
 
@@ -324,7 +326,7 @@ export class SiteUtils {
       let note = processQ.pop() as NoteProps;
 
       logger.debug({
-        ctx: "filterByHiearchy",
+        ctx: "filterByHierarchy",
         maybeNote: NoteUtils.toNoteLoc(note),
       });
 
@@ -344,7 +346,7 @@ export class SiteUtils {
       let children = HierarchyUtils.getChildren({
         skipLevels: siteFM.skipLevels || 0,
         note,
-        notes: notesForHiearchy,
+        notes: notesForHierarchy,
       });
       if (siteFM.skipLevels && siteFM.skipLevels > 0) {
         note.children = children.map((ent) => ent.id);
@@ -362,7 +364,7 @@ export class SiteUtils {
         })
       );
       logger.debug({
-        ctx: "filterByHiearchy:post-filter-children",
+        ctx: "filterByHierarchy:post-filter-children",
         note: NoteUtils.toNoteLoc(note),
         children: children.map((ent) => ent.id),
       });
@@ -444,6 +446,61 @@ export class SiteUtils {
     }
     return siteRootPath;
   }
+  static getSiteUrlRootForVault({
+    vault,
+    config,
+  }: {
+    vault: DVault;
+    config: IntermediateDendronConfig;
+  }): { url?: string; index?: string } {
+    if (vault.seed) {
+      const seeds = ConfigUtils.getWorkspace(config).seeds;
+      if (seeds && seeds[vault.seed]) {
+        const maybeSite = seeds[vault.seed]?.site;
+        if (maybeSite) {
+          return { url: maybeSite.url, index: maybeSite.index };
+        }
+      }
+    }
+    if (vault.siteUrl) {
+      return { url: vault.siteUrl, index: vault.siteIndex };
+    }
+    const { siteUrl, siteIndex } = ConfigUtils.getPublishingConfig(config);
+    return { url: siteUrl, index: siteIndex };
+  }
+
+  static getSiteUrlPathForNote({
+    pathValue,
+    pathAnchor,
+    config,
+    addPrefix,
+  }: {
+    pathValue?: string;
+    pathAnchor?: string;
+    config: IntermediateDendronConfig;
+    addPrefix?: boolean;
+  }): string {
+    // add path prefix if valid
+    let pathPrefix: string = "";
+    if (addPrefix) {
+      const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+      pathPrefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+    }
+
+    // slug anchor if it is not a block anchor
+    if (pathAnchor && !isBlockAnchor(pathAnchor)) {
+      pathAnchor = `${getSlugger().slug(pathAnchor)}`;
+    }
+    // remove extension for pretty links
+    const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
+    const pathExtension =
+      _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
+
+    // put together the url path
+    return `${pathPrefix || ""}${pathValue}${pathExtension}${
+      pathAnchor ? "#" + pathAnchor : ""
+    }`;
+  }
 
   static handleDup(opts: {
     dupBehavior?: DuplicateNoteBehavior;
@@ -520,7 +577,7 @@ export class SiteUtils {
       const logger = createLogger(LOGGER_NAME);
       if (maybeDomainNotes.length < 1) {
         logger.error({
-          ctx: "filterByHiearchy",
+          ctx: "filterByHierarchy",
           msg: "dup-resolution: no note found",
           vault,
         });
@@ -549,12 +606,26 @@ export class SiteUtils {
     });
     const logger = createLogger(LOGGER_NAME);
     logger.info({
-      ctx: "filterByHiearchy",
+      ctx: "filterByHierarchy",
       msg: "dup-resolution: resolving dup",
       parent: domainNote.id,
       children: domainNote.children,
     });
     return domainNote;
+  }
+
+  /**
+   * Is the current note equivalent ot the index of the published site?
+   * @returns
+   */
+  static isIndexNote({
+    indexNote,
+    note,
+  }: {
+    indexNote?: string;
+    note: NoteProps;
+  }): boolean {
+    return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }
 
   static validateConfig(

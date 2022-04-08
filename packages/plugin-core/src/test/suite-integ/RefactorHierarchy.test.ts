@@ -16,7 +16,7 @@ import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 
-suite("RefactorHiearchy", function () {
+suite("RefactorHierarchy", function () {
   const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.89.0 (2022-04-05)
+
+**Note:** Version bump only for package root
+
+
+
+
+
 # 0.88.0 (2022-03-29)
 
 **Note:** Version bump only for package root
@@ -24912,7 +24920,7 @@ The changelog below lists changes that follow the [conventional commits](https:/
 
 ### Bug Fixes
 
-- handle single hiearchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
+- handle single hierarchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
 
 ## [0.20.1-alpha.13](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.12...v0.20.1-alpha.13) (2020-12-21)
 
@@ -24937,7 +24945,7 @@ The changelog below lists changes that follow the [conventional commits](https:/
 
 ### Bug Fixes
 
-- refactor hiearchy miss self referential links ([00b385d](https://github.com/dendronhq/dendron/commit/00b385dd0d13e5809da012bbc88388886012b837))
+- refactor hierarchy miss self referential links ([00b385d](https://github.com/dendronhq/dendron/commit/00b385dd0d13e5809da012bbc88388886012b837))
 
 ## [0.20.1-alpha.9](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.8...v0.20.1-alpha.9) (2020-12-19)
 

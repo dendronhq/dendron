@@ -1590,6 +1590,42 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "oolonek",
+      "name": "oolonek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2760049?v=4",
+      "profile": "https://github.com/oolonek",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Mettcon",
+      "name": "Mettcon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14955363?v=4",
+      "profile": "https://github.com/Mettcon",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "LamentConfiguration",
+      "name": "LamentConfiguration",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15186074?v=4",
+      "profile": "https://github.com/LamentConfiguration",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "irishandyb",
+      "name": "irishandyb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23081516?v=4",
+      "profile": "https://github.com/irishandyb",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

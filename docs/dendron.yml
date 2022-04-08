@@ -26,12 +26,12 @@ workspace:
         dendron-docs:
             remote:
                 type: git
-                url: 'git@github.com:dendronhq/dendron-docs.git'
+                url: git@github.com:dendronhq/dendron-docs.git
     seeds:
         dendron.dendron-site:
             branch: dev
             site:
-                url: 'https://wiki.dendron.so'
+                url: https://wiki.dendron.so
                 index: dendron
         dendron.templates: {}
     vaults:
@@ -91,6 +91,8 @@ preview:
     enablePrettyRefs: false
     enableKatex: false
     automaticallyShowPreview: false
+    enableFrontmatterTags: true
+    enableHashesForFMTags: false
 publishing:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -102,7 +104,7 @@ publishing:
         - handbook
     enableSiteLastModified: true
     siteRootDir: docs
-    siteUrl: 'https://wiki.dendron.so'
+    siteUrl: https://wiki.dendron.so
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true

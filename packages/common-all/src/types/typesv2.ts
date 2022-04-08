@@ -761,7 +761,7 @@ export enum TreeViewMessageEnum {
    */
   "onReady" = "onReady",
 }
-export enum GraphViewMessageType {
+export enum GraphViewMessageEnum {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
@@ -815,6 +815,8 @@ export type OnDidChangeActiveTextEditorData = {
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
+
+export type GraphViewMessageType = DMessageEnum | GraphViewMessageEnum;
 
 /** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;

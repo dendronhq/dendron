@@ -39,7 +39,7 @@
         },
         "hierarchyDisplay": {
           "type": "boolean",
-          "description": "Shoud show hiearchy"
+          "description": "Should show hierarchy"
         },
         "hierarchyDisplayTitle": {
           "type": "string",
@@ -418,6 +418,14 @@
         "selfContained": {
           "type": "boolean",
           "description": "Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults."
+        },
+        "siteUrl": {
+          "type": "string",
+          "description": "Published URL endpoint for the vault. When wikilinks are exported from this vault, they will be converted with url defined here"
+        },
+        "siteIndex": {
+          "type": "string",
+          "description": "Index page for the vault"
         }
       },
       "required": [

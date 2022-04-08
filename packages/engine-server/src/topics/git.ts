@@ -388,6 +388,16 @@ export class Git {
     }
   }
 
+  /** Returns the number of contributors to this repository, or undefined if this is not a repository. */
+  async getNumContributors(): Promise<number | undefined> {
+    try {
+      const { stdout } = await this._execute("git shortlog -s HEAD");
+      return stdout.split("\n").length;
+    } catch {
+      return undefined;
+    }
+  }
+
   /**
    * @param nameOnly: If true, only return the file names. Otherwise the full diff including contents is returned.
    * @param oldCommit: The old identifier (e.g. commit, tag, branch) that we are diffing against.

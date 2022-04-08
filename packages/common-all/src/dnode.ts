@@ -1082,29 +1082,40 @@ export class NoteUtils {
   }
 
   /**
-   * Add {@link DNodeProps["parent"]}, {@link DNodeProps["children"]}, and backlinks from {@link noteHydrated} to {@link noteRaw}
+   * Add derived metadata from `noteHydrated` to `noteRaw`
+   * By default, include the following properties:
+   *  - parent
+   *  - children
    * @param noteRaw - note for other fields
-   * @param noteHydrated - note to get {@link DNodeProps["parent"]}, {@link DNodeProps["children"]}, and backlink properties from
+   * @param noteHydrated - note to get metadata properties from
    * @returns Merged Note object
    */
   static hydrate({
     noteRaw,
     noteHydrated,
+    opts,
   }: {
     noteRaw: NoteProps;
     noteHydrated: NoteProps;
+    opts?: Partial<{
+      keepBackLinks: boolean;
+    }>;
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
-    if (noteHydrated) {
+
+    // check if we hydrate with links
+    if (opts?.keepBackLinks) {
       noteRaw.links = noteHydrated.links.filter(
         (link) => link.type === "backlink"
       );
     }
+
     return { ...noteRaw, ...hydrateProps };
   }
 
   /**
    * Update note metadata (eg. links and anchors)
+   * Calculate note metadata based on contents of the notes
    */
   static async updateNoteMetadata({
     note,

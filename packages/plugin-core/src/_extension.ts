@@ -4,12 +4,14 @@ import {
   SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
+  assertUnreachable,
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
   DendronError,
   ExtensionEvents,
   getStage,
+  GitEvents,
   InstallStatus,
   MigrationEvents,
   NativeWorkspaceEvents,
@@ -43,6 +45,11 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import {
+  CURRENT_AB_TESTS,
+  UpgradeToastOrViewTestGroups,
+  UPGRADE_TOAST_OR_VIEW_TEST,
+} from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
@@ -92,6 +99,7 @@ import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegis
 import { StartupUtils } from "./utils/StartupUtils";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
+import { showUpgradeView } from "./views/UpgradeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
@@ -496,7 +504,6 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
-
       // check for vaults with same name
       const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
@@ -632,7 +639,17 @@ export async function _activate(
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
       );
-      AnalyticsUtils.identify({ numNotes });
+      AnalyticsUtils.identify({
+        numNotes,
+        // Which side of all currently running tests is this user on?
+        splitTests: CURRENT_AB_TESTS.map(
+          (test) =>
+            // Formatted as `testName.groupName` since group names are not necessarily unique
+            `${test.name}.${test.getUserGroup(
+              SegmentClient.instance().anonymousId
+            )}`
+        ),
+      });
 
       const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
       const siteUrl = publishigConfig.siteUrl;
@@ -649,7 +666,24 @@ export async function _activate(
         numSelfContainedVaults: ws
           .getDWorkspace()
           .vaults.filter(VaultUtils.isSelfContained).length,
+        numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
+          .length,
       };
+
+      // Track contributors to repositories, but do so in the background so
+      // initialization isn't delayed.
+      const startGetAllReposNumContributors = process.hrtime();
+      wsService
+        .getAllReposNumContributors()
+        .then((numContributors) => {
+          AnalyticsUtils.track(GitEvents.ContributorsFound, {
+            maxNumContributors: _.max(numContributors),
+            duration: getDurationMilliseconds(startGetAllReposNumContributors),
+          });
+        })
+        .catch((err) => {
+          Sentry.captureException(err);
+        });
 
       if (siteUrl !== undefined) {
         _.set(trackProps, "siteUrl", siteUrl);
@@ -796,25 +830,51 @@ async function showWelcomeOrWhatsNew({
         previousExtensionVersion,
       });
       await StateService.instance().setGlobalVersion(version);
+
+      // ^t6dxodie048o
+      const toastOrView = UPGRADE_TOAST_OR_VIEW_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
+        toastOrView,
       });
-      vscode.window
-        .showInformationMessage(
-          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
-          "See what changed"
-        )
-        .then((resp) => {
-          if (resp === "See what changed") {
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
-              )
-            );
-          }
-        });
+
+      switch (toastOrView) {
+        case UpgradeToastOrViewTestGroups.upgradeToast: {
+          vscode.window
+            .showInformationMessage(
+              `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+              "See what changed"
+            )
+            .then((resp) => {
+              if (resp === "See what changed") {
+                AnalyticsUtils.track(
+                  VSCodeEvents.UpgradeSeeWhatsChangedClicked,
+                  {
+                    previousVersion: previousExtensionVersion,
+                    duration: getDurationMilliseconds(start),
+                  }
+                );
+                vscode.commands.executeCommand(
+                  "vscode.open",
+                  vscode.Uri.parse(
+                    "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
+                  )
+                );
+              }
+            });
+          break;
+        }
+        case UpgradeToastOrViewTestGroups.upgradeView: {
+          showUpgradeView();
+          break;
+        }
+        default:
+          assertUnreachable(toastOrView);
+      }
       break;
     }
     default:

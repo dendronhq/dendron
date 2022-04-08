@@ -1,8 +1,11 @@
 import {
+  DendronEditorViewKey,
   DendronError,
   DMessageEnum,
+  DMessageSource,
+  getWebEditorViewEntry,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -15,6 +18,7 @@ import { Disposable, TextEditor, ViewColumn, window } from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { Logger } from "../../logger";
 import { GraphStyleService } from "../../styles";
+import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 
@@ -23,15 +27,20 @@ export class NoteGraphPanelFactory {
   private static _onEngineNoteStateChangedDisposable: Disposable | undefined;
   private static _engineEvents: EngineEventEmitter;
   private static _ext: DendronExtension;
+  private static initWithNote: NoteProps | undefined;
 
   static create(
     ext: DendronExtension,
     engineEvents: EngineEventEmitter
   ): vscode.WebviewPanel {
     if (!this._panel) {
+      const { bundleName: name, label } = getWebEditorViewEntry(
+        DendronEditorViewKey.NOTE_GRAPH
+      );
+
       this._panel = window.createWebviewPanel(
-        "dendronIframe", // Identifies the type of the webview. Used internally
-        "Note Graph", // Title of the panel displayed to the user
+        name, // Identifies the type of the webview. Used internally
+        label, // Title of the panel displayed to the user
         {
           viewColumn: ViewColumn.Beside,
           preserveFocus: true,
@@ -40,6 +49,7 @@ export class NoteGraphPanelFactory {
           enableScripts: true,
           retainContextWhenHidden: true,
           enableFindWidget: false,
+          localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
         }
       );
       this._ext = ext;
@@ -63,9 +73,8 @@ export class NoteGraphPanelFactory {
       this._panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
         const ctx = "ShowNoteGraph:onDidReceiveMessage";
         Logger.debug({ ctx, msgType: msg.type });
-
         switch (msg.type) {
-          case GraphViewMessageType.onSelect: {
+          case GraphViewMessageEnum.onSelect: {
             const note = this._ext.getEngine().notes[msg.data.id];
             await new GotoNoteCommand(this._ext).execute({
               qs: note.fname,
@@ -74,37 +83,12 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
-          case GraphViewMessageType.onGetActiveEditor: {
-            const document = VSCodeUtils.getActiveTextEditor()?.document;
-            const { vaults, wsRoot } = this._ext.getDWorkspace();
-            if (document) {
-              if (
-                !WorkspaceUtils.isPathInWorkspace({
-                  wsRoot,
-                  vaults,
-                  fpath: document.uri.fsPath,
-                })
-              ) {
-                Logger.info({
-                  ctx,
-                  uri: document.uri.fsPath,
-                  msg: "not in workspace",
-                });
-                return;
-              }
-              const note = this._ext.wsUtils.getNoteFromDocument(document);
-              if (note) {
-                Logger.info({
-                  ctx: "onDidReceiveMessage",
-                  msg: "refresh note",
-                  note: NoteUtils.toLogObj(note),
-                });
-                this.refresh(note);
-              }
-            }
+          case GraphViewMessageEnum.onGetActiveEditor: {
+            const editor = VSCodeUtils.getActiveTextEditor();
+            this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageType.onRequestGraphStyle: {
+          case GraphViewMessageEnum.onRequestGraphStyle: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
             if (styles) {
@@ -118,7 +102,7 @@ export class NoteGraphPanelFactory {
             }
             break;
           }
-          case GraphViewMessageType.onReady:
+          case GraphViewMessageEnum.onReady:
             throw new DendronError({
               message: "Unexpected message received from the graph view",
               payload: {
@@ -126,6 +110,32 @@ export class NoteGraphPanelFactory {
                 "msg.type": msg.type,
               },
             });
+
+          case DMessageEnum.MESSAGE_DISPATCHER_READY: {
+            // if ready, get current note
+            let note: NoteProps | undefined;
+            if (this.initWithNote !== undefined) {
+              note = this.initWithNote;
+              Logger.debug({
+                ctx,
+                msg: "got pre-set note",
+                note: NoteUtils.toLogObj(note),
+              });
+            } else {
+              note = this._ext.wsUtils.getActiveNote();
+              if (note) {
+                Logger.debug({
+                  ctx,
+                  msg: "got active note",
+                  note: NoteUtils.toLogObj(note),
+                });
+              }
+            }
+            if (note) {
+              this.refresh(note);
+            }
+            break;
+          }
           default:
             break;
         }
@@ -154,7 +164,7 @@ export class NoteGraphPanelFactory {
           syncChangedNote: true,
           activeNote: this._ext.wsUtils.getActiveNote(),
         },
-        source: "vscode",
+        source: DMessageSource.vscode,
       } as OnDidChangeActiveTextEditorMsg);
     }
   }

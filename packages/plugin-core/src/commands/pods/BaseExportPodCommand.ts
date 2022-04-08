@@ -4,6 +4,7 @@ import {
   DendronError,
   DNodeProps,
   DVault,
+  NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -21,7 +22,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { HierarchySelector } from "../../components/lookup/HierarchySelector";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { BaseCommand } from "../base";
 
@@ -44,9 +45,11 @@ export abstract class BaseExportPodCommand<
     Config,
     Partial<Config>
   >
-  implements ExportPodFactory<Config, R>
+  implements ExportPodFactory<Config, R>, vscode.Disposable
 {
   private hierarchySelector: HierarchySelector;
+  private _onEngineNoteStateChangedDisposable: vscode.Disposable | undefined;
+  public extension: IDendronExtension;
 
   /**
    *
@@ -54,9 +57,13 @@ export abstract class BaseExportPodCommand<
    * hierarchy to export. Should use {@link QuickPickHierarchySelector} by
    * default
    */
-  constructor(hierarchySelector: HierarchySelector) {
+  constructor(
+    hierarchySelector: HierarchySelector,
+    extension: IDendronExtension
+  ) {
     super();
     this.hierarchySelector = hierarchySelector;
+    this.extension = extension;
   }
 
   /**
@@ -86,6 +93,13 @@ export abstract class BaseExportPodCommand<
         message:
           "Multi Note Export cannot have clipboard as destination. Please configure your destination by using Dendron: Configure Export Pod V2 command",
       });
+    }
+  }
+
+  public dispose(): void {
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+      this._onEngineNoteStateChangedDisposable = undefined;
     }
   }
 
@@ -188,21 +202,16 @@ export abstract class BaseExportPodCommand<
           return;
         });
 
-        const pod = this.createPod(opts.config);
-
         switch (opts.config.exportScope) {
           case PodExportScope.Note:
+            this.saveActiveDocumentBeforeExporting(opts);
+            break;
           case PodExportScope.Vault:
           case PodExportScope.Lookup:
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-            const result = await pod.exportNotes(opts.payload);
-            await this.onExportComplete({
-              exportReturnValue: result,
-              payload: opts.payload,
-              config: opts.config,
-            });
+            await this.executeExportNotes(opts);
 
             break;
           }
@@ -240,16 +249,84 @@ export abstract class BaseExportPodCommand<
         if (!selection) {
           return resolve(undefined);
         }
-        const { hierarchy, vault } = selection
-        const notes = ExtensionProvider.getEngine().notes;
+        const { hierarchy, vault } = selection;
+        const notes = this.extension.getEngine().notes;
 
         resolve(
           Object.values(notes).filter(
-            (value) => value.fname.startsWith(hierarchy) && value.stub !== true &&
-             VaultUtils.isEqualV2(value.vault, vault)
+            (value) =>
+              value.fname.startsWith(hierarchy) &&
+              value.stub !== true &&
+              VaultUtils.isEqualV2(value.vault, vault)
           )
         );
       });
+    });
+  }
+
+  /**
+   * If the active text editor document has dirty changes, save first before exporting
+   * @returns True if document is dirty, false otherwise
+   */
+  private async saveActiveDocumentBeforeExporting(opts: {
+    config: Config;
+    payload: NoteProps[];
+  }): Promise<boolean> {
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (editor && editor.document.isDirty) {
+      const fname = NoteUtils.uri2Fname(editor.document.uri);
+      this._onEngineNoteStateChangedDisposable = this.extension
+        .getEngine()
+        .engineEventEmitter.onEngineNoteStateChanged(
+          async (noteChangeEntries: NoteChangeEntry[]) => {
+            const updateNoteEntries = noteChangeEntries.filter(
+              (entry) => entry.note.fname === fname && entry.status === "update"
+            );
+            // Received event from engine about successful save
+            if (updateNoteEntries.length > 0) {
+              this.dispose();
+              const savedNote = updateNoteEntries[0].note;
+              // Remove notes that match saved note as they contain old content
+              const filteredPayload = opts.payload.filter(
+                (note) => note.fname !== savedNote.fname
+              );
+              await this.executeExportNotes({
+                ...opts,
+                payload: filteredPayload.concat(savedNote),
+              });
+            }
+          }
+        );
+      await editor.document.save();
+      // Dispose of listener after 3 sec (if not already disposed) in case engine events never arrive
+      setTimeout(() => {
+        if (this._onEngineNoteStateChangedDisposable) {
+          vscode.window.showErrorMessage(
+            `Unable to run export. Please save file and try again.`
+          );
+        }
+        this.dispose();
+      }, 3000);
+
+      return true;
+    } else {
+      // Save is not needed. Go straight to exporting
+      await this.executeExportNotes(opts);
+      return false;
+    }
+  }
+
+  private async executeExportNotes(opts: {
+    config: Config;
+    payload: NoteProps[];
+  }): Promise<string | void> {
+    const pod = this.createPod(opts.config);
+
+    const result = await pod.exportNotes(opts.payload);
+    return this.onExportComplete({
+      exportReturnValue: result,
+      payload: opts.payload,
+      config: opts.config,
     });
   }
 
@@ -263,7 +340,7 @@ export abstract class BaseExportPodCommand<
       return;
     }
 
-    const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+    const { vaults, engine, wsRoot } = this.extension.getDWorkspace();
 
     const vault = VaultUtils.getVaultByFilePath({
       vaults,
@@ -291,7 +368,7 @@ export abstract class BaseExportPodCommand<
    * @returns all notes in the workspace
    */
   private getPropsForWorkspaceScope(): DNodeProps[] | undefined {
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     return Object.values(engine.notes).filter((notes) => notes.stub !== true);
   }
 
@@ -300,7 +377,7 @@ export abstract class BaseExportPodCommand<
    * @returns all notes in the vault
    */
   private getPropsForVaultScope(vault: DVault): DNodeProps[] | undefined {
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     return Object.values(engine.notes).filter(
       (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)
     );

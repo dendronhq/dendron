@@ -1151,6 +1151,7 @@ export class RemarkUtils {
     dendronConfig: IntermediateDendronConfig
   ) {
     const prevNote = { ...note };
+    // eslint-disable-next-line func-names
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;

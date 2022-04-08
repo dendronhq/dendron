@@ -17,6 +17,7 @@ import {
   FOLDERS,
   InstallStatus,
   IntermediateDendronConfig,
+  isNotUndefined,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
@@ -639,6 +640,21 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       `Dendron version: ${version}`,
       `Hostname: ${os.hostname()}`,
     ].join("\n");
+  }
+
+  async getAllReposNumContributors() {
+    const repos = await this.getAllRepos();
+    const contributors = await Promise.all(
+      repos.map((repo) => {
+        const git = new Git({ localUrl: repo });
+        try {
+          return git.getNumContributors();
+        } catch {
+          return 0;
+        }
+      })
+    );
+    return contributors.filter(isNotUndefined);
   }
 
   async commitAndAddAll({

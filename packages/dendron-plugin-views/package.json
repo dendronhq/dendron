@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-plugin-views",
-  "version": "0.88.0",
+  "version": "0.89.0",
   "private": true,
   "workspaces": {
     "nohoist": [
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@babel/core": "7.12.3",
-    "@dendronhq/common-all": "^0.88.0",
-    "@dendronhq/common-frontend": "^0.88.0",
-    "@dendronhq/common-server": "^0.88.0",
+    "@dendronhq/common-all": "^0.89.0",
+    "@dendronhq/common-frontend": "^0.89.0",
+    "@dendronhq/common-server": "^0.89.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -40,6 +40,7 @@
     "camelcase": "^6.1.0",
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "css-loader": "4.3.0",
+    "cytoscape-euler": "^1.2.2",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
     "eslint": "^7.11.0",

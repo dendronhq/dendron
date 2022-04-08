@@ -256,6 +256,7 @@ export class SegmentClient {
       this._anonymousId = genUUID();
       fs.writeFileSync(uuidPath, this._anonymousId);
     }
+    this.logger.info({ msg: "anonymous id", anonymousId: this._anonymousId });
   }
 
   identifyAnonymous(props?: { [key: string]: any }, opts?: SegmentExtraArg) {
@@ -534,6 +535,10 @@ type UserProfileProps = {
    * The number of notes in the workspace
    */
   numNotes?: number;
+  /**
+   * The current A/B test groups the user is participating in
+   */
+  splitTests?: string[];
   /**
    * The role of user. Retrieved from initial survey.
    */

@@ -3,6 +3,7 @@ export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",
   Install = "Install",
+  NewInstanceInstall = "NewInstanceInstall",
   SchemaLookup_Show = "SchemaLookup_Show",
   NoteLookup_Gather = "NoteLookup_Gather",
   SchemaLookup_Gather = "SchemaLookup_Gather",

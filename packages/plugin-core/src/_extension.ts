@@ -414,9 +414,22 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+
+    // check if this is an install event, but a repeated one on a new instance.
+    let isNewInstanceInstall = false;
+
     // set initial install ^194e5bw7so9g
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      MetadataService.instance().setInitialInstall();
+      // even if it's an initial install for this instance of vscode, it may not be for this machine.
+      // in that case, we should skip setting the initial install time since it's already set.
+      const metadata = MetadataService.instance().getMeta();
+      if (metadata.firstInstall === undefined) {
+        MetadataService.instance().setInitialInstall();
+      } else {
+        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
+        // tied to initial install to happen in this instance of VSCode once for the first time
+        isNewInstanceInstall = true;
+      }
     }
 
     // TODO: temporary backfill
@@ -764,6 +777,7 @@ export async function _activate(
 
     await showWelcomeOrWhatsNew({
       extensionInstallStatus,
+      isNewInstanceInstall,
       version: DendronExtension.version(),
       previousExtensionVersion: previousWorkspaceVersion,
       start: startActivate,
@@ -811,12 +825,14 @@ export function deactivate() {
 
 async function showWelcomeOrWhatsNew({
   extensionInstallStatus,
+  isNewInstanceInstall,
   version,
   previousExtensionVersion,
   start,
   assetUri,
 }: {
   extensionInstallStatus: InstallStatus;
+  isNewInstanceInstall: boolean;
   version: string;
   previousExtensionVersion: string;
   start: [number, number];
@@ -826,12 +842,22 @@ async function showWelcomeOrWhatsNew({
   Logger.info({ ctx, version, previousExtensionVersion });
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
-      Logger.info({ ctx, msg: "extension, initial install" });
-
+      Logger.info({
+        ctx,
+        msg: `extension, ${
+          isNewInstanceInstall
+            ? "initial install"
+            : "install on new vscode instance"
+        }`,
+      });
       // track how long install process took ^e8itkyfj2rn3
-      AnalyticsUtils.track(VSCodeEvents.Install, {
+      const trackEvent = isNewInstanceInstall
+        ? VSCodeEvents.NewInstanceInstall
+        : VSCodeEvents.Install;
+      AnalyticsUtils.track(trackEvent, {
         duration: getDurationMilliseconds(start),
       });
+
       // set the global version of dendron ^oncxlt645b5r
       await StateService.instance().setGlobalVersion(version);
 

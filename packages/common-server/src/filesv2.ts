@@ -25,6 +25,7 @@ import SparkMD5 from "spark-md5";
 import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
+import textextensionslist from "textextensions";
 
 /** Dendron should ignore any of these folders when watching or searching folders.
  *
@@ -634,6 +635,24 @@ class FileUtils {
         });
     });
   };
+}
+
+export class ExtensionUtils {
+  private static textExtensions: ReadonlySet<string>;
+  private static ensureTextExtensions() {
+    if (this.textExtensions === undefined) {
+      this.textExtensions = new Set(
+        textextensionslist.map((extension) => extension.toLowerCase())
+      );
+    }
+  }
+
+  /** Checks if a given file extension is a well known text file extension. */
+  static isTextFileExtension(extension: string) {
+    extension = _.trimStart(extension, ".").toLowerCase();
+    this.ensureTextExtensions();
+    return this.textExtensions.has(extension);
+  }
 }
 
 export { tmp, DirResult, FileUtils };

@@ -21,9 +21,14 @@ export type GoToNoteCommandOpts = {
 };
 export { GoToNoteCommandOpts as GotoNoteCommandOpts };
 
+export enum GotoFileType {
+  BINARY = "binary",
+  TEXT = "text",
+}
+
 export type GoToNoteCommandOutput =
   // When opening a note
   | { kind: TargetKind.NOTE; note: NoteProps; pos?: Position; source?: string }
   // When opening a non-note file
-  | { kind: TargetKind.NON_NOTE; fullPath: string }
+  | { kind: TargetKind.NON_NOTE; fullPath: string; type: GotoFileType }
   | undefined;

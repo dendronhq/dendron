@@ -17,11 +17,13 @@ import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
+import { PluginFileUtils } from "../utils/files";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 import { BasicCommand } from "./base";
 import {
+  GotoFileType,
   GoToNoteCommandOpts,
   GoToNoteCommandOutput,
   TargetKind,
@@ -263,21 +265,31 @@ export class GotoNoteCommand extends BasicCommand<
 
     // Non-note files use `qs` for full path, and set vault to null
     if (opts.kind === TargetKind.NON_NOTE && qs) {
-      const editor = await VSCodeUtils.openFileInEditor(
-        Uri.from({ scheme: "file", path: qs }),
-        {
-          column: opts.column,
-        }
-      );
-      if (editor && opts.anchor) {
-        await this.extension.wsUtils.trySelectRevealNonNoteAnchor(
-          editor,
-          opts.anchor
+      let type: GotoFileType;
+      if (PluginFileUtils.isTextFileExtension(path.extname(qs))) {
+        // Text file, open inside of VSCode
+        type = GotoFileType.TEXT;
+        const editor = await VSCodeUtils.openFileInEditor(
+          Uri.from({ scheme: "file", path: qs }),
+          {
+            column: opts.column,
+          }
         );
+        if (editor && opts.anchor) {
+          await this.extension.wsUtils.trySelectRevealNonNoteAnchor(
+            editor,
+            opts.anchor
+          );
+        }
+      } else {
+        // Binary file, open with default app
+        type = GotoFileType.BINARY;
+        await PluginFileUtils.openWithDefaultApp(qs);
       }
 
       return {
         kind: TargetKind.NON_NOTE,
+        type,
         fullPath: qs,
       };
     }
@@ -322,7 +334,12 @@ export class GotoNoteCommand extends BasicCommand<
     opts?: GoToNoteCommandOpts,
     resp?: GoToNoteCommandOutput
   ) {
-    const { source } = { ...opts, ...resp };
-    return getAnalyticsPayload(source);
+    const { source, type } = {
+      type: undefined,
+      ...opts,
+      ...resp,
+    };
+    const payload = { ...getAnalyticsPayload(source), fileType: type };
+    return payload;
   }
 }

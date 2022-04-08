@@ -1086,7 +1086,7 @@ suite("GIVEN Dendron plugin activation", function () {
     );
   });
 
-  describe.only("AND WHEN fresh install on new vscode instance", () => {
+  describe("AND WHEN fresh install on new vscode instance", () => {
     describeMultiWS(
       "AND WHEN activate",
       {

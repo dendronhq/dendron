@@ -177,6 +177,23 @@ class ExtensionUtils {
 
     return port;
   }
+
+  /**
+   * Track if welcome button was clicked
+   */
+  static trackWelcomeClicked() {
+    const welcomeClicked = MetadataService.instance().getWelcomeClicked();
+    // check if we have a welcome click message
+    // see [[../packages/plugin-core/src/WelcomeUtils.ts#^z5hpzc3fdkxs]] where this property is set
+    if (welcomeClicked) {
+      AnalyticsUtils.trackSync({
+        event: TutorialEvents.ClickStart,
+        timestamp: welcomeClicked,
+      }).then(() => {
+        MetadataService.instance().deleteMeta("welcomeClicked");
+      });
+    }
+  }
 }
 
 // this method is called when your extension is activated
@@ -443,17 +460,7 @@ export async function _activate(
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
-      const welcomeClicked = MetadataService.instance().getWelcomeClicked();
-      // check if we have a welcome click message
-      if (welcomeClicked) {
-        AnalyticsUtils.trackSync({
-          event: TutorialEvents.ClickStart,
-          timestamp: welcomeClicked,
-        }).then(() => {
-          MetadataService.instance().deleteMeta("welcomeClicked");
-        });
-      }
-
+      ExtensionUtils.trackWelcomeClicked();
       // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
       const changes = await wsService.runMigrationsIfNecessary({
         currentVersion,

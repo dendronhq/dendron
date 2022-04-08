@@ -517,15 +517,16 @@ export function describeMultiWS(
     timeout?: number;
     noSetInstallStatus?: boolean;
   },
-  fn: () => void
+  fn: (ctx: ExtensionContext) => void
 ) {
   describe(title, function () {
     if (opts.timeout) {
       this.timeout(opts.timeout);
     }
-    let ctx: ExtensionContext;
+    const ctx = opts.ctx ?? VSCodeUtils.getOrCreateMockContext();
+
     before(async () => {
-      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
+      setupWorkspaceStubs({ ...opts, ctx });
       if (opts.beforeHook) {
         await opts.beforeHook({ ctx });
       }
@@ -538,7 +539,7 @@ export function describeMultiWS(
       await _activate(ctx);
     });
 
-    const result = fn();
+    const result = fn(ctx);
     assertTestFnNotAsync(result);
 
     // Release all registered resouces such as commands and providers
@@ -577,9 +578,9 @@ export function describeSingleWS(
     if (opts.timeout) {
       this.timeout(opts.timeout);
     }
-    let ctx: ExtensionContext;
+    const ctx = opts.ctx ?? VSCodeUtils.getOrCreateMockContext();
     before(async () => {
-      ctx = opts.ctx ?? setupWorkspaceStubs(opts);
+      setupWorkspaceStubs({ ...opts, ctx });
       await setupLegacyWorkspace(opts);
       await _activate(ctx);
     });
@@ -623,11 +624,9 @@ export function stubCancellationToken(): CancellationToken {
 }
 
 export function setupWorkspaceStubs(opts: {
-  ctx?: ExtensionContext;
+  ctx: ExtensionContext;
   noSetInstallStatus?: boolean;
 }): ExtensionContext {
-  const ctx = opts.ctx ?? VSCodeUtils.getOrCreateMockContext();
-
   // workspace has not upgraded
   if (!opts.noSetInstallStatus) {
     sinon
@@ -635,8 +634,8 @@ export function setupWorkspaceStubs(opts: {
       .returns(InstallStatus.NO_CHANGE);
   }
   sinon.stub(WorkspaceInitFactory, "create").returns(new BlankInitializer());
-  Logger.configure(ctx, "info");
-  return ctx;
+  Logger.configure(opts.ctx, "info");
+  return opts.ctx;
 }
 
 export function cleanupWorkspaceStubs(ctx: ExtensionContext): void {

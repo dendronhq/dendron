@@ -40,6 +40,9 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
+            // ^z5hpzc3fdkxs
+            // it takes up to 8s to do a synchronous track call which becomes noticable to the user
+            // instead of doing that, we write the timestamp when the welcome was clicked and async track it during initialization
             MetadataService.instance().setMeta(
               "welcomeClicked",
               Time.now().toMillis()

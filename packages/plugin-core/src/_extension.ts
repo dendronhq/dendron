@@ -851,11 +851,9 @@ async function showWelcomeOrWhatsNew({
         }`,
       });
       // track how long install process took ^e8itkyfj2rn3
-      const trackEvent = isNewInstanceInstall
-        ? VSCodeEvents.NewInstanceInstall
-        : VSCodeEvents.Install;
-      AnalyticsUtils.track(trackEvent, {
+      AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
+        isNewInstanceInstall,
       });
 
       // set the global version of dendron ^oncxlt645b5r

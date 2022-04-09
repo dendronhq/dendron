@@ -38,15 +38,22 @@ function SchemaBox({
   schema,
   schemaModule,
   currentMatch,
+  partialMatch,
 }: {
   schema: SchemaProps;
   schemaModule: SchemaModuleProps;
   currentMatch: string | null;
+  partialMatch: boolean;
 }) {
   return (
     <div
       style={{
-        backgroundColor: currentMatch !== schema.id ? "#FFFFFF" : "#b1ffb6",
+        backgroundColor:
+          currentMatch !== schema.id
+            ? "#FFFFFF"
+            : partialMatch
+            ? "#e4ffb1"
+            : "#b1ffb6",
         borderRadius: "15px",
         border: "1px solid #a9a9a9",
         padding: "1em",
@@ -59,6 +66,7 @@ function SchemaBox({
         {schema.children.map((childID) => (
           <SchemaBox
             key={childID}
+            partialMatch={partialMatch}
             schema={schemaModule.schemas[childID]}
             schemaModule={schemaModule}
             currentMatch={currentMatch}
@@ -140,6 +148,7 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
               schema={schemaModule.schemas[schemaModule.root.id]}
               schemaModule={schemaModule}
               currentMatch={match !== undefined ? match.schema.id : null}
+              partialMatch={match !== undefined ? match.partial : false}
             />
           </div>
         </div>

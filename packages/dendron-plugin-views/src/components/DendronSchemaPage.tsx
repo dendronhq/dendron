@@ -1,19 +1,15 @@
 import { DendronProps } from "../types";
-import { Select, Input, Card, Badge, Tag, AutoComplete, Tree } from "antd";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { Select, AutoComplete } from "antd";
+import { useEffect, useState } from "react";
 import {
-  SchemaModuleDict,
   SchemaModuleProps,
   SchemaProps,
-  SchemaPropsDict,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import Ribbon from "antd/lib/badge/Ribbon";
-import { DataNode } from "antd/lib/tree";
 
 function generatePath(module: SchemaModuleProps, schema: SchemaProps): string {
   const partString = schema.data.pattern
-    ? `${schema.id}.${schema.data.pattern}`
+    ? `${schema.data.pattern}`
     : schema.data.namespace
     ? `${schema.id}.*`
     : schema.id;

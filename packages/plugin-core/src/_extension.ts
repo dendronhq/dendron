@@ -53,7 +53,6 @@ import {
   UPGRADE_TOAST_WORDING_TEST,
 } from "./abTests";
 import { ALL_COMMANDS } from "./commands";
-import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";

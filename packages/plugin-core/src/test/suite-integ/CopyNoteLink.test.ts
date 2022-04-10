@@ -7,17 +7,13 @@ import {
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
+import { beforeEach, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  describeSingleWS,
-  toDendronEngineClient,
-} from "../testUtilsV3";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import sinon from "sinon";
@@ -86,7 +82,7 @@ suite("CopyNoteLink", function () {
           });
       });
 
-      test.only("WHEN the editor is selecting a header, THEN CopyNoteLink should return a link with that header", async () => {
+      test("WHEN the editor is selecting a header, THEN CopyNoteLink should return a link with that header", async () => {
         const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "testHeader",
@@ -272,7 +268,7 @@ suite("CopyNoteLink", function () {
     },
     () => {
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "foo.md"
@@ -422,7 +418,7 @@ suite("CopyNoteLink", function () {
 
   describeSingleWS("WHEN in a non-note file", {}, () => {
     test("THEN creates a link to that file", async () => {
-      const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
       const fsPath = path.join(wsRoot, "test.js");
       await fs.writeFile(
         fsPath,
@@ -435,7 +431,7 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file name starts with a dot", async () => {
       test("THEN creates a link to that file", async () => {
-        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const fsPath = path.join(wsRoot, ".config.yaml");
         await fs.writeFile(fsPath, "x: 1");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fsPath));
@@ -446,7 +442,7 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file is in assets", () => {
       test("THEN creates a link using assets", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const dirPath = path.join(
           wsRoot,
           VaultUtils.getRelPath(vaults[0]),
@@ -466,7 +462,7 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file is in a vault, but not in assets", () => {
       test("THEN creates a link from root", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const fsPath = path.join(path.join(wsRoot, vaultPath), "test.rs");
         await fs.writeFile(fsPath, "let x = 123;");
@@ -478,7 +474,7 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file is in a nested folder", () => {
       test("THEN creates a link to that file", async () => {
-        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const dirPath = path.join(wsRoot, "src", "clj");
         await fs.ensureDir(dirPath);
         const fsPath = path.join(dirPath, "test.clj");
@@ -502,11 +498,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection(" ^my-block-anchor");
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(
             await linkHasAnchor(
               "block",
@@ -530,11 +522,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a line anchor", async () => {
           await prepFileAndSelection();
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           // Link should contain an anchor
           expect(
             await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -554,11 +542,7 @@ suite("CopyNoteLink", function () {
       () => {
         test("THEN creates a link to that file with a block anchor", async () => {
           await prepFileAndSelection();
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(
             await linkHasAnchor("block", ["src", "test.hs"], link)
           ).toBeTruthy();
@@ -569,11 +553,7 @@ suite("CopyNoteLink", function () {
     describeSingleWS("AND config is set unset", {}, () => {
       test("THEN creates a link to that file with a block anchor", async () => {
         await prepFileAndSelection();
-        const link = (
-          await new CopyNoteLinkCommand(
-            toDendronEngineClient(ExtensionProvider.getEngine())
-          ).run()
-        )?.link;
+        const link = (await copyNoteLinkCommand.run())?.link;
         expect(
           await linkHasAnchor("block", ["src", "test.hs"], link)
         ).toBeTruthy();
@@ -594,11 +574,7 @@ suite("CopyNoteLink", function () {
           const pick = sinon
             .stub(vscode.window, "showQuickPick")
             .resolves({ label: "line" });
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(pick.calledOnce).toBeTruthy();
           expect(
             await linkHasAnchor("line", ["src", "test.hs"], link)
@@ -621,11 +597,7 @@ suite("CopyNoteLink", function () {
           const pick = sinon
             .stub(vscode.window, "showQuickPick")
             .resolves({ label: "block" });
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(pick.calledOnce).toBeTruthy();
           expect(
             await linkHasAnchor("block", ["src", "test.hs"], link)
@@ -648,11 +620,7 @@ suite("CopyNoteLink", function () {
           const pick = sinon
             .stub(vscode.window, "showQuickPick")
             .resolves(undefined);
-          const link = (
-            await new CopyNoteLinkCommand(
-              toDendronEngineClient(ExtensionProvider.getEngine())
-            ).run()
-          )?.link;
+          const link = (await copyNoteLinkCommand.run())?.link;
           expect(pick.calledOnce).toBeTruthy();
           expect(
             await linkHasAnchor("line", ["src", "test.hs"], link)

@@ -13,6 +13,7 @@ import {
   getStage,
   GitEvents,
   InstallStatus,
+  isDisposable,
   MigrationEvents,
   NativeWorkspaceEvents,
   SurveyEvents,
@@ -393,7 +394,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands({ ws, context, requireActiveWorkspace: false });
+    await _setupCommands({ ws, context, requireActiveWorkspace: false });
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -655,7 +656,7 @@ export async function _activate(
       }
 
       MetadataService.instance().setDendronWorkspaceActivated();
-      _setupCommands({ ws, context, requireActiveWorkspace: true });
+      await _setupCommands({ ws, context, requireActiveWorkspace: true });
 
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
@@ -1077,6 +1078,7 @@ export function shouldDisplayLapsedUserMsg(): boolean {
 async function _setupCommands({
   ws,
   context,
+  // If your command needs access to the engine at setup, requireActiveWorkspace should be set to true
   requireActiveWorkspace,
 }: {
   ws: DendronExtension;
@@ -1092,6 +1094,9 @@ async function _setupCommands({
       return;
     }
     const cmd = new Cmd(ws);
+    if (isDisposable(cmd)) {
+      context.subscriptions.push(cmd);
+    }
 
     // Register commands that implement on `onAutoComplete` with AutoCompletableRegister
     // to be able to be invoked with auto completion action.
@@ -1177,7 +1182,10 @@ async function _setupCommands({
     );
   }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key) &&
+    requireActiveWorkspace
+  ) {
     context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
@@ -1188,22 +1196,6 @@ async function _setupCommands({
         })
       )
     );
-  }
-
-  if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
-    const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COPY_NOTE_LINK.key,
-        sentryReportingCallback(async (args) => {
-          if (args === undefined) {
-            args = {};
-          }
-          await copyNoteLinkCommand.run(args);
-        })
-      )
-    );
-    context.subscriptions.push(copyNoteLinkCommand);
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

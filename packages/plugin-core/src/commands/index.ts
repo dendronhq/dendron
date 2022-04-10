@@ -71,6 +71,7 @@ import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { OpenBackupCommand } from "./OpenBackupCommand";
 import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
+import { CopyNoteLinkCommand } from "./CopyNoteLink";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -87,6 +88,7 @@ const ALL_COMMANDS = [
   ConfigureExportPodV2,
   ConfigureGraphStylesCommand,
   ContributeCommand,
+  CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,
   CopyToClipboardCommand,

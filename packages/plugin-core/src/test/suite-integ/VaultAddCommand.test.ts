@@ -39,6 +39,7 @@ import {
   createWorkspaceWithGit,
   describeSingleWS,
   runLegacySingleWorkspaceTest,
+  runTestButSkipForWindows,
   setupBeforeAfter,
   stubVaultInput,
 } from "../testUtilsV3";
@@ -580,84 +581,88 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
     }
   );
 
-  describeSingleWS(
-    "WHEN creating and adding a remote vault inside a native workspace",
-    {
-      modConfigCb: enableSelfCOntainedVaults,
-      workspaceType: WorkspaceType.NATIVE,
-    },
-    () => {
-      let remoteDir: string;
-      let vaultName: string;
-      before(async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const tmpVaultPath = "tmp";
-        remoteDir = path.join(wsRoot, tmpVaultPath);
-        await createSelfContainedVaultWithGit(remoteDir);
-        vaultName = path.basename(remoteDir);
+  runTestButSkipForWindows()("", () => {
+    describeSingleWS(
+      "WHEN creating and adding a remote vault inside a native workspace",
+      {
+        modConfigCb: enableSelfCOntainedVaults,
+        workspaceType: WorkspaceType.NATIVE,
+      },
+      () => {
+        let remoteDir: string;
+        let vaultName: string;
+        before(async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const tmpVaultPath = "tmp";
+          remoteDir = path.join(wsRoot, tmpVaultPath);
+          await createSelfContainedVaultWithGit(remoteDir);
+          vaultName = path.basename(remoteDir);
 
-        sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
-        sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);
-        sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
+          sinon
+            .stub(VSCodeUtils, "showQuickPick")
+            .resolves({ label: "remote" });
+          sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);
+          sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
 
-        await new VaultAddCommand().run();
-      });
-
-      test("THEN the vault is under `dependencies/remote`, and is self contained", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        // It's kinda hard to mock git cloning from a remote here, so the remote
-        // we're using is a directory. That means this looks like
-        // `dependencies/tmp-123-foo` which is not "up to spec" but it's a good
-        // fallback behavior
-        const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
-        expect(await fs.pathExists(vaultPath)).toBeTruthy();
-        expect(
-          await fs.pathExists(path.join(vaultPath, FOLDERS.NOTES))
-        ).toBeTruthy();
-        expect(
-          await readYAMLAsync(
-            path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
-          )
-        ).toBeTruthy();
-        // A workspace file hasn't been created
-        expect(
-          await fs.pathExists(path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME))
-        ).toBeFalsy();
-      });
-
-      test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
-        const vault = VaultUtils.getVaultByName({
-          vaults: ConfigUtils.getVaults(config),
-          vname: vaultName,
+          await new VaultAddCommand().run();
         });
-        expect(vault?.selfContained).toBeTruthy();
-        expect(vault?.name).toEqual(vaultName);
-        expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
-        );
-      });
 
-      test("THEN the notes in this vault are accessible", async () => {
-        // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
-        await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
-        const vault = VaultUtils.getVaultByName({
-          vaults,
-          vname: vaultName,
+        test("THEN the vault is under `dependencies/remote`, and is self contained", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          // It's kinda hard to mock git cloning from a remote here, so the remote
+          // we're using is a directory. That means this looks like
+          // `dependencies/tmp-123-foo` which is not "up to spec" but it's a good
+          // fallback behavior
+          const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
+          expect(await fs.pathExists(vaultPath)).toBeTruthy();
+          expect(
+            await fs.pathExists(path.join(vaultPath, FOLDERS.NOTES))
+          ).toBeTruthy();
+          expect(
+            await readYAMLAsync(
+              path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
+            )
+          ).toBeTruthy();
+          // A workspace file hasn't been created
+          expect(
+            await fs.pathExists(path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME))
+          ).toBeFalsy();
         });
-        expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
+
+        test("THEN the vault was added to the workspace config correctly", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const config = DConfig.getOrCreate(wsRoot);
+          const vault = VaultUtils.getVaultByName({
+            vaults: ConfigUtils.getVaults(config),
+            vname: vaultName,
+          });
+          expect(vault?.selfContained).toBeTruthy();
+          expect(vault?.name).toEqual(vaultName);
+          expect(vault?.fsPath).toEqual(
+            path.join(FOLDERS.DEPENDENCIES, vaultName)
+          );
         });
-        expect(note).toBeTruthy();
-        expect(note?.vault.name).toEqual(vaultName);
-      });
-    }
-  );
+
+        test("THEN the notes in this vault are accessible", async () => {
+          // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
+          await new ReloadIndexCommand().run();
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const vault = VaultUtils.getVaultByName({
+            vaults,
+            vname: vaultName,
+          });
+          expect(vault).toBeTruthy();
+          const note = NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
+            vault: vault!,
+            engine,
+          });
+          expect(note).toBeTruthy();
+          expect(note?.vault.name).toEqual(vaultName);
+        });
+      }
+    );
+  });
 
   describeSingleWS(
     "WHEN creating and adding a remote workspace vault",

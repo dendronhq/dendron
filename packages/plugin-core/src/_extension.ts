@@ -88,6 +88,7 @@ import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
+import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
 import { SurveyUtils } from "./survey";
 import { IBaseCommand } from "./types";
@@ -599,6 +600,9 @@ export async function _activate(
         treeView.show();
         context.subscriptions.push(treeView);
       }
+
+      // Instantiate TextDocumentService
+      context.subscriptions.push(TextDocumentServiceFactory.create(ws));
 
       // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
       const existingCommands = await vscode.commands.getCommands();

@@ -366,9 +366,6 @@ export class DendronExtension implements IDendronExtension {
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
 
-    // Instantiate TextDocumentService
-    context.subscriptions.push(TextDocumentServiceFactory.create(this));
-
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
   }

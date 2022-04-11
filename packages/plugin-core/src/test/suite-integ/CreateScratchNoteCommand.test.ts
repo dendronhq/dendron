@@ -4,15 +4,12 @@ import * as vscode from "vscode";
 import { CreateScratchNoteCommand } from "../../commands/CreateScratchNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 suite("CreateScratchNoteCommand", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this);
   describeMultiWS(
     "GIVEN command executed",
     {
-      ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
     () => {

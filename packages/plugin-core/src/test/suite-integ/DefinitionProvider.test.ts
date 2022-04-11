@@ -5,24 +5,24 @@ import {
   ENGINE_HOOKS_MULTI,
   SETUP_HOOK_KEYS,
 } from "@dendronhq/engine-test-utils";
-import { describe, before } from "mocha";
+import fs from "fs-extra";
+import { before, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { TextEditor } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import DefinitionProvider from "../../features/DefinitionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
+import { getActiveEditorBasename } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import {
+  describeMultiWS,
   describeSingleWS,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
   stubCancellationToken,
 } from "../testUtilsV3";
-import fs from "fs-extra";
-import { getActiveEditorBasename } from "../testUtils";
 
 async function provide(editor: TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -36,18 +36,14 @@ async function provide(editor: TextEditor) {
 }
 
 suite("DefinitionProvider", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
   describe("same vault", () => {
     let noteWithLink: NoteProps;
     let noteWithTarget: NoteProps;
     let _wsRoot: string;
 
-    test("basic", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           _wsRoot = wsRoot;
           noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
@@ -60,7 +56,9 @@ suite("DefinitionProvider", function () {
             vault: vaults[0],
           });
         },
-        onInit: async () => {
+      },
+      () => {
+        test("THEN provide correct definitions", async () => {
           const editor = await WSUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
@@ -69,24 +67,13 @@ suite("DefinitionProvider", function () {
               note: noteWithLink,
             }).toLowerCase()
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("basic with vault prefix", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ engine, wsRoot }) => {
-          const note = engine.notes["alpha"];
-          const beta = engine.notes["beta"];
-          const editor = await WSUtils.openNote(note);
-          const location = (await provide(editor)) as vscode.Location;
-          expect(location.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({ wsRoot, note: beta }).toLowerCase()
-          );
-          done();
-        },
+    describeMultiWS(
+      "GIVEN vault prefix",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
             workspaceType: "single",
@@ -95,12 +82,24 @@ suite("DefinitionProvider", function () {
             withVaultPrefix: true,
           });
         },
-      });
-    });
+      },
+      () => {
+        test("THEN provide correct definitions", async () => {
+          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const note = engine.notes["alpha"];
+          const beta = engine.notes["beta"];
+          const editor = await WSUtils.openNote(note);
+          const location = (await provide(editor)) as vscode.Location;
+          expect(location.uri.fsPath.toLowerCase()).toEqual(
+            NoteUtils.getFullPath({ wsRoot, note: beta }).toLowerCase()
+          );
+        });
+      }
+    );
 
-    test("with anchor", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "GIVEN anchor",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
           await GOTO_NOTE_PRESETS.ANCHOR.preSetupHook({ wsRoot, vaults });
@@ -111,7 +110,10 @@ suite("DefinitionProvider", function () {
             wsRoot,
           });
         },
-        onInit: async ({ engine }) => {
+      },
+      () => {
+        test("THEN provide correct definitions", async () => {
+          const { engine } = ExtensionProvider.getDWorkspace();
           const note = engine.notes["beta"];
           const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
@@ -125,17 +127,13 @@ suite("DefinitionProvider", function () {
           expect(LocationTestUtils.getBasenameFromLocation(loc)).toEqual(
             "alpha.md"
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("with alias", (done) => {
-      let noteWithLink: NoteProps;
-      let _wsRoot: string;
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "GIVEN alias",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           _wsRoot = wsRoot;
           noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
@@ -147,7 +145,9 @@ suite("DefinitionProvider", function () {
             vault: vaults[0],
           });
         },
-        onInit: async () => {
+      },
+      () => {
+        test("THEN provide correct definitions", async () => {
           const editor = await WSUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
@@ -156,23 +156,21 @@ suite("DefinitionProvider", function () {
               note: noteWithTarget,
             }).toLowerCase()
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     const { ANCHOR_WITH_SPECIAL_CHARS } = GOTO_NOTE_PRESETS;
-    test("anchor with special chars", (done) => {
-      let specialCharsHeader: string;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "GIVEN anchor with special characters",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
-          ({ specialCharsHeader } =
+          const { specialCharsHeader } =
             await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
               wsRoot,
               vaults: [vault],
-            }));
+            });
           await NoteTestUtilsV4.createNote({
             fname: "beta",
             vault,
@@ -180,7 +178,10 @@ suite("DefinitionProvider", function () {
             wsRoot,
           });
         },
-        onInit: async ({ engine }) => {
+      },
+      () => {
+        test("THEN provide correct definitions", async () => {
+          const { engine } = ExtensionProvider.getDWorkspace();
           const note = engine.notes["beta"];
           const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
@@ -194,197 +195,154 @@ suite("DefinitionProvider", function () {
           expect(LocationTestUtils.getBasenameFromLocation(loc)).toEqual(
             "alpha.md"
           );
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
   });
 
-  describe("multi vault", () => {
-    test("basic", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ vaults, wsRoot }) => {
-          await ENGINE_HOOKS_MULTI.setupLinksMulti({ wsRoot, vaults });
-        },
-        onInit: async ({ engine, vaults, wsRoot }) => {
-          const note = engine.notes["alpha"];
-          const editor = await WSUtils.openNote(note);
+  describeMultiWS(
+    "GIVEN multi vault",
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await ENGINE_HOOKS_MULTI.setupLinksMulti({ wsRoot, vaults });
+      },
+    },
+    () => {
+      test("THEN provide correct definitions", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const note = engine.notes["alpha"];
+        const editor = await WSUtils.openNote(note);
 
-          const doc = editor?.document as vscode.TextDocument;
-          const provider = new DefinitionProvider();
-          const locations = (await provider.provideDefinition(
-            doc,
-            LocationTestUtils.getPresetWikiLinkPosition(),
-            null as any
-          )) as vscode.Location;
-          expect(locations.uri.fsPath.toLowerCase()).toEqual(
-            path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
-          );
-          done();
-        },
+        const doc = editor?.document as vscode.TextDocument;
+        const provider = new DefinitionProvider();
+        const locations = (await provider.provideDefinition(
+          doc,
+          LocationTestUtils.getPresetWikiLinkPosition(),
+          null as any
+        )) as vscode.Location;
+        expect(locations.uri.fsPath.toLowerCase()).toEqual(
+          path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
+        );
       });
-    });
+    }
+  );
+  describeMultiWS(
+    "GIVEN multi vault with prefix",
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
+          workspaceType: "multi",
+          wsRoot,
+          vaults,
+          withVaultPrefix: true,
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct definitions", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const note = engine.notes["alpha"];
+        const editor = await WSUtils.openNote(note);
 
-    test("basic with vault prefix", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ vaults, wsRoot }) => {
-          await callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
-            workspaceType: "multi",
-            wsRoot,
-            vaults,
-            withVaultPrefix: true,
-          });
-        },
-        onInit: async ({ engine, vaults, wsRoot }) => {
-          const note = engine.notes["alpha"];
-          const editor = await WSUtils.openNote(note);
-
-          const doc = editor?.document as vscode.TextDocument;
-          const provider = new DefinitionProvider();
-          const locations = (await provider.provideDefinition(
-            doc,
-            LocationTestUtils.getPresetWikiLinkPosition(),
-            null as any
-          )) as vscode.Location;
-          expect(locations.uri.fsPath.toLowerCase()).toEqual(
-            path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
-          );
-          done();
-        },
+        const doc = editor?.document as vscode.TextDocument;
+        const provider = new DefinitionProvider();
+        const locations = (await provider.provideDefinition(
+          doc,
+          LocationTestUtils.getPresetWikiLinkPosition(),
+          null as any
+        )) as vscode.Location;
+        expect(locations.uri.fsPath.toLowerCase()).toEqual(
+          path.join(wsRoot, vaults[1].fsPath, "beta.md").toLowerCase()
+        );
       });
-    });
+    }
+  );
 
-    test("with same name", (done) => {
-      let noteWithLink: NoteProps;
-      let noteTarget1: NoteProps;
-      let noteTarget2: NoteProps;
-      let _wsRoot: string;
+  let noteTarget1: NoteProps;
+  let noteTarget2: NoteProps;
+  let noteWithLink: NoteProps;
 
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          _wsRoot = wsRoot;
-          noteTarget1 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+  describeMultiWS(
+    "GIVEN multi vault with same name",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteTarget1 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+          genRandomId: true,
+        });
+        noteTarget2 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+          genRandomId: true,
+        });
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct definitions", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const editor = await WSUtils.openNote(noteWithLink);
+        const locations = (await provide(editor)) as vscode.Location[];
+        expect(locations.length).toEqual(2);
+        expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
+          NoteUtils.getFullPath({
             wsRoot,
-            vault: vaults[0],
-            genRandomId: true,
-          });
-          noteTarget2 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+            note: noteTarget1,
+          }).toLowerCase(),
+          NoteUtils.getFullPath({
             wsRoot,
-            vault: vaults[1],
-            genRandomId: true,
-          });
-          noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
-            wsRoot,
-            vault: vaults[0],
-          });
-        },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(noteWithLink);
-          const locations = (await provide(editor)) as vscode.Location[];
-          expect(locations.length).toEqual(2);
-          expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
-            NoteUtils.getFullPath({
-              wsRoot: _wsRoot,
-              note: noteTarget1,
-            }).toLowerCase(),
-            NoteUtils.getFullPath({
-              wsRoot: _wsRoot,
-              note: noteTarget2,
-            }).toLowerCase(),
-          ]);
-          done();
-        },
+            note: noteTarget2,
+          }).toLowerCase(),
+        ]);
       });
-    });
+    }
+  );
 
-    test("with anchor", (done) => {
-      let noteWithTarget: NoteProps;
-      let noteWithLink: NoteProps;
-      let _wsRoot: string;
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          _wsRoot = wsRoot;
-          noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create(
-            {
-              wsRoot,
-              vault: vaults[0],
-            }
-          );
-          noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+  describeMultiWS(
+    "GIVEN notes with same name",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteTarget1 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+          genRandomId: true,
+        });
+        noteTarget2 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[1],
+          genRandomId: true,
+        });
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct definitions", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const editor = await WSUtils.openNote(noteWithLink);
+        const locations = (await provide(editor)) as vscode.Location[];
+        expect(locations.length).toEqual(2);
+        expect(locations.map((l) => l.uri.fsPath.toLowerCase())).toEqual([
+          NoteUtils.getFullPath({
             wsRoot,
-            vault: vaults[1],
-          });
-        },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(noteWithLink);
-          const doc = editor?.document as vscode.TextDocument;
-          const provider = new DefinitionProvider();
-          const pos = LocationTestUtils.getPresetWikiLinkPosition();
-          const loc = (await provider.provideDefinition(
-            doc,
-            pos,
-            null as any
-          )) as vscode.Location;
-          expect(loc.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({
-              wsRoot: _wsRoot,
-              note: noteWithTarget,
-            }).toLowerCase()
-          );
-          done();
-        },
+            note: noteTarget1,
+          }).toLowerCase(),
+          NoteUtils.getFullPath({
+            wsRoot,
+            note: noteTarget2,
+          }).toLowerCase(),
+        ]);
       });
-    });
+    }
+  );
 
-    test("with hashtag", (done) => {
-      let noteWithTarget: NoteProps;
-      let noteWithLink: NoteProps;
-      let _wsRoot: string;
-
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          _wsRoot = wsRoot;
-          noteWithTarget = await NoteTestUtilsV4.createNote({
-            fname: "tags.my-test.note0",
-            vault: vaults[0],
-            wsRoot,
-          });
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "test-note",
-            vault: vaults[0],
-            body: "#my-test.note0",
-            wsRoot,
-          });
-        },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(noteWithLink);
-          const doc = editor?.document as vscode.TextDocument;
-          const provider = new DefinitionProvider();
-          const pos = LocationTestUtils.getPresetWikiLinkPosition();
-          const loc = (await provider.provideDefinition(
-            doc,
-            pos,
-            null as any
-          )) as vscode.Location;
-          expect(loc.uri.fsPath.toLowerCase()).toEqual(
-            NoteUtils.getFullPath({
-              wsRoot: _wsRoot,
-              note: noteWithTarget,
-            }).toLowerCase()
-          );
-          done();
-        },
-      });
-    });
-  });
-
-  describeSingleWS("WHEN used on a link to a non-note file", { ctx }, () => {
+  describeSingleWS("WHEN used on a link to a non-note file", {}, () => {
     before(async () => {
       const { wsRoot } = getDWorkspace();
       await fs.writeFile(

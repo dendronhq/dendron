@@ -94,11 +94,19 @@ export class AnalyticsUtils {
     return currentTime.minus(firstInstallTime) < ONE_WEEK;
   }
 
-  static track(event: string, props?: any) {
+  static _trackCommon({
+    event,
+    props,
+    timestamp,
+  }: {
+    event: string;
+    props?: any;
+    timestamp?: Date;
+  }) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
     const properties = { ...props, ...AnalyticsUtils.getCommonTrackProps() };
     const sessionId = AnalyticsUtils.getSessionId();
-    SegmentUtils.track({
+    return {
       event,
       platformProps: {
         type: AppNames.CODE,
@@ -106,8 +114,19 @@ export class AnalyticsUtils {
         ideFlavor,
       },
       properties,
+      timestamp,
       integrations: { Amplitude: { session_id: sessionId } },
-    });
+    } as Parameters<typeof SegmentUtils.track>[0];
+  }
+
+  static track(
+    event: string,
+    customProps?: any,
+    segmentProps?: { timestamp?: Date }
+  ) {
+    return SegmentUtils.trackSync(
+      this._trackCommon({ event, ...customProps, ...segmentProps })
+    );
   }
 
   static identify(props?: Partial<VSCodeIdentifyProps>) {

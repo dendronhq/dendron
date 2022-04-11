@@ -19,10 +19,10 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import * as mocha from "mocha";
-import { afterEach, beforeEach, describe, it, after } from "mocha";
+import { after, afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
 import semver from "semver";
-import sinon, { SinonStub, SinonSpy } from "sinon";
+import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { ExtensionContext, window } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
@@ -857,10 +857,6 @@ suite("WHEN migrate config", function () {
   let confirmationSpy: sinon.SinonSpy;
   let mockHomeDirStub: sinon.SinonStub;
 
-  const ctx: ExtensionContext = setupBeforeAfter(this, {
-    noSetInstallStatus: true,
-  });
-
   async function beforeSetup({ version }: { version: string }) {
     mockHomeDirStub = TestEngineUtils.mockHomeDir();
     DendronExtension.version = () => version;
@@ -882,7 +878,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.83.0 and config is legacy",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 4;
         return config;
@@ -908,7 +903,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.83.0 and config is up to date",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 5;
         return config;
@@ -934,7 +928,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.84.0 and config is legacy",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 4;
         return config;
@@ -960,7 +953,6 @@ suite("WHEN migrate config", function () {
   describeMultiWS(
     "GIVEN: current version is 0.84.0 and config is up to date",
     {
-      ctx,
       modConfigCb: (config) => {
         config.version = 5;
         return config;
@@ -982,117 +974,6 @@ suite("WHEN migrate config", function () {
       });
     }
   );
-});
-
-suite("GIVEN Dendron plugin activation", function () {
-  let setInitialInstallSpy: sinon.SinonSpy;
-  let showTelemetryNoticeSpy: sinon.SinonSpy;
-  const ctx: ExtensionContext = setupBeforeAfter(this);
-  let mockHomeDirStub: sinon.SinonStub;
-
-  function stubDendronWhenNotFirstInstall() {
-    MetadataService.instance().setInitialInstall();
-  }
-
-  function stubDendronWhenFirstInstall(ctx: ExtensionContext) {
-    ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
-  }
-
-  function setupSpies() {
-    setInitialInstallSpy = sinon.spy(
-      MetadataService.instance(),
-      "setInitialInstall"
-    );
-    showTelemetryNoticeSpy = sinon.spy(AnalyticsUtils, "showTelemetryNotice");
-  }
-
-  async function afterHook() {
-    mockHomeDirStub.restore();
-    sinon.restore();
-  }
-
-  describe("AND WHEN not first install", () => {
-    describeMultiWS(
-      "AND WHEN activate",
-      {
-        ctx,
-        preActivateHook: async () => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          stubDendronWhenNotFirstInstall();
-          setupSpies();
-        },
-        afterHook,
-        timeout: 1e4,
-      },
-      () => {
-        test("THEN set initial install not called", () => {
-          expect(setInitialInstallSpy.called).toBeFalsy();
-        });
-
-        test("THEN do not show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeFalsy();
-        });
-      }
-    );
-    describeMultiWS(
-      "AND WHEN firstInstall not set for old user",
-      {
-        ctx,
-        preActivateHook: async () => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          stubDendronWhenNotFirstInstall();
-          setupSpies();
-          // when check for first install, should be empty
-          MetadataService.instance().deleteMeta("firstInstall");
-        },
-        afterHook,
-        timeout: 1e5,
-      },
-      () => {
-        test("THEN set initial install called", () => {
-          expect(
-            setInitialInstallSpy.calledWith(
-              Time.DateTime.fromISO("2021-06-22").toSeconds()
-            )
-          ).toBeTruthy();
-        });
-
-        test("THEN do not show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeFalsy();
-        });
-      }
-    );
-  });
-
-  describe("AND WHEN first install", () => {
-    describeMultiWS(
-      "AND WHEN activate",
-      {
-        ctx,
-        preActivateHook: async ({ ctx }) => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          setupSpies();
-          stubDendronWhenFirstInstall(ctx);
-        },
-        afterHook,
-        timeout: 1e4,
-      },
-      () => {
-        test("THEN set initial install called", () => {
-          expect(setInitialInstallSpy.called).toBeTruthy();
-        });
-
-        test("THEN global version set", () => {
-          expect(ctx.globalState.get(GLOBAL_STATE.VERSION)).toNotEqual(
-            undefined
-          );
-        });
-        test("THEN show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeTruthy();
-        });
-      }
-    );
-  });
 });
 
 describe("shouldDisplayInactiveUserSurvey", () => {

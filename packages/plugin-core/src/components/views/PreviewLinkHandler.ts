@@ -7,7 +7,7 @@ import {
   NoteUtils,
   NoteViewMessage,
 } from "@dendronhq/common-all";
-import { findNonNoteFile } from "@dendronhq/common-server";
+import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -97,7 +97,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       })) || {};
     if (fullPath) {
       // Found a matching non-note file.
-      if (PluginFileUtils.isTextFileExtension(path.extname(fullPath))) {
+      if (ExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
         // If it's a text file, open it inside VSCode.
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(fullPath),

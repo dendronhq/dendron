@@ -182,15 +182,18 @@ class ExtensionUtils {
    * Track if welcome button was clicked
    */
   static trackWelcomeClicked() {
-    const welcomeClicked = MetadataService.instance().getWelcomeClicked();
+    const welcomeClickedTime = MetadataService.instance().getWelcomeClicked();
     // check if we have a welcome click message
     // see [[../packages/plugin-core/src/WelcomeUtils.ts#^z5hpzc3fdkxs]] where this property is set
-    if (welcomeClicked) {
-      AnalyticsUtils.trackSync({
-        event: TutorialEvents.ClickStart,
-        timestamp: welcomeClicked,
-      }).then(() => {
-        MetadataService.instance().deleteMeta("welcomeClicked");
+    if (welcomeClickedTime) {
+      AnalyticsUtils.track(
+        TutorialEvents.ClickStart,
+        {},
+        {
+          timestamp: welcomeClickedTime,
+        }
+      ).then(() => {
+        MetadataService.instance().deleteMeta("welcomeClickedTime");
       });
     }
   }

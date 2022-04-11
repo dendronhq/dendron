@@ -20,7 +20,10 @@ suite("GIVEN Dendron plugin activation", function () {
 
   function stubDendronWhenFirstInstall(ctx: ExtensionContext) {
     ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
-    MetadataService.instance().setMeta("welcomeClicked", Time.now().toMillis());
+    MetadataService.instance().setMeta(
+      "welcomeClickedTime",
+      Time.now().toMillis()
+    );
   }
 
   function setupSpies() {
@@ -113,8 +116,9 @@ suite("GIVEN Dendron plugin activation", function () {
           expect(showTelemetryNoticeSpy.called).toBeTruthy();
         });
         test("THEN welcomeClick timestamp removed", () => {
-          const welcomeClicked = MetadataService.instance().getWelcomeClicked();
-          expect(welcomeClicked).toBeFalsy();
+          const welcomeClickedTime =
+            MetadataService.instance().getWelcomeClicked();
+          expect(welcomeClickedTime).toBeFalsy();
         });
 
         this.afterAll(afterHook);

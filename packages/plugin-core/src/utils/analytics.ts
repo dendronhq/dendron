@@ -119,12 +119,14 @@ export class AnalyticsUtils {
     } as Parameters<typeof SegmentUtils.track>[0];
   }
 
-  static track(event: string, props?: any) {
-    SegmentUtils.track(this._trackCommon({ event, props }));
-  }
-
-  static trackSync(opts: { event: string; props?: any; timestamp?: Date }) {
-    return SegmentUtils.trackSync(this._trackCommon(opts));
+  static track(
+    event: string,
+    customProps?: any,
+    segmentProps?: { timestamp?: Date }
+  ) {
+    return SegmentUtils.trackSync(
+      this._trackCommon({ event, ...customProps, ...segmentProps })
+    );
   }
 
   static identify(props?: Partial<VSCodeIdentifyProps>) {

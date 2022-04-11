@@ -39,6 +39,7 @@ export class CopyNoteLinkCommand
   key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
   private engineEvents: EngineEventEmitter;
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
+  static requireActiveWorkspace: boolean = true;
 
   constructor(engineEvents: EngineEventEmitter) {
     super();

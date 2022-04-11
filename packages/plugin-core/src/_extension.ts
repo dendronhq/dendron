@@ -1110,99 +1110,101 @@ async function _setupCommands({
   });
 
   // ---
-  if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "next" });
-        })
-      )
-    );
-  }
-  if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "prev" });
-        })
-      )
-    );
-  }
+  if (requireActiveWorkspace === true) {
+    if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
+          sentryReportingCallback(async () => {
+            await new GoToSiblingCommand().execute({ direction: "next" });
+          })
+        )
+      );
+    }
+    if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+          sentryReportingCallback(async () => {
+            await new GoToSiblingCommand().execute({ direction: "prev" });
+          })
+        )
+      );
+    }
 
-  // RENAME is alias to MOVE
-  if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RENAME_NOTE.key,
-        sentryReportingCallback(async (args: any) => {
-          await new MoveNoteCommand().run({
-            allowMultiselect: false,
-            useSameVault: true,
-            ...args,
-          });
-        })
-      )
-    );
-  }
+    // RENAME is alias to MOVE
+    if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.RENAME_NOTE.key,
+          sentryReportingCallback(async (args: any) => {
+            await new MoveNoteCommand().run({
+              allowMultiselect: false,
+              useSameVault: true,
+              ...args,
+            });
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        sentryReportingCallback(async (args) => {
-          if (args === undefined) {
-            args = {};
-          }
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
-            args
-          );
-        })
-      )
-    );
-  }
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_PREVIEW.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
+              args
+            );
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowSchemaGraphCommand(
-            SchemaGraphViewFactory.create(ws)
-          ).run();
-        })
-      )
-    );
-  }
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
+          sentryReportingCallback(async () => {
+            await new ShowSchemaGraphCommand(
+              SchemaGraphViewFactory.create(ws)
+            ).run();
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowNoteGraphCommand(
-            NoteGraphPanelFactory.create(ws, ws.getEngine())
-          ).run();
-        })
-      )
-    );
-  }
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
+          sentryReportingCallback(async () => {
+            await new ShowNoteGraphCommand(
+              NoteGraphPanelFactory.create(ws, ws.getEngine())
+            ).run();
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
-    const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COPY_NOTE_LINK.key,
-        sentryReportingCallback(async (args) => {
-          if (args === undefined) {
-            args = {};
-          }
-          await copyNoteLinkCommand.run(args);
-        })
-      )
-    );
-    context.subscriptions.push(copyNoteLinkCommand);
+    if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
+      const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.COPY_NOTE_LINK.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await copyNoteLinkCommand.run(args);
+          })
+        )
+      );
+      context.subscriptions.push(copyNoteLinkCommand);
+    }
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

@@ -49,7 +49,6 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,

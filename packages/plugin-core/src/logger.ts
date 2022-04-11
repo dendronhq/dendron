@@ -120,6 +120,20 @@ export class Logger {
       this.output || window.createOutputChannel(DENDRON_CHANNEL_NAME);
   }
 
+  /** Log an error.
+   *
+   * If an `error` is attached to log payload, the error is also sent to Sentry.
+   * This should be used for internal Dendron errors that we can fix, or for
+   * problems we assume should never happen.
+   *
+   * If the error is expected in regular execution, you can log it with
+   * {@link Logger.info} instead.
+   *
+   * If the error is unexpected, but also not something we could fix (i.e. the
+   * user misconfigured something), you'll probably want to use
+   * {@link Logger.warn} instead. That way we can debug the issue in a bug
+   * report by looking at the logs, but it doesn't clog up Sentry.
+   */
   static error(payload: LogPayload) {
     Logger.log(payload, "error");
 
@@ -154,6 +168,15 @@ export class Logger {
 
   static debug(payload: any) {
     Logger.log(payload, "debug");
+  }
+
+  /** Use this to log an error without submitting it to Sentry.
+   *
+   * This should be used for errors related to users setup etc., where
+   * we wouldn't be able to do anything on our part to fix the problem.
+   */
+  static warn(payload: any) {
+    Logger.log(payload, "warn");
   }
 
   static log = (

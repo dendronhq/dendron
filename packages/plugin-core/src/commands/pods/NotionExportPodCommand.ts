@@ -38,10 +38,8 @@ export class NotionExportPodCommand extends BaseExportPodCommand<
   NotionExportReturnType
 > {
   public key = "dendron.notionexport";
-  private extension: IDendronExtension;
   public constructor(extension: IDendronExtension) {
-    super(new QuickPickHierarchySelector());
-    this.extension = extension;
+    super(new QuickPickHierarchySelector(), extension);
   }
 
   public createPod(

@@ -54,7 +54,7 @@ export class EngineAPIService
   implements DEngineClient, IEngineAPIService, EngineEventEmitter
 {
   private _internalEngine: DEngineClient;
-  private _engineEvents: EngineEventEmitter;
+  private _engineEventEmitter: EngineEventEmitter;
   private _trustedWorkspace: boolean = true;
 
   static createEngine({
@@ -103,14 +103,14 @@ export class EngineAPIService
     engineEvents: EngineEventEmitter;
   }) {
     this._internalEngine = engineClient;
-    this._engineEvents = engineEvents;
+    this._engineEventEmitter = engineEvents;
   }
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
-    return this._engineEvents.onEngineNoteStateChanged;
+    return this._engineEventEmitter.onEngineNoteStateChanged;
   }
 
   dispose() {
-    this._engineEvents.dispose();
+    this._engineEventEmitter.dispose();
   }
 
   get trustedWorkspace(): boolean {
@@ -182,6 +182,10 @@ export class EngineAPIService
   }
   public set hooks(arg: DHookDict) {
     this._internalEngine.hooks = arg;
+  }
+
+  public get engineEventEmitter(): EngineEventEmitter {
+    return this._engineEventEmitter;
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {

@@ -15,6 +15,7 @@ import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { PluginFileUtils } from "../../utils/files";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
@@ -920,12 +921,12 @@ suite("GotoNote", function () {
               wsRoot,
               vault: vaults[0],
               fname: "test.note",
-              body: "[[.test/file.test]]",
+              body: "[[.test/file.txt]]",
               engine,
             });
             await fs.ensureDir(path.join(wsRoot, ".test"));
             await fs.writeFile(
-              path.join(wsRoot, ".test", "file.test"),
+              path.join(wsRoot, ".test", "file.txt"),
               ["Et corporis assumenda quia libero illo."].join("\n")
             );
 
@@ -936,7 +937,7 @@ suite("GotoNote", function () {
           });
 
           test("THEN opens that file", async () => {
-            expect(getActiveEditorBasename()).toEqual("file.test");
+            expect(getActiveEditorBasename()).toEqual("file.txt");
             expect(
               AssertUtils.assertInString({
                 body: VSCodeUtils.getActiveTextEditorOrThrow().document.getText(),
@@ -946,6 +947,42 @@ suite("GotoNote", function () {
           });
         }
       );
+
+      describeMultiWS("WHEN linked to a binary file", { ctx }, () => {
+        const filename = "test.zip";
+        const notename = "test.note";
+        let openWithDefaultApp: sinon.SinonStub<[string], Promise<void>>;
+        before(async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const note = await NoteTestUtilsV4.createNoteWithEngine({
+            wsRoot,
+            vault: vaults[0],
+            fname: notename,
+            body: `[[/${filename}]]`,
+            engine,
+          });
+          await fs.writeFile(path.join(wsRoot, filename), "");
+          openWithDefaultApp = sinon.stub(
+            PluginFileUtils,
+            "openWithDefaultApp"
+          );
+
+          await ExtensionProvider.getWSUtils().openNote(note);
+          VSCodeUtils.getActiveTextEditorOrThrow().selection =
+            new vscode.Selection(7, 1, 7, 1);
+          await createGoToNoteCmd().run();
+        });
+
+        test("THEN opens that file in the default app", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          // The open note didn't change
+          expect(getActiveEditorBasename().startsWith(notename)).toBeTruthy();
+          // Used the stubbed function to open in default app
+          expect(
+            openWithDefaultApp.calledOnceWith(path.join(wsRoot, filename))
+          );
+        });
+      });
 
       describeMultiWS(
         "WHEN linked to a file under assets where assets is in root and not a vault",

@@ -30,11 +30,9 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
   MarkdownExportReturnType
 > {
   public key = "dendron.markdownexportv2";
-  private extension: IDendronExtension;
 
   public constructor(extension: IDendronExtension) {
-    super(new QuickPickHierarchySelector());
-    this.extension = extension;
+    super(new QuickPickHierarchySelector(), extension);
   }
 
   public async gatherInputs(

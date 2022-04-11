@@ -5,6 +5,7 @@ import {
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { AnalyticsUtils } from "../utils/analytics";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 
@@ -45,6 +46,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
 
     this._panel.webview.html = html;
 
-    this._panel.reveal();
+    WebViewUtils.openWebviewAndMeasureTimeOpen(this._panel, (duration) => {
+      AnalyticsUtils.track(this.key, {
+        timeOpen: duration,
+      });
+    });
   }
 }

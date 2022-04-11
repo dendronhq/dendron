@@ -710,3 +710,11 @@ export async function createVaultWithGit(dir: string) {
   await schemaModuleOpts2File(schema, dir, "root");
   await gitInitializeRepo(dir);
 }
+
+export async function waitInMilliseconds(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, milliseconds);
+  });
+}

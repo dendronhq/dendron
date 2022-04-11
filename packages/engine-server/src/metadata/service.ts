@@ -44,7 +44,7 @@ type Metadata = Partial<{
   /**
    * Time when the welcome button was clicked
    */
-  welcomeClicked: number;
+  welcomeClickedTime: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -90,10 +90,10 @@ export class MetadataService {
   }
 
   getWelcomeClicked(): Date | false {
-    const welcomeClicked =
-      MetadataService.instance().getMeta()["welcomeClicked"];
-    if (_.isNumber(welcomeClicked)) {
-      return Time.DateTime.fromMillis(welcomeClicked).toJSDate();
+    const welcomeClickedTime =
+      MetadataService.instance().getMeta()["welcomeClickedTime"];
+    if (_.isNumber(welcomeClickedTime)) {
+      return Time.DateTime.fromMillis(welcomeClickedTime).toJSDate();
     }
     return false;
   }

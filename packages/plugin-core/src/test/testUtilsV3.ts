@@ -668,6 +668,13 @@ export function toDendronEngineClient(engine: IEngineAPIService) {
   return engine as unknown as DendronEngineClient;
 }
 
+async function gitInitializeRepo(dir: string) {
+  const git = new Git({ localUrl: dir });
+  await git.init();
+  await git.add(".");
+  await git.commit({ msg: "testUtilsV3" });
+}
+
 export async function createWorkspaceWithGit(
   dir: string,
   opts?: Partial<SetupWorkspaceOpts>
@@ -681,10 +688,7 @@ export async function createWorkspaceWithGit(
     workspaceInitializer: new BlankInitializer(),
     ...opts,
   });
-  const git = new Git({ localUrl: dir });
-  await git.init();
-  await git.add(".");
-  await git.commit({ msg: "testUtilsV3" });
+  await gitInitializeRepo(dir);
 }
 
 export async function createSelfContainedVaultWithGit(dir: string) {
@@ -704,4 +708,5 @@ export async function createVaultWithGit(dir: string) {
   const schema = SchemaUtils.createRootModule({ vault });
   await note2File({ note, vault, wsRoot: dir });
   await schemaModuleOpts2File(schema, dir, "root");
+  await gitInitializeRepo(dir);
 }

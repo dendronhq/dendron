@@ -327,7 +327,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           // Some things, like updating config, can't be parallelized so needs
           // to be done one at a time
-          asyncLoopOneAtATime(vaults, async (vault) => {
+          await asyncLoopOneAtATime(vaults, async (vault) => {
             if (VaultUtils.isSelfContained(vault)) {
               // eslint-disable-next-line no-await-in-loop
               await wsService.createSelfContainedVault({

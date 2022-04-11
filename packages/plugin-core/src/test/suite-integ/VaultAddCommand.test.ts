@@ -698,15 +698,12 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = DConfig.getOrCreate(wsRoot);
-        const vault = VaultUtils.getVaultByName({
-          vaults: ConfigUtils.getVaults(config),
-          vname: vaultName,
-        });
-        expect(vault?.selfContained).toBeFalsy();
-        expect(vault?.name).toEqual(vaultName);
-        expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
+        expect(ConfigUtils.getVaults(config).length).toEqual(2);
+        const vault = ConfigUtils.getVaults(config).find(
+          (vault) => vault.workspace === vaultName
         );
+        expect(vault?.selfContained).toBeFalsy();
+        expect(vault?.fsPath).toEqual("vault");
         expect(config.workspace.workspaces).toBeTruthy();
         expect(config.workspace.workspaces![vaultName]).toBeTruthy();
         expect(config.workspace.workspaces![vaultName]?.remote.url).toEqual(
@@ -718,11 +715,11 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
-        const vault = VaultUtils.getVaultByName({
-          vaults,
-          vname: vaultName,
-        });
+        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getOrCreate(wsRoot);
+        const vault = ConfigUtils.getVaults(config).find(
+          (vault) => vault.workspace === vaultName
+        );
         expect(vault).toBeTruthy();
         const note = NoteUtils.getNoteByFnameFromEngine({
           fname: "root",
@@ -730,7 +727,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           engine,
         });
         expect(note).toBeTruthy();
-        expect(note?.vault.name).toEqual(vaultName);
+        expect(note?.vault.workspace).toEqual(vaultName);
       });
     }
   );
@@ -774,12 +771,13 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = DConfig.getOrCreate(wsRoot);
+        expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
         });
+
         expect(vault?.selfContained).toBeFalsy();
-        expect(vault?.name).toEqual(vaultName);
         expect(vault?.fsPath).toEqual(
           path.join(FOLDERS.DEPENDENCIES, vaultName)
         );

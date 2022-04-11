@@ -1,5 +1,6 @@
-import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
+import { Time, TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
 import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
+import { MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -39,7 +40,13 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            AnalyticsUtils.track(TutorialEvents.ClickStart);
+            // ^z5hpzc3fdkxs
+            // it takes up to 8s to do a synchronous track call which becomes noticable to the user
+            // instead of doing that, we write the timestamp when the welcome was clicked and async track it during initialization
+            MetadataService.instance().setMeta(
+              "welcomeClickedTime",
+              Time.now().toMillis()
+            );
             // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
             const { filePath } =
               FileUtils.genFilePathWithSuffixThatDoesNotExist({

@@ -17,21 +17,17 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  runLegacyMultiWorkspaceTest,
-  runLegacySingleWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 
 suite("DoctorCommandTest", function () {
-  const ctx = setupBeforeAfter(this, {});
-
-  test("basic", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN bad frontmatter",
+    {
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN fix frontmatter", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         // create files without frontmatter
         const vaultDirRoot = path.join(
           wsRoot,
@@ -63,16 +59,18 @@ suite("DoctorCommandTest", function () {
         expect(NoteUtils.RE_FM.exec(resp2)).toBeTruthy();
         expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeTruthy();
         expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("basic file scoped", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "AND when scoped to file",
+    {
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN fix frontmatter", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultDirRoot = path.join(
           wsRoot,
           VaultUtils.getRelPath(vaults[0])
@@ -105,15 +103,14 @@ suite("DoctorCommandTest", function () {
         expect(NoteUtils.RE_FM.exec(resp2)).toBeFalsy();
         expect(NoteUtils.RE_FM_UPDATED.exec(resp2)).toBeFalsy();
         expect(NoteUtils.RE_FM_CREATED.exec(resp2)).toBeFalsy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("fixes bad note id", (done) => {
-    let note: NoteProps;
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  let note: NoteProps;
+  describeMultiWS(
+    "GIVEN bad note id",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         note = await NoteTestUtilsV4.createNote({
           wsRoot,
@@ -124,7 +121,10 @@ suite("DoctorCommandTest", function () {
           },
         });
       },
-      onInit: async ({ wsRoot, engine, vaults }) => {
+    },
+    () => {
+      test("THEN fix id", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(note);
 
         const ext = ExtensionProvider.getExtension();
@@ -143,73 +143,20 @@ suite("DoctorCommandTest", function () {
           vault: vaults[0],
         })!;
         expect(note.id === "-bad-id").toBeFalsy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 });
 
 suite("CREATE_MISSING_LINKED_NOTES", function () {
-  const ctx = setupBeforeAfter(this);
-
-  test("basic proceed, file scoped", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "AND when cancelled",
+    {
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults }) => {
-        const vault = vaults[0];
-        const file = await NoteTestUtilsV4.createNote({
-          fname: "real",
-          body: "[[real.fake]]\n",
-          vault,
-          wsRoot,
-        });
-        await NoteTestUtilsV4.createNote({
-          fname: "real2",
-          body: "[[real.fake2]]\n",
-          vault,
-          wsRoot,
-        });
-        await WSUtils.openNote(file);
-        const ext = ExtensionProvider.getExtension();
-        const cmd = new DoctorCommand(ext);
-        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
-          Promise.resolve({
-            action: DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
-            scope: "file",
-          })
-        );
-        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
-
-        try {
-          quickPickStub
-            .onCall(0)
-            .returns(
-              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-            );
-          await cmd.run();
-          const vaultPath = vault2Path({ vault, wsRoot });
-          const created = _.includes(fs.readdirSync(vaultPath), "real.fake.md");
-          expect(created).toBeTruthy();
-          const didNotCreate = !_.includes(
-            fs.readdirSync(vaultPath),
-            "real.fake2.md"
-          );
-          expect(didNotCreate).toBeTruthy();
-        } finally {
-          gatherInputsStub.restore();
-          quickPickStub.restore();
-        }
-        done();
-      },
-    });
-  });
-
-  test("basic cancelled", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
-      postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN create no notes", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
@@ -245,16 +192,18 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("broken link with alias", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeSingleWS(
+    "GIVEN broken link with alias",
+    {
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN fix link", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const file = await NoteTestUtilsV4.createNote({
           fname: "real",
@@ -293,18 +242,20 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("xvault broken links", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN xvault broken links",
+    {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN fix links", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const file = await NoteTestUtilsV4.createNote({
@@ -348,18 +299,20 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("should do nothing in multivault workspace if vault prefix isn't there", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN missing vault prefix",
+    {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ wsRoot, vaults }) => {
+    },
+    () => {
+      test("THEN do nothing", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         await NoteTestUtilsV4.createNote({
@@ -428,18 +381,22 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("broken links in multiple vaults with workspace scope", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN broken links in multiple vaults with workspace scope",
+    {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
-      onInit: async ({ wsRoot, vaults }) => {
+      // this test can take up to 3s to run
+      timeout: 3e3,
+    },
+    () => {
+      test("THEN fix all links", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         await NoteTestUtilsV4.createNote({
@@ -513,20 +470,20 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 });
 
 suite("REGENERATE_NOTE_ID", function () {
-  const ctx = setupBeforeAfter(this);
-
-  test("file scoped", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN file scope",
+    {
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults, engine }) => {
+    },
+    () => {
+      test("THEN fix file", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const oldNote = NoteUtils.getNoteOrThrow({
           fname: "foo",
@@ -564,16 +521,18 @@ suite("REGENERATE_NOTE_ID", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("workspace scoped", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN workspace scoped",
+    {
       postSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ wsRoot, vaults, engine }) => {
+    },
+    () => {
+      test("THEN regenerate note id", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const oldRootId = NoteUtils.getNoteOrThrow({
           fname: "root",
@@ -636,20 +595,16 @@ suite("REGENERATE_NOTE_ID", function () {
           gatherInputsStub.restore();
           quickPickStub.restore();
         }
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 });
 
 suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
-  const ctx = setupBeforeAfter(this);
-
   describeMultiWS(
     "GIVEN findIncompatibleExtensions selected",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      ctx,
     },
     () => {
       test("THEN reload is not called", async () => {

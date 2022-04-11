@@ -1,8 +1,4 @@
-import {
-  describeMultiWS,
-  setupBeforeAfter,
-  setupLegacyWorkspaceMulti,
-} from "../testUtilsV3";
+import { describeMultiWS, setupLegacyWorkspaceMulti } from "../testUtilsV3";
 import { describe, before, beforeEach, after, afterEach } from "mocha";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import sinon from "sinon";
@@ -14,95 +10,81 @@ import { getDWorkspace } from "../../workspace";
 
 // eslint-disable-next-line prefer-arrow-callback
 suite("GIVEN ChangeWorkspace command", function () {
-  const ctx = setupBeforeAfter(this, {});
+  describeMultiWS("WHEN command is gathering inputs", {}, () => {
+    let showOpenDialog: sinon.SinonStub;
 
-  describeMultiWS(
-    "WHEN command is gathering inputs",
-    {
-      ctx,
-    },
-    () => {
-      let showOpenDialog: sinon.SinonStub;
+    beforeEach(async () => {
+      const cmd = new ChangeWorkspaceCommand();
+      showOpenDialog = sinon.stub(window, "showOpenDialog");
+      await cmd.gatherInputs();
+    });
+    afterEach(() => {
+      showOpenDialog.restore();
+    });
 
-      beforeEach(async () => {
+    test("THEN file picker is opened", (done) => {
+      expect(showOpenDialog.calledOnce).toBeTruthy();
+      done();
+    });
+  });
+
+  describeMultiWS("WHEN command is run", {}, (ctx) => {
+    describe("AND a code workspace is selected", () => {
+      let openWS: sinon.SinonStub;
+      let newWSRoot: string;
+      before(async () => {
+        const { wsRoot: currentWSRoot } = getDWorkspace();
+        openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
+
+        const out = await setupLegacyWorkspaceMulti({
+          ctx,
+          workspaceType: WorkspaceType.CODE,
+        });
+        newWSRoot = out.wsRoot;
+        expect(newWSRoot).toNotEqual(currentWSRoot);
+
         const cmd = new ChangeWorkspaceCommand();
-        showOpenDialog = sinon.stub(window, "showOpenDialog");
-        await cmd.gatherInputs();
+        sinon.stub(cmd, "gatherInputs").resolves({ rootDirRaw: newWSRoot });
+        await cmd.run();
       });
-      afterEach(() => {
-        showOpenDialog.restore();
+      after(() => {
+        openWS.restore();
       });
 
-      test("THEN file picker is opened", (done) => {
-        expect(showOpenDialog.calledOnce).toBeTruthy();
+      test("THEN workspace is opened", (done) => {
+        expect(openWS.calledOnce).toBeTruthy();
+        expect(openWS.calledOnceWithExactly(newWSRoot));
         done();
       });
-    }
-  );
+    });
 
-  describeMultiWS(
-    "WHEN command is run",
-    {
-      ctx,
-    },
-    () => {
-      describe("AND a code workspace is selected", () => {
-        let openWS: sinon.SinonStub;
-        let newWSRoot: string;
-        before(async () => {
-          const { wsRoot: currentWSRoot } = getDWorkspace();
-          openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
+    describe("AND a native workspace is selected", () => {
+      let openWS: sinon.SinonStub;
+      let newWSRoot: string;
+      before(async () => {
+        const { wsRoot: currentWSRoot } = getDWorkspace();
+        openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
 
-          const out = await setupLegacyWorkspaceMulti({
-            ctx,
-            workspaceType: WorkspaceType.CODE,
-          });
-          newWSRoot = out.wsRoot;
-          expect(newWSRoot).toNotEqual(currentWSRoot);
-
-          const cmd = new ChangeWorkspaceCommand();
-          sinon.stub(cmd, "gatherInputs").resolves({ rootDirRaw: newWSRoot });
-          await cmd.run();
+        const out = await setupLegacyWorkspaceMulti({
+          ctx,
+          workspaceType: WorkspaceType.NATIVE,
         });
-        after(() => {
-          openWS.restore();
-        });
+        newWSRoot = out.wsRoot;
+        expect(newWSRoot).toNotEqual(currentWSRoot);
 
-        test("THEN workspace is opened", (done) => {
-          expect(openWS.calledOnce).toBeTruthy();
-          expect(openWS.calledOnceWithExactly(newWSRoot));
-          done();
-        });
+        const cmd = new ChangeWorkspaceCommand();
+        sinon.stub(cmd, "gatherInputs").resolves({ rootDirRaw: newWSRoot });
+        await cmd.run();
+      });
+      after(() => {
+        openWS.restore();
       });
 
-      describe("AND a native workspace is selected", () => {
-        let openWS: sinon.SinonStub;
-        let newWSRoot: string;
-        before(async () => {
-          const { wsRoot: currentWSRoot } = getDWorkspace();
-          openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
-
-          const out = await setupLegacyWorkspaceMulti({
-            ctx,
-            workspaceType: WorkspaceType.NATIVE,
-          });
-          newWSRoot = out.wsRoot;
-          expect(newWSRoot).toNotEqual(currentWSRoot);
-
-          const cmd = new ChangeWorkspaceCommand();
-          sinon.stub(cmd, "gatherInputs").resolves({ rootDirRaw: newWSRoot });
-          await cmd.run();
-        });
-        after(() => {
-          openWS.restore();
-        });
-
-        test("THEN workspace is opened", (done) => {
-          expect(openWS.calledOnce).toBeTruthy();
-          expect(openWS.calledOnceWithExactly(newWSRoot));
-          done();
-        });
+      test("THEN workspace is opened", (done) => {
+        expect(openWS.calledOnce).toBeTruthy();
+        expect(openWS.calledOnceWithExactly(newWSRoot));
+        done();
       });
-    }
-  );
+    });
+  });
 });

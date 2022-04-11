@@ -1,20 +1,16 @@
 import { NoteTrait } from "@dendronhq/common-all";
 import { afterEach, describe } from "mocha";
-import { ExtensionProvider } from "../../../../ExtensionProvider";
+import sinon from "sinon";
 import vscode from "vscode";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 import { CommandRegistrar } from "../../../../services/CommandRegistrar";
 import { NoteTraitManager } from "../../../../services/NoteTraitService";
 import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
-import sinon from "sinon";
+import { describeSingleWS } from "../../../testUtilsV3";
 
 //TODO: Expand coverage once other methods of NoteTraitManager are implemented
 suite("NoteTraitManager tests", () => {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    noSetTimeout: true,
-  });
-
   describe(`GIVEN a NoteTraitManager`, () => {
     const TRAIT_ID = "test-trait";
 
@@ -22,7 +18,7 @@ suite("NoteTraitManager tests", () => {
       id: TRAIT_ID,
     };
 
-    describeSingleWS("WHEN registering a new trait", { ctx }, () => {
+    describeSingleWS("WHEN registering a new trait", {}, (ctx) => {
       let registrar: CommandRegistrar;
       afterEach(() => {
         if (registrar) {

@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { AxiosError } from "axios";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
+import { RespV3 } from "./types";
 
 type DendronErrorProps = {
   /**
@@ -315,6 +316,10 @@ export class ErrorUtils {
 
   static isDendronError(error: unknown): error is DendronError {
     return _.get(error, "name", "") === "DendronError";
+  }
+
+  static isErrorResp(resp: RespV3<any>) {
+    return "error" in resp;
   }
 }
 

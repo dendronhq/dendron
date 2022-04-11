@@ -621,16 +621,14 @@ export class SegmentUtils {
   }
 
   /**
-   * Async tracking. Do not return promise from track call so it cannot be awaited
-   * in downstream functions
+   * Async tracking. Do not await this method as track calls can take ~8s to finish
    */
-  static track(
+  static async track(
     opts: SegmentEventProps & {
       platformProps: VSCodeProps | CLIProps;
     }
-  ): void {
-    this._trackCommon(opts);
-    return;
+  ): Promise<void> {
+    return this._trackCommon(opts);
   }
 
   /**

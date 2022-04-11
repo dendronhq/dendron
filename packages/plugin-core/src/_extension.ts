@@ -48,8 +48,8 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CURRENT_AB_TESTS,
-  UpgradeToastOrViewTestGroups,
-  UPGRADE_TOAST_OR_VIEW_TEST,
+  UpgradeToastWordingTestGroups,
+  UPGRADE_TOAST_WORDING_TEST,
 } from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
@@ -100,7 +100,6 @@ import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegis
 import { StartupUtils } from "./utils/StartupUtils";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
-import { showUpgradeView } from "./views/UpgradeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
@@ -854,49 +853,51 @@ async function showWelcomeOrWhatsNew({
       await StateService.instance().setGlobalVersion(version);
 
       // ^t6dxodie048o
-      const toastOrView = UPGRADE_TOAST_OR_VIEW_TEST.getUserGroup(
+      const toastWording = UPGRADE_TOAST_WORDING_TEST.getUserGroup(
         SegmentClient.instance().anonymousId
       );
 
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
-        toastOrView,
+        toastWording,
       });
 
-      switch (toastOrView) {
-        case UpgradeToastOrViewTestGroups.upgradeToast: {
-          vscode.window
-            .showInformationMessage(
-              `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
-              "See what changed"
-            )
-            .then((resp) => {
-              if (resp === "See what changed") {
-                AnalyticsUtils.track(
-                  VSCodeEvents.UpgradeSeeWhatsChangedClicked,
-                  {
-                    previousVersion: previousExtensionVersion,
-                    duration: getDurationMilliseconds(start),
-                  }
-                );
-                vscode.commands.executeCommand(
-                  "vscode.open",
-                  vscode.Uri.parse(
-                    "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
-                  )
-                );
-              }
-            });
+      let buttonAction: string;
+      switch (toastWording) {
+        case UpgradeToastWordingTestGroups.openChangelog:
+          buttonAction = "Open the changelog";
           break;
-        }
-        case UpgradeToastOrViewTestGroups.upgradeView: {
-          showUpgradeView();
+        case UpgradeToastWordingTestGroups.seeWhatChanged:
+          buttonAction = "See what changed";
           break;
-        }
+        case UpgradeToastWordingTestGroups.seeWhatsNew:
+          buttonAction = "See what's new";
+          break;
         default:
-          assertUnreachable(toastOrView);
+          assertUnreachable(toastWording);
       }
+
+      vscode.window
+        .showInformationMessage(
+          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+          buttonAction
+        )
+        .then((resp) => {
+          if (resp === buttonAction) {
+            AnalyticsUtils.track(VSCodeEvents.UpgradeSeeWhatsChangedClicked, {
+              previousVersion: previousExtensionVersion,
+              duration: getDurationMilliseconds(start),
+              toastWording,
+            });
+            vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(
+                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
+              )
+            );
+          }
+        });
       break;
     }
     default:

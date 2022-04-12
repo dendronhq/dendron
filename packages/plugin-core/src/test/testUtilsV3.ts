@@ -8,6 +8,8 @@ import {
   IntermediateDendronConfig,
   isNotUndefined,
   NoteChangeEntry,
+  NoteUtils,
+  SchemaUtils,
   VaultRemoteSource,
   WorkspaceFolderRaw,
   WorkspaceOpts,
@@ -16,7 +18,9 @@ import {
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
+  note2File,
   readYAML,
+  schemaModuleOpts2File,
   tmpDir,
   writeYAML,
 } from "@dendronhq/common-server";
@@ -31,6 +35,7 @@ import {
   DConfig,
   DendronEngineClient,
   DendronEngineV2,
+  Git,
   HistoryService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -673,6 +678,49 @@ export function subscribeToEngineStateChange(
 
 export function toDendronEngineClient(engine: IEngineAPIService) {
   return engine as unknown as DendronEngineClient;
+}
+
+async function gitInitializeRepo(dir: string) {
+  const git = new Git({ localUrl: dir });
+  await git.init();
+  await git.add(".");
+  await git.commit({ msg: "testUtilsV3" });
+}
+
+export async function createWorkspaceWithGit(
+  dir: string,
+  opts?: Partial<SetupWorkspaceOpts>
+) {
+  await fs.ensureDir(dir);
+  const setup = new SetupWorkspaceCommand();
+  await setup.execute({
+    rootDirRaw: dir,
+    skipOpenWs: true,
+    selfContained: false,
+    workspaceInitializer: new BlankInitializer(),
+    ...opts,
+  });
+  await gitInitializeRepo(dir);
+}
+
+export async function createSelfContainedVaultWithGit(dir: string) {
+  return createWorkspaceWithGit(dir, { selfContained: true });
+}
+
+export async function createVaultWithGit(dir: string) {
+  await fs.ensureDir(dir);
+  const vault: DVault = {
+    fsPath: ".",
+  };
+
+  const note = NoteUtils.createRoot({
+    vault,
+    body: "root note",
+  });
+  const schema = SchemaUtils.createRootModule({ vault });
+  await note2File({ note, vault, wsRoot: dir });
+  await schemaModuleOpts2File(schema, dir, "root");
+  await gitInitializeRepo(dir);
 }
 
 export async function waitInMilliseconds(milliseconds: number): Promise<void> {

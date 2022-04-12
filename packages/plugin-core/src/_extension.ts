@@ -355,6 +355,7 @@ export async function _activate(
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
   const { extensionPath, extensionUri, logUri } = context;
+  const metadataService = MetadataService.instance();
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,
@@ -422,7 +423,18 @@ export async function _activate(
     // this used to be handled by StateService (if undefined, 0.0.0).
     // this will be reassigned if we are in a dendron workspace.
     let previousWorkspaceVersion = "0.0.0";
-    const previousGlobalVersion = stateService.getGlobalVersion();
+
+    const previousGlobalVersionFromState = stateService.getGlobalVersion();
+
+    // temporarily here to backfill globalState into metadata
+    // this should be removed once we determine that
+    // we have sufficiently backfilled out user.
+    if (previousGlobalVersionFromState) {
+      metadataService.setGlobalVersion(previousGlobalVersionFromState);
+    }
+
+    const previousGlobalVersion = metadataService.getGlobalVersion();
+
     const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
       previousGlobalVersion,
       currentVersion,
@@ -882,6 +894,7 @@ async function showWelcomeOrWhatsNew({
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
+  const metadataService = MetadataService.instance();
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({
@@ -898,8 +911,7 @@ async function showWelcomeOrWhatsNew({
         isSecondaryInstall,
       });
 
-      // set the global version of dendron ^oncxlt645b5r
-      await StateService.instance().setGlobalVersion(version);
+      metadataService.setGlobalVersion(version);
 
       // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
       if (!SegmentClient.instance().hasOptedOut) {
@@ -916,7 +928,8 @@ async function showWelcomeOrWhatsNew({
         version,
         previousExtensionVersion,
       });
-      await StateService.instance().setGlobalVersion(version);
+
+      metadataService.setGlobalVersion(version);
 
       // ^t6dxodie048o
       const toastWording = UPGRADE_TOAST_WORDING_TEST.getUserGroup(

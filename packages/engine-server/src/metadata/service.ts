@@ -53,6 +53,10 @@ type Metadata = Partial<{
    * Time when feature showcase mssages have been shown.
    */
   featureShowcase: { [key in ShowcaseEntry]?: number };
+  /**
+   * Global version of Dendron
+   */
+  version: string;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -115,6 +119,10 @@ export class MetadataService {
     return featureShowcaseData[key];
   }
 
+  getGlobalVersion() {
+    return this.getMeta().version || "0.0.0";
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -129,39 +137,43 @@ export class MetadataService {
    */
   setInitialInstall(time?: number) {
     time ||= Time.now().toSeconds();
-    return this.setMeta("firstInstall", time);
+    this.setMeta("firstInstall", time);
   }
 
   setFirstWsInitialize() {
-    return this.setMeta("firstWsInitialize", Time.now().toSeconds());
+    this.setMeta("firstWsInitialize", Time.now().toSeconds());
   }
 
   setLapsedUserMsgSendTime() {
-    return this.setMeta("lapsedUserMsgSendTime", Time.now().toSeconds());
+    this.setMeta("lapsedUserMsgSendTime", Time.now().toSeconds());
   }
 
   setDendronWorkspaceActivated() {
-    return this.setMeta("dendronWorkspaceActivated", Time.now().toSeconds());
+    this.setMeta("dendronWorkspaceActivated", Time.now().toSeconds());
   }
 
   setFirstLookupTime() {
-    return this.setMeta("firstLookupTime", Time.now().toSeconds());
+    this.setMeta("firstLookupTime", Time.now().toSeconds());
   }
 
   setLastLookupTime() {
-    return this.setMeta("lastLookupTime", Time.now().toSeconds());
+    this.setMeta("lastLookupTime", Time.now().toSeconds());
   }
 
   setInactiveUserMsgSendTime() {
-    return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+    this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
   }
 
   setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
-    return this.setMeta("inactiveUserMsgStatus", value);
+    this.setMeta("inactiveUserMsgStatus", value);
   }
 
   setInitialSurveyStatus(value: InitialSurveyStatusEnum) {
-    return this.setMeta("initialSurveyStatus", value);
+    this.setMeta("initialSurveyStatus", value);
+  }
+
+  setGlobalVersion(value: string) {
+    this.setMeta("version", value);
   }
 
   setFeatureShowcaseStatus(key: ShowcaseEntry) {

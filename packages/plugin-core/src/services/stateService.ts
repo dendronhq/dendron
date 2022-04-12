@@ -37,6 +37,7 @@ export class StateService {
   }
 
   /**
+   * @deprecated
    * Previous global version
    * Get from {@link ExtensionGlobalState} (VSCode specific state)
    */
@@ -54,6 +55,9 @@ export class StateService {
     return this.workspaceState.get<string>(WORKSPACE_STATE.VERSION) || "0.0.0";
   }
 
+  /**
+   * @deprecated
+   */
   setGlobalVersion(version: string) {
     return this.globalState.update(GLOBAL_STATE.VERSION, version);
   }

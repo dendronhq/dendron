@@ -125,7 +125,11 @@ export class AnalyticsUtils {
     segmentProps?: { timestamp?: Date }
   ) {
     return SegmentUtils.trackSync(
-      this._trackCommon({ event, ...customProps, ...segmentProps })
+      this._trackCommon({
+        event,
+        props: customProps,
+        timestamp: segmentProps?.timestamp,
+      })
     );
   }
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.90.0 (2022-04-12)
+
+
+### Bug Fixes
+
+* malformed _trackCommon arguments ([7e4bfa0](https://github.com/dendronhq/dendron/commit/7e4bfa0ea805ee74380052f560af21eee2c28169))
+
+
+
+
+
 # 0.89.0 (2022-04-05)
 
 **Note:** Version bump only for package @dendronhq/nextjs-template

@@ -700,15 +700,18 @@ export async function _activate(
         duration: durationReloadWorkspace,
         noCaching: dendronConfig.noCaching || false,
         numNotes,
-        numVaults: ws.getDWorkspace().vaults.length,
+        numVaults: vaults.length,
         workspaceType: ws.type,
         codeWorkspacePresent,
         selfContainedVaultsEnabled:
           dendronConfig.dev?.enableSelfContainedVaults || false,
-        numSelfContainedVaults: ws
-          .getDWorkspace()
-          .vaults.filter(VaultUtils.isSelfContained).length,
-        numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
+        numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained)
+          .length,
+        numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
+        numWorkspaceVaults: vaults.filter(
+          (vault) => vault.workspace !== undefined
+        ).length,
+        numSeedVaults: vaults.filter((vault) => vault.seed !== undefined)
           .length,
       };
 

@@ -53,9 +53,11 @@ import {
 } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
+import { WSMeta } from "../types";
 import {
   EngineUtils,
   getWSMetaFilePath,
+  openWSMetaFile,
   removeCache,
   writeWSMetaFile,
 } from "../utils";
@@ -1544,6 +1546,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
   }
 
+  getMeta(): WSMeta {
+    const fpath = getWSMetaFilePath({ wsRoot: this.wsRoot });
+    const meta = openWSMetaFile({ fpath });
+    return meta;
+  }
+
   writeMeta(opts: { version: string }) {
     const { version } = opts;
     const fpath = getWSMetaFilePath({ wsRoot: this.wsRoot });
@@ -1552,6 +1560,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       data: {
         version,
         activationTime: Time.now().toMillis(),
+      },
+    });
+  }
+
+  resetMeta() {
+    const fpath = getWSMetaFilePath({ wsRoot: this.wsRoot });
+    writeWSMetaFile({
+      fpath,
+      data: {
+        version: "0.0.0",
       },
     });
   }

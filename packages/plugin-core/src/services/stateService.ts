@@ -46,6 +46,7 @@ export class StateService {
     );
   }
   /**
+   * @deprecated
    * Previous workspace version
    * Get from {@link ExtensionWorkspaceState}  (VSCode specific store)
    */
@@ -57,6 +58,9 @@ export class StateService {
     return this.globalState.update(GLOBAL_STATE.VERSION, version);
   }
 
+  /**
+   * @deprecated
+   */
   setWorkspaceVersion(version: string) {
     return this.workspaceState.update(WORKSPACE_STATE.VERSION, version);
   }
@@ -102,6 +106,9 @@ export class StateService {
     });
   }
 
+  /**
+   * @deprecated
+   */
   resetWorkspaceState() {
     _.keys(WORKSPACE_STATE).map((k) => {
       this.workspaceState.update(k, undefined);

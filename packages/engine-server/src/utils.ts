@@ -148,7 +148,17 @@ export function openPortFile({ fpath }: { fpath: string }): number {
 }
 
 export function openWSMetaFile({ fpath }: { fpath: string }): WSMeta {
-  return fs.readJSONSync(fpath) as WSMeta;
+  const wsMetaFileExists = fs.existsSync(fpath);
+  if (wsMetaFileExists) {
+    return fs.readJSONSync(fpath) as WSMeta;
+  } else {
+    fs.ensureFileSync(fpath);
+    const defaultWSMeta: WSMeta = {
+      version: "0.0.0",
+    };
+    writeWSMetaFile({ fpath, data: defaultWSMeta });
+    return defaultWSMeta;
+  }
 }
 
 export function writeWSMetaFile({

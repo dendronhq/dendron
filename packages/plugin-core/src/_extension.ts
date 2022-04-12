@@ -30,10 +30,12 @@ import {
 } from "@dendronhq/common-server";
 import {
   FileAddWatcher,
+  getWSMetaFilePath,
   HistoryService,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
+  openWSMetaFile,
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -211,9 +213,10 @@ export function activate(context: vscode.ExtensionContext) {
   return;
 }
 
-async function reloadWorkspace() {
+async function reloadWorkspace(opts: { extension: DendronExtension }) {
   const ctx = "reloadWorkspace";
-  const ws = getDWorkspace();
+  const { extension } = opts;
+  const ws = extension.getDWorkspace();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -229,7 +232,8 @@ async function reloadWorkspace() {
 
   vscode.window.showInformationMessage("Dendron is active");
   Logger.info({ ctx, msg: "exit" });
-  await postReloadWorkspace();
+
+  await postReloadWorkspace({ extension });
   HistoryService.instance().add({
     source: "extension",
     action: "initialized",
@@ -237,9 +241,21 @@ async function reloadWorkspace() {
   return maybeEngine;
 }
 
-async function postReloadWorkspace() {
+async function postReloadWorkspace(opts: { extension: DendronExtension }) {
   const ctx = "postReloadWorkspace";
-  const previousWsVersion = StateService.instance().getWorkspaceVersion();
+  const { extension } = opts;
+  const wsService = extension.workspaceService;
+  if (!wsService) {
+    const errorMsg = "No workspace service found.";
+    Logger.error({
+      msg: errorMsg,
+      error: new DendronError({ message: errorMsg }),
+    });
+    return;
+  }
+
+  const wsMeta = wsService.getMeta();
+  const previousWsVersion = wsMeta.version;
   // stats
   // NOTE: this is legacy to upgrade .code-workspace specific settings
   // we are moving everything to dendron.yml
@@ -251,9 +267,7 @@ async function postReloadWorkspace() {
       .then((changes) => {
         Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
       });
-    await StateService.instance().setWorkspaceVersion(
-      DendronExtension.version()
-    );
+    wsService.writeMeta({ version: DendronExtension.version() });
   } else {
     const newVersion = DendronExtension.version();
     if (semver.lt(previousWsVersion, newVersion)) {
@@ -270,9 +284,7 @@ async function postReloadWorkspace() {
           previousWsVersion,
           newVersion,
         });
-        await StateService.instance().setWorkspaceVersion(
-          DendronExtension.version()
-        );
+        wsService.writeMeta({ version: DendronExtension.version() });
       } catch (err) {
         Logger.error({
           msg: "error upgrading",
@@ -347,7 +359,6 @@ export async function _activate(
     globalState: context.globalState,
     workspaceState: context.workspaceState,
   });
-
   Logger.info({
     ctx,
     stage,
@@ -407,7 +418,10 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
+
+    // this used to be handled by StateService (if undefined, 0.0.0).
+    // this will be reassigned if we are in a dendron workspace.
+    let previousWorkspaceVersion = "0.0.0";
     const previousGlobalVersion = stateService.getGlobalVersion();
     const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
       previousGlobalVersion,
@@ -462,7 +476,6 @@ export async function _activate(
       msg: "initializeWorkspace",
       wsType: ws.type,
       currentVersion,
-      previousWorkspaceVersion,
       previousGlobalVersion,
       extensionInstallStatus,
     });
@@ -477,13 +490,15 @@ export async function _activate(
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
 
+      const wsRoot = wsImpl.wsRoot;
+      const wsService = new WorkspaceService({ wsRoot });
+      const wsMeta = wsService.getMeta();
+      previousWorkspaceVersion = wsMeta.version;
       // --- Get Version State
       const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
         previousWorkspaceVersion,
         currentVersion,
       });
-      const wsRoot = wsImpl.wsRoot;
-      const wsService = new WorkspaceService({ wsRoot });
       const maybeWsSettings =
         maybeWs.type === WorkspaceType.CODE
           ? wsService.getCodeWorkspaceSettingsSync()
@@ -644,7 +659,7 @@ export async function _activate(
           )
         );
       }
-      const reloadSuccess = await reloadWorkspace();
+      const reloadSuccess = await reloadWorkspace({ extension: ws });
       const durationReloadWorkspace = getDurationMilliseconds(start);
       if (!reloadSuccess) {
         HistoryService.instance().add({

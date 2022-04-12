@@ -1,6 +1,8 @@
+import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { StateService } from "../services/stateService";
 import { BasicCommand } from "./base";
 
@@ -22,6 +24,13 @@ export class ResetConfigCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.RESET_CONFIG.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     const scope = await window.showInputBox({
       prompt: "Select scope",
@@ -43,13 +52,15 @@ export class ResetConfigCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const scope = opts.scope;
     const stateService = StateService.instance();
+    const wsRoot = this.extension.getDWorkspace().wsRoot;
+    const wsService = new WorkspaceService({ wsRoot });
     if (scope === "all") {
       stateService.resetGlobalState();
-      stateService.resetWorkspaceState();
+      wsService.resetMeta();
     } else if (scope === "global") {
       stateService.resetGlobalState();
     } else if (scope === "local") {
-      stateService.resetWorkspaceState();
+      wsService.resetMeta();
     } else {
       throw Error(`wrong scope: ${opts}`);
     }

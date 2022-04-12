@@ -13,7 +13,7 @@ export type ReplaceLinkOpts = { from: DNoteLoc; to: DNoteLoc };
 
 export type WSMeta = {
   version: string;
-  activationTime: number;
+  activationTime?: number;
 };
 
 // === HAST Types

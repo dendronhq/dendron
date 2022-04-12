@@ -46,6 +46,7 @@ import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import os from "os";
 import {
   CURRENT_AB_TESTS,
   UpgradeToastOrViewTestGroups,
@@ -368,6 +369,12 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
+  // At this point, the segment client has not been created yet.
+  // We need to check here if the uuid has been set for future references
+  // because the Segment client constructor will go ahead and create one if it doesn't exist.
+  const maybeUUIDPath = path.join(os.homedir(), CONSTANTS.DENDRON_ID);
+  const UUIDPathExists = await fs.pathExists(maybeUUIDPath);
+
   // If telemetry is not disabled, we enable telemetry and error reporting ^rw8l1w51hnjz
   // - NOTE: we do this outside of the try/catch block in case we run into an error with initialization
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
@@ -417,19 +424,20 @@ export async function _activate(
     });
 
     // check if this is an install event, but a repeated one on a new instance.
-    let isNewInstanceInstall = false;
+    let isSecondaryInstall = false;
 
     // set initial install ^194e5bw7so9g
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       // even if it's an initial install for this instance of vscode, it may not be for this machine.
       // in that case, we should skip setting the initial install time since it's already set.
+      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
       const metadata = MetadataService.instance().getMeta();
-      if (metadata.firstInstall === undefined) {
+      if (metadata.firstInstall === undefined && !UUIDPathExists) {
         MetadataService.instance().setInitialInstall();
       } else {
         // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
         // tied to initial install to happen in this instance of VSCode once for the first time
-        isNewInstanceInstall = true;
+        isSecondaryInstall = true;
       }
     }
 
@@ -778,7 +786,7 @@ export async function _activate(
 
     await showWelcomeOrWhatsNew({
       extensionInstallStatus,
-      isNewInstanceInstall,
+      isSecondaryInstall,
       version: DendronExtension.version(),
       previousExtensionVersion: previousWorkspaceVersion,
       start: startActivate,
@@ -826,14 +834,14 @@ export function deactivate() {
 
 async function showWelcomeOrWhatsNew({
   extensionInstallStatus,
-  isNewInstanceInstall,
+  isSecondaryInstall,
   version,
   previousExtensionVersion,
   start,
   assetUri,
 }: {
   extensionInstallStatus: InstallStatus;
-  isNewInstanceInstall: boolean;
+  isSecondaryInstall: boolean;
   version: string;
   previousExtensionVersion: string;
   start: [number, number];
@@ -846,15 +854,15 @@ async function showWelcomeOrWhatsNew({
       Logger.info({
         ctx,
         msg: `extension, ${
-          isNewInstanceInstall
+          isSecondaryInstall
             ? "initial install"
-            : "install on new vscode instance"
+            : "secondary install on new vscode instance"
         }`,
       });
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
-        isNewInstanceInstall,
+        isSecondaryInstall,
       });
 
       // set the global version of dendron ^oncxlt645b5r

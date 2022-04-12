@@ -979,7 +979,6 @@ suite("WHEN migrate config", function () {
 suite("GIVEN Dendron plugin activation", function () {
   let setInitialInstallSpy: sinon.SinonSpy;
   let showTelemetryNoticeSpy: sinon.SinonSpy;
-  const ctx: ExtensionContext = setupBeforeAfter(this);
   let mockHomeDirStub: sinon.SinonStub;
 
   function stubDendronWhenNotFirstInstall() {
@@ -1007,7 +1006,6 @@ suite("GIVEN Dendron plugin activation", function () {
     describeMultiWS(
       "AND WHEN activate",
       {
-        ctx,
         preActivateHook: async () => {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           stubDendronWhenNotFirstInstall();
@@ -1029,7 +1027,6 @@ suite("GIVEN Dendron plugin activation", function () {
     describeMultiWS(
       "AND WHEN firstInstall not set for old user",
       {
-        ctx,
         preActivateHook: async () => {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           stubDendronWhenNotFirstInstall();
@@ -1060,7 +1057,6 @@ suite("GIVEN Dendron plugin activation", function () {
     describeMultiWS(
       "AND WHEN activate",
       {
-        ctx,
         preActivateHook: async ({ ctx }) => {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           setupSpies();
@@ -1068,8 +1064,9 @@ suite("GIVEN Dendron plugin activation", function () {
         },
         afterHook,
         timeout: 1e4,
+        noSetInstallStatus: true,
       },
-      () => {
+      (ctx) => {
         test("THEN set initial install called", () => {
           expect(setInitialInstallSpy.called).toBeTruthy();
         });
@@ -1086,11 +1083,10 @@ suite("GIVEN Dendron plugin activation", function () {
     );
   });
 
-  describe("AND WHEN fresh install on new vscode instance", () => {
+  describe("AND WHEN secondary install on a fresh vscode instance", () => {
     describeMultiWS(
       "AND WHEN activate",
       {
-        ctx,
         preActivateHook: async ({ ctx }) => {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           // new instance, so fresh user-data. global storage is clean slate.
@@ -1101,8 +1097,9 @@ suite("GIVEN Dendron plugin activation", function () {
         },
         afterHook,
         timeout: 1e4,
+        noSetInstallStatus: true,
       },
-      () => {
+      (ctx) => {
         // we prevent this from happening in new vscode instances.
         test("THEN set initial install is not called", () => {
           expect(setInitialInstallSpy.called).toBeFalsy();

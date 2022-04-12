@@ -2,6 +2,7 @@ import {
   assert,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
+  extractNoteChangeEntriesByType,
 } from "@dendronhq/common-all";
 import { genHash } from "@dendronhq/common-server";
 import {
@@ -9,10 +10,7 @@ import {
   NOTE_PRESETS_V4,
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
-import {
-  ENGINE_HOOKS,
-  extractNoteChangeEntriesByType,
-} from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";

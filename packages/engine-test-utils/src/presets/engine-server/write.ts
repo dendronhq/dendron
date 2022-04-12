@@ -4,6 +4,7 @@ import {
   NoteProps,
   NoteUtils,
   SchemaUtils,
+  extractNoteChangeEntriesByType,
 } from "@dendronhq/common-all";
 import {
   FileTestUtils,
@@ -14,7 +15,6 @@ import {
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import path from "path";
-import { extractNoteChangeEntriesByType } from "../..";
 import { setupBasic } from "./utils";
 
 const SCHEMAS = {

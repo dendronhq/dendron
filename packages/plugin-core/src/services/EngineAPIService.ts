@@ -9,12 +9,14 @@ import {
   DHookDict,
   DLink,
   DVault,
+  EngagementEvents,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   Event,
+  extractNoteChangeEntriesByType,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -48,6 +50,7 @@ import {
   HistoryService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { AnalyticsUtils } from "../utils/analytics";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
 export class EngineAPIService
@@ -226,6 +229,7 @@ export class EngineAPIService
     return this._internalEngine.writeSchema(schema);
   }
   init(): Promise<DEngineInitResp> {
+    this.setupEngineAnalyticsTracking();
     return this._internalEngine.init();
   }
 
@@ -309,7 +313,49 @@ export class EngineAPIService
   ): Promise<GetNoteLinksPayload> {
     return this._internalEngine.getLinks(opts);
   }
+
   getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return this._internalEngine.getAnchors(opts);
+  }
+
+  /**
+   * Setup telemetry tracking on engine events to understand user engagement
+   * levels
+   */
+  private setupEngineAnalyticsTracking() {
+    this._engineEventEmitter.onEngineNoteStateChanged((entries) => {
+      const createCount = extractNoteChangeEntriesByType(
+        entries,
+        "create"
+      ).length;
+
+      if (createCount > 0) {
+        AnalyticsUtils.track(EngagementEvents.NoteCreated, {
+          count: createCount,
+        });
+      }
+
+      const updateCount = extractNoteChangeEntriesByType(
+        entries,
+        "update"
+      ).length;
+
+      if (updateCount > 0) {
+        AnalyticsUtils.track(EngagementEvents.NoteUpdated, {
+          count: updateCount,
+        });
+      }
+
+      const deleteCount = extractNoteChangeEntriesByType(
+        entries,
+        "delete"
+      ).length;
+
+      if (deleteCount > 0) {
+        AnalyticsUtils.track(EngagementEvents.NoteDeleted, {
+          count: deleteCount,
+        });
+      }
+    });
   }
 }

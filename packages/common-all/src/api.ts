@@ -285,7 +285,6 @@ abstract class API {
     };
     this._log({ ctx: "pre-request", requestParams }, "debug");
     const str = querystring.stringify(requestParams.qs);
-    console.log("BOND2", requestParams);
     if (method === "get") {
       return _request.get(requestParams.url + `?${str}`, {
         headers,

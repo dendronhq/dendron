@@ -1,5 +1,4 @@
 import {
-  assertUnreachable,
   CalendarViewMessage,
   CalendarViewMessageType,
   DendronTreeViewKey,
@@ -17,11 +16,10 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtilsV2 } from "../WSUtilsV2";
 import { WebViewUtils } from "./utils";
 
 export class CalendarViewV2 implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronTreeViewKey.LOOKUP_VIEW;
+  public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
   private _extension: IDendronExtension;
   constructor(extension: IDendronExtension) {
@@ -79,12 +77,14 @@ export class CalendarViewV2 implements vscode.WebviewViewProvider {
         this.onActiveTextEditorChangeHandler(); // initial call
         break;
       }
-      case CalendarViewMessageType.messageDispatcherReady:
-        // Exception was thrown on this event, hence including it in the case statement
-        // but as far as it seems there isn't much we need to do for Calendar to work.
+      case CalendarViewMessageType.messageDispatcherReady: {
+        const note = this._extension.wsUtils.getActiveNote();
+        if (note) {
+          this.refresh(note);
+        }
         break;
+      }
       default:
-        assertUnreachable(msg.type);
         break;
     }
   }
@@ -122,8 +122,7 @@ export class CalendarViewV2 implements vscode.WebviewViewProvider {
       });
       return;
     }
-    const utils = new WSUtilsV2(this._extension);
-    const note = utils.getNoteFromDocument(document);
+    const note = this._extension.wsUtils.getNoteFromDocument(document);
     if (note) {
       Logger.info({
         ctx,
@@ -146,6 +145,7 @@ export class CalendarViewV2 implements vscode.WebviewViewProvider {
         data: {
           note,
           syncChangedNote: true,
+          activeNote: this._extension.wsUtils.getActiveNote(),
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   CalendarViewMessageType,
   ConfigUtils,
@@ -5,11 +6,7 @@ import {
   NoteProps,
   Time,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  engineSliceUtils,
-  engineHooks,
-} from "@dendronhq/common-frontend";
+import { createLogger, engineHooks } from "@dendronhq/common-frontend";
 import {
   Badge,
   Button,
@@ -75,13 +72,13 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
   const { getPrefixCls } = React.useContext(ConfigProvider.ConfigContext);
 
   const [activeMode, setActiveMode] = useState<CalendarProps["mode"]>("month");
-
-  const engineInitialized = engineSliceUtils.hasInitialized(engine);
-
   const { notes, config } = engine;
   const { noteActive } = ide;
   const currentVault = noteActive?.vault;
 
+  logger.info({
+    activeNoteFname: noteActive ? noteActive.fname : "no active note found",
+  });
   const maxDots: number = 5;
   const wordsPerDot: number = 250;
 
@@ -92,7 +89,6 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
 
   // Load up the full engine state as all notes are needed for the Tree View
   const [workspace] = useWorkspaceProps();
-  console.log("BOND", workspace);
   useEngine({ engineState: engine, opts: workspace });
 
   // luxon token format lookup https://github.com/moment/luxon/blob/master/docs/formatting.md#table-of-tokens
@@ -169,7 +165,6 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
   >(
     (date, mode) => {
       logger.info({ ctx: "onSelect", date });
-      debugger;
       const dateKey = getDateKey(date, mode);
       const selectedNote = dateKey
         ? _.first(groupedDailyNotes[dateKey])
@@ -191,7 +186,6 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
     Exclude<CalendarProps["onPanelChange"], undefined>
   >((date, mode) => {
     logger.info({ ctx: "onPanelChange", date, mode });
-    debugger;
     setActiveMode(mode);
   }, []);
 
@@ -281,16 +275,18 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
 
   return (
     <>
-      <Calendar
-        mode={activeMode}
-        onSelect={onSelect}
-        onPanelChange={onPanelChange}
-        /*
-        // @ts-ignore -- `null` initializes ant Calendar into a controlled component whereby it does not render an selected/visible date (today) when `activeDate` is `undefined`*/
-        value={activeDate || null}
-        dateFullCellRender={dateFullCellRender}
-        fullscreen={false}
-      />
+      <div className="calendar">
+        <Calendar
+          mode={activeMode}
+          onSelect={onSelect}
+          onPanelChange={onPanelChange}
+          /*
+          // @ts-ignore -- `null` initializes ant Calendar into a controlled component whereby it does not render an selected/visible date (today) when `activeDate` is `undefined`*/
+          value={activeDate || null}
+          dateFullCellRender={dateFullCellRender}
+          fullscreen={false}
+        />
+      </div>
       <Divider plain style={{ marginTop: 0 }}>
         <Button type="primary" onClick={onClickToday}>
           Today
@@ -299,28 +295,3 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
     </>
   );
 }
-
-// function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
-//   const logger = createLogger("calendarViewContainer");
-
-//   const didNotesLengthChanged =
-//     Object.keys(prevProps.engine.notes || {}).length !==
-//     Object.keys(nextProps.engine.notes || {}).length;
-
-//   const isDiff = _.some([
-//     // active note changed
-//     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
-//     // engine initialized for first time
-//     _.isUndefined(prevProps.engine.notes) || didNotesLengthChanged,
-//     // engine just went from pending to loading
-//     prevProps.engine.loading === "pending" &&
-//       nextProps.engine.loading === "idle",
-//   ]);
-//   logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
-//   return !isDiff;
-// }
-// const DendronCalendarPanelContainer = React.memo(
-//   DendronCalendarPanel,
-//   areEqual
-// );
-// export default DendronCalendarPanelContainer;

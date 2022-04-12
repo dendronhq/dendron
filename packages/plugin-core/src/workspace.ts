@@ -61,7 +61,6 @@ import { BacklinkSortOrder } from "./types";
 import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
-import { CalendarView } from "./views/CalendarView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -516,7 +515,7 @@ export class DendronExtension implements IDendronExtension {
         this.treeViews[DendronTreeViewKey.CALENDAR_VIEW] = calendarView;
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
-            CalendarView.viewType,
+            CalendarViewV2.viewType,
             calendarView
           )
         );

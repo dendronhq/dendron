@@ -1,12 +1,14 @@
 import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
-import { WorkspaceService } from "@dendronhq/engine-server";
+import {
+  MetadataService,
+  WorkspaceActivationContext,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import {
   SeedBrowseCommand,
   WebViewPanelFactory,
 } from "../commands/SeedBrowseCommand";
-import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
-import { StateService } from "../services/stateService";
 import { getExtension } from "../workspace";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -44,8 +46,8 @@ export class SeedBrowserInitializer implements WorkspaceInitializer {
     const cmd = new SeedBrowseCommand(panel);
     await cmd.execute();
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.normal
     );
 
     vscode.window.showInformationMessage("Seeds Updated");

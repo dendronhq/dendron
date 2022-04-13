@@ -10,6 +10,7 @@ import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
   InitialSurveyStatusEnum,
   MetadataService,
+  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
@@ -50,8 +51,8 @@ export class TutorialInitializer
     const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.tutorial
     );
 
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
@@ -117,8 +118,8 @@ export class TutorialInitializer
       });
     }
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.normal
     );
 
     // backfill global state to metadata

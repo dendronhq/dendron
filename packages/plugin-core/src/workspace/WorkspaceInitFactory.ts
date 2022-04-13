@@ -1,5 +1,7 @@
-import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
-import { StateService } from "../services/stateService";
+import {
+  MetadataService,
+  WorkspaceActivationContext,
+} from "@dendronhq/engine-server";
 import { BlankInitializer } from "./blankInitializer";
 import { SeedBrowserInitializer } from "./seedBrowserInitializer";
 import { TutorialInitializer } from "./tutorialInitializer";
@@ -10,11 +12,11 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
  */
 export class WorkspaceInitFactory {
   static create(): WorkspaceInitializer | undefined {
-    switch (StateService.instance().getActivationContext()) {
-      case WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL:
+    switch (MetadataService.instance().getActivationContext()) {
+      case WorkspaceActivationContext.tutorial:
         return new TutorialInitializer();
 
-      case WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER:
+      case WorkspaceActivationContext.seedBrowser:
         return new SeedBrowserInitializer();
 
       default:

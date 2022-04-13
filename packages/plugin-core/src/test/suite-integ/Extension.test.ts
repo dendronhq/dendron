@@ -14,6 +14,7 @@ import {
   getWSMetaFilePath,
   MetadataService,
   openWSMetaFile,
+  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -30,11 +31,7 @@ import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../../commands/SetupWorkspace";
-import {
-  DEFAULT_LEGACY_VAULT_NAME,
-  GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT,
-} from "../../constants";
+import { DEFAULT_LEGACY_VAULT_NAME, GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
@@ -228,8 +225,8 @@ suite("GIVEN SetupWorkspace Command", function () {
       test("THEN Dendron creates the workspace correctly", async () => {
         const wsRoot = tmpDir().name;
 
-        StateService.instance().setActivationContext(
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        MetadataService.instance().setActivationContext(
+          WorkspaceActivationContext.normal
         );
 
         const active = await _activate(ctx);
@@ -385,8 +382,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     describe("AND a new workspace is being created with a template initializer", () => {
       test("setup with template initializer", async () => {
         const wsRoot = tmpDir().name;
-        StateService.instance().setActivationContext(
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        MetadataService.instance().setActivationContext(
+          WorkspaceActivationContext.normal
         );
         const out = await _activate(ctx);
         // Not active yet, because there is no workspace
@@ -588,8 +585,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     test("not active, initial create ws", async () => {
       const wsRoot = tmpDir().name;
 
-      StateService.instance().setActivationContext(
-        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+      MetadataService.instance().setActivationContext(
+        WorkspaceActivationContext.normal
       );
 
       const out = await _activate(ctx);
@@ -621,8 +618,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     test("THEN Dendron correctly creates a workspace", async () => {
       const wsRoot = tmpDir().name;
 
-      StateService.instance().setActivationContext(
-        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+      MetadataService.instance().setActivationContext(
+        WorkspaceActivationContext.normal
       );
 
       const out = await _activate(ctx);

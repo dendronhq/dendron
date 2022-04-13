@@ -29,6 +29,9 @@ export class StateService {
     _StateService = this;
   }
 
+  /**
+   * @deprecated
+   */
   static instance(): StateService {
     if (!_StateService) {
       throw Error("StateService not initialized");
@@ -69,6 +72,9 @@ export class StateService {
     return this.workspaceState.update(WORKSPACE_STATE.VERSION, version);
   }
 
+  /**
+   * @deprecated
+   */
   getActivationContext(): WORKSPACE_ACTIVATION_CONTEXT {
     return (
       this.globalState.get<WORKSPACE_ACTIVATION_CONTEXT>(
@@ -77,6 +83,9 @@ export class StateService {
     );
   }
 
+  /**
+   * @deprecated
+   */
   setActivationContext(context: WORKSPACE_ACTIVATION_CONTEXT) {
     return this.globalState.update(
       GLOBAL_STATE.WORKSPACE_ACTIVATION_CONTEXT,
@@ -93,6 +102,7 @@ export class StateService {
   }
 
   /**
+   * @deprecated
    * added generic method for cases when the keys and values both are dynamic
    * eg: hierarchy destination for imported google doc.
    */
@@ -100,6 +110,9 @@ export class StateService {
     return this.globalState.get(key);
   }
 
+  /**
+   * @deprecated
+   */
   updateGlobalState(key: string, value: any) {
     return this.globalState.update(key, value);
   }

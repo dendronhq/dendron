@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-174-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-175-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -423,6 +423,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/irishandyb"><img src="https://avatars.githubusercontent.com/u/23081516?v=4?s=100" width="100px;" alt=""/><br /><sub><b>irishandyb</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Airishandyb" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/PabloLION"><img src="https://avatars.githubusercontent.com/u/36828324?v=4?s=100" width="100px;" alt=""/><br /><sub><b>PabloLION</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=PabloLION" title="Code">💻</a></td>
     <td align="center"><a href="http://dmytro-shapovalov"><img src="https://avatars.githubusercontent.com/u/35997118?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dmytro Shapovalov</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=dmytro-shapovalov" title="Documentation">📖</a> <a href="#example-dmytro-shapovalov" title="Examples">💡</a></td>
+    <td align="center"><a href="https://github.com/lexthanthree"><img src="https://avatars.githubusercontent.com/u/43601654?v=4?s=100" width="100px;" alt=""/><br /><sub><b>lexthanthree</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=lexthanthree" title="Documentation">📖</a></td>
   </tr>
 </table>
 

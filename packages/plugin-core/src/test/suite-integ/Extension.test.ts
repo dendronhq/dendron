@@ -175,7 +175,8 @@ suite("GIVEN SetupWorkspace Command", function () {
       workspaceState: ctx.workspaceState,
     });
     await resetCodeWorkspace();
-    await new ResetConfigCommand().execute({ scope: "all" });
+    const ext = ExtensionProvider.getExtension();
+    await new ResetConfigCommand(ext).execute({ scope: "all" });
     homeDirStub = TestEngineUtils.mockHomeDir();
     userConfigDirStub = mockUserConfigDir();
     wsFoldersStub = stubWSFolders(undefined);
@@ -666,7 +667,8 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        await new ResetConfigCommand().execute({ scope: "all" });
+        const ext = ExtensionProvider.getExtension();
+        await new ResetConfigCommand(ext).execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;
@@ -711,7 +713,8 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        await new ResetConfigCommand().execute({ scope: "all" });
+        const ext = ExtensionProvider.getExtension();
+        await new ResetConfigCommand(ext).execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;

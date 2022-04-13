@@ -1570,6 +1570,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       fpath,
       data: {
         version: "0.0.0",
+        activationTime: 0,
       },
     });
   }

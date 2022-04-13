@@ -1663,6 +1663,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "stevefan",
+      "name": "Steven Fan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5408965?v=4",
+      "profile": "https://github.com/stevefan",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

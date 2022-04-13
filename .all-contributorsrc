@@ -1654,6 +1654,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "MrGlitchByte",
+      "name": "GlitchByte",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49317853?v=4",
+      "profile": "https://glitchbyte.iuo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

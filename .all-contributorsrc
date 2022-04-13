@@ -1635,6 +1635,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "dmytro-shapovalov",
+      "name": "Dmytro Shapovalov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35997118?v=4",
+      "profile": "http://dmytro-shapovalov",
+      "contributions": [
+        "doc",
+        "example"
+      ]
     }
   ],
   "contributorsPerLine": 7,

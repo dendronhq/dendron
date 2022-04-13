@@ -3,8 +3,7 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
-import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { getExtension } from "../../workspace";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
@@ -15,8 +14,6 @@ suite("StartServer", function () {
     beforeHook: async () => {
       sinon.restore();
       await resetCodeWorkspace();
-      const ext = ExtensionProvider.getExtension();
-      await new ResetConfigCommand(ext).execute({ scope: "all" });
       homeDirStub = TestEngineUtils.mockHomeDir();
     },
     afterHook: async () => {
@@ -26,10 +23,9 @@ suite("StartServer", function () {
 
   describe("basic", function () {
     test("ok", function (done) {
-      const ext = ExtensionProvider.getExtension();
       ServerUtils.execServerNode({
         scriptPath: path.join(__dirname, "..", "..", "server.js"),
-        logPath: ext.context.logPath,
+        logPath: getExtension().context.logPath,
       }).then(({ port }) => {
         expect(port > 0).toBeTruthy();
         done();

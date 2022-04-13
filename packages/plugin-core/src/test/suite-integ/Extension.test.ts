@@ -26,7 +26,6 @@ import semver from "semver";
 import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { ExtensionContext, window } from "vscode";
-import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -175,8 +174,6 @@ suite("GIVEN SetupWorkspace Command", function () {
       workspaceState: ctx.workspaceState,
     });
     await resetCodeWorkspace();
-    const ext = ExtensionProvider.getExtension();
-    await new ResetConfigCommand(ext).execute({ scope: "all" });
     homeDirStub = TestEngineUtils.mockHomeDir();
     userConfigDirStub = mockUserConfigDir();
     wsFoldersStub = stubWSFolders(undefined);
@@ -667,8 +664,6 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        const ext = ExtensionProvider.getExtension();
-        await new ResetConfigCommand(ext).execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;
@@ -713,8 +708,6 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        const ext = ExtensionProvider.getExtension();
-        await new ResetConfigCommand(ext).execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;

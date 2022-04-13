@@ -102,13 +102,13 @@ suite("GIVEN Dendron plugin activation", function () {
         noSetInstallStatus: true,
         timeout: 1e5,
       },
-      (ctx: ExtensionContext) => {
+      () => {
         test("THEN set initial install called", () => {
           expect(setInitialInstallSpy.called).toBeTruthy();
         });
 
         test("THEN global version set", () => {
-          expect(ctx.globalState.get(GLOBAL_STATE.VERSION)).toNotEqual(
+          expect(MetadataService.instance().getGlobalVersion()).toNotEqual(
             undefined
           );
         });

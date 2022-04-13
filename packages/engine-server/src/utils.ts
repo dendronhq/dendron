@@ -155,6 +155,7 @@ export function openWSMetaFile({ fpath }: { fpath: string }): WSMeta {
     fs.ensureFileSync(fpath);
     const defaultWSMeta: WSMeta = {
       version: "0.0.0",
+      activationTime: 0,
     };
     writeWSMetaFile({ fpath, data: defaultWSMeta });
     return defaultWSMeta;

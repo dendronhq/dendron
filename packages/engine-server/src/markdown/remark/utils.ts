@@ -329,6 +329,7 @@ const getLinkCandidates = ({
       const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
         engine,
+        vault: note.vault,
       }).filter((note) => note.stub !== true);
       linkCandidates.push(
         ...possibleCandidates.map((candidate): DLink => {

@@ -3,6 +3,10 @@ export type Disposable = {
   dispose: () => any;
 };
 
+export const isDisposable = (cmd: any): cmd is Disposable => {
+  return (cmd as Disposable).dispose !== undefined;
+};
+
 /** Simplified version of VSCode's `Point` class. */
 export type VSPosition = {
   line: number;

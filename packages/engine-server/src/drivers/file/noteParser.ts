@@ -61,6 +61,7 @@ export class NoteParser extends ParserBase {
   ): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
+    fileMetaDict: FileMetaDict;
     errors: DendronError[];
   }> {
     const ctx = "parseFile";
@@ -207,7 +208,7 @@ export class NoteParser extends ParserBase {
       })
     );
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    return { notes: out, cacheUpdates, errors };
+    return { notes: out, cacheUpdates, fileMetaDict, errors };
   }
 
   /**

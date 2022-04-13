@@ -556,12 +556,25 @@ export class FileStorage implements DStore {
     const {
       notes,
       cacheUpdates,
+      fileMetaDict,
       errors: parseErrors,
     } = await new NoteParser({
       store: this,
       cache,
       logger: this.logger,
     }).parseFiles(noteFiles, vault);
+    const seenFiles = new Set(
+      _.values(fileMetaDict).flatMap((items) => {
+        return items.map((items) => {
+          return path.parse(items.fpath).name;
+        });
+      })
+    );
+    _.keys(cache.notes).map((key) => {
+      if (!seenFiles.has(key)) {
+        delete cache.notes[key];
+      }
+    });
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
@@ -623,7 +636,7 @@ export class FileStorage implements DStore {
             return;
           }
           try {
-            const anchors = await AnchorUtils.findAnchors({
+            const anchors = AnchorUtils.findAnchors({
               note: n,
             });
             cacheUpdates[n.fname].data.anchors = anchors;

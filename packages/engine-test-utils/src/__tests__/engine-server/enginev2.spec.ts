@@ -1,7 +1,11 @@
 import { DVault, NotesCacheEntryMap, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { readNotesFromCache } from "@dendronhq/engine-server";
+import {
+  createCacheEntry,
+  readNotesFromCache,
+  writeNotesToCache,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
@@ -44,6 +48,55 @@ describe("engine, cache", () => {
         });
         // cache is based on unique filenames so don't count roots
         expect(_.size(cache)).toEqual(4);
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+        },
+      }
+    );
+  });
+
+  test("delete stale entries from cache", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const cache: NotesCacheEntryMap = {};
+        let cacheVault = readNotesFromCache(
+          vault2Path({ wsRoot, vault: vaults[0] })
+        );
+        expect(_.size(cacheVault.notes)).toEqual(4);
+        _.merge(cache, cacheVault.notes);
+
+        // Create random note and write to cache
+        const staleNote = await NoteTestUtilsV4.createNote({
+          fname: "my-new-note",
+          wsRoot,
+          vault: vaults[0],
+          noWrite: true,
+        });
+        const cacheEntry = createCacheEntry({
+          noteProps: staleNote,
+          hash: "123123",
+        });
+        cache["my-new-note"] = cacheEntry;
+        cacheVault.notes = cache;
+        writeNotesToCache(vault2Path({ wsRoot, vault: vaults[0] }), cacheVault);
+
+        // Verify cache is updated
+        cacheVault = readNotesFromCache(
+          vault2Path({ wsRoot, vault: vaults[0] })
+        );
+        expect(_.size(cacheVault.notes)).toEqual(5);
+        expect(cacheVault.notes["my-new-note"]).toBeTruthy();
+        await engine.init();
+
+        // Verify stale note from cache is deleted
+        cacheVault = readNotesFromCache(
+          vault2Path({ wsRoot, vault: vaults[0] })
+        );
+        expect(cacheVault.notes["my-new-note"]).toBeFalsy();
+        expect(_.size(cacheVault.notes)).toEqual(4);
       },
       {
         expect,

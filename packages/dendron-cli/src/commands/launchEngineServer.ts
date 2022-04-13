@@ -119,34 +119,23 @@ export class LaunchEngineServerCommand extends CLICommand<
           "create"
         ).length;
 
-        if (createCount > 0) {
-          CLIAnalyticsUtils.track(EngagementEvents.NoteCreated, {
-            count: createCount,
-          });
-        }
-
         const updateCount = extractNoteChangeEntriesByType(
           entries,
           "update"
         ).length;
-
-        if (updateCount > 0) {
-          CLIAnalyticsUtils.track(EngagementEvents.NoteUpdated, {
-            count: updateCount,
-          });
-        }
 
         const deleteCount = extractNoteChangeEntriesByType(
           entries,
           "delete"
         ).length;
 
-        if (deleteCount > 0) {
-          CLIAnalyticsUtils.track(EngagementEvents.NoteDeleted, {
-            count: deleteCount,
-          });
-        }
+        CLIAnalyticsUtils.track(EngagementEvents.EngineStateChanged, {
+          created: createCount,
+          updated: updateCount,
+          deleted: deleteCount,
+        });
       });
+
       if (out.error) {
         this.printError(out.error);
       }

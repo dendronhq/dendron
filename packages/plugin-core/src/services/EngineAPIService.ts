@@ -329,33 +329,21 @@ export class EngineAPIService
         "create"
       ).length;
 
-      if (createCount > 0) {
-        AnalyticsUtils.track(EngagementEvents.NoteCreated, {
-          count: createCount,
-        });
-      }
-
       const updateCount = extractNoteChangeEntriesByType(
         entries,
         "update"
       ).length;
-
-      if (updateCount > 0) {
-        AnalyticsUtils.track(EngagementEvents.NoteUpdated, {
-          count: updateCount,
-        });
-      }
 
       const deleteCount = extractNoteChangeEntriesByType(
         entries,
         "delete"
       ).length;
 
-      if (deleteCount > 0) {
-        AnalyticsUtils.track(EngagementEvents.NoteDeleted, {
-          count: deleteCount,
-        });
-      }
+      AnalyticsUtils.track(EngagementEvents.EngineStateChanged, {
+        created: createCount,
+        updated: updateCount,
+        deleted: deleteCount,
+      });
     });
   }
 }

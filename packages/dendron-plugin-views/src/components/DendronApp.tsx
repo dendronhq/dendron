@@ -17,7 +17,7 @@ import {
   setLogLevel,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
-import React from "react";
+import React, { useEffect } from "react";
 import { useWorkspaceProps } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
@@ -115,6 +115,14 @@ function DendronApp(props: DendronAppProps) {
   const opts = _.defaults(props.opts, {
     padding: props.Component.name === "DendronGraphPanel" ? "0px" : "33px",
   });
+
+  useEffect(() => {
+    // this class is introduced with new reduced Motion feature of vscode and is resulting
+    // in a bug where webviews are updated to light theme.
+    //More info about this class here: https://code.visualstudio.com/api/extension-guides/webview#accessibility
+    document.body.classList.remove("vscode-reduce-motion");
+  }, []);
+
   return (
     <Provider store={combinedStore}>
       <Layout style={{ padding: opts.padding }}>

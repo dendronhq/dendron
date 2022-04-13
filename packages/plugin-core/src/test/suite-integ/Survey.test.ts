@@ -1,5 +1,6 @@
 import {
   InitialSurveyStatusEnum,
+  LapsedUserSurveyStatusEnum,
   MetadataService,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
@@ -14,11 +15,7 @@ import { StartupUtils } from "../../utils/StartupUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TutorialInitializer } from "../../workspace/tutorialInitializer";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 suite("SurveyUtils", function () {
   describe("showInitialSurvey", () => {
@@ -176,69 +173,157 @@ suite("SurveyUtils", function () {
   });
 
   describe("showLapsedUserSurvey", () => {
-    const ctx = setupBeforeAfter(this);
-    describe("GIVEN: user rejects lapsed user message", () => {
-      describe("WHEN: Global state for lapsed user survey isn't set", () => {
-        test("THEN: showLapsedUserSurvey is called", (done) => {
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async () => {},
-            onInit: async () => {
-              sinon
-                .stub(StateService.instance(), "getGlobalState")
-                .resolves(undefined);
-              const lapsedSurveySpy = sinon.spy(
-                SurveyUtils,
-                "showLapsedUserSurvey"
-              );
-              sinon
-                .stub(vscode.window, "showInformationMessage")
-                .resolves({ title: "foo" });
-              await StartupUtils.showLapsedUserMessage(
-                VSCodeUtils.getAssetUri(ctx)
-              );
-              await new Promise((resolve: any) => {
-                setTimeout(() => {
-                  resolve();
-                }, 1);
-              });
-              expect(lapsedSurveySpy.calledOnce).toBeTruthy();
-              done();
-            },
-          });
-        });
-      });
+    let homeDirStub: SinonStub;
+    let stateStub: SinonStub;
+    let surveySpy: SinonSpy;
+    let infoMsgStub: SinonStub;
 
-      describe("WHEN: Global state for lapsed user survey is set", () => {
-        test("THEN: showLapsedUserSurvey is not called", (done) => {
-          runLegacyMultiWorkspaceTest({
-            ctx,
-            preSetupHook: async () => {},
-            onInit: async () => {
-              sinon
-                .stub(StateService.instance(), "getGlobalState")
-                .resolves("submitted");
-              const lapsedSurveySpy = sinon.spy(
-                SurveyUtils,
-                "showLapsedUserSurvey"
-              );
-              sinon
-                .stub(vscode.window, "showInformationMessage")
-                .resolves({ title: "foo" });
-              await StartupUtils.showLapsedUserMessage(
-                VSCodeUtils.getAssetUri(ctx)
-              );
-              await new Promise((resolve: any) => {
-                setTimeout(() => {
-                  resolve();
-                }, 1);
-              });
-              expect(lapsedSurveySpy.calledOnce).toBeFalsy();
-              done();
-            },
+    describeMultiWS(
+      "GIVEN LAPSED_USER_SURVEY_SUBMITTED is not set",
+      {
+        beforeHook: async () => {
+          await resetCodeWorkspace();
+          homeDirStub = TestEngineUtils.mockHomeDir();
+        },
+      },
+      (ctx) => {
+        after(() => {
+          homeDirStub.restore();
+        });
+
+        beforeEach(() => {
+          stateStub = sinon
+            .stub(StateService.instance(), "getGlobalState")
+            .resolves(undefined);
+          surveySpy = sinon.spy(SurveyUtils, "showLapsedUserSurvey");
+          infoMsgStub = sinon
+            .stub(vscode.window, "showInformationMessage")
+            .resolves({ title: "foo" });
+        });
+
+        afterEach(() => {
+          stateStub.restore();
+          surveySpy.restore();
+          infoMsgStub.restore();
+        });
+
+        describe("AND lapsedUserSurveyStatus is not set", () => {
+          test("THEN showLapsedUserSurvey is called", async () => {
+            await StartupUtils.showLapsedUserMessage(
+              VSCodeUtils.getAssetUri(ctx)
+            );
+            await new Promise((resolve: any) => {
+              setTimeout(() => {
+                resolve();
+              }, 1);
+            });
+            expect(surveySpy.calledOnce).toBeTruthy();
           });
         });
-      });
-    });
+
+        describe("AND lapsedUserSurveyStatus is set to submitted", () => {
+          test("THEN showLapsedUserSurvey is not called", async () => {
+            MetadataService.instance().setLapsedUserSurveyStatus(
+              LapsedUserSurveyStatusEnum.submitted
+            );
+            await StartupUtils.showLapsedUserMessage(
+              VSCodeUtils.getAssetUri(ctx)
+            );
+            await new Promise((resolve: any) => {
+              setTimeout(() => {
+                resolve();
+              }, 1);
+            });
+            expect(surveySpy.calledOnce).toBeFalsy();
+          });
+        });
+      }
+    );
+
+    describeMultiWS(
+      "GIVEN LAPSED_USER_SURVEY_SUBMITTED is set",
+      {
+        beforeHook: async () => {
+          await resetCodeWorkspace();
+          homeDirStub = TestEngineUtils.mockHomeDir();
+        },
+      },
+      (ctx) => {
+        after(() => {
+          homeDirStub.restore();
+        });
+
+        beforeEach(() => {
+          stateStub = sinon
+            .stub(StateService.instance(), "getGlobalState")
+            .resolves("submitted");
+          surveySpy = sinon.spy(SurveyUtils, "showLapsedUserSurvey");
+          infoMsgStub = sinon
+            .stub(vscode.window, "showInformationMessage")
+            .resolves({ title: "foo" });
+        });
+
+        afterEach(() => {
+          stateStub.restore();
+          surveySpy.restore();
+          infoMsgStub.restore();
+        });
+
+        describe("AND lapsedUserSurveyStatus is not set", () => {
+          test("THEN metadata is backfilled AND showLapsedUserSurvye is not called", async () => {
+            // metadata is not set yet, we expect this to be backfilled.
+            expect(
+              MetadataService.instance().getLapsedUserSurveyStatus()
+            ).toEqual(undefined);
+            // global state is already set.
+            expect(
+              await StateService.instance().getGlobalState(
+                GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
+              )
+            ).toEqual("submitted");
+
+            await StartupUtils.showLapsedUserMessage(
+              VSCodeUtils.getAssetUri(ctx)
+            );
+            await new Promise((resolve: any) => {
+              setTimeout(() => {
+                resolve();
+              }, 1);
+            });
+
+            expect(surveySpy.calledOnce).toBeFalsy();
+
+            // metadata is backfilled.
+            expect(
+              MetadataService.instance().getLapsedUserSurveyStatus()
+            ).toEqual(LapsedUserSurveyStatusEnum.submitted);
+          });
+        });
+
+        describe("AND lapsedUserSurveyStatus is set to submitted", () => {
+          test("THEN showLapsedUserSurvey is not called", async () => {
+            expect(
+              MetadataService.instance().getLapsedUserSurveyStatus()
+            ).toEqual(LapsedUserSurveyStatusEnum.submitted);
+            expect(
+              await StateService.instance().getGlobalState(
+                GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
+              )
+            ).toEqual("submitted");
+
+            await StartupUtils.showLapsedUserMessage(
+              VSCodeUtils.getAssetUri(ctx)
+            );
+            await new Promise((resolve: any) => {
+              setTimeout(() => {
+                resolve();
+              }, 1);
+            });
+
+            expect(surveySpy.calledOnce).toBeFalsy();
+          });
+        });
+      }
+    );
   });
 });

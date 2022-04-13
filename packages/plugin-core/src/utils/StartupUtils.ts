@@ -26,6 +26,15 @@ import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
 
 export class StartupUtils {
+  static showMissingDefaultConfigMessageIfNecessary(opts: {
+    ext: IDendronExtension;
+    extensionInstallStatus: InstallStatus;
+  }) {
+    if (StartupUtils.shouldDisplayMissingDefaultConfigMessage(opts)) {
+      StartupUtils.showMissingDefaultConfigMessage({ ext: opts.ext });
+    }
+  }
+
   static shouldDisplayMissingDefaultConfigMessage(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
@@ -69,6 +78,14 @@ export class StartupUtils {
           );
         }
       });
+  }
+
+  static async showLapsedUserMessageIfNecessary(opts: {
+    assetUri: vscode.Uri;
+  }) {
+    if (StartupUtils.shouldDisplayLapsedUserMsg()) {
+      await StartupUtils.showLapsedUserMessage(opts.assetUri);
+    }
   }
 
   static shouldDisplayLapsedUserMsg(): boolean {
@@ -127,6 +144,12 @@ export class StartupUtils {
           return;
         }
       });
+  }
+
+  static async showInactiveUserMessageIfNecessary() {
+    if (StartupUtils.shouldDisplayInactiveUserSurvey()) {
+      await StartupUtils.showInactiveUserMessage();
+    }
   }
 
   static shouldDisplayInactiveUserSurvey(): boolean {

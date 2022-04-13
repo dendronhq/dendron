@@ -503,14 +503,10 @@ export async function _activate(
       }
 
       // check for missing default config keys and prompt for a backfill.
-      if (
-        StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-          ext: ws,
-          extensionInstallStatus,
-        })
-      ) {
-        StartupUtils.showMissingDefaultConfigMessage({ ext: ws });
-      }
+      StartupUtils.showMissingDefaultConfigMessageIfNecessary({
+        ext: ws,
+        extensionInstallStatus,
+      });
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
@@ -929,15 +925,11 @@ async function showWelcomeOrWhatsNew({
 
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
-  if (StartupUtils.shouldDisplayLapsedUserMsg()) {
-    await StartupUtils.showLapsedUserMessage(assetUri);
-  }
+  StartupUtils.showLapsedUserMessageIfNecessary({ assetUri });
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  if (StartupUtils.shouldDisplayInactiveUserSurvey()) {
-    await StartupUtils.showInactiveUserMessage();
-  }
+  StartupUtils.showInactiveUserMessageIfNecessary();
 }
 
 async function _setupCommands({

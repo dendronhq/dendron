@@ -144,7 +144,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   static async isWorkspaceVault(fpath: string) {
-    return fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
+    return (
+      // Config file exists
+      (await fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE))) &&
+      // And is not a self contained vault
+      !(await fs.pathExists(path.join(fpath, FOLDERS.NOTES)))
+    );
   }
 
   public wsRoot: string;

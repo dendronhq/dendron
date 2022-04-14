@@ -277,7 +277,6 @@ suite("NativeTreeView tests", function () {
             newName: "fooz",
           });
           console.log({ bond: engine.notes });
-          debugger;
 
           const vault1RootPropsAfter = engine.notes[vaultOneRootId];
           const childrenAfter = await (provider.getChildren(

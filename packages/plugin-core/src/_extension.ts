@@ -9,13 +9,12 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
-  ExtensionEvents,
   getStage,
   GitEvents,
   InstallStatus,
+  isDisposable,
   MigrationEvents,
   NativeWorkspaceEvents,
-  SurveyEvents,
   Time,
   TutorialEvents,
   VaultUtils,
@@ -31,7 +30,6 @@ import {
 import {
   FileAddWatcher,
   HistoryService,
-  InactvieUserMsgStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
@@ -42,18 +40,16 @@ import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
-import { Duration } from "luxon";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import os from "os";
 import {
   CURRENT_AB_TESTS,
-  UpgradeToastOrViewTestGroups,
-  UPGRADE_TOAST_OR_VIEW_TEST,
+  UpgradeToastWordingTestGroups,
+  UPGRADE_TOAST_WORDING_TEST,
 } from "./abTests";
 import { ALL_COMMANDS } from "./commands";
-import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
-import { DoctorCommand, PluginDoctorActionsEnum } from "./commands/Doctor";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
@@ -69,14 +65,7 @@ import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
-import {
-  CONFIG,
-  DendronContext,
-  DENDRON_COMMANDS,
-  GLOBAL_STATE,
-  INCOMPATIBLE_EXTENSIONS,
-} from "./constants";
-import { IDendronExtension } from "./dendronExtensionInterface";
+import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
@@ -90,7 +79,6 @@ import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
-import { SurveyUtils } from "./survey";
 import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -101,7 +89,6 @@ import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegis
 import { StartupUtils } from "./utils/StartupUtils";
 import { EngineNoteProvider } from "./views/EngineNoteProvider";
 import { NativeTreeView } from "./views/NativeTreeView";
-import { showUpgradeView } from "./views/UpgradeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
@@ -369,6 +356,12 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
+  // At this point, the segment client has not been created yet.
+  // We need to check here if the uuid has been set for future references
+  // because the Segment client constructor will go ahead and create one if it doesn't exist.
+  const maybeUUIDPath = path.join(os.homedir(), CONSTANTS.DENDRON_ID);
+  const UUIDPathExists = await fs.pathExists(maybeUUIDPath);
+
   // If telemetry is not disabled, we enable telemetry and error reporting ^rw8l1w51hnjz
   // - NOTE: we do this outside of the try/catch block in case we run into an error with initialization
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
@@ -395,7 +388,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    _setupCommands({ ws, context, requireActiveWorkspace: false });
+    await _setupCommands({ ws, context, requireActiveWorkspace: false });
     _setupLanguageFeatures(context);
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
@@ -416,9 +409,23 @@ export async function _activate(
       previousGlobalVersion,
       currentVersion,
     });
+
+    // check if this is an install event, but a repeated one on a new instance.
+    let isSecondaryInstall = false;
+
     // set initial install ^194e5bw7so9g
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      MetadataService.instance().setInitialInstall();
+      // even if it's an initial install for this instance of vscode, it may not be for this machine.
+      // in that case, we should skip setting the initial install time since it's already set.
+      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
+      const metadata = MetadataService.instance().getMeta();
+      if (metadata.firstInstall === undefined && !UUIDPathExists) {
+        MetadataService.instance().setInitialInstall();
+      } else {
+        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
+        // tied to initial install to happen in this instance of VSCode once for the first time
+        isSecondaryInstall = true;
+      }
     }
 
     // TODO: temporary backfill
@@ -497,14 +504,10 @@ export async function _activate(
       }
 
       // check for missing default config keys and prompt for a backfill.
-      if (
-        StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-          ext: ws,
-          extensionInstallStatus,
-        })
-      ) {
-        StartupUtils.showMissingDefaultConfigMessage({ ext: ws });
-      }
+      StartupUtils.showMissingDefaultConfigMessageIfNecessary({
+        ext: ws,
+        extensionInstallStatus,
+      });
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
@@ -660,7 +663,7 @@ export async function _activate(
       }
 
       MetadataService.instance().setDendronWorkspaceActivated();
-      _setupCommands({ ws, context, requireActiveWorkspace: true });
+      await _setupCommands({ ws, context, requireActiveWorkspace: true });
 
       const codeWorkspacePresent = await fs.pathExists(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
@@ -684,15 +687,18 @@ export async function _activate(
         duration: durationReloadWorkspace,
         noCaching: dendronConfig.noCaching || false,
         numNotes,
-        numVaults: ws.getDWorkspace().vaults.length,
+        numVaults: vaults.length,
         workspaceType: ws.type,
         codeWorkspacePresent,
         selfContainedVaultsEnabled:
           dendronConfig.dev?.enableSelfContainedVaults || false,
-        numSelfContainedVaults: ws
-          .getDWorkspace()
-          .vaults.filter(VaultUtils.isSelfContained).length,
-        numRemoteVaults: ws.getDWorkspace().vaults.filter(VaultUtils.isRemote)
+        numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained)
+          .length,
+        numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
+        numWorkspaceVaults: vaults.filter(
+          (vault) => vault.workspace !== undefined
+        ).length,
+        numSeedVaults: vaults.filter((vault) => vault.seed !== undefined)
           .length,
       };
 
@@ -719,7 +725,7 @@ export async function _activate(
 
       // on first install, warn if extensions are incompatible ^dlx35gstwsun
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-        warnIncompatibleExtensions({ ext: ws });
+        StartupUtils.warnIncompatibleExtensions({ ext: ws });
       }
 
       if (stage !== "test") {
@@ -769,6 +775,7 @@ export async function _activate(
 
     await showWelcomeOrWhatsNew({
       extensionInstallStatus,
+      isSecondaryInstall,
       version: DendronExtension.version(),
       previousExtensionVersion: previousWorkspaceVersion,
       start: startActivate,
@@ -816,12 +823,14 @@ export function deactivate() {
 
 async function showWelcomeOrWhatsNew({
   extensionInstallStatus,
+  isSecondaryInstall,
   version,
   previousExtensionVersion,
   start,
   assetUri,
 }: {
   extensionInstallStatus: InstallStatus;
+  isSecondaryInstall: boolean;
   version: string;
   previousExtensionVersion: string;
   start: [number, number];
@@ -831,12 +840,20 @@ async function showWelcomeOrWhatsNew({
   Logger.info({ ctx, version, previousExtensionVersion });
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
-      Logger.info({ ctx, msg: "extension, initial install" });
-
+      Logger.info({
+        ctx,
+        msg: `extension, ${
+          isSecondaryInstall
+            ? "initial install"
+            : "secondary install on new vscode instance"
+        }`,
+      });
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
+        isSecondaryInstall,
       });
+
       // set the global version of dendron ^oncxlt645b5r
       await StateService.instance().setGlobalVersion(version);
 
@@ -858,49 +875,51 @@ async function showWelcomeOrWhatsNew({
       await StateService.instance().setGlobalVersion(version);
 
       // ^t6dxodie048o
-      const toastOrView = UPGRADE_TOAST_OR_VIEW_TEST.getUserGroup(
+      const toastWording = UPGRADE_TOAST_WORDING_TEST.getUserGroup(
         SegmentClient.instance().anonymousId
       );
 
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
-        toastOrView,
+        toastWording,
       });
 
-      switch (toastOrView) {
-        case UpgradeToastOrViewTestGroups.upgradeToast: {
-          vscode.window
-            .showInformationMessage(
-              `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
-              "See what changed"
-            )
-            .then((resp) => {
-              if (resp === "See what changed") {
-                AnalyticsUtils.track(
-                  VSCodeEvents.UpgradeSeeWhatsChangedClicked,
-                  {
-                    previousVersion: previousExtensionVersion,
-                    duration: getDurationMilliseconds(start),
-                  }
-                );
-                vscode.commands.executeCommand(
-                  "vscode.open",
-                  vscode.Uri.parse(
-                    "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
-                  )
-                );
-              }
-            });
+      let buttonAction: string;
+      switch (toastWording) {
+        case UpgradeToastWordingTestGroups.openChangelog:
+          buttonAction = "Open the changelog";
           break;
-        }
-        case UpgradeToastOrViewTestGroups.upgradeView: {
-          showUpgradeView();
+        case UpgradeToastWordingTestGroups.seeWhatChanged:
+          buttonAction = "See what changed";
           break;
-        }
+        case UpgradeToastWordingTestGroups.seeWhatsNew:
+          buttonAction = "See what's new";
+          break;
         default:
-          assertUnreachable(toastOrView);
+          assertUnreachable(toastWording);
       }
+
+      vscode.window
+        .showInformationMessage(
+          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+          buttonAction
+        )
+        .then((resp) => {
+          if (resp === buttonAction) {
+            AnalyticsUtils.track(VSCodeEvents.UpgradeSeeWhatsChangedClicked, {
+              previousVersion: previousExtensionVersion,
+              duration: getDurationMilliseconds(start),
+              toastWording,
+            });
+            vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(
+                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
+              )
+            );
+          }
+        });
       break;
     }
     default:
@@ -910,176 +929,17 @@ async function showWelcomeOrWhatsNew({
 
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
-  if (shouldDisplayLapsedUserMsg()) {
-    await showLapsedUserMessage(assetUri);
-  }
+  StartupUtils.showLapsedUserMessageIfNecessary({ assetUri });
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  if (shouldDisplayInactiveUserSurvey()) {
-    await showInactiveUserMessage();
-  }
+  StartupUtils.showInactiveUserMessageIfNecessary();
 }
 
-export async function showInactiveUserMessage() {
-  AnalyticsUtils.track(VSCodeEvents.ShowInactiveUserMessage);
-  MetadataService.instance().setInactiveUserMsgSendTime();
-  await SurveyUtils.showInactiveUserSurvey();
-}
-
-export async function showLapsedUserMessage(assetUri: vscode.Uri) {
-  const START_TITLE = "Get Started";
-
-  AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
-  MetadataService.instance().setLapsedUserMsgSendTime();
-  vscode.window
-    .showInformationMessage(
-      "Hey, we noticed you haven't started using Dendron yet. Would you like to get started?",
-      { modal: true },
-      { title: START_TITLE }
-    )
-    .then(async (resp) => {
-      if (resp?.title === START_TITLE) {
-        AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
-        showWelcome(assetUri);
-      } else {
-        AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-        const lapsedSurveySubmitted =
-          await StateService.instance().getGlobalState(
-            GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
-          );
-        if (lapsedSurveySubmitted === undefined) {
-          await SurveyUtils.showLapsedUserSurvey();
-        }
-        return;
-      }
-    });
-}
-
-export function shouldDisplayInactiveUserSurvey(): boolean {
-  const metaData = MetadataService.instance().getMeta();
-
-  const inactiveSurveyMsgStatus = metaData.inactiveUserMsgStatus;
-  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.submitted) {
-    return false;
-  }
-
-  // rare case where global state has been reset (or a reinstall) may cause issues with
-  // the prompt logic. ignore these cases and don't show the
-  if (
-    metaData.firstInstall !== undefined &&
-    metaData.firstLookupTime !== undefined
-  ) {
-    if (metaData.firstLookupTime - metaData.firstInstall < 0) {
-      return false;
-    }
-  }
-
-  const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const FOUR_WEEKS = Duration.fromObject({ weeks: 4 });
-  const currentTime = Time.now().toSeconds();
-  const CUR_TIME = Duration.fromObject({ seconds: currentTime });
-
-  const FIRST_INSTALL =
-    metaData.firstInstall !== undefined
-      ? Duration.fromObject({ seconds: metaData.firstInstall })
-      : undefined;
-
-  const FIRST_LOOKUP_TIME =
-    metaData.firstLookupTime !== undefined
-      ? Duration.fromObject({ seconds: metaData.firstLookupTime })
-      : undefined;
-
-  const LAST_LOOKUP_TIME =
-    metaData.lastLookupTime !== undefined
-      ? Duration.fromObject({ seconds: metaData.lastLookupTime })
-      : undefined;
-
-  const INACTIVE_USER_MSG_SEND_TIME =
-    metaData.inactiveUserMsgSendTime !== undefined
-      ? Duration.fromObject({ seconds: metaData.inactiveUserMsgSendTime })
-      : undefined;
-
-  // is the user a first week active user?
-  const isFirstWeekActive =
-    FIRST_INSTALL !== undefined &&
-    FIRST_LOOKUP_TIME !== undefined &&
-    FIRST_LOOKUP_TIME.minus(FIRST_INSTALL) <= ONE_WEEK;
-
-  // was the user active on the first week but has been inactive for more than four weeks?
-  const isInactive =
-    isFirstWeekActive &&
-    LAST_LOOKUP_TIME !== undefined &&
-    CUR_TIME.minus(LAST_LOOKUP_TIME) >= FOUR_WEEKS;
-
-  // if they have cancelled last time, we should be waiting another four weeks.
-  if (inactiveSurveyMsgStatus === InactvieUserMsgStatusEnum.cancelled) {
-    const shouldSendAgain =
-      INACTIVE_USER_MSG_SEND_TIME !== undefined &&
-      CUR_TIME.minus(INACTIVE_USER_MSG_SEND_TIME) >= FOUR_WEEKS &&
-      isInactive;
-    if (shouldSendAgain) {
-      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
-        reason: "reprompt",
-        currentTime,
-        ...metaData,
-      });
-    }
-    return shouldSendAgain;
-  } else {
-    // this is the first time we are asking them.
-    const shouldSend =
-      metaData.dendronWorkspaceActivated !== undefined &&
-      metaData.firstWsInitialize !== undefined &&
-      isInactive &&
-      // this is needed since we may have prompted them before we introduced this metadata
-      metaData.inactiveUserMsgSendTime === undefined;
-    if (shouldSend) {
-      AnalyticsUtils.track(SurveyEvents.InactiveUserSurveyPromptReason, {
-        reason: "initial_prompt",
-        currentTime,
-        ...metaData,
-      });
-    }
-    return shouldSend;
-  }
-}
-
-/**
- * Visible for Testing purposes only
- * @returns
- */
-export function shouldDisplayLapsedUserMsg(): boolean {
-  const ONE_DAY = Duration.fromObject({ days: 1 });
-  const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-  const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
-  const metaData = MetadataService.instance().getMeta();
-
-  // If we haven't prompted the user yet and it's been a day since their
-  // initial install OR if it's been one week since we last prompted the user
-  const refreshMsg =
-    (metaData.lapsedUserMsgSendTime === undefined &&
-      ONE_DAY <=
-        CUR_TIME.minus(
-          Duration.fromObject({ seconds: metaData.firstInstall })
-        )) ||
-    (metaData.lapsedUserMsgSendTime !== undefined &&
-      ONE_WEEK <=
-        CUR_TIME.minus(
-          Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
-        ));
-
-  // If the user has never initialized, has never activated a dendron workspace,
-  // and it's time to refresh the lapsed user message
-  return (
-    !metaData.dendronWorkspaceActivated &&
-    !metaData.firstWsInitialize &&
-    refreshMsg
-  );
-}
 async function _setupCommands({
   ws,
   context,
+  // If your command needs access to the engine at setup, requireActiveWorkspace should be set to true
   requireActiveWorkspace,
 }: {
   ws: DendronExtension;
@@ -1095,6 +955,9 @@ async function _setupCommands({
       return;
     }
     const cmd = new Cmd(ws);
+    if (isDisposable(cmd)) {
+      context.subscriptions.push(cmd);
+    }
 
     // Register commands that implement on `onAutoComplete` with AutoCompletableRegister
     // to be able to be invoked with auto completion action.
@@ -1193,22 +1056,6 @@ async function _setupCommands({
         )
       );
     }
-
-    if (!existingCommands.includes(DENDRON_COMMANDS.COPY_NOTE_LINK.key)) {
-      const copyNoteLinkCommand = new CopyNoteLinkCommand(ws.getEngine());
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.COPY_NOTE_LINK.key,
-          sentryReportingCallback(async (args) => {
-            if (args === undefined) {
-              args = {};
-            }
-            await copyNoteLinkCommand.run(args);
-          })
-        )
-      );
-      context.subscriptions.push(copyNoteLinkCommand);
-    }
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument
@@ -1299,36 +1146,4 @@ function updateEngineAPI(port: number | string): EngineAPIService {
   ext.port = _.toInteger(port);
 
   return svc;
-}
-
-function warnIncompatibleExtensions(opts: { ext: IDendronExtension }) {
-  const installStatus = INCOMPATIBLE_EXTENSIONS.map((extId) => {
-    return { id: extId, installed: VSCodeUtils.isExtensionInstalled(extId) };
-  });
-
-  const installedExtensions = installStatus
-    .filter((status) => status.installed)
-    .map((status) => status.id);
-
-  const shouldDisplayWarning = installStatus.some((status) => status.installed);
-  if (shouldDisplayWarning) {
-    AnalyticsUtils.track(ExtensionEvents.IncompatibleExtensionsWarned, {
-      installedExtensions,
-    });
-    vscode.window
-      .showWarningMessage(
-        "We have detected some extensions that may conflict with Dendron. Further action is needed for Dendron to function correctly",
-        "Fix conflicts..."
-      )
-      .then(async (resp) => {
-        if (resp === "Fix conflicts...") {
-          const cmd = new DoctorCommand(opts.ext);
-          await cmd.execute({
-            action: PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS,
-            scope: "workspace",
-            data: { installStatus },
-          });
-        }
-      });
-  }
 }

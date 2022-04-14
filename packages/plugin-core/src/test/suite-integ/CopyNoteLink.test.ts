@@ -13,11 +13,7 @@ import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  describeSingleWS,
-  toDendronEngineClient,
-} from "../testUtilsV3";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import sinon from "sinon";
@@ -30,7 +26,7 @@ suite("CopyNoteLink", function () {
   let copyNoteLinkCommand: CopyNoteLinkCommand;
   beforeEach(() => {
     copyNoteLinkCommand = new CopyNoteLinkCommand(
-      toDendronEngineClient(ExtensionProvider.getEngine())
+      ExtensionProvider.getExtension()
     );
   });
 
@@ -564,76 +560,74 @@ suite("CopyNoteLink", function () {
       });
     });
 
-    describe("AND config is set to prompt", () => {
-      describeSingleWS(
-        "AND user picks line in the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a link anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves({ label: "line" });
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("line", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
+      },
+      () => {
+        test("WHEN user picks line in the prompt, THEN CopyNoteLinkCommand generates a link anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves({ label: "line" });
+          const link = (await copyNoteLinkCommand.run())?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("line", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
 
-      describeSingleWS(
-        "AND user picks block in the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a block anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves({ label: "block" });
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("block", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
+      },
+      () => {
+        test("WHEN user picks block in the prompt, THEN CopyNoteLinkCommand generates a block anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves({ label: "block" });
+          const link = (await copyNoteLinkCommand.run())?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("block", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
 
-      describeSingleWS(
-        "AND user cancels the prompt",
-        {
-          modConfigCb: (config) => {
-            ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
-            return config;
-          },
+    describeSingleWS(
+      "GIVEN a workspace where config is set to prompt",
+      {
+        modConfigCb: (config) => {
+          ConfigUtils.setNonNoteLinkAnchorType(config, "prompt");
+          return config;
         },
-        () => {
-          test("THEN generates a line anchor ", async () => {
-            await prepFileAndSelection();
-            const pick = sinon
-              .stub(vscode.window, "showQuickPick")
-              .resolves(undefined);
-            const link = (await copyNoteLinkCommand.run())?.link;
-            expect(pick.calledOnce).toBeTruthy();
-            expect(
-              await linkHasAnchor("line", ["src", "test.hs"], link)
-            ).toBeTruthy();
-          });
-        }
-      );
-    });
+      },
+      () => {
+        test("WHEN user cancels the prompt, THEN CopyNoteLinkCommand generates a line anchor ", async () => {
+          await prepFileAndSelection();
+          const pick = sinon
+            .stub(vscode.window, "showQuickPick")
+            .resolves(undefined);
+          const link = (await copyNoteLinkCommand.run())?.link;
+          expect(pick.calledOnce).toBeTruthy();
+          expect(
+            await linkHasAnchor("line", ["src", "test.hs"], link)
+          ).toBeTruthy();
+        });
+      }
+    );
   });
 });
 

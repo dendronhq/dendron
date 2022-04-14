@@ -6,7 +6,7 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache } from ".";
+import { DateTime, LruCache, VaultUtils } from ".";
 import { COLORS_LIST } from "./colors";
 import {
   CompatUtils,
@@ -1150,6 +1150,22 @@ export class ConfigUtils {
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
     ConfigUtils.setWorkspaceProp(config, "vaults", value);
+  }
+
+  /** Finds the matching vault in the config, and uses the callback to update it. */
+  static updateVault(
+    config: IntermediateDendronConfig,
+    vaultToUpdate: DVault,
+    updateCb: (vault: DVault) => DVault
+  ): void {
+    ConfigUtils.setVaults(
+      config,
+      ConfigUtils.getVaults(config).map((configVault) => {
+        if (!VaultUtils.isEqualV2(vaultToUpdate, configVault))
+          return configVault;
+        return updateCb(configVault);
+      })
+    );
   }
 
   static setNoteLookupProps<K extends keyof NoteLookupConfig>(

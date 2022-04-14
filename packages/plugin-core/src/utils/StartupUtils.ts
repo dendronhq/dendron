@@ -2,6 +2,7 @@ import {
   ConfigEvents,
   ConfigUtils,
   ConfirmStatus,
+  DVault,
   ExtensionEvents,
   InstallStatus,
   SurveyEvents,
@@ -11,6 +12,7 @@ import {
 import {
   DConfig,
   DoctorActionsEnum,
+  DoctorService,
   InactvieUserMsgStatusEnum,
   MetadataService,
 } from "@dendronhq/engine-server";
@@ -24,6 +26,11 @@ import { StateService } from "../services/stateService";
 import { GLOBAL_STATE, INCOMPATIBLE_EXTENSIONS } from "../constants";
 import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { isSelfContainedVaultFolder } from "@dendronhq/common-server";
+import path from "path";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { Logger } from "../logger";
 
 export class StartupUtils {
   static showMissingDefaultConfigMessageIfNecessary(opts: {

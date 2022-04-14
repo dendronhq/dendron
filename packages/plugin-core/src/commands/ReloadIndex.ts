@@ -14,12 +14,15 @@ import {
   schemaModuleOpts2File,
   vault2Path,
 } from "@dendronhq/common-server";
+import { DoctorActionsEnum, DoctorService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { Logger } from "../logger";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
@@ -103,6 +106,63 @@ export class ReloadIndexCommand extends BasicCommand<
     }
   }
 
+  /** Checks if there are any self contained vaults that aren't marked correctly, and prompts the user to fix the configuration. */
+  static async checkAndPromptForMisconfiguredSelfContainedVaults({
+    engine,
+  }: {
+    engine: IEngineAPIService;
+  }) {
+    const ctx = "checkAndPromptForMisconfiguredSelfContainedVaults";
+    const { wsRoot, vaults } = engine;
+
+    const doctor = new DoctorService();
+    const vaultsToFix = await doctor.findMisconfiguredSelfContainedVaults(
+      wsRoot,
+      vaults
+    );
+
+    const fixConfig = "Fix configuration";
+
+    if (vaultsToFix.length > 0) {
+      Logger.info({
+        ctx,
+        numVaultsToFix: vaultsToFix.length,
+      });
+
+      let message: string;
+      let detail: string | undefined;
+      if (vaultsToFix.length === 1) {
+        message = `Vault "${vaultsToFix[0]}" needs to be marked as a self contained vault in your configuration file.`;
+      } else {
+        message = `${vaultsToFix.length} vaults need to be marked as self contained vaults in your configuration file`;
+      }
+      const pick = await window.showWarningMessage(
+        message,
+        {
+          detail,
+        },
+        fixConfig,
+        "Ignore for now"
+      );
+      Logger.info({
+        ctx,
+        msg: "Used picked an option in the fix prompt",
+        pick,
+      });
+      if (pick === fixConfig) {
+        await doctor.executeDoctorActions({
+          action: DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG,
+          engine,
+        });
+        Logger.info({
+          ctx,
+          msg: "Fixing vaults done!",
+        });
+      }
+    }
+    doctor.dispose();
+  }
+
   /**
    * Update index
    * @param opts
@@ -115,6 +175,12 @@ export class ReloadIndexCommand extends BasicCommand<
     const ws = ExtensionProvider.getDWorkspace();
     let initError: DendronError | undefined;
     const { wsRoot, engine } = ws;
+
+    // Check if there are any misconfigured self contained vaults.
+    // Deliberately now awaiting this to avoid blocking the reload
+    ReloadIndexCommand.checkAndPromptForMisconfiguredSelfContainedVaults({
+      engine: ExtensionProvider.getEngine(),
+    });
 
     // Fix up any broken vaults
     const reloadIndex = async () => {

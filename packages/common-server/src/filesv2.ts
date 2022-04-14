@@ -1,7 +1,9 @@
 import {
+  CONSTANTS,
   DendronError,
   DNodeUtils,
   DVault,
+  FOLDERS,
   isNotUndefined,
   NoteProps,
   NotesCache,
@@ -635,6 +637,16 @@ class FileUtils {
         });
     });
   };
+}
+
+/** Looks at the files at the given path to check if it's a self contained vault. */
+export async function isSelfContainedVaultFolder(dir: string) {
+  return _.every(
+    await Promise.all([
+      fs.pathExists(path.join(dir, CONSTANTS.DENDRON_CONFIG_FILE)),
+      fs.pathExists(path.join(dir, FOLDERS.NOTES)),
+    ])
+  );
 }
 
 export class ExtensionUtils {

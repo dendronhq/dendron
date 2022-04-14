@@ -1,7 +1,7 @@
 import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
-import { DendronGlobalConfig, NoteTrait } from ".";
+import { DendronGlobalConfig } from ".";
 
 export interface Point {
   /**
@@ -206,7 +206,7 @@ export type DNodeProps<T = any, TCustom = any> = DNodeExplicitProps & {
   image?: DNodeImage;
 
   /** Any note traits that add special behavior to the note */
-  traits?: NoteTrait[];
+  traits?: string[];
 };
 
 export type SchemaData = {

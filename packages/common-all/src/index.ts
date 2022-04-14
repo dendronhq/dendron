@@ -23,6 +23,7 @@ export * from "./fuse";
 export * from "./util";
 export * from "./timing";
 export * from "./config";
+export * from "./SchemaCreationUtils";
 export { axios, AxiosError };
 export { DateTime };
 

@@ -95,7 +95,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     };
   }
 
-  async execute(opts: CommandOpts) {
+  async execute(opts: CommandOpts): Promise<any> {
     const { fname } = opts;
     const ctx = "CreateNoteWithTraitCommand";
 
@@ -108,6 +108,11 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       context.currentNoteName = fname;
 
       title = this.trait.OnCreate.setTitle(context);
+    }
+
+    let body;
+    if (this.trait.OnCreate?.setBody && this.checkWorkspaceTrustAndWarn()) {
+      body = await this.trait.OnCreate.setBody();
     }
 
     // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then
@@ -135,7 +140,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     await new GotoNoteCommand(this._extension).execute({
       qs: fname,
       vault,
-      overrides: { title, traits: [this.trait] },
+      overrides: { title, traits: [this.trait.id], body },
     });
 
     this.L.info({ ctx, msg: "exit" });

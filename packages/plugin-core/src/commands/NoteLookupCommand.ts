@@ -420,6 +420,10 @@ export class NoteLookupCommand
                 item.traits = [journalTrait];
               }
             }
+          } else if (
+            ConfigUtils.getWorkspace(ws.config).enableFullHierarchyNoteTitle
+          ) {
+            item.title = NoteUtils.genTitleFromFullFname(item.fname);
           }
           return this.acceptItem(item);
         })

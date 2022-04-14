@@ -733,6 +733,11 @@ export class NoteUtils {
     return titleFromBasename;
   }
 
+  static genTitleFromFullFname(fname: string): string {
+    const formatted = fname.replace(/\./g, " ");
+    return title(formatted);
+  }
+
   static genUpdateTime() {
     const now = Time.now().toMillis();
     return now;

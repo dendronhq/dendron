@@ -84,6 +84,13 @@ export class WebViewCommonUtils {
         if (newTheme === 'high-contrast') {
             newTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
         }
+        // this class is introduced with new vscode setting reduce motion  to reduce the amount of motion
+        // in the window.
+        var reduceMotionClassName = "vscode-reduce-motion"
+        if(newTheme.includes(reduceMotionClassName)) {
+          newTheme = newTheme.replace(reduceMotionClassName,"").trim()
+        }
+
         // be bale to get current theme using JS;
         window.currentTheme = newTheme;
 

@@ -201,6 +201,12 @@ export class WebViewUtils {
       function getTheme() {
           // get theme
           let vsTheme = document.body.className;
+          
+          var reduceMotionClassName = "vscode-reduce-motion"
+          if(vsTheme.includes(reduceMotionClassName)) {
+            vsTheme = vsTheme.replace(reduceMotionClassName,"").trim()
+          }
+
           let dendronTheme;
           if (vsTheme.endsWith("dark")) {
               dendronTheme = "dark";

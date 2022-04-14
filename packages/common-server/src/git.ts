@@ -208,6 +208,42 @@ export class GitUtils {
     return vaultName;
   }
 
+  /** If this vault had this remote, what path should it be stored under?
+   *
+   * If the remote is null, then you'll get the path should be if the vault was a local vault.
+   */
+  static getDependencyPathWithRemote({
+    vault,
+    remote,
+  }: {
+    remote: string | null;
+    vault: DVault;
+  }): string {
+    const vaultName =
+      vault.name ??
+      // if the vault has no name, compute one based on the path
+      _.findLast(vault.fsPath.split(/[/\\]/), (part) => part.length > 0) ??
+      // Fall back to fsPath directly if the calculation fails
+      vault.fsPath;
+
+    if (!remote) {
+      // local
+      return path.join(
+        FOLDERS.DEPENDENCIES,
+        FOLDERS.LOCAL_DEPENDENCY,
+        vaultName
+      );
+    } else {
+      return path.join(
+        FOLDERS.DEPENDENCIES,
+        GitUtils.remoteUrlToDependencyPath({
+          vaultName,
+          url: remote,
+        })
+      );
+    }
+  }
+
   static getVaultFromRepo(opts: {
     repoPath: string;
     repoUrl: string;

@@ -531,23 +531,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     let ignorePath: string = targetVault.fsPath;
     if (config.dev?.enableSelfContainedVaults) {
       // Move vault folder to the correct location
-      const vaultName =
-        targetVault.name ??
-        // if the vault has no name, compute one based on the path
-        _.findLast(
-          targetVault.fsPath.split(/[/\\]/),
-          (part) => part.length > 0
-        ) ??
-        // Fall back to fsPath directly if the calculation fails
-        targetVault.fsPath;
 
-      const newVaultPath = path.join(
-        FOLDERS.DEPENDENCIES,
-        GitUtils.remoteUrlToDependencyPath({
-          vaultName,
-          url: remoteUrl,
-        })
-      );
+      const newVaultPath = GitUtils.getDependencyPathWithRemote({
+        vault: targetVault,
+        remote: remoteUrl,
+      });
       await fs.move(
         path.join(wsRoot, targetVault.fsPath),
         path.join(wsRoot, newVaultPath)
@@ -605,20 +593,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     if (config.dev?.enableSelfContainedVaults) {
       // Move vault folder to the correct location
-      const vaultName =
-        targetVault.name ??
-        // if the vault has no name, compute one based on the path
-        _.findLast(
-          targetVault.fsPath.split(/[/\\]/),
-          (part) => part.length > 0
-        ) ??
-        // Fall back to fsPath directly if the calculation fails
-        targetVault.fsPath;
-      const newVaultPath = path.join(
-        FOLDERS.DEPENDENCIES,
-        FOLDERS.LOCAL_DEPENDENCY,
-        vaultName
-      );
+      const newVaultPath = GitUtils.getDependencyPathWithRemote({
+        vault: targetVault,
+        remote: null,
+      });
       await fs.move(
         path.join(wsRoot, targetVault.fsPath),
         path.join(wsRoot, newVaultPath)

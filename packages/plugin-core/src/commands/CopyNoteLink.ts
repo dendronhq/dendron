@@ -40,7 +40,6 @@ export class CopyNoteLinkCommand
   key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
   private extension: IDendronExtension;
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
-  static requireActiveWorkspace: boolean = true;
 
   constructor(ext: IDendronExtension) {
     super();

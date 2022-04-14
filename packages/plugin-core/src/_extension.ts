@@ -1043,19 +1043,6 @@ async function _setupCommands({
         )
       );
     }
-
-    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
-          sentryReportingCallback(async () => {
-            await new ShowNoteGraphCommand(
-              NoteGraphPanelFactory.create(ws, ws.getEngine())
-            ).run();
-          })
-        )
-      );
-    }
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

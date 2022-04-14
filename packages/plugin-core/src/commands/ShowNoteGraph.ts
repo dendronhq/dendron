@@ -16,6 +16,8 @@ export class ShowNoteGraphCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static requireActiveWorkspace: boolean = true;
+
   key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key;
 
   private _panel;

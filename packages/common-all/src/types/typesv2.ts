@@ -766,6 +766,7 @@ export enum GraphViewMessageEnum {
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
   "onRequestGraphStyle" = "onRequestGraphStyle",
+  "onGraphStyleLoad" = "onGraphStyleLoad",
 }
 
 export enum CalendarViewMessageType {

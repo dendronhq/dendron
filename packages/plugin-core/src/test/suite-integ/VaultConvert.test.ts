@@ -118,6 +118,7 @@ suite("GIVEN VaultConvert", function () {
         const cmd = new VaultConvertCommand();
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+        sinon.stub(cmd, "promptForFolderMove").resolves(true);
 
         // Create a remote repository to be the upstream
         remote = tmpDir().name;
@@ -177,6 +178,7 @@ suite("GIVEN VaultConvert", function () {
           const cmd = new VaultConvertCommand();
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+          sinon.stub(cmd, "promptForFolderMove").resolves(true);
 
           await cmd.run();
         });

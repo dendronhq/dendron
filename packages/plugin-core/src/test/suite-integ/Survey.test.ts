@@ -10,9 +10,9 @@ import { GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
 import { SurveyUtils } from "../../survey";
+import { StartupUtils } from "../../utils/StartupUtils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TutorialInitializer } from "../../workspace/tutorialInitializer";
-import { showLapsedUserMessage } from "../../_extension";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -194,7 +194,9 @@ suite("SurveyUtils", function () {
               sinon
                 .stub(vscode.window, "showInformationMessage")
                 .resolves({ title: "foo" });
-              await showLapsedUserMessage(VSCodeUtils.getAssetUri(ctx));
+              await StartupUtils.showLapsedUserMessage(
+                VSCodeUtils.getAssetUri(ctx)
+              );
               await new Promise((resolve: any) => {
                 setTimeout(() => {
                   resolve();
@@ -223,7 +225,9 @@ suite("SurveyUtils", function () {
               sinon
                 .stub(vscode.window, "showInformationMessage")
                 .resolves({ title: "foo" });
-              await showLapsedUserMessage(VSCodeUtils.getAssetUri(ctx));
+              await StartupUtils.showLapsedUserMessage(
+                VSCodeUtils.getAssetUri(ctx)
+              );
               await new Promise((resolve: any) => {
                 setTimeout(() => {
                   resolve();

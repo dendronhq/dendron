@@ -45,12 +45,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
 import { TemplateInitializer } from "../../workspace/templateInitializer";
-import {
-  shouldDisplayInactiveUserSurvey,
-  shouldDisplayLapsedUserMsg,
-  // shouldDisplayMissingDefaultConfigMessage,
-  _activate,
-} from "../../_extension";
+import { _activate } from "../../_extension";
 import {
   expect,
   genDefaultSettings,
@@ -103,7 +98,9 @@ function lapsedMessageTest({
   svc.setMeta("firstWsInitialize", firstWsInitialize);
   svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
   svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
-  expect(shouldDisplayLapsedUserMsg()).toEqual(shouldDisplayMessage);
+  expect(StartupUtils.shouldDisplayLapsedUserMsg()).toEqual(
+    shouldDisplayMessage
+  );
   done();
 }
 
@@ -137,7 +134,7 @@ async function inactiveMessageTest(opts: {
   svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
   svc.setMeta("firstLookupTime", firstLookupTime);
   svc.setMeta("lastLookupTime", lastLookupTime);
-  const expected = shouldDisplayInactiveUserSurvey();
+  const expected = StartupUtils.shouldDisplayInactiveUserSurvey();
   expect(expected).toEqual(shouldDisplayMessage);
   sinon.restore();
   done();

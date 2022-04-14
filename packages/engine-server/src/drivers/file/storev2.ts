@@ -235,11 +235,25 @@ export class FileStorage implements DStore {
 
     // if have children, keep this node around as a stub
     if (!_.isEmpty(noteToDelete.children)) {
-      this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
-      const prevNote = { ...noteToDelete };
-      noteToDelete.stub = true;
-      this.updateNote(noteToDelete);
-      out.push({ note: noteToDelete, status: "update", prevNote });
+      if (!opts?.replaceWithNewStub) {
+        this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
+        const prevNote = { ...noteToDelete };
+        noteToDelete.stub = true;
+        this.updateNote(noteToDelete);
+        out.push({ note: noteToDelete, status: "update", prevNote });
+      } else {
+        // the delete operation originated from rename.
+        // since _noteToDelete) in this case is renamed and
+        // moved to another location, simply adding stub: true
+        // will not work.
+        // we need a fresh stub note that will fill in the old note's place.
+        const replacingStub = NoteUtils.create({
+          ..._.omit(noteToDelete, "id"),
+          stub: true,
+        });
+        this.writeNote(replacingStub);
+        out.push({ note: replacingStub, status: "create" });
+      }
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -913,6 +927,10 @@ export class FileStorage implements DStore {
         vname: newLoc.vaultName!,
       })!,
       title: newNoteTitle,
+      // when renaming, we are moving a note into a completely different hierarchy. ^pojmz0g80gds
+      // we are not concerned with the children it has, so the new note
+      // shouldn't inherit the old note's children.
+      children: [],
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note
@@ -930,6 +948,11 @@ export class FileStorage implements DStore {
     ) {
       // The file is being renamed to itself. We do this to rename a header.
       this.logger.info({ ctx, msg: "Renaming the file to same name" });
+
+      // we remove the children [[here|../packages/engine-server/src/drivers/file/storev2.ts#^pojmz0g80gds]],
+      // but we don't want that in this case. we need to add the old note's children back in
+      newNote.children = oldNote.children;
+
       const out = await this.writeNote(newNote, { updateExisting: true });
       changeFromWrite = out.data;
     } else {
@@ -938,6 +961,7 @@ export class FileStorage implements DStore {
       try {
         changedFromDelete = await this.deleteNote(oldNote.id, {
           metaOnly: true,
+          replaceWithNewStub: true,
         });
       } catch (err) {
         throw new DendronError({

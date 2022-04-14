@@ -1,10 +1,9 @@
 import { expect } from "../testUtilsv2";
-import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import { EngineNoteProvider } from "../../views/EngineNoteProvider";
 import { describeMultiWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
-import { DendronError, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
 import { vault2Path } from "@dendronhq/common-server";
@@ -276,15 +275,18 @@ suite("NativeTreeView tests", function () {
             noteId: childrenBefore[0].id,
             newName: "fooz",
           });
-          console.log({ bond: engine.notes });
 
           const vault1RootPropsAfter = engine.notes[vaultOneRootId];
           const childrenAfter = await (provider.getChildren(
             vault1RootPropsAfter
           ) as Promise<NoteProps[]>);
-          expect(childrenAfter.map((child) => child.fname)).toEqual([
-            "foo",
-            "fooz",
+          expect(
+            childrenAfter.map((child) => {
+              return { fname: child.fname, stub: child.stub };
+            })
+          ).toEqual([
+            { fname: "foo", stub: true },
+            { fname: "fooz", stub: undefined },
           ]);
 
           const grandChildrenAfter = await (provider.getChildren(
@@ -305,6 +307,7 @@ suite("NativeTreeView tests", function () {
     );
     // when renaming note with non-stub children
     // when renaming note with a chain of ancestors that are only stubs
+    // when renaming note to a file name of an existing stub note
   });
 
   describe("filesystem change interactions", function () {});

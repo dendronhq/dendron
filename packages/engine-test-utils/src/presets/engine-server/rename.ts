@@ -4,6 +4,7 @@ import {
   IDendronError,
   NoteChangeEntry,
   NoteUtils,
+  RenameNotePayload,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -1496,6 +1497,54 @@ const NOTES = {
   //     ];
   //   }
   // ),
+  NOTE_WITH_STUB_CHILD: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vaultName = VaultUtils.getName(vaults[0]);
+      const out = await engine.renameNote({
+        oldLoc: {
+          fname: "foo",
+          vaultName,
+        },
+        newLoc: {
+          fname: "foo1",
+          vaultName,
+        },
+      });
+
+      const changedEntries: RenameNotePayload | undefined = out.data;
+      const isReplacingStubCreated = changedEntries?.find((entry) => {
+        return entry.status === "create" && entry.note.fname === "foo";
+      })?.note.stub;
+      return [
+        {
+          actual: isReplacingStubCreated,
+          expected: true,
+        },
+        {
+          actual: engine.notes["foo"].fname,
+          expected: "foo1",
+        },
+        {
+          actual: changedEntries && changedEntries.length === 3,
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo.bar.baz",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+    }
+  ),
 };
 export const ENGINE_RENAME_PRESETS = {
   // use the below to test a specific test

@@ -752,6 +752,9 @@
         "enableHashTags": {
           "type": "boolean"
         },
+        "enableFullHierarchyNoteTitle": {
+          "type": "boolean"
+        },
         "maxPreviewsCached": {
           "type": "number"
         },
@@ -781,6 +784,7 @@
         "enableAutoFoldFrontmatter",
         "enableUserTags",
         "enableHashTags",
+        "enableFullHierarchyNoteTitle",
         "maxPreviewsCached",
         "maxNoteLength",
         "enableEditorDecorations"

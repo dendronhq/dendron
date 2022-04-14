@@ -49,7 +49,6 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -365,9 +364,6 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
-
-    // Instantiate TextDocumentService
-    context.subscriptions.push(TextDocumentServiceFactory.create(this));
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });

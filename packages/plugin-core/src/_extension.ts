@@ -59,10 +59,8 @@ import {
   WebViewPanelFactory,
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
-import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
-import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
@@ -77,6 +75,7 @@ import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
+import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
 import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
@@ -603,6 +602,9 @@ export async function _activate(
         context.subscriptions.push(treeView);
       }
 
+      // Instantiate TextDocumentService
+      context.subscriptions.push(TextDocumentServiceFactory.create(ws));
+
       // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
       const existingCommands = await vscode.commands.getCommands();
       if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
@@ -973,86 +975,72 @@ async function _setupCommands({
   });
 
   // ---
-  if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "next" });
-        })
-      )
-    );
-  }
-  if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-        sentryReportingCallback(async () => {
-          await new GoToSiblingCommand().execute({ direction: "prev" });
-        })
-      )
-    );
-  }
+  if (requireActiveWorkspace === true) {
+    if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
+          sentryReportingCallback(async () => {
+            await new GoToSiblingCommand().execute({ direction: "next" });
+          })
+        )
+      );
+    }
+    if (!existingCommands.includes(DENDRON_COMMANDS.GO_PREV_HIERARCHY.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+          sentryReportingCallback(async () => {
+            await new GoToSiblingCommand().execute({ direction: "prev" });
+          })
+        )
+      );
+    }
 
-  // RENAME is alias to MOVE
-  if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RENAME_NOTE.key,
-        sentryReportingCallback(async (args: any) => {
-          await new MoveNoteCommand().run({
-            allowMultiselect: false,
-            useSameVault: true,
-            ...args,
-          });
-        })
-      )
-    );
-  }
+    // RENAME is alias to MOVE
+    if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.RENAME_NOTE.key,
+          sentryReportingCallback(async (args: any) => {
+            await new MoveNoteCommand().run({
+              allowMultiselect: false,
+              useSameVault: true,
+              ...args,
+            });
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        sentryReportingCallback(async (args) => {
-          if (args === undefined) {
-            args = {};
-          }
-          await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
-            args
-          );
-        })
-      )
-    );
-  }
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_PREVIEW.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_PREVIEW.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
+              args
+            );
+          })
+        )
+      );
+    }
 
-  if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowSchemaGraphCommand(
-            SchemaGraphViewFactory.create(ws)
-          ).run();
-        })
-      )
-    );
-  }
-
-  if (
-    !existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key) &&
-    requireActiveWorkspace
-  ) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
-        sentryReportingCallback(async () => {
-          await new ShowNoteGraphCommand(
-            NoteGraphPanelFactory.create(ws, ws.getEngine())
-          ).run();
-        })
-      )
-    );
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
+          sentryReportingCallback(async () => {
+            await new ShowSchemaGraphCommand(
+              SchemaGraphViewFactory.create(ws)
+            ).run();
+          })
+        )
+      );
+    }
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

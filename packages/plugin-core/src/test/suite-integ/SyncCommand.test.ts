@@ -3,6 +3,7 @@ import {
   DVault,
   ConfigUtils,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -24,6 +25,7 @@ import {
 } from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import path from "path";
 
 suite("workspace sync command", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -1242,6 +1244,61 @@ suite("workspace sync command", function () {
         expect(pulled[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
         expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN using a self contained vault, it is treated as a regular vault",
+    {
+      ctx,
+      selfContained: true,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "skip");
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron stashes and restores the changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        const vault = vaults[0];
+
+        await GitTestUtils.createRepoForRemoteVault({
+          wsRoot,
+          vault,
+          remoteDir,
+        });
+
+        // Add the vault to a repo
+        const git = new Git({
+          localUrl: path.join(wsRoot, VaultUtils.getRelPath(vault)),
+        });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
+            vault: vaults[0],
+            engine,
+          })!,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should use the vault default and sync everthing, and ignore the workspace default config
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
+        expect(committed[0].status).toEqual(SyncActionStatus.DONE);
+        // Should pull
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+        expect(pulled[0].status).toEqual(SyncActionStatus.DONE);
+        // Should push
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
+        expect(pushed[0].status).toEqual(SyncActionStatus.DONE);
       });
     }
   );

@@ -112,7 +112,7 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN correct results ", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];

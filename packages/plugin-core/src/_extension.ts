@@ -93,6 +93,8 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
+import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
+import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -1036,6 +1038,19 @@ async function _setupCommands({
           sentryReportingCallback(async () => {
             await new ShowSchemaGraphCommand(
               SchemaGraphViewFactory.create(ws)
+            ).run();
+          })
+        )
+      );
+    }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
+          sentryReportingCallback(async () => {
+            await new ShowNoteGraphCommand(
+              NoteGraphPanelFactory.create(ws, ws.getEngine())
             ).run();
           })
         )

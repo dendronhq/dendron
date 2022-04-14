@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  GraphViewMessageEnum,
   LookupViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -96,6 +97,13 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
+      case GraphViewMessageEnum.onGraphStyleLoad: {
+        const cmsg = msg;
+        const { styles } = cmsg.data;
+        logger.info({ ctx, styles, msg: "styles" });
+        ideDispatch(ideSlice.actions.setGraphStyles(styles));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

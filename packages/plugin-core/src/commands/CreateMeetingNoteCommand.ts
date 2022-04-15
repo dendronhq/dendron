@@ -31,7 +31,12 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
   public static requireActiveWorkspace: boolean = true;
   public static MEETING_TEMPLATE_FNAME: string = "dendron.templates.meet";
 
-  constructor(ext: IDendronExtension) {
+  /**
+   *
+   * @param ext
+   * @param noConfirm - for testing purposes only; don't set in production code
+   */
+  constructor(ext: IDendronExtension, noConfirm?: boolean) {
     const workspaceService = ext.workspaceService;
 
     if (!workspaceService) {
@@ -41,7 +46,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     super(
       ext,
       "dendron.meeting",
-      new MeetingNote(workspaceService.config, ext)
+      new MeetingNote(workspaceService.config, ext, noConfirm ?? false)
     );
     this.key = DENDRON_COMMANDS.CREATE_MEETING_NOTE.key;
     this._ext = ext;

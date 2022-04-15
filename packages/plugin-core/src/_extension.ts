@@ -21,6 +21,7 @@ import {
   TutorialEvents,
   VaultUtils,
   VSCodeEvents,
+  WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
@@ -130,6 +131,59 @@ class ExtensionUtils {
     }
   };
 
+  static async runMigrationsIfNecessary({
+    wsService,
+    currentVersion,
+    previousWorkspaceVersion,
+    dendronConfig,
+    maybeWsSettings,
+  }: {
+    wsService: WorkspaceService;
+    currentVersion: string;
+    previousWorkspaceVersion: string;
+    dendronConfig: IntermediateDendronConfig;
+    maybeWsSettings?: WorkspaceSettings;
+  }) {
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion,
+      currentVersion,
+    });
+    // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
+    const changes = await wsService.runMigrationsIfNecessary({
+      currentVersion,
+      previousVersion: previousWorkspaceVersion,
+      dendronConfig,
+      workspaceInstallStatus,
+      wsConfig: maybeWsSettings,
+    });
+    Logger.info({
+      ctx: "runMigrationsIfNecessary",
+      changes,
+      workspaceInstallStatus,
+    });
+    if (changes.length > 0) {
+      changes.forEach((change: MigrationChangeSetStatus) => {
+        const event = _.isUndefined(change.error)
+          ? MigrationEvents.MigrationSucceeded
+          : MigrationEvents.MigrationFailed;
+
+        AnalyticsUtils.track(
+          event,
+          MigrationUtils.getMigrationAnalyticProps(change)
+        );
+      });
+    } else {
+      // no migration changes.
+      // see if we need to force a config migration.
+      // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
+      ConfigMigrationUtils.maybePromptConfigMigration({
+        dendronConfig,
+        wsService,
+        currentVersion,
+      });
+    }
+  }
+
   static setWorkspaceContextOnActivate(
     dendronConfig: IntermediateDendronConfig
   ) {
@@ -195,10 +249,48 @@ class ExtensionUtils {
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-
     wsService.writePort(port);
-
     return port;
+  }
+
+  static getAndTrackInstallStatus({
+    UUIDPathExists,
+    previousGlobalVersion,
+    currentVersion,
+  }: {
+    UUIDPathExists: boolean;
+    currentVersion: string;
+    previousGlobalVersion: string;
+  }) {
+    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
+      previousGlobalVersion,
+      currentVersion,
+    });
+
+    // check if this is an install event, but a repeated one on a new instance.
+    let isSecondaryInstall = false;
+
+    // set initial install ^194e5bw7so9g
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      // even if it's an initial install for this instance of vscode, it may not be for this machine.
+      // in that case, we should skip setting the initial install time since it's already set.
+      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
+      const metadata = MetadataService.instance().getMeta();
+      if (metadata.firstInstall === undefined && !UUIDPathExists) {
+        MetadataService.instance().setInitialInstall();
+      } else {
+        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
+        // tied to initial install to happen in this instance of VSCode once for the first time
+        isSecondaryInstall = true;
+      }
+    }
+
+    // TODO: temporary backfill
+    if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
+      const time = Time.DateTime.fromISO("2021-06-22");
+      MetadataService.instance().setInitialInstall(time.toSeconds());
+    }
+    return { extensionInstallStatus, isSecondaryInstall };
   }
 
   /**
@@ -519,68 +611,34 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
+    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
+    const previousGlobalVersion = stateService.getGlobalVersion();
+    const { extensionInstallStatus, isSecondaryInstall } =
+      ExtensionUtils.getAndTrackInstallStatus({
+        UUIDPathExists,
+        currentVersion,
+        previousGlobalVersion,
+      });
 
-    // this used to be handled by StateService (if undefined, 0.0.0).
-    // this will be reassigned if we are in a dendron workspace.
-    let previousWorkspaceVersion = "0.0.0";
-
-    const previousGlobalVersionFromState = stateService.getGlobalVersion();
-
-    // temporarily here to backfill globalState into metadata
-    // this should be removed once we determine that
-    // we have sufficiently backfilled out user.
-    if (previousGlobalVersionFromState) {
-      metadataService.setGlobalVersion(previousGlobalVersionFromState);
-    }
-
-    const previousGlobalVersion = metadataService.getGlobalVersion();
-
-    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
-      previousGlobalVersion,
-      currentVersion,
-    });
-
-    // check if this is an install event, but a repeated one on a new instance.
-    let isSecondaryInstall = false;
-
-    // set initial install ^194e5bw7so9g
-    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      // even if it's an initial install for this instance of vscode, it may not be for this machine.
-      // in that case, we should skip setting the initial install time since it's already set.
-      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
-      const metadata = MetadataService.instance().getMeta();
-      if (metadata.firstInstall === undefined && !UUIDPathExists) {
-        MetadataService.instance().setInitialInstall();
-      } else {
-        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
-        // tied to initial install to happen in this instance of VSCode once for the first time
-        isSecondaryInstall = true;
-      }
-
-      if (!isSecondaryInstall) {
-        // For new users, we want to roll out self contained vaults to some of
-        // them. We'll do that by setting the global config, so all workspace
-        // they create from now on will be self contained, and they can turn off
-        // the config if there are problems.
-        const split = SELF_CONTAINED_VAULTS_TEST.getUserGroup(
-          SegmentClient.instance().anonymousId
+    if (
+      !isSecondaryInstall &&
+      extensionInstallStatus === InstallStatus.INITIAL_INSTALL
+    ) {
+      // For new users, we want to roll out self contained vaults to some of
+      // them. We'll do that by setting the global config, so all workspace
+      // they create from now on will be self contained, and they can turn off
+      // the config if there are problems.
+      const split = SELF_CONTAINED_VAULTS_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+      if (split === SelfContainedVaultsTestGroups.selfContained) {
+        VSCodeUtils.setWorkspaceConfig(
+          DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
+          true,
+          vscode.ConfigurationTarget.Global
         );
-        if (split === SelfContainedVaultsTestGroups.selfContained) {
-          VSCodeUtils.setWorkspaceConfig(
-            DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
-            true,
-            vscode.ConfigurationTarget.Global
-          );
-        }
       }
     }
-
-    // TODO: temporary backfill
-    if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
-      const time = Time.DateTime.fromISO("2021-06-22");
-      MetadataService.instance().setInitialInstall(time.toSeconds());
-    }
-
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -602,54 +660,25 @@ export async function _activate(
       const start = process.hrtime();
       const dendronConfig = wsImpl.config;
 
+      // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
-      const wsMeta = wsService.getMeta();
-      previousWorkspaceVersion = wsMeta.version;
-      // --- Get Version State
-      const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
-        previousWorkspaceVersion,
-        currentVersion,
-      });
-      const maybeWsSettings =
-        maybeWs.type === WorkspaceType.CODE
-          ? wsService.getCodeWorkspaceSettingsSync()
-          : undefined;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       ExtensionUtils.trackWelcomeClicked();
-      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
-      const changes = await wsService.runMigrationsIfNecessary({
+      const maybeWsSettings =
+        ws.type === WorkspaceType.CODE
+          ? wsService.getCodeWorkspaceSettingsSync()
+          : undefined;
+      await ExtensionUtils.runMigrationsIfNecessary({
+        wsService,
         currentVersion,
-        previousVersion: previousWorkspaceVersion,
+        previousWorkspaceVersion,
+        maybeWsSettings,
         dendronConfig,
-        workspaceInstallStatus,
-        wsConfig: maybeWsSettings,
       });
-
-      if (changes.length > 0) {
-        changes.forEach((change: MigrationChangeSetStatus) => {
-          const event = _.isUndefined(change.error)
-            ? MigrationEvents.MigrationSucceeded
-            : MigrationEvents.MigrationFailed;
-
-          AnalyticsUtils.track(
-            event,
-            MigrationUtils.getMigrationAnalyticProps(change)
-          );
-        });
-      } else {
-        // no migration changes.
-        // see if we need to force a config migration.
-        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
-        ConfigMigrationUtils.maybePromptConfigMigration({
-          dendronConfig,
-          wsService,
-          currentVersion,
-        });
-      }
 
       // check for missing default config keys and prompt for a backfill.
       StartupUtils.showMissingDefaultConfigMessageIfNecessary({
@@ -716,10 +745,6 @@ export async function _activate(
 
       Logger.info({
         ctx,
-        workspaceInstallStatus,
-        currentVersion,
-        previousWorkspaceVersion,
-        previousGlobalVersion,
         platform,
         extensions,
         vaults: wsImpl.vaults,

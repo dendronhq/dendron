@@ -3,9 +3,11 @@ import {
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
+  FOLDERS,
   isNotUndefined,
   NoteUtils,
   SchemaUtils,
+  VaultUtils,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
@@ -24,6 +26,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 enum AutoFixAction {
@@ -63,6 +66,11 @@ export class ReloadIndexCommand extends BasicCommand<
     const rootSchemaPath = path.join(vaultDir, "root.schema.yml");
     // If it already exists, nothing to do
     if (await fs.pathExists(rootSchemaPath)) return;
+    // If this is just a misconfigured self contained vault, skip it because we'll need to fix the config
+    if (
+      await fs.pathExists(path.join(vaultDir, FOLDERS.NOTES, "root.schema.yml"))
+    )
+      return;
 
     try {
       const schema = SchemaUtils.createRootModule({ vault });
@@ -90,6 +98,9 @@ export class ReloadIndexCommand extends BasicCommand<
     const rootNotePath = path.join(vaultDir, "root.md");
     // If it already exists, nothing to do
     if (await fs.pathExists(rootNotePath)) return;
+    // If this is just a misconfigured self contained vault, skip it because we'll need to fix the config
+    if (await fs.pathExists(path.join(vaultDir, FOLDERS.NOTES, "root.md")))
+      return;
 
     try {
       const note = NoteUtils.createRoot({ vault });
@@ -132,7 +143,9 @@ export class ReloadIndexCommand extends BasicCommand<
       let message: string;
       let detail: string | undefined;
       if (vaultsToFix.length === 1) {
-        message = `Vault "${vaultsToFix[0]}" needs to be marked as a self contained vault in your configuration file.`;
+        message = `Vault "${VaultUtils.getName(
+          vaultsToFix[0]
+        )}" needs to be marked as a self contained vault in your configuration file.`;
       } else {
         message = `${vaultsToFix.length} vaults need to be marked as self contained vaults in your configuration file`;
       }
@@ -158,6 +171,8 @@ export class ReloadIndexCommand extends BasicCommand<
           ctx,
           msg: "Fixing vaults done!",
         });
+        // Need to reload because the vaults loaded are incorrect now
+        VSCodeUtils.reloadWindow();
       }
     }
     doctor.dispose();

@@ -200,6 +200,15 @@ export class FileStorage implements DStore {
     });
   }
 
+  /**
+   *
+   * @param id id of note to be deleted
+   * @param opts EngineDeleteOptsV2 the flag `replaceWithNewStub` is used
+   *             for a specific case where this method is called from
+   *             `renameNote`. TODO: remove this flag so that this is handled
+   *             automatically.
+   * @returns
+   */
   async deleteNote(
     id: string,
     opts?: EngineDeleteOptsV2

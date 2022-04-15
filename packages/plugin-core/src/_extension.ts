@@ -383,6 +383,41 @@ class ExtensionUtils {
       });
     }
   }
+
+  // run this when we don't have an active workspace
+  static watchForNativeWorkspace(ext: DendronExtension) {
+    const ctx = "watchForNativeWorkspace";
+    const context = ext.context;
+    const watchForNativeWorkspace = vscode.workspace
+      .getConfiguration()
+      .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
+    if (watchForNativeWorkspace) {
+      Logger.info({
+        ctx,
+        msg: "watching for a native workspace to be created",
+      });
+
+      togglePluginActiveContext(false);
+      const autoInit = new FileAddWatcher(
+        vscode.workspace.workspaceFolders?.map(
+          (vscodeFolder) => vscodeFolder.uri.fsPath
+        ) || [],
+        CONSTANTS.DENDRON_CONFIG_FILE,
+        async (filePath) => {
+          Logger.info({
+            ctx,
+            msg: "New `dendron.yml` file has been created, re-activating dendron",
+          });
+          AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
+            filePath,
+          });
+          await ext.deactivate();
+          activate(context);
+        }
+      );
+      ext.addDisposable(autoInit);
+    }
+  }
 }
 
 // this method is called when your extension is activated
@@ -854,36 +889,7 @@ export async function _activate(
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });
-
-      const watchForNativeWorkspace = vscode.workspace
-        .getConfiguration()
-        .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
-      if (watchForNativeWorkspace) {
-        Logger.info({
-          ctx,
-          msg: "watching for a native workspace to be created",
-        });
-
-        togglePluginActiveContext(false);
-        const autoInit = new FileAddWatcher(
-          vscode.workspace.workspaceFolders?.map(
-            (vscodeFolder) => vscodeFolder.uri.fsPath
-          ) || [],
-          CONSTANTS.DENDRON_CONFIG_FILE,
-          async (filePath) => {
-            Logger.info({
-              ctx,
-              msg: "New `dendron.yml` file has been created, re-activating dendron",
-            });
-            AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
-              filePath,
-            });
-            await ws.deactivate();
-            activate(context);
-          }
-        );
-        ws.addDisposable(autoInit);
-      }
+      ExtensionUtils.watchForNativeWorkspace(ws);
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

@@ -49,13 +49,11 @@ export const _SETTINGS: ConfigUpdateChangeSet = {
   // "editor.minimap.enabled": {
   //   default: false,
   // },
-  //"dendron.rootDir": opts.rootDir,
   "files.autoSave": {
     default: "onFocusChange",
   },
-  // "workbench.colorTheme": { default: "GitHub Light" },
-  // "workbench.colorTheme": { default: "Kimbie Dark" },
   // --- images
+  // eslint-disable-next-line no-template-curly-in-string
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // required for jekyll image build
   "pasteImage.prefix": { default: "/" },
@@ -63,8 +61,6 @@ export const _SETTINGS: ConfigUpdateChangeSet = {
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
-  // "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
-  // "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
   // --- snippets
   // add snippet completion
   "editor.snippetSuggestions": { default: "inline" },
@@ -74,6 +70,7 @@ export const _SETTINGS: ConfigUpdateChangeSet = {
 };
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
+  { default: "dendron.dendron" },
   { default: "dendron.dendron-paste-image" },
   { default: "dendron.dendron-markdown-shortcuts" },
   // Autocomplete & warnings when editing `dendron.yml`

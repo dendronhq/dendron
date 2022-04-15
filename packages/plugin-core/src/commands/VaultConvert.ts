@@ -8,11 +8,13 @@ import {
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
-import { ProgressLocation, window } from "vscode";
+import { ProgressLocation, QuickPickItem, window } from "vscode";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { Logger } from "../logger";
 import { ReloadIndexCommand } from "./ReloadIndex";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { GitUtils } from "@dendronhq/common-server";
 
 type CommandOpts = {
   type: VaultRemoteSource;
@@ -83,6 +85,36 @@ export class VaultConvertCommand extends BasicCommand<
     });
   }
 
+  /** Prompt the user if they agree to have their vault folder moved.
+   *
+   * @return true if the user agreed to the prompt, false if they cancelled or dismissed it.
+   */
+  async promptForFolderMove(
+    vault: DVault,
+    remote: string | null
+  ): Promise<boolean> {
+    const fromPath = VaultUtils.getRelPath(vault);
+    const toPath = GitUtils.getDependencyPathWithRemote({ vault, remote });
+    const acceptLabel = "Accept";
+
+    const items: QuickPickItem[] = [
+      {
+        label: acceptLabel,
+        description: `${fromPath} will be moved to ${toPath}`,
+      },
+      {
+        label: "Cancel",
+      },
+    ];
+    const out = await window.showQuickPick(items, {
+      canPickMany: false,
+      ignoreFocusOut: true,
+      title: "The vault folder will be moved",
+    });
+    if (out?.label === acceptLabel) return true;
+    return false;
+  }
+
   async gatherInputs(opts?: CommandOpts): Promise<CommandOpts | undefined> {
     const ctx = "VaultConvertCommand:gatherInputs";
     let { vault, type, remoteUrl } = opts || {};
@@ -118,6 +150,19 @@ export class VaultConvertCommand extends BasicCommand<
         });
         return;
       }
+    }
+
+    if (
+      ExtensionProvider.getDWorkspace().config.dev?.enableSelfContainedVaults
+    ) {
+      // If self contained vaults are enabled, we'll move the vault into the
+      // `dependencies` folder. We should ask the user if they are okay with us
+      // moving the folder.
+      const acceptedMove = await this.promptForFolderMove(
+        vault,
+        remoteUrl ?? null
+      );
+      if (!acceptedMove) return;
     }
 
     return { type, vault, remoteUrl };

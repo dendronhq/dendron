@@ -29,9 +29,6 @@ function setupConfig(config: IntermediateDendronConfig) {
   return config;
 }
 
-// these tests can run long, set timeout to 5s
-const timeout = 5e3;
-
 suite("GIVEN CopyNoteUrlV2", function () {
   const modConfigCb = setupConfig;
   describe("AND WHEN has selection", () => {
@@ -39,7 +36,6 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "WHEN selection with block anchor",
       {
         modConfigCb,
-        timeout,
         postSetupHook: async (opts) => {
           const { vaults, wsRoot } = opts;
           const vault = vaults[0];
@@ -68,7 +64,6 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "WHEN selection with header anchor",
       {
         modConfigCb,
-        timeout,
         postSetupHook: async (opts) => {
           const { vaults, wsRoot } = opts;
           const vault = vaults[0];
@@ -99,7 +94,6 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "",
       {
         modConfigCb,
-        timeout,
         postSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
         },
@@ -122,7 +116,6 @@ suite("GIVEN CopyNoteUrlV2", function () {
     describeMultiWS(
       "",
       {
-        timeout,
         modConfigCb: (config) => {
           config = setupConfig(config);
           config.publishing.assetsPrefix = "/" + ASSET_PREFIX;

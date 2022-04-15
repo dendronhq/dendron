@@ -19,7 +19,7 @@ import * as vscode from "vscode";
 import { MeetingNoteTestGroups, MEETING_NOTE_TUTORIAL_TEST } from "../abTests";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";

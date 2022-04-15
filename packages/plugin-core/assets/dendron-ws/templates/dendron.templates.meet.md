@@ -1,10 +1,3 @@
----
-id: dendronMeetingNoteTemplate
-title: "Meeting Notes Template"
-updated: 1649256304998
-created: 1649242380382
----
-
 _Edit the [[dendron.templates.meet]] to change this template generated for Dendron Meeting Notes._
 
 ## Attendees

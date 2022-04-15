@@ -170,7 +170,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
     const src = path.join(dendronWSTemplate.fsPath, "templates", fname);
-    await fs.copyFile(src, destfPath);
+    const body = (await fs.readFile(src)).toString();
 
     // Ensure that engine state is aware of the template before returning so
     // that the template can be found when creating the meeting note. TODO: This
@@ -181,6 +181,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
       vault,
       id: "dendronMeetingNoteTemplate",
       title: "Meeting Notes Template",
+      body,
     });
 
     await this._ext.getEngine().writeNote(templateNoteProps);

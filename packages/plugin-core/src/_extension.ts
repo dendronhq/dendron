@@ -325,6 +325,7 @@ class ExtensionUtils {
     const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
     const siteUrl = publishigConfig.siteUrl;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
+    const { workspaceFile, workspaceFolders } = vscode.workspace;
 
     const trackProps = {
       duration: durationReloadWorkspace,
@@ -345,6 +346,10 @@ class ExtensionUtils {
       activatedSuccess,
       hasLegacyPreview: MarkdownUtils.hasLegacyPreview(),
       enabledExportPodV2,
+      hasWorkspaceFile: !_.isUndefined(workspaceFile),
+      workspaceFolders: _.isUndefined(workspaceFolders)
+        ? 0
+        : workspaceFolders.length,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);

@@ -18,12 +18,13 @@ import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { SurveyUtils } from "../survey";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getExtension } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
@@ -90,7 +91,7 @@ export class TutorialInitializer
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
           new ShowPreviewCommand(
-            PreviewPanelFactory.create(getExtension())
+            PreviewPanelFactory.create(ExtensionProvider.getExtension())
           ).execute();
         }, 1000);
       }
@@ -129,31 +130,30 @@ export class TutorialInitializer
     }
 
     // Register a special analytics handler for the tutorial:
-    const extension = getExtension();
-    if (extension.windowWatcher) {
-      extension.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
-        const fileName = e?.document.uri.fsPath;
+    const disposable = vscode.window.onDidChangeActiveTextEditor((e) => {
+      const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined;
+      let eventName: TutorialEvents | undefined;
 
-        if (fileName?.endsWith("tutorial.md")) {
-          eventName = TutorialEvents.Tutorial_0_Show;
-        } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
-          eventName = TutorialEvents.Tutorial_1_Show;
-        } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
-          eventName = TutorialEvents.Tutorial_2_Show;
-        } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
-          eventName = TutorialEvents.Tutorial_3_Show;
-        } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
-          eventName = TutorialEvents.Tutorial_4_Show;
-        } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
-          eventName = TutorialEvents.Tutorial_5_Show;
-        }
+      if (fileName?.endsWith("tutorial.md")) {
+        eventName = TutorialEvents.Tutorial_0_Show;
+      } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+        eventName = TutorialEvents.Tutorial_1_Show;
+      } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+        eventName = TutorialEvents.Tutorial_2_Show;
+      } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+        eventName = TutorialEvents.Tutorial_3_Show;
+      } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+        eventName = TutorialEvents.Tutorial_4_Show;
+      } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+        eventName = TutorialEvents.Tutorial_5_Show;
+      }
 
-        if (eventName) {
-          AnalyticsUtils.track(eventName);
-        }
-      });
-    }
+      if (eventName) {
+        AnalyticsUtils.track(eventName);
+      }
+    });
+
+    ExtensionProvider.getExtension().context.subscriptions.push(disposable);
   }
 }

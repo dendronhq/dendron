@@ -1,3 +1,6 @@
+// For all new additions to the telemetry events, follow UpperCamelCasing and
+// use noun+verb for the event name.
+
 /* eslint-disable camelcase */
 export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
@@ -131,6 +134,11 @@ export enum NativeWorkspaceEvents {
   DetectedInNonDendronWS = "Native_Workspace_Detected_In_Non_Dendron_WS", // watcher has detected a Dendron workspace getting created inside a non-Dendron workspace
 }
 
+export enum EngagementEvents {
+  NoteViewed = "NoteViewed",
+  EngineStateChanged = "EngineStateChanged",
+}
+
 export enum AppNames {
   CODE = "vscode",
   CLI = "cli",
@@ -148,4 +156,5 @@ export const DendronEvents = {
   ContextualUIEvents,
   NativeWorkspaceEvents,
   WorkspaceEvents,
+  EngagementEvents,
 };

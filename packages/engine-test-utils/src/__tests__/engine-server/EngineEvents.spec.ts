@@ -1,15 +1,14 @@
-import { NoteChangeEntry, NoteChangeUpdateEntry } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NoteChangeUpdateEntry,
+  extractNoteChangeEntriesByType,
+} from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
-import {
-  createEngineFromServer,
-  ENGINE_HOOKS,
-  extractNoteChangeEntriesByType,
-  runEngineTestV5,
-} from "../..";
+import { createEngineFromServer, ENGINE_HOOKS, runEngineTestV5 } from "../..";
 
 /**
  * Tests that the EngineEvents interface of the client-side DendronEngineClient signals properly

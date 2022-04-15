@@ -59,10 +59,11 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
       canSelectFiles: true,
       canSelectFolders: false,
     };
-    const destination = await PodUIControls.promptUserForDestination(
-      exportScope,
-      options
-    );
+    const destination =
+      opts && opts.destination
+        ? opts.destination
+        : await PodUIControls.promptUserForDestination(exportScope, options);
+
     if (!destination) {
       return;
     }
@@ -129,6 +130,7 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
   ): ExportPodV2<JSONExportReturnType> {
     return new JSONExportPodV2({
       podConfig: config,
+      wsRoot: this.extension.getDWorkspace().wsRoot,
     });
   }
 

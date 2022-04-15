@@ -81,6 +81,7 @@ export class ExportPodV2CLICommand extends CLICommand<
       case PodV2Types.JSONExportV2:
         return new JSONExportPodV2({
           podConfig: config,
+          wsRoot: engine.wsRoot,
         });
       case PodV2Types.AirtableExportV2:
         return new AirtableExportPodV2({

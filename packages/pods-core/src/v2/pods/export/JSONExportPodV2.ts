@@ -3,13 +3,15 @@ import {
   NoteProps,
   ResponseUtil,
   RespV2,
+  URI,
 } from "@dendronhq/common-all";
 import { JSONSchemaType } from "ajv";
 import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
-import { ConfigFileUtils, ExportPodV2 } from "../../..";
+import { ConfigFileUtils, ExportPodV2, PodUtils } from "../../..";
 import { JSONV2PodConfig, RunnableJSONV2PodConfig } from "../..";
+import { resolvePath } from "@dendronhq/common-server";
 
 /**
  * JSON Export Pod (V2 - for compatibility with Pod V2 workflow).
@@ -20,9 +22,17 @@ export type JSONExportReturnType = RespV2<{
 }>;
 export class JSONExportPodV2 implements ExportPodV2<JSONExportReturnType> {
   private _config: RunnableJSONV2PodConfig;
+  private _wsRoot: string;
 
-  constructor({ podConfig }: { podConfig: RunnableJSONV2PodConfig }) {
+  constructor({
+    podConfig,
+    wsRoot,
+  }: {
+    podConfig: RunnableJSONV2PodConfig;
+    wsRoot: string;
+  }) {
     this._config = podConfig;
+    this._wsRoot = wsRoot;
   }
 
   async exportNotes(input: NoteProps[]): Promise<JSONExportReturnType> {
@@ -36,10 +46,14 @@ export class JSONExportPodV2 implements ExportPodV2<JSONExportReturnType> {
         },
       });
     }
-
+    // resolve relative path
+    const podDstPath = URI.file(resolvePath(destination, this._wsRoot)).fsPath;
     try {
-      fs.ensureDirSync(path.dirname(destination));
-      fs.writeJSONSync(destination, input, { encoding: "utf8" });
+      // should not create parent directory when parent is root
+      if (!PodUtils.isParentRoot(podDstPath)) {
+        fs.ensureDirSync(path.dirname(podDstPath));
+      }
+      fs.writeJSONSync(podDstPath, input, { encoding: "utf8" });
     } catch (err) {
       return {
         data: {

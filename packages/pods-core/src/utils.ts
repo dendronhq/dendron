@@ -573,4 +573,14 @@ export class PodUtils {
       `svcconfig.${connectionId}.yml`
     );
   };
+
+  /**
+   * @param dest
+   * @returns true if parent of filepath is root
+   */
+  static isParentRoot = (dest: string) => {
+    const parent = path.dirname(dest);
+    const parsedPath = path.parse(parent);
+    return parsedPath.root === parent;
+  };
 }

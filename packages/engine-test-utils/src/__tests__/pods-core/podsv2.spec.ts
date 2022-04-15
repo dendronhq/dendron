@@ -501,6 +501,7 @@ describe("GIVEN a JSON Export Pod with a particular config", () => {
           };
           const pod = new JSONExportPodV2({
             podConfig,
+            wsRoot: opts.wsRoot,
           });
           const props = NoteUtils.getNoteByFnameFromEngine({
             fname: "bar",
@@ -539,6 +540,7 @@ describe("GIVEN a JSON Export Pod with a particular config", () => {
             };
             const pod = new JSONExportPodV2({
               podConfig,
+              wsRoot: opts.wsRoot,
             });
 
             const props = NoteUtils.getNoteByFnameFromEngine({

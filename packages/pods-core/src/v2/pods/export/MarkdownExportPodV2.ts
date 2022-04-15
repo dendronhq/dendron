@@ -9,6 +9,7 @@ import {
   NoteProps,
   ResponseUtil,
   RespV2,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -24,10 +25,11 @@ import {
   ConfigFileUtils,
   ExportPodV2,
   MarkdownV2PodConfig,
+  PodUtils,
   RunnableMarkdownV2PodConfig,
 } from "../../..";
 import { PodExportScope } from "../..";
-import { createDisposableLogger } from "@dendronhq/common-server";
+import { createDisposableLogger, resolvePath } from "@dendronhq/common-server";
 
 /**
  * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).
@@ -69,9 +71,14 @@ export class MarkdownExportPodV2
         },
       });
     }
-
+    // resolve relative path
+    const podDstPath = URI.file(
+      resolvePath(destination, this._engine.wsRoot)
+    ).fsPath;
     try {
-      fs.ensureDirSync(path.dirname(destination));
+      if (!PodUtils.isParentRoot(podDstPath)) {
+        fs.ensureDirSync(podDstPath);
+      }
     } catch (err) {
       return {
         data: {},
@@ -86,7 +93,7 @@ export class MarkdownExportPodV2
           const body = this.renderNote(note);
           const hpath = this.dot2Slash(note.fname) + ".md";
           const vname = VaultUtils.getName(note.vault);
-          const fpath = path.join(destination, vname, hpath);
+          const fpath = path.join(podDstPath, vname, hpath);
           logger.debug({ fpath, msg: "pre:write" });
           await fs.ensureDir(path.dirname(fpath));
           await fs.writeFile(fpath, body);

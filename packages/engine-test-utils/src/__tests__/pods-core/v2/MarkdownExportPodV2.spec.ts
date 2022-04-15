@@ -532,6 +532,51 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
       // clean up the export directory after each test.
       fs.rmdirSync(exportDest, { recursive: true });
     });
+    describe("WHEN destination is in the root of drive", () => {
+      test("THEN expect note to be exported", async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const parsedPath = path.parse(exportDest);
+            exportDest = path.join(parsedPath.root, "testing");
+            const podConfig: RunnableMarkdownV2PodConfig = {
+              exportScope: PodExportScope.Note,
+              destination: exportDest,
+            };
+            const pod = new MarkdownExportPodV2({
+              podConfig,
+              engine: opts.engine,
+              dendronConfig: opts.dendronConfig!,
+            });
+
+            const props = NoteUtils.getNoteByFnameFromEngine({
+              fname: "bar",
+              vault: opts.vaults[0],
+              engine: opts.engine,
+            }) as NoteProps;
+
+            await pod.exportNotes([props]);
+            const [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
+              path.join(exportDest, "vault1"),
+              ["bar.md"]
+            );
+            expect(actualFiles).toEqual(expectedFiles);
+
+            // check contents
+            const foo = fs.readFileSync(
+              path.join(exportDest, "vault1", "bar.md"),
+              {
+                encoding: "utf8",
+              }
+            );
+            expect(foo).toContain("bar body");
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupBasic,
+          }
+        );
+      });
+    });
     describe("WHEN exporting a note", () => {
       test("THEN expect note to be exported", async () => {
         await runEngineTestV5(

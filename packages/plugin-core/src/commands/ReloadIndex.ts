@@ -34,6 +34,8 @@ enum AutoFixAction {
   CREATE_ROOT_NOTE = "create root note",
 }
 
+export const FIX_CONFIG_SELF_CONTAINED = "Fix configuration";
+
 function categorizeActions(actions: (AutoFixAction | undefined)[]) {
   return {
     [AutoFixAction.CREATE_ROOT_NOTE]: actions.filter(
@@ -124,15 +126,14 @@ export class ReloadIndexCommand extends BasicCommand<
     engine: IEngineAPIService;
   }) {
     const ctx = "checkAndPromptForMisconfiguredSelfContainedVaults";
-    const { wsRoot, vaults } = engine;
-
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const doctor = new DoctorService();
     const vaultsToFix = await doctor.findMisconfiguredSelfContainedVaults(
       wsRoot,
       vaults
     );
 
-    const fixConfig = "Fix configuration";
+    const fixConfig = FIX_CONFIG_SELF_CONTAINED;
 
     if (vaultsToFix.length > 0) {
       Logger.info({

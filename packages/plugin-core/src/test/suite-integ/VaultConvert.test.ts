@@ -139,7 +139,12 @@ suite("GIVEN VaultConvert", function () {
         // Should have moved under dependencies
         expect(
           contents.match(
-            new RegExp(`^dependencies/${path.basename(remote)}`, "m")
+            new RegExp(
+              `^dependencies${_.escapeRegExp(path.sep)}${path.basename(
+                remote
+              )}`,
+              "m"
+            )
           )
         ).toBeTruthy();
       });

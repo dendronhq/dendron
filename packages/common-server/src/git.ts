@@ -534,7 +534,7 @@ export class GitUtils {
       const contents = await fs.readFile(gitignore, { encoding: "utf-8" });
 
       const newContents = contents.replace(
-        new RegExp(`^${removePath}/?$`, "m"),
+        new RegExp(`^${_.escapeRegExp(removePath)}/?$`, "m"),
         ""
       );
       if (newContents !== contents) await fs.writeFile(gitignore, newContents);

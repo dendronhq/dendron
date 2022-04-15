@@ -9,6 +9,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
+  DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
   InstallStatus,
@@ -46,6 +47,8 @@ import * as vscode from "vscode";
 import os from "os";
 import {
   CURRENT_AB_TESTS,
+  SelfContainedVaultsTestGroups,
+  SELF_CONTAINED_VAULTS_TEST,
   UpgradeToastWordingTestGroups,
   UPGRADE_TOAST_WORDING_TEST,
 } from "./abTests";
@@ -425,6 +428,23 @@ export async function _activate(
         // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
         // tied to initial install to happen in this instance of VSCode once for the first time
         isSecondaryInstall = true;
+      }
+
+      if (!isSecondaryInstall) {
+        // For new users, we want to roll out self contained vaults to some of
+        // them. We'll do that by setting the global config, so all workspace
+        // they create from now on will be self contained, and they can turn off
+        // the config if there are problems.
+        const split = SELF_CONTAINED_VAULTS_TEST.getUserGroup(
+          SegmentClient.instance().anonymousId
+        );
+        if (split === SelfContainedVaultsTestGroups.selfContained) {
+          VSCodeUtils.setWorkspaceConfig(
+            DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
+            true,
+            vscode.ConfigurationTarget.Global
+          );
+        }
       }
     }
 

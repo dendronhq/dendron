@@ -663,8 +663,6 @@ export class SegmentUtils {
             },
             os: {
               name: getOS(),
-              // segment might require this to send os to amplitude
-              version: "0.0.0",
             },
             userAgent,
           },

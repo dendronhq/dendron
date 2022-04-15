@@ -8,11 +8,13 @@ import {
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
+  DendronConfig,
   DendronError,
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
   InstallStatus,
+  IntermediateDendronConfig,
   isDisposable,
   MigrationEvents,
   NativeWorkspaceEvents,
@@ -41,10 +43,10 @@ import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import os from "os";
 import {
   CURRENT_AB_TESTS,
   SelfContainedVaultsTestGroups,
@@ -62,8 +64,10 @@ import {
   WebViewPanelFactory,
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
+import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
@@ -127,6 +131,34 @@ class ExtensionUtils {
     }
   };
 
+  static setWorkspaceContextOnActivate(
+    dendronConfig: IntermediateDendronConfig
+  ) {
+    if (VSCodeUtils.isDevMode()) {
+      vscode.commands.executeCommand(
+        "setContext",
+        DendronContext.DEV_MODE,
+        true
+      );
+    }
+    // used for enablement of legacy show preview command.
+    VSCodeUtils.setContext(
+      DendronContext.HAS_LEGACY_PREVIEW,
+      MarkdownUtils.hasLegacyPreview()
+    );
+
+    //used for enablement of export pod v2 command
+    VSCodeUtils.setContext(
+      DendronContext.ENABLE_EXPORT_PODV2,
+      dendronConfig.dev?.enableExportPodV2 ?? false
+    );
+
+    // @deprecate: should track as property of workspace init instead
+    if (dendronConfig.dev?.enableExportPodV2) {
+      AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
+    }
+  }
+
   /**
    * Setup segment client
    * Also setup cache flushing in case of missed uploads
@@ -168,6 +200,77 @@ class ExtensionUtils {
     wsService.writePort(port);
 
     return port;
+  }
+
+  /**
+   * Analytics related to initializing the workspace
+   * @param param0
+   */
+  static async trackWorkspaceInit({
+    durationReloadWorkspace,
+    ext,
+    activatedSuccess,
+  }: {
+    durationReloadWorkspace: number;
+    ext: DendronExtension;
+    activatedSuccess: boolean;
+  }) {
+    const engine = ext.getEngine();
+    const workspace = ext.getDWorkspace();
+    const {
+      wsRoot,
+      vaults,
+      type: workspaceType,
+      config: dendronConfig,
+    } = workspace;
+    let numNotes = _.size(engine.notes);
+    if (numNotes > 10) {
+      numNotes = Math.round(numNotes / 10) * 10;
+    }
+    const numSchemas = _.size(engine.schemas);
+    const codeWorkspacePresent = await fs.pathExists(
+      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
+    );
+    const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
+    const siteUrl = publishigConfig.siteUrl;
+    const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
+
+    const trackProps = {
+      duration: durationReloadWorkspace,
+      noCaching: dendronConfig.noCaching || false,
+      numNotes,
+      numSchemas,
+      numVaults: vaults.length,
+      workspaceType,
+      codeWorkspacePresent,
+      selfContainedVaultsEnabled:
+        dendronConfig.dev?.enableSelfContainedVaults || false,
+      numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained).length,
+      numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
+      numWorkspaceVaults: vaults.filter(
+        (vault) => vault.workspace !== undefined
+      ).length,
+      numSeedVaults: vaults.filter((vault) => vault.seed !== undefined).length,
+      activatedSuccess,
+      hasLegacyPreview: MarkdownUtils.hasLegacyPreview(),
+      enabledExportPodV2,
+    };
+    if (siteUrl !== undefined) {
+      _.set(trackProps, "siteUrl", siteUrl);
+    }
+
+    AnalyticsUtils.identify({
+      numNotes,
+      // Which side of all currently running tests is this user on?
+      splitTests: CURRENT_AB_TESTS.map(
+        (test) =>
+          // Formatted as `testName.groupName` since group names are not necessarily unique
+          `${test.name}.${test.getUserGroup(
+            SegmentClient.instance().anonymousId
+          )}`
+      ),
+    });
+    AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
   }
 
   /**
@@ -671,6 +774,13 @@ export async function _activate(
       }
       const reloadSuccess = await reloadWorkspace({ extension: ws });
       const durationReloadWorkspace = getDurationMilliseconds(start);
+
+      await ExtensionUtils.trackWorkspaceInit({
+        durationReloadWorkspace,
+        activatedSuccess: !!reloadSuccess,
+        ext: ws,
+      });
+
       if (!reloadSuccess) {
         HistoryService.instance().add({
           source: "extension",
@@ -679,74 +789,10 @@ export async function _activate(
         return false;
       }
 
-      if (VSCodeUtils.isDevMode()) {
-        vscode.commands.executeCommand(
-          "setContext",
-          DendronContext.DEV_MODE,
-          true
-        );
-      }
-
-      // used for enablement of legacy show preview command.
-      VSCodeUtils.setContext(
-        DendronContext.HAS_LEGACY_PREVIEW,
-        MarkdownUtils.hasLegacyPreview()
-      );
-
-      //used for enablement of export pod v2 command
-      VSCodeUtils.setContext(
-        DendronContext.ENABLE_EXPORT_PODV2,
-        dendronConfig.dev?.enableExportPodV2 ?? false
-      );
-
-      if (dendronConfig.dev?.enableExportPodV2) {
-        AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
-      }
-      // round to nearest 10th
-      let numNotes = _.size(ws.getEngine().notes);
-      if (numNotes > 10) {
-        numNotes = Math.round(numNotes / 10) * 10;
-      }
+      ExtensionUtils.setWorkspaceContextOnActivate(dendronConfig);
 
       MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ws, context, requireActiveWorkspace: true });
-
-      const codeWorkspacePresent = await fs.pathExists(
-        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
-      AnalyticsUtils.identify({
-        numNotes,
-        // Which side of all currently running tests is this user on?
-        splitTests: CURRENT_AB_TESTS.map(
-          (test) =>
-            // Formatted as `testName.groupName` since group names are not necessarily unique
-            `${test.name}.${test.getUserGroup(
-              SegmentClient.instance().anonymousId
-            )}`
-        ),
-      });
-
-      const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
-      const siteUrl = publishigConfig.siteUrl;
-
-      const trackProps = {
-        duration: durationReloadWorkspace,
-        noCaching: dendronConfig.noCaching || false,
-        numNotes,
-        numVaults: vaults.length,
-        workspaceType: ws.type,
-        codeWorkspacePresent,
-        selfContainedVaultsEnabled:
-          dendronConfig.dev?.enableSelfContainedVaults || false,
-        numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained)
-          .length,
-        numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
-        numWorkspaceVaults: vaults.filter(
-          (vault) => vault.workspace !== undefined
-        ).length,
-        numSeedVaults: vaults.filter((vault) => vault.seed !== undefined)
-          .length,
-      };
 
       // Track contributors to repositories, but do so in the background so
       // initialization isn't delayed.
@@ -762,12 +808,6 @@ export async function _activate(
         .catch((err) => {
           Sentry.captureException(err);
         });
-
-      if (siteUrl !== undefined) {
-        _.set(trackProps, "siteUrl", siteUrl);
-      }
-
-      AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
 
       // on first install, warn if extensions are incompatible ^dlx35gstwsun
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

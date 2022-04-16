@@ -847,7 +847,7 @@ describe("markdown export pod", () => {
           }
         );
         expect(foo).toMatchSnapshot("note link reference");
-        await checkString(foo, "[One](/simple-wikilink/one)");
+        await checkString(foo, "[One](/simple-wikilink/one.md)");
 
         // Now do a comparison for a note reference at the top level hierarchy
         // check contents
@@ -860,7 +860,7 @@ describe("markdown export pod", () => {
         expect(foo).toMatchSnapshot("top hierarchy note link reference");
         await checkString(
           foo,
-          "[Wikilink Top Hierarchy Target](/wikilink-top-hierarchy-target)"
+          "[Wikilink Top Hierarchy Target](/wikilink-top-hierarchy-target.md)"
         );
       },
       {

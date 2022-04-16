@@ -1,16 +1,17 @@
+/* eslint-disable no-undef */
 import { writeYAML } from "@dendronhq/common-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { ExternalService } from "@dendronhq/pods-core";
+import { ExternalService, PodUtils } from "@dendronhq/pods-core";
 import { ensureDirSync } from "fs-extra";
 import path from "path";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import { PodUIControls } from "../../components/pods/PodControls";
 import * as vscode from "vscode";
-import { getExtension } from "../../workspace";
 import { ConfigureServiceConnection } from "../../commands/pods/ConfigureServiceConnection";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { describe } from "mocha";
 
 suite("ConfigureServiceConnection", function () {
@@ -19,13 +20,15 @@ suite("ConfigureServiceConnection", function () {
       sinon.restore();
     },
   });
-
-  describe("WHEN ConfigureServiceConnection is run with Create New option", () => {
-    test("THEN new service config must be created", (done) => {
-      runLegacyMultiWorkspaceTest({
+  describe("GIVEN Configure Service Connection command is run", () => {
+    describeMultiWS(
+      "WHEN Create New option is selected",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async () => {
+      },
+      () => {
+        test("THEN new service config must be created", async () => {
           const cmd = new ConfigureServiceConnection();
           sinon.stub(vscode.window, "showQuickPick").returns(
             Promise.resolve({
@@ -47,18 +50,18 @@ suite("ConfigureServiceConnection", function () {
               path.join("pods", "service-connections", "svcconfig.airtable.yml")
             )
           ).toBeTruthy();
-          done();
-        },
-      });
-    });
-  });
+        });
+      }
+    );
 
-  describe("WHEN service config are present", () => {
-    test("THEN service config of selected connection Id must open ", (done) => {
-      runLegacyMultiWorkspaceTest({
+    describeMultiWS(
+      "AND WHEN a service connection Id is selected",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async () => {
+      },
+      () => {
+        test("THEN service config of selected connection Id must open", async () => {
           const cmd = new ConfigureServiceConnection();
           sinon.stub(vscode.window, "showQuickPick").returns(
             Promise.resolve({
@@ -66,11 +69,11 @@ suite("ConfigureServiceConnection", function () {
             }) as Thenable<vscode.QuickPickItem>
           );
           //setup
-          const configPath = path.join(
-            getExtension().podsDir,
-            "service-connections",
-            "svcconfig.airtable-2.yml"
-          );
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const configPath = PodUtils.getServiceConfigPath({
+            wsRoot,
+            connectionId: "airtable-2",
+          });
           ensureDirSync(path.dirname(configPath));
           writeYAML(configPath, {
             serviceType: ExternalService.Airtable,
@@ -89,9 +92,8 @@ suite("ConfigureServiceConnection", function () {
               )
             )
           ).toBeTruthy();
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
   });
 });

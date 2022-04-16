@@ -9,12 +9,14 @@ import {
   DHookDict,
   DLink,
   DVault,
+  EngagementEvents,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   Event,
+  extractNoteChangeEntriesByType,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -48,13 +50,14 @@ import {
   HistoryService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { AnalyticsUtils } from "../utils/analytics";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
 
 export class EngineAPIService
   implements DEngineClient, IEngineAPIService, EngineEventEmitter
 {
   private _internalEngine: DEngineClient;
-  private _engineEvents: EngineEventEmitter;
+  private _engineEventEmitter: EngineEventEmitter;
   private _trustedWorkspace: boolean = true;
 
   static createEngine({
@@ -103,14 +106,14 @@ export class EngineAPIService
     engineEvents: EngineEventEmitter;
   }) {
     this._internalEngine = engineClient;
-    this._engineEvents = engineEvents;
+    this._engineEventEmitter = engineEvents;
   }
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
-    return this._engineEvents.onEngineNoteStateChanged;
+    return this._engineEventEmitter.onEngineNoteStateChanged;
   }
 
   dispose() {
-    this._engineEvents.dispose();
+    this._engineEventEmitter.dispose();
   }
 
   get trustedWorkspace(): boolean {
@@ -184,6 +187,10 @@ export class EngineAPIService
     this._internalEngine.hooks = arg;
   }
 
+  public get engineEventEmitter(): EngineEventEmitter {
+    return this._engineEventEmitter;
+  }
+
   async refreshNotes(opts: RefreshNotesOpts) {
     return this._internalEngine.refreshNotes(opts);
   }
@@ -222,6 +229,7 @@ export class EngineAPIService
     return this._internalEngine.writeSchema(schema);
   }
   init(): Promise<DEngineInitResp> {
+    this.setupEngineAnalyticsTracking();
     return this._internalEngine.init();
   }
 
@@ -305,7 +313,37 @@ export class EngineAPIService
   ): Promise<GetNoteLinksPayload> {
     return this._internalEngine.getLinks(opts);
   }
+
   getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return this._internalEngine.getAnchors(opts);
+  }
+
+  /**
+   * Setup telemetry tracking on engine events to understand user engagement
+   * levels
+   */
+  private setupEngineAnalyticsTracking() {
+    this._engineEventEmitter.onEngineNoteStateChanged((entries) => {
+      const createCount = extractNoteChangeEntriesByType(
+        entries,
+        "create"
+      ).length;
+
+      const updateCount = extractNoteChangeEntriesByType(
+        entries,
+        "update"
+      ).length;
+
+      const deleteCount = extractNoteChangeEntriesByType(
+        entries,
+        "delete"
+      ).length;
+
+      AnalyticsUtils.track(EngagementEvents.EngineStateChanged, {
+        created: createCount,
+        updated: updateCount,
+        deleted: deleteCount,
+      });
+    });
   }
 }

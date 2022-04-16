@@ -1,3 +1,0 @@
-{
-  "permalink": "css/{{ title | slug }}.html"
-}

@@ -6,10 +6,10 @@ import {
 import {
   file2Note,
   file2Schema,
+  FileUtils,
   goUpTo,
   schemaModuleProps2File,
   tmpDir,
-  FileUtils,
 } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -157,6 +157,52 @@ describe("file2Schema", () => {
     );
     const schema = await file2Schema(fpath, root);
     expect(_.values(schema.schemas).length).toEqual(8);
+  });
+});
+
+describe("GIVEN createFileWithSuffixThatDoesNotExist", () => {
+  let root: string;
+  let fpath: string;
+
+  describe("WHEN orig file does not exist", () => {
+    beforeEach(() => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+    });
+    test("THEN create file", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo"), acc: 0 });
+    });
+  });
+
+  describe("WHEN orig file does exist", () => {
+    beforeEach(async () => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+      await FileTestUtils.createFiles(root, [{ path: "foo" }]);
+    });
+    test("THEN increment suffix", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo-1"), acc: 1 });
+    });
+  });
+
+  describe("WHEN orig file and one prefix exists", () => {
+    beforeEach(async () => {
+      root = FileTestUtils.tmpDir().name;
+      fpath = path.join(root, "foo");
+      await FileTestUtils.createFiles(root, [
+        { path: "foo" },
+        { path: "foo-1" },
+      ]);
+    });
+    test("THEN increment suffix", () => {
+      expect(
+        FileUtils.genFilePathWithSuffixThatDoesNotExist({ fpath })
+      ).toEqual({ filePath: path.join(root, "foo-2"), acc: 2 });
+    });
   });
 });
 

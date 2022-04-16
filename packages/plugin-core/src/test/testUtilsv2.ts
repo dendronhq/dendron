@@ -86,6 +86,7 @@ export function genDefaultSettings() {
   return {
     extensions: {
       recommendations: [
+        "dendron.dendron",
         "dendron.dendron-paste-image",
         "dendron.dendron-markdown-shortcuts",
         "redhat.vscode-yaml",
@@ -238,6 +239,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     skipOpenWs: true,
     ...setupWsOverride,
     workspaceInitializer: new BlankInitializer(),
+    selfContained: false,
   });
 
   await WorkspaceUtils.updateCodeWorkspaceSettings({

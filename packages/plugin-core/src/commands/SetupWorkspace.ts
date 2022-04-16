@@ -1,4 +1,9 @@
-import { CONSTANTS, DVault, WorkspaceType } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DENDRON_VSCODE_CONFIG_KEYS,
+  DVault,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -26,6 +31,8 @@ type CommandOpts = CommandInput & {
    * override prompts
    */
   skipConfirmation?: boolean;
+  /** Create self contained vaults, overriding the Dendron VSCode setting. */
+  selfContained?: boolean;
 };
 
 type CommandOutput = DVault[];
@@ -184,11 +191,19 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   async execute(opts: CommandOpts): Promise<DVault[]> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
+    // This command can run before the extension is registered, especially during testing
+    const defaultSelfContained =
+      VSCodeUtils.getWorkspaceConfig().get<boolean>(
+        DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE
+      ) ?? false;
     const {
       rootDirRaw: rootDir,
       skipOpenWs,
       workspaceType,
-    } = _.defaults(opts, {});
+      selfContained,
+    } = _.defaults(opts, {
+      selfContained: defaultSelfContained,
+    });
     Logger.info({ ctx, rootDir, skipOpenWs, workspaceType });
 
     if (
@@ -207,10 +222,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
       workspaceType === WorkspaceType.CODE || workspaceType === undefined;
+
     const svc = await WorkspaceService.createWorkspace({
       vaults,
       wsRoot: rootDir,
       createCodeWorkspace,
+      useSelfContainedVault: selfContained,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({

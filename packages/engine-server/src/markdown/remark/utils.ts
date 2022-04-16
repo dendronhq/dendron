@@ -329,6 +329,7 @@ const getLinkCandidates = ({
       const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
         engine,
+        vault: note.vault,
       }).filter((note) => note.stub !== true);
       linkCandidates.push(
         ...possibleCandidates.map((candidate): DLink => {
@@ -379,6 +380,7 @@ export class LinkUtils {
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
+   *
    * @param opts.filter - {type, loc
    *
    * - type: filter by {@link DendronASTTypes}
@@ -496,7 +498,7 @@ export class LinkUtils {
     engine: DEngineClient;
   }) {
     const { activeNote, wikiLinks, engine } = opts;
-    const { vaults, notes, wsRoot } = engine;
+    const { vaults } = engine;
 
     let out: DNodeProps[] = [];
     wikiLinks.forEach((wikiLink) => {
@@ -510,19 +512,18 @@ export class LinkUtils {
         : undefined;
 
       if (vault) {
-        const note = NoteUtils.getNoteByFnameV5({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes,
+          engine,
           vault,
-          wsRoot,
         });
         if (note) {
           out.push(note);
         }
       } else {
-        const notesWithSameFname = NoteUtils.getNotesByFname({
+        const notesWithSameFname = NoteUtils.getNotesByFnameFromEngine({
           fname,
-          notes,
+          engine,
         });
         out = out.concat(notesWithSameFname);
       }
@@ -1151,6 +1152,7 @@ export class RemarkUtils {
     dendronConfig: IntermediateDendronConfig
   ) {
     const prevNote = { ...note };
+    // eslint-disable-next-line func-names
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
@@ -1158,21 +1160,13 @@ export class RemarkUtils {
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
-
-        /** used findLinks to get vault of wikilink */
-        const links = LinkUtils.findLinks({ note, engine }).filter(
-          (linkNode) => linkNode.type === "wiki"
-        );
         let dirty = false;
-
-        links.forEach((linkNode, i) => {
+        wikiLinks.forEach((linkNode) => {
           let vault: DVault | undefined;
-
-          // If the link specifies a vault, we should only look at that vault
-          if (linkNode.to && !_.isUndefined(linkNode.to?.vaultName)) {
+          if (!_.isUndefined(linkNode.data.vaultName)) {
             vault = VaultUtils.getVaultByName({
               vaults: engine.vaults,
-              vname: linkNode.to?.vaultName,
+              vname: linkNode.data.vaultName,
             });
           }
           const existingNote = NoteUtils.getNoteFromMultiVault({
@@ -1187,12 +1181,12 @@ export class RemarkUtils {
               ConfigUtils.getPublishingConfig(dendronConfig);
             const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
-            wikiLinks[i]["value"] = WorkspaceUtils.getNoteUrl({
+            linkNode.value = WorkspaceUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
               urlRoot,
-              anchor: linkNode.to?.anchorHeader,
+              anchor: linkNode.data.anchorHeader,
             });
             dirty = true;
           }

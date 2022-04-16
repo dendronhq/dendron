@@ -1,29 +1,32 @@
 import { writeYAML } from "@dendronhq/common-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { PodV2Types } from "@dendronhq/pods-core";
+import { PodUtils, PodV2Types } from "@dendronhq/pods-core";
 import { ensureDirSync } from "fs-extra";
 import path from "path";
 import sinon from "sinon";
 import { ConfigureExportPodV2 } from "../../commands/pods/ConfigureExportPodV2";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import { PodUIControls } from "../../components/pods/PodControls";
-import { getExtension } from "../../workspace";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { describe } from "mocha";
 
-suite(" Configure ExportPod V2 ", function () {
+suite("Configure ExportPod V2 ", function () {
   const ctx = setupBeforeAfter(this, {
     afterHook: () => {
       sinon.restore();
     },
   });
-  describe("WHEN ConfigureExportV2 is run with New Export", () => {
-    test("THEN new config must be created", (done) => {
-      runLegacyMultiWorkspaceTest({
+  describe("GIVEN Configure Export V2 is run", () => {
+    describeMultiWS(
+      "WHEN New Export option is selected from the Quickpick",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async () => {
+      },
+      () => {
+        test("THEN new config must be created", async () => {
           const cmd = new ConfigureExportPodV2();
           sinon
             .stub(PodUIControls, "promptForExportConfigOrNewExport")
@@ -41,28 +44,28 @@ suite(" Configure ExportPod V2 ", function () {
           expect(
             activePath?.endsWith(path.join("pods", "custom", "config.foo.yml"))
           ).toBeTruthy();
-          done();
-        },
-      });
-    });
-  });
+        });
+      }
+    );
 
-  describe("WHEN custom configs are present", () => {
-    test("THEN config of selected podId must open", (done) => {
-      runLegacyMultiWorkspaceTest({
+    describeMultiWS(
+      "AND WHEN a custom pod ID is selected",
+      {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async () => {
+      },
+      () => {
+        test("THEN config of selected podId must open", async () => {
           const cmd = new ConfigureExportPodV2();
           sinon
             .stub(PodUIControls, "promptForExportConfigOrNewExport")
             .returns(Promise.resolve({ podId: "foobar" }));
           //setup
-          const configPath = path.join(
-            getExtension().podsDir,
-            "custom",
-            "config.foobar.yml"
-          );
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const configPath = PodUtils.getCustomConfigPath({
+            wsRoot,
+            podId: "foobar",
+          });
           ensureDirSync(path.dirname(configPath));
           writeYAML(configPath, {
             podType: PodV2Types.MarkdownExportV2,
@@ -78,9 +81,8 @@ suite(" Configure ExportPod V2 ", function () {
               path.join("pods", "custom", "config.foobar.yml")
             )
           ).toBeTruthy();
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
   });
 });

@@ -1,10 +1,16 @@
-import { ConfigUtils, DEngineClient, DVault } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DEngineClient,
+  DVault,
+  IntermediateDendronConfig,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
   DendronASTDest,
   DendronPubOpts,
-  MDUtilsV4,
   MDUtilsV5,
   ProcFlavor,
   ProcMode,
@@ -14,7 +20,7 @@ import _ from "lodash";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5, testWithEngine } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
-import { TestUnifiedUtils } from "../../../utils";
+import { checkString, TestUnifiedUtils } from "../../../utils";
 import { checkNotInVFile, checkVFile } from "./utils";
 
 function proc(
@@ -42,131 +48,226 @@ function proc(
   );
 }
 
-const verifyPrivateLink = async (vfile: VFile, value: string) => {
+const verifyPrivateLink = async (
+  vfile: VFile,
+  value: string,
+  capitalize = true
+) => {
   return TestUnifiedUtils.verifyPrivateLink({
     contents: vfile.contents as string,
-    value,
+    value: capitalize ? _.capitalize(value) : value,
   });
 };
 
+function verifyPublicLink(resp: any, match: string) {
+  return checkString(resp.contents as string, `<a href="/notes/${match}">`);
+}
+
+function verifyPrivateNoteRef(resp: VFile) {
+  // Example:
+  // A private note ref is currently 2 empty <p> blocks in succession
+  //
+  // "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\">
+  // <use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+  // <p></p><p></p><div class=\\"portal-container\\">
+  // <div class=\\"portal-head\\">
+  return checkString(
+    resp.contents as string,
+    `<p></p><p></p><div class="portal-container">`
+  );
+}
+
+function verifyPublicNoteRef(resp: VFile, match: string) {
+  // example: <a href=\\"/notes/beta\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  // return checkString(resp.contents as string, `<a href="/notes/${match}">`);
+  return checkString(
+    resp.contents as string,
+    `<a href="/notes/${match}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`
+  );
+}
+
+function genPublishConfigWithPublicPrivateHierarchies() {
+  const config = ConfigUtils.genDefaultConfig();
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);
+  return config;
+}
+
+function genPublishConfigWithAllPublicHierarchies() {
+  const config = ConfigUtils.genDefaultConfig();
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["alpha", "beta"]);
+  return config;
+}
+
+function createProc({
+  vaults,
+  engine,
+  linkText,
+  fname,
+  config,
+}: WorkspaceOpts & {
+  engine: DEngineClient;
+  linkText: string;
+  fname: string;
+  config: IntermediateDendronConfig;
+}) {
+  const vault = vaults[0];
+
+  const proc = MDUtilsV5.procRehypeFull(
+    {
+      engine,
+      fname,
+      vault,
+      config,
+    },
+    { flavor: ProcFlavor.PUBLISHING }
+  );
+  return proc.process(linkText);
+}
+
 describe("GIVEN dendronPub", () => {
-  describe("WHEN link is private", () => {
-    test("THEN show private link", async () => {
-      await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const config = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(
-              engine,
-              {
-                fname: "foo",
-                dest: DendronASTDest.HTML,
-                vault: vaults[0],
-                config,
-              },
-              {
-                wikiLinkOpts: { useId: true },
-                transformNoPublish: true,
-              }
-            ),
-          }).process(`[[an alias|bar]]`);
-          await verifyPrivateLink(resp, "an alias");
-        },
-        {
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-          expect,
-        }
-      );
-    });
-  });
-  describe("WHEN inside note ref", () => {
-    test("THEN show private link", async () => {
-      await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const vault = vaults[0];
-          const config = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-          ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-          const resp = await MDUtilsV4.procRehype({
-            proc: proc(
-              engine,
-              {
-                dest: DendronASTDest.HTML,
-                config,
-                vault,
-                fname: "gamma",
-                shouldApplyPublishRules: true,
-              },
-              {
-                wikiLinkOpts: { useId: true },
-                transformNoPublish: true,
-              }
-            ),
-          }).process("[[alpha]]");
-          await verifyPrivateLink(resp, "Alpha");
-        },
-        {
-          preSetupHook: async (opts) => {
-            await ENGINE_HOOKS.setupLinks(opts);
-            await NoteTestUtilsV4.createNote({
-              fname: "gamma",
-              body: `![[alpha]]`,
-              vault: opts.vaults[0],
-              wsRoot: opts.wsRoot,
+  const fnameAlpha = "alpha";
+  const fnameBeta = "beta";
+
+  describe("WHEN all notes are public", () => {
+    const config = genPublishConfigWithAllPublicHierarchies();
+    const fname = fnameBeta;
+
+    describe("AND WHEN wikilink", () => {
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[beta]] [[alpha]]`,
             });
           },
-          expect,
-        }
-      );
-    });
-    describe("AND noteRef link", () => {
-      test("THEN noteRef link is blank", async () => {
-        await runEngineTestV5(
-          async ({ engine, vaults }) => {
-            const vault = vaults[0];
-            const config = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-            ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
-            ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
-            const resp = await MDUtilsV4.procRehype({
-              proc: proc(
-                engine,
-                {
-                  dest: DendronASTDest.HTML,
-                  config,
-                  vault,
-                  fname: "gamma",
-                  shouldApplyPublishRules: true,
-                },
-                {
-                  wikiLinkOpts: { useId: true },
-                  transformNoPublish: true,
-                }
-              ),
-            }).process("![[alpha]]");
-            await checkVFile(resp, "<p></p><p></p>");
-          },
           {
-            preSetupHook: async (opts) => {
-              await ENGINE_HOOKS.setupLinks(opts);
-              await NoteTestUtilsV4.createNote({
-                fname: "gamma",
-                body: `![[alpha]]`,
-                vault: opts.vaults[0],
-                wsRoot: opts.wsRoot,
-              });
-            },
+            preSetupHook: ENGINE_HOOKS.setupLinks,
             expect,
           }
         );
+      });
+      test("THEN all links are rendered", async () => {
+        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, fnameAlpha);
+      });
+    });
+  });
+
+  describe("WHEN publish and private hierarchies", () => {
+    const fname = fnameBeta;
+    const config = genPublishConfigWithPublicPrivateHierarchies();
+
+    describe("AND WHEN noteRef", () => {
+      describe("AND WHEN noteref of published note", () => {
+        let resp: VFile;
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname,
+                linkText: `![[beta]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        test("THEN published note is rendered", async () => {
+          await verifyPublicNoteRef(resp, fnameBeta);
+        });
+        test("THEN private link in published note is hidden", async () => {
+          await verifyPrivateLink(resp, fnameAlpha);
+        });
+      });
+
+      describe("AND WHEN noteref of private note", () => {
+        let resp: VFile;
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname,
+                linkText: `![[alpha]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        test("THEN private note is not rendered", async () => {
+          await verifyPrivateNoteRef(resp);
+        });
+      });
+    });
+
+    describe("AND WHEN wikilink", () => {
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[beta]] [[alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+      test("THEN public link is rendered", async () => {
+        await verifyPublicLink(resp, fnameBeta);
+      });
+      test("THEN private link is hidden", async () => {
+        await verifyPrivateLink(resp, fnameAlpha);
+      });
+    });
+
+    describe("AND WHEN xvault link", () => {
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            const vaultName = VaultUtils.getName(opts.vaults[0]);
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[dendron://${vaultName}/beta]] [[dendron://${vaultName}/alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+      test("THEN public link is rendered", async () => {
+        await verifyPublicLink(resp, fnameBeta);
+      });
+      test("THEN private link is hidden", async () => {
+        await verifyPrivateLink(resp, fnameAlpha);
       });
     });
   });
 });
 
-describe("dendronPub", () => {
+describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("prefix", () => {
     testWithEngine("imagePrefix", async ({ engine, vaults }) => {
       const out = proc(

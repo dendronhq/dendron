@@ -19,6 +19,7 @@ import {
   ENABLE_PRETTY_REFS,
   ENABLE_FRONTMATTER_TAGS,
   ENABLE_HASHES_FOR_FM_TAGS,
+  ENABLE_BACK_LINKS,
 } from "./global";
 
 const GITHUB_EDIT_VIEW_MODE: Record<
@@ -159,6 +160,7 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Site URL",
       desc: "URL of the site without trailing slash.",
     },
+    enableBackLinks: ENABLE_BACK_LINKS("publishing"),
     enableFrontmatterTags: ENABLE_FRONTMATTER_TAGS("publishing"),
     enableHashesForFMTags: ENABLE_HASHES_FOR_FM_TAGS("publishing"),
     enableRandomlyColoredTags: {

@@ -426,7 +426,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const existing = await this.api.engineGetNoteByPath({
       vault: note.vault,
       ws: this.ws,
-      npath: note.id,
+      npath: note.fname,
       createIfNew: false,
     });
 

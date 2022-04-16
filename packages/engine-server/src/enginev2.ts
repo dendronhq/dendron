@@ -92,6 +92,7 @@ type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 type CachedPreview = {
   data: string;
   updated: number;
+  contentHash?: string;
 };
 
 function createRenderedCache(
@@ -168,6 +169,9 @@ export class DendronEngineV2 implements DEngine {
     this.renderedCache = createRenderedCache(this.config, this.logger);
   }
 
+  /**
+   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
+   */
   async getLinks(
     opts: Optional<GetLinksRequest, "ws">
   ): Promise<GetNoteLinksPayload> {
@@ -189,12 +193,13 @@ export class DendronEngineV2 implements DEngine {
       default:
         assertUnreachable(type);
     }
-    return { data: links, error: null };
+    const backlinks = note.links.filter((link) => link.type === "backlink");
+    return { data: links.concat(backlinks), error: null };
   }
 
   async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return {
-      data: await AnchorUtils.findAnchors({
+      data: AnchorUtils.findAnchors({
         note: opts.note,
       }),
       error: null,
@@ -391,11 +396,10 @@ export class DendronEngineV2 implements DEngine {
   }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtils.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
       fname: npath,
-      notes: this.notes,
+      engine: this,
       vault,
-      wsRoot: this.wsRoot,
     });
     this.logger.debug({ ctx, maybeNote, msg: "post-query" });
     let noteNew: NoteProps | undefined = maybeNote;
@@ -590,14 +594,27 @@ export class DendronEngineV2 implements DEngine {
     // Either we don't have have the cached preview or the version that is
     // cached has gotten stale, hence we will re-render the note and cache
     // the new value.
-    const data = await this._renderNote({
-      note,
-      flavor: flavor || ProcFlavor.PREVIEW,
-      dest: dest || DendronASTDest.HTML,
-    });
+    let data: string;
+    try {
+      data = await this._renderNote({
+        note,
+        flavor: flavor || ProcFlavor.PREVIEW,
+        dest: dest || DendronASTDest.HTML,
+      });
+    } catch (error) {
+      return ResponseUtil.createUnhappyResponse({
+        error: new DendronError({
+          message: `Unable to render note ${note.fname} in ${VaultUtils.getName(
+            note.vault
+          )}`,
+          payload: error,
+        }),
+      });
+    }
 
     this.renderedCache.set(id, {
       updated: note.updated,
+      contentHash: note.contentHash,
       data,
     });
 
@@ -620,9 +637,10 @@ export class DendronEngineV2 implements DEngine {
     // the note itself, hence before going through the trouble of checking whether linked
     // reference notes have been updated we should do the super cheap check to see
     // whether the note itself has invalidated the preview.
-    if (note.updated > cachedPreview.updated) {
+    if (note.contentHash !== cachedPreview.contentHash) {
       return false;
     }
+    // TODO: Add another check to see if backlinks have changed
 
     return (
       cachedPreview.updated >=

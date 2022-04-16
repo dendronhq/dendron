@@ -22,7 +22,6 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-import { INoteSyncService } from "../services/NoteSyncService";
 import { ISchemaSyncService } from "../services/SchemaSyncServiceInterface";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
@@ -84,9 +83,6 @@ export class MockDendronExtension implements IDendronExtension {
     return new WorkspaceService({
       wsRoot: this._wsRoot,
     });
-  }
-  get noteSyncService(): INoteSyncService {
-    throw new Error("Method not implemented in MockDendronExtension");
   }
   get lookupControllerFactory(): ILookupControllerV3Factory {
     throw new Error("Method not implemented in MockDendronExtension");

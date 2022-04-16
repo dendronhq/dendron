@@ -5,7 +5,7 @@ import { EventHandler } from "cytoscape";
 import {
   DMessageSource,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
   NoteProps,
 } from "@dendronhq/common-all";
 import Graph from "../../components/graph";
@@ -68,7 +68,7 @@ export default function FullNoteGraph({ engine, ide }: DendronProps) {
 
     setActiveNote(engine.notes[id]);
     postVSCodeMessage({
-      type: GraphViewMessageType.onSelect,
+      type: GraphViewMessageEnum.onSelect,
       data: { id },
       source: DMessageSource.webClient,
     } as GraphViewMessage);

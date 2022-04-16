@@ -8,7 +8,7 @@ import { PreviewProxy } from "../components/views/PreviewProxy";
 export class MockPreviewProxy implements PreviewProxy {
   _isVisible: boolean = false;
   _isOpen: boolean = false;
-  show(_note?: NoteProps): void {
+  async show(_note?: NoteProps): Promise<void> {
     this._isVisible = true;
     this._isOpen = true;
   }

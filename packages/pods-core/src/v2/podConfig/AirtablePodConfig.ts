@@ -36,7 +36,7 @@ export type PersistedAirtablePodConfig = AirtableV2PodConfig &
  */
 export type RunnableAirtableV2PodConfig = Omit<
   AirtableV2PodConfig,
-  "podId" | "podType"
+  "description" | "podType"
 > &
   Pick<AirtableConnection, "apiKey">;
 
@@ -69,6 +69,7 @@ export function createRunnableAirtableV2PodConfigSchema(): JSONSchemaType<Runnab
       "tableName",
       "sourceFieldMapping",
       "exportScope",
+      "podId",
     ],
     properties: {
       apiKey: {
@@ -87,10 +88,6 @@ export function createRunnableAirtableV2PodConfigSchema(): JSONSchemaType<Runnab
       exportScope: {
         type: "string",
       },
-      description: {
-        type: "string",
-        nullable: true,
-      },
       filters: {
         type: "object",
         required: [],
@@ -103,6 +100,9 @@ export function createRunnableAirtableV2PodConfigSchema(): JSONSchemaType<Runnab
             },
           },
         },
+      },
+      podId: {
+        type: "string",
       },
     },
   };

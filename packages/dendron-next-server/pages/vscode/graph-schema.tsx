@@ -8,7 +8,7 @@ import { GraphConfig, graphConfig } from "../../lib/graph";
 import {
   DMessageSource,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
 } from "@dendronhq/common-all";
 import { DendronProps } from "../../lib/types";
 
@@ -30,13 +30,13 @@ export default function FullSchemaGraph({ engine, ide }: DendronProps) {
 
     if (vault) {
       postVSCodeMessage({
-        type: GraphViewMessageType.onSelect,
+        type: GraphViewMessageEnum.onSelect,
         data: { id: fname, vault },
         source: DMessageSource.webClient,
       } as GraphViewMessage);
     } else {
       postVSCodeMessage({
-        type: GraphViewMessageType.onSelect,
+        type: GraphViewMessageEnum.onSelect,
         data: { id: fname },
         source: DMessageSource.webClient,
       } as GraphViewMessage);

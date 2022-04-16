@@ -284,6 +284,9 @@ export type EngineUpdateNodesOptsV2 = {
 };
 export type GetNoteOptsV2 = {
   vault: DVault;
+  /**
+   * Note file name minus the extension
+   */
   npath: string;
   /**
    * If node does not exist, create it?
@@ -600,6 +603,7 @@ export type DEngine = DCommonProps &
 
 /**
  * Implements the engine interface but has no backend store
+ *  ^sdxp5tjokad9
  */
 export type DEngineClient = Omit<DEngine, "store">;
 
@@ -747,6 +751,7 @@ export enum DMessageEnum {
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
 }
 
+/** @deprecated: Tree view v2 is deprecated */
 export enum TreeViewMessageEnum {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
@@ -756,11 +761,12 @@ export enum TreeViewMessageEnum {
    */
   "onReady" = "onReady",
 }
-export enum GraphViewMessageType {
+export enum GraphViewMessageEnum {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
   "onRequestGraphStyle" = "onRequestGraphStyle",
+  "onGraphStyleLoad" = "onGraphStyleLoad",
 }
 
 export enum CalendarViewMessageType {
@@ -810,6 +816,10 @@ export type OnDidChangeActiveTextEditorData = {
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
+
+export type GraphViewMessageType = DMessageEnum | GraphViewMessageEnum;
+
+/** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;
 
 export type VSCodeMessage = DMessage;
@@ -832,6 +842,8 @@ export type NoteViewMessage = DMessage<
   NoteViewMessageType,
   { id?: string; href?: string }
 >;
+
+/** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 
 export type SeedBrowserMessage = DMessage<

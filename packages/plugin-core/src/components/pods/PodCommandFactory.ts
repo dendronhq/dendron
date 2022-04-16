@@ -12,6 +12,7 @@ import { GoogleDocsExportPodCommand } from "../../commands/pods/GoogleDocsExport
 import { JSONExportPodCommand } from "../../commands/pods/JSONExportPodCommand";
 import { MarkdownExportPodCommand } from "../../commands/pods/MarkdownExportPodCommand";
 import { NotionExportPodCommand } from "../../commands/pods/NotionExportPodCommand";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { getExtension } from "../../workspace";
 
 export class PodCommandFactory {
@@ -40,10 +41,10 @@ export class PodCommandFactory {
       storedConfig.exportScope = exportScope;
     }
     let cmdWithArgs: CodeCommandInstance;
-
+    const extension = ExtensionProvider.getExtension();
     switch (storedConfig.podType) {
       case PodV2Types.AirtableExportV2: {
-        const airtableCmd = new AirtableExportPodCommand();
+        const airtableCmd = new AirtableExportPodCommand(extension);
         cmdWithArgs = {
           key: airtableCmd.key,
           run(): Promise<void> {
@@ -53,7 +54,7 @@ export class PodCommandFactory {
         break;
       }
       case PodV2Types.MarkdownExportV2: {
-        const cmd = new MarkdownExportPodCommand();
+        const cmd = new MarkdownExportPodCommand(extension);
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -63,7 +64,7 @@ export class PodCommandFactory {
         break;
       }
       case PodV2Types.GoogleDocsExportV2: {
-        const cmd = new GoogleDocsExportPodCommand();
+        const cmd = new GoogleDocsExportPodCommand(extension);
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -73,7 +74,7 @@ export class PodCommandFactory {
         break;
       }
       case PodV2Types.NotionExportV2: {
-        const cmd = new NotionExportPodCommand();
+        const cmd = new NotionExportPodCommand(extension);
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -84,7 +85,7 @@ export class PodCommandFactory {
       }
 
       case PodV2Types.JSONExportV2: {
-        const cmd = new JSONExportPodCommand();
+        const cmd = new JSONExportPodCommand(extension);
         cmdWithArgs = {
           key: cmd.key,
           run(): Promise<void> {
@@ -111,9 +112,10 @@ export class PodCommandFactory {
   public static createPodCommandForPodType(
     podType: PodV2Types
   ): CodeCommandInstance {
+    const extension = ExtensionProvider.getExtension();
     switch (podType) {
       case PodV2Types.AirtableExportV2: {
-        const cmd = new AirtableExportPodCommand();
+        const cmd = new AirtableExportPodCommand(extension);
 
         return {
           key: cmd.key,
@@ -124,7 +126,7 @@ export class PodCommandFactory {
       }
 
       case PodV2Types.MarkdownExportV2: {
-        const cmd = new MarkdownExportPodCommand();
+        const cmd = new MarkdownExportPodCommand(extension);
 
         return {
           key: cmd.key,
@@ -134,7 +136,7 @@ export class PodCommandFactory {
         };
       }
       case PodV2Types.GoogleDocsExportV2: {
-        const cmd = new GoogleDocsExportPodCommand();
+        const cmd = new GoogleDocsExportPodCommand(extension);
         return {
           key: cmd.key,
           run(): Promise<void> {
@@ -143,7 +145,7 @@ export class PodCommandFactory {
         };
       }
       case PodV2Types.NotionExportV2: {
-        const cmd = new NotionExportPodCommand();
+        const cmd = new NotionExportPodCommand(extension);
         return {
           key: cmd.key,
           run(): Promise<void> {
@@ -153,7 +155,7 @@ export class PodCommandFactory {
       }
 
       case PodV2Types.JSONExportV2: {
-        const cmd = new JSONExportPodCommand();
+        const cmd = new JSONExportPodCommand(extension);
         return {
           key: cmd.key,
           run(): Promise<void> {

@@ -83,7 +83,8 @@ export class GoogleDocsExportPodV2
 
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
     const resp = await this.getPayloadForNotes(notes);
-    let { accessToken, expirationTime, refreshToken } = this._config;
+    let { accessToken } = this._config;
+    const { expirationTime, refreshToken } = this._config;
     try {
       accessToken = await this.checkTokenExpiry(
         expirationTime,
@@ -169,13 +170,15 @@ export class GoogleDocsExportPodV2
           convertLinks: false,
         };
         // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
-        const data = await pod.plant({
+        let data = await pod.plant({
           config,
           engine: this._engine,
           note: input,
           vaults: this._vaults,
           wsRoot: this._wsRoot,
         });
+        // wrap data in html tags
+        data = `<html>${data}</html>`;
         const content = Buffer.from(data);
         const documentId = input.custom.documentId;
         return {

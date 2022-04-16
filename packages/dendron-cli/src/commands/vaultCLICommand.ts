@@ -1,5 +1,10 @@
 import { WorkspaceService } from "@dendronhq/engine-server";
-import { DendronError, DVault, VaultRemoteSource } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DVault,
+  SelfContainedVault,
+  VaultRemoteSource,
+} from "@dendronhq/common-all";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
@@ -65,21 +70,35 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, wsRoot, vaultPath, noAddToConfig } = opts;
+    const { cmd, wsRoot, vaultPath, noAddToConfig, engine } = opts;
 
     try {
       switch (cmd) {
         case VaultCommands.CREATE: {
           //const vault = checkAndCleanVault({ vaultName: opts.vault, engine });
-          const vault: DVault = {
-            fsPath: vaultPath,
-          };
+
           const wsService = new WorkspaceService({ wsRoot });
-          const resp = await wsService.createVault({
-            vault,
-            noAddToConfig,
-            addToCodeWorkspace: true,
-          });
+          let resp: DVault;
+          if (engine.config.dev?.enableSelfContainedVaults) {
+            const vault: SelfContainedVault = {
+              fsPath: vaultPath,
+              selfContained: true,
+            };
+            resp = await wsService.createSelfContainedVault({
+              vault,
+              addToConfig: true,
+              addToCodeWorkspace: true,
+            });
+          } else {
+            const vault: DVault = {
+              fsPath: vaultPath,
+            };
+            resp = await wsService.createVault({
+              vault,
+              noAddToConfig,
+              addToCodeWorkspace: true,
+            });
+          }
           this.print(`${vaultPath} created`);
           return { vault: resp, error: undefined };
         }

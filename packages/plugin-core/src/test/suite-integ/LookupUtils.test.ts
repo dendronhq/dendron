@@ -332,6 +332,8 @@ suite("NoteLookupProviderUtils", function () {
 
           expect(result.source).toEqual("lookupProvider");
           expect(result.action).toEqual("done");
+
+          controller.onHide();
         });
 
         test("THEN returns onDone callback output if onDone is specificed", async () => {
@@ -350,6 +352,8 @@ suite("NoteLookupProviderUtils", function () {
             },
           });
           expect(result.foo).toEqual("custom onDone");
+
+          controller.onHide();
         });
       });
 
@@ -372,6 +376,8 @@ suite("NoteLookupProviderUtils", function () {
             logger: Logger,
           });
           expect(_.isUndefined(result)).toBeTruthy();
+
+          controller.onHide();
         });
 
         test("THEN returns onError callback output if onError is specified", async () => {
@@ -390,6 +396,8 @@ suite("NoteLookupProviderUtils", function () {
             },
           });
           expect(result.foo).toEqual("custom onError");
+
+          controller.onHide();
         });
       });
 
@@ -416,6 +424,8 @@ suite("NoteLookupProviderUtils", function () {
               data: { action: "hide" },
             });
             expect((await result).foo).toEqual("custom onChangeState");
+
+            controller.onHide();
             done();
           }, 1000);
         });
@@ -435,8 +445,10 @@ suite("NoteLookupProviderUtils", function () {
               },
             });
             setTimeout(async () => {
-              controller.quickpick.hide();
+              controller.quickPick.hide();
               expect((await result).foo).toEqual("custom onHide");
+
+              controller.onHide();
               done();
             }, 1000);
           });

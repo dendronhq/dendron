@@ -2,7 +2,6 @@
 // @ts-ignore
 import title from "title";
 import matter from "gray-matter";
-import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -41,6 +40,7 @@ import {
   SchemaRaw,
 } from "./types";
 import {
+  ConfigUtils,
   DefaultMap,
   getSlugger,
   isNotUndefined,
@@ -310,16 +310,16 @@ export class DNodeUtils {
 }
 
 export class NoteUtils {
-  /** Regular expression FontMatter */
+  /** Regular expression FrontMatter */
   static RE_FM = /^---(.*)^---/ms;
 
-  /** Regular expression FontMatter updated. */
+  /** Regular expression FrontMatter updated. */
   static RE_FM_UPDATED = /^updated:\s+(\d+)$/m;
 
-  /** Regular expression FontMatter created. */
+  /** Regular expression FrontMatter created. */
   static RE_FM_CREATED = /^created:.*$/m;
 
-  /** Regular expression FontMatter updated or created.  */
+  /** Regular expression FrontMatter updated or created.  */
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
@@ -344,6 +344,34 @@ export class NoteUtils {
       value: link.value,
       alias: link.alias,
     });
+  }
+
+  static deleteChildFromParent(opts: {
+    childToDelete: NoteProps;
+    notes: NotePropsDict;
+  }): NoteChangeEntry[] {
+    const changed: NoteChangeEntry[] = [];
+    const { childToDelete, notes } = opts;
+    let parent;
+    if (childToDelete.parent) {
+      parent = notes[childToDelete.parent];
+    } else {
+      throw new DendronError({
+        message: `No parent found for ${childToDelete.fname}`,
+      });
+    }
+
+    const prevParentState = { ...parent };
+    parent.children = _.reject<string[]>(
+      parent.children,
+      (ent: string) => ent === childToDelete.id
+    ) as string[];
+    changed.push({
+      status: "update",
+      prevNote: prevParentState,
+      note: parent,
+    });
+    return changed;
   }
 
   /**
@@ -699,12 +727,15 @@ export class NoteUtils {
     // check if title is unchanged from default. if so, add default title
     if (_.toLower(fname) === fname) {
       fname = titleFromBasename.replace(/-/g, " ");
-      // type definitions are wrong
-      // @ts-ignore
-      return title(fname) as string;
+      return title(fname);
     }
     // if user customized title, return the title as user specified
     return titleFromBasename;
+  }
+
+  static genTitleFromFullFname(fname: string): string {
+    const formatted = fname.replace(/\./g, " ");
+    return title(formatted);
   }
 
   static genUpdateTime() {
@@ -816,30 +847,6 @@ export class NoteUtils {
     }
 
     return latestUpdated;
-  }
-
-  /** @deprecated see {@link NoteUtils.getNotesByFnameFromEngine} */
-  static getNotesByFname({
-    fname,
-    notes,
-    vault,
-  }: {
-    fname: string;
-    notes: NotePropsDict | NoteProps[];
-    vault?: DVault;
-  }): NoteProps[] {
-    if (!_.isArray(notes)) {
-      notes = _.values(notes);
-    }
-    const lowercaseFName = fname.toLowerCase();
-
-    const out = _.filter(notes, (ent) => {
-      return (
-        ent.fname.toLowerCase() === lowercaseFName &&
-        (vault ? ent.vault.fsPath === vault.fsPath : true)
-      );
-    });
-    return out;
   }
 
   static getNotesByFnameFromEngine({
@@ -1080,20 +1087,107 @@ export class NoteUtils {
   }
 
   /**
-   * Add {@link DNodeProps["parent"]} and {@link DNodeProps["children"]} from {@link noteHydrated} to {@link noteRaw}
+   * Add derived metadata from `noteHydrated` to `noteRaw`
+   * By default, include the following properties:
+   *  - parent
+   *  - children
    * @param noteRaw - note for other fields
-   * @param noteHydrated - note to get {@link DNodeProps["parent"]} and {@link DNodeProps["children"]}  properties from
+   * @param noteHydrated - note to get metadata properties from
    * @returns Merged Note object
    */
   static hydrate({
     noteRaw,
     noteHydrated,
+    opts,
   }: {
     noteRaw: NoteProps;
     noteHydrated: NoteProps;
+    opts?: Partial<{
+      keepBackLinks: boolean;
+    }>;
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
+
+    // check if we hydrate with links
+    if (opts?.keepBackLinks) {
+      noteRaw.links = noteHydrated.links.filter(
+        (link) => link.type === "backlink"
+      );
+    }
+
     return { ...noteRaw, ...hydrateProps };
+  }
+
+  /**
+   * Update note metadata (eg. links and anchors)
+   * Calculate note metadata based on contents of the notes
+   */
+  static async updateNoteMetadata({
+    note,
+    fmChangeOnly,
+    engine,
+    enableLinkCandidates,
+  }: {
+    note: NoteProps;
+    fmChangeOnly: boolean;
+    engine: DEngineClient;
+    enableLinkCandidates?: boolean;
+  }) {
+    // Avoid calculating links/anchors if the note is too long
+    if (
+      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
+    ) {
+      return note;
+    }
+    // Links have to be updated even with frontmatter only changes
+    // because `tags` in frontmatter adds new links
+    const links = await engine.getLinks({ note, type: "regular" });
+    if (!links.data) {
+      throw new DendronError({
+        message: "Unable to calculate the links in note",
+        payload: {
+          note: NoteUtils.toLogObj(note),
+          error: links.error,
+        },
+      });
+    }
+    note.links = links.data;
+
+    // if only frontmatter changed, don't bother with heavy updates
+    if (!fmChangeOnly) {
+      const anchors = await engine.getAnchors({
+        note,
+      });
+      if (!anchors.data) {
+        throw new DendronError({
+          message: "Unable to calculate anchors in note",
+          payload: {
+            note: NoteUtils.toLogObj(note),
+            error: anchors.error,
+          },
+        });
+      }
+      note.anchors = anchors.data;
+
+      if (enableLinkCandidates) {
+        const linkCandidates = await engine.getLinks({
+          note,
+          type: "candidate",
+        });
+        if (!linkCandidates.data) {
+          throw new DendronError({
+            message: "Unable to calculate the backlink candidates in note",
+            payload: {
+              note: NoteUtils.toLogObj(note),
+              error: linkCandidates.error,
+            },
+          });
+        }
+        note.links = note.links.concat(linkCandidates.data);
+      }
+    }
+
+    return note;
   }
 
   static match({ notePath, pattern }: { notePath: string; pattern: string }) {
@@ -1138,7 +1232,7 @@ export class NoteUtils {
     );
   }
 
-  static serializeExplicitProps(props: NoteProps) {
+  static serializeExplicitProps(props: NoteProps): Partial<NoteProps> {
     // Remove all undefined values, because they cause `matter` to fail serializing them
     const cleanProps: Partial<NoteProps> = Object.fromEntries(
       Object.entries(props).filter(([_k, v]) => isNotUndefined(v))
@@ -1177,6 +1271,10 @@ export class NoteUtils {
       blacklist.push("stub");
     }
     const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
+    // Make sure title and ID are always strings
+    meta.title = _.toString(meta.title);
+    meta.id = _.toString(meta.id);
+
     return matter.stringify(body || "", meta);
   }
 
@@ -1853,6 +1951,7 @@ export class SchemaUtils {
     });
   }
 
+  //  ^dtaatxvjb4s3
   static matchPath(opts: {
     notePath: string;
     schemaModDict: SchemaModuleDict;
@@ -2027,32 +2126,6 @@ export class SchemaUtils {
       builtinProps.parent = "root";
     }
     return { ...builtinProps, ...dataProps };
-  }
-
-  static serializeModuleProps(moduleProps: SchemaModuleProps) {
-    const { version, imports, schemas } = moduleProps;
-    // TODO: filter out imported schemas
-    const out: any = {
-      version,
-      imports: [],
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    if (imports) {
-      out.imports = imports;
-    }
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
-  }
-
-  static serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
-    const { version, imports, schemas } = _.defaults(moduleOpts, {
-      imports: [],
-    });
-    const out = {
-      version,
-      imports,
-      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
-    };
-    return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
 
   static isSchemaUri(uri: URI) {

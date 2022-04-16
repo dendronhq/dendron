@@ -1,12 +1,17 @@
-import { WorkspaceOpts } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
-import { DoctorActionsEnum } from "@dendronhq/engine-server";
+import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import { file2Note, tmpDir } from "@dendronhq/common-server";
+import {
+  BackupService,
+  DConfig,
+  DoctorActionsEnum,
+} from "@dendronhq/engine-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
 import path from "path";
 import fs from "fs-extra";
 import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 import _ from "lodash";
+import { GitTestUtils, TestConfigUtils } from "../../..";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -713,6 +718,164 @@ describe("FIND_BROKEN_LINKS", () => {
           createEngine: createEngineFromServer,
           expect,
           preSetupHook: setupMultiWithWikilink,
+        }
+      );
+    });
+  });
+});
+
+describe("GIVEN fixRemoteVaults", () => {
+  const action = DoctorActionsEnum.FIX_REMOTE_VAULTS;
+  describe("WHEN a vault has a remote", () => {
+    describe("AND the vault was not marked as remote", () => {
+      test("THEN it is marked as a remote vault", async () => {
+        await runEngineTestV5(
+          async ({ wsRoot, vaults, engine }) => {
+            const vault = vaults[0];
+            const remoteDir = tmpDir().name;
+            await GitTestUtils.createRepoForRemoteVault({
+              wsRoot,
+              vault,
+              remoteDir,
+            });
+
+            await runDoctor({
+              wsRoot,
+              engine,
+              action,
+            });
+            const configAfter = TestConfigUtils.getConfig({ wsRoot });
+            const vaultsAfter = ConfigUtils.getVaults(configAfter);
+            const vaultAfter = VaultUtils.getVaultByName({
+              vaults: vaultsAfter,
+              vname: VaultUtils.getName(vault),
+            });
+            expect(vaultAfter?.remote?.type).toEqual("git");
+            expect(vaultAfter?.remote?.url).toEqual(remoteDir);
+          },
+          {
+            expect,
+          }
+        );
+      });
+    });
+  });
+
+  describe("WHEN a vault does not have a remote", () => {
+    test("THEN it is NOT marked as a remote vault", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, vaults, engine }) => {
+          const vault = vaults[0];
+          await GitTestUtils.createRepoForVault({
+            wsRoot,
+            vault,
+          });
+
+          await runDoctor({ action, engine, wsRoot });
+
+          const configAfter = TestConfigUtils.getConfig({ wsRoot });
+          const vaultsAfter = ConfigUtils.getVaults(configAfter);
+          const vaultAfter = VaultUtils.getVaultByName({
+            vaults: vaultsAfter,
+            vname: VaultUtils.getName(vault),
+          });
+          expect(vaultAfter?.remote).toBeFalsy();
+        },
+        { expect }
+      );
+    });
+  });
+
+  describe("WHEN a repo contains the whole workspace and not just one vault", () => {
+    test("THEN it is NOT marked as a remote vault", async () => {
+      // In this case, we don't want to mark it because the whole workspace
+      // is in the repository and not just this vault. Someone who has the
+      // workspace doesn't need to also clone the vault.
+      await runEngineTestV5(
+        async ({ wsRoot, vaults, engine }) => {
+          const vault = vaults[0];
+          const remoteDir = tmpDir().name;
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+
+          await runDoctor({ action, engine, wsRoot });
+
+          const configAfter = TestConfigUtils.getConfig({ wsRoot });
+          const vaultsAfter = ConfigUtils.getVaults(configAfter);
+          const vaultAfter = VaultUtils.getVaultByName({
+            vaults: vaultsAfter,
+            vname: VaultUtils.getName(vault),
+          });
+          expect(vaultAfter?.remote).toBeFalsy();
+        },
+        { expect }
+      );
+    });
+  });
+});
+
+describe("GIVEN addMissingDefaultConfigs", () => {
+  const action = DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS;
+  describe("WHEN missing a default key", () => {
+    test("THEN adds missing default and create backup", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect(rawConfigBefore.workspace?.workspaceVaultSyncMode).toBeFalsy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out.resp.backupPath).toBeTruthy();
+          const backupPathExists = await fs.pathExists(out.resp.backupPath);
+          expect(backupPathExists).toBeTruthy();
+          const rawConfig = DConfig.getRaw(wsRoot);
+          const defaultConfig = ConfigUtils.genDefaultConfig();
+          expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(
+            defaultConfig.workspace.workspaceVaultSyncMode
+          );
+        },
+        {
+          expect,
+          modConfigCb: (config) => {
+            // @ts-ignore
+            delete config.workspace.workspaceVaultSyncMode;
+            return config;
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN not missing a default key", () => {
+    test("THEN doesn't add missing default", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect(
+            rawConfigBefore.workspace?.workspaceVaultSyncMode
+          ).toBeTruthy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out).toEqual({ exit: true });
+          const rawConfig = DConfig.getRaw(wsRoot);
+          expect(rawConfigBefore).toEqual(rawConfig);
+
+          const backupService = new BackupService({ wsRoot });
+          try {
+            const configBackups = backupService.getBackupsWithKey({
+              key: "config",
+            });
+            expect(configBackups.length).toEqual(0);
+          } finally {
+            backupService.dispose();
+          }
+        },
+        {
+          expect,
         }
       );
     });

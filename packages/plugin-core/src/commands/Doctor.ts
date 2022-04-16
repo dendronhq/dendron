@@ -4,6 +4,7 @@ import {
   DVault,
   ExtensionEvents,
   isNotUndefined,
+  KeybindingConflictDetectedSource,
   NoteProps,
   NoteUtils,
   Position,
@@ -14,6 +15,7 @@ import {
   DoctorActionsEnum,
   BackfillService,
   RemarkUtils,
+  DConfig,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -25,13 +27,20 @@ import {
   IDoctorQuickInputButton,
 } from "../components/doctor/buttons";
 import { DoctorScopeType } from "../components/doctor/types";
-import { INCOMPATIBLE_EXTENSIONS, DENDRON_COMMANDS } from "../constants";
+import {
+  INCOMPATIBLE_EXTENSIONS,
+  DENDRON_COMMANDS,
+  KNOWN_KEYBINDING_CONFLICTS,
+} from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { KeybindingUtils } from "../KeybindingUtils";
+import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
+import { PodUIControls } from "../components/pods/PodControls";
 
 const md = _md();
 type Finding = {
@@ -80,6 +89,31 @@ type DoctorQuickPickItem = QuickPick<DoctorQuickInput>;
 
 export enum PluginDoctorActionsEnum {
   FIND_INCOMPATIBLE_EXTENSIONS = "findIncompatibleExtensions",
+  FIX_KEYBINDING_CONFLICTS = "fixKeybindingConflicts",
+}
+
+// Only reload the workspace for these commands
+//  ^2z4m76v2e2xo
+const RELOAD_BEFORE_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
+];
+
+const RELOAD_AFTER_ACTIONS: (PluginDoctorActionsEnum | DoctorActionsEnum)[] = [
+  DoctorActionsEnum.FIX_FRONTMATTER,
+  DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES,
+];
+
+function shouldDoctorReloadWorkspaceBeforeDoctorAction(
+  action: PluginDoctorActionsEnum | DoctorActionsEnum
+) {
+  return RELOAD_BEFORE_ACTIONS.includes(action);
+}
+
+function shouldDoctorReloadWorkspaceAfterDoctorAction(
+  action: PluginDoctorActionsEnum | DoctorActionsEnum
+) {
+  return RELOAD_AFTER_ACTIONS.includes(action);
 }
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -89,6 +123,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   constructor(ext: IDendronExtension) {
     super();
     this.extension = ext;
+  }
+
+  getHierarchy() {
+    return new QuickPickHierarchySelector().getHierarchy();
   }
 
   createQuickPick(opts: CreateQuickPickOpts) {
@@ -296,6 +334,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return engine;
   }
 
+  addAnalyticsPayload(opts: CommandOpts) {
+    return {
+      action: opts.action,
+      scope: opts.scope,
+    };
+  }
+
   async execute(opts: CommandOpts) {
     const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
@@ -322,7 +367,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     this.L.info({ ctx, msg: "pre:Reload" });
 
-    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+    if (shouldDoctorReloadWorkspaceBeforeDoctorAction(opts.action)) {
       await this.reload();
     }
 
@@ -348,6 +393,20 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             };
           });
         await this.showIncompatibleExtensionPreview({ installStatus });
+        break;
+      }
+      case PluginDoctorActionsEnum.FIX_KEYBINDING_CONFLICTS: {
+        const conflicts = KeybindingUtils.getConflictingKeybindings({
+          knownConflicts: KNOWN_KEYBINDING_CONFLICTS,
+        });
+        if (conflicts.length > 0) {
+          await KeybindingUtils.showKeybindingConflictPreview({ conflicts });
+          AnalyticsUtils.track(ExtensionEvents.KeybindingConflictDetected, {
+            source: KeybindingConflictDetectedSource.doctor,
+          });
+        } else {
+          window.showInformationMessage(`There are no keybinding conflicts!`);
+        }
         break;
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
@@ -394,6 +453,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         } else {
           window.showInformationMessage(`There are no missing links!`);
         }
+        ds.dispose();
         if (this.extension.fileWatcher) {
           this.extension.fileWatcher.pause = false;
         }
@@ -415,11 +475,72 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           exit: false,
           quiet: true,
         });
+        ds.dispose();
         if (out.resp.length === 0) {
           window.showInformationMessage(`There are no broken links!`);
           break;
         }
         await this.showBrokenLinkPreview(out.resp, engine);
+        break;
+      }
+      case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
+        const selection = await this.getHierarchy();
+        // break if no hierarchy is selected.
+        if (!selection) break;
+        // get hierarchy of notes to be updated
+        const { hierarchy, vault } = selection;
+        // get podId used to export the notes
+        const podId = await PodUIControls.promptToSelectCustomPodId();
+        if (!podId) break;
+        const ds = new DoctorService();
+        await ds.executeDoctorActions({
+          action: opts.action,
+          engine,
+          podId,
+          hierarchy,
+          vault,
+        });
+        break;
+      }
+      case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
+        const ds = new DoctorService();
+        const out = await ds.executeDoctorActions({
+          action: opts.action,
+          engine,
+        });
+
+        if (out.error) {
+          window.showErrorMessage(out.error.message);
+        }
+
+        if (out.resp) {
+          const OPEN_CONFIG = "Open dendron.yml and Backup";
+          window
+            .showInformationMessage(
+              `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`,
+              OPEN_CONFIG
+            )
+            .then(async (resp) => {
+              if (resp === OPEN_CONFIG) {
+                const configPath = DConfig.configPath(wsRoot);
+                const configUri = Uri.file(configPath);
+                await VSCodeUtils.openFileInEditor(configUri);
+
+                const backupUri = Uri.file(out.resp.backupPath);
+                await VSCodeUtils.openFileInEditor(backupUri, {
+                  column: ViewColumn.Beside,
+                });
+              }
+            });
+          break;
+        } else {
+          // nothing happened.
+          window.showInformationMessage(
+            "There are no missing defaults. Exiting."
+          );
+        }
+
+        ds.dispose();
         break;
       }
       default: {
@@ -433,6 +554,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           engine,
           exit: false,
         });
+        ds.dispose();
       }
     }
 
@@ -440,7 +562,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       this.extension.fileWatcher.pause = false;
     }
 
-    if (opts.action !== PluginDoctorActionsEnum.FIND_INCOMPATIBLE_EXTENSIONS) {
+    if (shouldDoctorReloadWorkspaceAfterDoctorAction(opts.action)) {
       await this.reload();
       // Decorations don't auto-update here, I think because the contents of the
       // note haven't updated within VSCode yet. Regenerate the decorations, but

@@ -11,6 +11,7 @@ import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
@@ -42,21 +43,20 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     let value = "";
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    let respNodes: NoteProps[];
+    let respNodes: NoteProps[] = [];
 
-    const { vaults, engine, wsRoot } = getDWorkspace();
+    const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
     if (value === "root") {
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
         fsPath: maybeTextEditor.document.uri.fsPath,
       });
-      const rootNode = NoteUtils.getNoteByFnameV5({
+      const rootNode = NoteUtils.getNoteByFnameFromEngine({
         fname: value,
         vault,
-        notes: engine.notes,
-        wsRoot,
-      }) as NoteProps;
+        engine,
+      });
       if (_.isUndefined(rootNode)) {
         throw new DendronError({ message: "no root node found" });
       }
@@ -65,14 +65,16 @@ export class GoToSiblingCommand extends BasicCommand<
         .concat([rootNode]);
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-      const note = NoteUtils.getNotesByFname({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname: value,
-        notes: engine.notes,
         vault,
-      })[0] as NoteProps;
-      respNodes = engine.notes[note.parent as string].children
-        .map((id) => engine.notes[id])
-        .filter((ent) => _.isUndefined(ent.stub));
+        engine,
+      });
+      if (!_.isUndefined(note)) {
+        respNodes = engine.notes[note.parent as string].children
+          .map((id) => engine.notes[id])
+          .filter((ent) => _.isUndefined(ent.stub));
+      }
     }
 
     if (respNodes.length <= 1) {

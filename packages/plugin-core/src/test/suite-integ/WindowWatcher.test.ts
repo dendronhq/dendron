@@ -6,7 +6,6 @@ import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WindowWatcher } from "../../windowWatcher";
-import { getExtension } from "../../workspace";
 import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
@@ -169,13 +168,13 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             previewProxy,
           });
 
-          getExtension().workspaceWatcher = new WorkspaceWatcher({
+          const workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
             extension,
             windowWatcher,
           });
-          getExtension().workspaceWatcher?.activate(ctx);
+          workspaceWatcher.activate(ctx);
           watcher!.activate();
           // Open a note
           await WSUtils.openNote(
@@ -207,13 +206,14 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension,
             previewProxy,
           });
-          getExtension().workspaceWatcher = new WorkspaceWatcher({
+          const workspaceWatcher = new WorkspaceWatcher({
             schemaSyncService:
               ExtensionProvider.getExtension().schemaSyncService,
             extension,
             windowWatcher,
           });
-          getExtension().workspaceWatcher?.activate(ctx);
+
+          workspaceWatcher.activate(ctx);
 
           watcher!.activate();
           // Open a note

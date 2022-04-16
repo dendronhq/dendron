@@ -10,7 +10,6 @@ import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
 import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
 import { ConvertLinkCommand } from "./ConvertLink";
-import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
@@ -70,6 +69,9 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { OpenBackupCommand } from "./OpenBackupCommand";
+import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
+import { CopyNoteLinkCommand } from "./CopyNoteLink";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -89,6 +91,7 @@ const ALL_COMMANDS = [
   CopyNoteLinkCommand,
   CopyNoteRefCommand,
   CopyNoteURLCommand,
+  CopyToClipboardCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
   CreateSchemaFromHierarchyCommand,
@@ -147,6 +150,7 @@ const ALL_COMMANDS = [
   CreateTaskCommand,
   RegisterNoteTraitCommand,
   CreateNoteWithUserDefinedTrait,
+  OpenBackupCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

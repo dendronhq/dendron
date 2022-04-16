@@ -1,29 +1,22 @@
 import {
-  DendronError,
   DEngineClient,
   DNoteAnchorBasic,
   ErrorFactory,
-  ERROR_STATUS,
   isWebUri,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
 } from "@dendronhq/common-all";
-import { findNonNoteFile } from "@dendronhq/common-server";
+import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { QuickPickUtil } from "../../utils/quickPick";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import open from "open";
-import textextensionslist from "textextensions";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-
-const TEXT_EXTENSIONS: ReadonlySet<string> = new Set(
-  textextensionslist.map((s) => s.toLowerCase())
-);
+import { PluginFileUtils } from "../../utils/files";
 
 export enum LinkType {
   WIKI = "WIKI",
@@ -104,11 +97,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       })) || {};
     if (fullPath) {
       // Found a matching non-note file.
-      // get the extension, or if there is no extension try the file name in case it's Makefile or something well known
-      const extension = (
-        path.extname(fullPath).slice(1, undefined) || path.basename(fullPath)
-      ).toLowerCase();
-      if (TEXT_EXTENSIONS.has(extension)) {
+      if (ExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
         // If it's a text file, open it inside VSCode.
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(fullPath),
@@ -242,13 +231,5 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
 }
 
 export class ShowPreviewAssetOpener {
-  static async openWithDefaultApp(filePath: string) {
-    await open(filePath).catch((err) => {
-      const error = DendronError.createFromStatus({
-        status: ERROR_STATUS.UNKNOWN,
-        innerError: err,
-      });
-      Logger.error({ error });
-    });
-  }
+  static openWithDefaultApp = PluginFileUtils.openWithDefaultApp;
 }

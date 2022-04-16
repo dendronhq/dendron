@@ -7,13 +7,9 @@ import RenameProvider from "../../features/RenameProvider";
 import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 suite("RenameProvider", function () {
-  const ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
   let activeNote: NoteProps;
   let targetNote: NoteProps;
   let editor: vscode.TextEditor;
@@ -22,7 +18,6 @@ suite("RenameProvider", function () {
   describeMultiWS(
     "GIVEN wikilink",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({
@@ -165,7 +160,6 @@ suite("RenameProvider", function () {
   describeMultiWS(
     "GIVEN note references",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({
@@ -301,7 +295,6 @@ suite("RenameProvider", function () {
   describeMultiWS(
     "GIVEN hashtag",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({
@@ -397,7 +390,6 @@ suite("RenameProvider", function () {
   describeMultiWS(
     "GIVEN frontmatter tag",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({
@@ -490,7 +482,6 @@ suite("RenameProvider", function () {
   describeMultiWS(
     "GIVEN usertag",
     {
-      ctx,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({

@@ -66,4 +66,4 @@ Add any other context about the problem here.
 
 ## Dendron Log file
 
-Please attach the output of `> Dev:Dendron: Open Logs` here
+Please attach the output of `> Dendron:Dev: Open Logs` here

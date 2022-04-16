@@ -11,7 +11,8 @@ export type EngineSliceState = {
   error: any;
   loading: LoadingStatus;
   currentRequestId: string | undefined;
-} & Partial<DEngineInitPayload> & Pick<DEngineInitPayload, "notes"|"schemas"|"vaults">;
+} & Partial<DEngineInitPayload> &
+  Pick<DEngineInitPayload, "notes" | "schemas" | "vaults">;
 
 export function verifyEngineSliceState(
   opts: Partial<EngineSliceState>
@@ -19,3 +20,13 @@ export function verifyEngineSliceState(
   const engineSliceKeys: (keyof EngineSliceState)[] = ["notes", "config"];
   return _.every(engineSliceKeys, (k) => !_.isUndefined(opts[k]));
 }
+
+export type WorkspaceProps = {
+  url: string;
+  ws: string;
+  theme?: string;
+  /**
+   * workspace loaded through browser
+   */
+  browser?: boolean;
+};

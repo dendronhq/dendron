@@ -238,7 +238,7 @@ export class MoveHeaderCommand extends BasicCommand<
         logger: this.L,
         onDone: (event: HistoryEvent) => {
           const data = event.data as NoteLookupProviderSuccessResp;
-          const quickpick: DendronQuickPickerV2 = lc.quickpick;
+          const quickpick: DendronQuickPickerV2 = lc.quickPick;
           const dest = this.prepareDestination({
             engine,
             quickpick,

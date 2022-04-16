@@ -100,6 +100,18 @@ describe(`NoteUtils tests:`, () => {
       );
     });
   });
+
+  describe("WHEN generating note titles with the full hierarchy format", () => {
+    test("THEN title is formatted correctly for single level hierarchy note", () => {
+      expect(NoteUtils.genTitleFromFullFname("foo")).toEqual("Foo");
+    });
+
+    test("THEN title is formatted correctly for multi-level hierarchy note", () => {
+      expect(NoteUtils.genTitleFromFullFname("foo.bar.test")).toEqual(
+        "Foo Bar Test"
+      );
+    });
+  });
 });
 
 describe(`SchemaUtil tests:`, () => {

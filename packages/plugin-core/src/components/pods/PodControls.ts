@@ -7,6 +7,7 @@ import {
   ExternalService,
   ExternalTarget,
   PodExportScope,
+  PodUtils,
   PodV2ConfigManager,
   PodV2Types,
 } from "@dendronhq/pods-core";
@@ -210,7 +211,8 @@ export class PodUIControls {
   public static async promptForExternalServiceConnectionOrNew<
     T extends ExternalTarget
   >(connectionType: ExternalService): Promise<undefined | T> {
-    const mngr = new ExternalConnectionManager(getExtension().podsDir);
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const mngr = new ExternalConnectionManager(PodUtils.getPodDir({ wsRoot }));
 
     const existingConnections = await mngr.getAllConfigsByType(connectionType);
 
@@ -530,5 +532,23 @@ export class PodUIControls {
       default:
         assertUnreachable(type);
     }
+  }
+
+  /**
+   * Prompt user to select custom pod Id
+   */
+  public static async promptToSelectCustomPodId(): Promise<string | undefined> {
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configs = PodV2ConfigManager.getAllPodConfigs(
+      path.join(PodUtils.getPodDir({ wsRoot }), "custom")
+    );
+    const items = configs.map<QuickPickItem>((value) => {
+      return { label: value.podId, description: value.podType };
+    });
+    const podIdQuickPick = await VSCodeUtils.showQuickPick(items, {
+      title: "Pick a pod configuration Id",
+      ignoreFocusOut: true,
+    });
+    return podIdQuickPick?.label;
   }
 }

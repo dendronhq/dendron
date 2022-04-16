@@ -1,13 +1,13 @@
 /* eslint-disable no-dupe-class-members */
 import {
   DendronError,
-  DendronTreeViewKey,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DNoteLoc,
   DVault,
+  FuseEngine,
   NoteProps,
   NoteUtils,
   OrderedMatcher,
@@ -19,21 +19,20 @@ import { vault2Path } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _, { orderBy } from "lodash";
 import path from "path";
+import stringSimilarity from "string-similarity";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
-import { LookupView } from "../../views/LookupView";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getButtonCategory } from "./buttons";
-import { DendronBtn } from "./ButtonTypes";
+import { DendronBtn, getButtonCategory } from "./ButtonTypes";
 import {
   CREATE_NEW_DETAIL_LIST,
-  CREATE_NEW_NOTE_DETAIL,
   CREATE_NEW_LABEL,
+  CREATE_NEW_NOTE_DETAIL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { OnAcceptHook } from "./LookupProviderV3Interface";
 import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
+import { OnAcceptHook } from "./LookupProviderV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -259,17 +258,6 @@ export class PickerUtilsV2 {
       ...opts,
       label: opts.fname,
     };
-  }
-
-  static dumpPicker(picker: DendronQuickPickerV2) {
-    const activeItems = picker.activeItems.map((ent) =>
-      NoteUtils.toLogObj(ent)
-    );
-    const selectedItems = picker.selectedItems.map((ent) =>
-      NoteUtils.toLogObj(ent)
-    );
-    const value = picker.value;
-    return { activeItems, selectedItems, value };
   }
 
   static getValue(picker: DendronQuickPickerV2) {
@@ -640,48 +628,6 @@ export class PickerUtilsV2 {
     return vaultSuggestions;
   }
 
-  /**
-   * Update button props by value
-   * @param opts
-   */
-  static refreshButtons(opts: {
-    quickpick: DendronQuickPickerV2;
-    buttons: DendronBtn[];
-    buttonsPrev: DendronBtn[];
-  }) {
-    opts.buttonsPrev = opts.quickpick.buttons.map((b: DendronBtn) => b.clone());
-    opts.quickpick.buttons = opts.buttons;
-  }
-
-  /**
-   * Toggle all button enablement effects
-   * @param opts
-   */
-  static async refreshPickerBehavior(opts: {
-    quickpick: DendronQuickPickerV2;
-    buttons: DendronBtn[];
-  }) {
-    const buttonsEnabled = _.filter(opts.buttons, { pressed: true });
-    const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
-    // call onDisable first so that
-    // they don't modify state of the quickpick after onEnable.
-    await Promise.all(
-      buttonsDisabled.map((bt) => {
-        return bt.onDisable({ quickPick: opts.quickpick });
-      })
-    );
-    await Promise.all(
-      buttonsEnabled.map((bt) => {
-        return bt.onEnable({ quickPick: opts.quickpick });
-      })
-    );
-
-    const lookupView = ExtensionProvider.getTreeView(
-      DendronTreeViewKey.LOOKUP_VIEW
-    ) as LookupView;
-    lookupView.refresh({ buttons: opts.quickpick.buttons });
-  }
-
   static resetPaginationOpts(picker: DendronQuickPickerV2) {
     delete picker.moreResults;
     delete picker.offset;
@@ -813,3 +759,49 @@ export const filterPickerResults = ({
 
   return itemsToFilter;
 };
+
+/** This function presumes that 'CreateNew' should be shown and determines whether
+ *  CreateNew should be at the top of the look up results or not. */
+export function shouldBubbleUpCreateNew({
+  numberOfExactMatches,
+  querystring,
+  bubbleUpCreateNew,
+}: {
+  numberOfExactMatches: number;
+  querystring: string;
+  bubbleUpCreateNew?: boolean;
+}) {
+  // We don't want to bubble up create new if there is an exact match since
+  // vast majority of times if there is an exact match user wants to navigate to it
+  // rather than create a new file with exact same file name in different vault.
+  const noExactMatches = numberOfExactMatches === 0;
+
+  // Note: one of the special characters is space/' ' which for now we want to allow
+  // users to make the files with ' ' in them but we won't bubble up the create new
+  // option for the special characters, including space. The more contentious part
+  // about previous/current behavior is that we allow creation of files with
+  // characters like '$' which FuseJS will not match (Meaning '$' will NOT match 'hi$world').
+  const noSpecialQueryChars =
+    !FuseEngine.doesContainSpecialQueryChars(querystring);
+
+  if (_.isUndefined(bubbleUpCreateNew)) bubbleUpCreateNew = true;
+
+  return noSpecialQueryChars && noExactMatches && bubbleUpCreateNew;
+}
+
+/**
+ * Sorts the given candidates notes by similarity to the query string in
+ * descending order (the most similar come first) */
+export function sortBySimilarity(candidates: NoteProps[], query: string) {
+  return (
+    candidates
+      // To avoid duplicate similarity score calculation we will first map
+      // to have the similarity score cached and then sort using cached value.
+      .map((cand) => ({
+        cand,
+        similarityScore: stringSimilarity.compareTwoStrings(cand.fname, query),
+      }))
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .map((v) => v.cand)
+  );
+}

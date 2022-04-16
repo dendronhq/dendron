@@ -1,7 +1,7 @@
 import {
   DMessageEnum,
   GraphViewMessage,
-  GraphViewMessageType,
+  GraphViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -46,7 +46,7 @@ export class SchemaGraphViewFactory {
       Logger.debug({ ctx, msgType: msg.type });
 
       switch (msg.type) {
-        case GraphViewMessageType.onSelect: {
+        case GraphViewMessageEnum.onSelect: {
           const engine = ext.getEngine();
           const schema = engine.schemas[msg.data.id];
 
@@ -85,7 +85,7 @@ export class SchemaGraphViewFactory {
           break;
         }
         // not handled
-        case GraphViewMessageType.onRequestGraphStyle: {
+        case GraphViewMessageEnum.onRequestGraphStyle: {
           break;
         }
         // TODO: these should be handled

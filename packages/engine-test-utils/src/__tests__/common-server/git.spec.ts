@@ -60,7 +60,7 @@ describe("GitUtils", () => {
       ConfigUtils.setGithubProp(config, "editBranch", "main");
       ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
       const note = engine.notes["foo.ch1"];
-      note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHiearchy }}.md";
+      note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHierarchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/foo/ch1.md"
       );

@@ -12,10 +12,10 @@ import DendronCustomHead from "../components/DendronCustomHead";
 import DendronSEO from "../components/DendronSEO";
 import DendronSpinner from "../components/DendronSpinner";
 import { DendronTOC } from "../components/DendronTOC";
-import { useCombinedDispatch, useCombinedSelector } from "../features";
+import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
-import { useDendronRouter, useIsMobile } from "../utils/hooks";
+import { useDendronRouter } from "../utils/hooks";
 
 const { HEADER } = DENDRON_STYLE_CONSTANTS;
 
@@ -49,9 +49,7 @@ export default function Note({
 
   // --- Hooks
   const dispatch = useCombinedDispatch();
-  const engine = useCombinedSelector((state) => state.engine);
   logger.info({ ctx: "enter", id });
-  const { isMobile } = useIsMobile();
 
   // setup body
   React.useEffect(() => {

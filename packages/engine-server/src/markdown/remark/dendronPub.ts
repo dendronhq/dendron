@@ -6,6 +6,7 @@ import {
   isWebUri,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   StatusCodes,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
@@ -42,7 +43,6 @@ import { extendedImage2html } from "./extendedImage";
 import { convertNoteRefASTV2, NoteRefsOptsV2 } from "./noteRefsV2";
 import {
   addError,
-  getNoteOrError,
   hashTag2WikiLinkNoteV4,
   RemarkUtils,
   userTag2WikiLinkNoteV4,
@@ -152,7 +152,19 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = MDUtilsV5.getNoteByFname(proc, { fname });
+      let note;
+
+      // Special Logic for 403 Error Static Page:
+      if (fname === "403") {
+        note = SiteUtils.create403StaticNote({ engine });
+      } else {
+        note = NoteUtils.getNoteByFnameFromEngine({
+          fname,
+          vault,
+          engine,
+        });
+      }
+
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
@@ -218,14 +230,15 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
-          const notes = NoteUtils.getNotesByFname({
+          note = NoteUtils.getNoteByFnameFromEngine({
             fname: valueOrig,
-            notes: engine.notes,
             vault,
+            engine,
           });
-          const out = getNoteOrError(notes, value);
-          error = out.error;
-          note = out.note;
+
+          if (!note) {
+            error = new DendronError({ message: `no note found. ${value}` });
+          }
         }
 
         let color: string | undefined;
@@ -301,26 +314,18 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
-        const maybeFileExtension =
-          _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
-        // in v4, copts.prefix = absUrl + "/" + siteNotesDir + "/";
-        // if v5, copts.prefix = ""
-        let href: string;
-        if (MDUtilsV5.isV5Active(proc)) {
-          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
-            data.anchorHeader ? "#" + data.anchorHeader : ""
-          }`;
-        } else {
-          href = `${copts?.prefix || ""}${value}${maybeFileExtension}${
-            data.anchorHeader ? "#" + data.anchorHeader : ""
-          }`;
-        }
+        const href = SiteUtils.getSiteUrlPathForNote({
+          addPrefix: pOpts.flavor === ProcFlavor.PUBLISHING,
+          pathValue: value,
+          config,
+          pathAnchor: data.anchorHeader,
+        });
         const exists = true;
         // for rehype
         //_node.value = newValue;
         //_node.value = alias;
         _node.data = {
+          vaultName: data.vaultName,
           alias,
           permalink: href,
           exists,
@@ -382,10 +387,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         // no transform
-        if (
-          dest === DendronASTDest.MD_ENHANCED_PREVIEW ||
-          dest === DendronASTDest.MD_REGULAR
-        ) {
+        if (dest !== DendronASTDest.HTML) {
           return;
         }
         const anchorHTML = blockAnchor2html(node as BlockAnchor);

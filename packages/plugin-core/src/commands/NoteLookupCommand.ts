@@ -14,6 +14,10 @@ import {
   VSCodeEvents,
   SchemaTemplate,
   getJournalTitle,
+  LookupSelectionTypeEnum,
+  LookupNoteTypeEnum,
+  LookupNoteType,
+  LookupSelectionType,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -34,15 +38,13 @@ import {
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
-  LookupFilterType,
-  LookupNoteType,
-  LookupNoteTypeEnum,
-  LookupSelectionType,
-  LookupSelectionTypeEnum,
-  LookupSplitType,
-  LookupSplitTypeEnum,
   VaultSelectionMode,
 } from "../components/lookup/types";
+import {
+  LookupSplitType,
+  LookupSplitTypeEnum,
+  LookupFilterType,
+} from "../components/lookup/ButtonTypes";
 import {
   node2Uri,
   OldNewLocation,
@@ -164,6 +166,7 @@ export class NoteLookupCommand
     return this._provider;
   }
 
+  //  ^1h1dr08geo6c
   async onAutoComplete() {
     if (this._quickPick) {
       this._quickPick.value = AutoCompleter.getAutoCompletedValue(
@@ -172,7 +175,6 @@ export class NoteLookupCommand
 
       await this.provider.onUpdatePickerItems({
         picker: this._quickPick,
-        token: this.controller.createCancelSource().token,
       });
     }
   }
@@ -254,6 +256,7 @@ export class NoteLookupCommand
             copts.splitType === LookupSplitTypeEnum.horizontal
           ),
         ],
+        enableLookupView: true,
       });
     }
     this._provider = extension.noteLookupProviderFactory.create("lookup", {
@@ -266,10 +269,6 @@ export class NoteLookupCommand
       lc.fuzzThreshold = copts.fuzzThreshold;
     }
 
-    if (!_.isUndefined(this.controller.view)) {
-      VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, true);
-    }
-
     VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
 
     const { quickpick } = await lc.prepareQuickPick({
@@ -280,7 +279,6 @@ export class NoteLookupCommand
       alwaysShow: true,
       onDidHide: () => {
         VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
-        VSCodeUtils.setContext(DendronContext.SHOULD_SHOW_LOOKUP_VIEW, false);
       },
     });
     this._quickPick = quickpick;
@@ -422,6 +420,10 @@ export class NoteLookupCommand
                 item.traits = [journalTrait];
               }
             }
+          } else if (
+            ConfigUtils.getWorkspace(ws.config).enableFullHierarchyNoteTitle
+          ) {
+            item.title = NoteUtils.genTitleFromFullFname(item.fname);
           }
           return this.acceptItem(item);
         })
@@ -450,7 +452,9 @@ export class NoteLookupCommand
   cleanUp() {
     const ctx = "NoteLookupCommand:cleanup";
     Logger.debug({ ctx, msg: "enter" });
-    this.controller.onHide();
+    if (this._controller) {
+      this._controller.onHide();
+    }
     this.controller = undefined;
     HistoryService.instance().remove("lookup", "lookupProvider");
   }
@@ -490,7 +494,7 @@ export class NoteLookupCommand
     item: NoteQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewItem";
-    const picker = this.controller.quickpick;
+    const picker = this.controller.quickPick;
     const fname = this.getFNameForNewItem(item);
 
     const engine = ExtensionProvider.getEngine();
@@ -619,12 +623,13 @@ export class NoteLookupCommand
    */
   private getFNameForNewItem(item: NoteQuickInput) {
     if (this.isJournalButtonPressed()) {
-      return PickerUtilsV2.getValue(this.controller.quickpick);
+      return PickerUtilsV2.getValue(this.controller.quickPick);
     } else {
       return item.fname;
     }
   }
 
+  //  ^8jd6vr4qcsol
   private async getVaultForNewNote({
     fname,
     picker,
@@ -635,7 +640,7 @@ export class NoteLookupCommand
     const engine = ExtensionProvider.getEngine();
 
     const vaultsWithMatchingFile = new Set(
-      NoteUtils.getNotesByFname({ fname, notes: engine.notes }).map(
+      NoteUtils.getNotesByFnameFromEngine({ fname, engine }).map(
         (n) => n.vault.fsPath
       )
     );
@@ -679,11 +684,7 @@ export class NoteLookupCommand
   }
 
   private isJournalButtonPressed() {
-    const journalBtn = _.find(this.controller.state.buttons, (btn) => {
-      return btn.type === LookupNoteTypeEnum.journal;
-    });
-    const isPressed = journalBtn?.pressed;
-    return isPressed;
+    return this.controller.isJournalButtonPressed();
   }
 
   addAnalyticsPayload(opts?: CommandOpts, resp?: CommandOpts) {

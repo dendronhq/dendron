@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all";
+import { DEngineClient, DVault } from "@dendronhq/common-all";
 import _ from "lodash";
 import { CreateNoteOptsV4, NoteTestUtilsV4 } from "../noteUtils";
 
@@ -50,14 +50,47 @@ export const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     }
     return NoteTestUtilsV4.createNote(_opts);
   };
+
+  const createWithEngineFunc = ({
+    vault,
+    wsRoot,
+    genRandomId,
+    noWrite,
+    body,
+    fname,
+    props,
+    engine,
+  }: CreateNotePresetOptsV4 & { engine: DEngineClient }) => {
+    const _opts: CreateNoteOptsV4 & { engine: DEngineClient } = {
+      ...opts,
+      vault,
+      wsRoot,
+      genRandomId,
+      noWrite,
+      engine,
+    };
+    if (!_.isUndefined(body)) {
+      _opts.body = body;
+    }
+    if (!_.isUndefined(props)) {
+      _opts.props = props;
+    }
+    if (!_.isUndefined(fname)) {
+      _opts.fname = fname;
+    }
+    return NoteTestUtilsV4.createNoteWithEngine(_opts);
+  };
+
   return {
     create: func,
+    createWithEngine: createWithEngineFunc,
     fname: opts.fname,
     selection: opts.selection || SIMPLE_SELECTION,
     body: opts.body,
   };
 };
 
+// presets are documented in [[Presets|dendron://dendron.docs/pkg.common-test-utils.ref.presets]] for easy refeerence
 export const NOTE_PRESETS_V4 = {
   NOTE_EMPTY: CreateNoteFactory({ fname: "empty", body: "" }),
   /**
@@ -87,6 +120,7 @@ export const NOTE_PRESETS_V4 = {
   }),
   // START CHANGE
   /**
+   *  ^5xetq2e7t2z4
    * fname: alpha
    * body: [[beta]]
    */
@@ -140,10 +174,19 @@ export const NOTE_PRESETS_V4 = {
     fname: "fm-variables",
     body: "Title is {{ fm.title }}",
   }),
+  NOTE_WITH_FM_TAG: CreateNoteFactory({
+    fname: "fm-tag",
+    props: {
+      tags: "foo",
+    },
+    body: "",
+  }),
+  //  ^ar2re45pswxu
   NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-note-ref",
     body: "![[simple-note-ref.one]]",
   }),
+  // ^zp9pa2jancj0
   NOTE_WITH_NOTE_REF_SIMPLE_TARGET: CreateNoteFactory({
     fname: "simple-note-ref.one",
     body: ["# Header ", "body text"].join("\n"),
@@ -203,5 +246,20 @@ export const NOTE_PRESETS_V4 = {
   NOTE_WITH_TAG: CreateNoteFactory({
     fname: "footag",
     body: "#foobar",
+  }),
+  NOTE_WITH_LOWER_CASE_TITLE: CreateNoteFactory({
+    fname: "aaron",
+    body: "aaron",
+    props: {
+      title: "aaron",
+    },
+  }),
+  NOTE_WITH_UPPER_CASE_TITLE: CreateNoteFactory({
+    fname: "Aardvark",
+    body: "aardvark",
+  }),
+  NOTE_WITH_UNDERSCORE_TITLE: CreateNoteFactory({
+    fname: "_underscore",
+    body: "underscore",
   }),
 };

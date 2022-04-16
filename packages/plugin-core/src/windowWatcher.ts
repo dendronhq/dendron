@@ -1,19 +1,16 @@
+import { EngagementEvents } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
-import { sentryReportingCallback } from "./utils/analytics";
+import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 
 /**
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
  */
 export class WindowWatcher {
-  private onDidChangeActiveTextEditorHandlers: ((
-    e: TextEditor | undefined
-  ) => void)[] = [];
-
   private _extension: IDendronExtension;
   private _preview: PreviewProxy;
 
@@ -59,14 +56,8 @@ export class WindowWatcher {
     );
   }
 
-  registerActiveTextEditorChangedHandler(
-    handler: (e: TextEditor | undefined) => void
-  ) {
-    this.onDidChangeActiveTextEditorHandlers.push(handler);
-  }
-
   private onDidChangeActiveTextEditor = sentryReportingCallback(
-    (editor: TextEditor | undefined) => {
+    async (editor: TextEditor | undefined) => {
       const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
       if (
         editor &&
@@ -86,12 +77,6 @@ export class WindowWatcher {
         Logger.info({ ctx, editor: uri.fsPath });
         this.triggerUpdateDecorations(editor);
 
-        // other components can register handlers for window watcher
-        // those handlers get called here
-        this.onDidChangeActiveTextEditorHandlers.forEach((value) =>
-          value.call(this, editor)
-        );
-
         // If automatically show preview is enabled, then open the preview
         // whenever text editor changed, as long as it's not already opened:
         if (
@@ -99,11 +84,20 @@ export class WindowWatcher {
             ?.automaticallyShowPreview
         ) {
           if (!this._preview.isOpen()) {
-            this._preview.show();
+            await this._preview.show();
           }
         }
-      } else {
-        Logger.info({ ctx, editor: "undefined" });
+
+        // If the opened note is still the active text editor 5 seconds after
+        // opening, then count it as a valid 'viewed' event
+        setTimeout(() => {
+          if (
+            editor.document.uri.fsPath ===
+            window.activeTextEditor?.document.uri.fsPath
+          ) {
+            AnalyticsUtils.track(EngagementEvents.NoteViewed);
+          }
+        }, 5000);
       }
     }
   );

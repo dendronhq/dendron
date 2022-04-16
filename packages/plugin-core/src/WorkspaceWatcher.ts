@@ -2,7 +2,6 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
-  NoteProps,
   NoteUtils,
   SchemaUtils,
   Time,
@@ -32,6 +31,7 @@ import {
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
+import { TextDocumentService } from "./services/TextDocumentService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -244,9 +244,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  async onWillSaveTextDocument(
-    event: TextDocumentWillSaveEvent
-  ): Promise<{ changes: TextEdit[] }> {
+  onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -302,19 +300,29 @@ export class WorkspaceWatcher {
       fname,
       vault: this._extension.wsUtils.getVaultFromUri(uri),
       engine,
-    }) as NoteProps;
+    });
+
+    // If we can't find the note, don't do anything
+    if (!note) {
+      // Log at info level and not error level for now to reduce Sentry noise
+      Logger.info({
+        ctx,
+        msg: `Note with fname ${fname} not found in engine! Skipping updated field FM modification.`,
+      });
+      return;
+    }
+
+    // Return undefined if document is missing frontmatter
+    if (!TextDocumentService.containsFrontmatter(event.document)) {
+      return;
+    }
 
     const content = event.document.getText();
-    const matchFM = NoteUtils.RE_FM;
-    const matchOuter = content.match(matchFM);
-    if (!matchOuter) {
-      return { changes: [] };
-    }
     const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
 
-    // update the `updated` time in frontmatter
-    if (match && parseInt(match[1], 10) !== note.updated) {
+    // update the `updated` time in frontmatter if it exists and content has changed
+    if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = event.document.positionAt(match.index);
       const endPos = event.document.positionAt(match.index + match[0].length);
@@ -326,7 +334,6 @@ export class WorkspaceWatcher {
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
-        await engine.updateNote(note);
         return resolve(changes);
       });
       event.waitUntil(p);

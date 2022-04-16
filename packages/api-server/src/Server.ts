@@ -1,4 +1,5 @@
 import {
+  AppNames,
   error2PlainObject,
   getStage,
   StatusCodes,
@@ -7,6 +8,7 @@ import {
   findInParent,
   SegmentClient,
   initializeSentry,
+  NodeJSUtils,
 } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
@@ -24,6 +26,10 @@ import {
   OauthService,
   registerOauthHandler,
 } from "./routes/oauth";
+
+function getSentryRelease() {
+  return `${AppNames.EXPRESS_SERVER}@${NodeJSUtils.getVersionFromPkg()}`;
+}
 
 export function appModule({
   logPath,
@@ -62,7 +68,7 @@ export function appModule({
   app.use(express.static(staticDir));
 
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
-    initializeSentry(getStage());
+    initializeSentry({ environment: getStage(), release: getSentryRelease() });
   }
 
   // Re-use the id for error reporting too:

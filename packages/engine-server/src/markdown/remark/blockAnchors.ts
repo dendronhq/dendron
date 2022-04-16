@@ -81,7 +81,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
       const fullId = node.id;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
-          return fullId;
+          return `^${fullId}`;
         case DendronASTDest.MD_REGULAR:
           // Regular markdown has no concept of anchors, so best to strip it out
           return "";

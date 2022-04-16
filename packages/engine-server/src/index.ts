@@ -23,4 +23,5 @@ export * from "./util/inMemoryNoteCache";
 export * from "./util/noteMetadataUtils";
 export * from "./drivers";
 export * from "./doctor";
+export * from "./backup";
 export * from "./backfillV2";

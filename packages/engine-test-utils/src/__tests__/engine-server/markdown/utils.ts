@@ -160,6 +160,7 @@ type FlavorDict = { [key in ProcFlavor]?: TestFunc | ProcFlavor };
  * Create test cases for different processor destinations
  * - NOTE: by default, assume the `fname` passed to processor is `foo`
  * @param opts.setup: use this to run processor against custom text
+ * @param opts.fname: name to use for note. Default: "foo"
  */
 export const createProcCompileTests = (opts: {
   name: string;

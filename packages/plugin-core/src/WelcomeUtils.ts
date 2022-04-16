@@ -1,6 +1,6 @@
-import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
-import { readMD, resolveTilde } from "@dendronhq/common-server";
-import fs from "fs-extra";
+import { Time, TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
+import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
+import { MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -40,36 +40,21 @@ export function showWelcome(assetUri: vscode.Uri) {
             return;
 
           case "initializeWorkspace": {
-            // Try to put into a Default '~/Dendron' folder first. Only prompt
-            // if that path and the backup path already exist to lower
-            // onboarding friction
-            let wsPath;
-            const wsPathPrimary = path.join(resolveTilde("~"), "Dendron");
-            const wsPathBackup = path.join(
-              resolveTilde("~"),
-              "Dendron-Tutorial"
+            // ^z5hpzc3fdkxs
+            // it takes up to 8s to do a synchronous track call which becomes noticable to the user
+            // instead of doing that, we write the timestamp when the welcome was clicked and async track it during initialization
+            MetadataService.instance().setMeta(
+              "welcomeClickedTime",
+              Time.now().toMillis()
             );
-
-            if (!fs.pathExistsSync(wsPathPrimary)) {
-              wsPath = wsPathPrimary;
-            } else if (!fs.pathExistsSync(wsPathBackup)) {
-              wsPath = wsPathBackup;
-            } else {
-              wsPath = await VSCodeUtils.gatherFolderPath({
-                default: path.join(resolveTilde("~"), "Dendron"),
-                override: {
-                  title: "Path for new Dendron Code Workspace",
-                },
+            // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
+            const { filePath } =
+              FileUtils.genFilePathWithSuffixThatDoesNotExist({
+                fpath: path.join(resolveTilde("~"), "Dendron"),
               });
-            }
-
-            // User didn't pick a path, abort
-            if (!wsPath) {
-              return;
-            }
 
             await new SetupWorkspaceCommand().execute({
-              rootDirRaw: wsPath,
+              rootDirRaw: filePath,
               workspaceInitializer: new TutorialInitializer(),
               workspaceType: WorkspaceType.CODE,
             });

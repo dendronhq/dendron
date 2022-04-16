@@ -38,7 +38,7 @@ hr {
 
 // from from packages/dendron-next-server/assets/themes/light-theme.less
 $layout-header-background: #f5f7f9; // @layout-header-background
-$text-color: "rgba(0,0,0,.85)"; // @text-color
+$text-color: rgba(0, 0, 0, 0.85); // @text-color
 
 .site-layout-sidebar.ant-layout {
   background-color: $layout-header-background;
@@ -110,6 +110,10 @@ $text-color: "rgba(0,0,0,.85)"; // @text-color
       transform: scaleY(1);
       opacity: 1;
     }
+  }
+
+  .ant-menu-title-content a {
+    color: $text-color;
   }
 }
 

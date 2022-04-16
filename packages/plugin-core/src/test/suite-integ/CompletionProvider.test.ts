@@ -8,8 +8,9 @@ import {
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe, before } from "mocha";
+import { before } from "mocha";
 import { CompletionItem, Position, Range } from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import {
   provideBlockCompletionItems,
   provideCompletionItems,
@@ -22,294 +23,301 @@ import {
   describeMultiWS,
   runLegacyMultiWorkspaceTest,
   runTestButSkipForWindows,
-  setupBeforeAfter,
 } from "../testUtilsV3";
 
 suite("completionProvider", function () {
-  const ctx = setupBeforeAfter(this, {});
-
-  describe("wikilink", () => {
-    test("basic", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // Open a note, add [[]]
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[1],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "[[]]");
-          });
-          // have the completion provider complete this wikilink
-          const items = provideCompletionItems(
-            editor.document,
-            new Position(8, 2)
-          );
-          expect(items).toBeTruthy();
-          // Suggested all the notes
-          expect(items!.length).toEqual(7);
-          for (const item of items!) {
-            // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
-              fname: item.label as string,
-              notes: engine.notes,
-            });
-            expect(found.length > 0).toBeTruthy();
-          }
-          // check that same vault items are sorted before other items
-          const sortedItems = _.sortBy(
-            items,
-            (item) => item.sortText || item.label
-          );
-          const testIndex = _.findIndex(
-            sortedItems,
-            (item) => item.label === "test"
-          );
-          expect(testIndex !== -1 && testIndex < 2).toBeTruthy();
-          // Check that xvault links were generated where needed, and only where needed.
-          // Using root notes since they are in every vault.
-          const rootItems = _.filter(items, (item) => item.label === "root");
-          for (const item of rootItems) {
-            if (item.detail === VaultUtils.getName(vaults[1])) {
-              // don't need an xvault link, should be a regular one
-              expect(item.insertText).toEqual(item.label);
-              expect(
-                (item.insertText as string).startsWith(
-                  CONSTANTS.DENDRON_DELIMETER
-                )
-              ).toBeFalsy();
-            } else {
-              // does need an xvault link
-              expect(
-                (item.insertText as string).startsWith(
-                  CONSTANTS.DENDRON_DELIMETER
-                )
-              ).toBeTruthy();
-            }
-          }
-          done();
-        },
-        preSetupHook: async (opts) => {
-          const { wsRoot, vaults } = opts;
-          await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[1],
-            wsRoot,
-          });
-          await ENGINE_HOOKS.setupBasic(opts);
-        },
-      });
-    });
-
-    test("hashtag", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // Open a note, add [[]]
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[1],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "#");
-          });
-          // have the completion provider complete this wikilink
-          const items = provideCompletionItems(
-            editor.document,
-            new Position(8, 1)
-          );
-          expect(items).toBeTruthy();
-          // Suggested all the notes
-          expect(items!.length).toEqual(2);
-          for (const item of items!) {
-            // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
-              fname: `${TAGS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
-            });
-            expect(found.length > 0).toBeTruthy();
-          }
-          done();
-        },
-        preSetupHook: async (opts) => {
-          const { wsRoot, vaults } = opts;
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.foo",
-            vault: vaults[1],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.bar",
-            vault: vaults[1],
-            wsRoot,
-          });
-        },
-      });
-    });
-
-    test("hashtag that's in a sentence", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // Open a note, add [[]]
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[1],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "Lorem ipsum #");
-          });
-          // have the completion provider complete this wikilink
-          const items = provideCompletionItems(
-            editor.document,
-            new Position(8, 13)
-          );
-          expect(items).toBeTruthy();
-          // Suggested all the notes
-          expect(items!.length).toEqual(2);
-          for (const item of items!) {
-            // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
-              fname: `${TAGS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
-            });
-            expect(found.length > 0).toBeTruthy();
-          }
-          done();
-        },
-        preSetupHook: async (opts) => {
-          const { wsRoot, vaults } = opts;
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.foo",
-            vault: vaults[1],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "tags.bar",
-            vault: vaults[1],
-            wsRoot,
-          });
-        },
-      });
-    });
-
-    test("user tag", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // Open a note, add [[]]
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[1],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "@");
-          });
-          // have the completion provider complete this wikilink
-          const items = provideCompletionItems(
-            editor.document,
-            new Position(8, 1)
-          );
-          expect(items).toBeTruthy();
-          // Suggested all the notes
-          expect(items!.length).toEqual(2);
-          for (const item of items!) {
-            // All suggested items exist
-            const found = NoteUtils.getNotesByFname({
-              fname: `${USERS_HIERARCHY}${item.label}`,
-              notes: engine.notes,
-            });
-            expect(found.length > 0).toBeTruthy();
-          }
-          done();
-        },
-        preSetupHook: async (opts) => {
-          const { wsRoot, vaults } = opts;
-          await NoteTestUtilsV4.createNote({
-            fname: "user.foo",
-            vault: vaults[1],
-            wsRoot,
-          });
-          await NoteTestUtilsV4.createNote({
-            fname: "user.bar",
-            vault: vaults[1],
-            wsRoot,
-          });
-        },
-      });
-    });
-
-    describeMultiWS(
-      "WHEN completing a wikilink without closing brackets",
-      { ctx },
-      () => {
-        let items: CompletionItem[] | undefined;
-        before(async () => {
-          const { vaults, wsRoot, engine } = getDWorkspace();
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[1],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
-          });
-          items = provideCompletionItems(editor.document, new Position(8, 10));
+  describeMultiWS(
+    "wikilink",
+    {
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        await NoteTestUtilsV4.createNote({
+          fname: "test",
+          vault: vaults[1],
+          wsRoot,
         });
-
-        test("THEN it finds completions", () => {
-          expect(items?.length).toEqual(3);
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+    },
+    () => {
+      test("THEN provide completions", async () => {
+        const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+        // Open a note, add [[]]
+        await WSUtils.openNote(
+          NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[1],
+            wsRoot,
+            notes: engine.notes,
+          })
+        );
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        await editor.edit((editBuilder) => {
+          editBuilder.insert(new Position(8, 0), "[[]]");
         });
-
-        test("THEN it doesn't erase any text following the wikilink", async () => {
-          for (const item of items!) {
-            const range = item.range! as Range;
-            // Since there's no text, start and end of range is at the same place.
-            // The end doesn't go over the following text to avoid deleting them, since those are not part of the wikilink.
-            expect(range.start.character).toEqual(10);
-            expect(range.end.character).toEqual(10);
+        // have the completion provider complete this wikilink
+        const items = provideCompletionItems(
+          editor.document,
+          new Position(8, 2)
+        );
+        expect(items).toBeTruthy();
+        // Suggested all the notes
+        expect(items!.length).toEqual(7);
+        for (const item of items!) {
+          // All suggested items exist
+          const found = NoteUtils.getNotesByFnameFromEngine({
+            fname: item.label as string,
+            engine,
+          });
+          expect(found.length > 0).toBeTruthy();
+        }
+        // check that same vault items are sorted before other items
+        const sortedItems = _.sortBy(
+          items,
+          (item) => item.sortText || item.label
+        );
+        const testIndex = _.findIndex(
+          sortedItems,
+          (item) => item.label === "test"
+        );
+        expect(testIndex !== -1 && testIndex < 2).toBeTruthy();
+        // Check that xvault links were generated where needed, and only where needed.
+        // Using root notes since they are in every vault.
+        const rootItems = _.filter(items, (item) => item.label === "root");
+        for (const item of rootItems) {
+          if (item.detail === VaultUtils.getName(vaults[1])) {
+            // don't need an xvault link, should be a regular one
+            expect(item.insertText).toEqual(item.label);
+            expect(
+              (item.insertText as string).startsWith(
+                CONSTANTS.DENDRON_DELIMETER
+              )
+            ).toBeFalsy();
+          } else {
+            // does need an xvault link
+            expect(
+              (item.insertText as string).startsWith(
+                CONSTANTS.DENDRON_DELIMETER
+              )
+            ).toBeTruthy();
           }
-        });
+        }
+      });
+    }
+  );
 
-        test("THEN it adds the closing brackets", async () => {
-          for (const item of items!) {
-            expect(item.insertText!.toString().endsWith("]]")).toBeTruthy();
-          }
+  describeMultiWS(
+    "GIVEN hashtag",
+    {
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[1],
+          wsRoot,
         });
-      }
-    );
-  });
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.bar",
+          vault: vaults[1],
+          wsRoot,
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct completion", async () => {
+        const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+        // Open a note, add [[]]
+        await WSUtils.openNote(
+          NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[1],
+            wsRoot,
+            notes: engine.notes,
+          })
+        );
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        await editor.edit((editBuilder) => {
+          editBuilder.insert(new Position(8, 0), "#");
+        });
+        // have the completion provider complete this wikilink
+        const items = provideCompletionItems(
+          editor.document,
+          new Position(8, 1)
+        );
+        expect(items).toBeTruthy();
+        // Suggested all the notes
+        expect(items!.length).toEqual(2);
+        for (const item of items!) {
+          // All suggested items exist
+          const found = NoteUtils.getNotesByFnameFromEngine({
+            fname: `${TAGS_HIERARCHY}${item.label}`,
+            engine,
+          });
+          expect(found.length > 0).toBeTruthy();
+        }
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN hashtag that's in a sentence",
+    {
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.foo",
+          vault: vaults[1],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "tags.bar",
+          vault: vaults[1],
+          wsRoot,
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct completions", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        // Open a note, add [[]]
+        await WSUtils.openNote(
+          NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[1],
+            wsRoot,
+            notes: engine.notes,
+          })
+        );
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        await editor.edit((editBuilder) => {
+          editBuilder.insert(new Position(8, 0), "Lorem ipsum #");
+        });
+        // have the completion provider complete this wikilink
+        const items = provideCompletionItems(
+          editor.document,
+          new Position(8, 13)
+        );
+        expect(items).toBeTruthy();
+        // Suggested all the notes
+        expect(items!.length).toEqual(2);
+        for (const item of items!) {
+          // All suggested items exist
+          const found = NoteUtils.getNotesByFnameFromEngine({
+            fname: `${TAGS_HIERARCHY}${item.label}`,
+            engine,
+          });
+          expect(found.length > 0).toBeTruthy();
+        }
+      });
+    }
+  );
+
+  describeMultiWS(
+    "user tag",
+    {
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        await NoteTestUtilsV4.createNote({
+          fname: "user.foo",
+          vault: vaults[1],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "user.bar",
+          vault: vaults[1],
+          wsRoot,
+        });
+      },
+    },
+    () => {
+      test("THEN provide correct completions", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        // Open a note, add [[]]
+        await WSUtils.openNote(
+          NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[1],
+            wsRoot,
+            notes: engine.notes,
+          })
+        );
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        await editor.edit((editBuilder) => {
+          editBuilder.insert(new Position(8, 0), "@");
+        });
+        // have the completion provider complete this wikilink
+        const items = provideCompletionItems(
+          editor.document,
+          new Position(8, 1)
+        );
+        expect(items).toBeTruthy();
+        // Suggested all the notes
+        expect(items!.length).toEqual(2);
+        for (const item of items!) {
+          // All suggested items exist
+          const found = NoteUtils.getNotesByFnameFromEngine({
+            fname: `${USERS_HIERARCHY}${item.label}`,
+            engine,
+          });
+          expect(found.length > 0).toBeTruthy();
+        }
+      });
+    }
+  );
+
+  describeMultiWS(
+    "WHEN completing a wikilink without closing brackets",
+    {},
+    () => {
+      let items: CompletionItem[] | undefined;
+      before(async () => {
+        const { vaults, wsRoot, engine } = getDWorkspace();
+        await WSUtils.openNote(
+          NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[1],
+            wsRoot,
+            notes: engine.notes,
+          })
+        );
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        await editor.edit((editBuilder) => {
+          editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
+        });
+        items = provideCompletionItems(editor.document, new Position(8, 10));
+      });
+
+      test("THEN it finds completions", () => {
+        expect(items?.length).toEqual(3);
+      });
+
+      test("THEN it doesn't erase any text following the wikilink", async () => {
+        for (const item of items!) {
+          const range = item.range! as Range;
+          // Since there's no text, start and end of range is at the same place.
+          // The end doesn't go over the following text to avoid deleting them, since those are not part of the wikilink.
+          expect(range.start.character).toEqual(10);
+          expect(range.end.character).toEqual(10);
+        }
+      });
+
+      test("THEN it adds the closing brackets", async () => {
+        for (const item of items!) {
+          expect(item.insertText!.toString().endsWith("]]")).toBeTruthy();
+        }
+      });
+    }
+  );
 
   runTestButSkipForWindows()("blocks", () => {
-    test("doesn't provide outside wikilink", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
+    describeMultiWS(
+      "",
+      {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      },
+      () => {
+        test("THEN doesn't provide outside wikilink", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[]]
           await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
@@ -329,16 +337,32 @@ suite("completionProvider", function () {
             new Position(8, 1)
           );
           expect(items).toEqual(undefined);
-          done();
-        },
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      });
-    });
+        });
+      }
+    );
 
-    test("provides paragraphs", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
+    describeMultiWS(
+      "GIVEN paragraphs",
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test",
+            body: [
+              "Et et quam culpa.",
+              "",
+              "Cumque molestiae qui deleniti.",
+              "Eius odit commodi harum.",
+              "",
+              "Sequi ut non delectus tempore.",
+            ].join("\n"),
+          });
+        },
+      },
+      () => {
+        test("THEN provide correct completions", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
@@ -360,8 +384,13 @@ suite("completionProvider", function () {
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(3);
           // check that the
-          done();
-        },
+        });
+      }
+    );
+
+    describeMultiWS(
+      "GIVEN nested list",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           NoteTestUtilsV4.createNote({
             vault: vaults[0],
@@ -370,20 +399,20 @@ suite("completionProvider", function () {
             body: [
               "Et et quam culpa.",
               "",
-              "Cumque molestiae qui deleniti.",
-              "Eius odit commodi harum.",
+              "* Cumque molestiae qui deleniti.",
+              "* Eius odit commodi harum.",
+              "  * Sequi ut non delectus tempore.",
+              "  * In delectus quam sunt unde.",
+              "* Quasi ex debitis aut sed.",
               "",
-              "Sequi ut non delectus tempore.",
+              "Perferendis officiis ut non.",
             ].join("\n"),
           });
         },
-      });
-    });
-
-    test("provides nested lists", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
+      },
+      () => {
+        test("THEN provide correct completions", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
@@ -404,33 +433,13 @@ suite("completionProvider", function () {
           );
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(8);
-          done();
-        },
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "test",
-            body: [
-              "Et et quam culpa.",
-              "",
-              "* Cumque molestiae qui deleniti.",
-              "* Eius odit commodi harum.",
-              "  * Sequi ut non delectus tempore.",
-              "  * In delectus quam sunt unde.",
-              "* Quasi ex debitis aut sed.",
-              "",
-              "Perferendis officiis ut non.",
-            ].join("\n"),
-          });
-        },
-      });
-    });
+        });
+      }
+    );
 
     // TODO: flaky
     test.skip("provides headers for other files", (done) => {
       runLegacyMultiWorkspaceTest({
-        ctx,
         onInit: async ({ wsRoot, vaults, engine }) => {
           // Open a note, add [[test2#]]
           await WSUtils.openNote(
@@ -483,35 +492,9 @@ suite("completionProvider", function () {
       });
     });
 
-    test("provides block anchors for other files", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
-          // Open a note, add [[test2#^]]
-          await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
-          );
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(7, 0), "[[test2#^]]");
-          });
-          // have the completion provider complete this wikilink
-          const items = await provideBlockCompletionItems(
-            editor.document,
-            new Position(7, 3)
-          );
-          expect(items).toBeTruthy();
-          expect(items?.length).toEqual(3);
-          expect(items![0].insertText).toEqual("item-2");
-          expect(items![1].insertText).toEqual("item-4");
-          expect(items![2].insertText).toEqual("last-paragraph");
-          done();
-        },
+    describeMultiWS(
+      "GIVEN other files with block anchors",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           NoteTestUtilsV4.createNote({
             vault: vaults[0],
@@ -536,8 +519,36 @@ suite("completionProvider", function () {
             fname: "test",
           });
         },
-      });
-    });
+      },
+      () => {
+        test("THEN provide correct completions", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          // Open a note, add [[test2#^]]
+          await WSUtils.openNote(
+            NoteUtils.getNoteOrThrow({
+              fname: "test",
+              vault: vaults[0],
+              wsRoot,
+              notes: engine.notes,
+            })
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(7, 0), "[[test2#^]]");
+          });
+          // have the completion provider complete this wikilink
+          const items = await provideBlockCompletionItems(
+            editor.document,
+            new Position(7, 3)
+          );
+          expect(items).toBeTruthy();
+          expect(items?.length).toEqual(3);
+          expect(items![0].insertText).toEqual("item-2");
+          expect(items![1].insertText).toEqual("item-4");
+          expect(items![2].insertText).toEqual("last-paragraph");
+        });
+      }
+    );
 
     function hasNoEditContaining(
       item: CompletionItem,
@@ -551,10 +562,36 @@ suite("completionProvider", function () {
       ).toEqual(undefined);
     }
 
-    test("provides existing anchors", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults, engine }) => {
+    describeMultiWS(
+      "",
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          NoteTestUtilsV4.createNote({
+            vault: vaults[0],
+            wsRoot,
+            fname: "test",
+            body: [
+              "# Et et quam culpa. ^header",
+              "",
+              "Ullam vel eius reiciendis. ^paragraph",
+              "",
+              "* Cumque molestiae qui deleniti. ^item1",
+              "* Eius odit commodi harum. ^item2",
+              "  * Sequi ut non delectus tempore. ^item3",
+              "",
+              "^list",
+              "",
+              "| Sapiente | accusamus |",
+              "|----------|-----------|",
+              "| Laborum  | libero    |",
+              "| Ullam    | optio     | ^table",
+            ].join("\n"),
+          });
+        },
+      },
+      () => {
+        test("THEN provide correct completions", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
             NoteUtils.getNoteOrThrow({
@@ -592,32 +629,8 @@ suite("completionProvider", function () {
           hasNoEditContaining(items![4], "^item3");
           hasNoEditContaining(items![5], "^list");
           hasNoEditContaining(items![6], "^table");
-          done();
-        },
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "test",
-            body: [
-              "# Et et quam culpa. ^header",
-              "",
-              "Ullam vel eius reiciendis. ^paragraph",
-              "",
-              "* Cumque molestiae qui deleniti. ^item1",
-              "* Eius odit commodi harum. ^item2",
-              "  * Sequi ut non delectus tempore. ^item3",
-              "",
-              "^list",
-              "",
-              "| Sapiente | accusamus |",
-              "|----------|-----------|",
-              "| Laborum  | libero    |",
-              "| Ullam    | optio     | ^table",
-            ].join("\n"),
-          });
-        },
-      });
-    });
+        });
+      }
+    );
   });
 });

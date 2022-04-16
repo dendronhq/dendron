@@ -56,10 +56,10 @@ export class ShowPreviewCommand extends InputArgCommand<
       // Used the command bar or keyboard shortcut to open preview for active note
       note = ExtensionProvider.getWSUtils().getActiveNote();
     }
-    this._panel.show();
+    await this._panel.show();
 
     if (note) {
-      this._panel.show(note);
+      await this._panel.show(note);
       return { note };
     } else if (opts?.fsPath) {
       const fsPath = opts.fsPath;
@@ -103,6 +103,6 @@ export class ShowPreviewCommand extends InputArgCommand<
       contents,
     });
 
-    this._panel.show(dummyFileNote);
+    await this._panel.show(dummyFileNote);
   }
 }

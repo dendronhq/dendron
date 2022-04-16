@@ -10,8 +10,8 @@ import {
   getCustomHead,
   getNoteBody,
   getNoteMeta,
-  getNotes,
   getNotePaths,
+  getNotes,
 } from "../../utils/build";
 
 export default DendronNotePage;

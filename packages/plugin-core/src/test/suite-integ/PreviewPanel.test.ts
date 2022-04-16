@@ -4,7 +4,7 @@ import { describe, test, before } from "mocha";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeSingleWS } from "../testUtilsV3";
 import path from "path";
 import { PreviewPanel } from "../../components/views/PreviewPanel";
 
@@ -35,30 +35,39 @@ async function makeTestNote({
 }
 
 suite("GIVEN PreviewPanel", function () {
-  const ctx = setupBeforeAfter(this);
-
-  describeSingleWS(
-    "WHEN opening a note with images",
-    {
-      ctx,
-    },
-    () => {
-      let previewPanel: PreviewPanel;
-      before(async () => {
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        });
-        expect(note).toBeTruthy();
-        await ExtensionProvider.getWSUtils().openNote(note!);
-        previewPanel = PreviewPanelFactory.create(
-          ExtensionProvider.getExtension()
-        ) as PreviewPanel; // overriding the type here to get the function to expose internals
-        previewPanel.show(note);
+  describeSingleWS("WHEN opening a note", {}, () => {
+    let previewPanel: PreviewPanel;
+    before(async () => {
+      const { engine, vaults } = ExtensionProvider.getDWorkspace();
+      const note = NoteUtils.getNoteByFnameFromEngine({
+        fname: "root",
+        vault: vaults[0],
+        engine,
       });
+      expect(note).toBeTruthy();
+      await ExtensionProvider.getWSUtils().openNote(note!);
+      previewPanel = PreviewPanelFactory.create(
+        ExtensionProvider.getExtension()
+      ) as PreviewPanel; // overriding the type here to get the function to expose internals
+      previewPanel.show(note);
+    });
 
+    describe("AND note has block anchor", () => {
+      test("Block anchor is not converted to plain text", async () => {
+        const note = await makeTestNote({
+          previewPanel,
+          body: "Lorem ipsum ^anchor",
+        });
+        expect(
+          await AssertUtils.assertInString({
+            body: note.body,
+            match: ["^anchor"],
+          })
+        ).toBeTruthy();
+      });
+    });
+
+    describe("and note has images", () => {
       describe("AND image starts with a forward slash", () => {
         test("THEN URL is correctly rewritten", async () => {
           const { vaults } = ExtensionProvider.getDWorkspace();
@@ -183,6 +192,6 @@ suite("GIVEN PreviewPanel", function () {
           ).toBeTruthy();
         });
       });
-    }
-  );
+    });
+  });
 });

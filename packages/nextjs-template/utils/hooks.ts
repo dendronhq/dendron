@@ -19,11 +19,14 @@ export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
 export function useDendronRouter() {
   const router = useRouter();
   const query = getNoteRouterQuery(router);
-  const changeActiveNote = (id: string, opts: { noteIndex: NoteProps }) => {
+  const getNoteUrl = (id: string, opts: { noteIndex: NoteProps }) => {
     if (id === opts.noteIndex.id) {
-      return router.push(`/`);
+      return `/`;
     }
-    router.push(`/notes/${id}`);
+    return `/notes/${id}`;
+  };
+  const changeActiveNote = (id: string, opts: { noteIndex: NoteProps }) => {
+    router.push(getNoteUrl(id, opts));
   };
 
   const getActiveNote = ({
@@ -48,6 +51,7 @@ export function useDendronRouter() {
     router,
     query,
     changeActiveNote,
+    getNoteUrl,
     getActiveNote,
     getActiveNoteId,
   };

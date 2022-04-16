@@ -1,23 +1,25 @@
+import { assert, DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import {
+  NoteTestUtilsV4,
+  testAssertsInsideCallback,
+} from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import { PodExportScope } from "@dendronhq/pods-core";
-import { describe, after, beforeEach, afterEach } from "mocha";
+import { after, afterEach, beforeEach, describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
-import { getDWorkspace } from "../../../../workspace";
+import { PodUIControls } from "../../../../components/pods/PodControls";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
+import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { expect } from "../../../testUtilsv2";
 import {
   describeMultiWS,
   describeSingleWS,
-  setupBeforeAfter,
+  waitInMilliseconds,
 } from "../../../testUtilsV3";
-import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { TestExportPodCommand } from "./TestExportCommand";
-import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
-import sinon from "sinon";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
-import { PodUIControls } from "../../../../components/pods/PodControls";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ExtensionProvider } from "../../../../ExtensionProvider";
 
 const stubQuickPick = (vault: DVault) => {
   // @ts-ignore
@@ -27,21 +29,18 @@ const stubQuickPick = (vault: DVault) => {
 };
 
 suite("BaseExportPodCommand", function () {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
-
   describe("GIVEN a BaseExportPodCommand implementation", () => {
     describeSingleWS(
       "WHEN exporting a note scope",
       {
-        ctx,
+        postSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        const cmd = new TestExportPodCommand();
-
         test("THEN note prop should be in the export payload", async () => {
-          const { wsRoot, vaults } = getDWorkspace();
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
@@ -55,13 +54,71 @@ suite("BaseExportPodCommand", function () {
           expect((payload?.payload as NoteProps[])[0].fname).toEqual("root");
           expect((payload?.payload as NoteProps[]).length).toEqual(1);
         });
+
+        test("AND note is dirty, THEN a onDidSaveTextDocument should be fired", (done) => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
+          const engine = ExtensionProvider.getEngine();
+
+          const testNote = engine.notes["foo"];
+          const textToAppend = "BaseExportPodCommand testing";
+          // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+          const disposable = vscode.workspace.onDidSaveTextDocument(
+            (textDocument) => {
+              testAssertsInsideCallback(() => {
+                expect(
+                  textDocument.getText().includes(textToAppend)
+                ).toBeTruthy();
+                expect(textDocument.fileName.endsWith("foo.md")).toBeTruthy();
+                disposable.dispose();
+                cmd.dispose();
+              }, done);
+            }
+          );
+
+          ExtensionProvider.getWSUtils()
+            .openNote(testNote)
+            .then(async (editor) => {
+              editor
+                .edit(async (editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(
+                    new vscode.Position(line, 0),
+                    textToAppend
+                  );
+                })
+                .then(async () => {
+                  cmd.run();
+                });
+            });
+        });
+
+        test("AND note is clean, THEN a onDidSaveTextDocument should not be fired", (done) => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
+          const engine = ExtensionProvider.getEngine();
+
+          const testNote = engine.notes["foo"];
+          vscode.workspace.onDidSaveTextDocument(() => {
+            assert(false, "Callback not expected");
+          });
+
+          ExtensionProvider.getWSUtils()
+            .openNote(testNote)
+            .then(async () => {
+              cmd.run();
+            });
+          // Small sleep to ensure callback doesn't fire.
+          waitInMilliseconds(10).then(() => done());
+        });
       }
     );
 
     describeMultiWS(
       "WHEN exporting a hierarchy scope",
       {
-        ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
           await NoteTestUtilsV4.createNote({
@@ -69,12 +126,13 @@ suite("BaseExportPodCommand", function () {
             vault: vaults[1],
             fname: "foo.test",
           });
-        }
+        },
       },
       () => {
-        const cmd = new TestExportPodCommand();
-
         test("THEN hierarchy note props should be in the export payload AND a note with a hierarchy match but in a different vault should not appear", async () => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
           const payload = await cmd.enrichInputs({
             exportScope: PodExportScope.Hierarchy,
           });
@@ -92,13 +150,13 @@ suite("BaseExportPodCommand", function () {
     describeMultiWS(
       "WHEN exporting a workspace scope",
       {
-        ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        const cmd = new TestExportPodCommand();
-
         test("THEN workspace note props should be in the export payload", async () => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
           const payload = await cmd.enrichInputs({
             exportScope: PodExportScope.Workspace,
           });
@@ -111,7 +169,6 @@ suite("BaseExportPodCommand", function () {
     describeMultiWS(
       "WHEN exporting a lookup based scope",
       {
-        ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           await NoteTestUtilsV4.createNote({
@@ -127,7 +184,6 @@ suite("BaseExportPodCommand", function () {
         },
       },
       () => {
-        const cmd = new TestExportPodCommand();
         let sandbox: sinon.SinonSandbox;
 
         beforeEach(() => {
@@ -139,6 +195,9 @@ suite("BaseExportPodCommand", function () {
         });
 
         test("THEN lookup is prompted and lookup result should be the export payload", async () => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
           const engine = ExtensionProvider.getEngine();
           const { wsRoot, vaults } = engine;
           const testNote1 = NoteUtils.getNoteByFnameV5({
@@ -182,12 +241,13 @@ suite("BaseExportPodCommand", function () {
     describeMultiWS(
       "WHEN exporting a vault scope",
       {
-        ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
       },
       () => {
-        const cmd = new TestExportPodCommand();
         test("THEN quickpick is prompted and selected vault's notes shoul be export payload", async () => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
           const engine = ExtensionProvider.getEngine();
           const { vaults } = engine;
           stubQuickPick(vaults[0]);

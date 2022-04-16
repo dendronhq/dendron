@@ -18,20 +18,22 @@ export const useCurrentTheme = () => {
   );
   React.useEffect(() => {
     // @ts-ignore
-    setCurrentTheme(window.currentTheme);
-  }, [setCurrentTheme, currentTheme]);
+    window.currentTheme && setCurrentTheme(window.currentTheme);
+    // @ts-ignore
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [window.currentTheme]);
   return { currentTheme, setCurrentTheme };
 };
 
 export const useWorkspaceProps = (): [WorkspaceProps] => {
   const elem = window.document.getElementById("root")!;
-  const port = parseInt(elem.getAttribute("data-port")!, 10);
+  const url = elem.getAttribute("data-url")!;
   const ws = elem.getAttribute("data-ws")!;
   const isBrowser = elem.getAttribute("data-browser")! === "true";
   const theme = elem.getAttribute("data-browser")!;
   return [
     {
-      port,
+      url,
       ws,
       browser: isBrowser,
       theme,
@@ -53,7 +55,7 @@ export const useRenderedNoteBody = ({
     id: undefined,
     contentHash: undefined,
   };
-  const noteContent = engine.notesRendered[noteId || ""];
+  const noteContent = noteId ? engine.notesRendered[noteId] : undefined;
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
 
@@ -94,7 +96,10 @@ export const useMermaid = ({
     if (config && ConfigUtils.getPreview(config)?.enableMermaid) {
       mermaid.initialize({
         startOnLoad: true,
-        theme: themeType === "light" ? "forest" : "dark",
+        // Cast here because the type definitions seem to be incorrect. I can't
+        // get a value for the mermaid Theme enum, it's always undefined at
+        // runtime.
+        theme: (themeType === "light" ? "forest" : "dark") as any,
       });
       // use for debugging
       // @ts-ignore

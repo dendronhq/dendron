@@ -1,11 +1,16 @@
 import {
+  APIUtils,
   DendronEditorViewKey,
   DendronTreeViewKey,
   DUtils,
   getStage,
   getWebTreeViewEntry,
 } from "@dendronhq/common-all";
-import { findUpTo, WebViewCommonUtils } from "@dendronhq/common-server";
+import {
+  findUpTo,
+  getDurationMilliseconds,
+  WebViewCommonUtils,
+} from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../dendronExtensionInterface";
@@ -61,7 +66,7 @@ export class WebViewUtils {
    * @param panel: required to convert asset URLs to VSCode Webview Extension format
    * @returns
    */
-  static getWebviewContent({
+  static async getWebviewContent({
     jsSrc,
     cssSrc,
     port,
@@ -89,7 +94,16 @@ export class WebViewUtils {
     const out = WebViewCommonUtils.genVSCodeHTMLIndex({
       jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
       cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
-      port,
+      // Need to use `asExternalUri` to make sure port forwarding is set up
+      // correctly in remote workspaces
+      url: (
+        await vscode.env.asExternalUri(
+          vscode.Uri.parse(APIUtils.getLocalEndpoint(port))
+        )
+      )
+        .toString()
+        // Slice of trailing slash
+        .slice(undefined, -1),
       wsRoot,
       browser: false,
       // acquireVsCodeApi() Documentation: This function can only be invoked once per session.
@@ -100,7 +114,7 @@ export class WebViewUtils {
     });
     return out;
   }
-  static prepareTreeView({
+  static async prepareTreeView({
     ext,
     key,
     webviewView,
@@ -118,7 +132,7 @@ export class WebViewUtils {
       enableCommandUris: false,
       localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
     };
-    const html = WebViewUtils.getWebviewContent({
+    const html = await WebViewUtils.getWebviewContent({
       ...webViewAssets,
       port,
       wsRoot: ext.getEngine().wsRoot,
@@ -187,6 +201,12 @@ export class WebViewUtils {
       function getTheme() {
           // get theme
           let vsTheme = document.body.className;
+          
+          var reduceMotionClassName = "vscode-reduce-motion"
+          if(vsTheme.includes(reduceMotionClassName)) {
+            vsTheme = vsTheme.replace(reduceMotionClassName,"").trim()
+          }
+
           let dendronTheme;
           if (vsTheme.endsWith("dark")) {
               dendronTheme = "dark";
@@ -262,4 +282,42 @@ export class WebViewUtils {
      */
     return WebViewUtils.genHTMLForView({ title, view });
   };
+
+  /** Opens the given panel, and measures how long it stays open.
+   *
+   * Call this function **before** you open the panel with `panel.reveal()`.
+   * This function will open the panel for you.
+   *
+   * @param panel The panel, must not have been opened yet.
+   * @param onClose A callback that will run once the webview is closed. The duration given is in milliseconds.
+   */
+  static openWebviewAndMeasureTimeOpen(
+    panel: vscode.WebviewPanel,
+    onClose: (duration: number) => void
+  ) {
+    let visibleTimeTotal = 0;
+    // We don't get an initial view state change event, so we have to start the timer now
+    let visibleStart: [number, number] | undefined = process.hrtime();
+
+    panel.onDidChangeViewState((event) => {
+      if (event.webviewPanel.visible) {
+        // When the user switches back into the view, we start measuring
+        visibleStart = process.hrtime();
+      } else {
+        // When the user switches away from the view, we stop measuring
+        if (visibleStart)
+          visibleTimeTotal += getDurationMilliseconds(visibleStart);
+        visibleStart = undefined;
+      }
+    });
+
+    panel.onDidDispose(() => {
+      // If the user closes the webview while it's open, the view state change
+      // event is skipped and it immediately calls the dispose event.
+      if (visibleStart)
+        visibleTimeTotal += getDurationMilliseconds(visibleStart);
+
+      onClose(visibleTimeTotal);
+    });
+  }
 }

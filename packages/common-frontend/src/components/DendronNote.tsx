@@ -17,7 +17,7 @@ export const useMermaid = ({
 }) => {
   React.useEffect(() => {
     const logger = createLogger("useMermaid");
-    if (config && ConfigUtils.getProp(config, "mermaid")) {
+    if (config && ConfigUtils.getEnableMermaid(config, true)) {
       // @ts-ignore
       const mermaid = (window as any)._mermaid;
       logger.info("mermaid created");

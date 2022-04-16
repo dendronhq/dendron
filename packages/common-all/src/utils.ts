@@ -6,23 +6,32 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { ERROR_SEVERITY } from "./constants";
-import { DendronError, ErrorMessages } from "./error";
+import { DateTime, LruCache } from ".";
 import { COLORS_LIST } from "./colors";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
-} from "./constants/configs/compat";
+  ERROR_SEVERITY,
+} from "./constants";
+import { DendronError, ErrorMessages } from "./error";
 import {
   DendronSiteConfig,
   DHookDict,
   DVault,
-  NoteProps,
-  SEOProps,
-  NotePropsDict,
   LegacyDuplicateNoteBehavior,
   LegacyHierarchyConfig,
+  NoteChangeEntry,
+  NoteProps,
+  NotePropsDict,
+  SEOProps,
 } from "./types";
+import { GithubConfig } from "./types/configs/publishing/github";
+import {
+  DendronPublishingConfig,
+  DuplicateNoteBehavior,
+  genDefaultPublishingConfig,
+  HierarchyConfig,
+} from "./types/configs/publishing/publishing";
 import { TaskConfig } from "./types/configs/workspace/task";
 import {
   configIsV4,
@@ -42,14 +51,7 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { DateTime, LruCache } from ".";
-import {
-  DendronPublishingConfig,
-  DuplicateNoteBehavior,
-  genDefaultPublishingConfig,
-  HierarchyConfig,
-} from "./types/configs/publishing/publishing";
-import { GithubConfig } from "./types/configs/publishing/github";
+import { VaultUtils } from "./vault";
 
 /**
  * Dendron utilities
@@ -99,6 +101,10 @@ export function isLineAnchor(anchor?: string): boolean {
  */
 export function isNotUndefined<T>(t: T | undefined): t is T {
   return !_.isUndefined(t);
+}
+
+export function isNotNull<T>(t: T | null): t is T {
+  return !_.isNull(t);
 }
 
 /**
@@ -607,6 +613,11 @@ export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
 
+/** Makes not just the top level, but all nested properties optional. */
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export type ConfigVaildationResp = {
   isValid: boolean;
   reason?: "client" | "config";
@@ -976,6 +987,32 @@ export class ConfigUtils {
     }
     return true;
   }
+  static getEnableBackLinks(
+    _config: IntermediateDendronConfig,
+    opts?: { note?: NoteProps; shouldApplyPublishingRules?: boolean }
+  ): boolean {
+    // check if note has override. takes precedence
+    if (
+      opts &&
+      opts.note &&
+      opts.note.config &&
+      opts.note.config.global &&
+      _.isBoolean(opts.note.config.global.enableBackLinks)
+    ) {
+      return opts.note.config.global.enableBackLinks;
+    }
+    // check config value, if enableBacklinks set, then use value set
+    const publishConfig = ConfigUtils.getPublishingConfig(_config);
+    if (
+      ConfigUtils.isDendronPublishingConfig(publishConfig) &&
+      opts?.shouldApplyPublishingRules
+    ) {
+      if (_.isBoolean(publishConfig.enableBackLinks)) {
+        return publishConfig.enableBackLinks;
+      }
+    }
+    return true;
+  }
 
   static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
     return (
@@ -1038,6 +1075,12 @@ export class ConfigUtils {
   ) {
     const path = `publishing.github.${key}`;
     _.set(config, path, value);
+  }
+
+  static isDendronPublishingConfig(
+    config: unknown
+  ): config is DendronPublishingConfig {
+    return _.has(config, "enableBackLinks");
   }
 
   static overridePublishingConfig(
@@ -1109,6 +1152,22 @@ export class ConfigUtils {
 
   static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
     ConfigUtils.setWorkspaceProp(config, "vaults", value);
+  }
+
+  /** Finds the matching vault in the config, and uses the callback to update it. */
+  static updateVault(
+    config: IntermediateDendronConfig,
+    vaultToUpdate: DVault,
+    updateCb: (vault: DVault) => DVault
+  ): void {
+    ConfigUtils.setVaults(
+      config,
+      ConfigUtils.getVaults(config).map((configVault) => {
+        if (!VaultUtils.isEqualV2(vaultToUpdate, configVault))
+          return configVault;
+        return updateCb(configVault);
+      })
+    );
   }
 
   static setNoteLookupProps<K extends keyof NoteLookupConfig>(
@@ -1226,6 +1285,26 @@ export class ConfigUtils {
       return { isValid, minCompatClientVersion, minCompatConfigVersion };
     }
   }
+
+  static detectMissingDefaults(opts: {
+    config: Partial<IntermediateDendronConfig>;
+    defaultConfig?: IntermediateDendronConfig;
+  }): {
+    needsBackfill: boolean;
+    backfilledConfig: IntermediateDendronConfig;
+  } {
+    const { config } = opts;
+    const configDeepCopy = _.cloneDeep(config);
+    let { defaultConfig } = opts;
+    if (defaultConfig === undefined) {
+      defaultConfig = ConfigUtils.genDefaultConfig();
+    }
+    const backfilledConfig = _.defaultsDeep(config, defaultConfig);
+    return {
+      needsBackfill: !_.isEqual(backfilledConfig, configDeepCopy),
+      backfilledConfig,
+    };
+  }
 }
 
 /**
@@ -1285,4 +1364,18 @@ export function getJournalTitle(
   }
 
   return undefined;
+}
+
+/**
+ * Helper function to get a subset of NoteChangeEntry's matching a
+ * particular status from an array
+ * @param entries
+ * @param status
+ * @returns
+ */
+export function extractNoteChangeEntriesByType(
+  entries: NoteChangeEntry[],
+  status: "create" | "delete" | "update"
+): NoteChangeEntry[] {
+  return entries.filter((entry) => entry.status === status);
 }

@@ -5,23 +5,26 @@ import _ from "lodash";
 import path from "path";
 import sinon from "sinon";
 import { VaultConvertCommand } from "../../commands/VaultConvert";
-import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 import fs from "fs-extra";
 import { before, after, describe } from "mocha";
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  FOLDERS,
+  IntermediateDendronConfig,
+  VaultUtils,
+} from "@dendronhq/common-all";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 suite("GIVEN VaultConvert", function () {
-  const ctx = setupBeforeAfter(this, {});
-
   describeMultiWS(
     "WHEN converting a local vault to a remote vault",
-    { ctx, preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
     () => {
       let remote: string;
       before(async () => {
-        const { vaults } = getDWorkspace();
+        const { vaults } = ExtensionProvider.getDWorkspace();
         const cmd = new VaultConvertCommand();
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -38,7 +41,7 @@ suite("GIVEN VaultConvert", function () {
       });
 
       test("THEN updates .gitignore", async () => {
-        const { wsRoot } = getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const contents = await fs.readFile(path.join(wsRoot, ".gitignore"), {
           encoding: "utf-8",
         });
@@ -46,7 +49,7 @@ suite("GIVEN VaultConvert", function () {
       });
 
       test("THEN updates config", async () => {
-        const { wsRoot } = getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
@@ -55,7 +58,7 @@ suite("GIVEN VaultConvert", function () {
       });
 
       test("THEN the folder is a git repository", async () => {
-        const { wsRoot, vaults } = getDWorkspace();
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const git = new Git({ localUrl: path.join(wsRoot, vaults[0].fsPath) });
         expect(await git.getRemote()).toEqual("origin");
         expect(await git.getCurrentBranch()).toBeTruthy();
@@ -63,7 +66,7 @@ suite("GIVEN VaultConvert", function () {
 
       describe("AND converting that back to a local vault", () => {
         before(async () => {
-          const { vaults } = getDWorkspace();
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const cmd = new VaultConvertCommand();
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -75,7 +78,7 @@ suite("GIVEN VaultConvert", function () {
         });
 
         test("THEN updates .gitignore", async () => {
-          const { wsRoot } = getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const contents = await fs.readFile(path.join(wsRoot, ".gitignore"), {
             encoding: "utf-8",
           });
@@ -83,13 +86,142 @@ suite("GIVEN VaultConvert", function () {
         });
 
         test("THEN updates config", async () => {
-          const { wsRoot } = getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
         test("THEN the folder is NOT a git repository", async () => {
-          const { wsRoot, vaults } = getDWorkspace();
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const git = new Git({
+            localUrl: path.join(wsRoot, vaults[0].fsPath),
+          });
+          expect(await git.getRemote()).toBeFalsy();
+        });
+      });
+    }
+  );
+
+  describeMultiWS(
+    "WHEN converting a local vault to a remote vault with self contained vaults enabled",
+    {
+      preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+      modConfigCb: (config) => {
+        config.dev = { enableSelfContainedVaults: true };
+        return config;
+      },
+    },
+    () => {
+      let remote: string;
+      before(async () => {
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        const cmd = new VaultConvertCommand();
+        sinon.stub(cmd, "gatherType").resolves("remote");
+        sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+        sinon.stub(cmd, "promptForFolderMove").resolves(true);
+
+        // Create a remote repository to be the upstream
+        remote = tmpDir().name;
+        await GitTestUtils.remoteCreate(remote);
+        sinon.stub(cmd, "gatherRemoteURL").resolves(remote);
+
+        await cmd.run();
+      });
+      after(async () => {
+        sinon.restore();
+      });
+
+      test("THEN updates .gitignore", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const contents = await fs.readFile(path.join(wsRoot, ".gitignore"), {
+          encoding: "utf-8",
+        });
+        // Should have moved under dependencies
+        expect(
+          contents.match(
+            new RegExp(
+              `^dependencies${_.escapeRegExp(path.sep)}${path.basename(
+                remote
+              )}`,
+              "m"
+            )
+          )
+        ).toBeTruthy();
+      });
+
+      test("THEN updates config", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
+          type: "git",
+          url: remote,
+        });
+      });
+
+      test("THEN the vault is moved to the right folder", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        expect(
+          await fs.pathExists(
+            path.join(wsRoot, VaultUtils.getRelPath(vault), "root.md")
+          )
+        ).toBeTruthy();
+        expect(vault.fsPath.startsWith(FOLDERS.DEPENDENCIES)).toBeTruthy();
+        expect(vault.fsPath.endsWith(path.basename(remote))).toBeTruthy();
+      });
+
+      test("THEN the folder is a git repository", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const git = new Git({ localUrl: path.join(wsRoot, vaults[0].fsPath) });
+        expect(await git.getRemote()).toEqual("origin");
+        expect(await git.getCurrentBranch()).toBeTruthy();
+      });
+
+      describe("AND converting that back to a local vault", () => {
+        before(async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const cmd = new VaultConvertCommand();
+          sinon.stub(cmd, "gatherType").resolves("local");
+          sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
+          sinon.stub(cmd, "promptForFolderMove").resolves(true);
+
+          await cmd.run();
+        });
+        after(async () => {
+          sinon.restore();
+        });
+
+        test("THEN updates .gitignore", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const contents = await fs.readFile(path.join(wsRoot, ".gitignore"), {
+            encoding: "utf-8",
+          });
+          expect(contents.match(/^dependencies/m)).toBeFalsy();
+        });
+
+        test("THEN updates config", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
+        });
+
+        test("THEN the vault is moved to the right folder", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[0];
+          expect(
+            await fs.pathExists(
+              path.join(wsRoot, VaultUtils.getRelPath(vault), "root.md")
+            )
+          ).toBeTruthy();
+          expect(
+            vault.fsPath.startsWith(
+              path.join(FOLDERS.DEPENDENCIES, FOLDERS.LOCAL_DEPENDENCY)
+            )
+          ).toBeTruthy();
+        });
+
+        test("THEN the folder is NOT a git repository", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const git = new Git({
             localUrl: path.join(wsRoot, vaults[0].fsPath),
           });
@@ -101,10 +233,10 @@ suite("GIVEN VaultConvert", function () {
 
   describeMultiWS(
     "WHEN given a bad remote URL",
-    { ctx, preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
     () => {
       before(async () => {
-        const { vaults } = getDWorkspace();
+        const { vaults } = ExtensionProvider.getDWorkspace();
         const cmd = new VaultConvertCommand();
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -121,14 +253,14 @@ suite("GIVEN VaultConvert", function () {
 
       test("THEN conversion fails mid-operation", async () => {
         // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
-        const { wsRoot } = getDWorkspace();
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
       });
 
       describe("AND running the conversion command again", () => {
         before(async () => {
-          const { vaults } = getDWorkspace();
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const cmd = new VaultConvertCommand();
           sinon.stub(cmd, "gatherType").resolves("remote");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -146,7 +278,7 @@ suite("GIVEN VaultConvert", function () {
 
         test("THEN the conversion completes", async () => {
           // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
-          const { wsRoot } = getDWorkspace();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeTruthy();
         });

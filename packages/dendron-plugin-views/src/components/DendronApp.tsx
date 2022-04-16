@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  GraphViewMessageEnum,
   LookupViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -96,6 +97,13 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
+      case GraphViewMessageEnum.onGraphStyleLoad: {
+        const cmsg = msg;
+        const { styles } = cmsg.data;
+        logger.info({ ctx, styles, msg: "styles" });
+        ideDispatch(ideSlice.actions.setGraphStyles(styles));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;
@@ -111,8 +119,10 @@ export type DendronAppProps = {
 };
 
 function DendronApp(props: DendronAppProps) {
-  const opts = _.defaults(props.opts, { padding: "33px" });
-
+  // fix regression for scroll in graph view
+  const opts = _.defaults(props.opts, {
+    padding: props.Component.name === "DendronGraphPanel" ? "0px" : "33px",
+  });
   return (
     <Provider store={combinedStore}>
       <Layout style={{ padding: opts.padding }}>

@@ -23,7 +23,7 @@ export class WebViewCommonUtils {
   static genVSCodeHTMLIndex = ({
     jsSrc,
     cssSrc,
-    port,
+    url,
     wsRoot,
     browser,
     acquireVsCodeApi,
@@ -32,7 +32,7 @@ export class WebViewCommonUtils {
   }: {
     jsSrc: string;
     cssSrc: string;
-    port: number;
+    url: string;
     wsRoot: string;
     browser: boolean;
     acquireVsCodeApi: string;
@@ -84,6 +84,13 @@ export class WebViewCommonUtils {
         if (newTheme === 'high-contrast') {
             newTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
         }
+        // this class is introduced with new vscode setting reduce motion  to reduce the amount of motion
+        // in the window.
+        var reduceMotionClassName = "vscode-reduce-motion"
+        if(newTheme.includes(reduceMotionClassName)) {
+          newTheme = newTheme.replace(reduceMotionClassName,"").trim()
+        }
+
         // be bale to get current theme using JS;
         window.currentTheme = newTheme;
 
@@ -202,7 +209,7 @@ export class WebViewCommonUtils {
     <body onload="onload()" class="vscode-${initialTheme || "light"}">
       <div id="main-content-wrap" class="main-content-wrap">
         <div id="main-content" class="main-content">
-          <div id="root" data-port="${port}" data-ws="${wsRoot}" data-browser="${browser}"></div>
+          <div id="root" data-url="${url}" data-ws="${wsRoot}" data-browser="${browser}"></div>
         </div>
       </div>
 

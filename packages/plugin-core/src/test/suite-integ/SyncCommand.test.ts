@@ -3,10 +3,15 @@ import {
   DVault,
   ConfigUtils,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { Git, SyncActionStatus } from "@dendronhq/engine-server";
+import {
+  Git,
+  SyncActionStatus,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -20,6 +25,7 @@ import {
 } from "../testUtilsV3";
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import path from "path";
 
 suite("workspace sync command", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -32,9 +38,9 @@ suite("workspace sync command", function () {
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out;
           // Nothing should have happened since there is no repository
-          expect(SyncCommand.countDone(committed)).toEqual(0);
-          expect(SyncCommand.countDone(pulled)).toEqual(0);
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           done();
         },
         ctx,
@@ -63,11 +69,11 @@ suite("workspace sync command", function () {
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out;
           // The note created above should get committed
-          expect(SyncCommand.countDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
           // Nothing to pull or push since we don't have a remote set up
-          expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
           expect(pulled[0].status).toEqual(SyncActionStatus.NO_REMOTE);
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.NO_REMOTE);
           done();
         },
@@ -94,13 +100,13 @@ suite("workspace sync command", function () {
           const { committed, pulled, pushed } = out;
           // Should not attempt to commit since this is technically a workspace vault, and the default is noCommit
           // (the repo is at the root of the workspace, vault doesn't have it's own repo)
-          expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
           expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should attempt to pull since the remote is set up
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
           // Should not push since there are no comitted changes
           // (no commit since createRepo..., unlike other tests where changeConfig creates a commit)
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
           done();
         },
@@ -140,11 +146,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // Nothing should get committed since "noCommit" is used
-          expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
           expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should pull and push since configuration allows it
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(SyncCommand.countDone(pushed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
           done();
         },
       });
@@ -172,11 +178,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // The note added should get committed
-          expect(SyncCommand.countDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
           // Should try to pull since allowed by configuration
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
           // Should not push since "noPush" is used
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
@@ -205,11 +211,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // Nothing should be done since "skip" is used
-          expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
           expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
-          expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
           expect(pulled[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
@@ -238,9 +244,9 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out as any;
           // Should try doing everything since the config requires so
-          expect(SyncCommand.countDone(committed)).toEqual(1);
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(SyncCommand.countDone(pushed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
           done();
         },
       });
@@ -270,11 +276,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // Nothing should get committed since "noCommit" is used
-          expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
           expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           // Should pull and push since configuration allows it
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(SyncCommand.countDone(pushed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
           done();
         },
       });
@@ -302,11 +308,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // The note added should get committed
-          expect(SyncCommand.countDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
           // Should try to pull since allowed by configuration
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
           // Should not push since "noPush" is used
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
@@ -335,11 +341,11 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // Nothing should be done since "skip" is used
-          expect(SyncCommand.countDone(committed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
           expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
-          expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
           expect(pulled[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
           done();
         },
@@ -368,9 +374,9 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // Should try doing everything since the config requires so
-          expect(SyncCommand.countDone(committed)).toEqual(1);
-          expect(SyncCommand.countDone(pulled)).toEqual(1);
-          expect(SyncCommand.countDone(pushed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
           done();
         },
       });
@@ -401,12 +407,12 @@ suite("workspace sync command", function () {
           const out = await new SyncCommand().execute();
           const { committed, pulled, pushed } = out;
           // Should try to commit since there are changes
-          expect(SyncCommand.countDone(committed)).toEqual(1);
+          expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
           // Won't be able to pull or push because new branch has no upstream.
           // This should be gracefully handled.
-          expect(SyncCommand.countDone(pulled)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
           expect(pulled[0].status).toEqual(SyncActionStatus.NO_UPSTREAM);
-          expect(SyncCommand.countDone(pushed)).toEqual(0);
+          expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
           expect(pushed[0].status).toEqual(SyncActionStatus.NO_UPSTREAM);
           done();
         },
@@ -437,12 +443,12 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
         // Should still pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
         // nothing to push either
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
@@ -493,10 +499,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -508,7 +514,7 @@ suite("workspace sync command", function () {
         });
         GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" });
         // nothing to push
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
@@ -559,10 +565,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -577,7 +583,7 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         // nothing to push
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
@@ -645,9 +651,9 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         // Should still stash and pull, but notice the merge conflict after restoring
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(
           SyncActionStatus.MERGE_CONFLICT_AFTER_RESTORE
         );
@@ -673,7 +679,7 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         // nothing to push
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
       });
     }
@@ -744,10 +750,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -776,7 +782,7 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         // nothing to push
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
       });
     }
@@ -851,10 +857,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
         // the changes, tracked and untracked, should be restored after the pull
         await FileTestUtils.assertInFile({
           fpath,
@@ -884,7 +890,7 @@ suite("workspace sync command", function () {
         expect(
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
-        expect(SyncCommand.countDone(pushed)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
       });
     }
   );
@@ -945,10 +951,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(
           SyncActionStatus.MERGE_CONFLICT_AFTER_PULL
         );
@@ -970,7 +976,7 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         // can't push because there's a merge conflict that happened during the pull
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
       });
     }
@@ -1035,10 +1041,10 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip committing since it's set to no commit
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.SKIP_CONFIG);
         // Should still stash and pull
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(
           SyncActionStatus.MERGE_CONFLICT_LOSES_CHANGES
         );
@@ -1064,7 +1070,7 @@ suite("workspace sync command", function () {
           await GitTestUtils.hasChanges(wsRoot, { untrackedFiles: "no" })
         ).toBeTruthy();
         // can't push because we couldn't pull the changes
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.UNPULLED_CHANGES);
       });
     }
@@ -1129,11 +1135,11 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip everything since there's an ongoing rebase the user needs to resolve
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
       });
     }
@@ -1200,13 +1206,13 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // Should skip everything since there's an ongoing rebase the user needs to resolve
-        expect(SyncCommand.countDone(committed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(
           SyncActionStatus.REBASE_IN_PROGRESS
         );
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(SyncActionStatus.REBASE_IN_PROGRESS);
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.REBASE_IN_PROGRESS);
       });
     }
@@ -1232,12 +1238,67 @@ suite("workspace sync command", function () {
         const out = await new SyncCommand().execute();
         const { committed, pulled, pushed } = out;
         // There are some changes to commit
-        expect(SyncCommand.countDone(committed)).toEqual(1);
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
         // Should fail to push or pull
-        expect(SyncCommand.countDone(pulled)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(0);
         expect(pulled[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
-        expect(SyncCommand.countDone(pushed)).toEqual(0);
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(0);
         expect(pushed[0].status).toEqual(SyncActionStatus.BAD_REMOTE);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN using a self contained vault, it is treated as a regular vault",
+    {
+      ctx,
+      selfContained: true,
+      modConfigCb: (config) => {
+        ConfigUtils.setWorkspaceProp(config, "workspaceVaultSyncMode", "skip");
+        return config;
+      },
+    },
+    () => {
+      test("THEN Dendron stashes and restores the changes", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const remoteDir = tmpDir().name;
+        const vault = vaults[0];
+
+        await GitTestUtils.createRepoForRemoteVault({
+          wsRoot,
+          vault,
+          remoteDir,
+        });
+
+        // Add the vault to a repo
+        const git = new Git({
+          localUrl: path.join(wsRoot, VaultUtils.getRelPath(vault)),
+        });
+        await git.addAll();
+        await git.commit({ msg: "add all and commit" });
+        await git.push();
+        // Update root note so there are tracked changes
+        const fpath = NoteUtils.getFullPath({
+          note: NoteUtils.getNoteByFnameFromEngine({
+            fname: "root",
+            vault: vaults[0],
+            engine,
+          })!,
+          wsRoot,
+        });
+        await fs.appendFile(fpath, "Similique non atque");
+
+        const out = await new SyncCommand().execute();
+        const { committed, pulled, pushed } = out;
+        // Should use the vault default and sync everthing, and ignore the workspace default config
+        expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(1);
+        expect(committed[0].status).toEqual(SyncActionStatus.DONE);
+        // Should pull
+        expect(WorkspaceUtils.getCountForStatusDone(pulled)).toEqual(1);
+        expect(pulled[0].status).toEqual(SyncActionStatus.DONE);
+        // Should push
+        expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
+        expect(pushed[0].status).toEqual(SyncActionStatus.DONE);
       });
     }
   );

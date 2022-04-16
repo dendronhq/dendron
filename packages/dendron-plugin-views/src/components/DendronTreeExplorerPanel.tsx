@@ -8,6 +8,7 @@ import {
   createLogger,
   TreeViewUtils,
   engineHooks,
+  engineSliceUtils,
 } from "@dendronhq/common-frontend";
 import { Spin, Tree, TreeProps } from "antd";
 import _ from "lodash";
@@ -18,6 +19,8 @@ import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
+
+/** @deprecated: Tree view v2 is deprecated */
 const DendronTreeExplorerPanel: DendronComponent = (props) => {
   const logger = createLogger("DendronTreeExplorerPanel");
   const engine = props.engine;
@@ -43,7 +46,7 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
 
   // update active notes in tree
   React.useEffect(() => {
-    if (!_.isUndefined(noteActive)) {
+    if (!_.isUndefined(noteActive) && engineSliceUtils.hasInitialized(engine)) {
       logger.info({ msg: "calcActiveNoteIds:pre" });
       const _activeNoteIds = TreeViewUtils.getAllParents({
         notes,
@@ -54,11 +57,17 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
       logger.info({ msg: "setActiveNoteIds:post" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numNotes, noteActive?.id]);
+  }, [engine.loading, numNotes, noteActive?.id]);
 
   // calculate the tree data
   React.useEffect(() => {
     logger.info({ msg: "calcRoots:pre", numNotes, notePrevId: notePrev?.id });
+    if (!engineSliceUtils.hasInitialized(engine)) {
+      logger.info({
+        msg: "calcRoots:engine not yet initialized",
+      });
+      return;
+    }
     // Avoid recomputing if it's just that the active note changed
     if (
       roots.length !== 0 &&
@@ -89,6 +98,7 @@ const DendronTreeExplorerPanel: DendronComponent = (props) => {
     logger.info({ msg: "calcRoots:post:setRoots", numNotes });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    engine.loading,
     // update if there are new notes
     numNotes,
     // update if something that may reorder the active note changes

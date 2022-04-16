@@ -1,4 +1,7 @@
-import { ContextualUIEvents } from "@dendronhq/common-all";
+import {
+  ContextualUIEvents,
+  LookupSelectionTypeEnum,
+} from "@dendronhq/common-all";
 import {
   BAD_FRONTMATTER_CODE,
   DoctorActionsEnum,
@@ -23,7 +26,6 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { NoteLookupCommand } from "../commands/NoteLookupCommand";
 import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
-import { LookupSelectionTypeEnum } from "../components/lookup/types";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";

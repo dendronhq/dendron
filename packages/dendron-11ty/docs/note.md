@@ -1,3 +1,0 @@
----
-layout: includes/note.liquid
----

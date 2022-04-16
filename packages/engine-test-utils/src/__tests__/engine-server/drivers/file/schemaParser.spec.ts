@@ -30,14 +30,15 @@ async function parseSchemas(
       });
       const vault = vaults[0];
       const vpath = vault2Path({ vault, wsRoot });
-      const schemaFiles = getAllFiles({
+      const schemaFiles = await getAllFiles({
         root: vpath,
         include: ["*.schema.yml"],
-      }) as string[];
+      });
+      expect(schemaFiles.data).toBeTruthy();
 
-      payload = await parser.parse(schemaFiles, vault);
+      payload = await parser.parse(schemaFiles.data!, vault);
     },
-    { expect, preSetupHook: preSetupHook }
+    { expect, preSetupHook }
   );
 
   // @ts-ignore
@@ -184,23 +185,23 @@ describe(`schemaParser tests:`, () => {
       });
 
       it(`THEN first link to grandchild, grandchild stays as is`, () => {
-        let ch1 = schemaGroup.schemas["ch1"];
-        let gch = schemaGroup.schemas[ch1.children[0]];
+        const ch1 = schemaGroup.schemas["ch1"];
+        const gch = schemaGroup.schemas[ch1.children[0]];
 
         expect(gch.id).toEqual("gch");
         expect(gch.parent).toEqual("ch1");
       });
 
       it(`THEN grandchild from second first link has expected template.`, () => {
-        let ch1 = schemaGroup.schemas["ch1"];
-        let gch = schemaGroup.schemas[ch1.children[0]];
+        const ch1 = schemaGroup.schemas["ch1"];
+        const gch = schemaGroup.schemas[ch1.children[0]];
 
         expect(gch.data.template?.id).toEqual("template.test");
       });
 
       it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
-        let ch2 = schemaGroup.schemas["ch2"];
-        let gch = schemaGroup.schemas[ch2.children[0]];
+        const ch2 = schemaGroup.schemas["ch2"];
+        const gch = schemaGroup.schemas[ch2.children[0]];
 
         expect(gch.id.startsWith("gch_")).toBeTruthy();
         expect(gch.parent).toEqual("ch2");
@@ -208,8 +209,8 @@ describe(`schemaParser tests:`, () => {
       });
 
       it(`THEN grandchild from second link has expected template.`, () => {
-        let ch2 = schemaGroup.schemas["ch2"];
-        let gch = schemaGroup.schemas[ch2.children[0]];
+        const ch2 = schemaGroup.schemas["ch2"];
+        const gch = schemaGroup.schemas[ch2.children[0]];
 
         expect(gch.data.template?.id).toEqual("template.test");
       });
@@ -263,16 +264,16 @@ describe(`schemaParser tests:`, () => {
       });
 
       it(`THEN first link to grandchild, grandchild stays as is`, () => {
-        let ch1 = barSchemaGroup.schemas["ch1"];
-        let gch = barSchemaGroup.schemas[ch1.children[0]];
+        const ch1 = barSchemaGroup.schemas["ch1"];
+        const gch = barSchemaGroup.schemas[ch1.children[0]];
 
         expect(gch.id).toEqual("gch");
         expect(gch.parent).toEqual("ch1");
       });
 
       it(`THEN second link to grandchild, a clone is created for grandchild schema.`, () => {
-        let ch2 = barSchemaGroup.schemas["ch2"];
-        let gch = barSchemaGroup.schemas[ch2.children[0]];
+        const ch2 = barSchemaGroup.schemas["ch2"];
+        const gch = barSchemaGroup.schemas[ch2.children[0]];
 
         expect(gch.id.startsWith("gch_")).toBeTruthy();
         expect(gch.parent).toEqual("ch2");

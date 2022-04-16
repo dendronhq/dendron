@@ -1,5 +1,15 @@
-import { ContextualUIEvents, Time } from "@dendronhq/common-all";
-import { SegmentUtils, VSCodeIdentifyProps } from "@dendronhq/common-server";
+import {
+  AppNames,
+  ContextualUIEvents,
+  DWorkspaceV2,
+  getStage,
+  Time,
+} from "@dendronhq/common-all";
+import {
+  SegmentClient,
+  SegmentUtils,
+  VSCodeIdentifyProps,
+} from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
@@ -7,6 +17,10 @@ import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { VersionProvider } from "../versionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
+import fs from "fs-extra";
+import { setupSegmentClient } from "../telemetry";
+import { Logger } from "../logger";
+import path from "path";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -16,6 +30,10 @@ export type SegmentContext = Partial<{
 
 export class AnalyticsUtils {
   static sessionStart = -1;
+
+  static getVSCodeSentryRelease(): string {
+    return `${AppNames.CODE}@${VersionProvider.version()}`;
+  }
 
   static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
     const {
@@ -28,7 +46,7 @@ export class AnalyticsUtils {
     } = vscode.env;
 
     return {
-      type: "vscode" as const,
+      type: AppNames.CODE,
       ideVersion: vscode.version,
       ideFlavor: appName,
       appVersion: VersionProvider.version(),
@@ -43,18 +61,18 @@ export class AnalyticsUtils {
 
   static getCommonTrackProps() {
     const firstWeekSinceInstall = AnalyticsUtils.isFirstWeek();
-    const sessionId = AnalyticsUtils.getSessionId();
     const vscodeSessionId = vscode.env.sessionId;
+    const appVersion = VersionProvider.version();
     return {
       firstWeekSinceInstall,
       vscodeSessionId,
-      integrations: { Amplitude: { session_id: sessionId } },
+      appVersion,
     };
   }
 
   static getSessionId(): number {
     if (AnalyticsUtils.sessionStart < 0) {
-      AnalyticsUtils.sessionStart = Time.now().toSeconds();
+      AnalyticsUtils.sessionStart = Math.round(Time.now().toSeconds());
     }
     return AnalyticsUtils.sessionStart;
   }
@@ -76,18 +94,88 @@ export class AnalyticsUtils {
     return currentTime.minus(firstInstallTime) < ONE_WEEK;
   }
 
-  static track(event: string, props?: any) {
+  static _trackCommon({
+    event,
+    props,
+    timestamp,
+  }: {
+    event: string;
+    props?: any;
+    timestamp?: Date;
+  }) {
     const { ideVersion, ideFlavor } = AnalyticsUtils.getVSCodeIdentifyProps();
-    SegmentUtils.track(
+    const properties = { ...props, ...AnalyticsUtils.getCommonTrackProps() };
+    const sessionId = AnalyticsUtils.getSessionId();
+    return {
       event,
-      { type: "vscode", ideVersion, ideFlavor },
-      { ...props, ...AnalyticsUtils.getCommonTrackProps() }
+      platformProps: {
+        type: AppNames.CODE,
+        ideVersion,
+        ideFlavor,
+      },
+      properties,
+      timestamp,
+      integrations: { Amplitude: { session_id: sessionId } },
+    } as Parameters<typeof SegmentUtils.track>[0];
+  }
+
+  static track(
+    event: string,
+    customProps?: any,
+    segmentProps?: { timestamp?: Date }
+  ) {
+    return SegmentUtils.trackSync(
+      this._trackCommon({
+        event,
+        props: customProps,
+        timestamp: segmentProps?.timestamp,
+      })
     );
   }
 
-  static identify() {
-    const props: VSCodeIdentifyProps = AnalyticsUtils.getVSCodeIdentifyProps();
-    SegmentUtils.identify(props);
+  static identify(props?: Partial<VSCodeIdentifyProps>) {
+    const defaultProps = AnalyticsUtils.getVSCodeIdentifyProps();
+    // if partial props is passed, fill them with defaults before calling identify.
+    const _props = props ? _.defaults(props, defaultProps) : defaultProps;
+    SegmentUtils.identify(_props);
+  }
+
+  /**
+   * Setup segment client
+   * Also setup cache flushing in case of missed uploads
+   */
+  static setupSegmentWithCacheFlush({
+    context,
+    ws,
+  }: {
+    context: vscode.ExtensionContext;
+    ws: DWorkspaceV2;
+  }) {
+    if (getStage() === "prod") {
+      const segmentResidualCacheDir = context.globalStorageUri.fsPath;
+      fs.ensureDir(segmentResidualCacheDir);
+
+      setupSegmentClient(
+        ws,
+        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
+      );
+
+      // Try to flush the Segment residual cache every hour:
+      (function tryFlushSegmentCache() {
+        SegmentClient.instance()
+          .tryFlushResidualCache()
+          .then((result) => {
+            Logger.info(
+              `Segment Residual Cache flush attempted. ${JSON.stringify(
+                result
+              )}`
+            );
+          });
+
+        // Repeat once an hour:
+        setTimeout(tryFlushSegmentCache, 3600000);
+      })();
+    }
   }
 
   static showTelemetryNotice() {

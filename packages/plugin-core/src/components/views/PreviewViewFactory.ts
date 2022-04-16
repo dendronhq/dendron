@@ -2,6 +2,7 @@ import { IDendronExtension } from "../../dendronExtensionInterface";
 import { PreviewLinkHandler } from "./PreviewLinkHandler";
 import { PreviewProxy } from "./PreviewProxy";
 import { PreviewPanel } from "./PreviewPanel";
+import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
 
 /**
  * NOTE: This class is meant to only be used in _extension.ts/workspace.ts, or in
@@ -21,6 +22,7 @@ export class PreviewPanelFactory {
       PreviewPanelFactory._preview = new PreviewPanel({
         extension,
         linkHandler: new PreviewLinkHandler(extension),
+        textDocumentService: TextDocumentServiceFactory.create(extension),
       });
     }
 

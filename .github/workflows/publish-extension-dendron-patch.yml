@@ -1,0 +1,98 @@
+# Builds and publishes a release as a patch version incrementation. This will
+# publish packages to npm and publish the release extension to the VS Code and
+# Open VSX Marketplaces. This is manually triggered once the release build is
+# smoke-tested and ready for release.
+name: Publish Extension - Dendron - Patch Release
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    environment: plugin-production
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+
+      - name: Set Environment Variables
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+          echo "NPM_TOKEN=${{ secrets.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Configure NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+
+      - name: Yarn Setup
+        run: yarn setup
+
+      - name: Build the VSIX and Publish to NPM Registry
+        env:
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
+          NPM_PWD: ${{ secrets.NPM_PWD }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: |
+          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          yarn build:patch:remote:ci
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error
+
+      - name: Push Branch Commits to Github
+        run: git push -u origin HEAD
+
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
+        working-directory: ./packages/plugin-core
+        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
+
+      - name: Publish to Open VSX Marketplace
+        env:
+          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
+        working-directory: ./packages/plugin-core
+        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
+
+      - name: Tag Release on Github
+        run: |
+          git tag $DENDRON_RELEASE_VERSION
+          git push origin $DENDRON_RELEASE_VERSION
+
+      - name: Raise Pull Request back to master
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "master"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "chore: Pulling release/${{ env.DENDRON_RELEASE_VERSION }} into master"

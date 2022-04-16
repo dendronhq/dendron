@@ -6,6 +6,9 @@ import {
   TAGS_HIERARCHY,
   TAGS_HIERARCHY_BASE,
   VaultUtils,
+  TreeUtils,
+  TreeMenuNode,
+  TreeMenuNodeIcon,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
@@ -79,7 +82,7 @@ export class TreeViewUtils {
       key: note.id,
       title,
       icon,
-      children: this.sortNotesAtLevel({
+      children: TreeUtils.sortNotesAtLevel({
         noteIds: note.children,
         noteDict,
         reverse: note.custom?.sort_order === "reverse",
@@ -96,29 +99,55 @@ export class TreeViewUtils {
     };
   }
 
-  static sortNotesAtLevel = ({
-    noteIds,
-    noteDict,
-    reverse,
+  static treeMenuNode2DataNode({
+    roots,
+    showVaultName,
+    applyNavExclude = false,
   }: {
-    noteIds: string[];
-    noteDict: NotePropsDict;
-    reverse?: boolean;
-  }): string[] => {
-    const out = _.sortBy(
-      noteIds,
-      // Sort by nav order if set
-      (noteId) => noteDict[noteId]?.custom?.nav_order,
-      // Sort by titles
-      (noteId) => noteDict[noteId]?.title,
-      // If titles are identical, sort by last updated date
-      (noteId) => noteDict[noteId]?.updated,
-      // Put tags last
-      (noteId) => !noteDict[noteId]?.fname?.startsWith(TAGS_HIERARCHY_BASE)
-    );
-    if (reverse) {
-      return _.reverse(out);
-    }
-    return out;
-  };
+    roots: TreeMenuNode[];
+    showVaultName?: boolean;
+    applyNavExclude: boolean;
+  }): DataNode[] {
+    return roots
+      .map((node: TreeMenuNode) => {
+        let icon;
+        if (node.icon === TreeMenuNodeIcon.bookOutlined) {
+          icon = <BookOutlined />;
+        } else if (node.icon === TreeMenuNodeIcon.numberOutlined) {
+          icon = <NumberOutlined />;
+        } else if (node.icon === TreeMenuNodeIcon.plusOutlined) {
+          icon = <PlusOutlined />;
+        }
+
+        if (applyNavExclude && node.navExclude) {
+          return undefined;
+        }
+
+        let title: any = node.title;
+        if (showVaultName) title = `${title} (${node.vaultName})`;
+
+        if (node.hasTitleNumberOutlined) {
+          title = (
+            <span>
+              <NumberOutlined />
+              {title}
+            </span>
+          );
+        }
+
+        return {
+          key: node.key,
+          title,
+          icon,
+          children: node.children
+            ? TreeViewUtils.treeMenuNode2DataNode({
+                roots: node.children,
+                showVaultName,
+                applyNavExclude,
+              })
+            : [],
+        };
+      })
+      .filter(isNotUndefined);
+  }
 }

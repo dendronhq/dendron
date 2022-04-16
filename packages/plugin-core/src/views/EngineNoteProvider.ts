@@ -4,8 +4,10 @@ import {
   NoteProps,
   NotePropsDict,
   NoteUtils,
+  TreeUtils,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
+import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import {
   Disposable,
@@ -66,46 +68,62 @@ export class EngineNoteProvider
   }
 
   getTreeItem(noteProps: NoteProps): TreeItem {
-    return this._tree[noteProps.id];
+    try {
+      return this._tree[noteProps.id];
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 
   getChildren(noteProps?: NoteProps): ProviderResult<NoteProps[]> {
-    const ctx = "TreeView:getChildren";
-    Logger.debug({ ctx, id: noteProps });
-    const { engine } = ExtensionProvider.getDWorkspace();
-    const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
-    if (!roots) {
-      window.showInformationMessage("No notes found");
-      return Promise.resolve([]);
-    }
-    if (noteProps) {
-      const childrenIds = noteProps.children;
+    try {
+      const ctx = "TreeView:getChildren";
+      Logger.debug({ ctx, id: noteProps });
+      const { engine } = ExtensionProvider.getDWorkspace();
+      const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot);
+      if (!roots) {
+        window.showInformationMessage("No notes found");
+        return Promise.resolve([]);
+      }
+      if (noteProps) {
+        const childrenIds = TreeUtils.sortNotesAtLevel({
+          noteIds: noteProps.children,
+          noteDict: engine.notes,
+        });
 
-      const childrenNoteProps = childrenIds.map((id) => {
-        return engine.notes[id];
-      });
+        const childrenNoteProps = childrenIds.map((id) => {
+          return engine.notes[id];
+        });
 
-      // Sort the listing order by title:
-      _.sortBy(childrenNoteProps, (props) => props.title);
-      return Promise.resolve(childrenNoteProps);
-    } else {
-      Logger.info({ ctx, msg: "reconstructing tree: enter" });
-      const out = Promise.all(
-        roots.flatMap(async (root) => {
-          const treeNote = await this.parseTree(root, engine.notes);
-          return treeNote.note;
-        })
-      );
-      Logger.info({ ctx, msg: "reconstructing tree: exit" });
-      return out;
+        return Promise.resolve(childrenNoteProps);
+      } else {
+        Logger.info({ ctx, msg: "reconstructing tree: enter" });
+        const out = Promise.all(
+          roots.flatMap(async (root) => {
+            const treeNote = await this.parseTree(root, engine.notes);
+            return treeNote.note;
+          })
+        );
+        Logger.info({ ctx, msg: "reconstructing tree: exit" });
+        return out;
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
     }
   }
 
   getParent(id: NoteProps): ProviderResult<NoteProps> {
-    const { engine: client } = ExtensionProvider.getDWorkspace();
+    try {
+      const { engine: client } = ExtensionProvider.getDWorkspace();
 
-    const maybeParent = client.notes[id.parent || ""];
-    return maybeParent || null;
+      const maybeParent = client.notes[id.parent || ""];
+      return maybeParent || null;
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    }
   }
 
   private setupSubscriptions(): Disposable {
@@ -144,9 +162,10 @@ export class EngineNoteProvider
     const ctx = "parseTree";
     const tn = this.createTreeNote(note);
     this._tree[note.id] = tn;
-    const children = note.children;
-    _.sortBy(children, (id) => ndict[id].title);
-
+    const children = TreeUtils.sortNotesAtLevel({
+      noteIds: note.children,
+      noteDict: ndict,
+    });
     tn.children = await Promise.all(
       children.map(async (c) => {
         const childNote = ndict[c];

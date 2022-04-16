@@ -1,20 +1,16 @@
 import { CONSTANTS } from "@dendronhq/common-all";
 import { afterEach, beforeEach, describe } from "mocha";
-import { ExtensionProvider } from "../../../../ExtensionProvider";
 import path from "path";
+import sinon from "sinon";
 import vscode from "vscode";
 import { RegisterNoteTraitCommand } from "../../../../commands/RegisterNoteTraitCommand";
+import { ExtensionProvider } from "../../../../ExtensionProvider";
 import { VSCodeUtils } from "../../../../vsCodeUtils";
 import { expect } from "../../../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../../../testUtilsV3";
-import sinon from "sinon";
+import { describeSingleWS } from "../../../testUtilsV3";
 
 suite("RegisterNoteTraitCommand tests", () => {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    noSetTimeout: true,
-  });
-
-  describeSingleWS("GIVEN a new Note Trait", { ctx }, () => {
+  describeSingleWS("GIVEN a new Note Trait", {}, () => {
     describe(`WHEN registering a new note trait`, () => {
       beforeEach(async () => {
         await VSCodeUtils.closeAllEditors();

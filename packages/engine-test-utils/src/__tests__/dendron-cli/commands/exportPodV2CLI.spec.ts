@@ -3,30 +3,17 @@ import { ExportPodV2CLICommand } from "@dendronhq/dendron-cli";
 import {
   ExternalService,
   PodExportScope,
+  PodUtils,
   PodV2Types,
 } from "@dendronhq/pods-core";
-import path from "path";
 import { runEngineTestV5 } from "../../..";
 import fs from "fs-extra";
 import { ERROR_SEVERITY, Time } from "@dendronhq/common-all";
+import path from "path";
 
 /**
  * Export Pod V2
  */
-
-const getCustomConfigPath = (wsRoot: string, podId: string) => {
-  const podsDir = path.join(wsRoot, "pods", "custom");
-  const configPath = path.join(podsDir, `config.${podId}.yml`);
-  fs.ensureDirSync(podsDir);
-  return configPath;
-};
-
-const getSvcConfigPath = (wsRoot: string, connectionId: string) => {
-  const podsDir = path.join(wsRoot, "pods", "service-connections");
-  const configPath = path.join(podsDir, `svcconfig.${connectionId}.yml`);
-  fs.ensureDirSync(podsDir);
-  return configPath;
-};
 
 // dendron exportPodV2 --podId  dendron.markdown
 describe("GIVEN export pod V2 is run ", () => {
@@ -35,7 +22,8 @@ describe("GIVEN export pod V2 is run ", () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const podId = "dendron.markdown";
-          const configPath = getCustomConfigPath(wsRoot, podId);
+          const configPath = PodUtils.getCustomConfigPath({ wsRoot, podId });
+          await fs.ensureDir(path.dirname(configPath));
           writeYAML(configPath, {
             exportScope: "Workspace",
             podType: PodV2Types.MarkdownExportV2,
@@ -113,7 +101,8 @@ describe("GIVEN export pod V2 is run ", () => {
         async ({ wsRoot }) => {
           const cmd = new ExportPodV2CLICommand();
           const podId = "dendron.markdown";
-          const configPath = getCustomConfigPath(wsRoot, podId);
+          const configPath = PodUtils.getCustomConfigPath({ wsRoot, podId });
+          await fs.ensureDir(path.dirname(configPath));
           writeYAML(configPath, {
             exportScope: "Workspace",
             podType: PodV2Types.MarkdownExportV2,
@@ -142,8 +131,13 @@ describe("GIVEN export pod V2 is run ", () => {
           const cmd = new ExportPodV2CLICommand();
           const podId = "dendron.gdoc";
           const connectionId = "gdoc-main";
-          const configPath = getCustomConfigPath(wsRoot, podId);
-          const svcCongingPath = getSvcConfigPath(wsRoot, connectionId);
+          const configPath = PodUtils.getCustomConfigPath({ wsRoot, podId });
+          const svcCongingPath = PodUtils.getServiceConfigPath({
+            wsRoot,
+            connectionId,
+          });
+          await fs.ensureDir(path.dirname(configPath));
+          await fs.ensureDir(path.dirname(svcCongingPath));
           writeYAML(configPath, {
             exportScope: "Workspace",
             podType: PodV2Types.GoogleDocsExportV2,
@@ -177,7 +171,8 @@ describe("GIVEN export pod V2 is run ", () => {
         async ({ wsRoot }) => {
           const cmd = new ExportPodV2CLICommand();
           const podId = "dendron.foo";
-          const configPath = getCustomConfigPath(wsRoot, podId);
+          const configPath = PodUtils.getCustomConfigPath({ wsRoot, podId });
+          await fs.ensureDir(path.dirname(configPath));
           const resp = await cmd.enrichArgs({
             wsRoot,
             inlineConfig: ["Key=exportScope,Value=Vault"],

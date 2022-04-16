@@ -1,5 +1,6 @@
 import { Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
+import _ from "lodash";
 import os from "os";
 import path from "path";
 
@@ -21,6 +22,14 @@ type Metadata = Partial<{
    */
   inactiveUserMsgSendTime: number;
   /**
+   * The status of inactive user message. If submitted, we don't prompt again. If cancelled, we wait 2 weeks to send again.
+   */
+  inactiveUserMsgStatus: InactvieUserMsgStatusEnum;
+  /**
+   * The status of initial survey.
+   */
+  initialSurveyStatus: InitialSurveyStatusEnum;
+  /**
    * Set if a user has activated a dendron workspace
    */
   dendronWorkspaceActivated: number;
@@ -32,7 +41,21 @@ type Metadata = Partial<{
    * When the user last used lookup
    */
   lastLookupTime: number;
+  /**
+   * Time when the welcome button was clicked
+   */
+  welcomeClickedTime: number;
 }>;
+
+export enum InactvieUserMsgStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
+
+export enum InitialSurveyStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
 
 let _singleton: MetadataService | undefined;
 
@@ -64,6 +87,15 @@ export class MetadataService {
       return {};
     }
     return fs.readJSONSync(MetadataService.metaFilePath()) as Metadata;
+  }
+
+  getWelcomeClicked(): Date | false {
+    const welcomeClickedTime =
+      MetadataService.instance().getMeta()["welcomeClickedTime"];
+    if (_.isNumber(welcomeClickedTime)) {
+      return Time.DateTime.fromMillis(welcomeClickedTime).toJSDate();
+    }
+    return false;
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -105,5 +137,13 @@ export class MetadataService {
 
   setInactiveUserMsgSendTime() {
     return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+  }
+
+  setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
+    return this.setMeta("inactiveUserMsgStatus", value);
+  }
+
+  setInitialSurveyStatus(value: InitialSurveyStatusEnum) {
+    return this.setMeta("initialSurveyStatus", value);
   }
 }

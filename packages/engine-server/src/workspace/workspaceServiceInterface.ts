@@ -37,4 +37,9 @@ export interface IWorkspaceService {
   pullVaults(): Promise<SyncActionResult[]>;
 
   pushVaults(): Promise<SyncActionResult[]>;
+
+  markVaultAsRemoteInConfig(
+    targetVault: DVault,
+    remoteUrl: string
+  ): Promise<void>;
 }

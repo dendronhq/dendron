@@ -14,9 +14,7 @@ import {
 } from "./components/lookup/LookupProviderV3Interface";
 import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
-import { INoteSyncService } from "./services/NoteSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
-import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
 export type DendronWorkspaceSettings = Partial<{
@@ -58,7 +56,6 @@ export type DendronWorkspaceSettings = Partial<{
 export interface IDendronExtension {
   port?: number;
   context: vscode.ExtensionContext;
-  workspaceWatcher?: WorkspaceWatcher;
   serverWatcher?: vscode.FileSystemWatcher;
   fileWatcher?: FileWatcher;
   type: WorkspaceType;
@@ -66,7 +63,6 @@ export interface IDendronExtension {
   commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
-  noteSyncService: INoteSyncService;
 
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;
@@ -119,7 +115,9 @@ export interface IDendronExtension {
   isActiveAndIsDendronNote(fpath: string): Promise<boolean>;
 
   /**
-   * Get Global Workspace configuration
+   * @deprecated Use {@link VSCodeUtils.getWorkspaceConfig} instead.
+   *
+   * There is no need to read the configuration from the extension, it doesn't depend on the extension itself.
    */
   getWorkspaceConfig(
     section?: string | undefined

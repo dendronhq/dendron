@@ -39,7 +39,7 @@
         },
         "hierarchyDisplay": {
           "type": "boolean",
-          "description": "Shoud show hiearchy"
+          "description": "Should show hierarchy"
         },
         "hierarchyDisplayTitle": {
           "type": "string",
@@ -100,6 +100,10 @@
         "enableExportPodV2": {
           "type": "boolean",
           "description": "Enable export pod v2"
+        },
+        "enableSelfContainedVaults": {
+          "type": "boolean",
+          "description": "Sets self contained vaults as the default vault type. Dendron can read self-contained vaults even if this option is not enabled, but it will only create self contained vaults if this option is enabled."
         }
       },
       "additionalProperties": false
@@ -387,7 +391,7 @@
         },
         "fsPath": {
           "type": "string",
-          "description": "Filesystem path to fault"
+          "description": "Filesystem path to vault"
         },
         "workspace": {
           "type": "string",
@@ -410,6 +414,18 @@
         "seed": {
           "type": "string",
           "description": "Id of a seed this vault belongs to"
+        },
+        "selfContained": {
+          "type": "boolean",
+          "description": "Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults."
+        },
+        "siteUrl": {
+          "type": "string",
+          "description": "Published URL endpoint for the vault. When wikilinks are exported from this vault, they will be converted with url defined here"
+        },
+        "siteIndex": {
+          "type": "string",
+          "description": "Index page for the vault"
         }
       },
       "required": [
@@ -736,6 +752,9 @@
         "enableHashTags": {
           "type": "boolean"
         },
+        "enableFullHierarchyNoteTitle": {
+          "type": "boolean"
+        },
         "maxPreviewsCached": {
           "type": "number"
         },
@@ -765,6 +784,7 @@
         "enableAutoFoldFrontmatter",
         "enableUserTags",
         "enableHashTags",
+        "enableFullHierarchyNoteTitle",
         "maxPreviewsCached",
         "maxNoteLength",
         "enableEditorDecorations"
@@ -992,6 +1012,12 @@
         "enableNoteTitleForLink": {
           "type": "boolean"
         },
+        "enableFrontmatterTags": {
+          "type": "boolean"
+        },
+        "enableHashesForFMTags": {
+          "type": "boolean"
+        },
         "enableMermaid": {
           "type": "boolean"
         },
@@ -1008,6 +1034,8 @@
       "required": [
         "enableFMTitle",
         "enableNoteTitleForLink",
+        "enableFrontmatterTags",
+        "enableHashesForFMTags",
         "enableMermaid",
         "enablePrettyRefs",
         "enableKatex",
@@ -1035,6 +1063,9 @@
           "type": "boolean"
         },
         "enablePrettyRefs": {
+          "type": "boolean"
+        },
+        "enableBackLinks": {
           "type": "boolean"
         },
         "enableKatex": {

@@ -14,7 +14,6 @@ import {
   PodUtils,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
-import path from "path";
 import yargs from "yargs";
 import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
@@ -75,7 +74,6 @@ export async function enrichPodArgs(
   let { configValues = {} } = args;
   const engineArgs = await setupEngine(args);
   const wsRoot = engineArgs.wsRoot;
-  const podsDir = PodUtils.getPodDir({ wsRoot });
 
   // return if no config is given
   if (!args.podId && !args.podConfig && !args.inlineConfig) {
@@ -89,11 +87,10 @@ export async function enrichPodArgs(
 
   // if podId is provided, get configValues from the config.{podId}.yml
   if (args.podId) {
-    const podConfigPath = path.join(
-      podsDir,
-      "custom",
-      `config.${args.podId}.yml`
-    );
+    const podConfigPath = PodUtils.getCustomConfigPath({
+      wsRoot,
+      podId: args.podId,
+    });
     try {
       const resp = ConfigFileUtils.getConfigByFPath({
         fPath: podConfigPath,
@@ -129,11 +126,10 @@ export async function enrichPodArgs(
 
   // If the config has a connectionId, read the sevice connection config file.
   if (configValues.connectionId) {
-    const serviceConnectionPath = path.join(
-      podsDir,
-      "service-connections",
-      `svcconfig.${configValues.connectionId}.yml`
-    );
+    const serviceConnectionPath = PodUtils.getServiceConfigPath({
+      wsRoot,
+      connectionId: configValues.connectionId,
+    });
     try {
       const resp = ConfigFileUtils.getConfigByFPath({
         fPath: serviceConnectionPath,

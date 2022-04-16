@@ -48,15 +48,14 @@ function canShowDiff(opts: {
   filePath: string;
 }): boolean {
   const { engine, filePath } = opts;
-  const { wsRoot, vaults: vaults } = engine;
+  const { vaults } = engine;
   return vaults.some((vault) => {
     if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
       const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
-      const note = NoteUtils.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname,
-        notes: engine.notes,
+        engine,
         vault,
-        wsRoot,
       });
       if (!note) {
         return false;

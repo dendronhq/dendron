@@ -25,8 +25,8 @@ const ms2ShortDate = (ts: number) => {
 const formatString = (opts: { txt: string; note: NoteProps }) => {
   const { txt, note } = opts;
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
-  const noteHiearchy = note.fname.replace(/\./g, "/");
-  return _.template(txt)({ noteHiearchy });
+  const noteHierarchy = note.fname.replace(/\./g, "/");
+  return _.template(txt)({ noteHierarchy });
 };
 
 class GitUtils {

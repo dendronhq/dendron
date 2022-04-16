@@ -185,6 +185,7 @@ export class AirtableExportPodV2
       srcFieldMapping: this._config.sourceFieldMapping,
       logger,
       engine: this._engine,
+      podId: this._config.podId,
     });
     return resp;
   }

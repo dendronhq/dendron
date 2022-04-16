@@ -20,6 +20,7 @@ export type DendronDevConfig = {
   engineServerPort?: number;
   /**
    * Enable experimental web ui. Default is false
+   * @deprecated
    */
   enableWebUI?: boolean;
   /**
@@ -34,6 +35,12 @@ export type DendronDevConfig = {
    * Enable export pod v2
    */
   enableExportPodV2?: boolean;
+  /**
+   * Sets self contained vaults as the default vault type. Dendron can read
+   * self-contained vaults even if this option is not enabled, but it will only
+   * create self contained vaults if this option is enabled.
+   */
+  enableSelfContainedVaults?: boolean;
 };
 
 /**

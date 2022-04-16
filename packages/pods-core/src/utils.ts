@@ -34,6 +34,10 @@ export const podClassEntryToPodItemV4 = (p: PodClassEntryV4): PodItemV4 => {
 };
 
 export class PodUtils {
+  /**
+   * @param param0
+   * @returns config for v1 pods
+   */
   static getConfig({
     podsDir,
     podClass,
@@ -45,6 +49,10 @@ export class PodUtils {
     return PodUtils.readPodConfigFromDisk<any>(podConfigPath);
   }
 
+  /**
+   * @param param0
+   * @returns config path for v1 pods
+   */
   static getConfigPath({
     podsDir,
     podClass,
@@ -539,4 +547,30 @@ export class PodUtils {
       throw new DendronError({ message: stringifyError(err) });
     }
   }
+
+  /**
+   * @param opts
+   * @returns custom config file path for pods v2
+   */
+  static getCustomConfigPath = (opts: { wsRoot: string; podId: string }) => {
+    const { wsRoot, podId } = opts;
+    const podsDir = PodUtils.getPodDir({ wsRoot });
+    return path.join(podsDir, "custom", `config.${podId}.yml`);
+  };
+  /**
+   * @param opts
+   * @returns service config file path for pods v2
+   */
+  static getServiceConfigPath = (opts: {
+    wsRoot: string;
+    connectionId: string;
+  }) => {
+    const { wsRoot, connectionId } = opts;
+    const podsDir = PodUtils.getPodDir({ wsRoot });
+    return path.join(
+      podsDir,
+      "service-connections",
+      `svcconfig.${connectionId}.yml`
+    );
+  };
 }

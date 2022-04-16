@@ -1,6 +1,6 @@
 import { genUUID } from "@dendronhq/common-all";
-import { createLogger, getAllFiles } from "@dendronhq/common-server";
-import fs, { Dirent } from "fs-extra";
+import { createLogger, getAllFilesWithTypes } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { BasicCommand } from "./base";
@@ -62,14 +62,14 @@ export abstract class RefactorBaseCommand<
     });
   }
 
-  getFiles(
+  async getFiles(
     opts: Required<Pick<RefactorCommandOpts, "root" | "exclude" | "include">>
   ) {
-    const allFiles = getAllFiles({
+    const out = await getAllFilesWithTypes({
       ...opts,
-      withFileTypes: true,
-    }) as Dirent[];
-    return allFiles;
+    });
+    if (out.data === undefined) throw out.error;
+    return out.data;
   }
 
   abstract matchFile(file: TFile): { isMatch: boolean; matchData?: TMatchData };
@@ -81,7 +81,7 @@ export abstract class RefactorBaseCommand<
       numChanged: 0,
     };
     const { limit, root } = this.props;
-    const allFiles = this.getFiles({ ...this.props });
+    const allFiles = await this.getFiles({ ...this.props });
     // return Promise.all(
     return allFiles.map((dirent) => {
       const { name: fname } = dirent;
@@ -116,14 +116,14 @@ export class RefactorCommand extends BasicCommand<RefactorCommandOpts> {
     this._registerRules();
   }
 
-  getFiles(
+  async getFiles(
     opts: Required<Pick<RefactorCommandOpts, "root" | "exclude" | "include">>
   ) {
-    const allFiles = getAllFiles({
+    const out = await getAllFilesWithTypes({
       ...opts,
-      withFileTypes: true,
-    }) as Dirent[];
-    return allFiles;
+    });
+    if (out.data === undefined) throw out.error;
+    return out.data;
   }
 
   _registerRules() {
@@ -215,7 +215,7 @@ export class RefactorCommand extends BasicCommand<RefactorCommandOpts> {
       numChanged: 0,
     };
     logger.info({ msg: "enter" });
-    const allFiles = this.getFiles({ root, exclude, include });
+    const allFiles = await this.getFiles({ root, exclude, include });
     allFiles.forEach((dirent) => {
       const { name: fname } = dirent;
 

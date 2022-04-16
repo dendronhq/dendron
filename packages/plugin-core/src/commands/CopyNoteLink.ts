@@ -4,6 +4,7 @@ import {
   genUUIDInsecure,
   isBlockAnchor,
   isLineAnchor,
+  NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -12,28 +13,39 @@ import { isInsidePath } from "@dendronhq/common-server";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { TextEditor, window } from "vscode";
+import { Disposable, TextEditor, window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { ExtensionProvider } from "../ExtensionProvider";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { clipboard } from "../utils";
 import { getBlockAnchorAt, getSelectionAnchors } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
-type CommandOutput = {
-  link: string;
-  type: string;
-  anchorType?: string;
-};
+type CommandOutput =
+  | {
+      link: string;
+      type: string;
+      anchorType?: string;
+    }
+  | undefined;
 
-export class CopyNoteLinkCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class CopyNoteLinkCommand
+  extends BasicCommand<CommandOpts, CommandOutput>
+  implements Disposable
+{
+  static requireActiveWorkspace: boolean = true;
   key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
+  private extension: IDendronExtension;
+  private _onEngineNoteStateChangedDisposable: Disposable | undefined;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
+
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -46,7 +58,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
   }
 
   private async getUserLinkAnchorPreference(): Promise<"line" | "block"> {
-    const { config } = ExtensionProvider.getDWorkspace();
+    const { config } = this.extension.getDWorkspace();
     let anchorType = ConfigUtils.getNonNoteLinkAnchorType(config);
     if (anchorType === "prompt") {
       // The preferred anchor type is not set, so ask the user if they want line numbers or block anchors
@@ -81,7 +93,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
   }
 
   private async createNonNoteFileLink(editor: TextEditor) {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const { wsRoot, vaults } = this.extension.getDWorkspace();
     let { fsPath } = editor.document.uri;
     // Find it relative to wsRoot
     fsPath = path.relative(wsRoot, fsPath);
@@ -135,7 +147,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
   }
 
   private async createNoteLink(editor: TextEditor, note: NoteProps) {
-    const engine = ExtensionProvider.getEngine();
+    const engine = this.extension.getEngine();
     const { selection } = VSCodeUtils.getSelection();
     const { startAnchor: anchor } = await getSelectionAnchors({
       editor,
@@ -174,14 +186,52 @@ export class CopyNoteLinkCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    const engine = ExtensionProvider.getEngine();
-
+    const engine = this.extension.getEngine();
     const vault = PickerUtilsV2.getVaultForOpenEditor();
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    }) as NoteProps;
+
+    if (editor.document.isDirty) {
+      this._onEngineNoteStateChangedDisposable = this.extension
+        .getEngine()
+        .engineEventEmitter.onEngineNoteStateChanged(
+          async (noteChangeEntries: NoteChangeEntry[]) => {
+            const savedNote = noteChangeEntries.filter(
+              (entry) => entry.note.fname === fname && entry.status === "update"
+            );
+            // Received event from engine about successful save
+            if (savedNote.length > 0) {
+              await this.executeCopyNoteLink(savedNote[0].note, editor);
+              this.dispose();
+            }
+          }
+        );
+      await editor.document.save();
+      // Dispose of listener after 1 sec (if not already disposed) in case engine events never arrive
+      setTimeout(() => {
+        this.dispose();
+      }, 1000);
+      return;
+    } else if (this._onEngineNoteStateChangedDisposable) {
+      // If this is not disposed, it means we are still listening on engine state change from previous CopyNoteLink.execute command
+      // Do nothing as engine may still not be up-to-date
+      return;
+    } else {
+      const note = NoteUtils.getNoteByFnameFromEngine({
+        fname,
+        vault,
+        engine,
+      }) as NoteProps;
+      return this.executeCopyNoteLink(note, editor);
+    }
+  }
+
+  dispose(): void {
+    if (this._onEngineNoteStateChangedDisposable) {
+      this._onEngineNoteStateChangedDisposable.dispose();
+      this._onEngineNoteStateChangedDisposable = undefined;
+    }
+  }
+
+  private async executeCopyNoteLink(note: NoteProps, editor: TextEditor) {
     let link: string;
     let type;
     let anchor;

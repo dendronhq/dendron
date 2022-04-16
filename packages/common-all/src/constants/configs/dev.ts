@@ -14,6 +14,7 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Engine Server Port",
     desc: "What port to use for the engine server. Defaults to creating on startup.",
   },
+  /** @deprecated */
   enableWebUI: {
     label: "Enable web UI",
     desc: "Enable experimental web ui. Defaults to false.",
@@ -29,5 +30,9 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
   enableExportPodV2: {
     label: "Enable Export Pod V2",
     desc: "Enable experimental Export V2 command",
+  },
+  enableSelfContainedVaults: {
+    label: "Enable self contained vaults",
+    desc: "If enabled, Dendron will create self contained vaults. Dendron can still read self contained vaults even if this is disabled.",
   },
 };

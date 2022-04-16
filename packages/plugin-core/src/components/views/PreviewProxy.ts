@@ -14,7 +14,7 @@ export interface PreviewProxy {
   show(
     note?: NoteProps
     // opts?: PreviewProxyOpts
-  ): void;
+  ): Promise<void>;
 
   /**
    * close the preview webview

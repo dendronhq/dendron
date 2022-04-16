@@ -1,3 +1,7 @@
+// For all new additions to the telemetry events, follow UpperCamelCasing and
+// use noun+verb for the event name.
+
+/* eslint-disable camelcase */
 export enum VSCodeEvents {
   ServerCrashed = "ServerCrashed",
   InitializeWorkspace = "InitializeWorkspace",
@@ -9,8 +13,11 @@ export enum VSCodeEvents {
   SchemaLookup_Update = "SchemaLookup_Update",
   NoteLookup_Accept = "NoteLookup_Accept",
   SchemaLookup_Accept = "SchemaLookup_Accept",
+  /** @deprecated: treeview v2 is deprecated. */
   TreeView_Ready = "TreeView_Ready",
   Upgrade = "Upgrade",
+  UpgradeSeeWhatsChangedClicked = "UpgradeSeeWhatsChangedClicked",
+  UpgradeViewClosed = "UpgradeViewClosed",
   DisableTelemetry = "DisableTelemetry",
   EnableTelemetry = "EnableTelemetry",
   Uninstall = "Uninstall",
@@ -31,6 +38,7 @@ export enum CLIEvents {
 
 export enum TutorialEvents {
   WelcomeShow = "WelcomeShow",
+  ClickStart = "Getting_Started_Clicked",
   Tutorial_0_Show = "Tutorial_0_Show",
   Tutorial_1_Show = "Tutorial_1_Show",
   Tutorial_2_Show = "Tutorial_2_Show",
@@ -39,10 +47,23 @@ export enum TutorialEvents {
   Tutorial_5_Show = "Tutorial_5_Show",
 }
 
+export enum KeybindingConflictDetectedSource {
+  activation = "activation",
+  doctor = "doctor",
+}
+
+export enum ConfirmStatus {
+  accepted = "accepted",
+  rejected = "rejected",
+}
+
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
   IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
   IncompatibleExtensionsPreviewDisplayed = "Incompatible_Extensions_Preview_Displayed",
+  KeybindingConflictDetected = "Keybinding_Conflict_Detected",
+  ShowKeybindingConflictAccepted = "Show_Keybinding_Conflict_Accepted",
+  ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
 }
 
 export enum LookupEvents {
@@ -54,6 +75,7 @@ export enum SurveyEvents {
   InitialSurveyPrompted = "Initial_Survey_Prompted",
   InitialSurveyAccepted = "Initial_Survey_Accepted",
   InitialSurveyRejected = "Initial_Survey_Rejected",
+  ContextSurveyConfirm = "contextSurveyConfirm",
   BackgroundAnswered = "Background_Answered",
   BackgroundRejected = "Background_Rejected",
   UseCaseAnswered = "Use_Case_Answered",
@@ -81,9 +103,15 @@ export enum SurveyEvents {
   InactiveUserSurveyPromptReason = "Inactive_User_Prompt_Reason",
 }
 
+export enum GitEvents {
+  ContributorsFound = "ContributorsFound",
+}
+
 export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
+  ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
+  MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
 }
 
 export enum MigrationEvents {
@@ -98,17 +126,35 @@ export enum ContextualUIEvents {
   ContextualUICodeAction = "ContextualUI_CodeAction",
 }
 
+export enum WorkspaceEvents {
+  AutoFix = "AutoFix",
+}
+
 export enum NativeWorkspaceEvents {
   DetectedInNonDendronWS = "Native_Workspace_Detected_In_Non_Dendron_WS", // watcher has detected a Dendron workspace getting created inside a non-Dendron workspace
+}
+
+export enum EngagementEvents {
+  NoteViewed = "NoteViewed",
+  EngineStateChanged = "EngineStateChanged",
+}
+
+export enum AppNames {
+  CODE = "vscode",
+  CLI = "cli",
+  EXPRESS_SERVER = "express",
 }
 
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
+  GitEvents,
   TutorialEvents,
   ExtensionEvents,
   SurveyEvents,
   ConfigEvents,
   ContextualUIEvents,
   NativeWorkspaceEvents,
+  WorkspaceEvents,
+  EngagementEvents,
 };

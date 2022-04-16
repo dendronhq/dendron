@@ -12,6 +12,7 @@ export type DendronPublishingConfig = {
   enableNoteTitleForLink?: boolean; // TODO: split
   enableMermaid?: boolean;
   enablePrettyRefs?: boolean;
+  enableBackLinks?: boolean;
   enableKatex?: boolean;
 
   assetsPrefix?: string;

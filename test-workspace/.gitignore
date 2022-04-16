@@ -6,3 +6,4 @@ docs
 vault-generated/
 pods/*
 .history
+.backup

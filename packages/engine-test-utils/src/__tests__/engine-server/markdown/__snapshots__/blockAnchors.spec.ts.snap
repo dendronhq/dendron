@@ -52,3 +52,17 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`blockAnchors rendering compile "MD_DENDRON: simple" 1`] = `
+VFile {
+  "contents": "# Root
+
+^my-block-anchor-0
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

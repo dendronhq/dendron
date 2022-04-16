@@ -29,6 +29,10 @@ type CommandCLIOpts = {
    * so we don't want it to exit.
    */
   exit?: boolean;
+  /**
+   * pod Id used to export Note(s) to Airtable
+   */
+  podId?: string;
 } & SetupEngineCLIOpts;
 
 type CommandOpts = CommandCLIOpts & SetupEngineOpts & CommandCommonProps;
@@ -61,6 +65,10 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "dry run",
       type: "boolean",
     });
+    args.option("podId", {
+      describe: "podId used to export note(s) to Airtable",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {
@@ -71,6 +79,8 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ds = new DoctorService();
-    return ds.executeDoctorActions(opts);
+    const out = await ds.executeDoctorActions(opts);
+    ds.dispose();
+    return out;
   }
 }

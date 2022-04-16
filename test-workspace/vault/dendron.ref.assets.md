@@ -2,7 +2,7 @@
 id: Hf27I1UR3HvKyd6HRh8C0
 title: Assets
 desc: ''
-updated: 1643206013490
+updated: 1649146018848
 created: 1637568178090
 ---
 
@@ -24,6 +24,12 @@ created: 1637568178090
     * [with space raw](assets/file with space.pdf)
     * [with space raw](./assets/file with space.pdf)
     * [with space raw](/assets/file with space.pdf)
+
+## Assets with wikilinks
+
+This should open in the default OS app: [[assets/dummy-pdf.pdf]]
+
+This should open inside VSCode: [[other-files/config.ts]]
 
 ## Regular navigation should still work
 * Quick check navigate to this: [[dendron://assets/note-in-asset-vault]]

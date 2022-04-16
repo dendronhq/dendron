@@ -30,7 +30,7 @@ export type DVault = {
   /** Name of vault */
   name?: string;
   visibility?: DVaultVisibility;
-  /** Filesystem path to fault */
+  /** Filesystem path to vault */
   fsPath: string;
   /**
    * Indicate the workspace that this vault is part of
@@ -61,6 +61,17 @@ export type DVault = {
    * Id of a seed this vault belongs to
    */
   seed?: string;
+  /** Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults. */
+  selfContained?: boolean;
+  /**
+   * Published URL endpoint for the vault.
+   * When wikilinks are exported from this vault, they will be converted with url defined here
+   */
+  siteUrl?: string;
+  /**
+   * Index page for the vault
+   */
+  siteIndex?: string;
 };
 
 export type DWorkspace = {
@@ -265,7 +276,7 @@ export type DendronConfig = {
   useKatex?: boolean;
 
   /**
-   * Shoud show hiearchy
+   * Should show hierarchy
    */
   hierarchyDisplay?: boolean;
 
@@ -398,6 +409,7 @@ export type DendronDevConfig = {
   engineServerPort?: number;
   /**
    * Enable experimental web ui. Default is false
+   * @deprecated
    */
   enableWebUI?: boolean;
   /**
@@ -418,6 +430,12 @@ export type DendronDevConfig = {
    * Enable export pod v2
    */
   enableExportPodV2?: boolean;
+  /**
+   * Sets self contained vaults as the default vault type. Dendron can read
+   * self-contained vaults even if this option is not enabled, but it will only
+   * create self contained vaults if this option is enabled.
+   */
+  enableSelfContainedVaults?: boolean;
 };
 
 export type DendronSiteConfig = {

@@ -18,12 +18,9 @@ import path from "path";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
-import { INoteSyncService } from "./services/NoteSyncService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 
 export class FileWatcher {
-  private _noteSyncService: INoteSyncService;
-
   public watchers: { vault: DVault; watcher: FileWatcherAdapter }[];
   /**
    * Should watching be paused
@@ -31,13 +28,8 @@ export class FileWatcher {
   public pause: boolean;
   public L = Logger;
 
-  constructor(opts: {
-    workspaceOpts: WorkspaceOpts;
-    noteSyncSvc: INoteSyncService;
-  }) {
-    const { workspaceOpts, noteSyncSvc } = opts;
-
-    this._noteSyncService = noteSyncSvc;
+  constructor(opts: { workspaceOpts: WorkspaceOpts }) {
+    const { workspaceOpts } = opts;
 
     const { vaults, wsRoot } = workspaceOpts;
     this.watchers = vaults.map((vault) => {
@@ -126,28 +118,22 @@ export class FileWatcher {
       note = file2Note(fsPath, vault);
 
       // check if note exist as
-      const maybeNote = NoteUtils.getNoteByFnameV5({
+      const maybeNote = NoteUtils.getNoteByFnameFromEngine({
         fname,
         vault,
-        notes: engine.notes,
-        wsRoot,
-      }) as NoteProps;
+        engine,
+      });
       if (maybeNote) {
-        note = {
-          ...note,
-          ..._.pick(maybeNote, ["children", "parent"]),
-        } as NoteProps;
+        note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
         delete note["stub"];
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.
       }
 
-      // add note
-      //TODO: After refactoring fileWatcher to an eventing pattern,
-      //make noteSyncService depend on fileWatcher, not the other way around
-      note = await this._noteSyncService.syncNoteMetadata({
+      note = await NoteUtils.updateNoteMetadata({
         note,
         fmChangeOnly: false,
+        engine,
       });
       await engine.updateNote(note as NoteProps, {
         newNode: true,

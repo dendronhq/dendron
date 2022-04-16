@@ -73,7 +73,10 @@ export class WorkspaceCLICommand extends CLICommand<
         case WorkspaceCommands.INIT: {
           const ws = new WorkspaceService({ wsRoot });
           const out = await ws.initialize();
-          await engine?.init();
+          const engineOut = await engine?.init();
+          if (engineOut?.error) {
+            this.printError(engineOut.error);
+          }
           return { data: out };
         }
         case WorkspaceCommands.INFO: {

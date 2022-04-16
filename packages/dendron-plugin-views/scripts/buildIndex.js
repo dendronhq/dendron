@@ -19,6 +19,7 @@ const out = WebViewCommonUtils.genVSCodeHTMLIndex({
     dark: `${"/" + path.join("static", "css", "themes", "dark.css")}`,
   },
   initialTheme: theme,
+  url: "http://localhost:3005",
 });
 console.log("building index", { theme });
 fs.writeFileSync(path.join("public/index.html"), out);

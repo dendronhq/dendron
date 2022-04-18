@@ -50,6 +50,11 @@ export class FeatureShowcase {
     const confirm = "Create a meeting note";
     const reject = "Later";
 
+    AnalyticsUtils.track(VSCodeEvents.FeatureShowcaseDisplayed, {
+      messageType: ShowcaseEntry.TryMeetingNotes,
+      displayLocation: "InformationMessage",
+    });
+
     vscode.window
       .showInformationMessage(
         `Dendron now has meeting notes. Try it out!`,
@@ -74,7 +79,7 @@ export class FeatureShowcase {
           userResponse = "rejected";
         }
 
-        AnalyticsUtils.track(VSCodeEvents.FeatureShowcased, {
+        AnalyticsUtils.track(VSCodeEvents.FeatureShowcaseResponded, {
           messageType: ShowcaseEntry.TryMeetingNotes,
           displayLocation: "InformationMessage",
           userResponse,

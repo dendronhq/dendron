@@ -45,7 +45,7 @@ export const SELF_CONTAINED_VAULTS_TEST = new ABTest(
     },
     {
       name: SelfContainedVaultsTestGroups.selfContained,
-      weight: 1,
+      weight: 0,
     },
   ]
 );

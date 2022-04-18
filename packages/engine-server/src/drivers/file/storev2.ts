@@ -1079,6 +1079,7 @@ export class FileStorage implements DStore {
     existingNote?: NoteProps;
     opts?: EngineWriteOptsV2;
   }): Promise<NoteChangeEntry[]> {
+    console.log({ ctx: "_writeNewNote", note, existingNote, opts });
     const ctx = "_writeNewNote";
     this.logger.info({
       ctx,
@@ -1256,6 +1257,12 @@ export class FileStorage implements DStore {
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
+    console.log({
+      ctx: `note 2 file: ${note.fname}, ${note.id}`,
+      bond: this.engine.notes,
+      wsRoot: this.wsRoot,
+      note,
+    });
     await note2File({
       note,
       vault: note.vault,

@@ -84,7 +84,7 @@ suite("RefactorHierarchy", function () {
        * ```
        * - [[prefix.two]]
        */
-      test("THEN scope is all existing notes, all notes and links refactored.", (done) => {
+      test.only("THEN scope is all existing notes, all notes and links refactored.", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
           preSetupHook,

@@ -176,6 +176,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
       }
     );
 
+<<<<<<< Updated upstream
     describe("WHEN the engine note provider is providing tree data on the root node with children", function () {
       const preSetupHookFunc = async (
         opts: WorkspaceOpts & { extra?: any }
@@ -257,11 +258,50 @@ suite("EngineNoteProvider Tests", function testSuite() {
             await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
+=======
+    describe("WHEN the engine note provider is providing tree data on the root node with children", function {
+      const preSetupHookFunc = async (opts: WorkspaceOpts & { extra?: any }) => {
+        const { vaults, wsRoot } = opts;
+            const vault = vaults[0];
+            await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
+              wsRoot,
+              vault,
+            });
+            await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
+              wsRoot,
+              vault,
+            });
+            await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
+              wsRoot,
+              vault,
+            });
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "zebra",
+              custom: {
+                nav_order: 1,
+              },
+            });
+      }
+
+      describeMultiWS(
+        "AND tags hierarchy doesn't specify nav_order",
+        {
+          preSetupHook: async (opts) => {
+            const { vaults, wsRoot } = opts;
+            const vault = vaults[0];
+            await preSetupHookFunc(opts);
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault,
+>>>>>>> Stashed changes
               fname: "tags.aa-battery",
             });
           },
         },
         () => {
+<<<<<<< Updated upstream
           test("THEN tag hierarchy nav_order is respected", async () => {
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(mockEvents);
@@ -283,5 +323,83 @@ suite("EngineNoteProvider Tests", function testSuite() {
         }
       );
     });
+=======
+          testAsyncWithCallback(
+            "THEN tree item sort order is correct",
+            {},
+            async (done) => {
+              const mockEvents = new MockEngineEvents();
+              const provider = new EngineNoteProvider(mockEvents);
+  
+              const props = await (provider.getChildren() as Promise<
+                NoteProps[]
+              >);
+  
+              const vault1RootProps = props[0];
+              const children = await provider.getChildren(vault1RootProps);
+              expect(children?.map((child) => child.title)).toEqual([
+                "Zebra", // nav_order: 1
+                "Aardvark", // uppercase alphabets comes before underscore alphabets
+                "_underscore", // underscore comes before lowercase alphabets
+                "aaron",
+                "Tags", // tags come last.
+              ]);
+  
+              done();
+            }
+          );
+        }
+      );
+
+      describeMultiWS(
+        "AND tags hierarchy doesn't specify nav_order",
+        {
+          preSetupHook: async (opts) => {
+            const { wsRoot, vaults } = opts;
+            await preSetupHookFunc(opts);
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "tags",
+              custom: {
+                nav_order: 1.2,
+              },
+            });
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "tags.aa-battery",
+            });
+          },
+        },
+        () => {
+          testAsyncWithCallback(
+            "THEN tag hierarchy nav_order is respected",
+            {},
+            async (done) => {
+              const mockEvents = new MockEngineEvents();
+              const provider = new EngineNoteProvider(mockEvents);
+  
+              const props = await (provider.getChildren() as Promise<
+                NoteProps[]
+              >);
+  
+              const vault1RootProps = props[0];
+              const children = await provider.getChildren(vault1RootProps);
+              expect(children?.map((child) => child.title)).toEqual([
+                "Zebra", // nav_order: 1
+                "Tags", // nav_order respected
+                "Aardvark", // uppercase alphabets comes before underscore alphabets
+                "_underscore", // underscore comes before lowercase alphabets
+                "aaron",
+              ]);
+  
+              done();
+            }
+          );
+        }
+      );
+    })
+>>>>>>> Stashed changes
   });
 });

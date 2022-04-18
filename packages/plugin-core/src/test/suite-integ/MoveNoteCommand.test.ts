@@ -333,14 +333,12 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN note moved correctly", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const notes = engine.notes;
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
-        const fooNote = NoteUtils.getNoteByFnameV5({
+        const fooNote = NoteUtils.getNoteByFnameFromEngine({
           fname: "foo",
-          notes,
           vault: vaultFrom,
-          wsRoot,
+          engine,
         }) as NoteProps;
         await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
@@ -372,25 +370,18 @@ suite("MoveNoteCommand", function () {
             nomatch: ["foo.md"],
           })
         ).toBeTruthy();
-        // note note in engine
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vaultFrom,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        // note foo is now a stub
+        const fooNoteAfter = _.toArray(engine.notes).find((note) => {
+          return note.fname === "foo";
+        });
+        expect(!_.isUndefined(fooNoteAfter) && fooNoteAfter.stub).toBeTruthy();
         // bar isn't in the first vault
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameFromEngine({
               fname: "bar",
-              notes,
               vault: vaultFrom,
-              wsRoot,
+              engine,
             })
           )
         ).toBeFalsy();
@@ -508,16 +499,17 @@ suite("MoveNoteCommand", function () {
             match: ["foo.md"],
           })
         ).toBeTruthy();
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        const fooNotes = _.toArray(engine.notes).filter((note) => {
+          return note.fname === "foo";
+        });
+        const vault1Foo = fooNotes.find(
+          (note) => note.vault.fsPath === "vault1"
+        );
+        const vault2Foo = fooNotes.find(
+          (note) => note.vault.fsPath === "vault2"
+        );
+        expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
+        expect(!_.isUndefined(vault2Foo)).toBeTruthy();
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({
@@ -606,16 +598,10 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
 
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        const vault1Foo = _.toArray(engine.notes)
+          .filter((note) => note.fname === "foo")
+          .find((note) => note.vault.fsPath === "vault1");
+        expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({

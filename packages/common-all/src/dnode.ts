@@ -1200,9 +1200,8 @@ export class NoteUtils {
 
   static normalizeFname(nodePath: string) {
     // remove md extension
-    const idx = nodePath.lastIndexOf(".md");
-    if (idx > 0) {
-      nodePath = nodePath.slice(0, idx);
+    if (nodePath.endsWith(".md")) {
+      nodePath = nodePath.slice(undefined, -3);
     }
     return _.trim(nodePath);
   }

@@ -426,6 +426,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  CREATE_MEETING_NOTE: {
+    key: "dendron.createMeetingNote",
+    title: `${CMD_PREFIX} Create Meeting Note`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",
     title: `${CMD_PREFIX} Lookup Schema`,

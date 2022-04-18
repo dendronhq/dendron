@@ -26,6 +26,8 @@ export enum VSCodeEvents {
   LapsedUserMessageRejected = "Show_Lapsed_User_Rejected",
   UserOnOldVSCodeVerUnblocked = "User_On_Old_VSCode_Ver_Unblocked",
   ShowInactiveUserMessage = "Show_Inactive_User_Message",
+  FeatureShowcaseDisplayed = "FeatureShowcasedDisplayed",
+  FeatureShowcaseResponded = "FeatureShowcaseResponded",
 }
 
 export enum CLIEvents {

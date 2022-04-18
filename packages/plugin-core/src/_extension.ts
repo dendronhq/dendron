@@ -98,6 +98,7 @@ import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
+import { FeatureShowcase } from "./FeatureShowcase";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -752,6 +753,14 @@ export async function _activate(
         await ws.activateWatchers();
         togglePluginActiveContext(true);
       }
+
+      // Show the feature showcase toast one minute after initialization.
+      const ONE_MINUTE_IN_MS = 60_000;
+      setTimeout(() => {
+        const showcase = new FeatureShowcase();
+        showcase.show();
+      }, ONE_MINUTE_IN_MS);
+
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active

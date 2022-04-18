@@ -4,6 +4,10 @@ import _ from "lodash";
 import os from "os";
 import path from "path";
 
+export enum ShowcaseEntry {
+  TryMeetingNotes = "TryMeetingNotes",
+}
+
 type Metadata = Partial<{
   /**
    * When was dendron first installed
@@ -45,6 +49,10 @@ type Metadata = Partial<{
    * Time when the welcome button was clicked
    */
   welcomeClickedTime: number;
+  /**
+   * Time when feature showcase mssages have been shown.
+   */
+  featureShowcase: { [key in ShowcaseEntry]?: number };
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -98,6 +106,15 @@ export class MetadataService {
     return false;
   }
 
+  getFeatureShowcaseStatus(key: ShowcaseEntry) {
+    const featureShowcaseData = this.getMeta().featureShowcase;
+    if (!featureShowcaseData) {
+      return undefined;
+    }
+
+    return featureShowcaseData[key];
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -145,5 +162,16 @@ export class MetadataService {
 
   setInitialSurveyStatus(value: InitialSurveyStatusEnum) {
     return this.setMeta("initialSurveyStatus", value);
+  }
+
+  setFeatureShowcaseStatus(key: ShowcaseEntry) {
+    const meta = this.getMeta();
+
+    if (!meta.featureShowcase) {
+      meta.featureShowcase = {};
+    }
+    meta.featureShowcase[key] = Time.now().toSeconds();
+
+    return this.setMeta("featureShowcase", meta.featureShowcase);
   }
 }

@@ -1079,7 +1079,6 @@ export class FileStorage implements DStore {
     existingNote?: NoteProps;
     opts?: EngineWriteOptsV2;
   }): Promise<NoteChangeEntry[]> {
-    console.log({ ctx: "_writeNewNote", note, existingNote, opts });
     const ctx = "_writeNewNote";
     this.logger.info({
       ctx,

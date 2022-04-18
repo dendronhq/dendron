@@ -102,17 +102,19 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     this.L.info({ ctx, msg: "enter", opts });
 
     let title;
-
-    if (this.trait.OnCreate?.setTitle && this.checkWorkspaceTrustAndWarn()) {
-      const context = await this.getCreateContext();
-      context.currentNoteName = fname;
-
-      title = this.trait.OnCreate.setTitle(context);
-    }
-
     let body;
-    if (this.trait.OnCreate?.setBody && this.checkWorkspaceTrustAndWarn()) {
-      body = await this.trait.OnCreate.setBody();
+
+    if (this.checkWorkspaceTrustAndWarn()) {
+      if (this.trait.OnCreate?.setTitle) {
+        const context = await this.getCreateContext();
+        context.currentNoteName = fname;
+
+        title = this.trait.OnCreate.setTitle(context);
+      }
+
+      if (this.trait.OnCreate?.setBody) {
+        body = await this.trait.OnCreate.setBody();
+      }
     }
 
     // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then

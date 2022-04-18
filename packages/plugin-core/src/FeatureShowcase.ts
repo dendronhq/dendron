@@ -25,24 +25,34 @@ export class FeatureShowcase {
 
     if (
       ABUserGroup === MeetingNoteTestGroups.show &&
-      MetadataService.instance().getFeatureShowcaseStatus(
-        ShowcaseEntry.TryMeetingNotes
-      ) === undefined
+      !this.hasShownMessage(ShowcaseEntry.TryMeetingNotes) &&
+      !AnalyticsUtils.isFirstWeek()
     ) {
       this.showMeetingNotesTip();
     }
   }
 
   /**
+   * Check if we've shown this particular message to the user already
+   * @param type
+   * @returns
+   */
+  private hasShownMessage(type: ShowcaseEntry): boolean {
+    return (
+      MetadataService.instance().getFeatureShowcaseStatus(type) !== undefined
+    );
+  }
+
+  /**
    * Tip to try out meeting notes
    */
   private showMeetingNotesTip() {
-    const confirm = "Try It";
+    const confirm = "Create a meeting note";
     const reject = "Later";
 
     vscode.window
       .showInformationMessage(
-        `Would you like to try out the new Meeting Notes Feature?`,
+        `Dendron now has meeting notes. Try it out!`,
         confirm,
         reject
       )

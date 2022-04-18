@@ -47,6 +47,7 @@ import {
   DNoteLoc,
   NoteChangeUpdateEntry,
   DNodeUtils,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -257,7 +258,10 @@ export class FileStorage implements DStore {
         // will not work.
         // we need a fresh stub note that will fill in the old note's place.
         const replacingStub = NoteUtils.create({
-          ..._.omit(noteToDelete, "id"),
+          // the replacing stub should not keep the old note's body and link.
+          // otherwise, it will be captured while processing links and will
+          // fail because this note is not actually in the file system.
+          ..._.omit(noteToDelete, ["id", "links", "body"]),
           stub: true,
         });
         this.writeNote(replacingStub);
@@ -895,7 +899,6 @@ export class FileStorage implements DStore {
       newLoc.alias = newNoteTitle;
     }
 
-    // const notesToChange = NoteUtils.getNotesWithLinkTo({
     let notesChangedEntries: NoteChangeEntry[] = [];
     const notesWithLinkTo = NoteUtils.getNotesWithLinkTo({
       note: oldNote,
@@ -908,7 +911,7 @@ export class FileStorage implements DStore {
     });
 
     // update note body of all notes that have changed
-    notesWithLinkTo.forEach(async (n) => {
+    await asyncLoopOneAtATime(notesWithLinkTo, async (n) => {
       const out = await this.processNoteChangedByRename({
         note: n,
         oldLoc,
@@ -918,8 +921,6 @@ export class FileStorage implements DStore {
         notesChangedEntries.push(out);
       }
     });
-
-    await Promise.all(notesChangedEntries);
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
@@ -1256,12 +1257,6 @@ export class FileStorage implements DStore {
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
-    console.log({
-      ctx: `note 2 file: ${note.fname}, ${note.id}`,
-      bond: this.engine.notes,
-      wsRoot: this.wsRoot,
-      note,
-    });
     await note2File({
       note,
       vault: note.vault,

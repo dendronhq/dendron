@@ -1249,7 +1249,7 @@ export class NoteUtils {
     if (cleanProps.traits) {
       propsWithTrait = {
         ...cleanProps,
-        traitIds: cleanProps.traits.map((value) => value.id),
+        traitIds: cleanProps.traits.map((value) => value),
       };
     }
 

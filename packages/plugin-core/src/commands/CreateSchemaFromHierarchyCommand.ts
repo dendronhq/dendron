@@ -2,22 +2,24 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
+  SchemaCreationUtils,
+  SchemaInMaking,
   SchemaModuleProps,
+  SchemaToken,
   SchemaUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import * as fs from "fs";
-import YAML from "js-yaml";
 import * as _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { PluginSchemaUtils } from "../pluginSchemaUtils";
 import { PluginVaultUtils } from "../pluginVaultUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandOpts = {
   candidates?: readonly SchemaCandidate[];
@@ -390,14 +392,6 @@ export class UserQueries {
   }
 }
 
-type SchemaInMaking = {
-  id?: string;
-  title?: string;
-  parent?: string;
-  pattern?: string;
-  children?: SchemaInMaking[];
-};
-
 /**
  * Responsible for forming the schema body from the hierarchical files that user chose. */
 export class SchemaCreator {
@@ -408,8 +402,10 @@ export class SchemaCreator {
     candidates: readonly SchemaCandidate[];
     hierarchyLevel: HierarchyLevel;
   }): string {
-    const tokenizedMatrix: string[][] = candidates.map((cand) =>
-      hierarchyLevel.tokenize(cand.note.fname)
+    const tokenizedMatrix: SchemaToken[][] = candidates.map((cand) =>
+      hierarchyLevel.tokenize(cand.note.fname).map((value) => {
+        return { pattern: value };
+      })
     );
 
     const topLevel: SchemaInMaking = {
@@ -419,40 +415,10 @@ export class SchemaCreator {
       parent: "root",
     };
 
-    for (let r = 0; r < tokenizedMatrix.length; r += 1) {
-      const tokenizedRow = tokenizedMatrix[r];
-
-      let currParent = topLevel;
-      // Top level is already taken care of hence we start out and index 1.
-      for (let i = 1; i < tokenizedRow.length; i += 1) {
-        if (_.isUndefined(currParent["children"])) {
-          currParent.children = [];
-        }
-        const currPattern = tokenizedRow[i];
-
-        if (currParent.children?.some((ch) => ch.pattern === currPattern)) {
-          // There is already our pattern in the schema schema hierarchy, so we should
-          // not double add it, find the matching element and assign it as parent for next iteration.
-          currParent = currParent.children?.filter(
-            (ch) => ch.pattern === currPattern
-          )[0];
-        } else {
-          const curr: SchemaInMaking = {
-            pattern: currPattern,
-          };
-          currParent.children?.push(curr);
-          currParent = curr;
-        }
-      }
-    }
-
-    const schemaJson = {
-      version: 1,
-      imports: [],
-      schemas: [topLevel],
-    };
-
-    return YAML.dump(schemaJson);
+    return SchemaCreationUtils.getBodyForTokenizedMatrix({
+      topLevel,
+      tokenizedMatrix,
+    });
   }
 }
 

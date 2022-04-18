@@ -198,6 +198,10 @@
         "title": "Dendron: Create Scratch Note"
       },
       {
+        "command": "dendron.createMeetingNote",
+        "title": "Dendron: Create Meeting Note"
+      },
+      {
         "command": "dendron.lookupSchema",
         "title": "Dendron: Lookup Schema"
       },
@@ -531,6 +535,10 @@
         {
           "command": "dendron.createScratchNote",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.createMeetingNote",
+          "title": "Dendron: Create Meeting Note"
         },
         {
           "command": "dendron.lookupSchema",

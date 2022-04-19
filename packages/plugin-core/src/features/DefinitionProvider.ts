@@ -5,7 +5,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -32,22 +32,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   }
 
   private async provideForNonNoteFile(nonNoteFile: string) {
-    if (!ExtensionUtils.isTextFileExtension(nonNoteFile)) {
-      // If we provide a definition for asset files, it will also trigger on hover.
-      // Which means it will launch the deafult app when the user hovers over an asset link.
-      return;
-    }
-    // Otherwise it's a text file, in which case `GotoNoteCommand` will open it in the editor.
-    // In that case it should be safe to use it.
-    const out = await new GotoNoteCommand(
-      ExtensionProvider.getExtension()
-    ).execute({
-      qs: nonNoteFile,
-      kind: TargetKind.NON_NOTE,
-    });
-    // Wasn't able to create
-    if (out?.kind !== TargetKind.NON_NOTE) return;
-    return new Location(Uri.file(out.fullPath), new Position(0, 0));
+    return new Location(Uri.file(nonNoteFile), new Position(0, 0));
   }
 
   private async provideForNewNote(

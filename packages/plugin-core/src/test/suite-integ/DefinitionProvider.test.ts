@@ -343,78 +343,83 @@ suite("DefinitionProvider", function () {
     }
   );
 
-  describeSingleWS("WHEN used on a link to a non-note file", {}, () => {
-    before(async () => {
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
-      await fs.writeFile(
-        path.join(wsRoot, "test.txt"),
-        "Et voluptatem autem sunt."
-      );
-      await fs.ensureFile(path.join(wsRoot, "test.png"));
-    });
-
-    test("THEN opens the non-note text file in editor", async () => {
-      const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
-      const note = await NoteTestUtilsV4.createNoteWithEngine({
-        wsRoot,
-        vault: vaults[0],
-        fname: "test.note",
-        body: "[[/test.txt]]",
-        engine,
+  describe("WHEN used on a link to a non-note file", () => {
+    describeSingleWS("AND it's a text file", {}, () => {
+      before(async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        await fs.writeFile(
+          path.join(wsRoot, "test.txt"),
+          "Et voluptatem autem sunt."
+        );
       });
 
-      await ExtensionProvider.getWSUtils().openNote(note);
-      VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(
-        7,
-        1,
-        7,
-        1
-      );
-      const { document } = VSCodeUtils.getActiveTextEditorOrThrow();
-      const pos = LocationTestUtils.getPresetWikiLinkPosition();
-      await new DefinitionProvider().provideDefinition(
-        document,
-        pos,
-        stubCancellationToken()
-      );
-      expect(getActiveEditorBasename()).toEqual("test.txt");
-      expect(
-        VSCodeUtils.getActiveTextEditorOrThrow().document.getText().trim()
-      ).toEqual("Et voluptatem autem sunt.");
+      test("THEN finds the correct definiton for that file", async () => {
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const note = await NoteTestUtilsV4.createNoteWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          fname: "test.note",
+          body: "[[/test.txt]]",
+          engine,
+        });
+
+        await ExtensionProvider.getWSUtils().openNote(note);
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(7, 1, 7, 1);
+        const { document } = VSCodeUtils.getActiveTextEditorOrThrow();
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        const location = (await new DefinitionProvider().provideDefinition(
+          document,
+          pos,
+          stubCancellationToken()
+        )) as vscode.Location;
+        // The open file should not have changed
+        expect(getActiveEditorBasename()).toEqual("test.note.md");
+        // Should have provided the right file as definition
+        expect(location).toBeTruthy();
+        expect(location.uri.fsPath).toEqual(path.join(wsRoot, "test.txt"));
+      });
     });
 
-    test("THEN doesn't open the non-note binary file", async () => {
-      const openWithDefaultApp = sinon
-        .stub(PluginFileUtils, "openWithDefaultApp")
-        .resolves();
-      const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
-      const note = await NoteTestUtilsV4.createNoteWithEngine({
-        wsRoot,
-        vault: vaults[0],
-        fname: "test.note",
-        body: "[[/test.png]]",
-        engine,
+    describeSingleWS("AND it's a binary file", {}, () => {
+      before(async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        await fs.writeFile(
+          path.join(wsRoot, "test.txt"),
+          "Et voluptatem autem sunt."
+        );
+        await fs.ensureFile(path.join(wsRoot, "test.png"));
       });
 
-      await ExtensionProvider.getWSUtils().openNote(note);
-      VSCodeUtils.getActiveTextEditorOrThrow().selection = new vscode.Selection(
-        7,
-        1,
-        7,
-        1
-      );
-      const { document } = VSCodeUtils.getActiveTextEditorOrThrow();
-      const pos = LocationTestUtils.getPresetWikiLinkPosition();
-      await new DefinitionProvider().provideDefinition(
-        document,
-        pos,
-        stubCancellationToken()
-      );
-      // The open file should not have changed
-      expect(getActiveEditorBasename()).toEqual("test.note.md");
-      // The file should not have opened in default app
-      expect(openWithDefaultApp.called).toBeFalsy();
-      openWithDefaultApp.restore();
+      test("THEN doesn't open the non-note binary file", async () => {
+        const openWithDefaultApp = sinon
+          .stub(PluginFileUtils, "openWithDefaultApp")
+          .resolves();
+        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const note = await NoteTestUtilsV4.createNoteWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          fname: "test.note",
+          body: "[[/test.png]]",
+          engine,
+        });
+
+        await ExtensionProvider.getWSUtils().openNote(note);
+        VSCodeUtils.getActiveTextEditorOrThrow().selection =
+          new vscode.Selection(7, 1, 7, 1);
+        const { document } = VSCodeUtils.getActiveTextEditorOrThrow();
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        await new DefinitionProvider().provideDefinition(
+          document,
+          pos,
+          stubCancellationToken()
+        );
+        // The open file should not have changed
+        expect(getActiveEditorBasename()).toEqual("test.note.md");
+        // The file should not have opened in default app
+        expect(openWithDefaultApp.called).toBeFalsy();
+        openWithDefaultApp.restore();
+      });
     });
   });
 });

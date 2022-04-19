@@ -92,7 +92,7 @@ export const syncNote = createAsyncThunk(
       return resp;
     }
     const data = resp.data!;
-    logger.info({ state: "pre:setNotes" });
+    logger.info({ state: "pre:setNotes", notes: data.map(NoteUtils.toLogObj) });
     if (data?.length) {
       dispatch(updateNote(data[0]));
       dispatch(setError(undefined));

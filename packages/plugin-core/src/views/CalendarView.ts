@@ -18,7 +18,7 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "./utils";
 
-export class CalendarViewV2 implements vscode.WebviewViewProvider {
+export class CalendarView implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.CALENDAR_VIEW;
   private _view?: vscode.WebviewView;
   private _extension: IDendronExtension;

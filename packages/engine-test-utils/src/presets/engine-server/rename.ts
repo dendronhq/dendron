@@ -16,6 +16,7 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
+import { readNotesFromCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -510,9 +511,12 @@ const NOTES = {
   DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
+      let cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      expect(_.size(cacheVault.notes)).toEqual(3);
+      expect(_.find(cacheVault.notes["beta"])).toBeTruthy();
+      const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
         newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
@@ -520,8 +524,10 @@ const NOTES = {
         wsRoot,
         vault,
         match: ["gamma.md"],
-        nomatch: [`${alpha}.md`],
+        nomatch: [`${beta}.md`],
       });
+      await engine.init();
+      cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
       return [
         {
           actual: changed.data?.length,
@@ -534,6 +540,18 @@ const NOTES = {
         {
           actual: checkVault,
           expected: true,
+        },
+        {
+          actual: _.size(cacheVault.notes),
+          expected: 3,
+        },
+        {
+          actual: cacheVault.notes["beta"],
+          expected: undefined,
+        },
+        {
+          actual: cacheVault.notes["gamma"].data.fname,
+          expected: "gamma",
         },
       ];
     },

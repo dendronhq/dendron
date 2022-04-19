@@ -33,6 +33,10 @@ export type EngineDeleteOpts = {
    * If node is deleted and parents are stubs, default behavior is to alsod delete parents
    */
   noDeleteParentStub?: boolean;
+  /**
+   * If the deleted note has children, replace the deleted note with a newly created stub note in place.
+   */
+  replaceWithNewStub?: boolean;
 };
 
 export type NoteLink = {

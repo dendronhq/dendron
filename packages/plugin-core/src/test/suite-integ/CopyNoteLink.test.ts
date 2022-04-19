@@ -7,22 +7,24 @@ import {
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import fs from "fs-extra";
 import { beforeEach, describe } from "mocha";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
-import fs from "fs-extra";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import sinon from "sinon";
 
 function openNote(note: NoteProps) {
   return ExtensionProvider.getExtension().wsUtils.openNote(note);
 }
 
 suite("CopyNoteLink", function () {
+  // these tests can run long, set timeout to 5s
+  this.timeout(5e5);
   let copyNoteLinkCommand: CopyNoteLinkCommand;
   beforeEach(() => {
     copyNoteLinkCommand = new CopyNoteLinkCommand(

@@ -253,7 +253,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             expect(_.isString(data)).toBeTruthy();
             if (_.isString(data)) {
               expect(
-                data?.includes("[One](/simple-wikilink/one)")
+                data?.includes("[One](/simple-wikilink/one.md)")
               ).toBeTruthy();
             }
           },

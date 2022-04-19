@@ -12,6 +12,7 @@ import {
   DConfig,
   DoctorActionsEnum,
   InactvieUserMsgStatusEnum,
+  LapsedUserSurveyStatusEnum,
   MetadataService,
 } from "@dendronhq/engine-server";
 import { IDendronExtension } from "../dendronExtensionInterface";
@@ -96,6 +97,14 @@ export class StartupUtils {
 
     // If we haven't prompted the user yet and it's been a day since their
     // initial install OR if it's been one week since we last prompted the user
+
+    const lapsedUserMsgSendTime = metaData.lapsedUserMsgSendTime;
+    if (lapsedUserMsgSendTime !== undefined) {
+      MetadataService.instance().setLapsedUserSurveyStatus(
+        LapsedUserSurveyStatusEnum.cancelled
+      );
+    }
+
     const refreshMsg =
       (metaData.lapsedUserMsgSendTime === undefined &&
         ONE_DAY <=
@@ -134,11 +143,23 @@ export class StartupUtils {
           showWelcome(assetUri);
         } else {
           AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-          const lapsedSurveySubmitted =
+          const lapsedSurveySubmittedState =
             await StateService.instance().getGlobalState(
               GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
             );
-          if (lapsedSurveySubmitted === undefined) {
+
+          if (lapsedSurveySubmittedState) {
+            MetadataService.instance().setLapsedUserSurveyStatus(
+              LapsedUserSurveyStatusEnum.submitted
+            );
+          }
+
+          const lapsedUserSurveySubmitted =
+            MetadataService.instance().getLapsedUserSurveyStatus();
+
+          if (
+            lapsedUserSurveySubmitted !== LapsedUserSurveyStatusEnum.submitted
+          ) {
             await SurveyUtils.showLapsedUserSurvey();
           }
           return;

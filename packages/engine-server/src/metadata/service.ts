@@ -138,7 +138,7 @@ export class MetadataService {
 
     return featureShowcaseData[key];
   }
-
+  
   getGlobalVersion() {
     return this.getMeta().version || "0.0.0";
   }

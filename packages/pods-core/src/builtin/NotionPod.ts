@@ -1,4 +1,9 @@
-import { DendronError, ERROR_SEVERITY, NoteProps } from "@dendronhq/common-all";
+import {
+  asyncLoop,
+  DendronError,
+  ERROR_SEVERITY,
+  NoteProps,
+} from "@dendronhq/common-all";
 import { markdownToBlocks } from "@instantish/martian";
 import type {
   Page,
@@ -47,9 +52,11 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
   /**
    * Method to create pages in Notion
    */
-  createPagesInNotion = async (blockPagesArray: any, notion: Client) => {
-    blockPagesArray.forEach(async (block: any) => {
-      // @ts-ignore
+  createPagesInNotion = (
+    blockPagesArray: any,
+    notion: Client
+  ): Promise<any[]> => {
+    return asyncLoop(blockPagesArray, async (block: any) => {
       await limiter.removeTokens(1);
       try {
         await notion.pages.create(block);

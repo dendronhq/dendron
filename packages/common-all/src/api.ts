@@ -309,6 +309,7 @@ abstract class API {
       this._log(payload.error, "error");
       // Log errors from express:
       payload.error =
+        err?.response?.data?.error || // Corresponds to an expected error that we intentionally log in our code
         err?.response?.data || // Corresponds to an unexpected server error (HTTP 500) if a data payload was added
         err; // Corresponds to an axios (HTTP request) thrown error
     }

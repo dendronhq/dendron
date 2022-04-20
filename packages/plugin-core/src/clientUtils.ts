@@ -80,6 +80,17 @@ export class DendronClientUtilsV2 {
   }
 
   /**
+   * Generates a file name for a meeting note. The date format is not
+   * configurable, because it needs to match a pre-defined generated schema
+   * pattern for meeting notes.
+   * @returns
+   */
+  static getMeetingNoteName() {
+    const noteDate = Time.now().toFormat("y.MM.dd");
+    return ["meet", noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+  }
+
+  /**
    * Generates a file name for a journal or scratch note. Must be derived by an
    * open note, or passed as an option.
    * @param type 'JOURNAL' | 'SCRATCH'

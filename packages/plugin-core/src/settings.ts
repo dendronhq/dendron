@@ -24,7 +24,10 @@ import { DendronExtension, getDWorkspace } from "./workspace";
 export { Snippets };
 
 export class Extensions extends EngineExtension {
-  static getVSCodeExtnsion() {
+  /**
+   * Get Dendron recommended extensions
+   */
+  static getDendronExtensionRecommendations() {
     return _.filter(Extensions.configEntries(), (ent) => {
       return _.isUndefined(ent.action);
     }).map((ent) => {

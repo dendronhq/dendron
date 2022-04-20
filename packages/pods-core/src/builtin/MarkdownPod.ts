@@ -157,7 +157,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
    * @param items
    * @returns
    */
-  async _prepareItems(items: DItem[]) {
+  async buildFileDirAssetDicts(items: DItem[]) {
     const engineFileDict: { [k: string]: DItem } = {};
     const assetFileDict: { [k: string]: DItem } = {};
     // create map of files
@@ -453,7 +453,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     // get all items
     const { items, errors } = await this._collectItems(src.fsPath);
     this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
-    const { engineFileDict } = await this._prepareItems(items);
+    const { engineFileDict } = await this.buildFileDirAssetDicts(items);
     const { hDict, assetMap } = await this.collectNotesCopyAssets({
       files: _.values(engineFileDict),
       src: src.fsPath,

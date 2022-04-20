@@ -86,6 +86,7 @@ export function genDefaultSettings() {
   return {
     extensions: {
       recommendations: [
+        "dendron.dendron",
         "dendron.dendron-paste-image",
         "dendron.dendron-markdown-shortcuts",
         "redhat.vscode-yaml",

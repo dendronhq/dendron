@@ -86,6 +86,7 @@ jobs:
       - name: Sets env vars for publish test
         run: |
           echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
         if: runner.os == 'Linux'
 
       - name: Bootstrap

@@ -10,7 +10,6 @@ import {
   WorkspaceSettings,
   ConfigUtils,
   NoteUtils,
-  NoteChangeEntry,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -443,18 +442,4 @@ export class TestEngineUtils {
     const vault = vaults[0];
     return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
-}
-
-/**
- * Test helper function to get a subset of NoteChangeEntry's matching a
- * particular status from an array
- * @param entries
- * @param status
- * @returns
- */
-export function extractNoteChangeEntriesByType(
-  entries: NoteChangeEntry[],
-  status: "create" | "delete" | "update"
-): NoteChangeEntry[] {
-  return entries.filter((entry) => entry.status === status);
 }

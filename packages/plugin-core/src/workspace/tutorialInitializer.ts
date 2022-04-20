@@ -6,26 +6,35 @@ import {
   TutorialEvents,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
   InitialSurveyStatusEnum,
   MetadataService,
+  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
+import { MeetingNoteTestGroups, MEETING_NOTE_TUTORIAL_TEST } from "../abTests";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { GLOBAL_STATE } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { SurveyUtils } from "../survey";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getExtension } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
+
+const MeetingNoteTutorialText = `
+### Meeting Notes
+
+Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the \`Dendron: Create Meeting Note\` command to create a note with a pre-built template for meetings.  Try it out!
+`;
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -42,8 +51,8 @@ export class TutorialInitializer
     const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.tutorial
     );
 
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
@@ -53,14 +62,22 @@ export class TutorialInitializer
 
     fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
 
+    const ABUserGroup = MEETING_NOTE_TUTORIAL_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+
+    const replaceString =
+      ABUserGroup === MeetingNoteTestGroups.show ? MeetingNoteTutorialText : "";
+
     // Tailor the tutorial text to the particular OS and for their workspace location.
     const options = {
       files: [path.join(vpath, "*.md")],
 
-      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g],
+      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g, /%MEETING_NOTE_CONTENT%/g],
       to: [
         process.platform === "darwin" ? "Cmd" : "Ctrl",
         path.join(opts.wsRoot, "dendron.code-workspace"),
+        replaceString,
       ],
     };
 
@@ -90,7 +107,7 @@ export class TutorialInitializer
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
           new ShowPreviewCommand(
-            PreviewPanelFactory.create(getExtension())
+            PreviewPanelFactory.create(ExtensionProvider.getExtension())
           ).execute();
         }, 1000);
       }
@@ -101,8 +118,8 @@ export class TutorialInitializer
       });
     }
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.normal
     );
 
     // backfill global state to metadata
@@ -129,31 +146,30 @@ export class TutorialInitializer
     }
 
     // Register a special analytics handler for the tutorial:
-    const extension = getExtension();
-    if (extension.windowWatcher) {
-      extension.windowWatcher.registerActiveTextEditorChangedHandler((e) => {
-        const fileName = e?.document.uri.fsPath;
+    const disposable = vscode.window.onDidChangeActiveTextEditor((e) => {
+      const fileName = e?.document.uri.fsPath;
 
-        let eventName: TutorialEvents | undefined;
+      let eventName: TutorialEvents | undefined;
 
-        if (fileName?.endsWith("tutorial.md")) {
-          eventName = TutorialEvents.Tutorial_0_Show;
-        } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
-          eventName = TutorialEvents.Tutorial_1_Show;
-        } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
-          eventName = TutorialEvents.Tutorial_2_Show;
-        } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
-          eventName = TutorialEvents.Tutorial_3_Show;
-        } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
-          eventName = TutorialEvents.Tutorial_4_Show;
-        } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
-          eventName = TutorialEvents.Tutorial_5_Show;
-        }
+      if (fileName?.endsWith("tutorial.md")) {
+        eventName = TutorialEvents.Tutorial_0_Show;
+      } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+        eventName = TutorialEvents.Tutorial_1_Show;
+      } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+        eventName = TutorialEvents.Tutorial_2_Show;
+      } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+        eventName = TutorialEvents.Tutorial_3_Show;
+      } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+        eventName = TutorialEvents.Tutorial_4_Show;
+      } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+        eventName = TutorialEvents.Tutorial_5_Show;
+      }
 
-        if (eventName) {
-          AnalyticsUtils.track(eventName);
-        }
-      });
-    }
+      if (eventName) {
+        AnalyticsUtils.track(eventName);
+      }
+    });
+
+    ExtensionProvider.getExtension().context.subscriptions.push(disposable);
   }
 }

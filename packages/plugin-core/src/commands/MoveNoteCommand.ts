@@ -49,6 +49,10 @@ type CommandOpts = {
   nonInteractive?: boolean;
   initialValue?: string;
   vaultName?: string;
+  /**
+   * If set to true, don't allow toggling vaults
+   * Used in RenameNoteCommand
+   */
   useSameVault?: boolean;
   /** Defaults to true. */
   allowMultiselect?: boolean;
@@ -95,6 +99,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       // If vault selection is enabled we alwaysPrompt selection mode,
       // hence disable toggling.
       vaultSelectCanToggle: false,
+      // allow users to select multiple notes to move
       extraButtons: [MultiSelectBtn.create({ pressed: false })],
     };
     if (vault) {

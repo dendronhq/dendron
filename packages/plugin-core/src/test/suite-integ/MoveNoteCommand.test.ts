@@ -10,10 +10,11 @@ import {
   AssertUtils,
   EngineTestUtilsV4,
   NoteTestUtilsV4,
+  PreSetupHookFunction,
   runJestHarnessV2,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2, HistoryService } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -24,16 +25,11 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import {
-  createEngineFactory,
-  runLegacyMultiWorkspaceTest,
-  runLegacySingleWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
-import { ExtensionProvider } from "../../ExtensionProvider";
+import { createEngineFactory, describeMultiWS } from "../testUtilsV3";
 
 const createEngine = createEngineFactory({
   renameNote: (opts: WorkspaceOpts) => {
@@ -76,8 +72,6 @@ const createEngine = createEngineFactory({
 });
 
 suite("MoveNoteCommand", function () {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
-
   _.map(
     _.omit(ENGINE_RENAME_PRESETS["NOTES"], [
       "NO_UPDATE",
@@ -85,18 +79,16 @@ suite("MoveNoteCommand", function () {
       "NO_UPDATE_DOUBLE_QUOTE_IN_FM",
     ]),
     (TestCase: TestPresetEntryV4, name) => {
-      test(name, (done) => {
-        const { testFunc, preSetupHook } = TestCase;
+      const { testFunc, preSetupHook } = TestCase;
 
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          postSetupHook: async ({ wsRoot, vaults }) => {
-            await preSetupHook({
-              wsRoot,
-              vaults,
-            });
-          },
-          onInit: async ({ vaults, wsRoot }) => {
+      describeMultiWS(
+        name,
+        {
+          preSetupHook,
+        },
+        () => {
+          test("THEN correct results", async () => {
+            const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
             const engineMock = createEngine({ wsRoot, vaults });
             const results = await testFunc({
               engine: engineMock,
@@ -105,20 +97,22 @@ suite("MoveNoteCommand", function () {
               initResp: {} as any,
             });
             await runJestHarnessV2(results, expect);
-            done();
-          },
-        });
-      });
+          });
+        }
+      );
     }
   );
 
-  test("update body", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN update body",
+    {
       postSetupHook: async ({ wsRoot, vaults }) => {
         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({ vaults, wsRoot }) => {
+    },
+    () => {
+      test("THEN correct results ", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
@@ -164,16 +158,15 @@ suite("MoveNoteCommand", function () {
             "foobar"
           );
           expect(active.document.getText().indexOf("hello") >= 0).toBeTruthy();
-          done();
         }
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("update hashtags correctly", (done) => {
-    let tagNote: NoteProps;
-    runLegacySingleWorkspaceTest({
-      ctx,
+  let tagNote: NoteProps;
+  describeMultiWS(
+    "WHEN update hashtag",
+    {
       postSetupHook: async ({ wsRoot, vaults }) => {
         tagNote = await NoteTestUtilsV4.createNote({
           vault: vaults[0],
@@ -187,7 +180,10 @@ suite("MoveNoteCommand", function () {
           body: "#test-tag.0",
         });
       },
-      onInit: async ({ vaults, wsRoot, engine }) => {
+    },
+    () => {
+      test("THEN update hashtags correctly", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -217,15 +213,13 @@ suite("MoveNoteCommand", function () {
             match: ["#new-0-tag.1"],
           })
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("moving a note into `tags.` turns links to hashtags", (done) => {
-    let tagNote: NoteProps;
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN moving a note into `tags.`",
+    {
       postSetupHook: async ({ wsRoot, vaults }) => {
         tagNote = await NoteTestUtilsV4.createNote({
           vault: vaults[0],
@@ -239,7 +233,10 @@ suite("MoveNoteCommand", function () {
           body: "[[not-really-tag]]",
         });
       },
-      onInit: async ({ vaults, wsRoot, engine }) => {
+    },
+    () => {
+      test("THEN  turns links to hashtags", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -269,15 +266,13 @@ suite("MoveNoteCommand", function () {
             match: ["#actually-tag"],
           })
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("moving a note out of `tags.` turns hashtags into regular links", (done) => {
-    let tagNote: NoteProps;
-    runLegacySingleWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN moving a note out of `tags.`",
+    {
       postSetupHook: async ({ wsRoot, vaults }) => {
         tagNote = await NoteTestUtilsV4.createNote({
           vault: vaults[0],
@@ -291,7 +286,10 @@ suite("MoveNoteCommand", function () {
           body: "#actually-tag",
         });
       },
-      onInit: async ({ vaults, wsRoot, engine }) => {
+    },
+    () => {
+      test("THEN turns hashtags into regular links", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -321,26 +319,26 @@ suite("MoveNoteCommand", function () {
             match: ["[[not-really-tag]]"],
           })
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("move note in same vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN move note in same vault",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({ engine, vaults, wsRoot }) => {
-        const notes = engine.notes;
+    },
+    () => {
+      test("THEN note moved correctly", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
-        const fooNote = NoteUtils.getNoteByFnameV5({
+        const fooNote = NoteUtils.getNoteByFnameFromEngine({
           fname: "foo",
-          notes,
           vault: vaultFrom,
-          wsRoot,
+          engine,
         }) as NoteProps;
         await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
@@ -372,75 +370,35 @@ suite("MoveNoteCommand", function () {
             nomatch: ["foo.md"],
           })
         ).toBeTruthy();
-        // note note in engine
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vaultFrom,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        // note foo is now a stub
+        const fooNoteAfter = _.toArray(engine.notes).find((note) => {
+          return note.fname === "foo";
+        });
+        expect(!_.isUndefined(fooNoteAfter) && fooNoteAfter.stub).toBeTruthy();
         // bar isn't in the first vault
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameFromEngine({
               fname: "bar",
-              notes,
               vault: vaultFrom,
-              wsRoot,
+              engine,
             })
           )
         ).toBeFalsy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  // TODO: this test is flaky
-  test.skip("replace existing note", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      onInit: async ({ engine, vaults, wsRoot }) => {
-        const notes = engine.notes;
-        const vaultFrom = vaults[0];
-        const vaultTo = vaults[0];
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vaultFrom,
-          wsRoot,
-        }) as NoteProps;
-        await WSUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
-        HistoryService.instance().subscribev2("lookupProvider", {
-          id: "move",
-          listener: async (event) => {
-            expect(event.action).toEqual("error");
-            done();
-          },
-        });
-        await cmd.run({
-          nonInteractive: true,
-          initialValue: "bar",
-          vaultName: vaultTo.fsPath,
-        });
-      },
-    });
-  });
-
-  test("move scratch note ", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN move scratch note",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({ engine, vaults, wsRoot }) => {
+    },
+    () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const ext = ExtensionProvider.getExtension();
         const notes = engine.notes;
         const vault1 = vaults[0];
@@ -481,18 +439,20 @@ suite("MoveNoteCommand", function () {
             match: [fname],
           })
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("move note to new vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN move note to new vault",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({ engine, vaults, wsRoot }) => {
+    },
+    () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
@@ -539,16 +499,17 @@ suite("MoveNoteCommand", function () {
             match: ["foo.md"],
           })
         ).toBeTruthy();
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        const fooNotes = _.toArray(engine.notes).filter((note) => {
+          return note.fname === "foo";
+        });
+        const vault1Foo = fooNotes.find(
+          (note) => note.vault.fsPath === "vault1"
+        );
+        const vault2Foo = fooNotes.find(
+          (note) => note.vault.fsPath === "vault2"
+        );
+        expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
+        expect(!_.isUndefined(vault2Foo)).toBeTruthy();
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({
@@ -559,19 +520,20 @@ suite("MoveNoteCommand", function () {
             })
           )
         ).toBeFalsy();
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
-
-  test("bulk-move: move 2 notes from different vaults to new vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN bulk-move: move 2 notes from different vaults to new vault",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         await ENGINE_HOOKS_MULTI.setupBasicMulti({ wsRoot, vaults });
       },
-      onInit: async ({ engine, vaults, wsRoot }) => {
+    },
+    () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
@@ -589,9 +551,7 @@ suite("MoveNoteCommand", function () {
 
         sinon
           .stub(VSCodeUtils, "showQuickPick")
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
+          .returns(Promise.resolve("proceed") as any);
         await cmd.execute({
           moves: [
             {
@@ -638,16 +598,10 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
 
-        expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
-        ).toBeTruthy();
+        const vault1Foo = _.toArray(engine.notes)
+          .filter((note) => note.fname === "foo")
+          .find((note) => note.vault.fsPath === "vault1");
+        expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({
@@ -684,19 +638,20 @@ suite("MoveNoteCommand", function () {
             wsRoot,
           })
         ).toBeTruthy();
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
-
-  test("bulk-move: move 2 notes from same vault to new vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "WHEN bulk-move: move 2 notes from same vault to new vault",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
-      onInit: async ({ engine, vaults, wsRoot }) => {
+    },
+    () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
@@ -712,9 +667,7 @@ suite("MoveNoteCommand", function () {
 
         sinon
           .stub(VSCodeUtils, "showQuickPick")
-          .returns(
-            Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
-          );
+          .returns(Promise.resolve("proceed") as any);
 
         await cmd.execute({
           moves: [
@@ -799,11 +752,13 @@ suite("MoveNoteCommand", function () {
             wsRoot,
           })
         ).toBeTruthy();
+      });
+    }
+  );
 
-        done();
-      },
-    });
-  });
+  const preSetupHook: PreSetupHookFunction = async ({ wsRoot, vaults }) => {
+    await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+  };
 
   const mockProvider: any = {
     provide: () => {},
@@ -811,55 +766,17 @@ suite("MoveNoteCommand", function () {
     onDidAccept: () => {},
   };
 
-  test("don't prompt vault selection if single vault", (done) => {
-    runLegacySingleWorkspaceTest({
-      ctx,
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        const vault = vaults[0];
-        const notes = engine.notes;
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault,
-          wsRoot,
-        }) as NoteProps;
-
-        await WSUtils.openNote(fooNote);
-        const lc =
-          ExtensionProvider.getExtension().lookupControllerFactory.create({
-            nodeType: "note",
-          });
-        const initialValue = path.basename(
-          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
-          ".md"
-        );
-        await lc.show({
-          title: "Move note",
-          placeholder: "foo",
-          provider: mockProvider,
-          initialValue,
-        });
-        expect(_.isEmpty(lc.quickPick.buttons)).toBeTruthy();
-
-        lc.onHide();
-        done();
-      },
-    });
-  });
-
-  test("prompt vault selection if multi vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async ({ wsRoot, vaults }) => {
-        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      onInit: async ({ engine, wsRoot, vaults }) => {
+  describeMultiWS(
+    "WHEN prompt vault selection if multi vault",
+    {
+      preSetupHook,
+      timeout: 3e6,
+    },
+    () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const notes = engine.notes;
         const vault1 = vaults[0];
-        // const vault2 = vaults[1];
         const fooNote = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes,
@@ -885,8 +802,7 @@ suite("MoveNoteCommand", function () {
         expect(lc.quickPick.buttons[0].pressed).toBeTruthy();
 
         lc.onHide();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 });

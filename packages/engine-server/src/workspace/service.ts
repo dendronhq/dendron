@@ -53,9 +53,11 @@ import {
 } from "../migrations";
 import { SeedService, SeedUtils } from "../seed";
 import { Git } from "../topics/git";
+import { WSMeta } from "../types";
 import {
   EngineUtils,
   getWSMetaFilePath,
+  openWSMetaFile,
   removeCache,
   writeWSMetaFile,
 } from "../utils";
@@ -144,7 +146,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   static async isWorkspaceVault(fpath: string) {
-    return fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
+    return (
+      // Config file exists
+      (await fs.pathExists(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE))) &&
+      // And is not a self contained vault
+      !(await fs.pathExists(path.join(fpath, FOLDERS.NOTES)))
+    );
   }
 
   public wsRoot: string;
@@ -482,12 +489,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     vault: DVault;
     remoteUrl: string;
   }) {
-    // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
-    await GitUtils.addToGitignore({
-      addPath: targetVault.fsPath,
-      root: wsRoot,
-    });
-
     // Now, initialize a repository in it
     const git = new Git({
       localUrl: path.join(wsRoot, targetVault.fsPath),
@@ -513,8 +514,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       if (!_.isNumber(err?.exitCode)) throw err;
     }
     await git.push({ remote, branch });
-    // Update `dendron.yml`, adding the remote to the converted vault
-    await this.markVaultAsRemoteInConfig(targetVault, remoteUrl);
     // Remove the vault folder from the tree of the root repository. Otherwise, the files will be there when
     // someone else pulls the root repo, which can break remote vault initialization. This doesn't delete the actual files.
     if (await fs.pathExists(path.join(wsRoot, ".git"))) {
@@ -527,10 +526,51 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       });
     }
 
+    const config = this.config;
+    ConfigUtils.updateVault(config, targetVault, (vault) => {
+      vault.remote = {
+        type: "git",
+        url: remoteUrl,
+      };
+      return vault;
+    });
+
+    let ignorePath: string = targetVault.fsPath;
+    if (config.dev?.enableSelfContainedVaults) {
+      // Move vault folder to the correct location
+
+      const newVaultPath = GitUtils.getDependencyPathWithRemote({
+        vault: targetVault,
+        remote: remoteUrl,
+      });
+      await fs.move(
+        path.join(wsRoot, targetVault.fsPath),
+        path.join(wsRoot, newVaultPath)
+      );
+
+      ConfigUtils.updateVault(config, targetVault, (vault) => {
+        vault.fsPath = newVaultPath;
+        return vault;
+      });
+      ignorePath = newVaultPath;
+    }
+
+    // Add the vault to the gitignore of root, so that it doesn't show up as part of root anymore
+    await GitUtils.addToGitignore({
+      addPath: ignorePath,
+      root: wsRoot,
+    });
+
+    await this.setConfig(config);
     return { remote, branch };
   }
 
-  /** Converts a remote vault to a local vault. */
+  /** Converts a remote vault to a local vault.
+   *
+   * If self contained vaults are enabled in the config, it will also move the
+   * vault folder to `dependencies/localhost/`. It will not convert the vault
+   * into a self contained vault however.
+   */
   async convertVaultLocal({
     wsRoot,
     vault: targetVault,
@@ -552,16 +592,29 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     });
     // Update `dendron.yml`, removing the remote from the converted vault
     const config = this.config;
-    const vaults = ConfigUtils.getVaults(config);
-    ConfigUtils.setVaults(
-      config,
-      vaults.map((vault) => {
-        if (VaultUtils.isEqualV2(vault, targetVault)) {
-          delete vault.remote;
-        }
+
+    ConfigUtils.updateVault(config, targetVault, (vault) => {
+      delete vault.remote;
+      return vault;
+    });
+
+    if (config.dev?.enableSelfContainedVaults) {
+      // Move vault folder to the correct location
+      const newVaultPath = GitUtils.getDependencyPathWithRemote({
+        vault: targetVault,
+        remote: null,
+      });
+      await fs.move(
+        path.join(wsRoot, targetVault.fsPath),
+        path.join(wsRoot, newVaultPath)
+      );
+
+      ConfigUtils.updateVault(config, targetVault, (vault) => {
+        vault.fsPath = newVaultPath;
         return vault;
-      })
-    );
+      });
+    }
+
     await this.setConfig(config);
   }
 
@@ -1491,6 +1544,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     // dendron-cli can overwrite port file. anything that needs the port should connect to `portFilePathExtension`
     const portFilePath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
+  }
+
+  getMeta(): WSMeta {
+    const fpath = getWSMetaFilePath({ wsRoot: this.wsRoot });
+    const meta = openWSMetaFile({ fpath });
+    return meta;
   }
 
   writeMeta(opts: { version: string }) {

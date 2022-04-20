@@ -14,6 +14,7 @@ import {
   getWSMetaFilePath,
   MetadataService,
   openWSMetaFile,
+  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -25,16 +26,11 @@ import semver from "semver";
 import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { ExtensionContext, window } from "vscode";
-import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../../commands/SetupWorkspace";
-import {
-  DEFAULT_LEGACY_VAULT_NAME,
-  GLOBAL_STATE,
-  WORKSPACE_ACTIVATION_CONTEXT,
-} from "../../constants";
+import { DEFAULT_LEGACY_VAULT_NAME, GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
@@ -178,7 +174,6 @@ suite("GIVEN SetupWorkspace Command", function () {
       workspaceState: ctx.workspaceState,
     });
     await resetCodeWorkspace();
-    await new ResetConfigCommand().execute({ scope: "all" });
     homeDirStub = TestEngineUtils.mockHomeDir();
     userConfigDirStub = mockUserConfigDir();
     wsFoldersStub = stubWSFolders(undefined);
@@ -228,8 +223,8 @@ suite("GIVEN SetupWorkspace Command", function () {
       test("THEN Dendron creates the workspace correctly", async () => {
         const wsRoot = tmpDir().name;
 
-        StateService.instance().setActivationContext(
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        MetadataService.instance().setActivationContext(
+          WorkspaceActivationContext.normal
         );
 
         const active = await _activate(ctx);
@@ -329,6 +324,7 @@ suite("GIVEN SetupWorkspace Command", function () {
             enableEditorDecorations: true,
             maxPreviewsCached: 10,
             maxNoteLength: 204800,
+            enableFullHierarchyNoteTitle: false,
           },
           preview: {
             enableFMTitle: true,
@@ -384,8 +380,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     describe("AND a new workspace is being created with a template initializer", () => {
       test("setup with template initializer", async () => {
         const wsRoot = tmpDir().name;
-        StateService.instance().setActivationContext(
-          WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+        MetadataService.instance().setActivationContext(
+          WorkspaceActivationContext.normal
         );
         const out = await _activate(ctx);
         // Not active yet, because there is no workspace
@@ -587,8 +583,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     test("not active, initial create ws", async () => {
       const wsRoot = tmpDir().name;
 
-      StateService.instance().setActivationContext(
-        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+      MetadataService.instance().setActivationContext(
+        WorkspaceActivationContext.normal
       );
 
       const out = await _activate(ctx);
@@ -620,8 +616,8 @@ suite("GIVEN SetupWorkspace Command", function () {
     test("THEN Dendron correctly creates a workspace", async () => {
       const wsRoot = tmpDir().name;
 
-      StateService.instance().setActivationContext(
-        WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+      MetadataService.instance().setActivationContext(
+        WorkspaceActivationContext.normal
       );
 
       const out = await _activate(ctx);
@@ -668,7 +664,6 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        await new ResetConfigCommand().execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;
@@ -713,7 +708,6 @@ suite("GIVEN a native workspace", function () {
           workspaceState: ctx.workspaceState,
         });
         await resetCodeWorkspace();
-        await new ResetConfigCommand().execute({ scope: "all" });
         homeDirStub = TestEngineUtils.mockHomeDir();
         userConfigDirStub = mockUserConfigDir();
         const wsRoot = tmpDir().name;
@@ -971,146 +965,6 @@ suite("WHEN migrate config", function () {
       });
     }
   );
-});
-
-suite("GIVEN Dendron plugin activation", function () {
-  let setInitialInstallSpy: sinon.SinonSpy;
-  let showTelemetryNoticeSpy: sinon.SinonSpy;
-  let mockHomeDirStub: sinon.SinonStub;
-
-  function stubDendronWhenNotFirstInstall() {
-    MetadataService.instance().setInitialInstall();
-  }
-
-  function stubDendronGlobalVersionNotSet(ctx: ExtensionContext) {
-    ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
-  }
-
-  function setupSpies() {
-    setInitialInstallSpy = sinon.spy(
-      MetadataService.instance(),
-      "setInitialInstall"
-    );
-    showTelemetryNoticeSpy = sinon.spy(AnalyticsUtils, "showTelemetryNotice");
-  }
-
-  async function afterHook() {
-    mockHomeDirStub.restore();
-    sinon.restore();
-  }
-
-  describe("AND WHEN not first install", () => {
-    describeMultiWS(
-      "AND WHEN activate",
-      {
-        preActivateHook: async () => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          stubDendronWhenNotFirstInstall();
-          setupSpies();
-        },
-        afterHook,
-        timeout: 1e4,
-      },
-      () => {
-        test("THEN set initial install not called", () => {
-          expect(setInitialInstallSpy.called).toBeFalsy();
-        });
-
-        test("THEN do not show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeFalsy();
-        });
-      }
-    );
-    describeMultiWS(
-      "AND WHEN firstInstall not set for old user",
-      {
-        preActivateHook: async () => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          stubDendronWhenNotFirstInstall();
-          setupSpies();
-          // when check for first install, should be empty
-          MetadataService.instance().deleteMeta("firstInstall");
-        },
-        afterHook,
-        timeout: 1e5,
-      },
-      () => {
-        test("THEN set initial install called", () => {
-          expect(
-            setInitialInstallSpy.calledWith(
-              Time.DateTime.fromISO("2021-06-22").toSeconds()
-            )
-          ).toBeTruthy();
-        });
-
-        test("THEN do not show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeFalsy();
-        });
-      }
-    );
-  });
-
-  describe("AND WHEN first install", () => {
-    describeMultiWS(
-      "AND WHEN activate",
-      {
-        preActivateHook: async ({ ctx }) => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          setupSpies();
-          stubDendronGlobalVersionNotSet(ctx);
-        },
-        afterHook,
-        timeout: 1e4,
-        noSetInstallStatus: true,
-      },
-      (ctx) => {
-        test("THEN set initial install called", () => {
-          expect(setInitialInstallSpy.called).toBeTruthy();
-        });
-
-        test("THEN global version set", () => {
-          expect(ctx.globalState.get(GLOBAL_STATE.VERSION)).toNotEqual(
-            undefined
-          );
-        });
-        test("THEN show telemetry notice", () => {
-          expect(showTelemetryNoticeSpy.called).toBeTruthy();
-        });
-      }
-    );
-  });
-
-  describe("AND WHEN secondary install on a fresh vscode instance", () => {
-    describeMultiWS(
-      "AND WHEN activate",
-      {
-        preActivateHook: async ({ ctx }) => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          // new instance, so fresh user-data. global storage is clean slate.
-          stubDendronGlobalVersionNotSet(ctx);
-          // but we have first install already recorded in metadata.
-          stubDendronWhenNotFirstInstall();
-          setupSpies();
-        },
-        afterHook,
-        timeout: 1e4,
-        noSetInstallStatus: true,
-      },
-      (ctx) => {
-        // we prevent this from happening in new vscode instances.
-        test("THEN set initial install is not called", () => {
-          expect(setInitialInstallSpy.called).toBeFalsy();
-        });
-
-        // but stil want to set this in the fresh globalStorage of the new vscode instance
-        test("THEN global version set", () => {
-          expect(ctx.globalState.get(GLOBAL_STATE.VERSION)).toNotEqual(
-            undefined
-          );
-        });
-      }
-    );
-  });
 });
 
 describe("shouldDisplayInactiveUserSurvey", () => {

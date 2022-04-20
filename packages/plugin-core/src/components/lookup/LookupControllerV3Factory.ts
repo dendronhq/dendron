@@ -25,16 +25,21 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
   create(opts?: LookupControllerV3CreateOpts): ILookupControllerV3 {
     const { vaults } = this.extension.getDWorkspace();
 
+    // disable vault selection if explicitly requested or we are looking at schemas
     const disableVaultSelection =
       (_.isBoolean(opts?.disableVaultSelection) &&
         opts?.disableVaultSelection) ||
       opts?.nodeType === "schema";
+
+    // --- start: multi vault selection check
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
+    // should vault toggle be pressed?
     const maybeVaultSelectButtonPressed = _.isUndefined(
       opts?.vaultButtonPressed
     )
       ? isMultiVault
       : isMultiVault && opts!.vaultButtonPressed;
+
     const maybeVaultSelectButton =
       opts?.nodeType === "note" && isMultiVault
         ? [
@@ -44,6 +49,7 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
             }),
           ]
         : [];
+    // --- end: multi vault selection check
     const buttons = opts?.buttons || maybeVaultSelectButton;
     const extraButtons = opts?.extraButtons || [];
 

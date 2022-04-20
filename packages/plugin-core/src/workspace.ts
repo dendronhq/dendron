@@ -49,7 +49,6 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import {
   NoteTraitManager,
   NoteTraitService,
@@ -61,7 +60,6 @@ import { BacklinkSortOrder } from "./types";
 import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
-import { CalendarView } from "./views/CalendarView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -69,6 +67,7 @@ import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
+import { CalendarView } from "./views/CalendarView";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -366,9 +365,6 @@ export class DendronExtension implements IDendronExtension {
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
 
-    // Instantiate TextDocumentService
-    context.subscriptions.push(TextDocumentServiceFactory.create(this));
-
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
   }
@@ -512,6 +508,7 @@ export class DendronExtension implements IDendronExtension {
         );
 
         const calendarView = new CalendarView(this);
+        this.treeViews[DendronTreeViewKey.CALENDAR_VIEW] = calendarView;
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             CalendarView.viewType,

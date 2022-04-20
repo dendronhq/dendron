@@ -591,7 +591,7 @@ export type VSCodeIdentifyProps = {
 export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
-  static _trackCommon({
+  private static _trackCommon({
     event,
     context,
     platformProps,
@@ -654,6 +654,7 @@ export class SegmentUtils {
         {
           ...SegmentUtils.getCommonProps(),
           ...rest,
+          os: getOS(),
         },
         {
           context: {

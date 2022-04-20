@@ -98,7 +98,7 @@ export class NoteGraphPanelFactory {
             const styles = GraphStyleService.getParsedStyles();
             if (styles) {
               this._panel!.webview.postMessage({
-                type: "onGraphStyleLoad",
+                type: GraphViewMessageEnum.onGraphStyleLoad,
                 data: {
                   styles,
                 },

@@ -20,6 +20,7 @@ import {
   DVault,
   LegacyDuplicateNoteBehavior,
   LegacyHierarchyConfig,
+  NoteChangeEntry,
   NoteProps,
   NotePropsDict,
   SEOProps,
@@ -50,6 +51,7 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
+import { VaultUtils } from "./vault";
 
 /**
  * Dendron utilities
@@ -1362,4 +1364,18 @@ export function getJournalTitle(
   }
 
   return undefined;
+}
+
+/**
+ * Helper function to get a subset of NoteChangeEntry's matching a
+ * particular status from an array
+ * @param entries
+ * @param status
+ * @returns
+ */
+export function extractNoteChangeEntriesByType(
+  entries: NoteChangeEntry[],
+  status: "create" | "delete" | "update"
+): NoteChangeEntry[] {
+  return entries.filter((entry) => entry.status === status);
 }

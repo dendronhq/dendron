@@ -426,6 +426,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  CREATE_MEETING_NOTE: {
+    key: "dendron.createMeetingNote",
+    title: `${CMD_PREFIX} Create Meeting Note`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",
     title: `${CMD_PREFIX} Lookup Schema`,
@@ -795,15 +800,20 @@ export enum GLOBAL_STATE {
    */
   INITIAL_SURVEY_SUBMITTED = "dendron.initial_survey_submitted",
   /**
+   * @deprecated
    * Checks if lapsed user survey was submitted.
    */
   LAPSED_USER_SURVEY_SUBMITTED = "dendron.lapsed_user_survey_submitted",
   /**
+   * @deprecated
    * Chekcs if inactive user survey was submitted.
    */
   INACTIVE_USER_SURVEY_SUBMITTED = "dendron.inactive_user_survey_submitted",
 }
 
+/**
+ * @deprecated
+ */
 export enum WORKSPACE_ACTIVATION_CONTEXT {
   // UNSET - Indicates this is the first Workspace Launch
   "NORMAL", // Normal Launch; No Special Behavior
@@ -811,37 +821,7 @@ export enum WORKSPACE_ACTIVATION_CONTEXT {
   "SEED_BROWSER", // Open with Seed Browser Webview
 }
 
-// export const GLOBAL_STATE = {
-//   VERSION: "dendron.version",
-//   /**
-//    * Set the first time a dendron workspace is activated
-//    */
-//   DENDRON_FIRST_WS: "dendron.first_ws",
-//   DENDRON_FIRST_WS_TUTORIAL_STEP: "dendron.first_ws.tutorial_step",
-//   /**
-//    * Extension is being debugged
-//    */
-//   VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
-// };
-
-// type ConfigEntry = {
-//   key: string;
-//   default?: any;
-// };
-// type ConfigDict = { [k: keyof typeof CONFIG]: ConfigEntry};
-
 export type ConfigKey = keyof typeof CONFIG;
-
-/**
-
-const _noteDateDesc = (type: "journal" | "scratch") =>
-  `date format used for ${type} notes`;
-const _noteNameDesc = (type: "journal" | "scratch") =>
-  `name used for ${type} notes`;
-const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
-  `strategy for adding new ${type} notes`;
-
-*/
 
 export const _noteAddBehaviorEnum = [
   "childOfDomain",
@@ -979,13 +959,6 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     type: "number",
     description:
       "port for server. If not set, will be randomly generated at startup.",
-  },
-  WATCH_FOR_NATIVE_WS: {
-    key: "dendron.watchForNativeWorkspace",
-    type: "boolean",
-    default: false,
-    description:
-      "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace.",
   },
   ENABLE_SELF_CONTAINED_VAULT_WORKSPACE: {
     key: DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,

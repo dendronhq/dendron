@@ -166,4 +166,44 @@ suite("GIVEN ShowPreview", function () {
       });
     }
   );
+
+  describeSingleWS(
+    "WHEN preview is open for a note containing link with .md in its name", //[[lorem.ipsum.mdone.first]]
+    {
+      ctx,
+    },
+    () => {
+      let note: NoteProps;
+      before(async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          wsRoot,
+          vault: vaults[0],
+          fname: "lorem.ipsum.mdone.first",
+          body: "Lorem ipsum",
+        });
+        note = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          wsRoot,
+          vault: vaults[0],
+          fname: "preview-link-test",
+          body: "[[lorem.ipsum.mdone.first]]",
+        });
+      });
+      test("THEN preview must link to the correct note", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const cmd = new ShowPreviewCommand(
+          PreviewPanelFactory.create(ExtensionProvider.getExtension())
+        );
+        // When opened from a menu, the file path will be passed as an argument
+        const path = vscode.Uri.file(NoteUtils.getFullPath({ note, wsRoot }));
+        const out = await cmd.run(path);
+        expect(out?.note).toBeTruthy();
+        expect(out!.note!.fname).toEqual(note.fname);
+        const links = out!.note!.links;
+        expect(links[0].value).toEqual("lorem.ipsum.mdone.first");
+      });
+    }
+  );
 });

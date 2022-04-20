@@ -1200,10 +1200,11 @@ export class NoteUtils {
 
   static normalizeFname(nodePath: string) {
     // remove md extension
+    nodePath = _.trim(nodePath);
     if (nodePath.endsWith(".md")) {
       nodePath = nodePath.slice(undefined, -3);
     }
-    return _.trim(nodePath);
+    return nodePath;
   }
 
   static isNoteProps(props: Partial<NoteProps>): props is NoteProps {

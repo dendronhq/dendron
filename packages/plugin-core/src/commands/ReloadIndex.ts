@@ -1,4 +1,5 @@
 import {
+  ConfigEvents,
   DendronError,
   DEngineClient,
   DVault,
@@ -150,6 +151,9 @@ export class ReloadIndexCommand extends BasicCommand<
       } else {
         message = `${vaultsToFix.length} vaults need to be marked as self contained vaults in your configuration file`;
       }
+      AnalyticsUtils.track(ConfigEvents.MissingSelfContainedVaultsMessageShow, {
+        vaultsToFix: vaultsToFix.length,
+      });
       const pick = await window.showWarningMessage(
         message,
         {
@@ -164,6 +168,9 @@ export class ReloadIndexCommand extends BasicCommand<
         pick,
       });
       if (pick === fixConfig) {
+        AnalyticsUtils.track(
+          ConfigEvents.MissingSelfContainedVaultsMessageAccept
+        );
         await doctor.executeDoctorActions({
           action: DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG,
           engine,

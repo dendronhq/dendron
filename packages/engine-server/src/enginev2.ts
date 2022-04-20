@@ -541,7 +541,7 @@ export class DendronEngineV2 implements DEngine {
     let notes = items.map((ent) => this.notes[ent.id]);
     if (!_.isUndefined(vault)) {
       notes = notes.filter((ent) => {
-        return VaultUtils.isEqualV2(vault, ent.vault);
+        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
       });
     }
     return {

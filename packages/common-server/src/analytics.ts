@@ -654,6 +654,7 @@ export class SegmentUtils {
         {
           ...SegmentUtils.getCommonProps(),
           ...rest,
+          os: getOS(),
         },
         {
           context: {

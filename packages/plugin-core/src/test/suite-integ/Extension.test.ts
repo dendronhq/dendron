@@ -4,102 +4,35 @@ import {
   InstallStatus,
   isNotUndefined,
   Time,
-  VaultUtils,
-  WorkspaceType,
 } from "@dendronhq/common-all";
-import { readYAMLAsync, tmpDir, writeYAML } from "@dendronhq/common-server";
+import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
   DConfig,
   DEPRECATED_PATHS,
-  EngineUtils,
-  getWSMetaFilePath,
   MetadataService,
-  openWSMetaFile,
-  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
-import _ from "lodash";
 import * as mocha from "mocha";
 import { after, afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
 import semver from "semver";
 import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
-import { ExtensionContext, window } from "vscode";
-import {
-  SetupWorkspaceCommand,
-  SetupWorkspaceOpts,
-} from "../../commands/SetupWorkspace";
-import { DEFAULT_LEGACY_VAULT_NAME, GLOBAL_STATE } from "../../constants";
+import { ExtensionContext } from "vscode";
+import { GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
-import { AnalyticsUtils } from "../../utils/analytics";
-import { ConfigMigrationUtils } from "../../utils/ConfigMigration";
 import { StartupUtils } from "../../utils/StartupUtils";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { DendronExtension } from "../../workspace";
-import { BlankInitializer } from "../../workspace/blankInitializer";
-import { TemplateInitializer } from "../../workspace/templateInitializer";
 import { _activate } from "../../_extension";
-import {
-  expect,
-  genDefaultSettings,
-  genEmptyWSFiles,
-  resetCodeWorkspace,
-} from "../testUtilsv2";
+import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   describeMultiWS,
-  describeSingleWS,
   runTestButSkipForWindows,
   setupBeforeAfter,
-  stubSetupWorkspace,
+  VSCodeTestUtils,
 } from "../testUtilsV3";
-
-function mockUserConfigDir() {
-  const dir = tmpDir().name;
-  const getCodeUserConfigDurStub = sinon.stub(
-    VSCodeUtils,
-    "getCodeUserConfigDir"
-  );
-  getCodeUserConfigDurStub.callsFake(() => {
-    const wrappedMethod = getCodeUserConfigDurStub.wrappedMethod;
-    const originalOut = wrappedMethod();
-    return {
-      userConfigDir: [dir, originalOut.delimiter].join(""),
-      delimiter: originalOut.delimiter,
-      osName: originalOut.osName,
-    };
-  });
-  return getCodeUserConfigDurStub;
-}
-
-function lapsedMessageTest({
-  done,
-  firstInstall,
-  firstWsInitialize,
-  lapsedUserMsgSendTime,
-  shouldDisplayMessage,
-  workspaceActivated = false,
-}: {
-  done: mocha.Done;
-  firstInstall?: number;
-  firstWsInitialize?: number;
-  lapsedUserMsgSendTime?: number;
-  workspaceActivated?: boolean;
-  shouldDisplayMessage: boolean;
-}) {
-  const svc = MetadataService.instance();
-  svc.setMeta("firstInstall", firstInstall);
-  svc.setMeta("firstWsInitialize", firstWsInitialize);
-  svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
-  svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
-  expect(StartupUtils.shouldDisplayLapsedUserMsg()).toEqual(
-    shouldDisplayMessage
-  );
-  done();
-}
 
 async function inactiveMessageTest(opts: {
   done: mocha.Done;
@@ -137,518 +70,6 @@ async function inactiveMessageTest(opts: {
   done();
 }
 
-function stubWSFolders(wsRoot: string | undefined) {
-  if (wsRoot === undefined) {
-    const stub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .value(undefined);
-    DendronExtension.workspaceFolders = () => undefined;
-    return stub;
-  }
-  const wsFolders = [
-    {
-      name: "root",
-      index: 0,
-      uri: vscode.Uri.parse(wsRoot),
-    },
-  ];
-  const stub = sinon
-    .stub(vscode.workspace, "workspaceFolders")
-    .value(wsFolders);
-  DendronExtension.workspaceFolders = () => wsFolders;
-  return stub;
-}
-
-suite("GIVEN SetupWorkspace Command", function () {
-  let homeDirStub: SinonStub;
-  let userConfigDirStub: SinonStub;
-  let wsFoldersStub: SinonStub;
-  this.timeout(6 * 1000);
-
-  let ctx: ExtensionContext;
-  beforeEach(async () => {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    // Required for StateService Singleton Init at the moment.
-    // eslint-disable-next-line no-new
-    new StateService({
-      globalState: ctx.globalState,
-      workspaceState: ctx.workspaceState,
-    });
-    await resetCodeWorkspace();
-    homeDirStub = TestEngineUtils.mockHomeDir();
-    userConfigDirStub = mockUserConfigDir();
-    wsFoldersStub = stubWSFolders(undefined);
-  });
-  afterEach(() => {
-    homeDirStub.restore();
-    userConfigDirStub.restore();
-    wsFoldersStub.restore();
-  });
-  const opts = {
-    noSetInstallStatus: true,
-  };
-
-  // TODO: This test case fails in Windows if the logic in setupBeforeAfter (stubs) is not there. Look into why that is the case
-  describeMultiWS("WHEN command is gathering inputs", opts, () => {
-    let showOpenDialog: sinon.SinonStub;
-
-    beforeEach(async () => {
-      const cmd = new SetupWorkspaceCommand();
-      showOpenDialog = sinon.stub(window, "showOpenDialog");
-      await cmd.gatherInputs();
-    });
-    afterEach(() => {
-      showOpenDialog.restore();
-    });
-
-    test("THEN file picker is opened", (done) => {
-      expect(showOpenDialog.calledOnce).toBeTruthy();
-      done();
-    });
-  });
-
-  describe("WHEN initializing a CODE workspace", function () {
-    this.timeout(6 * 1000);
-
-    describe("AND workspace has not been set up yet", () => {
-      test("THEN Dendon does not activate", async () => {
-        const resp = await _activate(ctx);
-        expect(resp).toBeFalsy();
-        const dendronState = MetadataService.instance().getMeta();
-        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
-      });
-    });
-
-    describe("AND a new workspace is being created", () => {
-      test("THEN Dendron creates the workspace correctly", async () => {
-        const wsRoot = tmpDir().name;
-
-        MetadataService.instance().setActivationContext(
-          WorkspaceActivationContext.normal
-        );
-
-        const active = await _activate(ctx);
-        // Not active yet, because there is no workspace
-        expect(active).toBeFalsy();
-        stubSetupWorkspace({
-          wsRoot,
-        });
-        const cmd = new SetupWorkspaceCommand();
-        await cmd.execute({
-          rootDirRaw: wsRoot,
-          skipOpenWs: true,
-          skipConfirmation: true,
-          workspaceInitializer: new BlankInitializer(),
-          selfContained: false,
-        });
-        const resp = await readYAMLAsync(path.join(wsRoot, "dendron.yml"));
-        expect(resp).toEqual({
-          version: 5,
-          dev: {
-            enablePreviewV2: true,
-          },
-          commands: {
-            lookup: {
-              note: {
-                selectionMode: "extract",
-                confirmVaultOnCreate: true,
-                vaultSelectionModeOnCreate: "smart",
-                leaveTrace: false,
-                bubbleUpCreateNew: true,
-                fuzzThreshold: 0.2,
-              },
-            },
-            randomNote: {},
-            copyNoteLink: {},
-            insertNote: {
-              initialValue: "templates",
-            },
-            insertNoteLink: {
-              aliasMode: "none",
-              enableMultiSelect: false,
-            },
-            insertNoteIndex: {
-              enableMarker: false,
-            },
-          },
-          workspace: {
-            vaults: [
-              {
-                fsPath: "vault",
-              },
-            ],
-            journal: {
-              dailyDomain: "daily",
-              name: "journal",
-              dateFormat: "y.MM.dd",
-              addBehavior: "childOfDomain",
-            },
-            scratch: {
-              name: "scratch",
-              dateFormat: "y.MM.dd.HHmmss",
-              addBehavior: "asOwnDomain",
-            },
-            task: {
-              name: "task",
-              dateFormat: "y.MM.dd",
-              addBehavior: "asOwnDomain",
-              statusSymbols: {
-                "": " ",
-                wip: "w",
-                done: "x",
-                assigned: "a",
-                moved: "m",
-                blocked: "b",
-                delegated: "l",
-                dropped: "d",
-                pending: "y",
-              },
-              prioritySymbols: {
-                H: "high",
-                M: "medium",
-                L: "low",
-              },
-              todoIntegration: false,
-              createTaskSelectionType: "selection2link",
-            },
-            graph: {
-              zoomSpeed: 1,
-            },
-            enableAutoCreateOnDefinition: false,
-            enableXVaultWikiLink: false,
-            enableRemoteVaultInit: true,
-            enableUserTags: true,
-            enableHashTags: true,
-            workspaceVaultSyncMode: "noCommit",
-            enableAutoFoldFrontmatter: false,
-            enableEditorDecorations: true,
-            maxPreviewsCached: 10,
-            maxNoteLength: 204800,
-            enableFullHierarchyNoteTitle: false,
-          },
-          preview: {
-            enableFMTitle: true,
-            enableNoteTitleForLink: true,
-            enableFrontmatterTags: true,
-            enableHashesForFMTags: false,
-            enableMermaid: true,
-            enablePrettyRefs: true,
-            enableKatex: true,
-            automaticallyShowPreview: false,
-          },
-          publishing: {
-            enableFMTitle: true,
-            enableFrontmatterTags: true,
-            enableHashesForFMTags: false,
-            enableKatex: true,
-            enableMermaid: true,
-            enableNoteTitleForLink: true,
-            copyAssets: true,
-            enablePrettyRefs: true,
-            siteHierarchies: ["root"],
-            writeStubs: false,
-            siteRootDir: "docs",
-            seo: {
-              title: "Dendron",
-              description: "Personal Knowledge Space",
-            },
-            github: {
-              enableEditLink: true,
-              editLinkText: "Edit this page on GitHub",
-              editBranch: "main",
-              editViewMode: "tree",
-            },
-            enableSiteLastModified: true,
-            enableRandomlyColoredTags: true,
-            enablePrettyLinks: true,
-            duplicateNoteBehavior: {
-              action: "useVault",
-              payload: ["vault"],
-            },
-          },
-        });
-
-        const dendronState = MetadataService.instance().getMeta();
-        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
-        expect(
-          await fs.readdir(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
-        ).toEqual(genEmptyWSFiles());
-      });
-    });
-
-    describe("AND a new workspace is being created with a template initializer", () => {
-      test("setup with template initializer", async () => {
-        const wsRoot = tmpDir().name;
-        MetadataService.instance().setActivationContext(
-          WorkspaceActivationContext.normal
-        );
-        const out = await _activate(ctx);
-        // Not active yet, because there is no workspace
-        expect(out).toBeFalsy();
-        stubSetupWorkspace({
-          wsRoot,
-        });
-
-        const cmd = new SetupWorkspaceCommand();
-        await cmd.execute({
-          rootDirRaw: wsRoot,
-          skipOpenWs: true,
-          skipConfirmation: true,
-          workspaceInitializer: new TemplateInitializer(),
-          selfContained: false,
-        } as SetupWorkspaceOpts);
-
-        const resp = await readYAMLAsync(path.join(wsRoot, "dendron.yml"));
-        expect(resp).toContain({
-          workspace: {
-            vaults: [
-              {
-                fsPath: "templates",
-                name: "dendron.templates",
-                seed: "dendron.templates",
-              },
-              {
-                fsPath: "vault",
-              },
-            ],
-            seeds: {
-              "dendron.templates": {},
-            },
-          },
-        });
-        const dendronState = MetadataService.instance().getMeta();
-        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeTruthy();
-        expect(
-          await fs.readdir(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
-        ).toEqual(genEmptyWSFiles());
-      });
-    });
-
-    describeSingleWS(
-      "WHEN a workspace exists",
-      {
-        preSetupHook: async () => {
-          DendronExtension.version = () => "0.0.1";
-        },
-      },
-      () => {
-        test("THEN Dendron initializes", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-          // check for meta
-          const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
-          const fpath = getWSMetaFilePath({ wsRoot });
-          const meta = openWSMetaFile({ fpath });
-          expect(
-            _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-          ).toBeTruthy();
-          expect(meta.version).toEqual("0.0.1");
-          expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
-          expect(_.values(engine.notes).length).toEqual(1);
-          const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-
-          const settings = fs.readJSONSync(
-            path.join(wsRoot, "dendron.code-workspace")
-          );
-          expect(settings).toEqual(genDefaultSettings());
-          expect(fs.readdirSync(vault)).toEqual(
-            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-          );
-        });
-      }
-    );
-
-    describeSingleWS("WHEN a workspace exists", {}, () => {
-      test("THEN Dendron initializes", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        DendronExtension.version = () => "0.0.1";
-        // check for meta
-        const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
-        const fpath = getWSMetaFilePath({ wsRoot });
-        const meta = openWSMetaFile({ fpath });
-        expect(
-          _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-        ).toBeTruthy();
-        expect(meta.version).toEqual("0.0.1");
-        expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
-        expect(_.values(engine.notes).length).toEqual(1);
-        const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-
-        const settings = fs.readJSONSync(
-          path.join(wsRoot, "dendron.code-workspace")
-        );
-        expect(settings).toEqual(genDefaultSettings());
-        expect(fs.readdirSync(vault)).toEqual(
-          [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-        );
-      });
-    });
-
-    describeSingleWS(
-      "WHEN a workspace exists, but it is missing the root.schema.yml",
-      {
-        postSetupHook: async ({ vaults, wsRoot }) => {
-          const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-          fs.removeSync(path.join(vault, "root.schema.yml"));
-        },
-      },
-      () => {
-        // Question mark because I'm not sure what this test is actually testing for.
-        test("THEN it still initializes?", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-          expect(fs.readdirSync(vault)).toEqual(
-            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-          );
-        });
-      }
-    );
-
-    describe("test conditions for displaying lapsed user message", () => {
-      test("Workspace Not Initialized; Message Never Sent; > 1 Day ago", (done) => {
-        lapsedMessageTest({
-          done,
-          firstInstall: 1,
-          shouldDisplayMessage: true,
-        });
-      });
-
-      test("Workspace Not Initialized; Message Never Sent; < 1 Day ago", (done) => {
-        lapsedMessageTest({
-          done,
-          firstInstall: Time.now().toSeconds(),
-          shouldDisplayMessage: false,
-        });
-      });
-
-      test("Workspace Not Initialized; Message Sent < 1 week ago", (done) => {
-        lapsedMessageTest({
-          done,
-          firstInstall: 1,
-          lapsedUserMsgSendTime: Time.now().toSeconds(),
-          shouldDisplayMessage: false,
-        });
-      });
-
-      test("Workspace Not Initialized; Message Sent > 1 week ago", (done) => {
-        lapsedMessageTest({
-          done,
-          firstInstall: 1,
-          lapsedUserMsgSendTime: 1,
-          shouldDisplayMessage: true,
-        });
-      });
-
-      test("Workspace Already Initialized", (done) => {
-        lapsedMessageTest({
-          done,
-          firstInstall: 1,
-          firstWsInitialize: 1,
-          shouldDisplayMessage: false,
-        });
-      });
-    });
-
-    describe("firstWeekSinceInstall", () => {
-      describe("GIVEN first week", () => {
-        test("THEN isFirstWeek is true", (done) => {
-          const svc = MetadataService.instance();
-          svc.setInitialInstall();
-
-          const actual = AnalyticsUtils.isFirstWeek();
-          expect(actual).toBeTruthy();
-          done();
-        });
-      });
-      describe("GIVEN not first week", () => {
-        test("THEN isFirstWeek is false", (done) => {
-          const svc = MetadataService.instance();
-          const ONE_WEEK = 604800;
-          const NOW = Time.now().toSeconds();
-          const TWO_WEEKS_BEFORE = NOW - 2 * ONE_WEEK;
-          svc.setMeta("firstInstall", TWO_WEEKS_BEFORE);
-
-          const actual = AnalyticsUtils.isFirstWeek();
-          expect(actual).toBeFalsy();
-          done();
-        });
-      });
-    });
-  });
-
-  describe("WHEN initializing a NATIVE workspace", function () {
-    this.timeout(6 * 1000);
-
-    test("not active, initial create ws", async () => {
-      const wsRoot = tmpDir().name;
-
-      MetadataService.instance().setActivationContext(
-        WorkspaceActivationContext.normal
-      );
-
-      const out = await _activate(ctx);
-      // Shouldn't have activated because there is no workspace yet
-      expect(out).toBeFalsy();
-
-      stubSetupWorkspace({
-        wsRoot,
-      });
-      const cmd = new SetupWorkspaceCommand();
-      await cmd.execute({
-        workspaceType: WorkspaceType.NATIVE,
-        rootDirRaw: wsRoot,
-        skipOpenWs: true,
-        skipConfirmation: true,
-        workspaceInitializer: new BlankInitializer(),
-        selfContained: false,
-      });
-      expect(
-        await fs.pathExists(path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE))
-      ).toBeTruthy();
-      expect(
-        await fs.pathExists(path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME))
-      ).toBeFalsy();
-    });
-  });
-
-  describe("WHEN initializing a self contained vault as a workspace", () => {
-    test("THEN Dendron correctly creates a workspace", async () => {
-      const wsRoot = tmpDir().name;
-
-      MetadataService.instance().setActivationContext(
-        WorkspaceActivationContext.normal
-      );
-
-      const out = await _activate(ctx);
-      // Shouldn't have activated because there is no workspace yet
-      expect(out).toBeFalsy();
-
-      stubSetupWorkspace({
-        wsRoot,
-      });
-      const cmd = new SetupWorkspaceCommand();
-      await cmd.execute({
-        workspaceType: WorkspaceType.CODE,
-        rootDirRaw: wsRoot,
-        skipOpenWs: true,
-        skipConfirmation: true,
-        workspaceInitializer: new BlankInitializer(),
-        selfContained: true,
-      });
-      const firstFile = await fs.pathExists(
-        path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE)
-      );
-      expect(firstFile).toBeTruthy();
-      const secondFile = await fs.pathExists(
-        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
-      expect(secondFile).toBeTruthy();
-    });
-  });
-});
-
 // These tests run on Windows too actually, but fail on the CI. Skipping for now.
 suite("GIVEN a native workspace", function () {
   this.timeout(6 * 1000);
@@ -666,7 +87,7 @@ suite("GIVEN a native workspace", function () {
         });
         await resetCodeWorkspace();
         homeDirStub = TestEngineUtils.mockHomeDir();
-        userConfigDirStub = mockUserConfigDir();
+        userConfigDirStub = VSCodeTestUtils.mockUserConfigDir();
         const wsRoot = tmpDir().name;
         const docsRoot = path.join(wsRoot, "docs");
         await fs.ensureDir(docsRoot);
@@ -675,7 +96,7 @@ suite("GIVEN a native workspace", function () {
           path.join(docsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
           ConfigUtils.genDefaultConfig()
         );
-        wsFoldersStub = stubWSFolders(wsRoot);
+        wsFoldersStub = VSCodeTestUtils.stubWSFolders(wsRoot);
       },
       afterHook: async () => {
         homeDirStub.restore();
@@ -710,13 +131,13 @@ suite("GIVEN a native workspace", function () {
         });
         await resetCodeWorkspace();
         homeDirStub = TestEngineUtils.mockHomeDir();
-        userConfigDirStub = mockUserConfigDir();
+        userConfigDirStub = VSCodeTestUtils.mockUserConfigDir();
         const wsRoot = tmpDir().name;
         writeYAML(
           path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
           ConfigUtils.genDefaultConfig()
         );
-        wsFoldersStub = stubWSFolders(wsRoot);
+        wsFoldersStub = VSCodeTestUtils.stubWSFolders(wsRoot);
       },
       afterHook: async () => {
         homeDirStub.restore();
@@ -843,130 +264,6 @@ suite(
     });
   }
 );
-
-suite("WHEN migrate config", function () {
-  let promptSpy: sinon.SinonSpy;
-  let confirmationSpy: sinon.SinonSpy;
-  let mockHomeDirStub: sinon.SinonStub;
-
-  async function beforeSetup({ version }: { version: string }) {
-    mockHomeDirStub = TestEngineUtils.mockHomeDir();
-    DendronExtension.version = () => version;
-  }
-
-  async function afterHook() {
-    mockHomeDirStub.restore();
-    sinon.restore();
-  }
-
-  function setupSpies() {
-    promptSpy = sinon.spy(ConfigMigrationUtils, "maybePromptConfigMigration");
-    confirmationSpy = sinon.spy(
-      ConfigMigrationUtils,
-      "showConfigMigrationConfirmationMessage"
-    );
-  }
-
-  describeMultiWS(
-    "GIVEN: current version is 0.83.0 and config is legacy",
-    {
-      modConfigCb: (config) => {
-        config.version = 4;
-        return config;
-      },
-      preSetupHook: async () => {
-        setupSpies();
-        await beforeSetup({ version: "0.83.0" });
-      },
-      afterHook,
-    },
-    () => {
-      test("THEN: config migration is prompted on init", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(4);
-
-        expect(promptSpy.returnValues[0]).toEqual(true);
-        expect(confirmationSpy.called).toBeTruthy();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.83.0 and config is up to date",
-    {
-      modConfigCb: (config) => {
-        config.version = 5;
-        return config;
-      },
-      preSetupHook: async () => {
-        setupSpies();
-        await beforeSetup({ version: "0.83.0" });
-      },
-      afterHook,
-    },
-    () => {
-      test("THEN: config migration is not prompted on init", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(5);
-
-        expect(promptSpy.returnValues[0]).toEqual(false);
-        expect(confirmationSpy.called).toBeFalsy();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.84.0 and config is legacy",
-    {
-      modConfigCb: (config) => {
-        config.version = 4;
-        return config;
-      },
-      preSetupHook: async () => {
-        setupSpies();
-        await beforeSetup({ version: "0.84.0" });
-      },
-      afterHook,
-    },
-    () => {
-      test("THEN: config migration is prompted on init", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(4);
-
-        expect(promptSpy.returnValues[0]).toEqual(true);
-        expect(confirmationSpy.called).toBeTruthy();
-      });
-    }
-  );
-
-  describeMultiWS(
-    "GIVEN: current version is 0.84.0 and config is up to date",
-    {
-      modConfigCb: (config) => {
-        config.version = 5;
-        return config;
-      },
-      preSetupHook: async () => {
-        setupSpies();
-        await beforeSetup({ version: "0.84.0" });
-      },
-      afterHook,
-    },
-    () => {
-      test("THEN: config migration is not prompted on init", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = ws.config;
-        expect(config.version).toEqual(5);
-
-        expect(promptSpy.returnValues[0]).toEqual(false);
-        expect(confirmationSpy.called).toBeFalsy();
-      });
-    }
-  );
-});
 
 describe("shouldDisplayInactiveUserSurvey", () => {
   const ONE_WEEK = 604800;

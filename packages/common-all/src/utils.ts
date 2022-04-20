@@ -51,7 +51,6 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { VaultUtils } from "./vault";
 
 /**
  * Dendron utilities

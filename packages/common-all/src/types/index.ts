@@ -63,19 +63,9 @@ export type NotesCache = {
   notes: NotesCacheEntryMap;
 };
 export type NotesCacheEntryMap = { [key: string]: NotesCacheEntry };
-export type NotesCacheEntry =
-  | {
-      hash: string;
-      data: Omit<NoteProps, "body">;
-      status?: "create" | "delete";
-    }
-  | NotesCacheUpdateEntry;
-
-export type NotesCacheUpdateEntry = {
+export type NotesCacheEntry = {
   hash: string;
-  prevData: Omit<NoteProps, "body">;
   data: Omit<NoteProps, "body">;
-  status?: "update";
 };
 
 export type DendronSiteFM = {

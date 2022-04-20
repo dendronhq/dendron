@@ -27,7 +27,7 @@ export class Extensions extends EngineExtension {
   /**
    * Get Dendron recommended extensions
    */
-  static getDendronVSCodeExtnsion() {
+  static getDendronExtensionRecommendations() {
     return _.filter(Extensions.configEntries(), (ent) => {
       return _.isUndefined(ent.action);
     }).map((ent) => {

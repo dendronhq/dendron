@@ -15,13 +15,10 @@ import {
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
-  MigrationEvents,
-  NativeWorkspaceEvents,
   Time,
   TutorialEvents,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
@@ -31,11 +28,8 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
-  FileAddWatcher,
   HistoryService,
   MetadataService,
-  MigrationChangeSetStatus,
-  MigrationUtils,
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -88,7 +82,6 @@ import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
-import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { StartupUtils } from "./utils/StartupUtils";
@@ -130,59 +123,6 @@ class ExtensionUtils {
       );
     }
   };
-
-  static async runMigrationsIfNecessary({
-    wsService,
-    currentVersion,
-    previousWorkspaceVersion,
-    dendronConfig,
-    maybeWsSettings,
-  }: {
-    wsService: WorkspaceService;
-    currentVersion: string;
-    previousWorkspaceVersion: string;
-    dendronConfig: IntermediateDendronConfig;
-    maybeWsSettings?: WorkspaceSettings;
-  }) {
-    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
-      previousWorkspaceVersion,
-      currentVersion,
-    });
-    // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
-    const changes = await wsService.runMigrationsIfNecessary({
-      currentVersion,
-      previousVersion: previousWorkspaceVersion,
-      dendronConfig,
-      workspaceInstallStatus,
-      wsConfig: maybeWsSettings,
-    });
-    Logger.info({
-      ctx: "runMigrationsIfNecessary",
-      changes,
-      workspaceInstallStatus,
-    });
-    if (changes.length > 0) {
-      changes.forEach((change: MigrationChangeSetStatus) => {
-        const event = _.isUndefined(change.error)
-          ? MigrationEvents.MigrationSucceeded
-          : MigrationEvents.MigrationFailed;
-
-        AnalyticsUtils.track(
-          event,
-          MigrationUtils.getMigrationAnalyticProps(change)
-        );
-      });
-    } else {
-      // no migration changes.
-      // see if we need to force a config migration.
-      // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
-      ConfigMigrationUtils.maybePromptConfigMigration({
-        dendronConfig,
-        wsService,
-        currentVersion,
-      });
-    }
-  }
 
   static setWorkspaceContextOnActivate(
     dendronConfig: IntermediateDendronConfig
@@ -343,7 +283,7 @@ class ExtensionUtils {
         (vault) => vault.workspace !== undefined
       ).length,
       numSeedVaults: vaults.filter((vault) => vault.seed !== undefined).length,
-      activatedSuccess,
+      activationSucceeded: activatedSuccess,
       hasLegacyPreview: MarkdownUtils.hasLegacyPreview(),
       enabledExportPodV2,
       hasWorkspaceFile: !_.isUndefined(workspaceFile),
@@ -386,41 +326,6 @@ class ExtensionUtils {
       ).then(() => {
         MetadataService.instance().deleteMeta("welcomeClickedTime");
       });
-    }
-  }
-
-  // run this when we don't have an active workspace
-  static watchForNativeWorkspace(ext: DendronExtension) {
-    const ctx = "watchForNativeWorkspace";
-    const context = ext.context;
-    const watchForNativeWorkspace = vscode.workspace
-      .getConfiguration()
-      .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
-    if (watchForNativeWorkspace) {
-      Logger.info({
-        ctx,
-        msg: "watching for a native workspace to be created",
-      });
-
-      togglePluginActiveContext(false);
-      const autoInit = new FileAddWatcher(
-        vscode.workspace.workspaceFolders?.map(
-          (vscodeFolder) => vscodeFolder.uri.fsPath
-        ) || [],
-        CONSTANTS.DENDRON_CONFIG_FILE,
-        async (filePath) => {
-          Logger.info({
-            ctx,
-            msg: "New `dendron.yml` file has been created, re-activating dendron",
-          });
-          AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
-            filePath,
-          });
-          await ext.deactivate();
-          activate(context);
-        }
-      );
-      ext.addDisposable(autoInit);
     }
   }
 }
@@ -712,7 +617,7 @@ export async function _activate(
         ws.type === WorkspaceType.CODE
           ? wsService.getCodeWorkspaceSettingsSync()
           : undefined;
-      await ExtensionUtils.runMigrationsIfNecessary({
+      await StartupUtils.runMigrationsIfNecessary({
         wsService,
         currentVersion,
         previousWorkspaceVersion,
@@ -773,7 +678,7 @@ export async function _activate(
 
       // stats
       const platform = getOS();
-      const extensions = Extensions.getDendronVSCodeExtnsion().map(
+      const extensions = Extensions.getDendronExtensionRecommendations().map(
         ({ id, extension: ext }) => {
           return {
             id,
@@ -894,7 +799,6 @@ export async function _activate(
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });
-      ExtensionUtils.watchForNativeWorkspace(ws);
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

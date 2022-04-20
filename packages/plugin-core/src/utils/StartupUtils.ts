@@ -4,9 +4,12 @@ import {
   ConfirmStatus,
   ExtensionEvents,
   InstallStatus,
+  IntermediateDendronConfig,
+  MigrationEvents,
   SurveyEvents,
   Time,
   VSCodeEvents,
+  WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -14,19 +17,78 @@ import {
   InactvieUserMsgStatusEnum,
   LapsedUserSurveyStatusEnum,
   MetadataService,
+  MigrationChangeSetStatus,
+  MigrationUtils,
+  WorkspaceService,
 } from "@dendronhq/engine-server";
-import { IDendronExtension } from "../dendronExtensionInterface";
-import { AnalyticsUtils } from "./analytics";
+import _ from "lodash";
+import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../commands/Doctor";
-import { Duration } from "luxon";
-import { showWelcome } from "../WelcomeUtils";
-import { StateService } from "../services/stateService";
 import { GLOBAL_STATE, INCOMPATIBLE_EXTENSIONS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { Logger } from "../logger";
+import { StateService } from "../services/stateService";
 import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { showWelcome } from "../WelcomeUtils";
+import { AnalyticsUtils } from "./analytics";
+import { ConfigMigrationUtils } from "./ConfigMigration";
 
 export class StartupUtils {
+  static async runMigrationsIfNecessary({
+    wsService,
+    currentVersion,
+    previousWorkspaceVersion,
+    dendronConfig,
+    maybeWsSettings,
+  }: {
+    wsService: WorkspaceService;
+    currentVersion: string;
+    previousWorkspaceVersion: string;
+    dendronConfig: IntermediateDendronConfig;
+    maybeWsSettings?: WorkspaceSettings;
+  }) {
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion,
+      currentVersion,
+    });
+    // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
+    const changes = await wsService.runMigrationsIfNecessary({
+      currentVersion,
+      previousVersion: previousWorkspaceVersion,
+      dendronConfig,
+      workspaceInstallStatus,
+      wsConfig: maybeWsSettings,
+    });
+    Logger.info({
+      ctx: "runMigrationsIfNecessary",
+      changes,
+      workspaceInstallStatus,
+    });
+    if (changes.length > 0) {
+      changes.forEach((change: MigrationChangeSetStatus) => {
+        const event = _.isUndefined(change.error)
+          ? MigrationEvents.MigrationSucceeded
+          : MigrationEvents.MigrationFailed;
+
+        AnalyticsUtils.track(
+          event,
+          MigrationUtils.getMigrationAnalyticProps(change)
+        );
+      });
+    } else {
+      // no migration changes.
+      // see if we need to force a config migration.
+      // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
+      ConfigMigrationUtils.maybePromptConfigMigration({
+        dendronConfig,
+        wsService,
+        currentVersion,
+      });
+    }
+  }
+
   static showMissingDefaultConfigMessageIfNecessary(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;

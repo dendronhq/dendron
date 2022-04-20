@@ -13,9 +13,8 @@ import {
   getStage,
   GitEvents,
   InstallStatus,
+  IntermediateDendronConfig,
   isDisposable,
-  MigrationEvents,
-  NativeWorkspaceEvents,
   Time,
   TutorialEvents,
   VaultUtils,
@@ -29,11 +28,8 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
-  FileAddWatcher,
   HistoryService,
   MetadataService,
-  MigrationChangeSetStatus,
-  MigrationUtils,
   WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -41,10 +37,10 @@ import * as Sentry from "@sentry/node";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import os from "os";
 import {
   CURRENT_AB_TESTS,
   SelfContainedVaultsTestGroups,
@@ -62,8 +58,10 @@ import {
   WebViewPanelFactory,
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
+import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
 import { CONFIG, DendronContext, DENDRON_COMMANDS } from "./constants";
@@ -74,6 +72,7 @@ import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeP
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
+import { FeatureShowcase } from "./FeatureShowcase";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -84,7 +83,6 @@ import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
-import { ConfigMigrationUtils } from "./utils/ConfigMigration";
 import { MarkdownUtils } from "./utils/md";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { StartupUtils } from "./utils/StartupUtils";
@@ -96,8 +94,6 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
-import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
-import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -125,6 +121,34 @@ class ExtensionUtils {
       );
     }
   };
+
+  static setWorkspaceContextOnActivate(
+    dendronConfig: IntermediateDendronConfig
+  ) {
+    if (VSCodeUtils.isDevMode()) {
+      vscode.commands.executeCommand(
+        "setContext",
+        DendronContext.DEV_MODE,
+        true
+      );
+    }
+    // used for enablement of legacy show preview command.
+    VSCodeUtils.setContext(
+      DendronContext.HAS_LEGACY_PREVIEW,
+      MarkdownUtils.hasLegacyPreview()
+    );
+
+    //used for enablement of export pod v2 command
+    VSCodeUtils.setContext(
+      DendronContext.ENABLE_EXPORT_PODV2,
+      dendronConfig.dev?.enableExportPodV2 ?? false
+    );
+
+    // @deprecate: should track as property of workspace init instead
+    if (dendronConfig.dev?.enableExportPodV2) {
+      AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
+    }
+  }
 
   /**
    * Setup segment client
@@ -163,10 +187,124 @@ class ExtensionUtils {
     }
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
-
     wsService.writePort(port);
-
     return port;
+  }
+
+  static getAndTrackInstallStatus({
+    UUIDPathExists,
+    previousGlobalVersion,
+    currentVersion,
+  }: {
+    UUIDPathExists: boolean;
+    currentVersion: string;
+    previousGlobalVersion: string;
+  }) {
+    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
+      previousGlobalVersion,
+      currentVersion,
+    });
+
+    // check if this is an install event, but a repeated one on a new instance.
+    let isSecondaryInstall = false;
+
+    // set initial install ^194e5bw7so9g
+    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+      // even if it's an initial install for this instance of vscode, it may not be for this machine.
+      // in that case, we should skip setting the initial install time since it's already set.
+      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
+      const metadata = MetadataService.instance().getMeta();
+      if (metadata.firstInstall === undefined && !UUIDPathExists) {
+        MetadataService.instance().setInitialInstall();
+      } else {
+        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
+        // tied to initial install to happen in this instance of VSCode once for the first time
+        isSecondaryInstall = true;
+      }
+    }
+
+    // TODO: temporary backfill
+    if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
+      const time = Time.DateTime.fromISO("2021-06-22");
+      MetadataService.instance().setInitialInstall(time.toSeconds());
+    }
+    return { extensionInstallStatus, isSecondaryInstall };
+  }
+
+  /**
+   * Analytics related to initializing the workspace
+   * @param param0
+   */
+  static async trackWorkspaceInit({
+    durationReloadWorkspace,
+    ext,
+    activatedSuccess,
+  }: {
+    durationReloadWorkspace: number;
+    ext: DendronExtension;
+    activatedSuccess: boolean;
+  }) {
+    const engine = ext.getEngine();
+    const workspace = ext.getDWorkspace();
+    const {
+      wsRoot,
+      vaults,
+      type: workspaceType,
+      config: dendronConfig,
+    } = workspace;
+    let numNotes = _.size(engine.notes);
+    if (numNotes > 10) {
+      numNotes = Math.round(numNotes / 10) * 10;
+    }
+    const numSchemas = _.size(engine.schemas);
+    const codeWorkspacePresent = await fs.pathExists(
+      path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
+    );
+    const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
+    const siteUrl = publishigConfig.siteUrl;
+    const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
+    const { workspaceFile, workspaceFolders } = vscode.workspace;
+
+    const trackProps = {
+      duration: durationReloadWorkspace,
+      noCaching: dendronConfig.noCaching || false,
+      numNotes,
+      numSchemas,
+      numVaults: vaults.length,
+      workspaceType,
+      codeWorkspacePresent,
+      selfContainedVaultsEnabled:
+        dendronConfig.dev?.enableSelfContainedVaults || false,
+      numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained).length,
+      numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
+      numWorkspaceVaults: vaults.filter(
+        (vault) => vault.workspace !== undefined
+      ).length,
+      numSeedVaults: vaults.filter((vault) => vault.seed !== undefined).length,
+      activationSucceeded: activatedSuccess,
+      hasLegacyPreview: MarkdownUtils.hasLegacyPreview(),
+      enabledExportPodV2,
+      hasWorkspaceFile: !_.isUndefined(workspaceFile),
+      workspaceFolders: _.isUndefined(workspaceFolders)
+        ? 0
+        : workspaceFolders.length,
+    };
+    if (siteUrl !== undefined) {
+      _.set(trackProps, "siteUrl", siteUrl);
+    }
+
+    AnalyticsUtils.identify({
+      numNotes,
+      // Which side of all currently running tests is this user on?
+      splitTests: CURRENT_AB_TESTS.map(
+        (test) =>
+          // Formatted as `testName.groupName` since group names are not necessarily unique
+          `${test.name}.${test.getUserGroup(
+            SegmentClient.instance().anonymousId
+          )}`
+      ),
+    });
+    AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
   }
 
   /**
@@ -210,9 +348,10 @@ export function activate(context: vscode.ExtensionContext) {
   return;
 }
 
-async function reloadWorkspace() {
+async function reloadWorkspace(opts: { extension: DendronExtension }) {
   const ctx = "reloadWorkspace";
-  const ws = getDWorkspace();
+  const { extension } = opts;
+  const ws = extension.getDWorkspace();
   const maybeEngine = await WSUtils.reloadWorkspace();
   if (!maybeEngine) {
     return maybeEngine;
@@ -228,7 +367,8 @@ async function reloadWorkspace() {
 
   vscode.window.showInformationMessage("Dendron is active");
   Logger.info({ ctx, msg: "exit" });
-  await postReloadWorkspace();
+
+  await postReloadWorkspace({ extension });
   HistoryService.instance().add({
     source: "extension",
     action: "initialized",
@@ -236,9 +376,21 @@ async function reloadWorkspace() {
   return maybeEngine;
 }
 
-async function postReloadWorkspace() {
+async function postReloadWorkspace(opts: { extension: DendronExtension }) {
   const ctx = "postReloadWorkspace";
-  const previousWsVersion = StateService.instance().getWorkspaceVersion();
+  const { extension } = opts;
+  const wsService = extension.workspaceService;
+  if (!wsService) {
+    const errorMsg = "No workspace service found.";
+    Logger.error({
+      msg: errorMsg,
+      error: new DendronError({ message: errorMsg }),
+    });
+    return;
+  }
+
+  const wsMeta = wsService.getMeta();
+  const previousWsVersion = wsMeta.version;
   // stats
   // NOTE: this is legacy to upgrade .code-workspace specific settings
   // we are moving everything to dendron.yml
@@ -250,9 +402,7 @@ async function postReloadWorkspace() {
       .then((changes) => {
         Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
       });
-    await StateService.instance().setWorkspaceVersion(
-      DendronExtension.version()
-    );
+    wsService.writeMeta({ version: DendronExtension.version() });
   } else {
     const newVersion = DendronExtension.version();
     if (semver.lt(previousWsVersion, newVersion)) {
@@ -269,9 +419,7 @@ async function postReloadWorkspace() {
           previousWsVersion,
           newVersion,
         });
-        await StateService.instance().setWorkspaceVersion(
-          DendronExtension.version()
-        );
+        wsService.writeMeta({ version: DendronExtension.version() });
       } catch (err) {
         Logger.error({
           msg: "error upgrading",
@@ -346,7 +494,6 @@ export async function _activate(
     globalState: context.globalState,
     workspaceState: context.workspaceState,
   });
-
   Logger.info({
     ctx,
     stage,
@@ -408,52 +555,32 @@ export async function _activate(
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();
     const previousGlobalVersion = stateService.getGlobalVersion();
-    const extensionInstallStatus = VSCodeUtils.getInstallStatusForExtension({
-      previousGlobalVersion,
-      currentVersion,
-    });
+    const { extensionInstallStatus, isSecondaryInstall } =
+      ExtensionUtils.getAndTrackInstallStatus({
+        UUIDPathExists,
+        currentVersion,
+        previousGlobalVersion,
+      });
 
-    // check if this is an install event, but a repeated one on a new instance.
-    let isSecondaryInstall = false;
-
-    // set initial install ^194e5bw7so9g
-    if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-      // even if it's an initial install for this instance of vscode, it may not be for this machine.
-      // in that case, we should skip setting the initial install time since it's already set.
-      // we also check if we already set uuid for this machine. If so, this is not a true initial install.
-      const metadata = MetadataService.instance().getMeta();
-      if (metadata.firstInstall === undefined && !UUIDPathExists) {
-        MetadataService.instance().setInitialInstall();
-      } else {
-        // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
-        // tied to initial install to happen in this instance of VSCode once for the first time
-        isSecondaryInstall = true;
-      }
-
-      if (!isSecondaryInstall) {
-        // For new users, we want to roll out self contained vaults to some of
-        // them. We'll do that by setting the global config, so all workspace
-        // they create from now on will be self contained, and they can turn off
-        // the config if there are problems.
-        const split = SELF_CONTAINED_VAULTS_TEST.getUserGroup(
-          SegmentClient.instance().anonymousId
+    if (
+      !isSecondaryInstall &&
+      extensionInstallStatus === InstallStatus.INITIAL_INSTALL
+    ) {
+      // For new users, we want to roll out self contained vaults to some of
+      // them. We'll do that by setting the global config, so all workspace
+      // they create from now on will be self contained, and they can turn off
+      // the config if there are problems.
+      const split = SELF_CONTAINED_VAULTS_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+      if (split === SelfContainedVaultsTestGroups.selfContained) {
+        VSCodeUtils.setWorkspaceConfig(
+          DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
+          true,
+          vscode.ConfigurationTarget.Global
         );
-        if (split === SelfContainedVaultsTestGroups.selfContained) {
-          VSCodeUtils.setWorkspaceConfig(
-            DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
-            true,
-            vscode.ConfigurationTarget.Global
-          );
-        }
       }
     }
-
-    // TODO: temporary backfill
-    if (_.isUndefined(MetadataService.instance().getMeta().firstInstall)) {
-      const time = Time.DateTime.fromISO("2021-06-22");
-      MetadataService.instance().setInitialInstall(time.toSeconds());
-    }
-
     const assetUri = VSCodeUtils.getAssetUri(context);
 
     Logger.info({
@@ -461,7 +588,6 @@ export async function _activate(
       msg: "initializeWorkspace",
       wsType: ws.type,
       currentVersion,
-      previousWorkspaceVersion,
       previousGlobalVersion,
       extensionInstallStatus,
     });
@@ -477,51 +603,24 @@ export async function _activate(
       const dendronConfig = wsImpl.config;
 
       // --- Get Version State
-      const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
-        previousWorkspaceVersion,
-        currentVersion,
-      });
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
-      const maybeWsSettings =
-        maybeWs.type === WorkspaceType.CODE
-          ? wsService.getCodeWorkspaceSettingsSync()
-          : undefined;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       ExtensionUtils.trackWelcomeClicked();
-      // see [[Migration|dendron://dendron.docs/pkg.plugin-core.t.migration]] for overview of migration process
-      const changes = await wsService.runMigrationsIfNecessary({
+      const maybeWsSettings =
+        ws.type === WorkspaceType.CODE
+          ? wsService.getCodeWorkspaceSettingsSync()
+          : undefined;
+      await StartupUtils.runMigrationsIfNecessary({
+        wsService,
         currentVersion,
-        previousVersion: previousWorkspaceVersion,
+        previousWorkspaceVersion,
+        maybeWsSettings,
         dendronConfig,
-        workspaceInstallStatus,
-        wsConfig: maybeWsSettings,
       });
-
-      if (changes.length > 0) {
-        changes.forEach((change: MigrationChangeSetStatus) => {
-          const event = _.isUndefined(change.error)
-            ? MigrationEvents.MigrationSucceeded
-            : MigrationEvents.MigrationFailed;
-
-          AnalyticsUtils.track(
-            event,
-            MigrationUtils.getMigrationAnalyticProps(change)
-          );
-        });
-      } else {
-        // no migration changes.
-        // see if we need to force a config migration.
-        // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
-        ConfigMigrationUtils.maybePromptConfigMigration({
-          dendronConfig,
-          wsService,
-          currentVersion,
-        });
-      }
 
       // check for missing default config keys and prompt for a backfill.
       StartupUtils.showMissingDefaultConfigMessageIfNecessary({
@@ -576,7 +675,7 @@ export async function _activate(
 
       // stats
       const platform = getOS();
-      const extensions = Extensions.getVSCodeExtnsion().map(
+      const extensions = Extensions.getDendronExtensionRecommendations().map(
         ({ id, extension: ext }) => {
           return {
             id,
@@ -588,10 +687,6 @@ export async function _activate(
 
       Logger.info({
         ctx,
-        workspaceInstallStatus,
-        currentVersion,
-        previousWorkspaceVersion,
-        previousGlobalVersion,
         platform,
         extensions,
         vaults: wsImpl.vaults,
@@ -643,8 +738,15 @@ export async function _activate(
           )
         );
       }
-      const reloadSuccess = await reloadWorkspace();
+      const reloadSuccess = await reloadWorkspace({ extension: ws });
       const durationReloadWorkspace = getDurationMilliseconds(start);
+
+      await ExtensionUtils.trackWorkspaceInit({
+        durationReloadWorkspace,
+        activatedSuccess: !!reloadSuccess,
+        ext: ws,
+      });
+
       if (!reloadSuccess) {
         HistoryService.instance().add({
           source: "extension",
@@ -653,74 +755,10 @@ export async function _activate(
         return false;
       }
 
-      if (VSCodeUtils.isDevMode()) {
-        vscode.commands.executeCommand(
-          "setContext",
-          DendronContext.DEV_MODE,
-          true
-        );
-      }
-
-      // used for enablement of legacy show preview command.
-      VSCodeUtils.setContext(
-        DendronContext.HAS_LEGACY_PREVIEW,
-        MarkdownUtils.hasLegacyPreview()
-      );
-
-      //used for enablement of export pod v2 command
-      VSCodeUtils.setContext(
-        DendronContext.ENABLE_EXPORT_PODV2,
-        dendronConfig.dev?.enableExportPodV2 ?? false
-      );
-
-      if (dendronConfig.dev?.enableExportPodV2) {
-        AnalyticsUtils.track(ConfigEvents.EnabledExportPodV2);
-      }
-      // round to nearest 10th
-      let numNotes = _.size(ws.getEngine().notes);
-      if (numNotes > 10) {
-        numNotes = Math.round(numNotes / 10) * 10;
-      }
+      ExtensionUtils.setWorkspaceContextOnActivate(dendronConfig);
 
       MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ws, context, requireActiveWorkspace: true });
-
-      const codeWorkspacePresent = await fs.pathExists(
-        path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
-      );
-      AnalyticsUtils.identify({
-        numNotes,
-        // Which side of all currently running tests is this user on?
-        splitTests: CURRENT_AB_TESTS.map(
-          (test) =>
-            // Formatted as `testName.groupName` since group names are not necessarily unique
-            `${test.name}.${test.getUserGroup(
-              SegmentClient.instance().anonymousId
-            )}`
-        ),
-      });
-
-      const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
-      const siteUrl = publishigConfig.siteUrl;
-
-      const trackProps = {
-        duration: durationReloadWorkspace,
-        noCaching: dendronConfig.noCaching || false,
-        numNotes,
-        numVaults: vaults.length,
-        workspaceType: ws.type,
-        codeWorkspacePresent,
-        selfContainedVaultsEnabled:
-          dendronConfig.dev?.enableSelfContainedVaults || false,
-        numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained)
-          .length,
-        numRemoteVaults: vaults.filter(VaultUtils.isRemote).length,
-        numWorkspaceVaults: vaults.filter(
-          (vault) => vault.workspace !== undefined
-        ).length,
-        numSeedVaults: vaults.filter((vault) => vault.seed !== undefined)
-          .length,
-      };
 
       // Track contributors to repositories, but do so in the background so
       // initialization isn't delayed.
@@ -737,12 +775,6 @@ export async function _activate(
           Sentry.captureException(err);
         });
 
-      if (siteUrl !== undefined) {
-        _.set(trackProps, "siteUrl", siteUrl);
-      }
-
-      AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
-
       // on first install, warn if extensions are incompatible ^dlx35gstwsun
       if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
         StartupUtils.warnIncompatibleExtensions({ ext: ws });
@@ -752,40 +784,18 @@ export async function _activate(
         await ws.activateWatchers();
         togglePluginActiveContext(true);
       }
+
+      // Show the feature showcase toast one minute after initialization.
+      const ONE_MINUTE_IN_MS = 60_000;
+      setTimeout(() => {
+        const showcase = new FeatureShowcase();
+        showcase.show();
+      }, ONE_MINUTE_IN_MS);
+
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });
-
-      const watchForNativeWorkspace = vscode.workspace
-        .getConfiguration()
-        .get<boolean>(CONFIG.WATCH_FOR_NATIVE_WS.key);
-      if (watchForNativeWorkspace) {
-        Logger.info({
-          ctx,
-          msg: "watching for a native workspace to be created",
-        });
-
-        togglePluginActiveContext(false);
-        const autoInit = new FileAddWatcher(
-          vscode.workspace.workspaceFolders?.map(
-            (vscodeFolder) => vscodeFolder.uri.fsPath
-          ) || [],
-          CONSTANTS.DENDRON_CONFIG_FILE,
-          async (filePath) => {
-            Logger.info({
-              ctx,
-              msg: "New `dendron.yml` file has been created, re-activating dendron",
-            });
-            AnalyticsUtils.track(NativeWorkspaceEvents.DetectedInNonDendronWS, {
-              filePath,
-            });
-            await ws.deactivate();
-            activate(context);
-          }
-        );
-        ws.addDisposable(autoInit);
-      }
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
@@ -858,6 +868,7 @@ async function showWelcomeOrWhatsNew({
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
+  const metadataService = MetadataService.instance();
   switch (extensionInstallStatus) {
     case InstallStatus.INITIAL_INSTALL: {
       Logger.info({
@@ -874,8 +885,7 @@ async function showWelcomeOrWhatsNew({
         isSecondaryInstall,
       });
 
-      // set the global version of dendron ^oncxlt645b5r
-      await StateService.instance().setGlobalVersion(version);
+      metadataService.setGlobalVersion(version);
 
       // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
       if (!SegmentClient.instance().hasOptedOut) {
@@ -892,7 +902,8 @@ async function showWelcomeOrWhatsNew({
         version,
         previousExtensionVersion,
       });
-      await StateService.instance().setGlobalVersion(version);
+
+      metadataService.setGlobalVersion(version);
 
       // ^t6dxodie048o
       const toastWording = UPGRADE_TOAST_WORDING_TEST.getUserGroup(

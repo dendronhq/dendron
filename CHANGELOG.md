@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.91.0 (2022-04-19)
+
+
+### Features Dendron
+
+* **workspace:** Meeting Notes ([#2727](https://github.com/dendronhq/dendron/issues/2727)) ([8ea1d1b](https://github.com/dendronhq/dendron/commit/8ea1d1b8e6247fec3e636c26da3f98e047026a6b))
+
+
+
+
+
 # 0.90.0 (2022-04-12)
 
 

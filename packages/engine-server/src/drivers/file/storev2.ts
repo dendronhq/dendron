@@ -47,6 +47,7 @@ import {
   DNoteLoc,
   NoteChangeUpdateEntry,
   DNodeUtils,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -200,6 +201,15 @@ export class FileStorage implements DStore {
     });
   }
 
+  /**
+   *
+   * @param id id of note to be deleted
+   * @param opts EngineDeleteOptsV2 the flag `replaceWithNewStub` is used
+   *             for a specific case where this method is called from
+   *             `renameNote`. TODO: remove this flag so that this is handled
+   *             automatically.
+   * @returns
+   */
   async deleteNote(
     id: string,
     opts?: EngineDeleteOptsV2
@@ -235,11 +245,28 @@ export class FileStorage implements DStore {
 
     // if have children, keep this node around as a stub
     if (!_.isEmpty(noteToDelete.children)) {
-      this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
-      const prevNote = { ...noteToDelete };
-      noteToDelete.stub = true;
-      this.updateNote(noteToDelete);
-      out.push({ note: noteToDelete, status: "update", prevNote });
+      if (!opts?.replaceWithNewStub) {
+        this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
+        const prevNote = { ...noteToDelete };
+        noteToDelete.stub = true;
+        this.updateNote(noteToDelete);
+        out.push({ note: noteToDelete, status: "update", prevNote });
+      } else {
+        // the delete operation originated from rename.
+        // since _noteToDelete) in this case is renamed and
+        // moved to another location, simply adding stub: true
+        // will not work.
+        // we need a fresh stub note that will fill in the old note's place.
+        const replacingStub = NoteUtils.create({
+          // the replacing stub should not keep the old note's body and link.
+          // otherwise, it will be captured while processing links and will
+          // fail because this note is not actually in the file system.
+          ..._.omit(noteToDelete, ["id", "links", "body"]),
+          stub: true,
+        });
+        this.writeNote(replacingStub);
+        out.push({ note: replacingStub, status: "create" });
+      }
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -872,7 +899,6 @@ export class FileStorage implements DStore {
       newLoc.alias = newNoteTitle;
     }
 
-    // const notesToChange = NoteUtils.getNotesWithLinkTo({
     let notesChangedEntries: NoteChangeEntry[] = [];
     const notesWithLinkTo = NoteUtils.getNotesWithLinkTo({
       note: oldNote,
@@ -885,7 +911,7 @@ export class FileStorage implements DStore {
     });
 
     // update note body of all notes that have changed
-    notesWithLinkTo.forEach(async (n) => {
+    await asyncLoopOneAtATime(notesWithLinkTo, async (n) => {
       const out = await this.processNoteChangedByRename({
         note: n,
         oldLoc,
@@ -895,8 +921,6 @@ export class FileStorage implements DStore {
         notesChangedEntries.push(out);
       }
     });
-
-    await Promise.all(notesChangedEntries);
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
@@ -913,6 +937,10 @@ export class FileStorage implements DStore {
         vname: newLoc.vaultName!,
       })!,
       title: newNoteTitle,
+      // when renaming, we are moving a note into a completely different hierarchy. ^pojmz0g80gds
+      // we are not concerned with the children it has, so the new note
+      // shouldn't inherit the old note's children.
+      children: [],
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note
@@ -930,6 +958,11 @@ export class FileStorage implements DStore {
     ) {
       // The file is being renamed to itself. We do this to rename a header.
       this.logger.info({ ctx, msg: "Renaming the file to same name" });
+
+      // we remove the children [[here|../packages/engine-server/src/drivers/file/storev2.ts#^pojmz0g80gds]],
+      // but we don't want that in this case. we need to add the old note's children back in
+      newNote.children = oldNote.children;
+
       const out = await this.writeNote(newNote, { updateExisting: true });
       changeFromWrite = out.data;
     } else {
@@ -938,6 +971,7 @@ export class FileStorage implements DStore {
       try {
         changedFromDelete = await this.deleteNote(oldNote.id, {
           metaOnly: true,
+          replaceWithNewStub: true,
         });
       } catch (err) {
         throw new DendronError({

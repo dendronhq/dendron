@@ -4,6 +4,10 @@ import _ from "lodash";
 import os from "os";
 import path from "path";
 
+export enum ShowcaseEntry {
+  TryMeetingNotes = "TryMeetingNotes",
+}
+
 type Metadata = Partial<{
   /**
    * When was dendron first installed
@@ -26,6 +30,10 @@ type Metadata = Partial<{
    */
   inactiveUserMsgStatus: InactvieUserMsgStatusEnum;
   /**
+   * The status of lapsed user message.
+   */
+  lapsedUserSurveyStatus: LapsedUserSurveyStatusEnum;
+  /**
    * The status of initial survey.
    */
   initialSurveyStatus: InitialSurveyStatusEnum;
@@ -45,6 +53,18 @@ type Metadata = Partial<{
    * Time when the welcome button was clicked
    */
   welcomeClickedTime: number;
+  /**
+   * Time when feature showcase mssages have been shown.
+   */
+  featureShowcase: { [key in ShowcaseEntry]?: number };
+  /**
+   * Global version of Dendron
+   */
+  version: string;
+  /**
+   *
+   */
+  workspaceActivationContext: WorkspaceActivationContext;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -55,6 +75,18 @@ export enum InactvieUserMsgStatusEnum {
 export enum InitialSurveyStatusEnum {
   submitted = "submitted",
   cancelled = "cancelled",
+}
+
+export enum LapsedUserSurveyStatusEnum {
+  submitted = "submitted",
+  cancelled = "cancelled",
+}
+
+export enum WorkspaceActivationContext {
+  // UNSET - Indicates this is the first Workspace Launch
+  "normal", // Normal Launch; No Special Behavior
+  "tutorial", // Launch the Tutorial
+  "seedBrowser", // Open with Seed Browser Webview
 }
 
 let _singleton: MetadataService | undefined;
@@ -98,6 +130,30 @@ export class MetadataService {
     return false;
   }
 
+  getFeatureShowcaseStatus(key: ShowcaseEntry) {
+    const featureShowcaseData = this.getMeta().featureShowcase;
+    if (!featureShowcaseData) {
+      return undefined;
+    }
+
+    return featureShowcaseData[key];
+  }
+  
+  getGlobalVersion() {
+    return this.getMeta().version || "0.0.0";
+  }
+
+  getLapsedUserSurveyStatus() {
+    return this.getMeta().lapsedUserSurveyStatus;
+  }
+
+  getActivationContext() {
+    return (
+      this.getMeta().workspaceActivationContext ??
+      WorkspaceActivationContext.normal
+    );
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -112,38 +168,61 @@ export class MetadataService {
    */
   setInitialInstall(time?: number) {
     time ||= Time.now().toSeconds();
-    return this.setMeta("firstInstall", time);
+    this.setMeta("firstInstall", time);
   }
 
   setFirstWsInitialize() {
-    return this.setMeta("firstWsInitialize", Time.now().toSeconds());
+    this.setMeta("firstWsInitialize", Time.now().toSeconds());
   }
 
   setLapsedUserMsgSendTime() {
-    return this.setMeta("lapsedUserMsgSendTime", Time.now().toSeconds());
+    this.setMeta("lapsedUserMsgSendTime", Time.now().toSeconds());
   }
 
   setDendronWorkspaceActivated() {
-    return this.setMeta("dendronWorkspaceActivated", Time.now().toSeconds());
+    this.setMeta("dendronWorkspaceActivated", Time.now().toSeconds());
   }
 
   setFirstLookupTime() {
-    return this.setMeta("firstLookupTime", Time.now().toSeconds());
+    this.setMeta("firstLookupTime", Time.now().toSeconds());
   }
 
   setLastLookupTime() {
-    return this.setMeta("lastLookupTime", Time.now().toSeconds());
+    this.setMeta("lastLookupTime", Time.now().toSeconds());
   }
 
   setInactiveUserMsgSendTime() {
-    return this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
+    this.setMeta("inactiveUserMsgSendTime", Time.now().toSeconds());
   }
 
   setInactiveUserMsgStatus(value: InactvieUserMsgStatusEnum) {
-    return this.setMeta("inactiveUserMsgStatus", value);
+    this.setMeta("inactiveUserMsgStatus", value);
   }
 
   setInitialSurveyStatus(value: InitialSurveyStatusEnum) {
-    return this.setMeta("initialSurveyStatus", value);
+    this.setMeta("initialSurveyStatus", value);
+  }
+
+  setLapsedUserSurveyStatus(value: LapsedUserSurveyStatusEnum) {
+    this.setMeta("lapsedUserSurveyStatus", value);
+  }
+
+  setGlobalVersion(value: string) {
+    this.setMeta("version", value);
+  }
+
+  setFeatureShowcaseStatus(key: ShowcaseEntry) {
+    const meta = this.getMeta();
+
+    if (!meta.featureShowcase) {
+      meta.featureShowcase = {};
+    }
+    meta.featureShowcase[key] = Time.now().toSeconds();
+
+    return this.setMeta("featureShowcase", meta.featureShowcase);
+  }
+
+  setActivationContext(context: WorkspaceActivationContext) {
+    this.setMeta("workspaceActivationContext", context);
   }
 }

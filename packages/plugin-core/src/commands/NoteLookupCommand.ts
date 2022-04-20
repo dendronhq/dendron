@@ -415,9 +415,9 @@ export class NoteLookupCommand
                 ExtensionProvider.getDWorkspace().config
               );
               if (item.traits) {
-                item.traits.push(journalTrait);
+                item.traits.push(journalTrait.id);
               } else {
-                item.traits = [journalTrait];
+                item.traits = [journalTrait.id];
               }
             }
           } else if (

@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.90.0",
+  "version": "0.91.0",
   "engines": {
     "vscode": "^1.58.0"
   },
@@ -196,6 +196,10 @@
       {
         "command": "dendron.createScratchNote",
         "title": "Dendron: Create Scratch Note"
+      },
+      {
+        "command": "dendron.createMeetingNote",
+        "title": "Dendron: Create Meeting Note"
       },
       {
         "command": "dendron.lookupSchema",
@@ -531,6 +535,10 @@
         {
           "command": "dendron.createScratchNote",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.createMeetingNote",
+          "title": "Dendron: Create Meeting Note"
         },
         {
           "command": "dendron.lookupSchema",
@@ -925,11 +933,6 @@
           "type": "number",
           "description": "port for server. If not set, will be randomly generated at startup."
         },
-        "dendron.watchForNativeWorkspace": {
-          "type": "boolean",
-          "default": false,
-          "description": "When enabled, Dendron will watch non-Dendron workspaces to detect when one is created, and will automatically initialize itself. Otherwise, you may need to reload VSCode after creating a native workspace."
-        },
         "dendron.enableSelfContainedVaultWorkspace": {
           "type": "boolean",
           "default": false,
@@ -1078,8 +1081,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.90.0",
-    "@dendronhq/engine-test-utils": "^0.90.0",
+    "@dendronhq/common-test-utils": "^0.91.0",
+    "@dendronhq/engine-test-utils": "^0.91.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1115,11 +1118,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.90.0",
-    "@dendronhq/common-all": "^0.90.0",
-    "@dendronhq/common-server": "^0.90.0",
-    "@dendronhq/engine-server": "^0.90.0",
-    "@dendronhq/pods-core": "^0.90.0",
+    "@dendronhq/api-server": "^0.91.0",
+    "@dendronhq/common-all": "^0.91.0",
+    "@dendronhq/common-server": "^0.91.0",
+    "@dendronhq/engine-server": "^0.91.0",
+    "@dendronhq/pods-core": "^0.91.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

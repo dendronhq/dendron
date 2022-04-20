@@ -22,18 +22,32 @@ $text-color: #111 !default;
 
 // TODO_START: hardcoded
 .vscode-light {
+	.calendar {
+		table,
+		td,
+		th {
+			border: none; // added to remove border from calendar view
+		}
+	}
 	table,
 	td,
 	th {
-		border: 1px solid black; padding:10px;
+		border: 1px solid black; padding:10px; // required for tables in preview
 	}
 }
 
 .vscode-dark{
+	.calendar { 
+		table,
+		td,
+		th {
+			border: none; // added to remove border from calendar view
+		}
+	}
 	table,
 	td,
 	th {
-		border: 1px solid white; padding:10px;
+		border: 1px solid white; padding:10px; // required for tables in preview
 	}
 }
 // TODO_END

@@ -1,8 +1,10 @@
 import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
-import { SeedService } from "@dendronhq/engine-server";
+import {
+  MetadataService,
+  SeedService,
+  WorkspaceActivationContext,
+} from "@dendronhq/engine-server";
 import { commands } from "vscode";
-import { WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
-import { StateService } from "../services/stateService";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -41,8 +43,8 @@ export abstract class SeedCommandBase<
   }
 
   protected async onUpdatingWorkspace() {
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.SEED_BROWSER
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.seedBrowser
     );
   }
 

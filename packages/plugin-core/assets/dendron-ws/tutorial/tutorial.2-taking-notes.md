@@ -56,6 +56,8 @@ When combined with hierarchies, this fast lookup system enables you to find your
 
 If you want to search for content within the notes, you can use VS Code's built-in search tools with `%KEYBINDING%+Shift+F`.
 
+%MEETING_NOTE_CONTENT%
+
 ### Next Steps
 
 - Tutorial Step 3: [[Linking Your Notes|tutorial.3-linking-your-notes]]

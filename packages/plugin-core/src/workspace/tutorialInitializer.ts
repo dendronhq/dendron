@@ -6,18 +6,20 @@ import {
   TutorialEvents,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
   InitialSurveyStatusEnum,
   MetadataService,
+  WorkspaceActivationContext,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
+import { MeetingNoteTestGroups, MEETING_NOTE_TUTORIAL_TEST } from "../abTests";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
-import { GLOBAL_STATE, WORKSPACE_ACTIVATION_CONTEXT } from "../constants";
+import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
@@ -27,6 +29,12 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
+
+const MeetingNoteTutorialText = `
+### Meeting Notes
+
+Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the \`Dendron: Create Meeting Note\` command to create a note with a pre-built template for meetings.  Try it out!
+`;
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -43,8 +51,8 @@ export class TutorialInitializer
     const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.TUTORIAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.tutorial
     );
 
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
@@ -54,14 +62,22 @@ export class TutorialInitializer
 
     fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
 
+    const ABUserGroup = MEETING_NOTE_TUTORIAL_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+
+    const replaceString =
+      ABUserGroup === MeetingNoteTestGroups.show ? MeetingNoteTutorialText : "";
+
     // Tailor the tutorial text to the particular OS and for their workspace location.
     const options = {
       files: [path.join(vpath, "*.md")],
 
-      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g],
+      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g, /%MEETING_NOTE_CONTENT%/g],
       to: [
         process.platform === "darwin" ? "Cmd" : "Ctrl",
         path.join(opts.wsRoot, "dendron.code-workspace"),
+        replaceString,
       ],
     };
 
@@ -102,8 +118,8 @@ export class TutorialInitializer
       });
     }
 
-    StateService.instance().setActivationContext(
-      WORKSPACE_ACTIVATION_CONTEXT.NORMAL
+    MetadataService.instance().setActivationContext(
+      WorkspaceActivationContext.normal
     );
 
     // backfill global state to metadata

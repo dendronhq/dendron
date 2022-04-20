@@ -71,6 +71,7 @@ module.exports = {
     lookupPanelView: resolveApp("src/views/DendronLookupPanelView"),
     schemaPageView: resolveApp("src/views/DendronSchemaPageView"),
     graphView: resolveApp("src/views/DendronGraphPanelView"),
+    calendarPanelView: resolveApp("src/views/DendronCalendarPanelView"),
   },
   yarnLockFile: resolveApp("yarn.lock"),
   testsSetup: resolveModule(resolveApp, "src/setupTests"),

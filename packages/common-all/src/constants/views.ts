@@ -99,7 +99,7 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     desc: "Calendar View",
     label: "Calendar View",
     type: "webview",
-    bundleName: "TODO",
+    bundleName: "calendarPanelView",
   },
   [DendronTreeViewKey.LOOKUP_VIEW]: {
     desc: "Lookup View",

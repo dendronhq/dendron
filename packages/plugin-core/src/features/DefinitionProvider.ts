@@ -13,7 +13,6 @@ import { TargetKind } from "../commands/GoToNoteInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { getExtension } from "../workspace";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   private async maybeNonNoteFileDefinition({
@@ -33,13 +32,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   }
 
   private async provideForNonNoteFile(nonNoteFile: string) {
-    const out = await new GotoNoteCommand(getExtension()).execute({
-      qs: nonNoteFile,
-      kind: TargetKind.NON_NOTE,
-    });
-    // Wasn't able to create
-    if (out?.kind !== TargetKind.NON_NOTE) return;
-    return new Location(Uri.file(out.fullPath), new Position(0, 0));
+    return new Location(Uri.file(nonNoteFile), new Position(0, 0));
   }
 
   private async provideForNewNote(

@@ -10,6 +10,7 @@ const out = WebViewCommonUtils.genVSCodeHTMLIndex({
   jsSrc: "",
   cssSrc: "",
   // cssSrc: `${path.join("public", "static", "css", theme + ".css")}`,
+  url: "http://localhost:3005",
   port: 3005,
   wsRoot: path.resolve(path.join("..", "..", "test-workspace")),
   browser: true,

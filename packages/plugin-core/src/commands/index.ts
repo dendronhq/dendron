@@ -72,6 +72,7 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { OpenBackupCommand } from "./OpenBackupCommand";
 import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
+import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -116,6 +117,7 @@ const ALL_COMMANDS = [
   NoteLookupAutoCompleteCommand,
   CreateJournalNoteCommand,
   CreateScratchNoteCommand,
+  CreateMeetingNoteCommand,
   SchemaLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,

@@ -69,7 +69,7 @@ export type onCreateProps = {
 
   //TODO: What are the arguments?
   //configurable_level_1 - via a template
-  setBody?(): string;
+  setBody?(): Promise<string>;
 
   //TODO: needs to return a prop array of some sort
   setFrontmatter?(): string;

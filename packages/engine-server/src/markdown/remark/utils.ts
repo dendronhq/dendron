@@ -1130,7 +1130,8 @@ export class RemarkUtils {
             dirty = true;
           }
 
-          linkNode.value = newValue;
+          // NOTE: important to add this at the end so that we don't convert `.md` to `/md`
+          linkNode.value = newValue + ".md";
         });
         //TODO: Add support for Ref Notes and Block Links
 

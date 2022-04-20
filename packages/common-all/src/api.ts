@@ -307,7 +307,11 @@ abstract class API {
       payload.error = resp.data.error;
     } catch (err: any) {
       this._log(payload.error, "error");
-      payload.error = err?.response?.data?.error || err;
+      // Log errors from express:
+      payload.error =
+        err?.response?.data?.error || // Corresponds to an expected error that we intentionally log in our code
+        err?.response?.data || // Corresponds to an unexpected server error (HTTP 500) if a data payload was added
+        err; // Corresponds to an axios (HTTP request) thrown error
     }
     if (payload.error) {
       this._log(payload.error, "error");
@@ -349,155 +353,134 @@ export class DendronAPI extends API {
     return _DendronAPI_INSTANCE;
   }
 
-  async assetGet(req: AssetGetRequest): Promise<DendronError | Buffer> {
-    const resp = await this._makeRequestRaw({
+  assetGet(req: AssetGetRequest): Promise<DendronError | Buffer> {
+    return this._makeRequestRaw({
       path: "assets/",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async assetGetTheme(
-    req: AssetGetThemeRequest
-  ): Promise<DendronError | Buffer> {
-    const resp = await this._makeRequestRaw({
+  assetGetTheme(req: AssetGetThemeRequest): Promise<DendronError | Buffer> {
+    return this._makeRequestRaw({
       path: "assets/theme",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async configGet(
-    req: WorkspaceRequest
-  ): Promise<APIPayload<ConfigGetPayload>> {
-    const resp = await this._makeRequest({
+  configGet(req: WorkspaceRequest): Promise<APIPayload<ConfigGetPayload>> {
+    return this._makeRequest({
       path: "config/get",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async configWrite(
-    req: ConfigWriteOpts & WorkspaceRequest
-  ): Promise<RespV2<void>> {
-    const resp = await this._makeRequest({
+  configWrite(req: ConfigWriteOpts & WorkspaceRequest): Promise<RespV2<void>> {
+    return this._makeRequest({
       path: "config/write",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async workspaceInit(req: WorkspaceInitRequest): Promise<InitializePayload> {
-    const resp = await this._makeRequest({
+  workspaceInit(req: WorkspaceInitRequest): Promise<InitializePayload> {
+    return this._makeRequest({
       path: "workspace/initialize",
       method: "post",
       body: {
         ...req,
       },
     });
-    return resp;
   }
 
-  async workspaceList(): Promise<WorkspaceListPayload> {
-    const resp = await this._makeRequest({
+  workspaceList(): Promise<WorkspaceListPayload> {
+    return this._makeRequest({
       path: "workspace/all",
       method: "get",
     });
-    return resp;
   }
 
-  async workspaceSync(req: WorkspaceSyncRequest): Promise<InitializePayload> {
-    const resp = await this._makeRequest({
+  workspaceSync(req: WorkspaceSyncRequest): Promise<InitializePayload> {
+    return this._makeRequest({
       path: "workspace/sync",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineBulkAdd(req: EngineBulkAddRequest): Promise<WriteNoteResp> {
-    const resp = await this._makeRequest({
+  engineBulkAdd(req: EngineBulkAddRequest): Promise<WriteNoteResp> {
+    return this._makeRequest({
       path: "note/bulkAdd",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineDelete(req: EngineDeleteRequest): Promise<EngineDeletePayload> {
-    const resp = await this._makeRequest({
+  engineDelete(req: EngineDeleteRequest): Promise<EngineDeletePayload> {
+    return this._makeRequest({
       path: "note/delete",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineGetNoteByPath(
+  engineGetNoteByPath(
     req: EngineGetNoteByPathRequest
   ): Promise<EngineGetNoteByPathPayload> {
-    const resp = await this._makeRequest({
+    return this._makeRequest({
       path: "note/getByPath",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineInfo(): Promise<RespRequired<EngineInfoResp>> {
-    const resp = await this._makeRequest({
+  engineInfo(): Promise<RespRequired<EngineInfoResp>> {
+    return this._makeRequest({
       path: "note/info",
       method: "get",
     });
-    return resp;
   }
 
-  async engineRenameNote(
+  engineRenameNote(
     req: EngineRenameNoteRequest
   ): Promise<EngineRenameNotePayload> {
-    const resp = await this._makeRequest({
+    return this._makeRequest({
       path: "note/rename",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineUpdateNote(
+  engineUpdateNote(
     req: EngineUpdateNoteRequest
   ): Promise<EngineUpdateNotePayload> {
-    const resp = await this._makeRequest({
+    return this._makeRequest({
       path: "note/update",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
-    const resp = await this._makeRequest({
+  engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
+    return this._makeRequest({
       path: "note/write",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async noteQuery(req: NoteQueryRequest): Promise<NoteQueryResp> {
-    const resp = await this._makeRequest({
+  noteQuery(req: NoteQueryRequest): Promise<NoteQueryResp> {
+    return this._makeRequest({
       path: "note/query",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async noteRender(req: APIRequest<RenderNoteOpts>) {
-    const resp = await this._makeRequest<{
+  noteRender(req: APIRequest<RenderNoteOpts>) {
+    return this._makeRequest<{
       data: RenderNotePayload;
       error: null | DendronError;
     }>({
@@ -505,92 +488,78 @@ export class DendronAPI extends API {
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async getNoteBlocks(
-    req: GetNoteBlocksRequest
-  ): Promise<GetNoteBlocksPayload> {
-    const resp = await this._makeRequest({
+  getNoteBlocks(req: GetNoteBlocksRequest): Promise<GetNoteBlocksPayload> {
+    return this._makeRequest({
       path: "note/blocks",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async getDecorations(
-    req: GetDecorationsRequest
-  ): Promise<GetDecorationsPayload> {
-    const resp = await this._makeRequest({
+  getDecorations(req: GetDecorationsRequest): Promise<GetDecorationsPayload> {
+    return this._makeRequest({
       path: "note/decorations",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async getLinks(req: GetLinksRequest): Promise<GetNoteLinksPayload> {
-    const resp = await this._makeRequest({
+  getLinks(req: GetLinksRequest): Promise<GetNoteLinksPayload> {
+    return this._makeRequest({
       path: "note/links",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async getAnchors(req: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
-    const resp = await this._makeRequest({
+  getAnchors(req: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
+    return this._makeRequest({
       path: "note/anchors",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async schemaDelete(req: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
-    const resp = await this._makeRequest({
+  schemaDelete(req: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
+    return this._makeRequest({
       path: "schema/delete",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async schemaRead(req: SchemaReadRequest): Promise<SchemaReadPayload> {
-    const resp = await this._makeRequest({
+  schemaRead(req: SchemaReadRequest): Promise<SchemaReadPayload> {
+    return this._makeRequest({
       path: "schema/get",
       method: "get",
       qs: req,
     });
-    return resp;
   }
 
-  async schemaQuery(req: SchemaQueryRequest): Promise<SchemaQueryPayload> {
-    const resp = await this._makeRequest({
+  schemaQuery(req: SchemaQueryRequest): Promise<SchemaQueryPayload> {
+    return this._makeRequest({
       path: "schema/query",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async schemaWrite(req: SchemaWriteRequest): Promise<SchemaWritePayload> {
-    const resp = await this._makeRequest({
+  schemaWrite(req: SchemaWriteRequest): Promise<SchemaWritePayload> {
+    return this._makeRequest({
       path: "schema/write",
       method: "post",
       body: req,
     });
-    return resp;
   }
 
-  async schemaUpdate(req: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
-    const resp = await this._makeRequest({
+  schemaUpdate(req: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
+    return this._makeRequest({
       path: "schema/update",
       method: "post",
       body: req,
     });
-    return resp;
   }
 }
 

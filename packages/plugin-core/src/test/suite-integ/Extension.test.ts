@@ -176,7 +176,7 @@ suite("GIVEN regular activation", () => {
     describeMultiWS(
       "AND WHEN override is in workspace",
       {
-        preActivateHook: async ({ ctx, wsRoot }) => {
+        preActivateHook: async ({ wsRoot }) => {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           await DConfig.writeLocalConfig({
             wsRoot,
@@ -189,7 +189,7 @@ suite("GIVEN regular activation", () => {
       () => {
         // we prevent this from happening in new vscode instances.
         test("THEN merge workspace config", () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const expectedConfig = WorkspaceTestUtils.generateDefaultConfig({
             vaults,
           });

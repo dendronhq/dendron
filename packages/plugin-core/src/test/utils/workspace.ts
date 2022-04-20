@@ -1,4 +1,10 @@
-import { DVault, StrictConfigV5 } from "@dendronhq/common-all";
+import {
+  DVault,
+  InsertNoteLinkAliasModeEnum,
+  LegacyLookupSelectionType,
+  NoteAddBehaviorEnum,
+  StrictConfigV5,
+} from "@dendronhq/common-all";
 
 export class WorkspaceTestUtils {
   /**
@@ -9,9 +15,9 @@ export class WorkspaceTestUtils {
     duplicateNoteBehavior,
   }: {
     vaults: DVault[];
-    duplicateNoteBehavior: StrictConfigV5["publishing"]["duplicateNoteBehavior"];
+    duplicateNoteBehavior?: StrictConfigV5["publishing"]["duplicateNoteBehavior"];
   }) {
-    return {
+    const config: StrictConfigV5 = {
       version: 5,
       dev: {
         enablePreviewV2: true,
@@ -33,7 +39,7 @@ export class WorkspaceTestUtils {
           initialValue: "templates",
         },
         insertNoteLink: {
-          aliasMode: "none",
+          aliasMode: InsertNoteLinkAliasModeEnum.none,
           enableMultiSelect: false,
         },
         insertNoteIndex: {
@@ -46,17 +52,17 @@ export class WorkspaceTestUtils {
           dailyDomain: "daily",
           name: "journal",
           dateFormat: "y.MM.dd",
-          addBehavior: "childOfDomain",
+          addBehavior: NoteAddBehaviorEnum.childOfDomain,
         },
         scratch: {
           name: "scratch",
           dateFormat: "y.MM.dd.HHmmss",
-          addBehavior: "asOwnDomain",
+          addBehavior: NoteAddBehaviorEnum.asOwnDomain,
         },
         task: {
           name: "",
           dateFormat: "",
-          addBehavior: "childOfCurrent",
+          addBehavior: NoteAddBehaviorEnum.childOfCurrent,
           statusSymbols: {
             "": " ",
             wip: "w",
@@ -74,7 +80,7 @@ export class WorkspaceTestUtils {
             L: "low",
           },
           todoIntegration: false,
-          createTaskSelectionType: "selection2link",
+          createTaskSelectionType: LegacyLookupSelectionType.selection2link,
         },
         graph: {
           zoomSpeed: 1,
@@ -126,8 +132,11 @@ export class WorkspaceTestUtils {
         enableSiteLastModified: true,
         enableRandomlyColoredTags: true,
         enablePrettyLinks: true,
-        duplicateNoteBehavior,
       },
     };
+    if (duplicateNoteBehavior) {
+      config.publishing.duplicateNoteBehavior = duplicateNoteBehavior;
+    }
+    return config;
   }
 }

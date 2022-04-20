@@ -761,7 +761,7 @@ export async function _activate(
       });
 
       // Setup the Engine API Service and the tree view
-      const engineAPIService = updateEngineAPI(port);
+      const engineAPIService = updateEngineAPI(port, ws);
 
       // TODO: This should eventually be consolidated with other view setup
       // logic as in workspace.ts, but right now this needs an instance of
@@ -1219,9 +1219,10 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
-function updateEngineAPI(port: number | string): EngineAPIService {
-  const ext = getExtension();
-
+function updateEngineAPI(
+  port: number | string,
+  ext: DendronExtension
+): EngineAPIService {
   // set engine api ^9dr6chh7ah9v
   const svc = EngineAPIService.createEngine({
     port,

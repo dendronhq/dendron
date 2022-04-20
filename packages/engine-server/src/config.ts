@@ -19,10 +19,22 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
+import os from "os";
+
+export enum LocalConfigScope {
+  WORKSPACE = "WORKSPACE",
+  GLOBAL = "GLOBAL",
+}
 
 export class DConfig {
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  }
+
+  static configOverridePath(wsRoot: string, scope: LocalConfigScope): string {
+    const configPath =
+      scope === LocalConfigScope.GLOBAL ? os.homedir() : wsRoot;
+    return path.join(configPath, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
   }
 
   /**
@@ -182,6 +194,19 @@ export class DConfig {
     config: IntermediateDendronConfig;
   }): Promise<void> {
     const configPath = DConfig.configPath(wsRoot);
+    return writeYAMLAsync(configPath, config);
+  }
+
+  static writeLocalConfig({
+    wsRoot,
+    config,
+    configScope,
+  }: {
+    wsRoot: string;
+    config: DeepPartial<IntermediateDendronConfig>;
+    configScope: LocalConfigScope;
+  }): Promise<void> {
+    const configPath = DConfig.configOverridePath(wsRoot, configScope);
     return writeYAMLAsync(configPath, config);
   }
 

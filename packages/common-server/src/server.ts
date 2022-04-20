@@ -28,6 +28,10 @@ export class ExpressUtils {
     dendronResponse: RespV2<any>
   ): void {
     if (dendronResponse.error) {
+      // TODO: Don't set a status code of 500 by default.  The default for
+      // expected error (as is the case for all handled errors here) should be
+      // 400 BAD_REQUEST. All 500 Internal Errors are handled by default express
+      // error handler (see appModule in Server.ts)
       expressResponse
         .status(dendronResponse.error.code || StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: error2PlainObject(dendronResponse.error) });

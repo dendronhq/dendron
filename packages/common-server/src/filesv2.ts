@@ -353,7 +353,7 @@ export function note2File({
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtils.serialize(note);
+  const payload = NoteUtils.serialize(note, { excludeStub: true });
   const vpath = vault2Path({ vault, wsRoot });
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }

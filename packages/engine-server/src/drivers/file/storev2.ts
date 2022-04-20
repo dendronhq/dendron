@@ -1091,6 +1091,7 @@ export class FileStorage implements DStore {
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
+      note = _.omit(note, "stub");
       noDelete = true;
     } else {
       changedEntries = await this._writeNewNote({

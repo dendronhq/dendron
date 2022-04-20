@@ -321,36 +321,6 @@ suite("RefactorHierarchy", function () {
           },
         });
       });
-
-      test("THEN: stub note is captured if it exists in the file system.", (done) => {
-        runLegacyMultiWorkspaceTest({
-          ctx,
-          preSetupHook,
-          onInit: async () => {
-            const lookup = new NoteLookupCommand();
-            await lookup.run({
-              noConfirm: true,
-              initialValue: "dendron.ref.foo",
-            });
-
-            const cmd = new RefactorHierarchyCommandV2();
-            const engine = getEngine();
-            const capturedNotes = cmd.getCapturedNotes({
-              scope: undefined,
-              matchRE: new RegExp("dendron.ref"),
-              engine,
-            });
-
-            // only the note `dendron.ref.foo`, that is a stub note but has an actual file created
-            // should be part of the captured notes.
-            const capturedStubNotes = capturedNotes.filter((note) => note.stub);
-            expect(capturedStubNotes.length).toEqual(1);
-            expect(capturedStubNotes[0].fname).toEqual("dendron.ref.foo");
-
-            done();
-          },
-        });
-      });
     });
   });
 });

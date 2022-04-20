@@ -24,6 +24,7 @@ import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
 import "../styles/scss/main.scss";
 import { Layout } from "antd";
+import DendronNotePage from "./DendronNotePage";
 const { Content } = Layout;
 
 const { useEngineAppSelector } = engineHooks;
@@ -121,7 +122,10 @@ export type DendronAppProps = {
 function DendronApp(props: DendronAppProps) {
   // fix regression for scroll in graph view
   const opts = _.defaults(props.opts, {
-    padding: props.Component.name === "DendronGraphPanel" ? "0px" : "33px",
+    padding:
+      props.Component.name && props.Component.name === DendronNotePage.name
+        ? "33px"
+        : props.opts.padding,
   });
   return (
     <Provider store={combinedStore}>

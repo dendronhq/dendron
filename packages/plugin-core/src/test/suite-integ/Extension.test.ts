@@ -31,7 +31,7 @@ import {
   runTestButSkipForWindows,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { VSCodeTestUtils } from "../utils";
+import { VSCodeTestUtils, WorkspaceTestUtils } from "../utils";
 
 async function inactiveMessageTest(opts: {
   done: mocha.Done;
@@ -159,7 +159,7 @@ suite("GIVEN a native workspace", function () {
 });
 
 suite("GIVEN regular activation", () => {
-  describe.only("AND WHEN local override is present", () => {
+  describe.skip("AND WHEN local override is present", () => {
     const configOverride: DeepPartial<IntermediateDendronConfig> = {
       workspace: {
         enableAutoCreateOnDefinition: true,
@@ -190,7 +190,16 @@ suite("GIVEN regular activation", () => {
         // we prevent this from happening in new vscode instances.
         test("THEN merge workspace config", () => {
           const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-          expect(engine.config).toEqual({ ...ConfigUtils.genDefaultConfig() });
+          const expectedConfig = WorkspaceTestUtils.generateDefaultConfig({
+            vaults,
+          });
+          // TODO: remove this
+          // @ts-ignore
+          expectedConfig.workspace = {
+            ...expectedConfig.workspace,
+            ...configOverride.workspace,
+          };
+          expect(engine.config).toEqual(expectedConfig);
         });
       }
     );

@@ -1,7 +1,9 @@
 import {
   ConfigUtils,
   CONSTANTS,
+  DeepPartial,
   InstallStatus,
+  IntermediateDendronConfig,
   isNotUndefined,
   Time,
 } from "@dendronhq/common-all";
@@ -9,20 +11,17 @@ import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
   DConfig,
   DEPRECATED_PATHS,
+  LocalConfigScope,
   MetadataService,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import * as mocha from "mocha";
-import { after, afterEach, beforeEach, describe, it } from "mocha";
+import { describe } from "mocha";
 import path from "path";
-import semver from "semver";
-import sinon, { SinonSpy, SinonStub } from "sinon";
-import * as vscode from "vscode";
+import sinon, { SinonStub } from "sinon";
 import { ExtensionContext } from "vscode";
-import { GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { KeybindingUtils } from "../../KeybindingUtils";
 import { StateService } from "../../services/stateService";
 import { StartupUtils } from "../../utils/StartupUtils";
 import { _activate } from "../../_extension";
@@ -159,111 +158,44 @@ suite("GIVEN a native workspace", function () {
   });
 });
 
-suite("keybindings", function () {
-  let promptSpy: SinonSpy;
-  describeMultiWS(
-    "GIVEN initial install",
-    {
-      beforeHook: async ({ ctx }) => {
-        ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
-        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
+suite("GIVEN regular activation", () => {
+  describe.only("AND WHEN local override is present", () => {
+    const configOverride: DeepPartial<IntermediateDendronConfig> = {
+      workspace: {
+        enableAutoCreateOnDefinition: true,
+        enableUserTags: false,
       },
-      noSetInstallStatus: true,
-    },
-    () => {
-      let installStatusStub: SinonStub;
-      beforeEach(() => {
-        installStatusStub = sinon
-          .stub(
-            KeybindingUtils,
-            "getInstallStatusForKnownConflictingExtensions"
-          )
-          .returns([{ id: "dummyExt", installed: true }]);
-      });
+    };
+    let mockHomeDirStub: sinon.SinonStub;
 
-      afterEach(() => {
-        installStatusStub.restore();
-      });
-
-      after(() => {
-        promptSpy.restore();
-      });
-
-      test("THEN maybePromptKeybindingConflict is called", async () => {
-        expect(promptSpy.called).toBeTruthy();
-      });
+    async function afterHook() {
+      mockHomeDirStub.restore();
+      sinon.restore();
     }
-  );
 
-  describeMultiWS(
-    "GIVEN not initial install",
-    {
-      beforeHook: async () => {
-        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
-      },
-    },
-    () => {
-      let installStatusStub: SinonStub;
-      beforeEach(() => {
-        installStatusStub = sinon
-          .stub(
-            KeybindingUtils,
-            "getInstallStatusForKnownConflictingExtensions"
-          )
-          .returns([{ id: "dummyExt", installed: true }]);
-      });
-
-      afterEach(() => {
-        installStatusStub.restore();
-      });
-
-      after(() => {
-        promptSpy.restore();
-      });
-
-      test("THEN maybePromptKeybindingConflict is not called", async () => {
-        expect(promptSpy.called).toBeFalsy();
-      });
-    }
-  );
-});
-
-suite(
-  "temporary testing of Dendron version compatibility downgrade sequence",
-  () => {
-    describe(`GIVEN the activation sequence of Dendron`, () => {
-      describe(`WHEN VS Code Version is up to date`, () => {
-        let invokedWorkspaceTrustFn: boolean = false;
-
-        beforeEach(() => {
-          invokedWorkspaceTrustFn = semver.gte(vscode.version, "1.57.0");
-        });
-
-        it(`THEN onDidGrantWorkspaceTrust will get invoked.`, () => {
-          expect(invokedWorkspaceTrustFn).toEqual(true);
-        });
-
-        it(`AND onDidGrantWorkspaceTrust can be found in the API.`, () => {
-          vscode.workspace.onDidGrantWorkspaceTrust(() => {
-            //no-op for testing
+    describeMultiWS(
+      "AND WHEN override is in workspace",
+      {
+        preActivateHook: async ({ ctx, wsRoot }) => {
+          mockHomeDirStub = TestEngineUtils.mockHomeDir();
+          await DConfig.writeLocalConfig({
+            wsRoot,
+            config: configOverride,
+            configScope: LocalConfigScope.WORKSPACE,
           });
+        },
+        afterHook,
+      },
+      () => {
+        // we prevent this from happening in new vscode instances.
+        test("THEN merge workspace config", () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          expect(engine.config).toEqual({ ...ConfigUtils.genDefaultConfig() });
         });
-      });
-
-      describe(`WHEN VS Code Version is on a version less than 1.57.0`, () => {
-        let invokedWorkspaceTrustFn: boolean = false;
-        const userVersion = "1.56.1";
-        beforeEach(() => {
-          invokedWorkspaceTrustFn = semver.gte(userVersion, "1.57.0");
-        });
-
-        it(`THEN onDidGrantWorkspaceTrust will not get invoked.`, () => {
-          expect(invokedWorkspaceTrustFn).toEqual(false);
-        });
-      });
-    });
-  }
-);
+      }
+    );
+  });
+});
 
 describe("shouldDisplayInactiveUserSurvey", () => {
   const ONE_WEEK = 604800;

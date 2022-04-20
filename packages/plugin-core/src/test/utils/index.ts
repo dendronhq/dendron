@@ -1,2 +1,2 @@
-export * from "./vscode";
+export * from "./vscode-test-utils";
 export * from "./workspace";

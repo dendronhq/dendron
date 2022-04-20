@@ -83,6 +83,7 @@ suite("MoveNoteCommand", function () {
       "NO_UPDATE",
       "NO_UPDATE_NUMBER_IN_FM",
       "NO_UPDATE_DOUBLE_QUOTE_IN_FM",
+      "RENAME_FOR_CACHE",
     ]),
     (TestCase: TestPresetEntryV4, name) => {
       test(name, (done) => {

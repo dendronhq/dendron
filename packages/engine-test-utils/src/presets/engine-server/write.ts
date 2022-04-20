@@ -111,7 +111,6 @@ const NOTES = {
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const vault = vaults[0];
     const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-    expect(_.size(cacheVault.notes)).toEqual(1);
     const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
       wsRoot,
       vault,
@@ -132,6 +131,10 @@ const NOTES = {
       {
         actual: noteRoot.custom,
         expected: { bond: 42 },
+      },
+      {
+        actual: _.size(cacheVault.notes),
+        expected: 1,
       },
       {
         actual: _.size(readNotesFromCache(vault2Path({ wsRoot, vault })).notes),

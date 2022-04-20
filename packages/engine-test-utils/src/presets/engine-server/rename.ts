@@ -508,12 +508,9 @@ const NOTES = {
   //     },
   //   }
   // ),
-  DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
+  RENAME_FOR_CACHE: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      let cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(3);
-      expect(_.find(cacheVault.notes["beta"])).toBeTruthy();
       const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
         oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
@@ -527,7 +524,7 @@ const NOTES = {
         nomatch: [`${beta}.md`],
       });
       await engine.init();
-      cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
       return [
         {
           actual: changed.data?.length,
@@ -552,6 +549,50 @@ const NOTES = {
         {
           actual: cacheVault.notes["gamma"].data.fname,
           expected: "gamma",
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          vault,
+          wsRoot,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          vault,
+          wsRoot,
+        });
+      },
+    }
+  ),
+  DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
+      const changed = await engine.renameNote({
+        oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
+      });
+
+      const checkVault = await FileTestUtils.assertInVault({
+        wsRoot,
+        vault,
+        match: ["gamma.md"],
+        nomatch: [`${beta}.md`],
+      });
+      return [
+        {
+          actual: changed.data?.length,
+          expected: 4,
+        },
+        {
+          actual: _.trim(findByName("alpha", changed.data!).note.body),
+          expected: "[[gamma]]",
+        },
+        {
+          actual: checkVault,
+          expected: true,
         },
       ];
     },

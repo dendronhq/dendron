@@ -49,8 +49,6 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(2);
-
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -91,6 +89,10 @@ const NOTES = {
           expected: true,
         },
         {
+          actual: _.size(cacheVault.notes),
+          expected: 2,
+        },
+        {
           actual: _.size(
             readNotesFromCache(vault2Path({ wsRoot, vault })).notes
           ),
@@ -114,7 +116,6 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(3);
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -132,6 +133,10 @@ const NOTES = {
         {
           actual: _.includes(fs.readdirSync(vpath), "foo.ch1.md"),
           expected: false,
+        },
+        {
+          actual: _.size(cacheVault.notes),
+          expected: 3,
         },
         {
           actual: _.size(
@@ -213,7 +218,6 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(2);
       const noteToDelete = NoteUtils.getNoteByFnameFromEngine({
         fname: "foo",
         vault,
@@ -242,6 +246,10 @@ const NOTES = {
           expected: false,
         },
         {
+          actual: _.size(cacheVault.notes),
+          expected: 2,
+        },
+        {
           actual: _.size(
             readNotesFromCache(vault2Path({ wsRoot, vault })).notes
           ),
@@ -263,8 +271,7 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const cache: NotesCacheEntryMap = {};
-      let cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(4);
+      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
       _.merge(cache, cacheVault.notes);
 
       // Create random note and write to cache
@@ -282,12 +289,17 @@ const NOTES = {
       cacheVault.notes = cache;
       writeNotesToCache(vault2Path({ wsRoot, vault }), cacheVault);
 
-      // Verify cache is updated
-      cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(5);
-      expect(cacheVault.notes["my-new-note"]).toBeTruthy();
+      // Should remove random note from cache
       await engine.init();
       return [
+        {
+          actual: _.size(cacheVault.notes),
+          expected: 5,
+        },
+        {
+          actual: cacheVault.notes["my-new-note"].data.fname,
+          expected: "my-new-note",
+        },
         {
           actual: _.size(
             readNotesFromCache(vault2Path({ wsRoot, vault })).notes
@@ -307,7 +319,6 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      expect(_.size(cacheVault.notes)).toEqual(3);
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -340,6 +351,10 @@ const NOTES = {
             (ent) => ent.status === "delete" && ent.note.fname === "foo"
           ),
           expected: true,
+        },
+        {
+          actual: _.size(cacheVault.notes),
+          expected: 3,
         },
         {
           actual: _.size(

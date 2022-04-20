@@ -72,6 +72,7 @@ import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeP
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
+import { FeatureShowcase } from "./FeatureShowcase";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -93,9 +94,6 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
-import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
-import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
-import { FeatureShowcase } from "./FeatureShowcase";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -492,7 +490,6 @@ export async function _activate(
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
   const { extensionPath, extensionUri, logUri } = context;
-  const metadataService = MetadataService.instance();
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,

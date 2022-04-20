@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1645254233145
+updated: 1650354689201
 created: 1608518909864
 ---
 
@@ -152,6 +152,8 @@ const x = 1;
 [[/vault/root.schema.yml]]
 
 And a link to line 6 in that file: [[/vault/root.schema.yml#L6]]
+
+And to an asset file: [[/assets/images/logo.png]]
 
 ## Link to a file outside any vault
 

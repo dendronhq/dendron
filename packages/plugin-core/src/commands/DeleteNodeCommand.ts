@@ -3,25 +3,24 @@ import {
   DVault,
   EngineDeletePayload,
   NoteProps,
-  NotePropsDict,
   NoteUtils,
   Position,
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { RemarkUtils } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
+import _md from "markdown-it";
 import path from "path";
 import { TextEditor, ViewColumn, window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getEngine, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
-import _md from "markdown-it";
-import fs from "fs-extra";
-import { RemarkUtils } from "@dendronhq/engine-server";
 
 type CommandOpts = {
   _fsPath?: string;
@@ -49,22 +48,20 @@ export class DeleteNodeCommand extends BasicCommand<
     return {};
   }
 
-  getBacklinkFrontmatterLineOffset(opts: {
+  private getBacklinkFrontmatterLineOffset(opts: {
     link: DLink;
     vaults: DVault[];
-    notes: NotePropsDict;
     wsRoot: string;
   }) {
-    const { link, vaults, notes, wsRoot } = opts;
+    const { link, vaults, wsRoot } = opts;
     const vault = VaultUtils.getVaultByName({
       vaults,
       vname: link.from.vaultName as string,
     }) as DVault;
-    const noteWithLink = NoteUtils.getNoteByFnameV5({
+    const noteWithLink = NoteUtils.getNoteByFnameFromEngine({
       fname: link.from.fname as string,
       vault,
-      notes,
-      wsRoot,
+      engine: ExtensionProvider.getEngine(),
     }) as NoteProps;
     const fsPath = NoteUtils.getFullPath({
       note: noteWithLink,
@@ -93,14 +90,13 @@ export class DeleteNodeCommand extends BasicCommand<
       "",
     ];
 
-    const { wsRoot, engine } = getDWorkspace();
-    const { vaults, notes } = engine;
+    const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+    const { vaults } = engine;
 
     _.forEach(_.sortBy(backlinks, ["from.vaultName"]), (backlink) => {
       const fmLineOffset = this.getBacklinkFrontmatterLineOffset({
         link: backlink,
         vaults,
-        notes,
         wsRoot,
       });
       const entry = [
@@ -145,14 +141,13 @@ export class DeleteNodeCommand extends BasicCommand<
       const mode = fsPath.endsWith(".md") ? "note" : "schema";
       const trimEnd = mode === "note" ? ".md" : ".schema.yml";
       const fname = path.basename(fsPath, trimEnd);
-      const client = getExtension().getEngine();
+      const engine = ExtensionProvider.getEngine();
       if (mode === "note") {
         const vault = PickerUtilsV2.getVaultForOpenEditor();
-        const note = NoteUtils.getNoteByFnameV5({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname,
           vault,
-          notes: getEngine().notes,
-          wsRoot: getDWorkspace().wsRoot,
+          engine,
         }) as NoteProps;
 
         const backlinks = note.links.filter((link) => link.type === "backlink");
@@ -174,7 +169,7 @@ export class DeleteNodeCommand extends BasicCommand<
           return;
         }
 
-        const out = (await client.deleteNote(note.id)) as EngineDeletePayload;
+        const out = (await engine.deleteNote(note.id)) as EngineDeletePayload;
         if (out.error) {
           Logger.error({ ctx, msg: "error deleting node", error: out.error });
           return;
@@ -186,9 +181,9 @@ export class DeleteNodeCommand extends BasicCommand<
       } else {
         const smod = await DendronClientUtilsV2.getSchemaModByFname({
           fname,
-          client,
+          client: engine,
         });
-        await client.deleteSchema(SchemaUtils.getModuleRoot(smod).id);
+        await engine.deleteSchema(SchemaUtils.getModuleRoot(smod).id);
         window.showInformationMessage(
           formatDeletedMsg({ fsPath, vault: smod.vault })
         );

@@ -41,7 +41,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   }
 
   getNoteFromPath(fsPath: string): NoteProps | undefined {
-    const { engine, wsRoot } = this.extension.getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
@@ -50,11 +50,10 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameV5({
+    return NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      wsRoot,
-      notes: engine.notes,
+      engine,
     });
   }
 
@@ -83,7 +82,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   }
 
   getNoteFromDocument(document: vscode.TextDocument) {
-    const { engine, wsRoot } = this.extension.getDWorkspace();
+    const { engine } = this.extension.getDWorkspace();
     const txtPath = document.uri.fsPath;
     const fname = path.basename(txtPath, ".md");
     let vault: DVault;
@@ -93,11 +92,10 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameV5({
+    return NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      wsRoot,
-      notes: engine.notes,
+      engine,
     });
   }
 

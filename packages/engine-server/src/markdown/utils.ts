@@ -1,18 +1,16 @@
 import {
-  IntermediateDendronConfig,
+  ConfigUtils,
   DendronError,
   DEngineClient,
   DNoteLoc,
   DVault,
-  GetNoteOpts,
+  FIFOQueue,
   getSlugger,
   getStage,
-  NotePropsDict,
+  IntermediateDendronConfig,
   NoteProps,
   NoteUtils,
   VaultUtils,
-  ConfigUtils,
-  FIFOQueue,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
@@ -45,21 +43,21 @@ import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { hierarchies, RemarkUtils } from "./remark";
 import { backlinks } from "./remark/backlinks";
+import { BlockAnchorOpts, blockAnchors } from "./remark/blockAnchors";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
+import { extendedImage } from "./remark/extendedImage";
+import { hashtags } from "./remark/hashtag";
 import { NoteRefsOptsV2, noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
+import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { BlockAnchorOpts, blockAnchors } from "./remark/blockAnchors";
 import {
   DendronASTData,
   DendronASTDest,
-  VaultMissingBehavior,
   DendronASTTypes,
+  VaultMissingBehavior,
 } from "./types";
-import { hashtags } from "./remark/hashtag";
-import { userTags } from "./remark/userTags";
-import { extendedImage } from "./remark/extendedImage";
 
 const toString = require("mdast-util-to-string");
 
@@ -103,16 +101,6 @@ enum DendronProcDataKeys {
   NOTE_REF_LVL = "noteRefLvl",
   ENGINE = "engine",
 }
-
-export const renderFromNoteProps = (
-  opts: { notes: NotePropsDict } & GetNoteOpts
-) => {
-  const note = NoteUtils.getNoteByFnameV5(opts);
-  if (!note) {
-    throw Error("no note found");
-  }
-  return renderFromNote({ note });
-};
 
 export const renderFromNote = (opts: { note: NoteProps }) => {
   const { note } = opts;

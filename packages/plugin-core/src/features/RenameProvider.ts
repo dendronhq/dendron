@@ -6,18 +6,17 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import _ from "lodash";
 import { vault2Path } from "@dendronhq/common-server";
+import _ from "lodash";
 import vscode from "vscode";
 import { RenameNoteV2aCommand } from "../commands/RenameNoteV2a";
+import { ExtensionProvider } from "../ExtensionProvider";
 import {
   getReferenceAtPosition,
   getReferenceAtPositionResp,
 } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
-import { ExtensionProvider } from "../ExtensionProvider";
 
 export default class RenameProvider implements vscode.RenameProvider {
   private _targetNote: NoteProps | undefined;
@@ -32,8 +31,8 @@ export default class RenameProvider implements vscode.RenameProvider {
     document: vscode.TextDocument;
   }) {
     const { reference, document } = opts;
-    const { engine } = getDWorkspace();
-    const { notes, vaults, wsRoot } = engine;
+    const engine = ExtensionProvider.getEngine();
+    const { vaults } = engine;
     const { label, vaultName, range, ref, refType, refText } = reference;
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
@@ -44,11 +43,10 @@ export default class RenameProvider implements vscode.RenameProvider {
       });
     } else {
       const fname = ref;
-      const targetNote = NoteUtils.getNoteByFnameV5({
+      const targetNote = NoteUtils.getNoteByFnameFromEngine({
         fname,
-        notes,
+        engine,
         vault: targetVault,
-        wsRoot,
       });
       if (targetNote === undefined) {
         throw new DendronError({
@@ -123,7 +121,7 @@ export default class RenameProvider implements vscode.RenameProvider {
   > {
     const { newName } = opts;
     if (this._targetNote !== undefined) {
-      const { engine } = getDWorkspace();
+      const engine = ExtensionProvider.getEngine();
       const { wsRoot } = engine;
       const renameCmd = new RenameNoteV2aCommand();
       const targetVault = this._targetNote.vault;

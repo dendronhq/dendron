@@ -350,11 +350,10 @@ export abstract class BaseExportPodCommand<
 
     const fname = path.basename(fsPath, ".md");
 
-    const maybeNote = NoteUtils.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      notes: engine.notes,
-      wsRoot,
+      engine,
     }) as NoteProps;
 
     if (!maybeNote) {

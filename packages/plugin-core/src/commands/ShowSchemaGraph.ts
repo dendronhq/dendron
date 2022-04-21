@@ -1,6 +1,10 @@
-import { DendronEditorViewKey } from "@dendronhq/common-all";
+import {
+  DendronEditorViewKey,
+  getWebEditorViewEntry,
+} from "@dendronhq/common-all";
 import vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { WebViewUtils } from "../views/utils";
 import { BasicCommand } from "./base";
 
@@ -26,11 +30,22 @@ export class ShowSchemaGraphCommand extends BasicCommand<
   }
 
   async execute() {
-    const resp: string = await WebViewUtils.genHTMLForWebView({
-      title: "Schema Graph",
-      view: DendronEditorViewKey.SCHEMA_GRAPH,
+    const { bundleName: name } = getWebEditorViewEntry(
+      DendronEditorViewKey.SCHEMA_GRAPH
+    );
+    const ext = ExtensionProvider.getExtension();
+    const port = ext.port!;
+    const engine = ext.getEngine();
+    const { wsRoot } = engine;
+    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const html = await WebViewUtils.getWebviewContent({
+      ...webViewAssets,
+      port,
+      wsRoot,
+      panel: this._panel,
     });
 
-    this._panel.webview.html = resp;
+    this._panel.webview.html = html;
+    this._panel.reveal();
   }
 }

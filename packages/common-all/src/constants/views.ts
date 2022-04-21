@@ -51,9 +51,10 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     type: "webview",
   },
   [DendronEditorViewKey.SCHEMA_GRAPH]: {
-    desc: "TODO",
-    label: "TODO",
-    type: "nativeview",
+    desc: "Schema Graph",
+    label: "Schema Graph",
+    bundleName: "schemaView",
+    type: "webview",
   },
   [DendronEditorViewKey.SEED_BROWSER]: {
     desc: "TODO",

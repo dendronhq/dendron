@@ -130,6 +130,22 @@ export class FileStorage implements DStore {
       const { notes: _notes, errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
       _notes.map((ent) => {
+        // Check for duplicate IDs when adding notes to the map
+        if (this.notes[ent.id] !== undefined) {
+          const duplicate = this.notes[ent.id];
+          errors.push(
+            new DendronError({
+              message: `Note ${ent.fname} in ${VaultUtils.getName(
+                ent.vault
+              )} has the same ID as ${duplicate.fname} in ${VaultUtils.getName(
+                duplicate.vault
+              )}`,
+              payload: [NoteUtils.toLogObj(ent), NoteUtils.toLogObj(duplicate)],
+              // Duplicate IDs break some features, but we shouldn't stop initialization completely
+              severity: ERROR_SEVERITY.MINOR,
+            })
+          );
+        }
         this.notes[ent.id] = ent;
         this.noteFnames.add(ent);
       });

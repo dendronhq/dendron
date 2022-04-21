@@ -20,6 +20,7 @@ import {
   DEngineClient,
   ERROR_SEVERITY,
   getSlugger,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 
 const ID = "dendron.githubissue";
@@ -273,14 +274,15 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   /**
    * method to update the notes whose status has changed
    */
-  getUpdatedNotes(
+  private async getUpdatedNotes(
     notes: NoteProps[],
     engine: DEngineClient,
     wsRoot: string,
     vault: DVault
   ) {
     let updatedNotes: NoteProps[] = [];
-    notes.forEach(async (note) => {
+
+    asyncLoopOneAtATime(notes, async (note) => {
       const n = NoteUtils.getNoteByFnameV5({
         fname: note.fname,
         notes: engine.notes,
@@ -358,7 +360,12 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
       fnameAsId,
     });
     const newNotes = this.getNewNotes(notes, engine, wsRoot, vault);
-    const updatedNotes = this.getUpdatedNotes(notes, engine, wsRoot, vault);
+    const updatedNotes = await this.getUpdatedNotes(
+      notes,
+      engine,
+      wsRoot,
+      vault
+    );
 
     await engine.bulkAddNotes({ notes: newNotes });
 

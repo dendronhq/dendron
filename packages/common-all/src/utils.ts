@@ -6,7 +6,7 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache } from ".";
+import { DateTime, LruCache, VaultUtils } from ".";
 import { COLORS_LIST } from "./colors";
 import {
   CompatUtils,
@@ -51,7 +51,6 @@ import {
   StrictConfigV5,
 } from "./types/intermediateConfigs";
 import { isWebUri } from "./util/regex";
-import { VaultUtils } from "./vault";
 
 /**
  * Dendron utilities

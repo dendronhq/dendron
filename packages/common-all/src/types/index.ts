@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { DNodeType, NoteProps } from "./foundation";
+import { DNodeType } from "./foundation";
 
 export * from "./compat";
 export * from "./foundation";
@@ -17,6 +17,7 @@ export * from "./editor";
 export * from "./lookup";
 export * from "./unified";
 export * from "./events";
+export * from "./cacheData";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {
@@ -57,16 +58,6 @@ export interface Resp<T> {
   data: T;
   error?: Error | null;
 }
-
-export type NotesCache = {
-  version: number;
-  notes: NotesCacheEntryMap;
-};
-export type NotesCacheEntryMap = { [key: string]: NotesCacheEntry };
-export type NotesCacheEntry = {
-  hash: string;
-  data: Omit<NoteProps, "body">;
-};
 
 export type DendronSiteFM = {
   published?: boolean;

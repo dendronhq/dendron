@@ -25,3 +25,4 @@ export * from "./drivers";
 export * from "./doctor";
 export * from "./backup";
 export * from "./backfillV2";
+export * from "./cache";

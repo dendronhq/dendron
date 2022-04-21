@@ -6,12 +6,10 @@ import {
   DEngineClient,
   DNoteRefData,
   DNoteRefLink,
-  DVault,
   ErrorFactory,
   getSlugger,
   NoteProps,
   NotePropsDict,
-  NotesCache,
   NotesCacheEntry,
   NoteUtils,
   RespV3,
@@ -19,7 +17,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DendronEngineClient } from "./engineClient";
 import { WSMeta } from "./types";
 
 function normalize(text: string) {
@@ -106,36 +103,6 @@ export function refLink2Stringv2(opts: {
   }
   linkParts.push("]]");
   return linkParts.join("");
-}
-
-export async function getEngine(opts: {
-  numTries?: number;
-  wsRoot: string;
-  vaults: DVault[];
-}): Promise<{ error?: DendronError; data?: DEngineClient }> {
-  const { numTries, wsRoot, vaults } = _.defaults(opts, { numTries: 5 });
-  if (numTries <= 0) {
-    return {
-      error: new DendronError({ message: "exceeded numTries" }),
-    };
-  }
-  return new Promise((resolve, _reject) => {
-    try {
-      const port = DendronEngineClient.getPort({ wsRoot });
-      const dendronEngine = DendronEngineClient.create({
-        port,
-        ws: wsRoot,
-        vaults,
-      });
-      resolve({
-        data: dendronEngine,
-      });
-    } catch (err) {
-      setTimeout(() => {
-        resolve(getEngine({ ...opts, numTries: numTries - 1 }));
-      }, 5000);
-    }
-  });
 }
 
 export function getWSMetaFilePath({ wsRoot }: { wsRoot: string }) {
@@ -258,29 +225,12 @@ export function createCacheEntry(opts: {
 }
 
 export const getCachePath = (vpath: string): string => {
-  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-  return cachePath;
-};
-
-export const readNotesFromCache = (vpath: string): NotesCache => {
-  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-  if (fs.existsSync(cachePath)) {
-    return fs.readJSONSync(cachePath) as NotesCache;
-  }
-  return {
-    version: 0,
-    notes: {},
-  };
-};
-
-export const writeNotesToCache = (vpath: string, cache: NotesCache) => {
-  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-  return fs.writeJSONSync(cachePath, cache);
+  return path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
 };
 
 export const removeCache = (vpath: string) => {
-  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-  if (fs.pathExistsSync(cachePath)) {
+  const cachePath = getCachePath(vpath);
+  if (fs.pathExistsSync(getCachePath(cachePath))) {
     return fs.remove(cachePath);
   }
   return;

@@ -27,7 +27,6 @@ import {
   NoteProps,
   NotePropsDict,
   NoteFNamesDict,
-  NotesCache,
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
@@ -61,20 +60,12 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
+import { LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
-import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
-
-export type FileMeta = {
-  // file name: eg. foo.md, name = foo
-  prefix: string;
-  // fpath: full path, eg: foo.md, fpath: foo.md
-  fpath: string;
-};
-export type FileMetaDict = { [key: string]: FileMeta[] };
+import { NotesFileSystemCache } from "../../cache";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -86,7 +77,6 @@ export class FileStorage implements DStore {
   public notes: NotePropsDict;
   public noteFnames: NoteFNamesDict;
   public schemas: SchemaModuleDict;
-  public notesCache: NotesCache;
   public logger: DLogger;
   public links: DLink[];
   public anchors: DNoteAnchorPositioned[];
@@ -104,10 +94,6 @@ export class FileStorage implements DStore {
     this.notes = {};
     this.noteFnames = new NoteFNamesDict();
     this.schemas = {};
-    this.notesCache = {
-      version: 0,
-      notes: {},
-    };
     this.links = [];
     this.anchors = [];
     this.logger = logger;
@@ -423,7 +409,7 @@ export class FileStorage implements DStore {
         const {
           notes,
           cacheUpdates,
-          cache,
+          notesCache: cache,
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
@@ -437,15 +423,10 @@ export class FileStorage implements DStore {
           numEntries: _.size(notes),
           numCacheUpdates: _.size(cacheUpdates),
         });
-        const newCache: NotesCache = {
-          version: cache.version,
-          notes: _.defaults(cacheUpdates, cache.notes),
-        };
-        const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
         // Skip this if we found no notes, which means vault did not initialize
         if (!this.engine.config.noCaching && notes.length > 0) {
-          writeNotesToCache(vpath, newCache);
+          cache.writeToFileSystem();
         }
         return notes;
       })
@@ -543,7 +524,7 @@ export class FileStorage implements DStore {
   async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
-    cache: NotesCache;
+    notesCache: NotesFileSystemCache;
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
@@ -567,9 +548,14 @@ export class FileStorage implements DStore {
         })
       );
     }
+    const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+    const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
+      cachePath,
+      noCaching: this.engine.config.noCaching,
+    });
     if (!out.data) {
       return {
-        cache: { version: 0, notes: {} },
+        notesCache,
         cacheUpdates: {},
         errors,
         notes: [],
@@ -577,114 +563,67 @@ export class FileStorage implements DStore {
     }
     const noteFiles = out.data;
 
-    const cache: NotesCache = !this.engine.config.noCaching
-      ? readNotesFromCache(vpath)
-      : { version: 0, notes: {} };
     const {
       notes,
       cacheUpdates,
       errors: parseErrors,
     } = await new NoteParser({
       store: this,
-      cache,
+      cache: notesCache,
+      engine: this.engine,
       logger: this.logger,
     }).parseFiles(noteFiles, vault);
-    // Keep track of which notes in cache that no longer exist
-    const staleKeys = new Set(_.keys(cache.notes));
+    // Keep track of which notes in cache no longer exist
+    const staleKeys = notesCache.getCacheEntryKeys();
+
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
-    await Promise.all(
-      notes.map(async (n) => {
-        this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
-        // If note is stub and not custom stub, return
-        if (n.stub && !n.custom) {
-          return;
-        }
-
-        if (cache.notes[n.fname]) {
-          staleKeys.delete(n.fname);
-        }
-        const maxNoteLength = ConfigUtils.getWorkspace(
-          this.config
-        ).maxNoteLength;
-        if (
-          n.body.length >=
-          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-        ) {
-          this.logger.info({
-            ctx,
-            msg: "Note too large, skipping",
-            note: NoteUtils.toLogObj(n),
-            length: n.body.length,
-          });
-          errors.push(
-            new DendronError({
-              message:
-                `Note "${n.fname}" in vault "${VaultUtils.getName(
-                  n.vault
-                )}" is longer than ${
-                  maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
-                } characters, some features like backlinks may not work correctly for it. ` +
-                `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
-              severity: ERROR_SEVERITY.MINOR,
-            })
-          );
-          n.links = [];
-          n.anchors = {};
-          return;
-        }
-
-        // if note content is different, then we update all links and anchors ^link-anchor
-        if (_.has(cacheUpdates, n.fname)) {
-          try {
-            const links = LinkUtils.findLinks({
-              note: n,
-              engine: this.engine,
-            });
-            cacheUpdates[n.fname].data.links = links;
-            n.links = links;
-          } catch (err: any) {
-            let error = err;
-            if (!(err instanceof DendronError)) {
-              error = new DendronError({
-                message: `Failed to read links in note ${n.fname}`,
-                payload: err,
-              });
-            }
-            errors.push(error);
-            this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(n) });
-            return;
-          }
-          try {
-            const anchors = AnchorUtils.findAnchors({
-              note: n,
-            });
-            cacheUpdates[n.fname].data.anchors = anchors;
-            n.anchors = anchors;
-          } catch (err: any) {
-            let error = err;
-            if (!(err instanceof DendronError)) {
-              error = new DendronError({
-                message: `Failed to read headers or block anchors in note ${n.fname}`,
-                payload: err,
-              });
-            }
-            errors.push(error);
-            return;
-          }
-        } else {
-          n.links = cache.notes[n.fname].data.links;
-        }
+    notes.map((n) => {
+      this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
+      // If note is stub and not custom stub, return
+      if (n.stub && !n.custom) {
         return;
-      })
-    );
+      }
+
+      if (notesCache.get(n.fname)) {
+        staleKeys.delete(n.fname);
+      }
+      const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
+      if (
+        n.body.length >=
+        (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+      ) {
+        this.logger.info({
+          ctx,
+          msg: "Note too large, skipping",
+          note: NoteUtils.toLogObj(n),
+          length: n.body.length,
+        });
+        errors.push(
+          new DendronError({
+            message:
+              `Note "${n.fname}" in vault "${VaultUtils.getName(
+                n.vault
+              )}" is longer than ${
+                maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
+              } characters, some features like backlinks may not work correctly for it. ` +
+              `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
+            severity: ERROR_SEVERITY.MINOR,
+          })
+        );
+        n.links = [];
+        n.anchors = {};
+        return;
+      }
+      return;
+    });
 
     // Remove stale entries from cache
     staleKeys.forEach((staleKey) => {
-      delete cache.notes[staleKey];
+      notesCache.drop(staleKey);
     });
-    return { notes, cacheUpdates, cache, errors };
+    return { notes, cacheUpdates, notesCache, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

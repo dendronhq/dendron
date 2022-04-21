@@ -1,8 +1,4 @@
-import {
-  NoteChangeEntry,
-  NotesCacheEntryMap,
-  NoteUtils,
-} from "@dendronhq/common-all";
+import { CONSTANTS, NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   TestPresetEntryV4,
@@ -13,11 +9,11 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   createCacheEntry,
-  readNotesFromCache,
-  writeNotesToCache,
+  NotesFileSystemCache,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 import { ENGINE_HOOKS, setupBasic } from "./utils";
 
 const SCHEMAS = {
@@ -48,7 +44,12 @@ const NOTES = {
   GRANDCHILD_WITH_ALL_STUB_PARENTS: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -89,13 +90,12 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 2,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 1,
         },
       ];
@@ -115,7 +115,12 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const notes = engine.notes;
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -135,13 +140,12 @@ const NOTES = {
           expected: false,
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 3,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 2,
         },
       ];
@@ -217,7 +221,12 @@ const NOTES = {
   DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       const noteToDelete = NoteUtils.getNoteByFnameFromEngine({
         fname: "foo",
         vault,
@@ -246,13 +255,12 @@ const NOTES = {
           expected: false,
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 2,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 1,
         },
       ];
@@ -270,9 +278,11 @@ const NOTES = {
   STALE_CACHE_ENTRY: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const cache: NotesCacheEntryMap = {};
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
-      _.merge(cache, cacheVault.notes);
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
 
       // Create random note and write to cache
       const staleNote = await NoteTestUtilsV4.createNote({
@@ -285,26 +295,31 @@ const NOTES = {
         noteProps: staleNote,
         hash: "123123",
       });
-      cache["my-new-note"] = cacheEntry;
-      cacheVault.notes = cache;
-      writeNotesToCache(vault2Path({ wsRoot, vault }), cacheVault);
+      notesCache.set(staleNote.fname, cacheEntry);
+      notesCache.writeToFileSystem();
+      const keySet = notesCache.getCacheEntryKeys();
 
       // Should remove random note from cache
       await engine.init();
       return [
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 5,
         },
         {
-          actual: cacheVault.notes["my-new-note"].data.fname,
-          expected: "my-new-note",
+          actual: keySet.has("my-new-note"),
+          expected: true,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 4,
+        },
+        {
+          actual: new NotesFileSystemCache({ cachePath })
+            .getCacheEntryKeys()
+            .has("my-new-note"),
+          expected: false,
         },
       ];
     },
@@ -318,7 +333,12 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const notes = engine.notes;
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
           fname: "foo.ch1",
@@ -353,13 +373,12 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 3,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 1,
         },
       ];

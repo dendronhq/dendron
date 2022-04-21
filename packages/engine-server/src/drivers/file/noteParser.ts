@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DEngineClient,
   DNodeUtils,
   DStore,
   DVault,
@@ -8,7 +9,6 @@ import {
   isNotUndefined,
   NoteProps,
   NotePropsDict,
-  NotesCache,
   NotesCacheEntry,
   NotesCacheEntryMap,
   NoteUtils,
@@ -17,15 +17,26 @@ import {
 } from "@dendronhq/common-all";
 import {
   DLogger,
-  file2NoteWithCache,
+  genHash,
   globMatch,
+  string2Note,
   vault2Path,
 } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { FileMeta, FileMetaDict } from "./storev2";
 import { createCacheEntry } from "../../utils";
 import { ParserBase } from "./parseBase";
+import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
+import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
+
+export type FileMeta = {
+  // file name: eg. foo.md, name = foo
+  prefix: string;
+  // fpath: full path, eg: foo.md, fpath: foo.md
+  fpath: string;
+};
+export type FileMetaDict = { [key: string]: FileMeta[] };
 
 /**
  * Get hierarchy of each file
@@ -46,13 +57,20 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
 }
 
 export class NoteParser extends ParserBase {
-  public cache: NotesCache;
+  public cache: NotesFileSystemCache;
+  private engine: DEngineClient;
 
   constructor(
-    public opts: { store: DStore; cache: NotesCache; logger: DLogger }
+    public opts: {
+      store: DStore;
+      cache: NotesFileSystemCache;
+      engine: DEngineClient;
+      logger: DLogger;
+    }
   ) {
     super(opts);
     this.cache = opts.cache;
+    this.engine = opts.engine;
   }
 
   async parseFiles(
@@ -245,20 +263,22 @@ export class NoteParser extends ParserBase {
         note: noteProps,
         noteHash,
         matchHash,
-      } = file2NoteWithCache({
+      } = this.file2NoteWithCache({
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
-        cache: this.cache,
       }));
     } catch (_err: any) {
-      const err = DendronError.createFromStatus({
-        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
-        severity: ERROR_SEVERITY.MINOR,
-        payload: { fname: fileMeta.fpath, error: stringifyError(_err) },
-        message: `${fileMeta.fpath} could not be parsed`,
-      });
-      this.logger.error({ ctx, err });
-      throw err;
+      if (!(_err instanceof DendronError)) {
+        const err = DendronError.createFromStatus({
+          status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+          severity: ERROR_SEVERITY.MINOR,
+          payload: { fname: fileMeta.fpath, error: stringifyError(_err) },
+          message: `${fileMeta.fpath} could not be parsed`,
+        });
+        this.logger.error({ ctx, err });
+        throw err;
+      }
+      throw _err;
     }
     out.push(noteProps);
 
@@ -273,5 +293,96 @@ export class NoteParser extends ParserBase {
       out = out.concat(stubs.map((noteChangeEntry) => noteChangeEntry.note));
     }
     return { propsList: out, noteHash, matchHash };
+  }
+
+  private file2NoteWithCache({
+    fpath,
+    vault,
+    toLowercase,
+  }: {
+    fpath: string;
+    vault: DVault;
+    toLowercase?: boolean;
+  }): {
+    note: NoteProps;
+    matchHash: boolean;
+    noteHash: string;
+  } {
+    const content = fs.readFileSync(fpath, { encoding: "utf8" });
+    const { name } = path.parse(fpath);
+    const sig = genHash(content);
+    const cacheEntry = this.cache.get(name);
+    const matchHash = cacheEntry?.hash === sig;
+    const fname = toLowercase ? name.toLowerCase() : name;
+    let note: NoteProps;
+
+    // if hash matches, note hasn't changed
+    if (matchHash) {
+      // since we don't store the note body in the cache file, we need to re-parse the body
+      const capture = content.match(/^---[\s\S]+?---/);
+      if (capture) {
+        const offset = capture[0].length;
+        const body = content.slice(offset + 1);
+        // vault can change without note changing so we need to add this
+        // add `contentHash` to this signature because its not saved with note
+        note = {
+          ...cacheEntry.data,
+          body,
+          vault,
+          contentHash: sig,
+        };
+        return { note, matchHash, noteHash: sig };
+      }
+    }
+    // If hash is different, then we update all links and anchors ^link-anchor
+    // Update cache entry as well
+    note = string2Note({ content, fname, vault });
+    note.contentHash = sig;
+    this.updateLinksAndAnchors(note);
+    this.cache.set(
+      name,
+      createCacheEntry({
+        noteProps: note,
+        hash: note.contentHash,
+      })
+    );
+    return { note, matchHash, noteHash: sig };
+  }
+
+  private updateLinksAndAnchors(note: NoteProps) {
+    const ctx = "noteParser:updateLinksAndAnchors";
+    try {
+      const links = LinkUtils.findLinks({
+        note,
+        engine: this.engine,
+      });
+      note.links = links;
+    } catch (err: any) {
+      let error = err;
+      if (!(err instanceof DendronError)) {
+        error = new DendronError({
+          message: `Failed to read links in note ${note.fname}`,
+          payload: err,
+        });
+      }
+      this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(note) });
+      throw error;
+    }
+    try {
+      const anchors = AnchorUtils.findAnchors({
+        note,
+      });
+      note.anchors = anchors;
+      return;
+    } catch (err: any) {
+      let error = err;
+      if (!(err instanceof DendronError)) {
+        error = new DendronError({
+          message: `Failed to read headers or block anchors in note ${note.fname}`,
+          payload: err,
+        });
+      }
+      throw error;
+    }
   }
 }

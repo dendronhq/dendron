@@ -6,6 +6,7 @@ import {
   SchemaUtils,
   extractNoteChangeEntriesByType,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
   NoteTestUtilsV4,
@@ -13,6 +14,7 @@ import {
   SCHEMA_PRESETS_V4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { readNotesFromCache } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { setupBasic } from "./utils";
@@ -107,18 +109,20 @@ const SCHEMAS = {
 
 const NOTES = {
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
+    const vault = vaults[0];
+    const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
     const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
       wsRoot,
-      vault: vaults[0],
+      vault,
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtils.getNoteByFnameV5({
+    const noteRoot = NoteUtils.getNoteByFnameFromEngine({
       fname: note.fname,
-      notes: engine.notes,
-      vault: vaults[0],
-      wsRoot: engine.wsRoot,
+      engine,
+      vault,
     }) as NoteProps;
+    await engine.init();
     return [
       {
         actual: noteRoot.fname,
@@ -127,6 +131,14 @@ const NOTES = {
       {
         actual: noteRoot.custom,
         expected: { bond: 42 },
+      },
+      {
+        actual: _.size(cacheVault.notes),
+        expected: 1,
+      },
+      {
+        actual: _.size(readNotesFromCache(vault2Path({ wsRoot, vault })).notes),
+        expected: 2,
       },
     ];
   }),

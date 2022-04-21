@@ -589,14 +589,21 @@ export class FileStorage implements DStore {
       cache,
       logger: this.logger,
     }).parseFiles(noteFiles, vault);
+    // Keep track of which notes in cache that no longer exist
+    const staleKeys = new Set(_.keys(cache.notes));
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
     await Promise.all(
       notes.map(async (n) => {
         this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
-        if (n.stub) {
+        // If note is stub and not custom stub, return
+        if (n.stub && !n.custom) {
           return;
+        }
+
+        if (cache.notes[n.fname]) {
+          staleKeys.delete(n.fname);
         }
         const maxNoteLength = ConfigUtils.getWorkspace(
           this.config
@@ -650,7 +657,7 @@ export class FileStorage implements DStore {
             return;
           }
           try {
-            const anchors = await AnchorUtils.findAnchors({
+            const anchors = AnchorUtils.findAnchors({
               note: n,
             });
             cacheUpdates[n.fname].data.anchors = anchors;
@@ -672,6 +679,11 @@ export class FileStorage implements DStore {
         return;
       })
     );
+
+    // Remove stale entries from cache
+    staleKeys.forEach((staleKey) => {
+      delete cache.notes[staleKey];
+    });
     return { notes, cacheUpdates, cache, errors };
   }
 

@@ -200,7 +200,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const { wsRoot, engine } = ws;
 
     // Check if there are any misconfigured self contained vaults.
-    // Deliberately now awaiting this to avoid blocking the reload
+    // Deliberately not awaiting this to avoid blocking the reload
     ReloadIndexCommand.checkAndPromptForMisconfiguredSelfContainedVaults({
       engine: ExtensionProvider.getEngine(),
     });

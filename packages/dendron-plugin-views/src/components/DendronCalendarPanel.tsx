@@ -5,6 +5,7 @@ import {
   DMessageSource,
   NoteProps,
   Time,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, engineHooks } from "@dendronhq/common-frontend";
 import {
@@ -107,7 +108,7 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
   const groupedDailyNotes = useMemo(() => {
     const vaultNotes = _.values(notes).filter((notes) => {
       if (currentVault) {
-        return notes.vault.fsPath === currentVault?.fsPath;
+        return VaultUtils.isEqualV2(notes.vault, currentVault);
       }
       return true;
     });

@@ -1,11 +1,3 @@
-import { QuickPickItem, Range, TextEditor } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
-import {
-  getReferenceAtPosition,
-  getReferenceAtPositionResp,
-} from "../utils/md";
 import {
   assertUnreachable,
   DendronError,
@@ -13,18 +5,25 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { getDWorkspace } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import {
   HistoryEvent,
   LinkUtils,
   ParseLinkV2Resp,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { QuickPickItem, Range, TextEditor } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import {
+  getReferenceAtPosition,
+  getReferenceAtPositionResp,
+} from "../utils/md";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtils } from "../WSUtils";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {
   range: Range;
@@ -303,8 +302,8 @@ export class ConvertLinkCommand extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandOpts> {
-    const { engine } = getDWorkspace();
-    const { vaults, wsRoot, notes } = engine;
+    const engine = ExtensionProvider.getEngine();
+    const { vaults, wsRoot } = engine;
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const { document, selection } = editor;
     const reference = await getReferenceAtPosition({
@@ -332,11 +331,10 @@ export class ConvertLinkCommand extends BasicCommand<
     if (targetVault === undefined) {
       throw ConvertLinkCommand.noVaultError();
     } else {
-      const targetNote = NoteUtils.getNoteByFnameV5({
+      const targetNote = NoteUtils.getNoteByFnameFromEngine({
         fname: ref,
-        notes,
+        engine: ExtensionProvider.getEngine(),
         vault: targetVault,
-        wsRoot,
       });
 
       if (targetNote === undefined) {

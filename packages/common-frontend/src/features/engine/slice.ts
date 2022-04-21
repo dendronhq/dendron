@@ -6,6 +6,7 @@ import {
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
+  NoteFNamesDict,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -143,6 +144,7 @@ const initialState: InitialState = {
   currentRequestId: undefined,
   vaults: [],
   notes: {},
+  noteFName: new NoteFNamesDict([]),
   schemas: {},
   notesRendered: {},
   error: null,
@@ -160,6 +162,7 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
+      state.noteFName = new NoteFNamesDict(_.values(notes));
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;

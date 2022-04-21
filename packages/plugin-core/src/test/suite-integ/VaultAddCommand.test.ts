@@ -32,7 +32,7 @@ import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
 import {
   createSelfContainedVaultWithGit,
   createVaultWithGit,
@@ -49,7 +49,7 @@ suite("VaultAddCommand", function () {
   };
 
   // TODO: need to stub git clone with side effects
-  describe.only("remote", () => {
+  describe("remote", () => {
     this.beforeEach(beforeHook);
 
     describeSingleWS("WHEN running VaultAdd", { timeout: 1e6 }, () => {
@@ -170,7 +170,7 @@ suite("VaultAddCommand", function () {
       "AND WHEN add workspace vault with same name as existing vault",
       {},
       () => {
-        test("THEN ", async () => {
+        test("THEN do right thing", async () => {
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           // create remote repo
           const remoteDir = tmpDir().name;
@@ -261,13 +261,10 @@ suite("VaultAddCommand", function () {
     });
   });
 
-  const ctx = {} as any;
-  describe("remote", () => {});
-
   describe("local", () => {
-    test("add to existing folder", (done) => {
-      runSingleVaultTest({
-        ctx,
+    describeSingleWS(
+      "WHEN add to existing folder",
+      {
         postSetupHook: async ({ wsRoot }) => {
           const vpath = path.join(wsRoot, "vault2");
           fs.ensureDirSync(vpath);
@@ -281,7 +278,11 @@ suite("VaultAddCommand", function () {
           const schema = SchemaUtils.createRootModule({ vault });
           await schemaModuleOpts2File(schema, vault.fsPath, "root");
         },
-        onInit: async ({ vault, wsRoot }) => {
+      },
+      () => {
+        test("THEN do right thing", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[0];
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
 
@@ -334,99 +335,91 @@ suite("VaultAddCommand", function () {
               match: ["existing note"],
             })
           ).toBeTruthy();
-          done();
-        },
+        });
+      }
+    );
+
+    describeSingleWS("AND WHEN add absolute path inside wsRoot", {}, () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        const vpath = path.join(wsRoot, "vault2");
+        stubVaultInput({ sourceType: "local", sourcePath: vpath });
+        await new VaultAddCommand().run();
+        expect(fs.readdirSync(vpath)).toEqual([
+          ".gitignore",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        await checkVaults(
+          {
+            wsRoot,
+            vaults: [
+              {
+                fsPath: "vault2",
+              },
+              vault,
+            ],
+          },
+          expect
+        );
       });
     });
 
-    test("add absolute path inside wsRoot", (done) => {
-      runSingleVaultTest({
-        ctx,
-        onInit: async ({ vault, wsRoot }) => {
-          const vpath = path.join(wsRoot, "vault2");
-          stubVaultInput({ sourceType: "local", sourcePath: vpath });
-          await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            ".gitignore",
-            "root.md",
-            "root.schema.yml",
-          ]);
-          await checkVaults(
-            {
-              wsRoot,
-              vaults: [
-                {
-                  fsPath: "vault2",
-                },
-                vault,
-              ],
-            },
-            expect
-          );
-          done();
-        },
+    describeSingleWS("AND WHEN add rel path inside wsRoot", {}, () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        const sourcePath = "vault2";
+        stubVaultInput({ sourceType: "local", sourcePath });
+        await new VaultAddCommand().run();
+        const vpath = path.join(wsRoot, sourcePath);
+        expect(fs.readdirSync(vpath)).toEqual([
+          ".gitignore",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        await checkVaults(
+          {
+            wsRoot,
+            vaults: [
+              {
+                fsPath: "vault2",
+              },
+              vault,
+            ],
+          },
+          expect
+        );
       });
     });
 
-    test("add rel path inside wsRoot", (done) => {
-      runSingleVaultTest({
-        ctx,
-        onInit: async ({ vault, wsRoot }) => {
-          const sourcePath = "vault2";
-          stubVaultInput({ sourceType: "local", sourcePath });
-          await new VaultAddCommand().run();
-          const vpath = path.join(wsRoot, sourcePath);
-          expect(fs.readdirSync(vpath)).toEqual([
-            ".gitignore",
-            "root.md",
-            "root.schema.yml",
-          ]);
-          await checkVaults(
-            {
-              wsRoot,
-              vaults: [
-                {
-                  fsPath: "vault2",
-                },
-                vault,
-              ],
-            },
-            expect
-          );
-          done();
-        },
-      });
-    });
+    describeSingleWS("AND WHEN add absolute path outside of wsRoot", {}, () => {
+      test("THEN do right thing", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        const vpath = tmpDir().name;
+        const vaultRelPath = path.relative(wsRoot, vpath);
+        stubVaultInput({ sourceType: "local", sourcePath: vpath });
+        await new VaultAddCommand().run();
+        expect(fs.readdirSync(vpath)).toEqual([
+          ".gitignore",
+          "root.md",
+          "root.schema.yml",
+        ]);
 
-    test("add absolute path outside of wsRoot", (done) => {
-      runSingleVaultTest({
-        ctx,
-        onInit: async ({ vault, wsRoot }) => {
-          const vpath = tmpDir().name;
-          const vaultRelPath = path.relative(wsRoot, vpath);
-          stubVaultInput({ sourceType: "local", sourcePath: vpath });
-          await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            ".gitignore",
-            "root.md",
-            "root.schema.yml",
-          ]);
-
-          await checkVaults(
-            {
-              wsRoot,
-              vaults: [
-                {
-                  fsPath: vaultRelPath,
-                },
-                vault,
-              ],
-            },
-            expect
-          );
-
-          done();
-        },
+        await checkVaults(
+          {
+            wsRoot,
+            vaults: [
+              {
+                fsPath: vaultRelPath,
+              },
+              vault,
+            ],
+          },
+          expect
+        );
       });
     });
   });

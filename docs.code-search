@@ -1,0 +1,5 @@
+# Query: .
+# Flags: CaseSensitive WordMatch
+# Including: *.md
+# ContextLines: 1
+

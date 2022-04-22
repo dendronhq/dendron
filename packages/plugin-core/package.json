@@ -106,6 +106,10 @@
         "title": "Dendron: Contribute"
       },
       {
+        "command": "dendron.goto",
+        "title": "Dendron: Go to"
+      },
+      {
         "command": "dendron.gotoNote",
         "title": "Dendron: Go to Note"
       },
@@ -442,6 +446,10 @@
       "commandPalette": [
         {
           "command": "dendron.browseNote",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.goto",
           "when": "dendron:pluginActive"
         },
         {
@@ -933,6 +941,10 @@
       }
     },
     "keybindings": [
+      {
+        "command": "dendron.goto",
+        "when": "editorFocus"
+      },
       {
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",

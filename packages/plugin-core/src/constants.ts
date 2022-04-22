@@ -246,6 +246,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Contribute`,
   },
+  GOTO: {
+    key: "dendron.goto",
+    // no prefix, we don't want to show this command
+    title: `${CMD_PREFIX} Go to`,
+    when: DendronContext.PLUGIN_ACTIVE,
+    keybindings: {
+      when: "editorFocus",
+    },
+  },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command

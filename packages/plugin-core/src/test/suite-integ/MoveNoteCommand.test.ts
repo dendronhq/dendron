@@ -153,7 +153,7 @@ suite("MoveNoteCommand", function () {
               },
             ],
           });
-          expect(resp?.changed?.length).toEqual(3);
+          expect(resp?.changed?.length).toEqual(5);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
           expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(
             "foobar"
@@ -587,13 +587,6 @@ suite("MoveNoteCommand", function () {
         expect(
           await EngineTestUtilsV4.checkVault({
             wsRoot,
-            vault: vault1,
-            nomatch: ["foo.md"],
-          })
-        ).toBeTruthy();
-        expect(
-          await EngineTestUtilsV4.checkVault({
-            wsRoot,
             vault: vault2,
             nomatch: ["bar.md"],
           })
@@ -709,14 +702,12 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
 
         expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
+          NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault1,
+            wsRoot,
+          })?.stub
         ).toBeTruthy();
         expect(
           _.isUndefined(

@@ -1,3 +1,4 @@
+import { Server } from "@dendronhq/api-server";
 import {
   CleanDendronSiteConfig,
   CONSTANTS,
@@ -70,7 +71,7 @@ export type TestSetupWorkspaceOpts = {
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
-) => Promise<{ engine: DEngineClient; port?: number }>;
+) => Promise<{ engine: DEngineClient; port?: number; server?: Server }>;
 
 /**
  * Create an {@link DendronEngine}
@@ -79,6 +80,7 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
   return {
     engine: engineServerCreateEngine(opts) as DEngineClient,
     port: undefined,
+    server: undefined,
   };
 }
 
@@ -104,9 +106,8 @@ export async function createServer(opts: WorkspaceOpts & { port?: number }) {
 export async function createEngineFromServer(
   opts: WorkspaceOpts
 ): Promise<any> {
-  const { engine, port } = await createServer(opts);
-  await engine.init();
-  return { engine, port };
+  const { engine, port, server } = await createServer(opts);
+  return { engine, port, server };
 }
 
 export async function createEngineByConnectingToDebugServer(
@@ -114,9 +115,8 @@ export async function createEngineByConnectingToDebugServer(
 ): Promise<any> {
   // debug port used by launch:engine-server:debug
   const port = 3005;
-  const { engine } = await createServer({ ...opts, port });
-  await engine.init();
-  return { engine, port };
+  const { engine, server } = await createServer({ ...opts, port });
+  return { engine, port, server };
 }
 
 export function createSiteConfig(
@@ -306,6 +306,7 @@ export async function runEngineTestV5(
   });
 
   let homeDirStub: sinon.SinonStub | undefined;
+  let server: Server | undefined;
 
   try {
     // make sure tests don't overwrite local homedir contents
@@ -322,6 +323,7 @@ export async function runEngineTestV5(
     await preSetupHook({ wsRoot, vaults });
     const resp = await createEngine({ wsRoot, vaults });
     const engine = resp.engine;
+    server = resp.server;
     const start = process.hrtime();
     const initResp = await engine.init();
     if (addVSWorkspace) {
@@ -370,6 +372,9 @@ export async function runEngineTestV5(
     // restore sinon so other tests can keep running
     if (homeDirStub) {
       homeDirStub.restore();
+    }
+    if (server) {
+      server.close();
     }
   }
 }

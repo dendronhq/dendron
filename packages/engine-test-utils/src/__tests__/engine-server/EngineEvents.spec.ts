@@ -65,7 +65,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.writeNote(newNote);
+          await engineClient.writeNote(newNote);
         },
         {
           expect,
@@ -130,7 +130,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.writeNote(newNote);
+          await engineClient.writeNote(newNote);
         },
         {
           expect,
@@ -280,7 +280,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.bulkAddNotes({
+          await engineClient.bulkAddNotes({
             notes: [alpha, beta],
           });
         },
@@ -337,7 +337,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.updateNote(rootFile!);
+          await engineClient.updateNote(rootFile!);
         },
         {
           expect,
@@ -388,7 +388,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.deleteNote(foo.id);
+          await engineClient.deleteNote(foo.id);
         },
         {
           expect,
@@ -441,7 +441,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.deleteNote(bar.id);
+          await engineClient.deleteNote(bar.id);
         },
         {
           expect,
@@ -495,7 +495,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          engineClient.renameNote({
+          await engineClient.renameNote({
             oldLoc: { fname: bar.fname, vaultName: vaults[0].fsPath },
             newLoc: { fname: "cab", vaultName: vaults[0].fsPath },
           });

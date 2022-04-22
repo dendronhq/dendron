@@ -1,7 +1,7 @@
 import {
   IntermediateDendronConfig,
   NoteProps,
-  NotePropsDict
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import {
   createSlice,
@@ -21,16 +21,10 @@ export const slice = createSlice({
     error: null,
   } as BrowserEngineSliceState,
   reducers: {
-    setLoadingStatus: (
-      state: BrowserEngineSliceState,
-      action: PayloadAction<LoadingStatus>
-    ) => {
+    setLoadingStatus: (state, action: PayloadAction<LoadingStatus>) => {
       state.loading = action.payload;
     },
-    setConfig: (
-      state: BrowserEngineSliceState,
-      action: PayloadAction<IntermediateDendronConfig>
-    ) => {
+    setConfig: (state, action: PayloadAction<IntermediateDendronConfig>) => {
       state.config = action.payload;
     },
     setNotes: (state, action: PayloadAction<NotePropsDict>) => {

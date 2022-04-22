@@ -8,11 +8,12 @@ import {
   Spin,
   Tooltip,
   Button,
+  Radio,
 } from "antd";
 import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { useState } from "react";
-import { GraphConfig, GraphConfigItem } from "../utils/graph";
+import { GraphConfig, GraphConfigItem, GraphStylesEnum } from "../utils/graph";
 import AntThemes from "../styles/theme-antd";
 import { useCurrentTheme } from "../hooks";
 
@@ -100,6 +101,13 @@ const GraphFilterView = ({
         <Panel header="Information" key="information">
           <FilterViewSection
             section="information"
+            config={config}
+            updateConfigField={updateConfigField}
+          />
+        </Panel>
+        <Panel header="Graph Styles" key="graphStyles">
+          <FilterViewSection
+            section="graphStyles"
             config={config}
             updateConfigField={updateConfigField}
           />
@@ -193,6 +201,15 @@ const FilterViewSection = ({
               style={{ justifyContent: "space-between", width: "100%" }}
               key={key}
             >
+              {_.isString(entry.value) && entry.singleSelect && (
+                <>
+                  <RadioButton
+                    configField={key}
+                    value={entry.value as GraphStylesEnum}
+                    updateConfigField={updateConfigField}
+                  />
+                </>
+              )}
               {_.isBoolean(entry?.value) && (
                 <>
                   <Typography>{label}</Typography>
@@ -215,7 +232,8 @@ const FilterViewSection = ({
               )}
               {_.isString(entry?.value) &&
                 !_.isUndefined(entry) &&
-                !_.isUndefined(key) && (
+                !_.isUndefined(key) &&
+                !entry.singleSelect && (
                   <>
                     <FilterViewStringInput
                       fieldKey={key}
@@ -230,6 +248,34 @@ const FilterViewSection = ({
           );
         })}
     </Space>
+  );
+};
+
+const RadioButton = ({
+  configField,
+  value,
+  updateConfigField,
+}: {
+  configField: string;
+  value: GraphStylesEnum;
+  updateConfigField: (key: string, value: string | number | boolean) => void;
+}) => {
+  const singleSelectOptions = Object.keys(GraphStylesEnum).map(
+    (k) => GraphStylesEnum[k as GraphStylesEnum]
+  );
+  return (
+    <Radio.Group
+      onChange={(e) => updateConfigField(configField, e.target.value)}
+      value={value}
+    >
+      <Space direction="vertical">
+        {singleSelectOptions.map((option) => (
+          <Radio key={option} value={option}>
+            {option}
+          </Radio>
+        ))}
+      </Space>
+    </Radio.Group>
   );
 };
 

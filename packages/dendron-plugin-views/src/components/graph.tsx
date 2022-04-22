@@ -5,7 +5,12 @@ import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./GraphFilterView";
-import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
+import {
+  GraphConfig,
+  GraphConfigItem,
+  GraphElements,
+  GraphStylesEnum,
+} from "../utils/graph";
 import {
   ConfigUtils,
   DMessageSource,
@@ -19,6 +24,9 @@ import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 import { Button, Space, Spin, Typography } from "antd";
 import { useCurrentTheme, useWorkspaceProps } from "../hooks";
 import { postVSCodeMessage } from "../utils/vscode";
+import { getStyles } from "../styles/custom";
+import DefaultTheme from "../styles/theme-default";
+import ClassicThemes from "../styles/theme-classic";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -29,65 +37,22 @@ export class GraphUtils {
 
 const getCytoscapeStyle = (
   theme: string | undefined,
-  customCSS: string | undefined
+  customCSS: string | undefined,
+  config: GraphConfig
 ) => {
   if (_.isUndefined(theme)) return "";
 
-  // Cytoscape's "diamond" node is smaller than it's "circle" node, so
-  // this modifier adjusts to make parent and child nodes similarly sized.
-  const PARENT_NODE_SIZE_MODIFIER = 1.25;
-
-  return `
-node {
-  width: ${AntThemes[theme].graph.node.size};
-  height: ${AntThemes[theme].graph.node.size};
-  background-color: ${AntThemes[theme].graph.node.color};
-  color: ${AntThemes[theme].graph.node.label.color};
-  label: data(label);
-  font-size: ${AntThemes[theme].graph.node.label.fontSize};
-  min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
-  font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
-}
-
-node[color] {
-  background-color: data(color);
-}
-
-edge {
-  width: ${AntThemes[theme].graph.edge.width};
-  line-color: ${AntThemes[theme].graph.edge.color};
-  target-arrow-shape: none;
-  curve-style: haystack;
-}
-
-:selected{
-  background-color: ${AntThemes[theme].graph.node._selected.color};
-  color: ${AntThemes[theme].graph.node._selected.color};
-}
-
-.parent {
-  shape: diamond;
-  width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-  height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-}
-
-.links {
-  line-style: dashed;
-}
-
-.hidden--labels {
-  label: ;
-}
-
-.hidden--vault,
-.hidden--regex-allowlist,
-.hidden--regex-blocklist,
-.hidden--stub {
-  display: none;
-}
-
-${customCSS || ""}
-`;
+  if (customCSS) {
+    return getStyles(theme, DefaultTheme, customCSS);
+  }
+  switch (config.graphStyles.value) {
+    case GraphStylesEnum.DEFAULT: {
+      return getStyles(theme, DefaultTheme);
+    }
+    case GraphStylesEnum.CLASSIC: {
+      return getStyles(theme, ClassicThemes);
+    }
+  }
 };
 
 export const getEulerConfig = (shouldAnimate: boolean) => ({
@@ -186,7 +151,8 @@ export default function Graph({
 
       const style = getCytoscapeStyle(
         currentTheme || "light",
-        ide.graphStyles
+        ide.graphStyles,
+        config
       ) as any;
       const defaultConfig = ConfigUtils.genDefaultConfig();
 
@@ -264,6 +230,12 @@ export default function Graph({
     renderGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphRef, elements, ide.graphStyles]);
+
+  // re-render graph if graph style is changed.
+  useEffect(() => {
+    renderGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.graphStyles.value]);
 
   useEffect(() => {
     // If initial vault data received

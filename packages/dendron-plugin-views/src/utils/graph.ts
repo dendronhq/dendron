@@ -15,7 +15,13 @@ export type GraphConfigItem<T> = {
   label?: string;
   color?: string;
   placeholder?: string;
+  singleSelect?: boolean;
 };
+
+export enum GraphStylesEnum {
+  DEFAULT = "DEFAULT",
+  CLASSIC = "CLASSIC",
+}
 
 export type CoreGraphConfig = {
   "connections.hierarchy"?: GraphConfigItem<boolean>;
@@ -28,6 +34,8 @@ export type CoreGraphConfig = {
 
   "options.allow-relayout": GraphConfigItem<boolean>;
   "options.show-labels": GraphConfigItem<boolean>;
+
+  graphStyles: GraphConfigItem<GraphStylesEnum>;
 };
 
 export type NoteGraphConfig = {
@@ -79,6 +87,11 @@ const coreGraphConfig: CoreGraphConfig = {
   "options.show-labels": {
     value: true,
     mutable: true,
+  },
+  graphStyles: {
+    value: GraphStylesEnum.DEFAULT,
+    mutable: true,
+    singleSelect: true,
   },
 };
 

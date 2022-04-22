@@ -17,6 +17,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
+import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
 import { PluginFileUtils } from "../utils/files";
 import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -204,7 +205,7 @@ export class GotoNoteCommand extends BasicCommand<
       return opts;
     }
 
-    const link = await this.getLinkFromSelection();
+    const link = await getLinkFromSelectionWithWorkspace();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
       return null;

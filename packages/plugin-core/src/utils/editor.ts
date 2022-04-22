@@ -1,22 +1,25 @@
 import {
   DECORATION_TYPES,
   DEngineClient,
+  DNoteAnchorBasic,
+  DVault,
   genUUIDInsecure,
+  NoteProps,
 } from "@dendronhq/common-all";
 import {
+  AnchorUtils,
+  BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
-  select,
-  Heading,
-  BlockAnchor,
-  MDUtilsV5,
-  ProcMode,
-  AnchorUtils,
-  WikiLinkNoteV4,
-  UserTag,
   HashTag,
+  Heading,
   linkedNoteType,
   MdastUtils,
+  MDUtilsV5,
+  ProcMode,
+  select,
+  UserTag,
+  WikiLinkNoteV4,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import vscode, {
@@ -25,10 +28,13 @@ import vscode, {
   TextDocument,
   TextEditor,
   TextEditorEdit,
+  ViewColumn,
 } from "vscode";
+import { TargetKind } from "../commands/GoToNoteInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
+import { getReferenceAtPosition } from "./md";
 
 export function isAnythingSelected(): boolean {
   return !vscode.window?.activeTextEditor?.selection?.isEmpty;
@@ -235,4 +241,46 @@ export async function isBrokenWikilink(): Promise<boolean> {
     }
   );
   return type === DECORATION_TYPES.brokenWikilink;
+}
+
+export type ProcessSelectionOpts = {
+  qs?: string;
+  vault?: DVault;
+  anchor?: DNoteAnchorBasic;
+  overrides?: Partial<NoteProps>;
+  kind?: TargetKind;
+  /**
+   * What {@link vscode.ViewColumn} to open note in
+   */
+  column?: ViewColumn;
+  /** added for contextual UI analytics. */
+  source?: string;
+};
+
+export async function getLinkFromSelectionWithWorkspace() {
+  const { selection, editor } = VSCodeUtils.getSelection();
+  if (
+    _.isEmpty(selection) ||
+    _.isUndefined(selection) ||
+    _.isUndefined(selection.start) ||
+    !editor
+  )
+    return;
+  const currentLine = editor.document.lineAt(selection.start.line).text;
+  if (!currentLine) return;
+  const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  const reference = await getReferenceAtPosition({
+    document: editor.document,
+    position: selection.start,
+    opts: { allowInCodeBlocks: true },
+    wsRoot,
+    vaults,
+  });
+  if (!reference) return;
+  return {
+    alias: reference?.label,
+    value: reference?.ref,
+    vaultName: reference?.vaultName,
+    anchorHeader: reference.anchorStart,
+  };
 }

@@ -403,7 +403,7 @@ suite("NoteLookupCommand", function () {
           });
           await NoteTestUtilsV4.createNote({
             wsRoot,
-            fname: "foo.ch2",
+            fname: "foo.ch2.gch1",
             vault: vaults[0],
             props: { stub: true },
           });
@@ -723,7 +723,7 @@ suite("NoteLookupCommand", function () {
         },
       },
       () => {
-        test.only("THEN a note is created and stub property is removed", async () => {
+        test("THEN a note is created and stub property is removed", async () => {
           const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);

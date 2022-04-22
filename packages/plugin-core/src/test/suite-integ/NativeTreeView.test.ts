@@ -209,7 +209,7 @@ suite("NativeTreeView tests", function () {
         },
       },
       () => {
-        test.only("THEN tree view correctly displays renamed note", async () => {
+        test("THEN tree view correctly displays renamed note", async () => {
           const mockEvents = new MockEngineEvents();
           const provider = new EngineNoteProvider(mockEvents);
 

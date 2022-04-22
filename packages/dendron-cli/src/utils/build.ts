@@ -336,6 +336,7 @@ export class BuildUtils {
   /**
    * Migrate assets from next-server, plugin-views, and api-server to plugin-core
    * @returns
+   * ^gg4woyhxe1xn
    */
   static async syncStaticAssets() {
     // all assets are stored here
@@ -395,6 +396,7 @@ export class BuildUtils {
     return { staticPath: pluginStaticPath };
   }
 
+  // ^gxyyk2p87a5z
   static async syncStaticAssetsToNextjsTemplate() {
     // all assets are stored here
     const commonAssetsBuildRoot = path.join(

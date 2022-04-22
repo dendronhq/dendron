@@ -562,6 +562,7 @@ export class FileStorage implements DStore {
       };
     }
     const noteFiles = out.data;
+    const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
 
     const {
       notes,
@@ -572,6 +573,7 @@ export class FileStorage implements DStore {
       cache: notesCache,
       engine: this.engine,
       logger: this.logger,
+      maxNoteLength,
     }).parseFiles(noteFiles, vault);
     // Keep track of which notes in cache no longer exist
     const staleKeys = notesCache.getCacheEntryKeys();
@@ -589,34 +591,6 @@ export class FileStorage implements DStore {
       if (notesCache.get(n.fname)) {
         staleKeys.delete(n.fname);
       }
-      const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
-      if (
-        n.body.length >=
-        (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-      ) {
-        this.logger.info({
-          ctx,
-          msg: "Note too large, skipping",
-          note: NoteUtils.toLogObj(n),
-          length: n.body.length,
-        });
-        errors.push(
-          new DendronError({
-            message:
-              `Note "${n.fname}" in vault "${VaultUtils.getName(
-                n.vault
-              )}" is longer than ${
-                maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
-              } characters, some features like backlinks may not work correctly for it. ` +
-              `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
-            severity: ERROR_SEVERITY.MINOR,
-          })
-        );
-        n.links = [];
-        n.anchors = {};
-        return;
-      }
-      return;
     });
 
     // Remove stale entries from cache

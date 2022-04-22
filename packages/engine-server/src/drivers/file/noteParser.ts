@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -14,6 +15,7 @@ import {
   NoteUtils,
   SchemaUtils,
   stringifyError,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -59,6 +61,7 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
 export class NoteParser extends ParserBase {
   public cache: NotesFileSystemCache;
   private engine: DEngineClient;
+  private maxNoteLength: number;
 
   constructor(
     public opts: {
@@ -66,11 +69,13 @@ export class NoteParser extends ParserBase {
       cache: NotesFileSystemCache;
       engine: DEngineClient;
       logger: DLogger;
+      maxNoteLength: number;
     }
   ) {
     super(opts);
     this.cache = opts.cache;
     this.engine = opts.engine;
+    this.maxNoteLength = opts.maxNoteLength;
   }
 
   async parseFiles(
@@ -108,6 +113,7 @@ export class NoteParser extends ParserBase {
       fileMeta: rootFile,
       addParent: false,
       vault,
+      errors,
     });
     const rootNote = rootProps.propsList[0];
     this.logger.info({ ctx, msg: "post:parseRootNote" });
@@ -131,6 +137,7 @@ export class NoteParser extends ParserBase {
             fileMeta: ent,
             addParent: false,
             vault,
+            errors,
           });
           const notes = out.propsList;
           if (!out.matchHash) {
@@ -176,6 +183,7 @@ export class NoteParser extends ParserBase {
               notesByFname,
               addParent: true,
               vault,
+              errors,
             });
             const notes = resp.propsList;
 
@@ -240,6 +248,7 @@ export class NoteParser extends ParserBase {
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
+    errors: DendronError[];
   }): { propsList: NoteProps[]; noteHash: string; matchHash: boolean } {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
@@ -247,7 +256,7 @@ export class NoteParser extends ParserBase {
       notesByFname: {},
       parents: [] as NoteProps[],
     });
-    const { fileMeta, parents, notesByFname, vault } = cleanOpts;
+    const { fileMeta, parents, notesByFname, vault, errors } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
@@ -266,6 +275,7 @@ export class NoteParser extends ParserBase {
       } = this.file2NoteWithCache({
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
+        errors,
       }));
     } catch (_err: any) {
       if (!(_err instanceof DendronError)) {
@@ -299,10 +309,12 @@ export class NoteParser extends ParserBase {
     fpath,
     vault,
     toLowercase,
+    errors,
   }: {
     fpath: string;
     vault: DVault;
     toLowercase?: boolean;
+    errors: DendronError[];
   }): {
     note: NoteProps;
     matchHash: boolean;
@@ -338,7 +350,14 @@ export class NoteParser extends ParserBase {
     // Update cache entry as well
     note = string2Note({ content, fname, vault });
     note.contentHash = sig;
-    this.updateLinksAndAnchors(note);
+    // Link/anchor errors should be logged but not interfere with rest of parsing
+    try {
+      this.updateLinksAndAnchors(note);
+    } catch (_err: any) {
+      if (_err instanceof DendronError) {
+        errors.push(_err);
+      }
+    }
     this.cache.set(
       name,
       createCacheEntry({
@@ -349,8 +368,31 @@ export class NoteParser extends ParserBase {
     return { note, matchHash, noteHash: sig };
   }
 
-  private updateLinksAndAnchors(note: NoteProps) {
+  private updateLinksAndAnchors(note: NoteProps): void {
     const ctx = "noteParser:updateLinksAndAnchors";
+    // Skip finding links/anchors if note is too long
+    if (
+      note.body.length >=
+      (this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+    ) {
+      this.logger.info({
+        ctx,
+        msg: "Note too large, skipping",
+        note: NoteUtils.toLogObj(note),
+        length: note.body.length,
+      });
+      throw new DendronError({
+        message:
+          `Note "${note.fname}" in vault "${VaultUtils.getName(
+            note.vault
+          )}" is longer than ${
+            this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
+          } characters, some features like backlinks may not work correctly for it. ` +
+          `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
+
     try {
       const links = LinkUtils.findLinks({
         note,

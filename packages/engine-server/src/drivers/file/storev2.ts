@@ -409,7 +409,6 @@ export class FileStorage implements DStore {
         const {
           notes,
           cacheUpdates,
-          notesCache: cache,
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
@@ -423,11 +422,7 @@ export class FileStorage implements DStore {
           numEntries: _.size(notes),
           numCacheUpdates: _.size(cacheUpdates),
         });
-        // OPT:make async and don't wait for return
-        // Skip this if we found no notes, which means vault did not initialize
-        if (!this.engine.config.noCaching && notes.length > 0) {
-          cache.writeToFileSystem();
-        }
+
         return notes;
       })
     );
@@ -524,7 +519,6 @@ export class FileStorage implements DStore {
   async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
-    notesCache: NotesFileSystemCache;
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
@@ -555,7 +549,6 @@ export class FileStorage implements DStore {
     });
     if (!out.data) {
       return {
-        notesCache,
         cacheUpdates: {},
         errors,
         notes: [],
@@ -575,29 +568,11 @@ export class FileStorage implements DStore {
       logger: this.logger,
       maxNoteLength,
     }).parseFiles(noteFiles, vault);
-    // Keep track of which notes in cache no longer exist
-    const staleKeys = notesCache.getCacheEntryKeys();
 
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
-    notes.map((n) => {
-      this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
-      // If note is stub and not custom stub, return
-      if (n.stub && !n.custom) {
-        return;
-      }
-
-      if (notesCache.get(n.fname)) {
-        staleKeys.delete(n.fname);
-      }
-    });
-
-    // Remove stale entries from cache
-    staleKeys.forEach((staleKey) => {
-      notesCache.drop(staleKey);
-    });
-    return { notes, cacheUpdates, notesCache, errors };
+    return { notes, cacheUpdates, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

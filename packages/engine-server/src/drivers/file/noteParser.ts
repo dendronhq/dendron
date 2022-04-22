@@ -93,6 +93,8 @@ export class NoteParser extends ParserBase {
     const notesById: NotePropsDict = {};
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
+    // Keep track of which notes in cache no longer exist
+    const unseenKeys = this.cache.getCacheEntryKeys();
     const errors: DendronError[] = [];
 
     // get root note
@@ -125,6 +127,7 @@ export class NoteParser extends ParserBase {
     }
     notesByFname[rootNote.fname] = rootNote;
     notesById[rootNote.id] = rootNote;
+    unseenKeys.delete(rootNote.fname);
 
     // get root of hiearchies
     let lvl = 2;
@@ -140,6 +143,7 @@ export class NoteParser extends ParserBase {
             errors,
           });
           const notes = out.propsList;
+          unseenKeys.delete(notes[0].fname);
           if (!out.matchHash) {
             cacheUpdates[notes[0].fname] = createCacheEntry({
               noteProps: notes[0],
@@ -186,6 +190,7 @@ export class NoteParser extends ParserBase {
               errors,
             });
             const notes = resp.propsList;
+            unseenKeys.delete(notes[0].fname);
 
             // this indicates that the contents of the note was different
             // then what was in the cache. need to update later ^cache-update
@@ -232,6 +237,18 @@ export class NoteParser extends ParserBase {
         return SchemaUtils.matchDomain(d, notesById, schemas);
       })
     );
+    // Remove stale entries from cache
+    unseenKeys.forEach((unseenKey) => {
+      this.cache.drop(unseenKey);
+    });
+
+    // OPT:make async and don't wait for return
+    // Skip this if we found no notes, which means vault did not initialize
+    if (out.length > 0) {
+      // TODO only write if there are changes
+      this.cache.writeToFileSystem();
+    }
+
     this.logger.info({ ctx, msg: "post:matchSchemas" });
     return { notes: out, cacheUpdates, errors };
   }

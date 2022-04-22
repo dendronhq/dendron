@@ -7,6 +7,7 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
 {
   protected _cacheContents: T;
   private _cachePath: string;
+  private _noCaching: boolean | undefined;
 
   constructor({
     cachePath,
@@ -16,7 +17,8 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
     noCaching?: boolean;
   }) {
     this._cachePath = cachePath;
-    if (noCaching) {
+    this._noCaching = noCaching;
+    if (this._noCaching) {
       this._cacheContents = this.createEmptyCacheContents();
     } else {
       this._cacheContents = this.readFromFileSystem();
@@ -45,7 +47,10 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
    * Write contents of cache to file system
    */
   writeToFileSystem(): void {
-    return fs.writeJSONSync(this._cachePath, this._cacheContents);
+    if (!this._noCaching) {
+      return fs.writeJSONSync(this._cachePath, this._cacheContents);
+    }
+    return;
   }
 
   /**

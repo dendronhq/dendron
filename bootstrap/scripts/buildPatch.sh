@@ -6,7 +6,7 @@ if [ $PUBLISH_ENDPOINT = "local" ] && [ -z $USE_IN_MEMORY_REGISTRY ] ; then
 	verdaccio > verdaccio.log 2>&1 &
 	FOO_PID=$!
 	echo "$FOO_PID"
-	sleep 3
+	sleep 6
 fi
 if [ $PUBLISH_ENDPOINT = "local" ] && [ $USE_IN_MEMORY_REGISTRY ] ; then
 	echo "starting verdaccio with in-memory cache to speed up build time"

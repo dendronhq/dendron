@@ -11,6 +11,7 @@ import { Uri } from "vscode";
 import path from "path";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 
 function getNoteUri(opts: { note: NoteProps; wsRoot: string }) {
   const { note, wsRoot } = opts;
@@ -52,16 +53,35 @@ async function runRenameNote(opts: { noteId: string; newName: string }) {
 async function getFullTree(opts: {
   root: NoteProps;
   provider: EngineNoteProvider;
+  extra?: {
+    [key in keyof Partial<NoteProps>]: boolean;
+  };
 }): Promise<{ fname: string; childNodes: any }> {
   const { root, provider } = opts;
   const children = await (provider.getChildren(root) as Promise<NoteProps[]>);
   const childNodes = await Promise.all(
     children.map(async (child) => {
-      const tree = await getFullTree({ root: child, provider });
+      const tree = await getFullTree({
+        root: child,
+        provider,
+        extra: opts.extra,
+      });
       return tree;
     })
   );
-  return { fname: root.fname, childNodes };
+  const res = { fname: root.fname, childNodes };
+  if (opts.extra) {
+    const extraKeys = _.keys(opts.extra);
+    extraKeys.forEach((key) => {
+      if (opts.extra && opts.extra[key as keyof NoteProps]) {
+        const value = root[key as keyof NoteProps];
+        if (value !== undefined) {
+          _.set(res, key, root[key as keyof NoteProps]);
+        }
+      }
+    });
+  }
+  return res;
 }
 
 suite("NativeTreeView tests", function () {
@@ -165,6 +185,208 @@ suite("NativeTreeView tests", function () {
           expect(grandChildrenAfter.map((gchild) => gchild.fname)).toEqual([
             "foo.baz",
           ]);
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN renaming a note to an existing stub that has a stub parent and any children",
+      {
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "foo.bar.baz",
+            genRandomId: true,
+          });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "dummy",
+            body: "this is some dummy content",
+          });
+        },
+      },
+      () => {
+        test.only("THEN tree view correctly displays renamed note", async () => {
+          const mockEvents = new MockEngineEvents();
+          const provider = new EngineNoteProvider(mockEvents);
+
+          const propsBefore = await (provider.getChildren() as Promise<
+            NoteProps[]
+          >);
+
+          const vaultOneRootPropsBefore = propsBefore[0];
+
+          const fullTreeBefore = await getFullTree({
+            root: vaultOneRootPropsBefore,
+            provider,
+            extra: { stub: true },
+          });
+
+          expect(fullTreeBefore).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "dummy",
+                childNodes: [],
+              },
+              {
+                fname: "foo",
+                stub: true,
+                childNodes: [
+                  {
+                    fname: "foo.bar",
+                    stub: true,
+                    childNodes: [
+                      {
+                        fname: "foo.bar.baz",
+                        childNodes: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+
+          await runRenameNote({
+            noteId: "dummy",
+            newName: "foo.bar",
+          });
+
+          const propsAfter = await (provider.getChildren() as Promise<
+            NoteProps[]
+          >);
+          const vaultOneRootPropsAfter = propsAfter[0];
+          const fullTreeAfter = await getFullTree({
+            root: vaultOneRootPropsAfter,
+            provider,
+            extra: { stub: true },
+          });
+
+          expect(fullTreeAfter).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "foo",
+                stub: true,
+                childNodes: [
+                  {
+                    fname: "foo.bar",
+                    childNodes: [
+                      {
+                        fname: "foo.bar.baz",
+                        childNodes: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN renaming note with stub parent and any children",
+      {
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "foo.bar.baz",
+            genRandomId: true,
+          });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "foo.bar",
+            body: "this is some dummy content",
+          });
+        },
+      },
+      () => {
+        test("THEN tree view correctly displays renamed note", async () => {
+          const mockEvents = new MockEngineEvents();
+          const provider = new EngineNoteProvider(mockEvents);
+
+          const propsBefore = await (provider.getChildren() as Promise<
+            NoteProps[]
+          >);
+
+          const vaultOneRootPropsBefore = propsBefore[0];
+
+          const fullTreeBefore = await getFullTree({
+            root: vaultOneRootPropsBefore,
+            provider,
+            extra: { stub: true },
+          });
+
+          expect(fullTreeBefore).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "foo",
+                stub: true,
+                childNodes: [
+                  {
+                    fname: "foo.bar",
+                    childNodes: [
+                      {
+                        fname: "foo.bar.baz",
+                        childNodes: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+
+          await runRenameNote({
+            noteId: "foo.bar",
+            newName: "dummy",
+          });
+
+          const propsAfter = await (provider.getChildren() as Promise<
+            NoteProps[]
+          >);
+          const vaultOneRootPropsAfter = propsAfter[0];
+          const fullTreeAfter = await getFullTree({
+            root: vaultOneRootPropsAfter,
+            provider,
+            extra: { stub: true },
+          });
+
+          expect(fullTreeAfter).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "dummy",
+                childNodes: [],
+              },
+              {
+                fname: "foo",
+                stub: true,
+                childNodes: [
+                  {
+                    fname: "foo.bar",
+                    stub: true,
+                    childNodes: [
+                      {
+                        fname: "foo.bar.baz",
+                        childNodes: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
         });
       }
     );

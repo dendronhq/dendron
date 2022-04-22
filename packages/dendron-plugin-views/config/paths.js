@@ -62,10 +62,6 @@ module.exports = {
   appSrc: resolveApp("src"),
   appTsConfig: resolveApp("tsconfig.json"),
   appJsConfig: resolveApp("jsconfig.json"),
-  appViews: fs
-    .readdirSync(resolveApp("src/views"))
-    .map((ent) => ent.split(".tsx")[0]),
-  appPages: {},
   yarnLockFile: resolveApp("yarn.lock"),
   testsSetup: resolveModule(resolveApp, "src/setupTests"),
   proxySetup: resolveApp("src/setupProxy.js"),

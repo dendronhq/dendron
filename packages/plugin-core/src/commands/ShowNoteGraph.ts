@@ -38,9 +38,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
     const port = ext.port!;
     const engine = ext.getEngine();
     const { wsRoot } = engine;
-    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const webViewAssets = WebViewUtils.getJsAndCss();
     const html = await WebViewUtils.getWebviewContent({
       ...webViewAssets,
+      name,
       port,
       wsRoot,
       panel: this._panel,

@@ -37,12 +37,13 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     const port = ext.port!;
     const engine = ext.getEngine();
     const { wsRoot } = engine;
-    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const webViewAssets = WebViewUtils.getJsAndCss();
     const html = await WebViewUtils.getWebviewContent({
       ...webViewAssets,
       port,
       wsRoot,
       panel: this._panel,
+      name,
     });
 
     this._panel.webview.html = html;

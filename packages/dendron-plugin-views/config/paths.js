@@ -65,14 +65,7 @@ module.exports = {
   appViews: fs
     .readdirSync(resolveApp("src/views"))
     .map((ent) => ent.split(".tsx")[0]),
-  appPages: {
-    notePreview: resolveApp("src/views/DendronNotePageView"),
-    treePanelView: resolveApp("src/views/DendronTreeExplorerPanelView"),
-    lookupPanelView: resolveApp("src/views/DendronLookupPanelView"),
-    graphView: resolveApp("src/views/DendronGraphPanelView"),
-    calendarPanelView: resolveApp("src/views/DendronCalendarPanelView"),
-    schemaView: resolveApp("src/views/DendronSchemaGraphPanelView")
-  },
+  appPages: {},
   yarnLockFile: resolveApp("yarn.lock"),
   testsSetup: resolveModule(resolveApp, "src/setupTests"),
   proxySetup: resolveApp("src/setupProxy.js"),

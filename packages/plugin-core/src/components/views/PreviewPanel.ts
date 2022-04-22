@@ -108,10 +108,11 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         }
       );
 
-      const webViewAssets = WebViewUtils.getJsAndCss(name);
+      const webViewAssets = WebViewUtils.getJsAndCss();
 
       const html = await WebViewUtils.getWebviewContent({
         ...webViewAssets,
+        name,
         port,
         wsRoot,
         panel: this._panel,

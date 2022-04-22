@@ -16,14 +16,12 @@ type DendronErrorProps = {
   severity?: ERROR_SEVERITY;
 
   /**
-   * @deprecated - should only used in DendronServerError
-   * Optional HTTP status code for error
+   * Optional HTTP status code for error. Can also be used in Dendron internals.
    */
   code?: StatusCodes;
 
   /**
-   * @deprecated - should only used in DendronServerError
-   * Custom status errors
+   * Custom error status. You can use this to check whether a specific type of error happened.
    */
   status?: string;
 
@@ -320,6 +318,39 @@ export class ErrorUtils {
 
   static isErrorResp(resp: RespV3<any>) {
     return "error" in resp;
+  }
+
+  static isDendronCompositeError(
+    error: unknown
+  ): error is DendronCompositeError {
+    if (!ErrorUtils.isDendronError(error)) return false;
+
+    // The API stringifies these properties sometimes. We'll have to try parsing it if that's the case.
+    try {
+      if (_.isString(error.payload)) {
+        error.payload = JSON.parse(error.payload);
+      }
+    } catch {
+      // nothing, maybe it wasn't serialized
+    }
+
+    return (
+      _.isArray(error.payload) && error.payload.every(ErrorUtils.isDendronError)
+    );
+  }
+
+  /** Check if this error has the given status, or if it's a composite error
+   * that includes an error with this status.
+   */
+  static hasErrorStatus(error: unknown, status: string) {
+    return (
+      // Either this has the expected status code
+      (ErrorUtils.isDendronError(error) && error.status === status) ||
+      // or, this is a composite error
+      (ErrorUtils.isDendronCompositeError(error) &&
+        // that contains an error with the expected status code
+        error.payload.some((error) => error.status === status))
+    );
   }
 }
 

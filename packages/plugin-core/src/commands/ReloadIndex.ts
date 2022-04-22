@@ -2,7 +2,9 @@ import {
   DendronError,
   DEngineClient,
   DVault,
+  ErrorUtils,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   isNotUndefined,
   NoteUtils,
   SchemaUtils,
@@ -147,6 +149,9 @@ export class ReloadIndexCommand extends BasicCommand<
       if (error) {
         const msg = "init error";
         initError = error;
+        if (ErrorUtils.hasErrorStatus(error, ERROR_STATUS.DUPLICATE_NOTE_ID)) {
+          AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound);
+        }
         this.L.error({ ctx, error, msg });
       }
       return autoFixActions;

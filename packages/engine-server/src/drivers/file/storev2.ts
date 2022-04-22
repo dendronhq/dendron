@@ -48,6 +48,7 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -143,6 +144,8 @@ export class FileStorage implements DStore {
               payload: [NoteUtils.toLogObj(ent), NoteUtils.toLogObj(duplicate)],
               // Duplicate IDs break some features, but we shouldn't stop initialization completely
               severity: ERROR_SEVERITY.MINOR,
+              code: StatusCodes.BAD_REQUEST,
+              status: ERROR_STATUS.DUPLICATE_NOTE_ID,
             })
           );
         }

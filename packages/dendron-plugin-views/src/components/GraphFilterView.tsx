@@ -13,7 +13,7 @@ import {
 import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { useState } from "react";
-import { GraphConfig, GraphConfigItem, GraphStylesEnum } from "../utils/graph";
+import { GraphConfig, GraphConfigItem, GraphThemeEnum } from "../utils/graph";
 import AntThemes from "../styles/theme-antd";
 import { useCurrentTheme } from "../hooks";
 
@@ -105,9 +105,9 @@ const GraphFilterView = ({
             updateConfigField={updateConfigField}
           />
         </Panel>
-        <Panel header="Graph Styles" key="graphStyles">
+        <Panel header="Graph Theme" key="graphTheme">
           <FilterViewSection
-            section="graphStyles"
+            section="graphTheme"
             config={config}
             updateConfigField={updateConfigField}
           />
@@ -205,7 +205,7 @@ const FilterViewSection = ({
                 <>
                   <RadioButton
                     configField={key}
-                    value={entry.value as GraphStylesEnum}
+                    value={entry.value as GraphThemeEnum}
                     updateConfigField={updateConfigField}
                   />
                 </>
@@ -257,11 +257,11 @@ const RadioButton = ({
   updateConfigField,
 }: {
   configField: string;
-  value: GraphStylesEnum;
+  value: GraphThemeEnum;
   updateConfigField: (key: string, value: string | number | boolean) => void;
 }) => {
-  const singleSelectOptions = Object.keys(GraphStylesEnum).map(
-    (k) => GraphStylesEnum[k as GraphStylesEnum]
+  const singleSelectOptions = Object.keys(GraphThemeEnum).map(
+    (k) => GraphThemeEnum[k as GraphThemeEnum]
   );
   return (
     <Radio.Group

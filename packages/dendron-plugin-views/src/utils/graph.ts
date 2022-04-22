@@ -18,9 +18,10 @@ export type GraphConfigItem<T> = {
   singleSelect?: boolean;
 };
 
-export enum GraphStylesEnum {
+export enum GraphThemeEnum {
   DEFAULT = "DEFAULT",
   CLASSIC = "CLASSIC",
+  BLOCK = "BLOCK",
 }
 
 export type CoreGraphConfig = {
@@ -35,7 +36,7 @@ export type CoreGraphConfig = {
   "options.allow-relayout": GraphConfigItem<boolean>;
   "options.show-labels": GraphConfigItem<boolean>;
 
-  graphStyles: GraphConfigItem<GraphStylesEnum>;
+  graphTheme: GraphConfigItem<GraphThemeEnum>;
 };
 
 export type NoteGraphConfig = {
@@ -88,8 +89,8 @@ const coreGraphConfig: CoreGraphConfig = {
     value: true,
     mutable: true,
   },
-  graphStyles: {
-    value: GraphStylesEnum.DEFAULT,
+  graphTheme: {
+    value: GraphThemeEnum.DEFAULT,
     mutable: true,
     singleSelect: true,
   },

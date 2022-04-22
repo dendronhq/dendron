@@ -2,37 +2,35 @@ import { baseTheme, Theme } from "./theme-default";
 
 const classicBasicTheme = {
   links: {
-    curveStyle: "bezier",
+    curveStyle: "unbundled-bezier",
   },
   hierarchy: {
-    curveStyle: "bezier",
+    curveStyle: "taxi",
   },
   edge: {
     width: 0.5,
+    color: "#B3ABAB",
     targetDistanceFromNode: 5,
     sourceDistanceFromNode: 5,
-    targetEndpoint: "outside-to-line-or-label",
-    sourceEndpoint: "outside-to-line-or-label",
   },
 };
 
 const darkTheme: Theme = {
   graph: {
     node: {
-      color: "#E73C7F",
+      color: "#BB86FC",
       size: baseTheme.graph.node.size,
-      fontFamily: "cursive",
+      fontFamily: "sans-serif",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#E73C7F",
+        color: "#BB86FC",
       },
       _selected: {
-        color: "coral",
+        color: "#C7FC86",
       },
     },
     edge: {
       ...classicBasicTheme.edge,
-      color: "#5CBAC5",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -40,7 +38,7 @@ const darkTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "#27AC2C",
+      color: "coral",
     },
     links: {
       ...baseTheme.graph.links,
@@ -55,20 +53,19 @@ const darkTheme: Theme = {
 const lightTheme: Theme = {
   graph: {
     node: {
-      color: "#AC2065",
+      color: "#8800FC",
       size: baseTheme.graph.node.size,
-      fontFamily: "cursive",
+      fontFamily: "sans-serif",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#AC2065",
+        color: "#8800FC",
       },
       _selected: {
-        color: "coral",
+        color: "#7DB031",
       },
     },
     edge: {
       ...classicBasicTheme.edge,
-      color: "#5CBAC5",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -76,7 +73,7 @@ const lightTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "#27AC2C",
+      color: "coral",
     },
     links: {
       ...baseTheme.graph.links,
@@ -88,11 +85,11 @@ const lightTheme: Theme = {
   },
 };
 
-const ClassicTheme: {
+const BlockTheme: {
   [theme: string]: Theme;
 } = {
   dark: darkTheme,
   light: lightTheme,
 };
 
-export default ClassicTheme;
+export default BlockTheme;

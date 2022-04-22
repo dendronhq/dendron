@@ -9,7 +9,7 @@ import {
   GraphConfig,
   GraphConfigItem,
   GraphElements,
-  GraphStylesEnum,
+  GraphThemeEnum,
 } from "../utils/graph";
 import {
   ConfigUtils,
@@ -26,7 +26,8 @@ import { useCurrentTheme, useWorkspaceProps } from "../hooks";
 import { postVSCodeMessage } from "../utils/vscode";
 import { getStyles } from "../styles/custom";
 import DefaultTheme from "../styles/theme-default";
-import ClassicThemes from "../styles/theme-classic";
+import ClassicTheme from "../styles/theme-classic";
+import BlockTheme from "../styles/theme-block";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -45,12 +46,15 @@ const getCytoscapeStyle = (
   if (customCSS) {
     return getStyles(theme, DefaultTheme, customCSS);
   }
-  switch (config.graphStyles.value) {
-    case GraphStylesEnum.DEFAULT: {
+  switch (config.graphTheme.value) {
+    case GraphThemeEnum.DEFAULT: {
       return getStyles(theme, DefaultTheme);
     }
-    case GraphStylesEnum.CLASSIC: {
-      return getStyles(theme, ClassicThemes);
+    case GraphThemeEnum.CLASSIC: {
+      return getStyles(theme, ClassicTheme);
+    }
+    case GraphThemeEnum.BLOCK: {
+      return getStyles(theme, BlockTheme);
     }
   }
 };
@@ -235,7 +239,7 @@ export default function Graph({
   useEffect(() => {
     renderGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.graphStyles.value]);
+  }, [config.graphTheme.value]);
 
   useEffect(() => {
     // If initial vault data received

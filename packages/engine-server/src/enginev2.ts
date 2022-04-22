@@ -707,6 +707,7 @@ export class DendronEngineV2 implements DEngine {
         const { id } = ent.note;
         if (ent.status === "delete") {
           delete this.notes[id];
+          this.noteFnames.delete(ent.note);
         } else {
           const note = await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,

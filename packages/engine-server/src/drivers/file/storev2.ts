@@ -239,7 +239,7 @@ export class FileStorage implements DStore {
         out.push({ note: noteToDelete, status: "update", prevNote });
       } else {
         // the delete operation originated from rename.
-        // since _noteToDelete) in this case is renamed and
+        // since _noteToDelete_ in this case is renamed and
         // moved to another location, simply adding stub: true
         // will not work.
         // we need a fresh stub note that will fill in the old note's place.
@@ -250,7 +250,28 @@ export class FileStorage implements DStore {
           ..._.omit(noteToDelete, ["id", "links", "body"]),
           stub: true,
         });
-        this.writeNote(replacingStub);
+        this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
+        if (!noteToDelete.parent) {
+          throw DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+          });
+        }
+        const parentNote = this.notes[noteToDelete.parent] as NoteProps;
+        const parentNotePrev = { ...parentNote };
+        parentNote.children = _.reject(
+          parentNote.children,
+          (ent) => ent === noteToDelete.id
+        );
+        out.push({
+          note: parentNote,
+          status: "update",
+          prevNote: parentNotePrev,
+        });
+
+        delete this.notes[noteToDelete.id];
+        this.noteFnames.delete(noteToDelete);
+        await this.writeNote(replacingStub, { newNode: true });
+        out.push({ note: noteToDelete, status: "delete" });
         out.push({ note: replacingStub, status: "create" });
       }
     } else {
@@ -902,10 +923,6 @@ export class FileStorage implements DStore {
     notesChangedEntries = changedFromDelete
       .concat(changeFromWrite)
       .concat(notesChangedEntries);
-    // remove duplicate updates
-    notesChangedEntries = _.uniqBy(notesChangedEntries, (ent) => {
-      return [ent.status, ent.note.id, ent.note.fname].join("");
-    });
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
   }
@@ -1092,8 +1109,10 @@ export class FileStorage implements DStore {
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
       note = _.omit(note, "stub");
-      noDelete = true;
-    } else {
+      if (opts?.updateExisting) noDelete = true;
+    }
+
+    if (!opts?.updateExisting) {
       changedEntries = await this._writeNewNote({
         note,
         existingNote: maybeNote,

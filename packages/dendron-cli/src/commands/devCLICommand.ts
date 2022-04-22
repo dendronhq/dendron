@@ -63,6 +63,7 @@ type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
   fast?: boolean;
   extensionTarget: ExtensionTarget;
+  skipSentry?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
 
@@ -124,6 +125,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("fast", {
       describe: "skip some checks",
+    });
+    args.option("skipSentry", {
+      describe: "skip upload source map to sentry",
     });
     args.option("migrationVersion", {
       describe: "migration version to run",

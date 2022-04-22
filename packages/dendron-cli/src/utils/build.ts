@@ -165,15 +165,15 @@ export class BuildUtils {
   }
 
   static async compilePlugin({
-    fast,
     quiet,
+    skipSentry,
   }: {
-    fast?: boolean;
     quiet?: boolean;
+    skipSentry?: boolean;
   }) {
     await $$(`yarn build:prod`, {
       cwd: this.getPluginRootPath(),
-      env: fast ? { SKIP_SENTRY: "true" } : {},
+      env: skipSentry ? { SKIP_SENTRY: "true" } : {},
       quiet,
     });
   }
@@ -183,15 +183,15 @@ export class BuildUtils {
    * @returns
    */
   static async packagePluginDependencies({
-    fast,
+    skipSentry,
     quiet,
   }: {
-    fast?: boolean;
+    skipSentry?: boolean;
     quiet?: boolean;
   }) {
     await $$(`vsce package --yarn`, {
       cwd: this.getPluginRootPath(),
-      env: fast ? { SKIP_SENTRY: "true" } : {},
+      env: skipSentry ? { SKIP_SENTRY: "true" } : {},
       quiet,
     });
   }

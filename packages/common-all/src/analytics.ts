@@ -114,6 +114,8 @@ export enum ConfigEvents {
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
   ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
+  MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
+  MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
 }
 
 export enum MigrationEvents {

@@ -1,19 +1,20 @@
 import {
-  NoteProps,
   DVault,
+  NoteFNamesDict,
+  NoteProps,
   NotePropsDict,
   NoteUtils,
   SchemaModuleDict,
   SchemaProps,
-  VaultUtils,
   TAGS_HIERARCHY,
+  VaultUtils,
+  milliseconds,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { GraphUtils } from "../components/graph";
-
 import {
   GraphConfig,
   GraphEdges,
@@ -34,9 +35,10 @@ const getLocalNoteGraphElements = ({
   notes,
   noteActive,
   vaults,
-  wsRoot,
+  fNameDict,
 }: {
   notes: NotePropsDict;
+  fNameDict: NoteFNamesDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
@@ -211,12 +213,12 @@ const getLocalNoteGraphElements = ({
         return;
       }
 
-      const to = NoteUtils.getNoteByFnameV5({
-        fname: fnameArray[fnameArray.length - 1],
-        vault: toVault,
-        notes,
-        wsRoot,
-      });
+      const fname = fnameArray[fnameArray.length - 1];
+      let toNotes = fNameDict.get(notes, fname);
+
+      const to = toNotes.filter((note) =>
+        VaultUtils.isEqualV2(note.vault, toVault)
+      )[0];
 
       if (!to) {
         logger.warn(
@@ -279,16 +281,18 @@ function getNoteColor(opts: { fname: string; notes: NotePropsDict }) {
 
 const getFullNoteGraphElements = ({
   notes,
-  wsRoot,
+  fNameDict,
   vaults,
   noteActive,
 }: {
   notes: NotePropsDict;
+  fNameDict: NoteFNamesDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
 }): GraphElements => {
   const logger = createLogger("graph - getFullNoteGraphElements");
+  const startTime = milliseconds();
 
   // ADD NODES
   const nodes = Object.values(notes).map((note) => {
@@ -361,21 +365,21 @@ const getFullNoteGraphElements = ({
         });
 
         if (_.isUndefined(toVault)) {
-          logger.log(
+          logger.debug(
             `Couldn't find vault of note ${toFname}, aborting link creation`
           );
           return;
         }
 
-        const to = NoteUtils.getNoteByFnameV5({
-          fname: fnameArray[fnameArray.length - 1],
-          vault: toVault,
-          notes,
-          wsRoot,
-        });
+        const fname = fnameArray[fnameArray.length - 1];
+        let toNotes = fNameDict.get(notes, fname);
+
+        const to = toNotes.filter((note) =>
+          VaultUtils.isEqualV2(note.vault, toVault)
+        )[0];
 
         if (!to) {
-          logger.log(
+          logger.debug(
             `Failed to link note ${VaultUtils.getName(note.vault)}/${
               note.fname
             } to ${VaultUtils.getName(toVault)}/${
@@ -412,7 +416,16 @@ const getFullNoteGraphElements = ({
 
     edges.links.push(...linkConnections);
   });
-  logger.info({ msg: "exit", activeNoteId: noteActive?.id, nodes, edges });
+
+  const endTime = milliseconds();
+
+  logger.info({
+    msg: "exit",
+    activeNoteId: noteActive?.id,
+    nodes,
+    edges,
+    computeGraphDuration: `${endTime - startTime} ms`,
+  });
 
   return {
     nodes,
@@ -582,6 +595,7 @@ const useGraphElements = ({
         setElements(
           getFullNoteGraphElements({
             notes: engine.notes,
+            fNameDict: engine.noteFName,
             wsRoot,
             vaults: engine.vaults,
             noteActive,
@@ -598,6 +612,7 @@ const useGraphElements = ({
       setElements(
         getLocalNoteGraphElements({
           notes: engine.notes,
+          fNameDict: engine.noteFName,
           wsRoot,
           vaults: engine.vaults,
           noteActive,

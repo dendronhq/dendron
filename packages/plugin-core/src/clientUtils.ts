@@ -49,11 +49,10 @@ export class DendronClientUtilsV2 {
         // const domain: NoteProps | undefined = undefined;
         out = DNodeUtils.domainName(fname);
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const domain = NoteUtils.getNoteByFnameV5({
+        const domain = NoteUtils.getNoteByFnameFromEngine({
           fname,
-          notes: opts.engine.notes,
+          engine: opts.engine,
           vault,
-          wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
         });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];

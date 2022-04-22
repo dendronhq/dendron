@@ -36,6 +36,7 @@ import {
   TextDocument,
   TextEdit,
 } from "vscode";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { sentryReportingCallback } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -237,19 +238,20 @@ export const resolveCompletionItem = sentryReportingCallback(
     )
       return;
 
-    const engine = getDWorkspace().engine;
-    const { vaults, notes, wsRoot } = engine;
+    const engine = ExtensionProvider.getEngine();
+    const { vaults, wsRoot } = engine;
     const vault = VaultUtils.getVaultByName({ vname, vaults });
     if (_.isUndefined(vault)) {
       Logger.info({ ctx, msg: "vault not found", fname, vault, wsRoot });
       return;
     }
-    const note = NoteUtils.getNoteByFnameV5({
+
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      notes,
-      wsRoot,
+      engine,
     });
+
     if (_.isUndefined(note)) {
       Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });
       return;

@@ -142,7 +142,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     wsRoot: string;
     config: ImportPodConfig;
   }) {
-    const { vault, members, engine, wsRoot, config } = opts;
+    const { vault, members, engine, config } = opts;
     const conflicts: Conflict[] = [];
     const create: NoteProps[] = [];
     const notesToUpdate: UpdateNotesOpts[] = [];
@@ -162,11 +162,10 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         noteName = DNodeUtils.cleanFname(noteName);
         this.L.debug({ ctx: "membersToNotes", msg: "enter", member });
         let fname;
-        const note = NoteUtils.getNoteByFnameV5({
+        const note = NoteUtils.getNoteByFnameFromEngine({
           fname: `people.${noteName}`,
-          notes: engine.notes,
+          engine,
           vault,
-          wsRoot,
         });
 
         if (!_.isUndefined(note)) {

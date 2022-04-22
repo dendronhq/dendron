@@ -123,7 +123,7 @@ export class WSUtils {
     @deprecated. Use same method in {@link WSUtilsV2}
   **/
   static getNoteFromPath(fsPath: string) {
-    const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
@@ -132,11 +132,10 @@ export class WSUtils {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameV5({
+    return NoteUtils.getNoteByFnameFromEngine({
       fname,
       vault,
-      wsRoot,
-      notes: engine.notes,
+      engine,
     });
   }
 

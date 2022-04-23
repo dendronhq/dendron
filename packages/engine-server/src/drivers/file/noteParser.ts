@@ -5,6 +5,8 @@ import {
   DNodeUtils,
   DStore,
   DVault,
+  ErrorFactory,
+  ErrorUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
   isNotUndefined,
@@ -152,16 +154,14 @@ export class NoteParser extends ParserBase {
           }
           return notes;
         } catch (err: any) {
-          if (!(err instanceof DendronError)) {
-            err = new DendronError({
-              message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
-              payload: err,
-            });
-          }
+          const dendronError = ErrorFactory.wrapIfNeeded(err);
           // A fatal error would kill the initialization
-          err.severity = ERROR_SEVERITY.MINOR;
-          errors.push(err);
-          return undefined;
+          dendronError.severity = ERROR_SEVERITY.MINOR;
+          dendronError.message =
+            `Failed to read ${ent.fpath} in ${vault.fsPath}: ` +
+            dendronError.message;
+          errors.push(dendronError);
+          return;
         }
       })
       .filter(isNotUndefined);
@@ -208,15 +208,13 @@ export class NoteParser extends ParserBase {
             });
             return notes;
           } catch (err: any) {
-            if (!(err instanceof DendronError)) {
-              err = new DendronError({
-                message: `Failed to read ${ent.fpath} in ${vault.fsPath}`,
-                payload: err,
-              });
-            }
+            const dendronError = ErrorFactory.wrapIfNeeded(err);
             // A fatal error would kill the initialization
-            err.severity = ERROR_SEVERITY.MINOR;
-            errors.push(err);
+            dendronError.severity = ERROR_SEVERITY.MINOR;
+            dendronError.message =
+              `Failed to read ${ent.fpath} in ${vault.fsPath}: ` +
+              dendronError.message;
+            errors.push(dendronError);
             return undefined;
           }
         })
@@ -295,7 +293,7 @@ export class NoteParser extends ParserBase {
         errors,
       }));
     } catch (_err: any) {
-      if (!(_err instanceof DendronError)) {
+      if (!ErrorUtils.isDendronError(_err)) {
         const err = DendronError.createFromStatus({
           status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
           severity: ERROR_SEVERITY.MINOR,
@@ -371,9 +369,7 @@ export class NoteParser extends ParserBase {
     try {
       this.updateLinksAndAnchors(note);
     } catch (_err: any) {
-      if (_err instanceof DendronError) {
-        errors.push(_err);
-      }
+      errors.push(ErrorFactory.wrapIfNeeded(_err));
     }
     this.cache.set(
       name,
@@ -417,15 +413,15 @@ export class NoteParser extends ParserBase {
       });
       note.links = links;
     } catch (err: any) {
-      let error = err;
-      if (!(err instanceof DendronError)) {
-        error = new DendronError({
-          message: `Failed to read links in note ${note.fname}`,
-          payload: err,
-        });
-      }
-      this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(note) });
-      throw error;
+      const dendronError = ErrorFactory.wrapIfNeeded(err);
+      dendronError.message =
+        `Failed to read links in note ${note.fname}: ` + dendronError.message;
+      this.logger.error({
+        ctx,
+        error: dendronError,
+        note: NoteUtils.toLogObj(note),
+      });
+      throw dendronError;
     }
     try {
       const anchors = AnchorUtils.findAnchors({
@@ -434,14 +430,11 @@ export class NoteParser extends ParserBase {
       note.anchors = anchors;
       return;
     } catch (err: any) {
-      let error = err;
-      if (!(err instanceof DendronError)) {
-        error = new DendronError({
-          message: `Failed to read headers or block anchors in note ${note.fname}`,
-          payload: err,
-        });
-      }
-      throw error;
+      const dendronError = ErrorFactory.wrapIfNeeded(err);
+      dendronError.message =
+        `Failed to read headers or block anchors in note ${note.fname}` +
+        dendronError.message;
+      throw dendronError;
     }
   }
 }

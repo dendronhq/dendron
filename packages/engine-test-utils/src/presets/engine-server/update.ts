@@ -1,17 +1,23 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { CONSTANTS, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   TestPresetEntryV4,
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
-import { readNotesFromCache } from "@dendronhq/engine-server";
+import { NotesFileSystemCache } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 
 const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
       const vault = vaults[0];
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       const noteOld = NoteUtils.getNoteByFnameFromEngine({
         fname: "foo",
         engine,
@@ -37,13 +43,12 @@ const NOTES = {
           expected: "new body",
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 2,
         },
         {
-          actual: _.size(
-            readNotesFromCache(vault2Path({ wsRoot, vault })).notes
-          ),
+          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
+            .size,
           expected: 2,
         },
       ];

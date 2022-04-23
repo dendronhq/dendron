@@ -6,7 +6,6 @@ import {
   FOLDERS,
   isNotUndefined,
   NoteProps,
-  NotesCache,
   NoteUtils,
   RespV3,
   SchemaModuleOpts,
@@ -200,42 +199,6 @@ export function file2Note(
   const { name } = path.parse(fpath);
   const fname = toLowercase ? name.toLowerCase() : name;
   return string2Note({ content, fname, vault });
-}
-
-export function file2NoteWithCache({
-  fpath,
-  vault,
-  cache,
-  toLowercase,
-}: {
-  fpath: string;
-  vault: DVault;
-  cache: NotesCache;
-  toLowercase?: boolean;
-}): { note: NoteProps; matchHash: boolean; noteHash: string } {
-  const content = fs.readFileSync(fpath, { encoding: "utf8" });
-  const { name } = path.parse(fpath);
-  const sig = genHash(content);
-  const matchHash = cache.notes[name]?.hash === sig;
-  const fname = toLowercase ? name.toLowerCase() : name;
-  let note: NoteProps;
-
-  // if hash matches, note hasn't changed
-  if (matchHash) {
-    // since we don't store the note body in the cache file, we need to re-parse the body
-    const capture = content.match(/^---[\s\S]+?---/);
-    if (capture) {
-      const offset = capture[0].length;
-      const body = content.slice(offset + 1);
-      // vault can change without note changing so we need to add this
-      // add `contentHash` to this signature because its not saved with note
-      note = { ...cache.notes[name].data, body, vault, contentHash: sig };
-      return { note, matchHash, noteHash: sig };
-    }
-  }
-  note = string2Note({ content, fname, vault });
-  note.contentHash = sig;
-  return { note, matchHash, noteHash: sig };
 }
 
 /** Read the contents of a note from the filesystem.

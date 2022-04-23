@@ -10,7 +10,7 @@ import {
   PayloadAction,
 } from "@dendronhq/common-frontend";
 
-export type BrowserEngineSliceState = EngineSliceState & {
+export type BrowserEngineSliceState = Omit<EngineSliceState, "noteFName"> & {
   noteIndex: NoteProps;
 };
 
@@ -21,10 +21,16 @@ export const slice = createSlice({
     error: null,
   } as BrowserEngineSliceState,
   reducers: {
-    setLoadingStatus: (state, action: PayloadAction<LoadingStatus>) => {
+    setLoadingStatus: (
+      state: BrowserEngineSliceState,
+      action: PayloadAction<LoadingStatus>
+    ) => {
       state.loading = action.payload;
     },
-    setConfig: (state, action: PayloadAction<IntermediateDendronConfig>) => {
+    setConfig: (
+      state: BrowserEngineSliceState,
+      action: PayloadAction<IntermediateDendronConfig>
+    ) => {
       state.config = action.payload;
     },
     setNotes: (state, action: PayloadAction<NotePropsDict>) => {

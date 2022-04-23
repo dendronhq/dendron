@@ -105,8 +105,7 @@ export async function createServer(opts: WorkspaceOpts & { port?: number }) {
  */
 export async function createEngineFromServer(
   opts: WorkspaceOpts
-): Promise<any> {
-  const { engine, port, server } = await createServer(opts);
+): Promise<any> {  const { engine, port, server } = await createServer(opts);
   return { engine, port, server };
 }
 

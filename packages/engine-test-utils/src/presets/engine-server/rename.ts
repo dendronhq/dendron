@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DEngineClient,
   DVault,
   IDendronError,
@@ -17,7 +18,7 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
-import { readNotesFromCache } from "@dendronhq/engine-server";
+import { NotesFileSystemCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -97,7 +98,7 @@ const preSetupHook = async (
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault,
     wsRoot,
-    body: fooBody ? fooBody : "",
+    body: fooBody || "",
   });
   await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
     vault,
@@ -525,7 +526,12 @@ const NOTES = {
         nomatch: [`${beta}.md`],
       });
       await engine.init();
-      const cacheVault = readNotesFromCache(vault2Path({ wsRoot, vault }));
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
       return [
         {
           actual: changed.data?.length,
@@ -540,16 +546,16 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: _.size(cacheVault.notes),
+          actual: keySet.size,
           expected: 3,
         },
         {
-          actual: cacheVault.notes["beta"],
-          expected: undefined,
+          actual: keySet.has("beta"),
+          expected: false,
         },
         {
-          actual: cacheVault.notes["gamma"].data.fname,
-          expected: "gamma",
+          actual: keySet.has("gamma"),
+          expected: true,
         },
       ];
     },

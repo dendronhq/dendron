@@ -84,9 +84,9 @@ const useClickHandler = (noteId?: string) => {
   }, [onClickHandler]);
 };
 
-const DendronNotePage: DendronComponent = (props) => {
-  const ctx = "DendronNotePage";
-  const logger = createLogger("DendronNotePage");
+const DendronNotePreview: DendronComponent = (props) => {
+  const ctx = "DendronNotePreview";
+  const logger = createLogger("DendronNotePreview");
   const noteProps = props.ide.noteActive;
   const config = props.engine.config;
   const [workspace] = useWorkspaceProps();
@@ -124,4 +124,4 @@ const DendronNotePage: DendronComponent = (props) => {
   return <DendronNote noteContent={noteRenderedBody} config={config} />;
 };
 
-export default DendronNotePage;
+export default DendronNotePreview;

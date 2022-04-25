@@ -36,7 +36,7 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
   [DendronEditorViewKey.NOTE_PREVIEW]: {
     desc: "Note Preview",
     label: "Note Preview",
-    bundleName: "DendronNotePage",
+    bundleName: "DendronNotePreview",
     type: "webview",
   },
   [DendronEditorViewKey.CONFIGURE]: {

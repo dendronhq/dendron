@@ -1206,10 +1206,10 @@ export class FileStorage implements DStore {
         .map((ent) => this.updateNote(ent))
     );
 
-    changedEntries.push({ note, status: "create" });
     if (maybeNote && !noDelete) {
       changedEntries.push({ note: maybeNote, status: "delete" });
     }
+    changedEntries.push({ note, status: "create" });
     this.logger.info({
       ctx,
       msg: "exit",

@@ -103,6 +103,12 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setGraphStyles(styles));
         break;
       }
+      case GraphViewMessageEnum.onDefaultGraphThemeLoad: {
+        const { defaultGraphTheme } = msg.data;
+        logger.info({ ctx, defaultGraphTheme, msg: "default graph theme" });
+        ideDispatch(ideSlice.actions.setDefaultGraphTheme(defaultGraphTheme));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

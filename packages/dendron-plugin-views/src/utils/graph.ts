@@ -1,4 +1,5 @@
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
+import { GraphThemeEnum } from "@dendronhq/common-all";
 
 export type GraphNodes = NodeDefinition[];
 export type GraphEdges = {
@@ -17,12 +18,6 @@ export type GraphConfigItem<T> = {
   placeholder?: string;
   singleSelect?: boolean;
 };
-
-export enum GraphThemeEnum {
-  DEFAULT = "DEFAULT",
-  CLASSIC = "CLASSIC",
-  BLOCK = "BLOCK",
-}
 
 export type CoreGraphConfig = {
   "connections.hierarchy"?: GraphConfigItem<boolean>;
@@ -90,7 +85,7 @@ const coreGraphConfig: CoreGraphConfig = {
     mutable: true,
   },
   graphTheme: {
-    value: GraphThemeEnum.DEFAULT,
+    value: GraphThemeEnum.Default,
     mutable: true,
     singleSelect: true,
   },

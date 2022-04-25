@@ -4,13 +4,18 @@ import {
   DMessageEnum,
   DMessageSource,
   getWebEditorViewEntry,
+  GraphThemeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  EngineEventEmitter,
+  MetadataService,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -30,6 +35,7 @@ export class NoteGraphPanelFactory {
   private static _engineEvents: EngineEventEmitter;
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
+  private static defaultGraphTheme: GraphThemeEnum | undefined;
 
   static create(
     ext: DendronExtension,
@@ -141,6 +147,24 @@ export class NoteGraphPanelFactory {
             }
             break;
           }
+          case GraphViewMessageEnum.onGraphThemeChange: {
+            this.defaultGraphTheme = msg.data.defaultGraphTheme;
+            break;
+          }
+          case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
+            const defaultGraphTheme =
+              MetadataService.instance().getDefaultGraphTheme();
+            if (defaultGraphTheme) {
+              this._panel!.webview.postMessage({
+                type: GraphViewMessageEnum.onDefaultGraphThemeLoad,
+                data: {
+                  defaultGraphTheme,
+                },
+                source: "vscode",
+              });
+            }
+            break;
+          }
           default:
             break;
         }
@@ -150,6 +174,11 @@ export class NoteGraphPanelFactory {
         this._panel = undefined;
         if (this._onEngineNoteStateChangedDisposable) {
           this._onEngineNoteStateChangedDisposable.dispose();
+        }
+        if (this.defaultGraphTheme) {
+          MetadataService.instance().setDefaultGraphTheme(
+            this.defaultGraphTheme
+          );
         }
       });
     }

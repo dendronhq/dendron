@@ -5,15 +5,11 @@ import cytoscape, { Core, EdgeDefinition, EventHandler } from "cytoscape";
 import euler from "cytoscape-euler";
 import AntThemes from "../styles/theme-antd";
 import GraphFilterView from "./GraphFilterView";
-import {
-  GraphConfig,
-  GraphConfigItem,
-  GraphElements,
-  GraphThemeEnum,
-} from "../utils/graph";
+import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
 import {
   ConfigUtils,
   DMessageSource,
+  GraphThemeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
   VaultUtils,
@@ -47,13 +43,13 @@ const getCytoscapeStyle = (
     return getStyles(theme, DefaultTheme, customCSS);
   }
   switch (config.graphTheme.value) {
-    case GraphThemeEnum.DEFAULT: {
+    case GraphThemeEnum.Default: {
       return getStyles(theme, DefaultTheme);
     }
-    case GraphThemeEnum.CLASSIC: {
+    case GraphThemeEnum.Classic: {
       return getStyles(theme, ClassicTheme);
     }
-    case GraphThemeEnum.BLOCK: {
+    case GraphThemeEnum.Block: {
       return getStyles(theme, BlockTheme);
     }
   }
@@ -210,6 +206,17 @@ export default function Graph({
     // Get graph style
     postVSCodeMessage({
       type: GraphViewMessageEnum.onRequestGraphStyle,
+      data: {},
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    logger.log("Requesting default graph theme...");
+    // Get graph style
+    postVSCodeMessage({
+      type: GraphViewMessageEnum.onRequestDefaultGraphTheme,
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);

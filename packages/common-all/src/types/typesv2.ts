@@ -771,6 +771,9 @@ export enum GraphViewMessageEnum {
   "onReady" = "onReady",
   "onRequestGraphStyle" = "onRequestGraphStyle",
   "onGraphStyleLoad" = "onGraphStyleLoad",
+  "onGraphThemeChange" = "onGraphThemeChange",
+  "onRequestDefaultGraphTheme" = "onRequestDefaultGraphTheme",
+  "onDefaultGraphThemeLoad" = "onDefaultGraphThemeLoad",
 }
 
 export enum CalendarViewMessageType {
@@ -799,6 +802,12 @@ export enum SeedBrowserMessageType {
   "onSeedAdd" = "onSeedAdd",
   "onOpenUrl" = "onOpenUrl",
   "onSeedStateChange" = "onSeedStateChange",
+}
+
+export enum GraphThemeEnum {
+  Default = "Default",
+  Classic = "Classic",
+  Block = "Block",
 }
 
 // TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases
@@ -834,7 +843,7 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 
 export type GraphViewMessage = DMessage<
   GraphViewMessageType,
-  { id: string; vault?: string }
+  { id: string; vault?: string; defaultGraphTheme?: GraphThemeEnum }
 >;
 
 export type CalendarViewMessage = DMessage<

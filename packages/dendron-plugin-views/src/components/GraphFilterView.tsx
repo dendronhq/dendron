@@ -13,9 +13,17 @@ import {
 import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 import _ from "lodash";
 import { useState } from "react";
-import { GraphConfig, GraphConfigItem, GraphThemeEnum } from "../utils/graph";
+import { GraphConfig, GraphConfigItem } from "../utils/graph";
 import AntThemes from "../styles/theme-antd";
 import { useCurrentTheme } from "../hooks";
+import { postVSCodeMessage } from "../utils/vscode";
+import {
+  DMessageSource,
+  GraphThemeEnum,
+  GraphViewMessage,
+  GraphViewMessageEnum,
+} from "@dendronhq/common-all";
+import { ideHooks, ideSlice } from "@dendronhq/common-frontend";
 
 const { Panel } = Collapse;
 
@@ -263,9 +271,14 @@ const RadioButton = ({
   const singleSelectOptions = Object.keys(GraphThemeEnum).map(
     (k) => GraphThemeEnum[k as GraphThemeEnum]
   );
+  const ideDispatch = ideHooks.useIDEAppDispatch();
   return (
     <Radio.Group
-      onChange={(e) => updateConfigField(configField, e.target.value)}
+      onChange={(e) => {
+        updateDefaultTheme(e.target.value);
+        ideDispatch(ideSlice.actions.setDefaultGraphTheme(e.target.value));
+        updateConfigField(configField, e.target.value);
+      }}
       value={value}
     >
       <Space direction="vertical">
@@ -277,6 +290,14 @@ const RadioButton = ({
       </Space>
     </Radio.Group>
   );
+};
+
+const updateDefaultTheme = (defaultGraphTheme: GraphThemeEnum) => {
+  postVSCodeMessage({
+    type: GraphViewMessageEnum.onGraphThemeChange,
+    data: { defaultGraphTheme },
+    source: DMessageSource.webClient,
+  } as GraphViewMessage);
 };
 
 export default GraphFilterView;

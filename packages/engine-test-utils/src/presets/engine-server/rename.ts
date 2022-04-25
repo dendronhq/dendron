@@ -535,7 +535,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: _.trim(findByName("alpha", changed.data!).note.body),

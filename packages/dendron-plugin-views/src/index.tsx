@@ -1,7 +1,7 @@
 import { renderOnDOM } from "./bootstrap";
 // const VIEW_NAME = process.env["REACT_APP_VIEW_NAME"] || "";
 const VALID_NAMES = [
-  "DendronNotePage",
+  "DendronNotePreview",
   "SampleComponent",
   "DendronTreeExplorerPanel",
   "DendronLookupPanel",

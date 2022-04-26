@@ -263,8 +263,8 @@ const RadioButton = ({ value }: { value: GraphThemeEnum }) => {
   return (
     <Radio.Group
       onChange={(e) => {
-        updateDefaultTheme(e.target.value);
-        ideDispatch(ideSlice.actions.setDefaultGraphTheme(e.target.value));
+        updateGraphTheme(e.target.value);
+        ideDispatch(ideSlice.actions.setGraphTheme(e.target.value));
       }}
       value={value}
     >
@@ -284,7 +284,7 @@ const RadioButton = ({ value }: { value: GraphThemeEnum }) => {
  * When the graph panel is disposed, this value is written back to Metadata Service.
  * @param graphTheme
  */
-const updateDefaultTheme = (graphTheme: GraphThemeEnum) => {
+const updateGraphTheme = (graphTheme: GraphThemeEnum) => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.onGraphThemeChange,
     data: { graphTheme },

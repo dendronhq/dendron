@@ -41,7 +41,7 @@ export class NoteGraphPanelFactory {
    * This property temporarily stores the graph theme selected by user and is written
    * back to MetadataService once the panel is disposed.
    */
-  private static graphTheme: GraphThemeEnum | undefined;
+  private static defaultGraphTheme: GraphThemeEnum | undefined;
 
   static create(
     ext: DendronExtension,
@@ -154,29 +154,29 @@ export class NoteGraphPanelFactory {
             break;
           }
           case GraphViewMessageEnum.onGraphThemeChange: {
-            this.graphTheme = msg.data.graphTheme;
+            this.defaultGraphTheme = msg.data.graphTheme;
             break;
           }
           case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
-            let defaultGraphTheme = MetadataService.instance().getGraphTheme();
-            if (!defaultGraphTheme) {
+            let graphTheme = MetadataService.instance().getDefaultGraphTheme();
+            if (!graphTheme) {
               const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
                 SegmentClient.instance().anonymousId
               );
               switch (ABUserGroup) {
                 case GraphThemeTestGroups.monokai: {
-                  defaultGraphTheme = GraphThemeEnum.Monokai;
+                  graphTheme = GraphThemeEnum.Monokai;
                   break;
                 }
                 default:
-                  defaultGraphTheme = GraphThemeEnum.Classic;
+                  graphTheme = GraphThemeEnum.Classic;
               }
             }
-            this.graphTheme = defaultGraphTheme;
+            this.defaultGraphTheme = graphTheme;
             this._panel!.webview.postMessage({
               type: GraphViewMessageEnum.onDefaultGraphThemeLoad,
               data: {
-                defaultGraphTheme,
+                defaultGraphTheme: graphTheme,
               },
               source: "vscode",
             });
@@ -192,8 +192,10 @@ export class NoteGraphPanelFactory {
         if (this._onEngineNoteStateChangedDisposable) {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
-        if (this.graphTheme) {
-          MetadataService.instance().setGraphTheme(this.graphTheme);
+        if (this.defaultGraphTheme) {
+          MetadataService.instance().setDefaultGraphTheme(
+            this.defaultGraphTheme
+          );
         }
       });
     }

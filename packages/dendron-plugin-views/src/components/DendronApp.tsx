@@ -107,7 +107,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         // get the default graph theme for the user and update the ide state.
         const { defaultGraphTheme } = msg.data;
         logger.info({ ctx, defaultGraphTheme, msg: "default graph theme" });
-        ideDispatch(ideSlice.actions.setDefaultGraphTheme(defaultGraphTheme));
+        ideDispatch(ideSlice.actions.setGraphTheme(defaultGraphTheme));
         break;
       }
       default:

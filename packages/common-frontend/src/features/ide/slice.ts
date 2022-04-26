@@ -26,7 +26,7 @@ type InitialState = {
   seedsInWorkspace: string[] | undefined; // Contains the seed ID's
   lookupModifiers: LookupModifierStatePayload | undefined;
   tree?: TreeMenu;
-  defaultGraphTheme?: GraphThemeEnum;
+  graphTheme?: GraphThemeEnum;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -38,7 +38,7 @@ const INITIAL_STATE: InitialState = {
   seedsInWorkspace: undefined,
   lookupModifiers: undefined,
   tree: undefined,
-  defaultGraphTheme: GraphThemeEnum.Classic,
+  graphTheme: GraphThemeEnum.Classic,
 };
 
 export { InitialState as IDEState };
@@ -76,8 +76,8 @@ export const ideSlice = createSlice({
     setSeedsInWorkspace: (state, action: PayloadAction<string[]>) => {
       state.seedsInWorkspace = action.payload;
     },
-    setDefaultGraphTheme: (state, action: PayloadAction<GraphThemeEnum>) => {
-      state.defaultGraphTheme = action.payload;
+    setGraphTheme: (state, action: PayloadAction<GraphThemeEnum>) => {
+      state.graphTheme = action.payload;
     },
   },
 });

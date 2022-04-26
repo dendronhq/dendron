@@ -1,8 +1,6 @@
 import {
   error2PlainObject,
   ERROR_SEVERITY,
-  NotePropsDict,
-  SchemaModuleDict,
   InitializePayload,
   WorkspaceInitRequest,
   WorkspaceSyncPayload,

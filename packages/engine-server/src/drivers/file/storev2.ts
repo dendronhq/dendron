@@ -48,7 +48,6 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
-  StatusCodes,
   DEngineInitWarning,
   DEngineInitWarningTypes,
 } from "@dendronhq/common-all";

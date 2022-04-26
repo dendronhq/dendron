@@ -35,6 +35,10 @@ export class NoteGraphPanelFactory {
   private static _engineEvents: EngineEventEmitter;
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
+  /**
+   * This property temporarily stores the graph theme selected by user and is written
+   * back to MetadataService once the panel is disposed.
+   */
   private static defaultGraphTheme: GraphThemeEnum | undefined;
 
   static create(

@@ -104,6 +104,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       }
       case GraphViewMessageEnum.onDefaultGraphThemeLoad: {
+        // get the default graph theme for the user and update the ide state.
         const { defaultGraphTheme } = msg.data;
         logger.info({ ctx, defaultGraphTheme, msg: "default graph theme" });
         ideDispatch(ideSlice.actions.setDefaultGraphTheme(defaultGraphTheme));

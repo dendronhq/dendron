@@ -214,7 +214,7 @@ export default function Graph({
 
   useEffect(() => {
     logger.log("Requesting default graph theme...");
-    // Get graph style
+    // Get the default graph theme
     postVSCodeMessage({
       type: GraphViewMessageEnum.onRequestDefaultGraphTheme,
       data: {},

@@ -27,7 +27,6 @@ import {
 import { ThemeTarget, ThemeType } from "./constants";
 import { DendronError } from "./error";
 import {
-  DEngineInitPayload,
   DEngineInitResp,
   GetDecorationsPayload,
   GetNoteAnchorsPayload,

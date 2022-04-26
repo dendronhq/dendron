@@ -28,6 +28,7 @@ import { ThemeTarget, ThemeType } from "./constants";
 import { DendronError } from "./error";
 import {
   DEngineInitPayload,
+  DEngineInitResp,
   GetDecorationsPayload,
   GetNoteAnchorsPayload,
   GetNoteBlocksPayload,
@@ -72,6 +73,7 @@ interface IRequestArgs {
 
 interface IAPIPayload {
   data: null | any | any[];
+  warnings: null | any;
   error: null | DendronError;
 }
 
@@ -196,7 +198,7 @@ export type AssetGetThemeRequest = {
 } & WorkspaceRequest;
 
 // --- Payload
-export type InitializePayload = APIPayload<DEngineInitPayload>;
+export type InitializePayload = DEngineInitResp;
 
 export type WorkspaceSyncPayload = InitializePayload;
 export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;
@@ -305,6 +307,7 @@ abstract class API {
       const resp = await this._doRequest(args);
       payload.data = resp.data.data;
       payload.error = resp.data.error;
+      payload.warnings = resp.data.warnings;
     } catch (err: any) {
       this._log(payload.error, "error");
       // Log errors from express:
@@ -482,6 +485,7 @@ export class DendronAPI extends API {
   noteRender(req: APIRequest<RenderNoteOpts>) {
     return this._makeRequest<{
       data: RenderNotePayload;
+      warnings: undefined;
       error: null | DendronError;
     }>({
       path: "note/render",

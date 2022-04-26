@@ -1,11 +1,11 @@
 import {
+  assertUnreachable,
   ConfigEvents,
   DendronError,
   DEngineClient,
+  DEngineInitWarningTypes,
   DVault,
-  ErrorUtils,
   ERROR_SEVERITY,
-  ERROR_STATUS,
   FOLDERS,
   isNotUndefined,
   NoteUtils,
@@ -29,7 +29,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 enum AutoFixAction {
@@ -226,9 +226,32 @@ export class ReloadIndexCommand extends BasicCommand<
       }
 
       const start = process.hrtime();
-      const { error } = await engine.init();
+      const { error, warnings } = await engine.init();
       const durationEngineInit = getDurationMilliseconds(start);
       this.L.info({ ctx, durationEngineInit });
+
+      warnings?.forEach((warning) => {
+        switch (warning.type) {
+          case DEngineInitWarningTypes.DUPLICATE_NOTE_ID: {
+            VSCodeUtils.showMessage(
+              MessageSeverity.WARN,
+              `Note ${warning.noteA.fname} in ${VaultUtils.getName(
+                warning.noteA.vault
+              )} and ${warning.noteB.fname} in ${VaultUtils.getName(
+                warning.noteB.vault
+              )} have duplicate note IDs.`,
+              {
+                detail:
+                  "You can open one of these files and use the 'regenerateNoteId' Dendron Doctor action to fix this.",
+              }
+            );
+            AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound);
+            break;
+          }
+          default:
+            assertUnreachable(warning.type);
+        }
+      });
 
       // if fatal, stop initialization
       if (error && error.severity !== ERROR_SEVERITY.MINOR) {
@@ -238,9 +261,6 @@ export class ReloadIndexCommand extends BasicCommand<
       if (error) {
         const msg = "init error";
         initError = error;
-        if (ErrorUtils.hasErrorStatus(error, ERROR_STATUS.DUPLICATE_NOTE_ID)) {
-          AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound);
-        }
         this.L.error({ ctx, error, msg });
       }
       return autoFixActions;

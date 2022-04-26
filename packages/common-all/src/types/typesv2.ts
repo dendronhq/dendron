@@ -247,6 +247,53 @@ export type RespV3<T> =
       data: T;
     };
 
+/** A response that contains a response or an error.
+ *
+ * The response may also contain any number of warnings. These are non-fatal
+ * errors, or other side channel information that doesn't make sense in the
+ * actual data. For example, the init API uses the data field for initialized
+ * notes, and the warnings field for duplicate note IDs (which are not fatal).
+ *
+ * You should use this type when there are non-fatal issues you want the caller
+ * to be able to handle.
+ *
+ * ```ts
+ * type ExampleWarning = {
+ *   type: "uglyNoteTitle";
+ *   id: string;
+ * } | {
+ *   type: "confusingLinksUsed";
+ *   link: string;
+ *   line: number;
+ * };
+ * type ExampleResponse = Response<NoteProps, ExampleWarning>;
+ * ```
+ */
+export type Response<Data, Warning> =
+  | {
+      error: IDendronError;
+      data?: never;
+      warnings?: Warning[];
+    }
+  | {
+      error?: never;
+      data: Data;
+      warnings?: Warning[];
+    };
+
+/** Like {@link Response}, but allows both an error and data to be returned at
+ * the same time.
+ *
+ * This is primarily for backwards compatibility as we migrate some code.
+ * You should avoid this if possible: if there are non-fatal errors then
+ * return them as warnings.
+ */
+export type ResponseNonFatalError<Data, Warning> = {
+  error: IDendronError | null;
+  data?: Data;
+  warnings?: Warning[];
+};
+
 export type BooleanResp =
   | { data: true; error: null }
   | { data: false; error: DendronError };
@@ -329,6 +376,21 @@ export type DEngineInitPayload = {
   wsRoot: string;
   vaults: DVault[];
   config: IntermediateDendronConfig;
+};
+export enum DEngineInitWarningTypes {
+  DUPLICATE_NOTE_ID = "duplicate note id",
+}
+export type DEngineInitWarning = {
+  type: DEngineInitWarningTypes.DUPLICATE_NOTE_ID;
+  id: string;
+  noteA: {
+    fname: string;
+    vault: DVault;
+  };
+  noteB: {
+    fname: string;
+    vault: DVault;
+  };
 };
 export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
@@ -452,7 +514,10 @@ export type DCommonMethods = {
 
 // --- Engine
 
-export type DEngineInitResp = RespV2<DEngineInitPayload>;
+export type DEngineInitResp = ResponseNonFatalError<
+  DEngineInitPayload,
+  DEngineInitWarning
+>;
 export type EngineDeleteNotePayload = NoteChangeEntry[];
 // TODO: KLUDGE
 export type DEngineDeleteSchemaPayload = DEngineInitPayload;

@@ -60,6 +60,7 @@ import {
   GetNoteLinksPayload,
   Optional,
   assertUnreachable,
+  DEngineInitWarning,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -264,9 +265,10 @@ export class DendronEngineV2 implements DEngine {
    */
   async init(): Promise<DEngineInitResp> {
     try {
-      const { data, error: storeError } = await this.store.init();
-      if (_.isUndefined(data)) {
+      const { data, warnings, error: storeError } = await this.store.init();
+      if (storeError || !data) {
         return {
+          warnings,
           error: DendronError.createFromStatus({
             status: ERROR_STATUS.UNKNOWN,
             severity: ERROR_SEVERITY.FATAL,
@@ -288,9 +290,7 @@ export class DendronEngineV2 implements DEngine {
         }
         return valid;
       });
-      const allErrors = (_.isNull(storeError) ? [] : [storeError]).concat(
-        hookErrors
-      );
+      const allErrors = hookErrors;
       let error: IDendronError | null;
       switch (_.size(allErrors)) {
         case 0: {
@@ -307,6 +307,7 @@ export class DendronEngineV2 implements DEngine {
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
+        warnings,
         data: {
           notes,
           schemas,

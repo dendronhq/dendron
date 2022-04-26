@@ -191,6 +191,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.store.schemas = schemas;
     return {
       error: resp.error,
+      warnings: resp.warnings,
       data: {
         notes,
         schemas,

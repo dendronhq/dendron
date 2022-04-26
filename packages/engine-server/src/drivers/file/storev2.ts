@@ -49,6 +49,8 @@ import {
   DNodeUtils,
   asyncLoopOneAtATime,
   StatusCodes,
+  DEngineInitWarning,
+  DEngineInitWarningTypes,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -120,6 +122,7 @@ export class FileStorage implements DStore {
 
   async init(): Promise<DEngineInitResp> {
     let errors: DendronError[] = [];
+    const warnings: DEngineInitWarning[] = [];
     try {
       const resp = await this.initSchema();
       if (ResponseUtil.hasError(resp)) {
@@ -134,20 +137,18 @@ export class FileStorage implements DStore {
         // Check for duplicate IDs when adding notes to the map
         if (this.notes[ent.id] !== undefined) {
           const duplicate = this.notes[ent.id];
-          errors.push(
-            new DendronError({
-              message: `Note ${ent.fname} in ${VaultUtils.getName(
-                ent.vault
-              )} has the same ID as ${duplicate.fname} in ${VaultUtils.getName(
-                duplicate.vault
-              )}`,
-              payload: [NoteUtils.toLogObj(ent), NoteUtils.toLogObj(duplicate)],
-              // Duplicate IDs break some features, but we shouldn't stop initialization completely
-              severity: ERROR_SEVERITY.MINOR,
-              code: StatusCodes.BAD_REQUEST,
-              status: ERROR_STATUS.DUPLICATE_NOTE_ID,
-            })
-          );
+          warnings.push({
+            type: DEngineInitWarningTypes.DUPLICATE_NOTE_ID,
+            id: ent.id,
+            noteA: {
+              fname: duplicate.fname,
+              vault: duplicate.vault,
+            },
+            noteB: {
+              fname: ent.fname,
+              vault: ent.vault,
+            },
+          });
         }
         this.notes[ent.id] = ent;
         this.noteFnames.add(ent);
@@ -175,6 +176,7 @@ export class FileStorage implements DStore {
           config: this.config,
           vaults: this.vaults,
         },
+        warnings,
         error,
       };
     } catch (err) {

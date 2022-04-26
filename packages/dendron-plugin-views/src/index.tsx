@@ -16,10 +16,11 @@ const VIEW_NAME = elem.getAttribute("data-name")!;
 if (VALID_NAMES.includes(VIEW_NAME)) {
   console.log("NAME VALID: ", VIEW_NAME);
   const View = require(`./components/${VIEW_NAME}`).default;
-  let props = {};
-  console.log(View);
-  if (VIEW_NAME === "DendronTreeExplorerPanel") {
-    props = { padding: "inherit" };
+  let props = {
+    padding: "inherit",
+  };
+  if (VIEW_NAME === "DendronNotePreview") {
+    props = { padding: "33px" };
   }
   renderOnDOM(View, props);
 } else {

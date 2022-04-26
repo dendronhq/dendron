@@ -17,14 +17,12 @@ import {
   Provider,
   setLogLevel,
 } from "@dendronhq/common-frontend";
-import _ from "lodash";
+import { Layout } from "antd";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
+import "../styles/scss/main.scss";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
-import "../styles/scss/main.scss";
-import { Layout } from "antd";
-import DendronNotePreview from "./DendronNotePreview";
 const { Content } = Layout;
 
 const { useEngineAppSelector } = engineHooks;
@@ -115,21 +113,14 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
 }
 
 export type DendronAppProps = {
-  opts: { padding?: "inherit" };
+  opts: { padding: "inherit" | number | string };
   Component: DendronComponent;
 };
 
 function DendronApp(props: DendronAppProps) {
-  // fix regression for scroll in graph view
-  const opts = _.defaults(props.opts, {
-    padding:
-      props.Component.name && props.Component.name === DendronNotePreview.name
-        ? "33px"
-        : props.opts.padding,
-  });
   return (
     <Provider store={combinedStore}>
-      <Layout style={{ padding: opts.padding }}>
+      <Layout style={{ padding: props.opts.padding }}>
         <Content>
           <DendronVSCodeApp {...props} />
         </Content>

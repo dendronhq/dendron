@@ -61,7 +61,7 @@
           "id": "dendron.treeView",
           "name": "Tree View",
           "contextualTitle": "Tree View",
-          "when": "dendron:pluginActive && !dendron:webUIEnabled",
+          "when": "dendron:pluginActive",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {

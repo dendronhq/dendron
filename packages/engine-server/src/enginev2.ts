@@ -60,7 +60,6 @@ import {
   GetNoteLinksPayload,
   Optional,
   assertUnreachable,
-  DEngineInitWarning,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -266,13 +265,15 @@ export class DendronEngineV2 implements DEngine {
   async init(): Promise<DEngineInitResp> {
     try {
       const { data, warnings, error: storeError } = await this.store.init();
-      if (storeError || !data) {
+      if (!data) {
         return {
           warnings,
-          error: DendronError.createFromStatus({
-            status: ERROR_STATUS.UNKNOWN,
-            severity: ERROR_SEVERITY.FATAL,
-          }),
+          error:
+            storeError ||
+            DendronError.createFromStatus({
+              status: ERROR_STATUS.UNKNOWN,
+              severity: ERROR_SEVERITY.FATAL,
+            }),
         };
       }
       const { notes, schemas } = data;

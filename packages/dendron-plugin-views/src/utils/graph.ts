@@ -85,7 +85,7 @@ const coreGraphConfig: CoreGraphConfig = {
     mutable: true,
   },
   graphTheme: {
-    value: GraphThemeEnum.Default,
+    value: GraphThemeEnum.Classic,
     mutable: true,
     singleSelect: true,
   },

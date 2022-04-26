@@ -1,38 +1,101 @@
-import { baseTheme, Theme } from "./theme-default";
+export type Theme = {
+  graph: {
+    node: {
+      size: number;
+      color: string;
+      fontFamily?: string;
+      label: {
+        color: string;
+        fontSize: number;
+        minZoomedFontSize: number;
+        fontWeight: number;
+      };
+      _selected: {
+        color: string;
+      };
+    };
+    edge: {
+      width: number;
+      color: string;
+      targetDistanceFromNode?: number;
+      sourceDistanceFromNode?: number;
+      sourceEndpoint?: string;
+      targetEndpoint?: string;
+    };
+    filterView: {
+      margin: string; // likely rem units
+      background: string;
+      minWidth: string;
+      borderRadius: number;
+    };
+    parent: {
+      color?: string;
+      shape: string;
+    };
+    links: {
+      linkStyle: string;
+      curveStyle?: string;
+    };
+    hierarchy?: {
+      curveStyle: string;
+    };
+  };
+};
 
-const classicBasicTheme = {
-  links: {
-    curveStyle: "bezier",
-  },
-  hierarchy: {
-    curveStyle: "bezier",
-  },
-  edge: {
-    width: 0.5,
-    targetDistanceFromNode: 5,
-    sourceDistanceFromNode: 5,
-    targetEndpoint: "outside-to-line-or-label",
-    sourceEndpoint: "outside-to-line-or-label",
+export const PARENT_NODE_SIZE_MODIFIER = 1.25;
+
+// Theme-agnostic styles (font sizes, units, etc.)
+export const baseTheme: Theme = {
+  graph: {
+    node: {
+      size: 5,
+      color: "",
+      label: {
+        fontSize: 8,
+        minZoomedFontSize: 32,
+        fontWeight: 400,
+        color: "",
+      },
+      _selected: {
+        color: "",
+      },
+    },
+    edge: {
+      width: 0.25,
+      color: "",
+    },
+    filterView: {
+      margin: "1rem",
+      minWidth: "12rem",
+      borderRadius: 4,
+      background: "",
+    },
+    links: {
+      linkStyle: "dashed",
+    },
+    parent: {
+      shape: "diamond",
+    },
   },
 };
 
 const darkTheme: Theme = {
   graph: {
     node: {
-      color: "#E73C7F",
+      color: "#B3ABAB",
       size: baseTheme.graph.node.size,
-      fontFamily: "cursive",
+      fontFamily: "sans-serif",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#E73C7F",
+        color: "#ffffff",
       },
       _selected: {
-        color: "coral",
+        color: "#36B73B",
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
-      color: "#5CBAC5",
+      ...baseTheme.graph.edge,
+      color: "#B3ABAB",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -40,14 +103,9 @@ const darkTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "#27AC2C",
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
-    },
-    hierarchy: {
-      ...classicBasicTheme.hierarchy,
     },
   },
 };
@@ -55,20 +113,20 @@ const darkTheme: Theme = {
 const lightTheme: Theme = {
   graph: {
     node: {
-      color: "#AC2065",
+      color: "#666161",
       size: baseTheme.graph.node.size,
-      fontFamily: "cursive",
+      fontFamily: "sans-serif",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#AC2065",
+        color: "#2F3438",
       },
       _selected: {
-        color: "coral",
+        color: "#27AC2C",
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
-      color: "#5CBAC5",
+      ...baseTheme.graph.edge,
+      color: "#666161",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -76,14 +134,9 @@ const lightTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "#27AC2C",
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
-    },
-    hierarchy: {
-      ...classicBasicTheme.hierarchy,
     },
   },
 };

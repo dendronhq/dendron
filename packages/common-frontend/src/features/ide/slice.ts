@@ -38,7 +38,7 @@ const INITIAL_STATE: InitialState = {
   seedsInWorkspace: undefined,
   lookupModifiers: undefined,
   tree: undefined,
-  defaultGraphTheme: GraphThemeEnum.Default,
+  defaultGraphTheme: GraphThemeEnum.Classic,
 };
 
 export { InitialState as IDEState };

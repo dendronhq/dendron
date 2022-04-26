@@ -805,9 +805,9 @@ export enum SeedBrowserMessageType {
 }
 
 export enum GraphThemeEnum {
-  Default = "Default",
-  Classic = "Classic",
   Block = "Block",
+  Classic = "Classic",
+  Monokai = "Monokai",
 }
 
 // TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases

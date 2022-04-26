@@ -175,7 +175,7 @@ export class MetadataService {
   }
   
   getDefaultGraphTheme() {
-    return this.getMeta().defaultGraphTheme ?? GraphThemeEnum.Default;
+    return this.getMeta().defaultGraphTheme ?? GraphThemeEnum.Classic;
   }
 
   setMeta(key: keyof Metadata, value: any) {

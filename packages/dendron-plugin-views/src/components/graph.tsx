@@ -21,9 +21,9 @@ import { Button, Space, Spin, Typography } from "antd";
 import { useCurrentTheme, useWorkspaceProps } from "../hooks";
 import { postVSCodeMessage } from "../utils/vscode";
 import { getStyles } from "../styles/custom";
-import DefaultTheme from "../styles/theme-default";
 import ClassicTheme from "../styles/theme-classic";
 import BlockTheme from "../styles/theme-block";
+import MonokaiTheme from "../styles/theme-monokai";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -40,14 +40,14 @@ const getCytoscapeStyle = (
   if (_.isUndefined(theme)) return "";
 
   if (customCSS) {
-    return getStyles(theme, DefaultTheme, customCSS);
+    return getStyles(theme, ClassicTheme, customCSS);
   }
   switch (config.graphTheme.value) {
-    case GraphThemeEnum.Default: {
-      return getStyles(theme, DefaultTheme);
-    }
     case GraphThemeEnum.Classic: {
       return getStyles(theme, ClassicTheme);
+    }
+    case GraphThemeEnum.Monokai: {
+      return getStyles(theme, MonokaiTheme);
     }
     case GraphThemeEnum.Block: {
       return getStyles(theme, BlockTheme);

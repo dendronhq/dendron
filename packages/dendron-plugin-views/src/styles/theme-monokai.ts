@@ -1,36 +1,38 @@
 import { baseTheme, Theme } from "./theme-classic";
 
-const classicBasicTheme = {
+const monokaiBasicTheme = {
   links: {
-    curveStyle: "unbundled-bezier",
+    curveStyle: "bezier",
   },
   hierarchy: {
-    curveStyle: "taxi",
+    curveStyle: "bezier",
   },
   edge: {
     width: 0.5,
-    color: "#B3ABAB",
     targetDistanceFromNode: 5,
     sourceDistanceFromNode: 5,
+    targetEndpoint: "outside-to-line-or-label",
+    sourceEndpoint: "outside-to-line-or-label",
   },
 };
 
 const darkTheme: Theme = {
   graph: {
     node: {
-      color: "#BB86FC",
+      color: "#ff6188",
       size: baseTheme.graph.node.size,
-      fontFamily: "sans-serif",
+      fontFamily: "cursive",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#BB86FC",
+        color: "#ff6188",
       },
       _selected: {
-        color: "#C7FC86",
+        color: "#fc9867",
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
+      ...monokaiBasicTheme.edge,
+      color: "#78dce8",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -38,14 +40,14 @@ const darkTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "coral",
+      color: "#a9dc76",
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
+      ...monokaiBasicTheme.links,
     },
     hierarchy: {
-      ...classicBasicTheme.hierarchy,
+      ...monokaiBasicTheme.hierarchy,
     },
   },
 };
@@ -53,19 +55,20 @@ const darkTheme: Theme = {
 const lightTheme: Theme = {
   graph: {
     node: {
-      color: "#8800FC",
+      color: "#b7306c",
       size: baseTheme.graph.node.size,
-      fontFamily: "sans-serif",
+      fontFamily: "cursive",
       label: {
         ...baseTheme.graph.node.label,
-        color: "#8800FC",
+        color: "#b7306c",
       },
       _selected: {
-        color: "#7DB031",
+        color: "#d8704b",
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
+      ...monokaiBasicTheme.edge,
+      color: "#3c8aa7",
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -73,23 +76,23 @@ const lightTheme: Theme = {
     },
     parent: {
       ...baseTheme.graph.parent,
-      color: "coral",
+      color: "#639e3b",
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
+      ...monokaiBasicTheme.links,
     },
     hierarchy: {
-      ...classicBasicTheme.hierarchy,
+      ...monokaiBasicTheme.hierarchy,
     },
   },
 };
 
-const BlockTheme: {
+const MonokaiTheme: {
   [theme: string]: Theme;
 } = {
   dark: darkTheme,
   light: lightTheme,
 };
 
-export default BlockTheme;
+export default MonokaiTheme;

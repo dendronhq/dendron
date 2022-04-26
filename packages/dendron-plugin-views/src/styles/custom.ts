@@ -1,4 +1,4 @@
-import { Theme } from "./theme-default";
+import { Theme } from "./theme-classic";
 
 export const getStyles = (
   theme: string,

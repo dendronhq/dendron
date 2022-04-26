@@ -57,12 +57,6 @@ export const DENDRON_VIEWS = [
     icon: "media/icons/dendron-vscode.svg",
   },
   {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW_V2),
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.WEB_UI_ENABLED}`,
-    where: "explorer",
-    icon: "media/icons/dendron-vscode.svg",
-  },
-  {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
     when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
     where: "explorer",

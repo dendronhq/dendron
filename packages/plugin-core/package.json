@@ -65,14 +65,6 @@
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
-          "id": "dendron.tree-view",
-          "name": "Tree View",
-          "contextualTitle": "Tree View",
-          "type": "webview",
-          "when": "dendron:pluginActive && dendron:webUIEnabled",
-          "icon": "media/icons/dendron-vscode.svg"
-        },
-        {
           "id": "dendron.lookup-view",
           "name": "Lookup View",
           "contextualTitle": "Lookup View",
@@ -538,7 +530,7 @@
         },
         {
           "command": "dendron.createMeetingNote",
-          "title": "Dendron: Create Meeting Note"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.lookupSchema",

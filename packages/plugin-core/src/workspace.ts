@@ -37,7 +37,7 @@ import {
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
-import { DendronContext, DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
+import { DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
   IDendronExtension,
@@ -60,7 +60,6 @@ import { BacklinkSortOrder } from "./types";
 import { DisposableStore } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
-import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
@@ -495,7 +494,6 @@ export class DendronExtension implements IDendronExtension {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const dendronTreeView = new DendronTreeViewV2(this, this.getEngine());
         const sampleView = new SampleView();
 
         this.treeViews[DendronTreeViewKey.SAMPLE_VIEW] = sampleView;
@@ -516,22 +514,6 @@ export class DendronExtension implements IDendronExtension {
           )
         );
 
-        if (getDWorkspace().config.dev?.enableWebUI) {
-          Logger.info({ ctx, msg: "initWebUI" });
-          context.subscriptions.push(
-            vscode.window.registerWebviewViewProvider(
-              DendronTreeViewV2.viewType,
-              dendronTreeView,
-              {
-                webviewOptions: {
-                  retainContextWhenHidden: true,
-                },
-              }
-            )
-          );
-          VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
-        }
-
         // backlinks
         const backlinkTreeView = this.setupBacklinkTreeView();
 
@@ -539,7 +521,6 @@ export class DendronExtension implements IDendronExtension {
         // Removing it for now.
         // backlinkTreeView.message = "There are no links to this note."
         context.subscriptions.push(backlinkTreeView);
-        context.subscriptions.push(dendronTreeView);
       }
     });
   }

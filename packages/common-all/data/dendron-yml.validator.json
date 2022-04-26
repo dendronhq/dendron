@@ -77,10 +77,6 @@
           "type": "number",
           "description": "What port to use for engine server. Default behavior is to create at startup"
         },
-        "enableWebUI": {
-          "type": "boolean",
-          "description": "Enable experimental web ui. Default is false"
-        },
         "enableLinkCandidates": {
           "type": "boolean",
           "description": "Enable displaying and indexing link candidates. Default is false"

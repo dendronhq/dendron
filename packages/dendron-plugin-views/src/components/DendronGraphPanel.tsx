@@ -61,8 +61,9 @@ const DendronGraphPanel: DendronComponent = (props) => {
 
   useEffect(() => {
     const { defaultGraphTheme } = ide;
-    console.log("setting default theme to config from ide", defaultGraphTheme);
     if (defaultGraphTheme) {
+      // update the graphTheme option in graph config
+      logger.log("updating graph config with graph theme: ", defaultGraphTheme);
       setConfig((c) => ({
         ...c,
         graphTheme: {

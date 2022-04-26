@@ -78,9 +78,9 @@ type Metadata = Partial<{
    */
   tipOfTheDayIndex: number;
   /*
-   * default Theme for Note Graph View
+   *  theme for Note Graph View
    */
-  defaultGraphTheme: GraphThemeEnum;
+  graphTheme?: GraphThemeEnum;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -174,8 +174,8 @@ export class MetadataService {
     return this.getMeta().tipOfTheDayIndex;
   }
   
-  getDefaultGraphTheme() {
-    return this.getMeta().defaultGraphTheme ?? GraphThemeEnum.Classic;
+  getGraphTheme() {
+    return this.getMeta().graphTheme;
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -254,10 +254,10 @@ export class MetadataService {
     this.setMeta("tipOfTheDayIndex", index);
   }
   
-  setDefaultGraphTheme(defaultGraphTheme: GraphThemeEnum) {
+  setGraphTheme(graphTheme: GraphThemeEnum) {
     const meta = this.getMeta();
-    if (meta.defaultGraphTheme !== defaultGraphTheme) {
-      this.setMeta("defaultGraphTheme", defaultGraphTheme);
+    if (meta.graphTheme !== graphTheme) {
+      this.setMeta("graphTheme", graphTheme);
     }
   }
 }

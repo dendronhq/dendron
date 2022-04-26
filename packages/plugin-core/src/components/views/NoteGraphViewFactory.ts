@@ -28,6 +28,8 @@ import { WebViewUtils } from "../../views/utils";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
+import { GraphThemeTestGroups, GRAPH_THEME_TEST } from "../../abTests";
+import { SegmentClient } from "@dendronhq/common-server";
 
 export class NoteGraphPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
@@ -39,7 +41,7 @@ export class NoteGraphPanelFactory {
    * This property temporarily stores the graph theme selected by user and is written
    * back to MetadataService once the panel is disposed.
    */
-  private static defaultGraphTheme: GraphThemeEnum | undefined;
+  private static graphTheme: GraphThemeEnum | undefined;
 
   static create(
     ext: DendronExtension,
@@ -152,21 +154,32 @@ export class NoteGraphPanelFactory {
             break;
           }
           case GraphViewMessageEnum.onGraphThemeChange: {
-            this.defaultGraphTheme = msg.data.defaultGraphTheme;
+            this.graphTheme = msg.data.graphTheme;
             break;
           }
           case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
-            const defaultGraphTheme =
-              MetadataService.instance().getDefaultGraphTheme();
-            if (defaultGraphTheme) {
-              this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onDefaultGraphThemeLoad,
-                data: {
-                  defaultGraphTheme,
-                },
-                source: "vscode",
-              });
+            let defaultGraphTheme = MetadataService.instance().getGraphTheme();
+            if (!defaultGraphTheme) {
+              const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
+                SegmentClient.instance().anonymousId
+              );
+              switch (ABUserGroup) {
+                case GraphThemeTestGroups.monokai: {
+                  defaultGraphTheme = GraphThemeEnum.Monokai;
+                  break;
+                }
+                default:
+                  defaultGraphTheme = GraphThemeEnum.Classic;
+              }
             }
+            this.graphTheme = defaultGraphTheme;
+            this._panel!.webview.postMessage({
+              type: GraphViewMessageEnum.onDefaultGraphThemeLoad,
+              data: {
+                defaultGraphTheme,
+              },
+              source: "vscode",
+            });
             break;
           }
           default:
@@ -179,10 +192,8 @@ export class NoteGraphPanelFactory {
         if (this._onEngineNoteStateChangedDisposable) {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
-        if (this.defaultGraphTheme) {
-          MetadataService.instance().setDefaultGraphTheme(
-            this.defaultGraphTheme
-          );
+        if (this.graphTheme) {
+          MetadataService.instance().setGraphTheme(this.graphTheme);
         }
       });
     }

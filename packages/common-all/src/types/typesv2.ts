@@ -843,7 +843,7 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 
 export type GraphViewMessage = DMessage<
   GraphViewMessageType,
-  { id: string; vault?: string; defaultGraphTheme?: GraphThemeEnum }
+  { id: string; vault?: string; graphTheme?: GraphThemeEnum }
 >;
 
 export type CalendarViewMessage = DMessage<

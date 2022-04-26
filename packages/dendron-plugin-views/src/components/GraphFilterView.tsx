@@ -211,11 +211,7 @@ const FilterViewSection = ({
             >
               {_.isString(entry.value) && entry.singleSelect && (
                 <>
-                  <RadioButton
-                    configField={key}
-                    value={entry.value as GraphThemeEnum}
-                    updateConfigField={updateConfigField}
-                  />
+                  <RadioButton value={entry.value as GraphThemeEnum} />
                 </>
               )}
               {_.isBoolean(entry?.value) && (
@@ -259,15 +255,7 @@ const FilterViewSection = ({
   );
 };
 
-const RadioButton = ({
-  configField,
-  value,
-  updateConfigField,
-}: {
-  configField: string;
-  value: GraphThemeEnum;
-  updateConfigField: (key: string, value: string | number | boolean) => void;
-}) => {
+const RadioButton = ({ value }: { value: GraphThemeEnum }) => {
   const singleSelectOptions = Object.keys(GraphThemeEnum).map(
     (k) => GraphThemeEnum[k as GraphThemeEnum]
   );
@@ -277,7 +265,6 @@ const RadioButton = ({
       onChange={(e) => {
         updateDefaultTheme(e.target.value);
         ideDispatch(ideSlice.actions.setDefaultGraphTheme(e.target.value));
-        updateConfigField(configField, e.target.value);
       }}
       value={value}
     >
@@ -292,10 +279,15 @@ const RadioButton = ({
   );
 };
 
-const updateDefaultTheme = (defaultGraphTheme: GraphThemeEnum) => {
+/**
+ * vscode message to update graphTheme selected by User.
+ * When the graph panel is disposed, this value is written back to Metadata Service.
+ * @param graphTheme
+ */
+const updateDefaultTheme = (graphTheme: GraphThemeEnum) => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.onGraphThemeChange,
-    data: { defaultGraphTheme },
+    data: { graphTheme },
     source: DMessageSource.webClient,
   } as GraphViewMessage);
 };

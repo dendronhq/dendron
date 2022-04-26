@@ -165,15 +165,15 @@ export class BuildUtils {
   }
 
   static async compilePlugin({
-    fast,
     quiet,
+    skipSentry,
   }: {
-    fast?: boolean;
     quiet?: boolean;
+    skipSentry?: boolean;
   }) {
     await $$(`yarn build:prod`, {
       cwd: this.getPluginRootPath(),
-      env: fast ? { SKIP_SENTRY: "true" } : {},
+      env: skipSentry ? { SKIP_SENTRY: "true" } : {},
       quiet,
     });
   }
@@ -183,15 +183,15 @@ export class BuildUtils {
    * @returns
    */
   static async packagePluginDependencies({
-    fast,
+    skipSentry,
     quiet,
   }: {
-    fast?: boolean;
+    skipSentry?: boolean;
     quiet?: boolean;
   }) {
     await $$(`vsce package --yarn`, {
       cwd: this.getPluginRootPath(),
-      env: fast ? { SKIP_SENTRY: "true" } : {},
+      env: skipSentry ? { SKIP_SENTRY: "true" } : {},
       quiet,
     });
   }
@@ -336,6 +336,7 @@ export class BuildUtils {
   /**
    * Migrate assets from next-server, plugin-views, and api-server to plugin-core
    * @returns
+   * ^gg4woyhxe1xn
    */
   static async syncStaticAssets() {
     // all assets are stored here
@@ -395,6 +396,7 @@ export class BuildUtils {
     return { staticPath: pluginStaticPath };
   }
 
+  // ^gxyyk2p87a5z
   static async syncStaticAssetsToNextjsTemplate() {
     // all assets are stored here
     const commonAssetsBuildRoot = path.join(

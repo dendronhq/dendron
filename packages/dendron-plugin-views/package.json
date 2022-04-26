@@ -100,7 +100,7 @@
     "build": "yarn build:dev && yarn build:styles",
     "buildCI": "echo nop",
     "build:dev": "yarn setup && npx cross-env BUILD_DEV=1 node scripts/build.js",
-    "build:prod": "yarn setup && node scripts/build.js",
+    "build:prod": "yarn setup && GENERATE_SOURCEMAP=false node scripts/build.js",
     "build:styles": "node scripts/buildStyles.js",
     "build:index": "node scripts/buildIndex.js",
     "test": "echo 0",

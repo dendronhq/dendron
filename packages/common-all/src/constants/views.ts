@@ -36,7 +36,7 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
   [DendronEditorViewKey.NOTE_PREVIEW]: {
     desc: "Note Preview",
     label: "Note Preview",
-    bundleName: "notePreview",
+    bundleName: "DendronNotePreview",
     type: "webview",
   },
   [DendronEditorViewKey.CONFIGURE]: {
@@ -47,13 +47,13 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
   [DendronEditorViewKey.NOTE_GRAPH]: {
     desc: "Note Graph",
     label: "Note Graph",
-    bundleName: "graphView",
+    bundleName: "DendronGraphPanel",
     type: "webview",
   },
   [DendronEditorViewKey.SCHEMA_GRAPH]: {
     desc: "Schema Graph",
     label: "Schema Graph",
-    bundleName: "schemaView",
+    bundleName: "DendronSchemaGraphPanel",
     type: "webview",
   },
   [DendronEditorViewKey.SEED_BROWSER]: {
@@ -70,13 +70,13 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
   [DendronTreeViewKey.TREE_VIEW_V2]: {
     desc: "Tree View",
     label: "Tree View",
-    bundleName: "treePanelView",
+    bundleName: "DendronTreeExplorerPanel",
     type: "webview",
   },
   [DendronTreeViewKey.SAMPLE_VIEW]: {
     desc: "A view used for prototyping",
     label: "Sample View",
-    bundleName: "TODO",
+    bundleName: "SampleComponent",
     type: "webview",
   },
   [DendronTreeViewKey.TREE_VIEW]: {
@@ -93,13 +93,13 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     desc: "Calendar View",
     label: "Calendar View",
     type: "webview",
-    bundleName: "calendarPanelView",
+    bundleName: "DendronCalendarPanel",
   },
   [DendronTreeViewKey.LOOKUP_VIEW]: {
     desc: "Lookup View",
     label: "Lookup View",
     type: "webview",
-    bundleName: "LookupPanelView",
+    bundleName: "DendronLookupPanel",
   },
 };
 

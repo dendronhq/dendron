@@ -111,6 +111,8 @@ export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
   ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
+  DeprecatedConfigMessageConfirm = "DeprecatedConfigMessageConfirm",
+  ShowDeprecatedConfigMessage = "ShowDeprecatedConfigMessage",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",

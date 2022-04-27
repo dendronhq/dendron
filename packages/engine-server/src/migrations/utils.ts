@@ -247,6 +247,7 @@ export const DEPRECATED_PATHS = [
   "site.previewPort",
   "site.useContainers",
   "site.generateChangelog",
+  "dev.enableWebUI",
 ];
 
 export class MigrationUtils {

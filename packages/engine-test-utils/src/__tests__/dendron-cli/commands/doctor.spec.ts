@@ -848,13 +848,77 @@ describe("GIVEN addMissingDefaultConfigs", () => {
   });
 
   describe("WHEN not missing a default key", () => {
-    test("THEN doesn't add missing default", async () => {
+    test("THEN doesn't add missing default and backup is not created", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
           const rawConfigBefore = DConfig.getRaw(wsRoot);
           expect(
             rawConfigBefore.workspace?.workspaceVaultSyncMode
           ).toBeTruthy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out).toEqual({ exit: true });
+          const rawConfig = DConfig.getRaw(wsRoot);
+          expect(rawConfigBefore).toEqual(rawConfig);
+
+          const backupService = new BackupService({ wsRoot });
+          try {
+            const configBackups = backupService.getBackupsWithKey({
+              key: "config",
+            });
+            expect(configBackups.length).toEqual(0);
+          } finally {
+            backupService.dispose();
+          }
+        },
+        {
+          expect,
+        }
+      );
+    });
+  });
+});
+
+describe("GIVEN removeDeprecatedConfigs", () => {
+  const action = DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS;
+  describe("WHEN deprecated key exists", () => {
+    test("THEN removes deprecated key and create backup", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect((rawConfigBefore.dev as any).enableWebUI).toBeTruthy();
+          const out = await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          expect(out.resp.backupPath).toBeTruthy();
+          const backupPathExists = await fs.pathExists(out.resp.backupPath);
+          expect(backupPathExists).toBeTruthy();
+          const rawConfigAfter = DConfig.getRaw(wsRoot);
+          expect(_.has(rawConfigAfter.dev, "enableWebUI")).toBeFalsy();
+        },
+        {
+          expect,
+          modConfigCb: (config) => {
+            // @ts-ignore
+            config.dev = { enableWebUI: true };
+            return config;
+          },
+        }
+      );
+    });
+  });
+
+  describe("WHEN deprecated config doesn't exist", () => {
+    test("THEN config doesn't change and backup is not created.", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          expect(_.has(rawConfigBefore.dev, "enableWebUI")).toBeFalsy();
           const out = await runDoctor({
             wsRoot,
             engine,

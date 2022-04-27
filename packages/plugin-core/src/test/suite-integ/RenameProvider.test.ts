@@ -131,7 +131,7 @@ suite("RenameProvider", function () {
           done();
         });
         test("THEN references to target note is correctly updated", (done) => {
-          expect(executeOut?.changed.length).toEqual(6);
+          expect(executeOut?.changed.length).toEqual(7);
           const { vaults, engine, wsRoot } = getDWorkspace();
           const { notes } = engine;
           const noteWithLink = NoteUtils.getNoteByFnameV5({
@@ -266,7 +266,7 @@ suite("RenameProvider", function () {
           done();
         });
         test("THEN references to target note is correctly updated", (done) => {
-          expect(executeOut?.changed.length).toEqual(6);
+          expect(executeOut?.changed.length).toEqual(7);
           const { vaults, engine, wsRoot } = getDWorkspace();
           const { notes } = engine;
           const noteWithLink = NoteUtils.getNoteByFnameV5({
@@ -370,7 +370,7 @@ suite("RenameProvider", function () {
           done();
         });
         test("THEN references to target note is correctly updated", (done) => {
-          expect(executeOut?.changed.length).toEqual(7);
+          expect(executeOut?.changed.length).toEqual(8);
           const { vaults, engine, wsRoot } = getDWorkspace();
           const { notes } = engine;
           const noteWithLink = NoteUtils.getNoteByFnameV5({
@@ -461,7 +461,7 @@ suite("RenameProvider", function () {
           done();
         });
         test("THEN references to target note is correctly updated", (done) => {
-          expect(executeOut?.changed.length).toEqual(7);
+          expect(executeOut?.changed.length).toEqual(8);
           const { vaults, engine, wsRoot } = getDWorkspace();
           const { notes } = engine;
           const noteWithLink = NoteUtils.getNoteByFnameV5({
@@ -557,7 +557,7 @@ suite("RenameProvider", function () {
           done();
         });
         test("THEN references to target note is correctly updated", (done) => {
-          expect(executeOut?.changed.length).toEqual(7);
+          expect(executeOut?.changed.length).toEqual(8);
           const { vaults, engine, wsRoot } = getDWorkspace();
           const { notes } = engine;
           const noteWithLink = NoteUtils.getNoteByFnameV5({

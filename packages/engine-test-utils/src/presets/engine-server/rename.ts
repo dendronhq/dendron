@@ -81,7 +81,7 @@ const runRename = async ({
   return out.concat([
     {
       actual: changed.data!.length,
-      expected: numChanges || 4,
+      expected: numChanges || 5,
     },
     {
       actual: checkVault,
@@ -218,7 +218,7 @@ const NOTES = {
         wsRoot,
         vaults,
         engine,
-        numChanges: 3,
+        numChanges: 4,
         cb: ({ barChange }) => {
           return [
             {
@@ -535,7 +535,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: _.trim(findByName("alpha", changed.data!).note.body),
@@ -591,7 +591,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: _.trim(findByName("alpha", changed.data!).note.body),
@@ -635,7 +635,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         {
           actual: changed.data!.map((ent) => [ent.note.fname, ent.status]),
@@ -648,6 +648,7 @@ const NOTES = {
             // from creation
             ["baz", "create"],
             ["baz.one", "create"],
+            ["root", "update"],
             ["baz.one.three", "create"],
           ],
         },
@@ -690,7 +691,7 @@ const NOTES = {
         // alpha deleted, gamma created
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         // 3 notes, gamma and 3 roots
         {
@@ -732,7 +733,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: createdChange?.note.title,
@@ -783,7 +784,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 3,
+          expected: 5,
         },
         {
           actual: await AssertUtils.assertInString({
@@ -840,13 +841,13 @@ const NOTES = {
         match: [fnameLink],
         nomatch: [fnameTarget, fnameNew],
       });
-
       return [
         {
           actual: updated,
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: fnameTarget },
+            { status: "update", fname: "root" },
             { status: "create", fname: fnameNew },
           ],
         },
@@ -896,19 +897,19 @@ const NOTES = {
         match: ["baz"],
         nomatch: ["foo"],
       });
-
       return [
         {
           actual: updated,
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
             { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![3].note.body),
+          actual: _.trim(changed![4].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -1031,6 +1032,7 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
             { status: "update", fname: "beta" },
           ],
@@ -1092,6 +1094,7 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
           ],
         },
@@ -1590,7 +1593,7 @@ const NOTES = {
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 3,
+          actual: changedEntries && changedEntries.length === 5,
           expected: true,
         },
       ];

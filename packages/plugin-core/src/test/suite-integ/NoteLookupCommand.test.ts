@@ -403,7 +403,7 @@ suite("NoteLookupCommand", function () {
           });
           await NoteTestUtilsV4.createNote({
             wsRoot,
-            fname: "foo.ch2",
+            fname: "foo.ch2.gch1",
             vault: vaults[0],
             props: { stub: true },
           });
@@ -723,7 +723,7 @@ suite("NoteLookupCommand", function () {
         },
       },
       () => {
-        test("THEN stub is created", async () => {
+        test("THEN a note is created and stub property is removed", async () => {
           const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
@@ -733,12 +733,13 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           }))!;
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
-          NoteUtils.getNoteOrThrow({
+          const fooNote = NoteUtils.getNoteOrThrow({
             fname: "foo",
             notes: engine.notes,
             vault,
             wsRoot,
           });
+          expect(fooNote.stub).toBeFalsy();
         });
       }
     );

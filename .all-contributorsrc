@@ -1703,6 +1703,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "agichim",
+      "name": "Alexandru Ichim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51931067?v=4",
+      "profile": "https://github.com/agichim",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

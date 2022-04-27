@@ -6,6 +6,7 @@ import path from "path";
 
 export enum ShowcaseEntry {
   TryMeetingNotes = "TryMeetingNotes",
+  SchemasTip = "SchemasTip",
 }
 
 type Metadata = Partial<{
@@ -138,7 +139,7 @@ export class MetadataService {
 
     return featureShowcaseData[key];
   }
-  
+
   getGlobalVersion() {
     return this.getMeta().version || "0.0.0";
   }

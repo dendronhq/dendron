@@ -1184,7 +1184,7 @@ suite("deprecated config detection", () => {
       timeout: 1e5,
     },
     () => {
-      test.only("THEN deprecated key is detected", () => {
+      test("THEN deprecated key is detected", () => {
         const ws = ExtensionProvider.getDWorkspace();
         const config = DConfig.getRaw(ws.wsRoot);
         expect((config.dev as any).enableWebUI).toBeTruthy();

@@ -118,7 +118,7 @@ export class StartupUtils {
   }
 
   static showDeprecatedConfigMessage(opts: { ext: IDendronExtension }) {
-    AnalyticsUtils.track(ConfigEvents.ShowDeprecatedConfigMessage);
+    AnalyticsUtils.track(ConfigEvents.DeprecatedConfigMessageShow);
     const REMOVE_CONFIG = "Remove Deprecated Configuration";
     const MESSAGE =
       "We have detected some deprecated configurations. Would you like to remove them from dendron.yml?";

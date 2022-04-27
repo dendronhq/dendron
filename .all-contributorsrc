@@ -1682,6 +1682,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "danbburg",
+      "name": "Daniel Brandenburg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6763573?v=4",
+      "profile": "https://github.com/danbburg",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -1712,6 +1712,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "ScriptAutomate",
+      "name": "Derek Ardolf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5951023?v=4",
+      "profile": "http://icanteven.io",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

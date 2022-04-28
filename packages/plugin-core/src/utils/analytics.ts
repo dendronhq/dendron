@@ -1,7 +1,10 @@
 import {
   AppNames,
+  asyncLoop,
   ContextualUIEvents,
   DWorkspaceV2,
+  FOLDERS,
+  genUUID,
   getStage,
   Time,
 } from "@dendronhq/common-all";
@@ -21,6 +24,7 @@ import fs from "fs-extra";
 import { setupSegmentClient } from "../telemetry";
 import { Logger } from "../logger";
 import path from "path";
+import os from "os";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -130,6 +134,75 @@ export class AnalyticsUtils {
         props: customProps,
         timestamp: segmentProps?.timestamp,
       })
+    );
+  }
+
+  /** Saves analytics to be sent during the next run of Dendron.
+   *
+   * This is required for actions that reload the window, where the analytics
+   * won't get sent in time before the reload and where delaying the reload
+   * would be undesirable.
+   */
+  static async trackForNextRun(
+    event: string,
+    customProps?: any,
+    segmentProps?: { timestamp?: Date }
+  ) {
+    const analyticsProps = this._trackCommon({
+      event,
+      props: {
+        ...customProps,
+        savedAnalytics: true,
+      },
+      timestamp: segmentProps?.timestamp,
+    });
+    const telemetryDir = path.join(
+      os.homedir(),
+      FOLDERS.DOTFILES,
+      FOLDERS.SAVED_TELEMETRY
+    );
+    await fs.ensureDir(telemetryDir);
+    await fs.writeFile(
+      path.join(telemetryDir, `${genUUID()}.json`),
+      JSON.stringify(analyticsProps)
+    );
+  }
+
+  static async sendSavedAnalytics() {
+    const ctx = "AnalyticsUtils.sendSavedAnalytics";
+    const telemetryDir = path.join(
+      os.homedir(),
+      FOLDERS.DOTFILES,
+      FOLDERS.SAVED_TELEMETRY
+    );
+    let files: string[] = [];
+    try {
+      files = await fs.readdir(telemetryDir);
+    } catch {
+      Logger.warn({
+        ctx,
+        msg: "failed to read the saved telemetry dir",
+        telemetryDir,
+      });
+    }
+
+    return asyncLoop(
+      files.filter((filename) => path.extname(filename) === ".json"),
+      async (filename) => {
+        const filePath = path.join(telemetryDir, filename);
+        try {
+          const contents = await fs.readFile(filePath, { encoding: "utf-8" });
+          const payload = JSON.parse(contents);
+          await fs.rm(filePath);
+          return SegmentUtils.trackSync(payload);
+        } catch (err) {
+          Logger.warn({
+            ctx,
+            msg: "failed to read or parse saved telemetry",
+            filePath,
+          });
+        }
+      }
     );
   }
 

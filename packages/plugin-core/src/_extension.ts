@@ -98,6 +98,11 @@ import { WSUtils } from "./WSUtils";
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
+/** Before sending saved telemetry events, wait this long (in ms) to make sure
+ * the workspace will likely remain open long enough for us to send everything.
+ */
+const DELAY_TO_SEND_SAVED_TELEMETRY = 30 * 1000;
+
 class ExtensionUtils {
   static addCommand = ({
     context,
@@ -305,6 +310,9 @@ class ExtensionUtils {
       ),
     });
     AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
+    setTimeout(() => {
+      AnalyticsUtils.sendSavedAnalytics();
+    }, DELAY_TO_SEND_SAVED_TELEMETRY);
   }
 
   /**

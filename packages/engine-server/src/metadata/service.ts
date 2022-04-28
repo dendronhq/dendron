@@ -1,4 +1,4 @@
-import { Time } from "@dendronhq/common-all";
+import { FOLDERS, Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -100,7 +100,7 @@ export class MetadataService {
   }
 
   static metaFilePath() {
-    return path.join(os.homedir(), ".dendron", "meta.json");
+    return path.join(os.homedir(), FOLDERS.DOTFILES, "meta.json");
   }
 
   deleteMeta(key: keyof Metadata) {
@@ -138,7 +138,7 @@ export class MetadataService {
 
     return featureShowcaseData[key];
   }
-  
+
   getGlobalVersion() {
     return this.getMeta().version || "0.0.0";
   }

@@ -12,6 +12,7 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
+  GraphThemeEnum,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
@@ -43,6 +44,8 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CURRENT_AB_TESTS,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   UpgradeToastWordingTestGroups,
@@ -595,6 +598,25 @@ export async function _activate(
           vscode.ConfigurationTarget.Global
         );
       }
+
+      // For new users, we want to load graph with new graph themes as default
+      let graphTheme;
+      const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+      switch (ABUserGroup) {
+        case GraphThemeTestGroups.monokai: {
+          graphTheme = GraphThemeEnum.Monokai;
+          break;
+        }
+        case GraphThemeTestGroups.block: {
+          graphTheme = GraphThemeEnum.Block;
+          break;
+        }
+        default:
+          graphTheme = GraphThemeEnum.Classic;
+      }
+      MetadataService.instance().setDefaultGraphTheme(graphTheme);
     }
     const assetUri = VSCodeUtils.getAssetUri(context);
 

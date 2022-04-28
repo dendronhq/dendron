@@ -86,13 +86,17 @@ export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
 
 export enum GraphThemeTestGroups {
   /**
-   * User will get Monokai graph theme by default
+   * New user will get Monokai graph theme by default
    */
   monokai = GraphThemeEnum.Monokai,
   /**
-   * User will get Classic graph theme by default
+   * New user will get Classic graph theme by default
    */
   classic = GraphThemeEnum.Classic,
+  /**
+   * New User will get Block theme by default
+   */
+  block = GraphThemeEnum.Block,
 }
 
 export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
@@ -102,6 +106,10 @@ export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
   },
   {
     name: GraphThemeTestGroups.classic,
+    weight: 1,
+  },
+  {
+    name: GraphThemeTestGroups.block,
     weight: 1,
   },
 ]);

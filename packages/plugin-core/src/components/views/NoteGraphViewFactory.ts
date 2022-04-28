@@ -28,8 +28,6 @@ import { WebViewUtils } from "../../views/utils";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
-import { GraphThemeTestGroups, GRAPH_THEME_TEST } from "../../abTests";
-import { SegmentClient } from "@dendronhq/common-server";
 
 export class NoteGraphPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
@@ -155,23 +153,15 @@ export class NoteGraphPanelFactory {
           }
           case GraphViewMessageEnum.onGraphThemeChange: {
             this.defaultGraphTheme = msg.data.graphTheme;
+            AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
+              theme: msg.data.graphTheme,
+            });
             break;
           }
           case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
-            let graphTheme = MetadataService.instance().getDefaultGraphTheme();
-            if (!graphTheme) {
-              const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
-                SegmentClient.instance().anonymousId
-              );
-              switch (ABUserGroup) {
-                case GraphThemeTestGroups.monokai: {
-                  graphTheme = GraphThemeEnum.Monokai;
-                  break;
-                }
-                default:
-                  graphTheme = GraphThemeEnum.Classic;
-              }
-            }
+            const graphTheme =
+              MetadataService.instance().getDefaultGraphTheme() ||
+              GraphThemeEnum.Classic;
             this.defaultGraphTheme = graphTheme;
             this._panel!.webview.postMessage({
               type: GraphViewMessageEnum.onDefaultGraphThemeLoad,

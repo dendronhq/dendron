@@ -490,7 +490,6 @@ export async function _activate(
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
   const { extensionPath, extensionUri, logUri } = context;
-  const metadataService = MetadataService.instance();
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,
@@ -554,21 +553,21 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-
-    // this used to be handled by StateService (if undefined, 0.0.0).
-    // this will be reassigned if we are in a dendron workspace.
-    let previousWorkspaceVersion = "0.0.0";
+    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
 
     const previousGlobalVersionFromState = stateService.getGlobalVersion();
-
-    // temporarily here to backfill globalState into metadata
-    // this should be removed once we determine that
-    // we have sufficiently backfilled out user.
-    if (previousGlobalVersionFromState) {
-      metadataService.setGlobalVersion(previousGlobalVersionFromState);
+    let previousGlobalVersionFromMetadata =
+      MetadataService.instance().getGlobalVersion();
+    // state is more recent than global, backfill
+    if (
+      semver.gt(
+        previousGlobalVersionFromState,
+        previousGlobalVersionFromMetadata
+      )
+    ) {
+      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
     }
-
-    const previousGlobalVersion = metadataService.getGlobalVersion();
+    const previousGlobalVersion = previousGlobalVersionFromMetadata;
 
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({
@@ -620,8 +619,6 @@ export async function _activate(
       // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
-      const wsMeta = wsService.getMeta();
-      previousWorkspaceVersion = wsMeta.version;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });

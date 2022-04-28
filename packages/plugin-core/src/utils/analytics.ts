@@ -139,22 +139,27 @@ export class AnalyticsUtils {
 
   /** Saves analytics to be sent during the next run of Dendron.
    *
+   * Make sure any properties you use can be trivially serialized and
+   * deserialized, numbers, strings, plain JSON objects, arrays are fine. No
+   * Maps or complex objects.
+   *
    * This is required for actions that reload the window, where the analytics
    * won't get sent in time before the reload and where delaying the reload
    * would be undesirable.
    */
-  static async trackForNextRun(
-    event: string,
-    customProps?: any,
-    segmentProps?: { timestamp?: Date }
-  ) {
+  static async trackForNextRun(event: string, customProps?: any) {
+    const ctx = "AnalyticsUtils.trackForNextRun";
+    Logger.debug({
+      ctx,
+      event,
+    });
     const analyticsProps = this._trackCommon({
       event,
       props: {
         ...customProps,
         savedAnalytics: true,
       },
-      timestamp: segmentProps?.timestamp,
+      timestamp: new Date(),
     });
     const telemetryDir = path.join(
       os.homedir(),
@@ -170,6 +175,7 @@ export class AnalyticsUtils {
 
   static async sendSavedAnalytics() {
     const ctx = "AnalyticsUtils.sendSavedAnalytics";
+    Logger.debug({ ctx, message: "start" });
     const telemetryDir = path.join(
       os.homedir(),
       FOLDERS.DOTFILES,
@@ -192,7 +198,17 @@ export class AnalyticsUtils {
         const filePath = path.join(telemetryDir, filename);
         try {
           const contents = await fs.readFile(filePath, { encoding: "utf-8" });
-          const payload = JSON.parse(contents);
+          const payload = JSON.parse(contents, (_key, value) => {
+            // If we have a timestamp, that will get serialized as a string. We have to deserialize it here.
+            if (
+              _.isString(value) &&
+              // yyyy-mm-ddThh:mm:ss.msZ
+              value.match(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d[.]\d+Z/)
+            ) {
+              return new Date(value);
+            }
+            return value;
+          });
           await fs.rm(filePath);
           return SegmentUtils.trackSync(payload);
         } catch (err) {

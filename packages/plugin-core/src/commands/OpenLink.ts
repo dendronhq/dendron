@@ -23,13 +23,13 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }
-  async execute({ url }: { url?: string }) {
+  async execute(opts?: { url?: string }) {
     const ctx = DENDRON_COMMANDS.OPEN_LINK;
     this.L.info({ ctx });
 
     let text = "";
 
-    text = url ?? getURLAt(VSCodeUtils.getActiveTextEditor());
+    text = opts?.url ?? getURLAt(VSCodeUtils.getActiveTextEditor());
 
     if (_.isUndefined(text) || text === "") {
       const error = DendronError.createFromStatus({

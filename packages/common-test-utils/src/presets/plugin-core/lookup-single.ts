@@ -7,7 +7,7 @@ import { TestPresetEntry } from "../../utils";
 const UPDATE_ITEMS = {
   SCHEMA_SUGGESTION: new TestPresetEntry({
     label: "schema suggestion",
-    before: async ({ vault }: { vault: DVault }) => {
+    beforeTestResults: async ({ vault }: { vault: DVault }) => {
       fs.removeSync(path.join(vault.fsPath, "foo.ch1.md"));
     },
     results: async ({ items }: { items: NoteProps }) => {

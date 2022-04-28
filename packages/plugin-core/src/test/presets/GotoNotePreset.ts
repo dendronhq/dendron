@@ -1,6 +1,9 @@
 import { NoteTestUtilsV4, TestPresetEntry } from "@dendronhq/common-test-utils";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { getActiveEditorBasename } from "../testUtils";
+import { LocationTestUtils } from "../testUtilsv2";
 
 const ANCHOR = new TestPresetEntry({
   label: "anchor",
@@ -70,7 +73,9 @@ const ANCHOR_WITH_SPECIAL_CHARS = new TestPresetEntry({
   },
 });
 
-const CODE_BLOCK_PRESET = new TestPresetEntry({
+const CODE_BLOCK_PRESET = new TestPresetEntry<{
+  ext: IDendronExtension;
+}>({
   label: "link in code block",
 
   preSetupHook: async ({ wsRoot, vaults }) => {
@@ -93,6 +98,17 @@ const CODE_BLOCK_PRESET = new TestPresetEntry({
       ].join("\n"),
     });
   },
+
+  beforeTestResults: async ({ ext }) => {
+    const { engine } = ext.getDWorkspace();
+    const note = engine.notes["test.note"];
+    const editor = await new WSUtilsV2(ext).openNote(note);
+    editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+      line: 9,
+      char: 23,
+    });
+  },
+
   results: async () => {
     return [
       {

@@ -89,10 +89,20 @@ export class AssertUtils {
   }
 }
 
-export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
+export class TestPresetEntry<
+  TBeforeOpts,
+  TAfterOpts = any,
+  TResultsOpts = any
+> {
   public label: string;
-  public before: (_opts: TBeforeOpts) => Promise<any>;
+  public beforeTestResults: (_opts: TBeforeOpts) => Promise<any>;
+  /**
+   * Run this before setting up workspace
+   */
   public preSetupHook: SetupHookFunction;
+  /**
+   * Run this before setting up hooks
+   */
   public postSetupHook: SetupHookFunction;
   public after: (_opts: TAfterOpts) => Promise<any>;
   public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
@@ -102,7 +112,7 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
   constructor({
     label,
     results,
-    before,
+    beforeTestResults,
     after,
     preSetupHook,
     postSetupHook,
@@ -111,13 +121,13 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     preSetupHook?: SetupHookFunction;
     postSetupHook?: SetupHookFunction;
     beforeSetup?: (_opts: TBeforeOpts) => Promise<any>;
-    before?: (_opts: TBeforeOpts) => Promise<any>;
+    beforeTestResults?: (_opts: TBeforeOpts) => Promise<any>;
     after?: (_opts: TAfterOpts) => Promise<any>;
     results: (_opts: TResultsOpts) => Promise<TestResult[]>;
   }) {
     this.label = label;
     this.results = results;
-    this.before = before || (async () => {});
+    this.beforeTestResults = beforeTestResults || (async () => {});
     this.preSetupHook = preSetupHook || (async () => {});
     this.postSetupHook = postSetupHook || (async () => {});
     this.after = after || (async () => {});

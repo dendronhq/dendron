@@ -554,21 +554,21 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-
-    // this used to be handled by StateService (if undefined, 0.0.0).
-    // this will be reassigned if we are in a dendron workspace.
-    let previousWorkspaceVersion = "0.0.0";
+    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
 
     const previousGlobalVersionFromState = stateService.getGlobalVersion();
-
-    // temporarily here to backfill globalState into metadata
-    // this should be removed once we determine that
-    // we have sufficiently backfilled out user.
-    if (previousGlobalVersionFromState) {
-      metadataService.setGlobalVersion(previousGlobalVersionFromState);
+    let previousGlobalVersionFromMetadata =
+      MetadataService.instance().getGlobalVersion();
+    // state is more recent than global, backfill
+    if (
+      semver.gt(
+        previousGlobalVersionFromState,
+        previousGlobalVersionFromMetadata
+      )
+    ) {
+      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
     }
-
-    const previousGlobalVersion = metadataService.getGlobalVersion();
+    const previousGlobalVersion = previousGlobalVersionFromMetadata;
 
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({

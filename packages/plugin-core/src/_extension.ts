@@ -100,7 +100,7 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
  */
-const DELAY_TO_SEND_SAVED_TELEMETRY = 1 * 1000; // TODO
+const DELAY_TO_SEND_SAVED_TELEMETRY = 15 * 1000;
 
 class ExtensionUtils {
   static addCommand = ({

@@ -69,7 +69,7 @@ export async function createFileWatcher(
   });
   const didCreate = false;
 
-  return new Promise(async (resolve, _reject) => {
+  return new Promise((resolve, _reject) => {
     if (!fs.existsSync(fpath)) {
       return setTimeout(() => {
         resolve(

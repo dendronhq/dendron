@@ -234,7 +234,7 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
   ["publishing.enablePrettyLinks", { target: "site.usePrettyLinks" }],
 ]);
 
-/**
+/** ^2hgqigv11pvy
  * List of config paths that are deprecated
  * and should be checked for existence
  * and deleted from `dendron.yml`

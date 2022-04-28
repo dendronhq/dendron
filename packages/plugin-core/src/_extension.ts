@@ -735,16 +735,13 @@ export async function _activate(
       // logic as in workspace.ts, but right now this needs an instance of
       // EngineAPIService for init
 
-      // If the web UI dev flag is not set, then setup a native tree view:
-      if (!ws.workspaceService?.config.dev?.enableWebUI) {
-        const providerConstructor = function () {
-          return new EngineNoteProvider(engineAPIService);
-        };
+      const providerConstructor = function () {
+        return new EngineNoteProvider(engineAPIService);
+      };
 
-        const treeView = new NativeTreeView(providerConstructor);
-        treeView.show();
-        context.subscriptions.push(treeView);
-      }
+      const treeView = new NativeTreeView(providerConstructor);
+      treeView.show();
+      context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));

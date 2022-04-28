@@ -14,11 +14,6 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Engine Server Port",
     desc: "What port to use for the engine server. Defaults to creating on startup.",
   },
-  /** @deprecated */
-  enableWebUI: {
-    label: "Enable web UI",
-    desc: "Enable experimental web ui. Defaults to false.",
-  },
   enableLinkCandidates: {
     label: "Enable Link Candidates",
     desc: "Enable displaying and indexing link candidates. Defaults to false.",

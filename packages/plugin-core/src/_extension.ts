@@ -554,8 +554,6 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-    // const previousWorkspaceVersion = stateService.getWorkspaceVersion();
-    // const previousGlobalVersion = stateService.getGlobalVersion();
 
     // this used to be handled by StateService (if undefined, 0.0.0).
     // this will be reassigned if we are in a dendron workspace.

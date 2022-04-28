@@ -960,7 +960,7 @@ async function showWelcomeOrWhatsNew({
 
       vscode.window
         .showInformationMessage(
-          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+          `Dendron has been upgraded to ${version}`,
           buttonAction
         )
         .then((resp) => {

@@ -553,7 +553,8 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
+    const previousWorkspaceVersionFromState =
+      stateService.getWorkspaceVersion();
 
     const previousGlobalVersionFromState = stateService.getGlobalVersion();
     let previousGlobalVersionFromMetadata =
@@ -619,6 +620,18 @@ export async function _activate(
       // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
+      let previousWorkspaceVersionFromWSService = wsService.getMeta().version;
+      if (
+        semver.gt(
+          previousWorkspaceVersionFromState,
+          previousWorkspaceVersionFromWSService
+        )
+      ) {
+        previousWorkspaceVersionFromWSService =
+          previousWorkspaceVersionFromState;
+        wsService.writeMeta({ version: previousGlobalVersionFromState });
+      }
+      const previousWorkspaceVersion = previousWorkspaceVersionFromWSService;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
@@ -821,7 +834,7 @@ export async function _activate(
       extensionInstallStatus,
       isSecondaryInstall,
       version: DendronExtension.version(),
-      previousExtensionVersion: previousWorkspaceVersion,
+      previousExtensionVersion: previousWorkspaceVersionFromState,
       start: startActivate,
       assetUri,
     });

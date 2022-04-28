@@ -490,7 +490,6 @@ export async function _activate(
   const { workspaceFile, workspaceFolders } = vscode.workspace;
   const logLevel = process.env["LOG_LEVEL"];
   const { extensionPath, extensionUri, logUri } = context;
-  const metadataService = MetadataService.instance();
   const stateService = new StateService({
     globalState: context.globalState,
     workspaceState: context.workspaceState,

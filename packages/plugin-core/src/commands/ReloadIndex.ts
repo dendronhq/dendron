@@ -168,7 +168,7 @@ export class ReloadIndexCommand extends BasicCommand<
         pick,
       });
       if (pick === fixConfig) {
-        AnalyticsUtils.track(
+        AnalyticsUtils.trackForNextRun(
           ConfigEvents.MissingSelfContainedVaultsMessageAccept
         );
         await doctor.executeDoctorActions({

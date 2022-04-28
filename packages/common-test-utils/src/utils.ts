@@ -1,6 +1,7 @@
 import {
   DEngineClient,
   DEngineInitResp,
+  NotePropsDict,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import assert from "assert";
@@ -96,6 +97,7 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
   public after: (_opts: TAfterOpts) => Promise<any>;
   public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
   public init: () => Promise<void>;
+  public notes: NotePropsDict = {};
 
   constructor({
     label,
@@ -115,11 +117,12 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
   }) {
     this.label = label;
     this.results = results;
-    this.before = before ? before : async () => {};
-    this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
-    this.postSetupHook = postSetupHook ? postSetupHook : async () => {};
-    this.after = after ? after : async () => {};
+    this.before = before || (async () => {});
+    this.preSetupHook = preSetupHook || (async () => {});
+    this.postSetupHook = postSetupHook || (async () => {});
+    this.after = after || (async () => {});
     this.init = async () => {};
+    this.preSetupHook = _.bind(this.preSetupHook, this);
   }
 }
 

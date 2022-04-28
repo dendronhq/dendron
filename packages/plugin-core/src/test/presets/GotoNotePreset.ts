@@ -70,7 +70,41 @@ const ANCHOR_WITH_SPECIAL_CHARS = new TestPresetEntry({
   },
 });
 
+const CODE_BLOCK_PRESET = new TestPresetEntry({
+  label: "link in code block",
+
+  preSetupHook: async ({ wsRoot, vaults }) => {
+    await NoteTestUtilsV4.createNote({
+      fname: "test.target",
+      vault: vaults[0],
+      wsRoot,
+      body: "In aut veritatis odit tempora aut ipsa quo.",
+    });
+    await NoteTestUtilsV4.createNote({
+      fname: "test.note",
+      vault: vaults[0],
+      wsRoot,
+      body: [
+        "```tsx",
+        "const x = 1;",
+        "// see [[test target|test.target]]",
+        "const y = x + 1;",
+        "```",
+      ].join("\n"),
+    });
+  },
+  results: async () => {
+    return [
+      {
+        actual: getActiveEditorBasename(),
+        expected: "test.target.md",
+      },
+    ];
+  },
+});
+
 export const GOTO_NOTE_PRESETS = {
   ANCHOR,
   ANCHOR_WITH_SPECIAL_CHARS,
+  CODE_BLOCK_PRESET,
 };

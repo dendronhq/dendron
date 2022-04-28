@@ -73,6 +73,7 @@ import { OpenBackupCommand } from "./OpenBackupCommand";
 import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
+import { GotoCommand } from "./Goto";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -108,6 +109,7 @@ const ALL_COMMANDS = [
   ExportPodV2Command,
   GoDownCommand,
   GoUpCommand,
+  GotoCommand,
   GotoNoteCommand,
   ImportPodCommand,
   InsertNoteCommand,

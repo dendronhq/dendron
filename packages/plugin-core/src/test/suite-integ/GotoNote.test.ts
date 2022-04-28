@@ -4,6 +4,7 @@ import {
   AssertUtils,
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  runMochaHarness,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -475,40 +476,22 @@ suite("GotoNote", function () {
   });
 
   describe("using selection", () => {
-    let note: NoteProps;
     describeMultiWS(
       "WHEN in a code block",
       {
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await NoteTestUtilsV4.createNote({
-            fname: "test.target",
-            vault: vaults[0],
-            wsRoot,
-            body: "In aut veritatis odit tempora aut ipsa quo.",
-          });
-          note = await NoteTestUtilsV4.createNote({
-            fname: "test.note",
-            vault: vaults[0],
-            wsRoot,
-            body: [
-              "```tsx",
-              "const x = 1;",
-              "// see [[test target|test.target]]",
-              "const y = x + 1;",
-              "```",
-            ].join("\n"),
-          });
-        },
+        preSetupHook: GOTO_NOTE_PRESETS.CODE_BLOCK_PRESET.preSetupHook,
       },
       () => {
         test("THEN opens the note", async () => {
+          const { engine } = ExtensionProvider.getDWorkspace();
+          const note = engine.notes["test.note"];
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
             line: 9,
             char: 23,
           });
           await createGoToNoteCmd().run();
-          expect(getActiveEditorBasename()).toEqual("test.target.md");
+          await runMochaHarness(GOTO_NOTE_PRESETS.CODE_BLOCK_PRESET.results);
         });
       }
     );

@@ -616,7 +616,7 @@ export async function _activate(
         default:
           graphTheme = GraphThemeEnum.Classic;
       }
-      MetadataService.instance().setDefaultGraphTheme(graphTheme);
+      MetadataService.instance().setGraphTheme(graphTheme);
     }
     const assetUri = VSCodeUtils.getAssetUri(context);
 

@@ -160,7 +160,7 @@ export class NoteGraphPanelFactory {
           }
           case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
             const graphTheme =
-              MetadataService.instance().getDefaultGraphTheme() ||
+              MetadataService.instance().getGraphTheme() ||
               GraphThemeEnum.Classic;
             this.defaultGraphTheme = graphTheme;
             this._panel!.webview.postMessage({
@@ -183,9 +183,7 @@ export class NoteGraphPanelFactory {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
         if (this.defaultGraphTheme) {
-          MetadataService.instance().setDefaultGraphTheme(
-            this.defaultGraphTheme
-          );
+          MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
         }
       });
     }

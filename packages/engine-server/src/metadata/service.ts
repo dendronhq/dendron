@@ -121,15 +121,6 @@ export class MetadataService {
     return fs.readJSONSync(MetadataService.metaFilePath()) as Metadata;
   }
 
-  getWelcomeClicked(): Date | false {
-    const welcomeClickedTime =
-      MetadataService.instance().getMeta()["welcomeClickedTime"];
-    if (_.isNumber(welcomeClickedTime)) {
-      return Time.DateTime.fromMillis(welcomeClickedTime).toJSDate();
-    }
-    return false;
-  }
-
   getFeatureShowcaseStatus(key: ShowcaseEntry) {
     const featureShowcaseData = this.getMeta().featureShowcase;
     if (!featureShowcaseData) {

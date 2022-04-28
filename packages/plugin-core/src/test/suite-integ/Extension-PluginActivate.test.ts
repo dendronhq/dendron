@@ -115,11 +115,6 @@ suite("GIVEN Dendron plugin activation", function () {
         test("THEN show telemetry notice", () => {
           expect(showTelemetryNoticeSpy.called).toBeTruthy();
         });
-        test("THEN welcomeClick timestamp removed", () => {
-          const welcomeClickedTime =
-            MetadataService.instance().getWelcomeClicked();
-          expect(welcomeClickedTime).toBeFalsy();
-        });
 
         this.afterAll(afterHook);
       }

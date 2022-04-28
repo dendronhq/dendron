@@ -554,7 +554,21 @@ export async function _activate(
 
     const currentVersion = DendronExtension.version();
     const previousWorkspaceVersion = stateService.getWorkspaceVersion();
-    const previousGlobalVersion = stateService.getGlobalVersion();
+
+    const previousGlobalVersionFromState = stateService.getGlobalVersion();
+    let previousGlobalVersionFromMetadata =
+      MetadataService.instance().getGlobalVersion();
+    // state is more recent than global, backfill
+    if (
+      semver.gt(
+        previousGlobalVersionFromState,
+        previousGlobalVersionFromMetadata
+      )
+    ) {
+      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
+    }
+    const previousGlobalVersion = previousGlobalVersionFromMetadata;
+
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({
         UUIDPathExists,

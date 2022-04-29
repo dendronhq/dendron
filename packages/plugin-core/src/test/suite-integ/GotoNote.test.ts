@@ -477,21 +477,16 @@ suite("GotoNote", function () {
 
   describe("using selection", () => {
     describeMultiWS(
-      "WHEN in a code block",
+      "WHEN link in code block",
       {
-        preSetupHook: GOTO_NOTE_PRESETS.CODE_BLOCK_PRESET.preSetupHook,
+        preSetupHook: GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.preSetupHook,
       },
       () => {
         test("THEN opens the note", async () => {
-          const { engine } = ExtensionProvider.getDWorkspace();
-          const note = engine.notes["test.note"];
-          const editor = await WSUtils.openNote(note);
-          editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
-            line: 9,
-            char: 23,
-          });
+          const ext = ExtensionProvider.getExtension();
+          await GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.beforeTestResults({ ext });
           await createGoToNoteCmd().run();
-          await runMochaHarness(GOTO_NOTE_PRESETS.CODE_BLOCK_PRESET.results);
+          await runMochaHarness(GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.results);
         });
       }
     );

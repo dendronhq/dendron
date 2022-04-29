@@ -7,9 +7,9 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
-import { DendronExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 import { GoToNoteCommandOutput, TargetKind } from "./GoToNoteInterface";
@@ -21,10 +21,12 @@ type CommandInput = {};
 
 type CommandOutput = RespV3<GoToNoteCommandOutput>;
 
+const GOTO_KEY = "uri";
+
 export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.GOTO.key;
 
-  constructor(private _ext: DendronExtension) {
+  constructor(private _ext: IDendronExtension) {
     super();
   }
 
@@ -67,7 +69,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const note = notes[0];
 
     // if note doesn't have url, run goto note command
-    if (_.isUndefined(note.custom.url)) {
+    if (_.isUndefined(note.custom[GOTO_KEY])) {
       const resp = await new GotoNoteCommand(this._ext).execute({
         qs: note.fname,
         vault: note.vault,
@@ -76,13 +78,17 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { data: resp };
     }
 
+    await this.openLink(note.custom[GOTO_KEY]);
     // we found a link
-    await new OpenLinkCommand().execute({ url: note.custom.url });
     return {
       data: {
         kind: TargetKind.LINK,
-        fullPath: note.custom.url,
+        fullPath: note.custom[GOTO_KEY],
       },
     };
+  }
+
+  private openLink(uri: string) {
+    return new OpenLinkCommand().execute({ uri });
   }
 }

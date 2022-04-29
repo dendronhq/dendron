@@ -980,6 +980,8 @@ export const INCOMPATIBLE_EXTENSIONS = [
   "kortina.vscode-markdown-notes",
   "maxedmands.vscode-zettel-markdown-notes",
   "tchayen.markdown-links",
+  // Note graph is now built into Dendron, and having this extension enabled breaks it.
+  "dendron.dendron-markdown-links",
 ];
 
 export type osType = "Linux" | "Darwin" | "Windows_NT";

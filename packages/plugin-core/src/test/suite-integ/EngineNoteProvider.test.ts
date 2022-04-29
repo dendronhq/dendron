@@ -1,13 +1,17 @@
 import {
+  ConfigUtils,
   DendronError,
   NoteChangeEntry,
   NoteProps,
+  TreeItemLabelTypeEnum,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { EngineNoteProvider } from "../../views/EngineNoteProvider";
 import { expect } from "../testUtilsv2";
 import {
@@ -119,6 +123,130 @@ suite("EngineNoteProvider Tests", function testSuite() {
   });
 
   describe("tree data", function () {
+    const preSetupHookFunc = async (opts: WorkspaceOpts & { extra?: any }) => {
+      const { vaults, wsRoot } = opts;
+      const vault = vaults[0];
+      await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
+        wsRoot,
+        vault,
+      });
+      await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
+        wsRoot,
+        vault,
+      });
+      await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
+        wsRoot,
+        vault,
+      });
+      await NoteTestUtilsV4.createNote({
+        wsRoot,
+        vault: vaults[0],
+        fname: "zebra",
+        custom: {
+          nav_order: 1,
+        },
+      });
+    };
+    describe("sort / label config", function () {
+      describeMultiWS(
+        "WHEN treeItemLabelType is omitted",
+        {
+          preSetupHook: preSetupHookFunc,
+          modConfigCb: (config) => {
+            // @ts-ignore
+            delete config.workspace.views;
+            return config;
+          },
+        },
+        () => {
+          test("THEN label and sort tree items by title", async () => {
+            const { config } = ExtensionProvider.getDWorkspace();
+            expect(ConfigUtils.getTreeItemLabelType(config)).toEqual(
+              TreeItemLabelTypeEnum.title
+            );
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
+
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
+
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(children?.map((child) => child.title)).toEqual([
+              "Zebra", // nav_order: 1
+              "Aardvark", // uppercase alphabets comes before underscore alphabets
+              "_underscore", // underscore comes before lowercase alphabets
+              "aaron",
+            ]);
+          });
+        }
+      );
+      describeMultiWS(
+        "WHEN treeItemLabelType is title",
+        {
+          preSetupHook: preSetupHookFunc,
+          modConfigCb: (config) => {
+            config.workspace.views.treeView.treeItemLabelType =
+              TreeItemLabelTypeEnum.title;
+            return config;
+          },
+        },
+        () => {
+          test("THEN label and sort tree items by title", async () => {
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
+
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
+
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(children?.map((child) => child.title)).toEqual([
+              "Zebra", // nav_order: 1
+              "Aardvark", // uppercase alphabets comes before underscore alphabets
+              "_underscore", // underscore comes before lowercase alphabets
+              "aaron",
+            ]);
+          });
+        }
+      );
+
+      describeMultiWS(
+        "WHEN treeItemLabelType is filename",
+        {
+          preSetupHook: preSetupHookFunc,
+          modConfigCb: (config) => {
+            config.workspace.views.treeView.treeItemLabelType =
+              TreeItemLabelTypeEnum.filename;
+            return config;
+          },
+        },
+        () => {
+          test("THEN label and sort tree items by filename", async () => {
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
+
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
+
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(
+              children?.map((child) => _.last(child.fname.split(".")))
+            ).toEqual([
+              "zebra", // nav_order: 1
+              "_underscore", // underscore comes before lowercase alphabets
+              "aardvark",
+              "aaron",
+            ]);
+          });
+        }
+      );
+    });
+
     describeMultiWS(
       "WHEN the engine note provider is providing tree data on the root node",
       {
@@ -177,33 +305,6 @@ suite("EngineNoteProvider Tests", function testSuite() {
     );
 
     describe("WHEN the engine note provider is providing tree data on the root node with children", function () {
-      const preSetupHookFunc = async (
-        opts: WorkspaceOpts & { extra?: any }
-      ) => {
-        const { vaults, wsRoot } = opts;
-        const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_WITH_LOWER_CASE_TITLE.create({
-          wsRoot,
-          vault,
-        });
-        await NOTE_PRESETS_V4.NOTE_WITH_UPPER_CASE_TITLE.create({
-          wsRoot,
-          vault,
-        });
-        await NOTE_PRESETS_V4.NOTE_WITH_UNDERSCORE_TITLE.create({
-          wsRoot,
-          vault,
-        });
-        await NoteTestUtilsV4.createNote({
-          wsRoot,
-          vault: vaults[0],
-          fname: "zebra",
-          custom: {
-            nav_order: 1,
-          },
-        });
-      };
-
       describeMultiWS(
         "AND tags hierarchy doesn't specify nav_order",
         {

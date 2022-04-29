@@ -255,8 +255,11 @@ export const NOTE_PRESETS_V4 = {
     },
   }),
   NOTE_WITH_UPPER_CASE_TITLE: CreateNoteFactory({
-    fname: "Aardvark",
+    fname: "aardvark",
     body: "aardvark",
+    props: {
+      title: "Aardvark",
+    },
   }),
   NOTE_WITH_UNDERSCORE_TITLE: CreateNoteFactory({
     fname: "_underscore",

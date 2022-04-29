@@ -47,17 +47,16 @@ export interface IFeatureShowcaseMessage {
   getDisplayMessage(displayLocation: DisplayLocation): string;
 
   /**
-   * Command string for the command to run when confirm is clicked. Return
-   * undefined if there is no confirm option (i.e., just a tip without any
-   * actions.)
-   */
-  get onConfirm(): string | undefined;
-
-  /**
    * The text to place on the 'confirm' button. Return undefined if there is no
    * confirm option (i.e., just a tip without any actions.)
    */
   get confirmText(): string | undefined;
+
+  /**
+   * Callback to run when confirm is clicked. Don't set if there is no confirm
+   * option (i.e., just a tip without any actions.)
+   */
+  onConfirm?(): void;
 
   /**
    * The text to place on the 'defer'/'reject' button. Return undefined if there is no

@@ -1,14 +1,15 @@
 import { assertUnreachable } from "@dendronhq/common-all";
 import { SegmentClient } from "@dendronhq/common-server";
 import { ShowcaseEntry } from "@dendronhq/engine-server";
+import * as vscode from "vscode";
 import {
-  MEETING_NOTE_FEATURE_SHOWCASE_TEST,
   MeetingNoteTestGroups,
+  MEETING_NOTE_FEATURE_SHOWCASE_TEST,
 } from "../abTests";
 import { AnalyticsUtils } from "../utils/analytics";
 import {
-  IFeatureShowcaseMessage,
   DisplayLocation,
+  IFeatureShowcaseMessage,
 } from "./IFeatureShowcaseMessage";
 
 export class MeetingNotesTip implements IFeatureShowcaseMessage {
@@ -45,8 +46,8 @@ export class MeetingNotesTip implements IFeatureShowcaseMessage {
     }
   }
 
-  get onConfirm(): string {
-    return "dendron.createMeetingNote";
+  onConfirm() {
+    vscode.commands.executeCommand("dendron.createMeetingNote");
   }
 
   get confirmText(): string {

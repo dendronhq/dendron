@@ -1,4 +1,5 @@
 import { VSCodeEvents } from "@dendronhq/common-all";
+import { MetadataService } from "@dendronhq/engine-server";
 import _md from "markdown-it";
 import * as vscode from "vscode";
 import {
@@ -12,12 +13,11 @@ import { AnalyticsUtils } from "../utils/analytics";
  * Side Panel webview that shows the tip of the day
  * TODO: Add functionality
  *  - let user rotate tips
- *  - save which tip they're on. (right now it just shows the first one.)
  */
 export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
   private _webview: vscode.WebviewView | undefined;
   private _tips: IFeatureShowcaseMessage[];
-  private _curTipIndex = 0;
+  private _curTipIndex;
 
   private BUTTON_CLICKED_MSG = "buttonClicked";
   private TIP_SHOWN_MSG = "loaded";
@@ -32,6 +32,17 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
    */
   constructor(tips: IFeatureShowcaseMessage[]) {
     this._tips = tips;
+
+    // Get the last seen tip from storage. If they've never seen one before,
+    // then set them at a random index so we can get an even distribution of
+    // tips shown across the population.
+    let storedIndex = MetadataService.instance().TipOfDayIndex;
+
+    if (!storedIndex) {
+      storedIndex = Math.random() * this._tips.length;
+    }
+
+    this._curTipIndex = storedIndex;
   }
 
   resolveWebviewView(
@@ -65,8 +76,11 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
               userResponse: FeatureShowcaseUserResponse.confirmed,
             });
 
-            const onConfirmCmd = this._currentTip.onConfirm;
-            if (onConfirmCmd) vscode.commands.executeCommand(onConfirmCmd);
+            if (this._currentTip.onConfirm) {
+              const fn = this._currentTip.onConfirm.bind(this._currentTip);
+              fn();
+            }
+
             return;
           }
           default:
@@ -87,6 +101,8 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
       this._webview.webview.html = this.getContent(
         this._tips[this._curTipIndex]
       );
+
+      MetadataService.instance().TipOfDayIndex = this._curTipIndex;
 
       // Rotate the tip every 10 seconds (for debugging purposes)
       // TODO: Extend this duration to rotate once a day.

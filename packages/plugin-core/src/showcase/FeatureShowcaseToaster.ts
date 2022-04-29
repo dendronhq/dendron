@@ -99,7 +99,7 @@ export class FeatureShowcaseToaster {
         });
 
         if (resp === message.confirmText && message.onConfirm) {
-          vscode.commands.executeCommand(message.onConfirm);
+          message.onConfirm.bind(message)();
         }
       });
   }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 861 861" style="enable-background:new 0 0 861 861;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;filter:url(#Adobe_OpacityMaskFilter);}
+	.st1{mask:url(#a_00000020392483143318763950000003336056596097065357_);}
+	.st2{fill:none;stroke:#000000;stroke-width:50;}
+	.st3{fill:none;stroke:#000000;stroke-width:35;}
+	.st4{fill:none;stroke:#000000;stroke-width:27;}
+</style>
+<g>
+	<path d="M430.6,50c51.3,0,101.1,10,147.9,29.8c45.2,19.1,85.9,46.5,120.8,81.5c34.9,34.9,62.3,75.6,81.5,120.8
+		c19.8,46.8,29.8,96.6,29.8,147.9s-10,101.1-29.8,147.9c-19.1,45.2-46.5,85.9-81.5,120.8c-34.9,34.9-75.6,62.3-120.8,81.5
+		C531.6,800,481.9,810,430.6,810s-101.1-10-147.9-29.8c-45.2-19.1-85.9-46.5-120.8-81.5c-34.9-34.9-62.3-75.6-81.5-120.8
+		C60.6,531.1,50.6,481.3,50.6,430s10-101.1,29.8-147.9c19.1-45.2,46.5-85.9,81.5-120.8c34.9-34.9,75.6-62.3,120.8-81.5
+		C329.5,60.1,379.2,50,430.6,50 M430.6,0C193.1,0,0.6,192.5,0.6,430s192.5,430,430,430s430-192.5,430-430S668.1,0,430.6,0L430.6,0z"
+		/>
+</g>
+<defs>
+	<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="255.3" y="158.8" width="403.2" height="706.9">
+		<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+	</filter>
+</defs>
+<mask maskUnits="userSpaceOnUse" x="255.3" y="158.8" width="403.2" height="706.9" id="a_00000020392483143318763950000003336056596097065357_">
+	<circle class="st0" cx="404.2" cy="424.1" r="430"/>
+</mask>
+<g class="st1">
+	<path class="st2" d="M361,857.8V356.5 M360.6,641.6c0-63.5,75.6-34,75.6-102.2 M405.4,859.7v-50.2c-1.4-38.7,33.5-46.8,49.9-55.8
+		l38-20.1c15.1-7.6,36.3-15.6,36.3-53.5V450.6"/>
+	<path class="st3" d="M389.8,865.6V723.2c-2-38.7,47-48.8,70-57.8l122-42.9c19.5-7.9,41.8-8.7,41.8-41.3v-44"/>
+	<circle class="st2" cx="360.6" cy="264.1" r="80.3"/>
+	
+		<ellipse transform="matrix(0.1602 -0.9871 0.9871 0.1602 63.103 847.5277)" class="st2" cx="529.6" cy="386.7" rx="53.1" ry="53.1"/>
+	<circle class="st4" cx="623.6" cy="510.1" r="21.4"/>
+	<circle cx="436.3" cy="506.2" r="46"/>
+</g>
+</svg>

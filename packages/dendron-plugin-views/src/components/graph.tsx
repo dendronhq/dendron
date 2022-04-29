@@ -39,9 +39,6 @@ const getCytoscapeStyle = (
 ) => {
   if (_.isUndefined(theme)) return "";
 
-  if (customCSS) {
-    return getStyles(theme, ClassicTheme, customCSS);
-  }
   switch (config.graphTheme.value) {
     case GraphThemeEnum.Classic: {
       return getStyles(theme, ClassicTheme);
@@ -51,6 +48,9 @@ const getCytoscapeStyle = (
     }
     case GraphThemeEnum.Block: {
       return getStyles(theme, BlockTheme);
+    }
+    case GraphThemeEnum.Custom: {
+      return getStyles(theme, ClassicTheme, customCSS);
     }
   }
 };
@@ -209,10 +209,7 @@ export default function Graph({
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  useEffect(() => {
     logger.log("Requesting default graph theme...");
     // Get the default graph theme
     postVSCodeMessage({
@@ -356,6 +353,7 @@ export default function Graph({
           config={config}
           isGraphReady={isReady}
           updateConfigField={updateConfigField}
+          customCSS={ide.graphStyles}
         />
         {type === "note" && (
           <div

@@ -32,12 +32,14 @@ type FilterProps = {
   config: GraphConfig;
   updateConfigField: (key: string, value: string | number | boolean) => void;
   isGraphReady: boolean;
+  customCSS?: string;
 };
 
 const GraphFilterView = ({
   config,
   updateConfigField,
   isGraphReady,
+  customCSS,
 }: FilterProps) => {
   const [showView, setShowView] = useState(false);
   const { currentTheme } = useCurrentTheme();
@@ -118,6 +120,7 @@ const GraphFilterView = ({
             section="graphTheme"
             config={config}
             updateConfigField={updateConfigField}
+            customCSS={customCSS}
           />
         </Panel>
       </Collapse>
@@ -185,10 +188,12 @@ const FilterViewSection = ({
   section,
   config,
   updateConfigField,
+  customCSS,
 }: {
   section: string;
   config: GraphConfig;
   updateConfigField: (key: string, value: string | number | boolean) => void;
+  customCSS?: string;
 }) => {
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
@@ -211,7 +216,20 @@ const FilterViewSection = ({
             >
               {_.isString(entry.value) && entry.singleSelect && (
                 <>
-                  <RadioButton value={entry.value as GraphThemeEnum} />
+                  <RadioButton
+                    value={entry.value as GraphThemeEnum}
+                    customCSS={customCSS}
+                  />
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={configureCustomStyling}
+                    style={{
+                      transform: "0.2s opacity ease-in-out",
+                    }}
+                  >
+                    {customCSS ? "Modify Custom CSS" : "Create Your Own"}
+                  </Button>
                 </>
               )}
               {_.isBoolean(entry?.value) && (
@@ -255,10 +273,21 @@ const FilterViewSection = ({
   );
 };
 
-const RadioButton = ({ value }: { value: GraphThemeEnum }) => {
-  const singleSelectOptions = Object.keys(GraphThemeEnum).map(
+const RadioButton = ({
+  value,
+  customCSS,
+}: {
+  value: GraphThemeEnum;
+  customCSS?: string;
+}) => {
+  let singleSelectOptions = Object.keys(GraphThemeEnum).map(
     (k) => GraphThemeEnum[k as GraphThemeEnum]
   );
+  if (!customCSS) {
+    singleSelectOptions = singleSelectOptions.filter(
+      (option) => option !== GraphThemeEnum.Custom
+    );
+  }
   const ideDispatch = ideHooks.useIDEAppDispatch();
   return (
     <Radio.Group
@@ -288,6 +317,13 @@ const updateGraphTheme = (graphTheme: GraphThemeEnum) => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.onGraphThemeChange,
     data: { graphTheme },
+    source: DMessageSource.webClient,
+  } as GraphViewMessage);
+};
+
+const configureCustomStyling = () => {
+  postVSCodeMessage({
+    type: GraphViewMessageEnum.configureCustomStyling,
     source: DMessageSource.webClient,
   } as GraphViewMessage);
 };

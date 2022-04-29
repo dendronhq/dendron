@@ -28,6 +28,7 @@ import { WebViewUtils } from "../../views/utils";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
+import { ConfigureGraphStylesCommand } from "../../commands/ConfigureGraphStyles";
 
 export class NoteGraphPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
@@ -169,6 +170,14 @@ export class NoteGraphPanelFactory {
                 defaultGraphTheme: graphTheme,
               },
               source: "vscode",
+            });
+            break;
+          }
+
+          case GraphViewMessageEnum.configureCustomStyling: {
+            await new ConfigureGraphStylesCommand().execute();
+            AnalyticsUtils.track(DENDRON_COMMANDS.CONFIGURE_GRAPH_STYLES.key, {
+              source: "graph filter menu",
             });
             break;
           }

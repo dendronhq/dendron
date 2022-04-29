@@ -774,6 +774,7 @@ export enum GraphViewMessageEnum {
   "onGraphThemeChange" = "onGraphThemeChange",
   "onRequestDefaultGraphTheme" = "onRequestDefaultGraphTheme",
   "onDefaultGraphThemeLoad" = "onDefaultGraphThemeLoad",
+  "configureCustomStyling" = "configureCustomStyling",
 }
 
 export enum CalendarViewMessageType {
@@ -808,6 +809,7 @@ export enum GraphThemeEnum {
   Block = "Block",
   Classic = "Classic",
   Monokai = "Monokai",
+  Custom = "Custom",
 }
 
 // TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases

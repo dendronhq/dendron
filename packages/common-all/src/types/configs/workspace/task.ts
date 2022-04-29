@@ -26,9 +26,9 @@ export type TaskConfig = Pick<
  */
 export function genDefaultTaskConfig(): TaskConfig {
   return {
-    name: "",
-    dateFormat: "",
-    addBehavior: NoteAddBehaviorEnum.childOfCurrent,
+    name: "task",
+    dateFormat: "y.MM.dd",
+    addBehavior: NoteAddBehaviorEnum.asOwnDomain,
     statusSymbols: {
       "": " ",
       wip: "w",

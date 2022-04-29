@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronError,
   DNodeUtils,
   NoteProps,
@@ -87,9 +88,12 @@ export class EngineNoteProvider
         return Promise.resolve([]);
       }
       if (noteProps) {
+        const { config } = ExtensionProvider.getDWorkspace();
+        const labelType = ConfigUtils.getTreeItemLabelType(config);
         const childrenIds = TreeUtils.sortNotesAtLevel({
           noteIds: noteProps.children,
           noteDict: engine.notes,
+          labelType,
         });
 
         const childrenNoteProps = childrenIds.map((id) => {
@@ -162,9 +166,12 @@ export class EngineNoteProvider
     const ctx = "parseTree";
     const tn = this.createTreeNote(note);
     this._tree[note.id] = tn;
+    const { config } = ExtensionProvider.getDWorkspace();
+    const labelType = ConfigUtils.getTreeItemLabelType(config);
     const children = TreeUtils.sortNotesAtLevel({
       noteIds: note.children,
       noteDict: ndict,
+      labelType,
     });
     tn.children = await Promise.all(
       children.map(async (c) => {

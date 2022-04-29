@@ -1019,6 +1019,10 @@ export class ConfigUtils {
     );
   }
 
+  static getTreeItemLabelType(config: IntermediateDendronConfig) {
+    return this.getWorkspace(config).views.treeView.treeItemLabelType;
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

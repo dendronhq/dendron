@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { NotePropsDict, NoteProps } from "../types";
+import { NotePropsDict, NoteProps, TreeItemLabelTypeEnum } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 
@@ -112,17 +112,27 @@ export class TreeUtils {
     noteIds,
     noteDict,
     reverse,
+    labelType,
   }: {
     noteIds: string[];
     noteDict: NotePropsDict;
     reverse?: boolean;
+    labelType?: TreeItemLabelTypeEnum;
   }): string[] => {
     const out = _.sortBy(
       noteIds,
       // Sort by nav order if set
       (noteId) => noteDict[noteId]?.custom?.nav_order,
       // Sort by titles
-      (noteId) => noteDict[noteId]?.title,
+      (noteId) => {
+        if (labelType) {
+          return labelType === TreeItemLabelTypeEnum.filename
+            ? _.last(noteDict[noteId]?.fname.split("."))
+            : noteDict[noteId]?.title;
+        } else {
+          return noteDict[noteId]?.title;
+        }
+      },
       // If titles are identical, sort by last updated date
       (noteId) => noteDict[noteId]?.updated
     );

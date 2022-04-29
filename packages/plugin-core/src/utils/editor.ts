@@ -33,7 +33,6 @@ import vscode, {
 import { TargetKind } from "../commands/GoToNoteInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtils } from "../WSUtils";
 import { getReferenceAtPosition } from "./md";
 
 export function isAnythingSelected(): boolean {
@@ -205,12 +204,17 @@ export async function getSelectionAnchors(opts: {
 /**
  * Utility method to check if the selected text is a broken wikilink
  */
-export async function isBrokenWikilink(): Promise<boolean> {
-  const { editor, selection } = VSCodeUtils.getSelection();
-  if (!editor || !selection) return false;
-  const note = WSUtils.getNoteFromDocument(editor.document);
-  const { engine } = ExtensionProvider.getDWorkspace();
-  if (!note) return false;
+export async function isBrokenWikilink({
+  editor,
+  selection,
+  note,
+  engine,
+}: {
+  editor: TextEditor;
+  selection: vscode.Selection;
+  note: NoteProps;
+  engine: DEngineClient;
+}): Promise<boolean> {
   const line = editor.document.lineAt(selection.start.line).text;
   const proc = MDUtilsV5.procRemarkParse(
     { mode: ProcMode.FULL },

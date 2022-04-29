@@ -31,6 +31,7 @@ import { sentryReportingCallback } from "../utils/analytics";
 import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
+import { WSUtilsV2 } from "../WSUtilsV2";
 
 function activate(context: ExtensionContext) {
   context.subscriptions.push(
@@ -98,9 +99,11 @@ export const refactorProvider: CodeActionProvider = {
       _token: CancellationToken
     ) => {
       // No-op if we're not in a Dendron Workspace
-      if (!DendronExtension.isActive()) {
+      const ext = ExtensionProvider.getExtension();
+      if (!(await ext.isActiveAndIsDendronNote(_document.uri.fsPath))) {
         return;
       }
+
       const { editor, selection, text } = VSCodeUtils.getSelection();
       if (!editor || !selection) return;
 
@@ -175,8 +178,13 @@ export const refactorProvider: CodeActionProvider = {
       };
 
       if (_range.isEmpty) {
+        const { engine } = ext.getDWorkspace();
+        const note = new WSUtilsV2(ext).getActiveNote();
         //return a code action for create note if user clicked next to a broken wikilink
-        if (await isBrokenWikilink()) {
+        if (
+          note &&
+          (await isBrokenWikilink({ editor, engine, note, selection }))
+        ) {
           return [brokenWikilinkAction];
         }
 

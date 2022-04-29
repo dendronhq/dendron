@@ -39,10 +39,11 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
     let storedIndex = MetadataService.instance().TipOfDayIndex;
 
     if (!storedIndex) {
-      storedIndex = Math.random() * this._tips.length;
+      storedIndex = Math.floor(Math.random() * this._tips.length);
     }
 
-    this._curTipIndex = storedIndex;
+    // Just in case we go down in the number of tips.
+    this._curTipIndex = Math.min(storedIndex, this._tips.length - 1);
   }
 
   resolveWebviewView(
@@ -104,9 +105,8 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
 
       MetadataService.instance().TipOfDayIndex = this._curTipIndex;
 
-      // Rotate the tip every 10 seconds (for debugging purposes)
-      // TODO: Extend this duration to rotate once a day.
-      setTimeout(() => this.showNextTip(), 10000);
+      // Rotate the tip once every 24 hours.
+      setTimeout(() => this.showNextTip(), 1000 * 60 * 60 * 24);
 
       return true;
     } else {

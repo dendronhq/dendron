@@ -57,9 +57,9 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   new MeetingNotesTip(),
   AUTOCOMPLETE_TIP,
   TAGS_TIP,
+  HEADER_REFS,
   RENAME_HEADER,
   TASK_MANAGEMENT,
   BLOCK_REFS,
-  HEADER_REFS,
   INSERT_NOTE_LINK,
 ];

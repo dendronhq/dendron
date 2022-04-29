@@ -104,14 +104,19 @@ export class NoteGraphPanelFactory {
             this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageEnum.onRequestGraphStyle: {
+          case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
-            if (styles) {
+            const graphTheme = MetadataService.instance().getGraphTheme();
+            if (graphTheme) {
+              this.defaultGraphTheme = graphTheme;
+            }
+            if (styles || graphTheme) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphStyleLoad,
+                type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
                 data: {
                   styles,
+                  graphTheme,
                 },
                 source: "vscode",
               });
@@ -159,20 +164,6 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
-          case GraphViewMessageEnum.onRequestDefaultGraphTheme: {
-            const graphTheme =
-              MetadataService.instance().getGraphTheme() ||
-              GraphThemeEnum.Classic;
-            this.defaultGraphTheme = graphTheme;
-            this._panel!.webview.postMessage({
-              type: GraphViewMessageEnum.onDefaultGraphThemeLoad,
-              data: {
-                defaultGraphTheme: graphTheme,
-              },
-              source: "vscode",
-            });
-            break;
-          }
 
           case GraphViewMessageEnum.configureCustomStyling: {
             await new ConfigureGraphStylesCommand().execute();
@@ -193,6 +184,7 @@ export class NoteGraphPanelFactory {
         }
         if (this.defaultGraphTheme) {
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
+          this.defaultGraphTheme = undefined;
         }
       });
     }

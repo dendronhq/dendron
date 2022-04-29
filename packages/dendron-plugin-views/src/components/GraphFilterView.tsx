@@ -228,7 +228,7 @@ const FilterViewSection = ({
                       transform: "0.2s opacity ease-in-out",
                     }}
                   >
-                    {customCSS ? "Modify Custom CSS" : "Create Your Own"}
+                    {customCSS ? "Modify custom css" : "Create Your Own"}
                   </Button>
                 </>
               )}

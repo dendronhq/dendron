@@ -202,18 +202,10 @@ export default function Graph({
   };
 
   useEffect(() => {
-    logger.log("Requesting graph style...");
+    logger.log("Requesting graph style and theme...");
     // Get graph style
     postVSCodeMessage({
-      type: GraphViewMessageEnum.onRequestGraphStyle,
-      data: {},
-      source: DMessageSource.webClient,
-    } as GraphViewMessage);
-
-    logger.log("Requesting default graph theme...");
-    // Get the default graph theme
-    postVSCodeMessage({
-      type: GraphViewMessageEnum.onRequestDefaultGraphTheme,
+      type: GraphViewMessageEnum.onRequestGraphStyleAndTheme,
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);

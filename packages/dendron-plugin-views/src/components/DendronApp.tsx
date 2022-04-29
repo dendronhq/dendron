@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  GraphThemeEnum,
   GraphViewMessageEnum,
   LookupViewMessageEnum,
   NoteUtils,
@@ -96,18 +97,20 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
-      case GraphViewMessageEnum.onGraphStyleLoad: {
+      case GraphViewMessageEnum.onGraphStyleAndThemeLoad: {
         const cmsg = msg;
-        const { styles } = cmsg.data;
+        const { styles, graphTheme } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
-        ideDispatch(ideSlice.actions.setGraphStyles(styles));
-        break;
-      }
-      case GraphViewMessageEnum.onDefaultGraphThemeLoad: {
-        // get the default graph theme for the user and update the ide state.
-        const { defaultGraphTheme } = msg.data;
-        logger.info({ ctx, defaultGraphTheme, msg: "default graph theme" });
-        ideDispatch(ideSlice.actions.setGraphTheme(defaultGraphTheme));
+        if (styles) {
+          ideDispatch(ideSlice.actions.setGraphStyles(styles));
+        }
+        if (graphTheme) {
+          logger.info({ ctx, graphTheme, msg: "default graph theme" });
+          ideDispatch(ideSlice.actions.setGraphTheme(graphTheme));
+        }
+        if (!graphTheme && styles) {
+          ideDispatch(ideSlice.actions.setGraphTheme(GraphThemeEnum.Custom));
+        }
         break;
       }
       default:

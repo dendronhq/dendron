@@ -1,6 +1,6 @@
 import { baseTheme, Theme } from "./theme-classic";
 
-const classicBasicTheme = {
+const blockBasicTheme = {
   links: {
     curveStyle: "unbundled-bezier",
   },
@@ -30,7 +30,7 @@ const darkTheme: Theme = {
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
+      ...blockBasicTheme.edge,
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -42,10 +42,10 @@ const darkTheme: Theme = {
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
+      ...blockBasicTheme.links,
     },
     hierarchy: {
-      ...classicBasicTheme.hierarchy,
+      ...blockBasicTheme.hierarchy,
     },
   },
 };
@@ -65,7 +65,7 @@ const lightTheme: Theme = {
       },
     },
     edge: {
-      ...classicBasicTheme.edge,
+      ...blockBasicTheme.edge,
     },
     filterView: {
       ...baseTheme.graph.filterView,
@@ -77,10 +77,10 @@ const lightTheme: Theme = {
     },
     links: {
       ...baseTheme.graph.links,
-      ...classicBasicTheme.links,
+      ...blockBasicTheme.links,
     },
     hierarchy: {
-      ...classicBasicTheme.hierarchy,
+      ...blockBasicTheme.hierarchy,
     },
   },
 };

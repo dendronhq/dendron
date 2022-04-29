@@ -13,6 +13,11 @@ import { DendronGraphConfig } from "../../types/configs/workspace/graph";
 import { ScratchConfig } from "../../types/configs/workspace/scratch";
 import { VAULT_SYNC_MODES } from "./base";
 import { SELECTION_MODES } from "./commands";
+import {
+  DendronViewsConfig,
+  TreeItemLabelTypeEnum,
+  TreeViewConfig,
+} from "../../types";
 
 const ADD_BEHAVIOR: Record<NoteAddBehaviorEnum, DendronConfigEntry<string>> = {
   [NoteAddBehaviorEnum.childOfDomain]: {
@@ -42,6 +47,30 @@ const GRAPH: DendronConfigEntryCollection<DendronGraphConfig> = {
     label: "Zoom Speed",
     desc: "The speed at which the graph zooms in and out. Lower is slower, higher is faster.",
   },
+};
+
+const TREE_ITEM_LABEL_TYPE: Record<
+  TreeItemLabelTypeEnum,
+  DendronConfigEntry<string>
+> = {
+  [TreeItemLabelTypeEnum.filename]: {
+    value: "filename",
+    label: "file name",
+    desc: "Items in the tree view will be labeled and sorted with the note file name",
+  },
+  [TreeItemLabelTypeEnum.title]: {
+    value: "title",
+    label: "title",
+    desc: "Items in the tree view will be labeled and sorted with the note title",
+  },
+};
+
+const TREE_VIEW: DendronConfigEntryCollection<TreeViewConfig> = {
+  treeItemLabelType: TREE_ITEM_LABEL_TYPE,
+};
+
+const VIEWS: DendronConfigEntryCollection<DendronViewsConfig> = {
+  treeView: TREE_VIEW,
 };
 
 /**
@@ -159,6 +188,7 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   scratch: SCRATCH,
   task: TASK,
   graph: GRAPH,
+  views: VIEWS,
   disableTelemetry: {
     label: `Disable Telemetry`,
     desc: `Disable telemetry that collects usage data to help improve Dendron.`,

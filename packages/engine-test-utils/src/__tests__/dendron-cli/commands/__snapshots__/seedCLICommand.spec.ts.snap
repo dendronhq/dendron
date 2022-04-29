@@ -76,6 +76,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+    views:
+        treeView:
+            treeItemLabelType: title
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
@@ -225,6 +228,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+    views:
+        treeView:
+            treeItemLabelType: title
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
@@ -364,6 +370,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+    views:
+        treeView:
+            treeItemLabelType: title
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
@@ -470,6 +479,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+    views:
+        treeView:
+            treeItemLabelType: title
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
@@ -593,6 +605,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+    views:
+        treeView:
+            treeItemLabelType: title
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true

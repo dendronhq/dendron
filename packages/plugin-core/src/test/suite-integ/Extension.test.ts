@@ -289,9 +289,9 @@ suite("GIVEN SetupWorkspace Command", function () {
               addBehavior: "asOwnDomain",
             },
             task: {
-              name: "",
-              dateFormat: "",
-              addBehavior: "childOfCurrent",
+              name: "task",
+              dateFormat: "y.MM.dd",
+              addBehavior: "asOwnDomain",
               statusSymbols: {
                 "": " ",
                 wip: "w",

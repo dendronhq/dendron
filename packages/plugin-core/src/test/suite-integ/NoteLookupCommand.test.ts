@@ -1594,7 +1594,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(out.quickpick.value.startsWith(`foo`)).toBeTruthy();
+          expect(out.quickpick.value.startsWith(`task`)).toBeTruthy();
 
           cmd.cleanUp();
           done();
@@ -2275,7 +2275,7 @@ suite("NoteLookupCommand", function () {
             expect(selection2linkBtn.pressed).toBeTruthy();
 
             const quickpickValue = controller.quickPick.value;
-            expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
+            expect(quickpickValue.startsWith(`task.`)).toBeTruthy();
             expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
 
             controller.onHide();

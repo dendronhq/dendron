@@ -12,6 +12,7 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
+  GraphEvents,
   GraphThemeEnum,
   InstallStatus,
   IntermediateDendronConfig,
@@ -616,6 +617,9 @@ export async function _activate(
         default:
           graphTheme = GraphThemeEnum.Classic;
       }
+      AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+        setDuringInstall: true,
+      });
       MetadataService.instance().setGraphTheme(graphTheme);
     }
     const assetUri = VSCodeUtils.getAssetUri(context);

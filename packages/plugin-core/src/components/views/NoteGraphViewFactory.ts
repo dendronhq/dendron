@@ -4,6 +4,7 @@ import {
   DMessageEnum,
   DMessageSource,
   getWebEditorViewEntry,
+  GraphEvents,
   GraphThemeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
@@ -159,7 +160,7 @@ export class NoteGraphPanelFactory {
           }
           case GraphViewMessageEnum.onGraphThemeChange: {
             this.defaultGraphTheme = msg.data.graphTheme;
-            AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
+            AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
               theme: msg.data.graphTheme,
             });
             break;

@@ -67,6 +67,8 @@ import { WorkspaceWatcher } from "./WorkspaceWatcher";
 import { WSUtilsV2 } from "./WSUtilsV2";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { CalendarView } from "./views/CalendarView";
+import TipOfTheDayWebview from "./features/TipOfTheDayWebview";
+import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -517,10 +519,11 @@ export class DendronExtension implements IDendronExtension {
         // backlinks
         const backlinkTreeView = this.setupBacklinkTreeView();
 
-        // This persists even if getChildren populates the view.
-        // Removing it for now.
-        // backlinkTreeView.message = "There are no links to this note."
+        // Tip of the Day
+        const tipOfDayView = this.setupTipOfTheDayView();
+
         context.subscriptions.push(backlinkTreeView);
+        context.subscriptions.push(tipOfDayView);
       }
     });
   }
@@ -554,6 +557,17 @@ export class DendronExtension implements IDendronExtension {
         }
       });
     }
+  }
+
+  private setupTipOfTheDayView() {
+    const featureShowcaseWebview = new TipOfTheDayWebview(
+      ALL_FEATURE_SHOWCASES
+    );
+
+    return vscode.window.registerWebviewViewProvider(
+      DendronTreeViewKey.TIP_OF_THE_DAY,
+      featureShowcaseWebview
+    );
   }
 
   private setupBacklinkTreeView() {

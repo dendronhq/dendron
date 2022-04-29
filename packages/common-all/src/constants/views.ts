@@ -28,6 +28,7 @@ export enum DendronTreeViewKey {
   BACKLINKS = "dendron.backlinks",
   CALENDAR_VIEW = "dendron.calendar-view",
   LOOKUP_VIEW = "dendron.lookup-view",
+  TIP_OF_THE_DAY = "dendron.tip-of-the-day",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -92,6 +93,11 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     label: "Lookup View",
     type: "webview",
     bundleName: "DendronLookupPanel",
+  },
+  [DendronTreeViewKey.TIP_OF_THE_DAY]: {
+    desc: "Feature Showcase",
+    label: "Feature Showcase",
+    type: "nativeview",
   },
 };
 

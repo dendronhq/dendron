@@ -72,7 +72,7 @@ import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeP
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { FeatureShowcase } from "./FeatureShowcase";
+import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -812,8 +812,8 @@ export async function _activate(
       // Show the feature showcase toast one minute after initialization.
       const ONE_MINUTE_IN_MS = 60_000;
       setTimeout(() => {
-        const showcase = new FeatureShowcase();
-        showcase.show();
+        const showcase = new FeatureShowcaseToaster();
+        showcase.showToast();
       }, ONE_MINUTE_IN_MS);
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });

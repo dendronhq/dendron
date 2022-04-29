@@ -100,7 +100,7 @@ export class MetadataService {
   }
 
   static metaFilePath() {
-    return path.join(os.homedir(), FOLDERS.DOTFILES, "meta.json");
+    return path.join(os.homedir(), FOLDERS.DENDRON_SYSTEM_ROOT, "meta.json");
   }
 
   deleteMeta(key: keyof Metadata) {

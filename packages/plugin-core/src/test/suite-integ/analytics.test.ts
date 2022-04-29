@@ -44,7 +44,7 @@ describe("GIVEN AnalyticsUtils", () => {
     test("THEN the properties are saved to disk", async () => {
       const telemetryDir = path.join(
         homedir,
-        FOLDERS.DOTFILES,
+        FOLDERS.DENDRON_SYSTEM_ROOT,
         FOLDERS.SAVED_TELEMETRY
       );
       const savedFiles = (await fs.readdir(telemetryDir)).filter(

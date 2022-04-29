@@ -49,7 +49,7 @@ Obsidian.md style
 
 export class GraphStyleService {
   static styleFilePath() {
-    return path.join(os.homedir(), FOLDERS.DOTFILES, "styles.css");
+    return path.join(os.homedir(), FOLDERS.DENDRON_SYSTEM_ROOT, "styles.css");
   }
 
   static doesStyleFileExist() {

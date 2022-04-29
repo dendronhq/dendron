@@ -163,7 +163,7 @@ export class AnalyticsUtils {
     });
     const telemetryDir = path.join(
       os.homedir(),
-      FOLDERS.DOTFILES,
+      FOLDERS.DENDRON_SYSTEM_ROOT,
       FOLDERS.SAVED_TELEMETRY
     );
     await fs.ensureDir(telemetryDir);
@@ -175,10 +175,10 @@ export class AnalyticsUtils {
 
   static async sendSavedAnalytics() {
     const ctx = "AnalyticsUtils.sendSavedAnalytics";
-    Logger.debug({ ctx, message: "start" });
+    Logger.info({ ctx, message: "start" });
     const telemetryDir = path.join(
       os.homedir(),
-      FOLDERS.DOTFILES,
+      FOLDERS.DENDRON_SYSTEM_ROOT,
       FOLDERS.SAVED_TELEMETRY
     );
     let files: string[] = [];

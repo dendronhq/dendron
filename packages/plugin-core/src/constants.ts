@@ -241,6 +241,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Browse Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  CAPITALIZE: {
+    key: "dendron.capitalize",
+    title: `${CMD_PREFIX} Capitalize`,
+  },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
     // no prefix, we don't want to show this command

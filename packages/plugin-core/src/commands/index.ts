@@ -2,6 +2,7 @@ import { AddAndCommit } from "./AddAndCommit";
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
 import { CodeCommandConstructor } from "./base";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
+import { CapitalizeCommand } from "./Capitalize";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
@@ -82,6 +83,7 @@ const ALL_COMMANDS = [
   AddAndCommit,
   ArchiveHierarchyCommand,
   BrowseNoteCommand,
+  CapitalizeCommand,
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,

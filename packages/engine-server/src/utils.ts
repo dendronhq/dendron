@@ -1,9 +1,11 @@
 import {
   APIUtils,
+  BacklinksCacheEntry,
   ConfigUtils,
   CONSTANTS,
   DendronError,
   DEngineClient,
+  DLink,
   DNoteRefData,
   DNoteRefLink,
   ErrorFactory,
@@ -14,6 +16,7 @@ import {
   NoteUtils,
   RespV3,
 } from "@dendronhq/common-all";
+import { genHash } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -222,6 +225,12 @@ export function createCacheEntry(opts: {
     data: _.omit(noteProps, "body"),
     hash,
   };
+}
+
+export function createBacklinksCacheEntry(
+  backlink: Omit<DLink, "type"> & { type: "backlink" }
+): BacklinksCacheEntry {
+  return [{ hash: genHash(JSON.stringify(backlink)), data: backlink }];
 }
 
 export const getCachePath = (vpath: string): string => {

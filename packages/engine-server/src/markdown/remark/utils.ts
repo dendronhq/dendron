@@ -414,6 +414,38 @@ export class LinkUtils {
     return links;
   }
 
+  /**
+   * Create backlink out of link if it references another note (denoted by presence of link.to field)
+   *
+   * @param link Original link to create backlink out of
+   * @returns backlink or none if not applicable
+   */
+  static createBackLinkFromDLink(
+    link: DLink
+  ): (Omit<DLink, "type"> & { type: "backlink" }) | undefined {
+    const maybeFromNoteFname = link.from.fname;
+    const maybeFromNoteVaultName = link.from.vaultName;
+    const maybeToNoteFname = link.to?.fname;
+    // Note referencing itself does not count as backlink
+    if (
+      maybeToNoteFname &&
+      maybeFromNoteFname &&
+      maybeToNoteFname !== maybeFromNoteFname
+    ) {
+      return {
+        from: {
+          fname: maybeFromNoteFname,
+          vaultName: maybeFromNoteVaultName,
+        },
+        type: "backlink",
+        position: link.position,
+        value: link.value,
+        alias: link.alias,
+      };
+    }
+    return;
+  }
+
   static findHashTags({ links }: { links: DLink[] }) {
     return links.filter((l) => {
       if (l.to as DNoteLoc) {

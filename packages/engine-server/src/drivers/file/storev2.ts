@@ -27,7 +27,6 @@ import {
   NoteProps,
   NotePropsDict,
   NoteFNamesDict,
-  NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
   RenameNotePayload,
@@ -65,7 +64,8 @@ import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
-import { NotesFileSystemCache } from "../../cache";
+import { BacklinksFileSystemCache, NotesFileSystemCache } from "../../cache";
+import { BacklinksParser } from "./backlinksParser";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -404,6 +404,7 @@ export class FileStorage implements DStore {
 
     let notesWithLinks: NoteProps[] = [];
     let errors: DendronError[] = [];
+    let noteChanges: NoteChangeEntry[] = [];
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
@@ -412,6 +413,7 @@ export class FileStorage implements DStore {
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
+        noteChanges = noteChanges.concat(cacheUpdates);
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
         );
@@ -436,9 +438,56 @@ export class FileStorage implements DStore {
       );
     }
 
+    // TODO: A/B test old/new backlinks logic
+    //this._addBacklinksWithCache({ noteChanges, allNotes });
     this._addBacklinks({ notesWithLinks, allNotes });
 
     return { notes: allNotes, errors };
+  }
+
+  /**
+   * Use cache to add backlinks and mutate allNotes. Update cache as well for each note change entry
+   */
+  private _addBacklinksWithCache({
+    noteChanges,
+    allNotes,
+  }: {
+    noteChanges: NoteChangeEntry[];
+    allNotes: NoteProps[];
+  }): void {
+    const ctx = "_addBacklinksWithCache:ext";
+    const start = process.hrtime();
+
+    const cachePath = path.join(
+      this.wsRoot,
+      CONSTANTS.DENDRON_BACKLINKS_CACHE_FILE
+    );
+    const backlinksCache: BacklinksFileSystemCache =
+      new BacklinksFileSystemCache({
+        cachePath,
+        noCaching: this.engine.config.noCaching,
+      });
+    const backlinksParser = new BacklinksParser({
+      cache: backlinksCache,
+      allNotes,
+      logger: this.logger,
+    });
+    // If cache file doesn't exist or is empty, init backlinks cache from scratch
+    // Otherwise update cache based on noteChanges
+    const backlinksCacheMap = backlinksParser.isCacheEmpty()
+      ? backlinksParser.initBacklinksCache()
+      : backlinksParser.updateBacklinksCache(noteChanges);
+
+    allNotes.forEach((note) => {
+      if (backlinksCacheMap[note.id].length > 0) {
+        backlinksCacheMap[note.id].forEach((backlink) => {
+          note.links.concat(backlink.data);
+        });
+      }
+    });
+
+    const duration = getDurationMilliseconds(start);
+    this.logger.info({ ctx, duration });
   }
 
   /** Adds backlinks mutating 'allNotes' argument in place. */
@@ -518,7 +567,7 @@ export class FileStorage implements DStore {
 
   async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
-    cacheUpdates: NotesCacheEntryMap;
+    cacheUpdates: NoteChangeEntry[];
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
@@ -549,7 +598,7 @@ export class FileStorage implements DStore {
     });
     if (!out.data) {
       return {
-        cacheUpdates: {},
+        cacheUpdates: [],
         errors,
         notes: [],
       };

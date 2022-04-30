@@ -10,10 +10,9 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   isNotUndefined,
+  NoteChangeEntry,
   NoteProps,
   NotePropsDict,
-  NotesCacheEntry,
-  NotesCacheEntryMap,
   NoteUtils,
   SchemaUtils,
   stringifyError,
@@ -85,7 +84,7 @@ export class NoteParser extends ParserBase {
     vault: DVault
   ): Promise<{
     notes: NoteProps[];
-    cacheUpdates: NotesCacheEntryMap;
+    cacheUpdates: NoteChangeEntry[];
     errors: DendronError[];
   }> {
     const ctx = "parseFile";
@@ -94,7 +93,7 @@ export class NoteParser extends ParserBase {
     const notesByFname: NotePropsDict = {};
     const notesById: NotePropsDict = {};
     this.logger.info({ ctx, msg: "enter", vault });
-    const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
+    const cacheUpdates: NoteChangeEntry[] = [];
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
     const errors: DendronError[] = [];
@@ -121,11 +120,8 @@ export class NoteParser extends ParserBase {
     });
     const rootNote = rootProps.propsList[0];
     this.logger.info({ ctx, msg: "post:parseRootNote" });
-    if (!rootProps.matchHash) {
-      cacheUpdates[rootNote.fname] = createCacheEntry({
-        noteProps: rootNote,
-        hash: rootProps.noteHash,
-      });
+    if (rootProps.maybeNoteChangeEntry) {
+      cacheUpdates.push(rootProps.maybeNoteChangeEntry);
     }
     notesByFname[rootNote.fname] = rootNote;
     notesById[rootNote.id] = rootNote;
@@ -146,11 +142,8 @@ export class NoteParser extends ParserBase {
           });
           const notes = out.propsList;
           unseenKeys.delete(notes[0].fname);
-          if (!out.matchHash) {
-            cacheUpdates[notes[0].fname] = createCacheEntry({
-              noteProps: notes[0],
-              hash: out.noteHash,
-            });
+          if (out.maybeNoteChangeEntry) {
+            cacheUpdates.push(out.maybeNoteChangeEntry);
           }
           return notes;
         } catch (err: any) {
@@ -194,11 +187,8 @@ export class NoteParser extends ParserBase {
 
             // this indicates that the contents of the note was different
             // then what was in the cache. need to update later ^cache-update
-            if (!resp.matchHash) {
-              cacheUpdates[notes[0].fname] = createCacheEntry({
-                noteProps: notes[0],
-                hash: resp.noteHash,
-              });
+            if (resp.maybeNoteChangeEntry) {
+              cacheUpdates.push(resp.maybeNoteChangeEntry);
             }
             // need to be inside this loop
             // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
@@ -235,15 +225,18 @@ export class NoteParser extends ParserBase {
         return SchemaUtils.matchDomain(d, notesById, schemas);
       })
     );
-    // Remove stale entries from cache
+    // Keep track of stale cache entries and remove from cache
     unseenKeys.forEach((unseenKey) => {
+      cacheUpdates.push({
+        note: _.defaults(this.cache.get(unseenKey)!.data, { body: "" }),
+        status: "delete",
+      });
       this.cache.drop(unseenKey);
     });
 
     // OPT:make async and don't wait for return
-    // Skip this if we found no notes, which means vault did not initialize
-    if (out.length > 0) {
-      // TODO only write if there are changes
+    // Skip this if we found no notes, which means vault did not initialize or there are no note changes
+    if (out.length > 0 && cacheUpdates.length > 0) {
       this.cache.writeToFileSystem();
     }
 
@@ -264,7 +257,11 @@ export class NoteParser extends ParserBase {
     createStubs?: boolean;
     vault: DVault;
     errors: DendronError[];
-  }): { propsList: NoteProps[]; noteHash: string; matchHash: boolean } {
+  }): {
+    propsList: NoteProps[];
+    noteHash: string;
+    maybeNoteChangeEntry?: NoteChangeEntry;
+  } {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       createStubs: true,
@@ -279,14 +276,14 @@ export class NoteParser extends ParserBase {
     let out: NoteProps[] = [];
     let noteProps: NoteProps;
     let noteHash: string;
-    let matchHash: boolean;
+    let maybeNoteChangeEntry: NoteChangeEntry | undefined;
 
     // get note props
     try {
       ({
         note: noteProps,
         noteHash,
-        matchHash,
+        maybeNoteChangeEntry,
       } = this.file2NoteWithCache({
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
@@ -317,7 +314,7 @@ export class NoteParser extends ParserBase {
       });
       out = out.concat(stubs.map((noteChangeEntry) => noteChangeEntry.note));
     }
-    return { propsList: out, noteHash, matchHash };
+    return { propsList: out, noteHash, maybeNoteChangeEntry };
   }
 
   private file2NoteWithCache({
@@ -332,7 +329,7 @@ export class NoteParser extends ParserBase {
     errors: DendronError[];
   }): {
     note: NoteProps;
-    matchHash: boolean;
+    maybeNoteChangeEntry?: NoteChangeEntry;
     noteHash: string;
   } {
     const content = fs.readFileSync(fpath, { encoding: "utf8" });
@@ -358,11 +355,11 @@ export class NoteParser extends ParserBase {
           vault,
           contentHash: sig,
         };
-        return { note, matchHash, noteHash: sig };
+        return { note, noteHash: sig };
       }
     }
+
     // If hash is different, then we update all links and anchors ^link-anchor
-    // Update cache entry as well
     note = string2Note({ content, fname, vault });
     note.contentHash = sig;
     // Link/anchor errors should be logged but not interfere with rest of parsing
@@ -371,6 +368,17 @@ export class NoteParser extends ParserBase {
     } catch (_err: any) {
       errors.push(ErrorFactory.wrapIfNeeded(_err));
     }
+
+    // If cache entry exists, then this must be an update. Otherwise, it is a new note
+    const noteChangeEntry: NoteChangeEntry = cacheEntry
+      ? {
+          prevNote: _.defaults(cacheEntry.data, { body: "" }),
+          note,
+          status: "update",
+        }
+      : { note, status: "create" };
+
+    // Update cache entry
     this.cache.set(
       name,
       createCacheEntry({
@@ -378,7 +386,7 @@ export class NoteParser extends ParserBase {
         hash: note.contentHash,
       })
     );
-    return { note, matchHash, noteHash: sig };
+    return { note, maybeNoteChangeEntry: noteChangeEntry, noteHash: sig };
   }
 
   private updateLinksAndAnchors(note: NoteProps): void {

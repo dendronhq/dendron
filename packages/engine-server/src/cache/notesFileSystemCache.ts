@@ -7,7 +7,9 @@ export class NotesFileSystemCache extends DendronFileSystemCache<
   NotesCacheEntry
 > {
   get(key: string): NotesCacheEntry | undefined {
-    return this._cacheContents.notes[key];
+    return this._cacheContents.notes[key]
+      ? JSON.parse(JSON.stringify(this._cacheContents.notes[key]))
+      : undefined;
   }
 
   set(key: string, value: NotesCacheEntry): void {

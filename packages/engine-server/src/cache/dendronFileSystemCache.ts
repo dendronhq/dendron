@@ -54,9 +54,10 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
   }
 
   /**
-   * Delete cache file if it exists
+   * Delete cache file if it exists and empty cache
    */
   removeFromFileSystem(): void {
+    this.createEmptyCacheContents();
     if (fs.pathExistsSync(this._cachePath)) {
       return fs.removeSync(this._cachePath);
     }

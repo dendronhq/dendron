@@ -31,6 +31,7 @@ export const CONSTANTS = {
   DENDRON_DELIMETER: "dendron://",
   DENDRON_USER_FILE: ".dendron.user",
   DENDRON_CACHE_FILE: ".dendron.cache.json",
+  DENDRON_BACKLINKS_CACHE_FILE: ".dendron.workspace.cache.backlinks.json",
   DENDRON_ID: ".dendron.uuid",
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
   DENDRON_TELEMETRY: ".dendron.telemetry",

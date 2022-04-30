@@ -4,10 +4,15 @@ import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { InsertNoteIndexCommand } from "../../commands/InsertNoteIndexCommand";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("InsertNoteIndex", function () {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
@@ -32,90 +37,6 @@ suite("InsertNoteIndex", function () {
             await AssertUtils.assertInString({
               body,
               match: [["## Index", "- [[Ch1|foo.ch1]]"].join("\n")],
-            })
-          );
-          done();
-        },
-      });
-    });
-
-    test("tags.foo without tags note", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          //await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "root",
-            body: "this is root",
-          });
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "tags.foo",
-            body: "this is tag foo",
-          });
-        },
-        onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          const cmd = new InsertNoteIndexCommand();
-
-          await WSUtils.openNote(notes["root"]);
-
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          editor.selection = new vscode.Selection(9, 0, 9, 0);
-          await cmd.execute({});
-          const body = editor.document.getText();
-          expect(
-            await AssertUtils.assertInString({
-              body,
-              match: [["## Index", "- [[Tags|tags]]"].join("\n")],
-            })
-          );
-          done();
-        },
-      });
-    });
-
-    test("tags.foo with tags note", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          //await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "root",
-            body: "this is root",
-          });
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "tags",
-            body: "this is tag",
-          });
-          await NoteTestUtilsV4.createNote({
-            vault: vaults[0],
-            wsRoot,
-            fname: "tags.foo",
-            body: "this is tag foo",
-          });
-        },
-        onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          const cmd = new InsertNoteIndexCommand();
-
-          await WSUtils.openNote(notes["root"]);
-
-          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-          editor.selection = new vscode.Selection(9, 0, 9, 0);
-          await cmd.execute({});
-          const body = editor.document.getText();
-          expect(
-            await AssertUtils.assertInString({
-              body,
-              match: [["## Index", "- [[Tags|tags]]"].join("\n")],
             })
           );
           done();
@@ -241,4 +162,86 @@ suite("InsertNoteIndex", function () {
       });
     });
   });
+
+  describeMultiWS(
+    "GIVEN foo tag without parent note tags",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "root",
+          body: "this is root",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "tags.foo",
+          body: "this is tag foo",
+        });
+      },
+    },
+    () => {
+      test("THEN insert note index add tags as index", async () => {
+        const engine = ExtensionProvider.getEngine();
+        const rootNote = engine.notes["root"];
+        await ExtensionProvider.getWSUtils().openNote(rootNote);
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        const cmd = new InsertNoteIndexCommand();
+        editor.selection = new vscode.Selection(9, 0, 9, 0);
+        await cmd.execute({});
+        const body = editor.document.getText();
+        expect(
+          await AssertUtils.assertInString({
+            body,
+            match: [["## Index", "- [[Tags|tags]]"].join("\n")],
+          })
+        );
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN foo tag with parent note tags",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "root",
+          body: "this is root",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "tags",
+          body: "this is tag",
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "tags.foo",
+          body: "this is tag foo",
+        });
+      },
+    },
+    () => {
+      test("THEN insert note index add tags as index", async () => {
+        const engine = ExtensionProvider.getEngine();
+        const rootNote = engine.notes["root"];
+        await ExtensionProvider.getWSUtils().openNote(rootNote);
+        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+        const cmd = new InsertNoteIndexCommand();
+        editor.selection = new vscode.Selection(9, 0, 9, 0);
+        await cmd.execute({});
+        const body = editor.document.getText();
+        expect(
+          await AssertUtils.assertInString({
+            body,
+            match: [["## Index", "- [[Tags|tags]]"].join("\n")],
+          })
+        );
+      });
+    }
+  );
 });

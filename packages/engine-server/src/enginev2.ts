@@ -504,6 +504,11 @@ export class DendronEngineV2 implements DEngine {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew, onlyDirectChildren, originalQS } = opts;
 
+    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
+    // @ts-ignore
+    if (vault?.selfContained === "true" || vault?.selfContained === "false")
+      vault.selfContained = vault.selfContained === "true";
+
     const items = await this.fuseEngine.queryNote({
       qs,
       onlyDirectChildren,
@@ -535,9 +540,9 @@ export class DendronEngineV2 implements DEngine {
     this.logger.info({ ctx, msg: "exit" });
     let notes = items.map((ent) => this.notes[ent.id]);
     if (!_.isUndefined(vault)) {
-      notes = notes.filter((ent) =>
-        VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
-      );
+      notes = notes.filter((ent) => {
+        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
+      });
     }
     return {
       error: null,
@@ -702,6 +707,7 @@ export class DendronEngineV2 implements DEngine {
         const { id } = ent.note;
         if (ent.status === "delete") {
           delete this.notes[id];
+          this.noteFnames.delete(ent.note);
         } else {
           const note = await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,

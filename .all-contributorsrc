@@ -904,7 +904,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/93843523?v=4",
       "profile": "https://github.com/benhsm",
       "contributions": [
-        "doc"
+        "doc",
+        "code"
       ]
     },
     {
@@ -1543,7 +1544,9 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/106794?v=4",
       "profile": "https://github.com/fnurl",
       "contributions": [
-        "bug"
+        "bug",
+        "doc",
+        "example"
       ]
     },
     {
@@ -1671,6 +1674,52 @@
       "profile": "https://github.com/stevefan",
       "contributions": [
         "bug"
+      ]
+    },
+    {
+      "login": "KucharczykL",
+      "name": "Lukáš Kucharczyk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31072879?v=4",
+      "profile": "https://github.com/KucharczykL",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "danbburg",
+      "name": "Daniel Brandenburg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6763573?v=4",
+      "profile": "https://github.com/danbburg",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "paolodina",
+      "name": "Paolo Dina",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1157401?v=4",
+      "profile": "https://github.com/paolodina",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "agichim",
+      "name": "Alexandru Ichim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51931067?v=4",
+      "profile": "https://github.com/agichim",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "ScriptAutomate",
+      "name": "Derek Ardolf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5951023?v=4",
+      "profile": "http://icanteven.io",
+      "contributions": [
+        "doc"
       ]
     }
   ],

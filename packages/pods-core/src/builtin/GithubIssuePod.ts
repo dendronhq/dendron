@@ -20,6 +20,7 @@ import {
   DEngineClient,
   ERROR_SEVERITY,
   getSlugger,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 
 const ID = "dendron.githubissue";
@@ -253,18 +254,12 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   /**
    * method to get notes that are not already present in the vault
    */
-  getNewNotes(
-    notes: NoteProps[],
-    engine: DEngineClient,
-    wsRoot: string,
-    vault: DVault
-  ) {
+  getNewNotes(notes: NoteProps[], engine: DEngineClient, vault: DVault) {
     return notes.filter((note) => {
-      const n = NoteUtils.getNoteByFnameV5({
+      const n = NoteUtils.getNoteByFnameFromEngine({
         fname: note.fname,
-        notes: engine.notes,
+        engine,
         vault,
-        wsRoot,
       });
       return _.isUndefined(n);
     });
@@ -273,19 +268,18 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   /**
    * method to update the notes whose status has changed
    */
-  getUpdatedNotes(
+  private async getUpdatedNotes(
     notes: NoteProps[],
     engine: DEngineClient,
-    wsRoot: string,
     vault: DVault
   ) {
     let updatedNotes: NoteProps[] = [];
-    notes.forEach(async (note) => {
-      const n = NoteUtils.getNoteByFnameV5({
+
+    asyncLoopOneAtATime(notes, async (note) => {
+      const n = NoteUtils.getNoteByFnameFromEngine({
         fname: note.fname,
-        notes: engine.notes,
+        engine,
         vault,
-        wsRoot,
       });
       if (
         !_.isUndefined(n) &&
@@ -357,8 +351,8 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
       concatenate,
       fnameAsId,
     });
-    const newNotes = this.getNewNotes(notes, engine, wsRoot, vault);
-    const updatedNotes = this.getUpdatedNotes(notes, engine, wsRoot, vault);
+    const newNotes = this.getNewNotes(notes, engine, vault);
+    const updatedNotes = await this.getUpdatedNotes(notes, engine, vault);
 
     await engine.bulkAddNotes({ notes: newNotes });
 

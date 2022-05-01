@@ -6,6 +6,13 @@ import path from "path";
 
 export enum ShowcaseEntry {
   TryMeetingNotes = "TryMeetingNotes",
+  AutocompleteTip = "AutocompleteTip",
+  TagsTip = "TagsTip",
+  RenameHeader = "RenameHeader",
+  TaskManagement = "TaskManagement",
+  BlockRefs = "BlockRefs",
+  HeaderRefs = "HeaderRefs",
+  InsertNoteLink = "InsertNoteLink",
 }
 
 type Metadata = Partial<{
@@ -65,6 +72,11 @@ type Metadata = Partial<{
    *
    */
   workspaceActivationContext: WorkspaceActivationContext;
+  /**
+   * Which index of tip-of-the-day the user has last seen so that we can show
+   * the user tips that they havent seen.
+   */
+  tipOfTheDayIndex: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -138,7 +150,7 @@ export class MetadataService {
 
     return featureShowcaseData[key];
   }
-  
+
   getGlobalVersion() {
     return this.getMeta().version || "0.0.0";
   }
@@ -152,6 +164,10 @@ export class MetadataService {
       this.getMeta().workspaceActivationContext ??
       WorkspaceActivationContext.normal
     );
+  }
+
+  get TipOfDayIndex(): number | undefined {
+    return this.getMeta().tipOfTheDayIndex;
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -224,5 +240,9 @@ export class MetadataService {
 
   setActivationContext(context: WorkspaceActivationContext) {
     this.setMeta("workspaceActivationContext", context);
+  }
+
+  set TipOfDayIndex(index: number | undefined) {
+    this.setMeta("tipOfTheDayIndex", index);
   }
 }

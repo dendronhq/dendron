@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DEngineClient,
   DVault,
   IDendronError,
@@ -17,6 +18,7 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
+import { NotesFileSystemCache } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -79,7 +81,7 @@ const runRename = async ({
   return out.concat([
     {
       actual: changed.data!.length,
-      expected: numChanges || 4,
+      expected: numChanges || 5,
     },
     {
       actual: checkVault,
@@ -96,7 +98,7 @@ const preSetupHook = async (
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault,
     wsRoot,
-    body: fooBody ? fooBody : "",
+    body: fooBody || "",
   });
   await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
     vault,
@@ -216,7 +218,7 @@ const NOTES = {
         wsRoot,
         vaults,
         engine,
-        numChanges: 3,
+        numChanges: 4,
         cb: ({ barChange }) => {
           return [
             {
@@ -508,12 +510,12 @@ const NOTES = {
   //     },
   //   }
   // ),
-  DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
+  RENAME_FOR_CACHE: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
+      const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
       const changed = await engine.renameNote({
-        oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
+        oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
         newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
 
@@ -521,12 +523,75 @@ const NOTES = {
         wsRoot,
         vault,
         match: ["gamma.md"],
-        nomatch: [`${alpha}.md`],
+        nomatch: [`${beta}.md`],
+      });
+      await engine.init();
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath });
+      const keySet = notesCache.getCacheEntryKeys();
+      return [
+        {
+          actual: changed.data?.length,
+          expected: 5,
+        },
+        {
+          actual: _.trim(findByName("alpha", changed.data!).note.body),
+          expected: "[[gamma]]",
+        },
+        {
+          actual: checkVault,
+          expected: true,
+        },
+        {
+          actual: keySet.size,
+          expected: 3,
+        },
+        {
+          actual: keySet.has("beta"),
+          expected: false,
+        },
+        {
+          actual: keySet.has("gamma"),
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          vault,
+          wsRoot,
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          vault,
+          wsRoot,
+        });
+      },
+    }
+  ),
+  DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
+      const changed = await engine.renameNote({
+        oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
+        newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
+      });
+
+      const checkVault = await FileTestUtils.assertInVault({
+        wsRoot,
+        vault,
+        match: ["gamma.md"],
+        nomatch: [`${beta}.md`],
       });
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: _.trim(findByName("alpha", changed.data!).note.body),
@@ -570,7 +635,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         {
           actual: changed.data!.map((ent) => [ent.note.fname, ent.status]),
@@ -583,6 +648,7 @@ const NOTES = {
             // from creation
             ["baz", "create"],
             ["baz.one", "create"],
+            ["root", "update"],
             ["baz.one.three", "create"],
           ],
         },
@@ -625,7 +691,7 @@ const NOTES = {
         // alpha deleted, gamma created
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         // 3 notes, gamma and 3 roots
         {
@@ -667,7 +733,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 4,
+          expected: 5,
         },
         {
           actual: createdChange?.note.title,
@@ -718,7 +784,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 3,
+          expected: 5,
         },
         {
           actual: await AssertUtils.assertInString({
@@ -775,13 +841,13 @@ const NOTES = {
         match: [fnameLink],
         nomatch: [fnameTarget, fnameNew],
       });
-
       return [
         {
           actual: updated,
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: fnameTarget },
+            { status: "update", fname: "root" },
             { status: "create", fname: fnameNew },
           ],
         },
@@ -831,19 +897,19 @@ const NOTES = {
         match: ["baz"],
         nomatch: ["foo"],
       });
-
       return [
         {
           actual: updated,
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
             { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![3].note.body),
+          actual: _.trim(changed![4].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -966,6 +1032,7 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
             { status: "update", fname: "beta" },
           ],
@@ -1027,6 +1094,7 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
           ],
         },
@@ -1525,7 +1593,7 @@ const NOTES = {
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 3,
+          actual: changedEntries && changedEntries.length === 5,
           expected: true,
         },
       ];

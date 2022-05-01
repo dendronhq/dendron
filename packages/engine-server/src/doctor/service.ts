@@ -1,5 +1,6 @@
 import {
   assertInvalidState,
+  asyncLoopOneAtATime,
   ConfigUtils,
   DendronError,
   DEngineClient,
@@ -7,12 +8,17 @@ import {
   DLink,
   DVault,
   genUUID,
+  isNotUndefined,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { createDisposableLogger, vault2Path } from "@dendronhq/common-server";
+import {
+  createDisposableLogger,
+  isSelfContainedVaultFolder,
+  vault2Path,
+} from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import path from "path";
@@ -34,6 +40,7 @@ export enum DoctorActionsEnum {
   FIX_REMOTE_VAULTS = "fixRemoteVaults",
   FIX_AIRTABLE_METADATA = "fixAirtableMetadata",
   ADD_MISSING_DEFAULT_CONFIGS = "addMissingDefaultConfigs",
+  FIX_SELF_CONTAINED_VAULT_CONFIG = "fixSelfContainedVaultsInConfig",
 }
 
 export type DoctorServiceOpts = {
@@ -140,6 +147,22 @@ export class DoctorService implements Disposable {
     return uniqueCandidates;
   }
 
+  async findMisconfiguredSelfContainedVaults(wsRoot: string, vaults: DVault[]) {
+    return (
+      await Promise.all(
+        vaults.map(async (vault) => {
+          if (vault.selfContained || vault.workspace || vault.seed) return;
+          if (
+            await isSelfContainedVaultFolder(path.join(wsRoot, vault.fsPath))
+          ) {
+            return vault;
+          }
+          return;
+        })
+      )
+    ).filter(isNotUndefined);
+  }
+
   async executeDoctorActions(opts: DoctorServiceOpts) {
     const {
       action,
@@ -200,20 +223,14 @@ export class DoctorService implements Disposable {
           const { needsBackfill, backfilledConfig } = detectOut;
           if (needsBackfill) {
             // back up dendron.yml first
-            let backupPath: string;
-            try {
-              backupPath = await DConfig.createBackup(
-                wsRoot,
-                "add-missing-defaults"
-              );
-            } catch (error) {
+            const backupPath = await this.createBackup(
+              wsRoot,
+              DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS
+            );
+            if (backupPath instanceof DendronError) {
               return {
                 exit: true,
-                error: new DendronError({
-                  message:
-                    "Backup failed. Exiting without filling missing defaults.",
-                  payload: error,
-                }),
+                error: backupPath,
               };
             }
 
@@ -360,31 +377,103 @@ export class DoctorService implements Disposable {
         // This action deliberately doesn't set `doctorAction` since it doesn't run per note
         const { wsRoot, vaults } = engine;
         const ctx = "ReloadIndex.convertToRemoteVaultIfPossible";
-        await Promise.all(
-          vaults.map(async (vault) => {
-            const vaultDir = vault2Path({ wsRoot, vault });
-            const gitPath = path.join(vaultDir, ".git");
-            // Already a remote vault
-            if (vault.remote !== undefined) return;
-            // Not a git repository, nothing to convert
-            if (!(await fs.pathExists(gitPath))) return;
 
-            const git = new Git({ localUrl: vaultDir });
-            const remoteUrl = await git.getRemoteUrl();
-            // We can't convert if there is no remote
-            if (!remoteUrl) return;
+        const vaultsToFix = (
+          await Promise.all(
+            vaults.map(async (vault) => {
+              const vaultDir = vault2Path({ wsRoot, vault });
+              const gitPath = path.join(vaultDir, ".git");
+              // Already a remote vault
+              if (vault.remote !== undefined) return;
+              // Not a git repository, nothing to convert
+              if (!(await fs.pathExists(gitPath))) return;
 
-            // Need the workspace service to function
-            const workspaceService = new WorkspaceService({ wsRoot });
+              const git = new Git({ localUrl: vaultDir });
+              const remoteUrl = await git.getRemoteUrl();
+              // We can't convert if there is no remote
+              if (!remoteUrl) return;
+
+              return { vault, remoteUrl };
+            })
+          )
+        ).filter(isNotUndefined);
+
+        if (vaultsToFix.length > 0) {
+          const out = await this.createBackup(
+            wsRoot,
+            DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG
+          );
+          if (out instanceof DendronError) {
+            return {
+              exit: true,
+              error: out,
+            };
+          }
+
+          const workspaceService = new WorkspaceService({ wsRoot });
+          await asyncLoopOneAtATime(
+            vaultsToFix,
+            async ({ vault, remoteUrl }) => {
+              const vaultDir = vault2Path({ wsRoot, vault });
+              this.L.info({
+                ctx,
+                vaultDir,
+                remoteUrl,
+                msg: "converting local vault to a remote vault",
+              });
+              await workspaceService.markVaultAsRemoteInConfig(
+                vault,
+                remoteUrl
+              );
+            }
+          );
+        }
+        return { exit: true };
+      }
+      case DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG: {
+        /** If a self contained vault was not marked as self contained in the settings, mark it as such. */
+        // This action deliberately doesn't set `doctorAction` since it doesn't run per note
+        const { wsRoot, vaults } = engine;
+        const ctx = "DoctorService.fixSelfContainedVaultConfig";
+        const workspaceService = new WorkspaceService({ wsRoot });
+        const vaultsToFix = await this.findMisconfiguredSelfContainedVaults(
+          wsRoot,
+          vaults
+        );
+        this.L.info({
+          ctx,
+          msg: `Found ${vaultsToFix.length} vaults to fix`,
+          numVaultsToFix: vaultsToFix.length,
+        });
+
+        if (vaultsToFix.length > 0) {
+          // We'll be modifying the config so take a backup first
+          const out = await this.createBackup(
+            wsRoot,
+            DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG
+          );
+          if (out instanceof DendronError) {
+            return {
+              exit: true,
+              error: out,
+            };
+          }
+
+          await asyncLoopOneAtATime(vaultsToFix, async (vault) => {
+            const config = workspaceService.config;
             this.L.info({
               ctx,
-              vaultDir,
-              remoteUrl,
-              msg: "converting local vault to a remote vault",
+              vaultName: VaultUtils.getName(vault),
+              msg: "marking vault as self contained vault",
             });
-            await workspaceService.markVaultAsRemoteInConfig(vault, remoteUrl);
-          })
-        );
+            ConfigUtils.updateVault(config, vault, (vault) => {
+              vault.selfContained = true;
+              return vault;
+            });
+            await workspaceService.setConfig(config);
+          });
+        }
+        workspaceService.dispose();
         return { exit: true };
       }
       case DoctorActionsEnum.FIX_AIRTABLE_METADATA: {
@@ -455,5 +544,21 @@ export class DoctorService implements Disposable {
       console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
     }
     return { exit, resp };
+  }
+
+  /** Returns the path for the backup if it was able to create one, or a DendronError if one occurred during backup. */
+  async createBackup(
+    wsRoot: string,
+    backupInfix: string
+  ): Promise<string | DendronError> {
+    try {
+      const path = await DConfig.createBackup(wsRoot, backupInfix);
+      return path;
+    } catch (error) {
+      return new DendronError({
+        message: `Backup ${backupInfix} failed. Aborting the Doctor action.`,
+        payload: error,
+      });
+    }
   }
 }

@@ -43,17 +43,6 @@ if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
   process.exit(1);
 }
 
-// check if a view is select
-const VALID_VIEWS = paths.appViews;
-if (!VALID_VIEWS.includes(process.env.REACT_APP_VIEW_NAME)) {
-  console.log(
-    `ERROR: REACT_APP_VIEW_NAME ${
-      process.env.REACT_APP_VIEW_NAME
-    } not set to valid view. Valid views: ${VALID_VIEWS.join(", ")}`
-  );
-  process.exit(1);
-}
-
 // Tools like Cloud9 rely on this.
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";

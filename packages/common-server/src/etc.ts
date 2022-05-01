@@ -21,6 +21,7 @@ export class WebViewCommonUtils {
    * @returns
    */
   static genVSCodeHTMLIndex = ({
+    name,
     jsSrc,
     cssSrc,
     url,
@@ -30,6 +31,7 @@ export class WebViewCommonUtils {
     themeMap,
     initialTheme,
   }: {
+    name: string;
     jsSrc: string;
     cssSrc: string;
     url: string;
@@ -209,7 +211,7 @@ export class WebViewCommonUtils {
     <body onload="onload()" class="vscode-${initialTheme || "light"}">
       <div id="main-content-wrap" class="main-content-wrap">
         <div id="main-content" class="main-content">
-          <div id="root" data-url="${url}" data-ws="${wsRoot}" data-browser="${browser}"></div>
+          <div id="root" data-url="${url}" data-ws="${wsRoot}" data-browser="${browser}" data-name="${name}"></div>
         </div>
       </div>
 

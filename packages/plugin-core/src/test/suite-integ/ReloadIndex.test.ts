@@ -2,12 +2,19 @@ import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import {
+  FIX_CONFIG_SELF_CONTAINED,
+  ReloadIndexCommand,
+} from "../../commands/ReloadIndex";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { test, before } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
+import { MessageItem, window } from "vscode";
+import sinon from "sinon";
+import { VSCodeUtils } from "../../vsCodeUtils";
 
 suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files are missing", {}, () => {
@@ -84,4 +91,37 @@ suite("GIVEN ReloadIndex", function () {
       expect(VaultUtils.isEqualV2(notes[1].vault, vaults[2])).toBeTruthy();
     });
   });
+
+  describeSingleWS(
+    "WHEN a self contained vault is misconfigured",
+    {
+      selfContained: true,
+      postSetupHook: async ({ wsRoot }) => {
+        const config = DConfig.getOrCreate(wsRoot);
+        expect(config.workspace.vaults.length).toEqual(1);
+        delete config.workspace.vaults[0].selfContained;
+        await DConfig.writeConfig({ wsRoot, config });
+      },
+    },
+    () => {
+      test("THEN it prompts to fix the config", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        sinon
+          .stub(window, "showWarningMessage")
+          // Cast needed because sinon doesn't get which overload we're stubbing
+          .resolves(FIX_CONFIG_SELF_CONTAINED as unknown as MessageItem);
+        const reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
+
+        await ReloadIndexCommand.checkAndPromptForMisconfiguredSelfContainedVaults(
+          { engine: ExtensionProvider.getEngine() }
+        );
+
+        // Should reload window after fixing so the plugin picks up new vault config
+        expect(reloadWindow.calledOnce).toBeTruthy();
+        // The config should be updated to mark the vault as self contained
+        const configAfter = DConfig.getOrCreate(wsRoot);
+        expect(configAfter.workspace.vaults[0].selfContained).toBeTruthy();
+      });
+    }
+  );
 });

@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   DendronError,
   DVault,
   RespV2,
@@ -46,7 +47,7 @@ function setupNotesForTest({
   vault3?: string[];
 }) {
   if (vault1) {
-    vault1.forEach(async (str) => {
+    asyncLoopOneAtATime(vault1, async (str) => {
       await NoteTestUtilsV4.createNote({
         vault: TestEngineUtils.vault1(vaults),
         wsRoot,
@@ -58,7 +59,7 @@ function setupNotesForTest({
   }
 
   if (vault2) {
-    vault2.forEach(async (str) => {
+    asyncLoopOneAtATime(vault2, async (str) => {
       await NoteTestUtilsV4.createNote({
         vault: TestEngineUtils.vault2(vaults),
         wsRoot,
@@ -70,7 +71,7 @@ function setupNotesForTest({
   }
 
   if (vault3) {
-    vault3.forEach(async (str) => {
+    asyncLoopOneAtATime(vault3, async (str) => {
       await NoteTestUtilsV4.createNote({
         vault: TestEngineUtils.vault3(vaults),
         wsRoot,

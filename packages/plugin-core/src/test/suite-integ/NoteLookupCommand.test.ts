@@ -70,6 +70,7 @@ import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   describeMultiWS,
+  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   waitInMilliseconds,
@@ -403,7 +404,7 @@ suite("NoteLookupCommand", function () {
           });
           await NoteTestUtilsV4.createNote({
             wsRoot,
-            fname: "foo.ch2",
+            fname: "foo.ch2.gch1",
             vault: vaults[0],
             props: { stub: true },
           });
@@ -723,7 +724,7 @@ suite("NoteLookupCommand", function () {
         },
       },
       () => {
-        test("THEN stub is created", async () => {
+        test("THEN a note is created and stub property is removed", async () => {
           const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
@@ -733,12 +734,13 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           }))!;
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
-          NoteUtils.getNoteOrThrow({
+          const fooNote = NoteUtils.getNoteOrThrow({
             fname: "foo",
             notes: engine.notes,
             vault,
             wsRoot,
           });
+          expect(fooNote.stub).toBeFalsy();
         });
       }
     );
@@ -1848,6 +1850,55 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+
+    describeSingleWS(
+      "WHEN selection2link is used with a multi-line string",
+      {
+        ctx,
+        postSetupHook: async ({ vaults, wsRoot }) => {
+          NoteTestUtilsV4.createNote({
+            fname: "multi-line",
+            vault: vaults[0],
+            wsRoot,
+            body: "test\ning\n",
+          });
+        },
+      },
+      () => {
+        test("THEN it produces a valid string", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await ExtensionProvider.getWSUtils().openNote(
+            engine.notes["multi-line"]
+          );
+
+          // selects "test \n ing \n"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 9, 0);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("test\ning\n");
+
+          await cmd.run({
+            selectionType: "selection2link",
+            noConfirm: true,
+          });
+
+          // should create foo.foo-body.md with an empty body.
+          expect(getActiveEditorBasename().endsWith("multi-line.testing.md"));
+          const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const newNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+            newNoteEditor.document
+          );
+          expect(newNote?.body).toEqual("");
+
+          // should change selection to link with alais.
+          const changedText = fooNoteEditor.document.getText();
+          expect(changedText.endsWith("[[testing|multi-line.testing]]\n"));
+
+          cmd.cleanUp();
+        });
+      }
+    );
 
     test("selection2link modifier toggle", (done) => {
       runLegacyMultiWorkspaceTest({

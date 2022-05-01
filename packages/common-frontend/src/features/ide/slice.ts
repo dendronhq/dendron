@@ -32,11 +32,7 @@ const INITIAL_STATE: InitialState = {
   notePrev: undefined,
   graphStyles: "",
   theme: "unknown",
-  views: {
-    "dendron.tree-view": {
-      ready: false,
-    },
-  },
+  views: {},
   seedsInWorkspace: undefined,
   lookupModifiers: undefined,
   tree: undefined,

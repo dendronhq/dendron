@@ -1,10 +1,11 @@
 import {
+  CONSTANTS,
   DendronError,
   DNodeUtils,
   DVault,
+  FOLDERS,
   isNotUndefined,
   NoteProps,
-  NotesCache,
   NoteUtils,
   RespV3,
   SchemaModuleOpts,
@@ -200,42 +201,6 @@ export function file2Note(
   return string2Note({ content, fname, vault });
 }
 
-export function file2NoteWithCache({
-  fpath,
-  vault,
-  cache,
-  toLowercase,
-}: {
-  fpath: string;
-  vault: DVault;
-  cache: NotesCache;
-  toLowercase?: boolean;
-}): { note: NoteProps; matchHash: boolean; noteHash: string } {
-  const content = fs.readFileSync(fpath, { encoding: "utf8" });
-  const { name } = path.parse(fpath);
-  const sig = genHash(content);
-  const matchHash = cache.notes[name]?.hash === sig;
-  const fname = toLowercase ? name.toLowerCase() : name;
-  let note: NoteProps;
-
-  // if hash matches, note hasn't changed
-  if (matchHash) {
-    // since we don't store the note body in the cache file, we need to re-parse the body
-    const capture = content.match(/^---[\s\S]+?---/);
-    if (capture) {
-      const offset = capture[0].length;
-      const body = content.slice(offset + 1);
-      // vault can change without note changing so we need to add this
-      // add `contentHash` to this signature because its not saved with note
-      note = { ...cache.notes[name].data, body, vault, contentHash: sig };
-      return { note, matchHash, noteHash: sig };
-    }
-  }
-  note = string2Note({ content, fname, vault });
-  note.contentHash = sig;
-  return { note, matchHash, noteHash: sig };
-}
-
 /** Read the contents of a note from the filesystem.
  *
  * Warning! The note contents may be out of date compared to changes in the editor.
@@ -388,7 +353,7 @@ export function note2File({
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtils.serialize(note);
+  const payload = NoteUtils.serialize(note, { excludeStub: true });
   const vpath = vault2Path({ vault, wsRoot });
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }
@@ -635,6 +600,16 @@ class FileUtils {
         });
     });
   };
+}
+
+/** Looks at the files at the given path to check if it's a self contained vault. */
+export async function isSelfContainedVaultFolder(dir: string) {
+  return _.every(
+    await Promise.all([
+      fs.pathExists(path.join(dir, CONSTANTS.DENDRON_CONFIG_FILE)),
+      fs.pathExists(path.join(dir, FOLDERS.NOTES)),
+    ])
+  );
 }
 
 export class ExtensionUtils {

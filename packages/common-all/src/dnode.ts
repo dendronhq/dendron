@@ -1199,12 +1199,13 @@ export class NoteUtils {
   }
 
   static normalizeFname(nodePath: string) {
-    // remove md extension
-    const idx = nodePath.lastIndexOf(".md");
-    if (idx > 0) {
-      nodePath = nodePath.slice(0, idx);
+    nodePath = _.trim(nodePath);
+    if (nodePath.endsWith(".md")) {
+      //removing .md extenion from the end.
+      //Can be sliced with undefined, 0 or the negative index from the end.
+      nodePath = nodePath.slice(undefined, -3);
     }
-    return _.trim(nodePath);
+    return nodePath;
   }
 
   static isNoteProps(props: Partial<NoteProps>): props is NoteProps {

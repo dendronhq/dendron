@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   DendronError,
   DLink,
   DNoteLink,
@@ -480,38 +481,40 @@ export class MoveHeaderCommand extends BasicCommand<
     dest: NoteProps
   ): Promise<NoteProps[]> {
     const updated: NoteProps[] = [];
-    foundReferences
+    const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
       .map((ref) => this.getNoteByLocation(ref.location, engine))
-      .filter((note) => note !== undefined)
-      .forEach(async (note) => {
-        const vaultPath = vault2Path({
-          vault: note!.vault,
-          wsRoot: engine.wsRoot,
-        });
-        const _note = file2Note(
-          path.join(vaultPath, note!.fname + ".md"),
-          note!.vault
-        );
-        const linksToUpdate = this.findLinksToUpdate(
-          _note,
-          engine,
-          origin,
-          anchorNamesToUpdate
-        );
-        const modifiedNote = this.updateLinksInNote({
-          note: _note,
-          engine,
-          linksToUpdate,
-          dest,
-        });
-        note!.body = modifiedNote.body;
-        const writeResp = await engine.writeNote(note!, {
-          updateExisting: true,
-        });
-        updated.push(writeResp.data[0].note);
+      .filter((note) => note !== undefined);
+
+    await asyncLoopOneAtATime(refsToProcess, async (note) => {
+      const vaultPath = vault2Path({
+        vault: note!.vault,
+        wsRoot: engine.wsRoot,
       });
+      const _note = file2Note(
+        path.join(vaultPath, note!.fname + ".md"),
+        note!.vault
+      );
+      const linksToUpdate = this.findLinksToUpdate(
+        _note,
+        engine,
+        origin,
+        anchorNamesToUpdate
+      );
+      const modifiedNote = this.updateLinksInNote({
+        note: _note,
+        engine,
+        linksToUpdate,
+        dest,
+      });
+      note!.body = modifiedNote.body;
+      const writeResp = await engine.writeNote(note!, {
+        updateExisting: true,
+      });
+      updated.push(writeResp.data[0].note);
+    });
+
     return updated;
   }
 

@@ -1,11 +1,14 @@
 import {
+  ConfigEvents,
   DendronError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
+  FOLDERS,
   isNotUndefined,
   NoteUtils,
   SchemaUtils,
+  VaultUtils,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
@@ -14,19 +17,25 @@ import {
   schemaModuleOpts2File,
   vault2Path,
 } from "@dendronhq/common-server";
+import { DoctorActionsEnum, DoctorService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { Logger } from "../logger";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 enum AutoFixAction {
   CREATE_ROOT_SCHEMA = "create root schema",
   CREATE_ROOT_NOTE = "create root note",
 }
+
+export const FIX_CONFIG_SELF_CONTAINED = "Fix configuration";
 
 function categorizeActions(actions: (AutoFixAction | undefined)[]) {
   return {
@@ -60,6 +69,11 @@ export class ReloadIndexCommand extends BasicCommand<
     const rootSchemaPath = path.join(vaultDir, "root.schema.yml");
     // If it already exists, nothing to do
     if (await fs.pathExists(rootSchemaPath)) return;
+    // If this is just a misconfigured self contained vault, skip it because we'll need to fix the config
+    if (
+      await fs.pathExists(path.join(vaultDir, FOLDERS.NOTES, "root.schema.yml"))
+    )
+      return;
 
     try {
       const schema = SchemaUtils.createRootModule({ vault });
@@ -87,6 +101,9 @@ export class ReloadIndexCommand extends BasicCommand<
     const rootNotePath = path.join(vaultDir, "root.md");
     // If it already exists, nothing to do
     if (await fs.pathExists(rootNotePath)) return;
+    // If this is just a misconfigured self contained vault, skip it because we'll need to fix the config
+    if (await fs.pathExists(path.join(vaultDir, FOLDERS.NOTES, "root.md")))
+      return;
 
     try {
       const note = NoteUtils.createRoot({ vault });
@@ -103,6 +120,72 @@ export class ReloadIndexCommand extends BasicCommand<
     }
   }
 
+  /** Checks if there are any self contained vaults that aren't marked correctly, and prompts the user to fix the configuration. */
+  static async checkAndPromptForMisconfiguredSelfContainedVaults({
+    engine,
+  }: {
+    engine: IEngineAPIService;
+  }) {
+    const ctx = "checkAndPromptForMisconfiguredSelfContainedVaults";
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const doctor = new DoctorService();
+    const vaultsToFix = await doctor.findMisconfiguredSelfContainedVaults(
+      wsRoot,
+      vaults
+    );
+
+    const fixConfig = FIX_CONFIG_SELF_CONTAINED;
+
+    if (vaultsToFix.length > 0) {
+      Logger.info({
+        ctx,
+        numVaultsToFix: vaultsToFix.length,
+      });
+
+      let message: string;
+      let detail: string | undefined;
+      if (vaultsToFix.length === 1) {
+        message = `Vault "${VaultUtils.getName(
+          vaultsToFix[0]
+        )}" needs to be marked as a self contained vault in your configuration file.`;
+      } else {
+        message = `${vaultsToFix.length} vaults need to be marked as self contained vaults in your configuration file`;
+      }
+      AnalyticsUtils.track(ConfigEvents.MissingSelfContainedVaultsMessageShow, {
+        vaultsToFix: vaultsToFix.length,
+      });
+      const pick = await window.showWarningMessage(
+        message,
+        {
+          detail,
+        },
+        fixConfig,
+        "Ignore for now"
+      );
+      Logger.info({
+        ctx,
+        msg: "Used picked an option in the fix prompt",
+        pick,
+      });
+      if (pick === fixConfig) {
+        AnalyticsUtils.track(
+          ConfigEvents.MissingSelfContainedVaultsMessageAccept
+        );
+        await doctor.executeDoctorActions({
+          action: DoctorActionsEnum.FIX_SELF_CONTAINED_VAULT_CONFIG,
+          engine,
+        });
+        Logger.info({
+          ctx,
+          msg: "Fixing vaults done!",
+        });
+        // Need to reload because the vaults loaded are incorrect now
+        VSCodeUtils.reloadWindow();
+      }
+    }
+    doctor.dispose();
+  }
+
   /**
    * Update index
    * @param opts
@@ -115,6 +198,12 @@ export class ReloadIndexCommand extends BasicCommand<
     const ws = ExtensionProvider.getDWorkspace();
     let initError: DendronError | undefined;
     const { wsRoot, engine } = ws;
+
+    // Check if there are any misconfigured self contained vaults.
+    // Deliberately not awaiting this to avoid blocking the reload
+    ReloadIndexCommand.checkAndPromptForMisconfiguredSelfContainedVaults({
+      engine: ExtensionProvider.getEngine(),
+    });
 
     // Fix up any broken vaults
     const reloadIndex = async () => {

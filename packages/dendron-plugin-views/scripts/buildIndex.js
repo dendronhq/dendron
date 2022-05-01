@@ -4,8 +4,10 @@ const path = require("path");
 
 // Compile Dendron `index.html` template
 let theme = process.env.THEME || "light";
+let name = process.env.REACT_APP_VIEW_NAME;
 
 const out = WebViewCommonUtils.genVSCodeHTMLIndex({
+  name,
   // dummy, not used. for browser mode, this is added by CRA app
   jsSrc: "",
   cssSrc: "",

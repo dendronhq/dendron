@@ -72,7 +72,7 @@ import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeP
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { FeatureShowcase } from "./FeatureShowcase";
+import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -553,8 +553,23 @@ export async function _activate(
     ws.workspaceImpl = undefined;
 
     const currentVersion = DendronExtension.version();
-    const previousWorkspaceVersion = stateService.getWorkspaceVersion();
-    const previousGlobalVersion = stateService.getGlobalVersion();
+    const previousWorkspaceVersionFromState =
+      stateService.getWorkspaceVersion();
+
+    const previousGlobalVersionFromState = stateService.getGlobalVersion();
+    let previousGlobalVersionFromMetadata =
+      MetadataService.instance().getGlobalVersion();
+    // state is more recent than global, backfill
+    if (
+      semver.gt(
+        previousGlobalVersionFromState,
+        previousGlobalVersionFromMetadata
+      )
+    ) {
+      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
+    }
+    const previousGlobalVersion = previousGlobalVersionFromMetadata;
+
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({
         UUIDPathExists,
@@ -605,6 +620,18 @@ export async function _activate(
       // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
+      let previousWorkspaceVersionFromWSService = wsService.getMeta().version;
+      if (
+        semver.gt(
+          previousWorkspaceVersionFromState,
+          previousWorkspaceVersionFromWSService
+        )
+      ) {
+        previousWorkspaceVersionFromWSService =
+          previousWorkspaceVersionFromState;
+        wsService.writeMeta({ version: previousGlobalVersionFromState });
+      }
+      const previousWorkspaceVersion = previousWorkspaceVersionFromWSService;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
@@ -708,16 +735,13 @@ export async function _activate(
       // logic as in workspace.ts, but right now this needs an instance of
       // EngineAPIService for init
 
-      // If the web UI dev flag is not set, then setup a native tree view:
-      if (!ws.workspaceService?.config.dev?.enableWebUI) {
-        const providerConstructor = function () {
-          return new EngineNoteProvider(engineAPIService);
-        };
+      const providerConstructor = function () {
+        return new EngineNoteProvider(engineAPIService);
+      };
 
-        const treeView = new NativeTreeView(providerConstructor);
-        treeView.show();
-        context.subscriptions.push(treeView);
-      }
+      const treeView = new NativeTreeView(providerConstructor);
+      treeView.show();
+      context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
@@ -788,8 +812,8 @@ export async function _activate(
       // Show the feature showcase toast one minute after initialization.
       const ONE_MINUTE_IN_MS = 60_000;
       setTimeout(() => {
-        const showcase = new FeatureShowcase();
-        showcase.show();
+        const showcase = new FeatureShowcaseToaster();
+        showcase.showToast();
       }, ONE_MINUTE_IN_MS);
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
@@ -807,7 +831,7 @@ export async function _activate(
       extensionInstallStatus,
       isSecondaryInstall,
       version: DendronExtension.version(),
-      previousExtensionVersion: previousWorkspaceVersion,
+      previousExtensionVersion: previousWorkspaceVersionFromState,
       start: startActivate,
       assetUri,
     });
@@ -933,7 +957,7 @@ async function showWelcomeOrWhatsNew({
 
       vscode.window
         .showInformationMessage(
-          `Dendron has been upgraded to ${version} from ${previousExtensionVersion}`,
+          `Dendron has been upgraded to ${version}`,
           buttonAction
         )
         .then((resp) => {

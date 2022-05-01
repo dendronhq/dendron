@@ -82,11 +82,10 @@ export abstract class PublishPod<
       vaults: engine.vaults,
       vname: vaultName,
     });
-    const note = NoteUtils.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes: engine.notes,
+      engine,
       vault: vault!,
-      wsRoot: engine.wsRoot,
     });
     if (!note) {
       throw Error("no note found");

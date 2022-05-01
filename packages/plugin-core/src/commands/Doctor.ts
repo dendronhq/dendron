@@ -237,18 +237,17 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       `## The following files have broken links`,
     ];
 
-    const { notes, vaults, wsRoot } = engine;
+    const { vaults, wsRoot } = engine;
     _.forEach(_.sortBy(brokenLinks, ["file"]), (ent) => {
       content = content.concat(`${ent.file}\n`);
       const vault = VaultUtils.getVaultByName({
         vaults,
         vname: ent.vault,
       }) as DVault;
-      const note = NoteUtils.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameFromEngine({
         fname: ent.file,
-        notes,
+        engine,
         vault,
-        wsRoot,
       }) as NoteProps;
       const fsPath = NoteUtils.getFullPath({
         note,

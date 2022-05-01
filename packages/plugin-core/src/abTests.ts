@@ -45,7 +45,7 @@ export const SELF_CONTAINED_VAULTS_TEST = new ABTest(
     },
     {
       name: SelfContainedVaultsTestGroups.selfContained,
-      weight: 0,
+      weight: 1,
     },
   ]
 );
@@ -89,6 +89,7 @@ export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
  */
 export const CURRENT_AB_TESTS = [
   UPGRADE_TOAST_WORDING_TEST,
+  SELF_CONTAINED_VAULTS_TEST,
   MEETING_NOTE_TUTORIAL_TEST,
   MEETING_NOTE_FEATURE_SHOWCASE_TEST,
 ];

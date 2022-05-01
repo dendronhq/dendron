@@ -38,19 +38,19 @@ export class WebViewUtils {
       : assetUri;
   }
 
-  static getJsAndCss(name: string) {
+  static getJsAndCss() {
     const pluginViewsRoot = WebViewUtils.getViewRootUri();
     const jsSrc = vscode.Uri.joinPath(
       pluginViewsRoot,
       "static",
       "js",
-      `${name}.bundle.js`
+      `index.bundle.js`
     );
     const cssSrc = vscode.Uri.joinPath(
       pluginViewsRoot,
       "static",
       "css",
-      `${name}.styles.css`
+      `index.styles.css`
     );
     return { jsSrc, cssSrc };
   }
@@ -67,12 +67,14 @@ export class WebViewUtils {
    * @returns
    */
   static async getWebviewContent({
+    name,
     jsSrc,
     cssSrc,
     port,
     wsRoot,
     panel,
   }: {
+    name: string;
     jsSrc: vscode.Uri;
     cssSrc: vscode.Uri;
     port: number;
@@ -111,6 +113,7 @@ export class WebViewUtils {
       // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
       themeMap,
+      name,
     });
     return out;
   }
@@ -125,7 +128,7 @@ export class WebViewUtils {
   }) {
     const viewEntry = getWebTreeViewEntry(key);
     const name = viewEntry.bundleName;
-    const webViewAssets = WebViewUtils.getJsAndCss(name);
+    const webViewAssets = WebViewUtils.getJsAndCss();
     const port = ext.port!;
     webviewView.webview.options = {
       enableScripts: true,
@@ -134,6 +137,7 @@ export class WebViewUtils {
     };
     const html = await WebViewUtils.getWebviewContent({
       ...webViewAssets,
+      name,
       port,
       wsRoot: ext.getEngine().wsRoot,
       panel: webviewView,

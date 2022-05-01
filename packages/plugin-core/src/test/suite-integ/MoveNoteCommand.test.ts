@@ -77,6 +77,7 @@ suite("MoveNoteCommand", function () {
       "NO_UPDATE",
       "NO_UPDATE_NUMBER_IN_FM",
       "NO_UPDATE_DOUBLE_QUOTE_IN_FM",
+      "RENAME_FOR_CACHE",
     ]),
     (TestCase: TestPresetEntryV4, name) => {
       const { testFunc, preSetupHook } = TestCase;
@@ -152,7 +153,7 @@ suite("MoveNoteCommand", function () {
               },
             ],
           });
-          expect(resp?.changed?.length).toEqual(3);
+          expect(resp?.changed?.length).toEqual(5);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
           expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(
             "foobar"
@@ -586,13 +587,6 @@ suite("MoveNoteCommand", function () {
         expect(
           await EngineTestUtilsV4.checkVault({
             wsRoot,
-            vault: vault1,
-            nomatch: ["foo.md"],
-          })
-        ).toBeTruthy();
-        expect(
-          await EngineTestUtilsV4.checkVault({
-            wsRoot,
             vault: vault2,
             nomatch: ["bar.md"],
           })
@@ -708,14 +702,12 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
 
         expect(
-          _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
-          )
+          NoteUtils.getNoteByFnameV5({
+            fname: "foo",
+            notes,
+            vault: vault1,
+            wsRoot,
+          })?.stub
         ).toBeTruthy();
         expect(
           _.isUndefined(

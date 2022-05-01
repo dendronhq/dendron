@@ -6,6 +6,7 @@ import {
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
+  NoteFNamesDict,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -92,7 +93,11 @@ export const syncNote = createAsyncThunk(
       return resp;
     }
     const data = resp.data!;
-    logger.info({ state: "pre:setNotes" });
+    logger.debug({
+      state: "pre:setNotes",
+      // Logging notes, but avoiding it if there's too many notes to avoid any performance impact
+      notes: data.length < 10 ? data.map(NoteUtils.toLogObj) : null,
+    });
     if (data?.length) {
       dispatch(updateNote(data[0]));
       dispatch(setError(undefined));
@@ -143,6 +148,7 @@ const initialState: InitialState = {
   currentRequestId: undefined,
   vaults: [],
   notes: {},
+  noteFName: new NoteFNamesDict([]),
   schemas: {},
   notesRendered: {},
   error: null,
@@ -160,6 +166,7 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
+      state.noteFName = new NoteFNamesDict(_.values(notes));
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;

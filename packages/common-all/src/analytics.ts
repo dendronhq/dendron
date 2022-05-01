@@ -13,8 +13,6 @@ export enum VSCodeEvents {
   SchemaLookup_Update = "SchemaLookup_Update",
   NoteLookup_Accept = "NoteLookup_Accept",
   SchemaLookup_Accept = "SchemaLookup_Accept",
-  /** @deprecated: treeview v2 is deprecated. */
-  TreeView_Ready = "TreeView_Ready",
   Upgrade = "Upgrade",
   UpgradeSeeWhatsChangedClicked = "UpgradeSeeWhatsChangedClicked",
   UpgradeViewClosed = "UpgradeViewClosed",
@@ -114,6 +112,8 @@ export enum ConfigEvents {
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
   ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
+  MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
+  MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
 }
 
 export enum MigrationEvents {

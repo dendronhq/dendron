@@ -502,6 +502,8 @@ export class NoteLookupCommand
     if (item.stub) {
       Logger.info({ ctx, msg: "create stub" });
       nodeNew = engine.notes[item.id];
+      // when we are accepting a new item that is a stub, it no longer is a stub
+      nodeNew = _.omit(nodeNew, "stub");
     } else {
       const vault = await this.getVaultForNewNote({ fname, picker });
       if (vault === undefined) {

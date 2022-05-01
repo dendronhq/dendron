@@ -1,5 +1,7 @@
 import {
+  DendronEditorViewKey,
   DMessageEnum,
+  getWebEditorViewEntry,
   GraphViewMessage,
   GraphViewMessageEnum,
   OnDidChangeActiveTextEditorMsg,
@@ -11,9 +13,9 @@ import * as vscode from "vscode";
 import { Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { sentryReportingCallback } from "../../utils/analytics";
+import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
-import { WSUtils } from "../../WSUtils";
 
 export class SchemaGraphViewFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
@@ -24,11 +26,12 @@ export class SchemaGraphViewFactory {
     if (this._panel) {
       return this._panel;
     }
-    const title = "Schema Graph";
-
+    const { bundleName: name, label } = getWebEditorViewEntry(
+      DendronEditorViewKey.SCHEMA_GRAPH
+    );
     this._panel = window.createWebviewPanel(
-      "dendronIframe", // Identifies the type of the webview. Used internally
-      title, // Title of the panel displayed to the user
+      name, // Identifies the type of the webview. Used internally
+      label, // Title of the panel displayed to the user
       {
         viewColumn: ViewColumn.Beside,
         preserveFocus: true,
@@ -37,6 +40,7 @@ export class SchemaGraphViewFactory {
         enableScripts: true,
         retainContextWhenHidden: true,
         enableFindWidget: true,
+        localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
       }
     );
 
@@ -110,7 +114,7 @@ export class SchemaGraphViewFactory {
             return;
           }
 
-          const note = WSUtils.getNoteFromDocument(editor.document);
+          const note = ext.wsUtils.getNoteFromDocument(editor.document);
 
           SchemaGraphViewFactory._panel.webview.postMessage({
             type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,

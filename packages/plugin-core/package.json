@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.91.0",
+  "version": "0.92.1",
   "engines": {
     "vscode": "^1.58.0"
   },
@@ -41,6 +41,21 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "viewsWelcome": [
+      {
+        "view": "dendron.backlinks",
+        "contents": "There are no backlinks to this note."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dendron-view",
+          "title": "Dendron",
+          "icon": "media/icons/dendron-activity-bar-icon.svg"
+        }
+      ]
+    },
     "views": {
       "explorer": [
         {
@@ -49,27 +64,25 @@
           "contextualTitle": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
+        }
+      ],
+      "dendron-view": [
+        {
+          "id": "dendron.tip-of-the-day",
+          "name": "Tip of the Day",
+          "when": "dendron:pluginActive",
+          "type": "webview"
         },
         {
-          "id": "dendron.calendar-view",
-          "name": "Calendar View",
-          "contextualTitle": "Calendar View",
-          "type": "webview",
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
           "when": "dendron:pluginActive"
         },
         {
           "id": "dendron.treeView",
           "name": "Tree View",
           "contextualTitle": "Tree View",
-          "when": "dendron:pluginActive && !dendron:webUIEnabled",
-          "icon": "media/icons/dendron-vscode.svg"
-        },
-        {
-          "id": "dendron.tree-view",
-          "name": "Tree View",
-          "contextualTitle": "Tree View",
-          "type": "webview",
-          "when": "dendron:pluginActive && dendron:webUIEnabled",
+          "when": "dendron:pluginActive",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
@@ -80,8 +93,10 @@
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
-          "id": "dendron.backlinks",
-          "name": "Backlinks",
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "contextualTitle": "Calendar View",
+          "type": "webview",
           "when": "dendron:pluginActive"
         }
       ]
@@ -538,7 +553,7 @@
         },
         {
           "command": "dendron.createMeetingNote",
-          "title": "Dendron: Create Meeting Note"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.lookupSchema",
@@ -1081,8 +1096,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.91.0",
-    "@dendronhq/engine-test-utils": "^0.91.0",
+    "@dendronhq/common-test-utils": "^0.92.1",
+    "@dendronhq/engine-test-utils": "^0.92.1",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1118,11 +1133,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.91.0",
-    "@dendronhq/common-all": "^0.91.0",
-    "@dendronhq/common-server": "^0.91.0",
-    "@dendronhq/engine-server": "^0.91.0",
-    "@dendronhq/pods-core": "^0.91.0",
+    "@dendronhq/api-server": "^0.92.1",
+    "@dendronhq/common-all": "^0.92.1",
+    "@dendronhq/common-server": "^0.92.1",
+    "@dendronhq/engine-server": "^0.92.1",
+    "@dendronhq/pods-core": "^0.92.1",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

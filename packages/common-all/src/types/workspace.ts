@@ -408,11 +408,6 @@ export type DendronDevConfig = {
    */
   engineServerPort?: number;
   /**
-   * Enable experimental web ui. Default is false
-   * @deprecated
-   */
-  enableWebUI?: boolean;
-  /**
    * Enable displaying and indexing link candidates. Default is false
    */
   enableLinkCandidates?: boolean;

@@ -27,7 +27,6 @@ import {
   NoteProps,
   NotePropsDict,
   NoteFNamesDict,
-  NotesCache,
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
@@ -61,20 +60,12 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
+import { LinkUtils } from "../../markdown/remark/utils";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
-import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
-
-export type FileMeta = {
-  // file name: eg. foo.md, name = foo
-  prefix: string;
-  // fpath: full path, eg: foo.md, fpath: foo.md
-  fpath: string;
-};
-export type FileMetaDict = { [key: string]: FileMeta[] };
+import { NotesFileSystemCache } from "../../cache";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -86,7 +77,6 @@ export class FileStorage implements DStore {
   public notes: NotePropsDict;
   public noteFnames: NoteFNamesDict;
   public schemas: SchemaModuleDict;
-  public notesCache: NotesCache;
   public logger: DLogger;
   public links: DLink[];
   public anchors: DNoteAnchorPositioned[];
@@ -104,10 +94,6 @@ export class FileStorage implements DStore {
     this.notes = {};
     this.noteFnames = new NoteFNamesDict();
     this.schemas = {};
-    this.notesCache = {
-      version: 0,
-      notes: {},
-    };
     this.links = [];
     this.anchors = [];
     this.logger = logger;
@@ -253,7 +239,7 @@ export class FileStorage implements DStore {
         out.push({ note: noteToDelete, status: "update", prevNote });
       } else {
         // the delete operation originated from rename.
-        // since _noteToDelete) in this case is renamed and
+        // since _noteToDelete_ in this case is renamed and
         // moved to another location, simply adding stub: true
         // will not work.
         // we need a fresh stub note that will fill in the old note's place.
@@ -264,7 +250,28 @@ export class FileStorage implements DStore {
           ..._.omit(noteToDelete, ["id", "links", "body"]),
           stub: true,
         });
-        this.writeNote(replacingStub);
+        this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
+        if (!noteToDelete.parent) {
+          throw DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+          });
+        }
+        const parentNote = this.notes[noteToDelete.parent] as NoteProps;
+        const parentNotePrev = { ...parentNote };
+        parentNote.children = _.reject(
+          parentNote.children,
+          (ent) => ent === noteToDelete.id
+        );
+        out.push({
+          note: parentNote,
+          status: "update",
+          prevNote: parentNotePrev,
+        });
+
+        delete this.notes[noteToDelete.id];
+        this.noteFnames.delete(noteToDelete);
+        await this.writeNote(replacingStub, { newNode: true });
+        out.push({ note: noteToDelete, status: "delete" });
         out.push({ note: replacingStub, status: "create" });
       }
     } else {
@@ -423,7 +430,6 @@ export class FileStorage implements DStore {
         const {
           notes,
           cacheUpdates,
-          cache,
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
@@ -437,16 +443,7 @@ export class FileStorage implements DStore {
           numEntries: _.size(notes),
           numCacheUpdates: _.size(cacheUpdates),
         });
-        const newCache: NotesCache = {
-          version: cache.version,
-          notes: _.defaults(cacheUpdates, cache.notes),
-        };
-        const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-        // OPT:make async and don't wait for return
-        // Skip this if we found no notes, which means vault did not initialize
-        if (!this.engine.config.noCaching && notes.length > 0) {
-          writeNotesToCache(vpath, newCache);
-        }
+
         return notes;
       })
     );
@@ -543,7 +540,6 @@ export class FileStorage implements DStore {
   async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
-    cache: NotesCache;
     errors: DendronError[];
   }> {
     const ctx = "initNotes";
@@ -567,112 +563,37 @@ export class FileStorage implements DStore {
         })
       );
     }
+    const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+    const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
+      cachePath,
+      noCaching: this.engine.config.noCaching,
+    });
     if (!out.data) {
       return {
-        cache: { version: 0, notes: {} },
         cacheUpdates: {},
         errors,
         notes: [],
       };
     }
     const noteFiles = out.data;
+    const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
 
-    const cache: NotesCache = !this.engine.config.noCaching
-      ? readNotesFromCache(vpath)
-      : { version: 0, notes: {} };
     const {
       notes,
       cacheUpdates,
       errors: parseErrors,
     } = await new NoteParser({
       store: this,
-      cache,
+      cache: notesCache,
+      engine: this.engine,
       logger: this.logger,
+      maxNoteLength,
     }).parseFiles(noteFiles, vault);
+
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
-    await Promise.all(
-      notes.map(async (n) => {
-        this.logger.debug({ ctx, note: NoteUtils.toLogObj(n) });
-        if (n.stub) {
-          return;
-        }
-        const maxNoteLength = ConfigUtils.getWorkspace(
-          this.config
-        ).maxNoteLength;
-        if (
-          n.body.length >=
-          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-        ) {
-          this.logger.info({
-            ctx,
-            msg: "Note too large, skipping",
-            note: NoteUtils.toLogObj(n),
-            length: n.body.length,
-          });
-          errors.push(
-            new DendronError({
-              message:
-                `Note "${n.fname}" in vault "${VaultUtils.getName(
-                  n.vault
-                )}" is longer than ${
-                  maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
-                } characters, some features like backlinks may not work correctly for it. ` +
-                `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
-              severity: ERROR_SEVERITY.MINOR,
-            })
-          );
-          n.links = [];
-          n.anchors = {};
-          return;
-        }
-
-        // if note content is different, then we update all links and anchors ^link-anchor
-        if (_.has(cacheUpdates, n.fname)) {
-          try {
-            const links = LinkUtils.findLinks({
-              note: n,
-              engine: this.engine,
-            });
-            cacheUpdates[n.fname].data.links = links;
-            n.links = links;
-          } catch (err: any) {
-            let error = err;
-            if (!(err instanceof DendronError)) {
-              error = new DendronError({
-                message: `Failed to read links in note ${n.fname}`,
-                payload: err,
-              });
-            }
-            errors.push(error);
-            this.logger.error({ ctx, error: err, note: NoteUtils.toLogObj(n) });
-            return;
-          }
-          try {
-            const anchors = await AnchorUtils.findAnchors({
-              note: n,
-            });
-            cacheUpdates[n.fname].data.anchors = anchors;
-            n.anchors = anchors;
-          } catch (err: any) {
-            let error = err;
-            if (!(err instanceof DendronError)) {
-              error = new DendronError({
-                message: `Failed to read headers or block anchors in note ${n.fname}`,
-                payload: err,
-              });
-            }
-            errors.push(error);
-            return;
-          }
-        } else {
-          n.links = cache.notes[n.fname].data.links;
-        }
-        return;
-      })
-    );
-    return { notes, cacheUpdates, cache, errors };
+    return { notes, cacheUpdates, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
@@ -1002,10 +923,6 @@ export class FileStorage implements DStore {
     notesChangedEntries = changedFromDelete
       .concat(changeFromWrite)
       .concat(notesChangedEntries);
-    // remove duplicate updates
-    notesChangedEntries = _.uniqBy(notesChangedEntries, (ent) => {
-      return [ent.status, ent.note.id, ent.note.fname].join("");
-    });
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
   }
@@ -1191,8 +1108,11 @@ export class FileStorage implements DStore {
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
-      noDelete = true;
-    } else {
+      note = _.omit(note, "stub");
+      if (opts?.updateExisting) noDelete = true;
+    }
+
+    if (!opts?.updateExisting) {
       changedEntries = await this._writeNewNote({
         note,
         existingNote: maybeNote,
@@ -1286,10 +1206,10 @@ export class FileStorage implements DStore {
         .map((ent) => this.updateNote(ent))
     );
 
-    changedEntries.push({ note, status: "create" });
     if (maybeNote && !noDelete) {
       changedEntries.push({ note: maybeNote, status: "delete" });
     }
+    changedEntries.push({ note, status: "create" });
     this.logger.info({
       ctx,
       msg: "exit",

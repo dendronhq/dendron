@@ -23,6 +23,10 @@ type CommandOutput = RespV3<GoToNoteCommandOutput>;
 
 const GOTO_KEY = "uri";
 
+/**
+ * Go to the current link under cursor. This command will exhibit different behavior depending on the type of the link.
+ * See [[dendron.ref.commands.goto]] for more details
+ */
 export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.GOTO.key;
 

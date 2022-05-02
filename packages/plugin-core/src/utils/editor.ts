@@ -261,6 +261,9 @@ export type ProcessSelectionOpts = {
   source?: string;
 };
 
+/**
+ * NOTE: this method requires that `ExtensionProvider` be available and can provide a workspace
+ */
 export async function getLinkFromSelectionWithWorkspace() {
   const { selection, editor } = VSCodeUtils.getSelection();
   if (

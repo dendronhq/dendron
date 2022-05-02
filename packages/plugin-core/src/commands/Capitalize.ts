@@ -19,9 +19,20 @@ export class CapitalizeCommand extends BasicCommand<
     const selection = editor.selection;
     const text = editor.document.getText(selection);
 
-    // Replace the selected text with upper case letters
+    // get the length of whitespaces at the start
+    const whiteSpaces = text.length - text.trimStart().length;
+
+    const res =
+      // Add the whitespaces back to the start of the string
+      " ".repeat(whiteSpaces) +
+      // Change the first letter to upper case
+      text.charAt(whiteSpaces).toUpperCase() +
+      // Replace the first letter in the string
+      text.slice(whiteSpaces + 1);
+
+    // Replace the selected text with capitalized text
     await editor.edit((editBuilder) => {
-      editBuilder.replace(selection, text.toUpperCase());
+      editBuilder.replace(selection, res);
     });
   }
 }

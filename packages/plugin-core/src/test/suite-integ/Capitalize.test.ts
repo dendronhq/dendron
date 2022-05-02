@@ -53,12 +53,46 @@ suite("Capitalize", function () {
         expect(final.document.getText(range)).toEqual("hello");
       });
 
-      test("WHEN all lower case text is selected, THEN Capitalize should change all letters to upper case", async () => {
+      test("WHEN text starting with upper case is selected, THEN Capitalize should not change anything", async () => {
         const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
         // Create a new note to test
         const note = await NoteTestUtilsV4.createNoteWithEngine({
-          fname: "text",
+          fname: "upper-text",
+          vault: vaults[0],
+          wsRoot,
+          body: "Hello",
+          engine,
+        });
+
+        // Open an editor
+        const editor = await ExtensionProvider.getExtension().wsUtils.openNote(
+          note
+        );
+
+        // Position of the text
+        const start = new vscode.Position(7, 0);
+        const end = new vscode.Position(7, 5);
+
+        // Select the text
+        editor.selection = new vscode.Selection(start, end);
+
+        await cmd.execute();
+
+        // Open the note again to get the latest version
+        const final = await ExtensionProvider.getExtension().wsUtils.openNote(
+          note
+        );
+
+        expect(final.document.getText(editor.selection)).toEqual("Hello");
+      });
+
+      test("WHEN text starting with lower case is selected, THEN Capitalize should change the first letter to upper case", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+        // Create a new note to test
+        const note = await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "lower-text",
           vault: vaults[0],
           wsRoot,
           body: "hello",
@@ -84,18 +118,18 @@ suite("Capitalize", function () {
           note
         );
 
-        expect(final.document.getText(editor.selection)).toEqual("HELLO");
+        expect(final.document.getText(editor.selection)).toEqual("Hello");
       });
 
-      test("WHEN text with upper and lower cases letters is selected, THEN Capitalize should change all lower case letters to upper case", async () => {
+      test("WHEN text starting with whitespaces is selected, THEN Capitalize should change the first non-whitespace letter to upper case", async () => {
         const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
         // Create a new note to test
         const note = await NoteTestUtilsV4.createNoteWithEngine({
-          fname: "mixed-text",
+          fname: "whitespace-text",
           vault: vaults[0],
           wsRoot,
-          body: "HelLo worLd",
+          body: "   hello",
           engine,
         });
 
@@ -106,7 +140,7 @@ suite("Capitalize", function () {
 
         // Position of the text
         const start = new vscode.Position(7, 0);
-        const end = new vscode.Position(7, 11);
+        const end = new vscode.Position(7, 8);
 
         // Select the text
         editor.selection = new vscode.Selection(start, end);
@@ -118,7 +152,7 @@ suite("Capitalize", function () {
           note
         );
 
-        expect(final.document.getText(editor.selection)).toEqual("HELLO WORLD");
+        expect(final.document.getText(editor.selection)).toEqual("   Hello");
       });
     }
   );

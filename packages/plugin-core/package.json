@@ -938,6 +938,11 @@
     },
     "keybindings": [
       {
+        "command": "dendron.capitalize",
+        "key": "ctrl+u",
+        "mac": "cmd+u"
+      },
+      {
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",
         "when": "editorFocus"

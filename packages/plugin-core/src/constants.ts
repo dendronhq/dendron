@@ -244,6 +244,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CAPITALIZE: {
     key: "dendron.capitalize",
     title: `${CMD_PREFIX} Capitalize`,
+    keybindings: {
+      key: "ctrl+u",
+      mac: "cmd+u",
+    },
   },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",

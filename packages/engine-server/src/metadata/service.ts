@@ -13,6 +13,7 @@ export enum ShowcaseEntry {
   BlockRefs = "BlockRefs",
   HeaderRefs = "HeaderRefs",
   InsertNoteLink = "InsertNoteLink",
+  GraphTheme = "GraphTheme",
 }
 
 type Metadata = Partial<{
@@ -253,7 +254,7 @@ export class MetadataService {
   set TipOfDayIndex(index: number | undefined) {
     this.setMeta("tipOfTheDayIndex", index);
   }
-  
+
   setGraphTheme(graphTheme: GraphThemeEnum) {
     const meta = this.getMeta();
     if (meta.graphTheme !== graphTheme) {

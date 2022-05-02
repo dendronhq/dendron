@@ -886,7 +886,7 @@ suite("NativeTreeView tests", function () {
     );
   });
 
-  describe.only("Delete Note Command interactions", function () {
+  describe("Delete Note Command interactions", function () {
     describeMultiWS(
       "WHEN deleting note with top level hierarchy",
       {

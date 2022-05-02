@@ -5,6 +5,7 @@ import {
   createSimpleTipOfDayMsg,
   createTipOfDayMsgWithDocsLink,
 } from "./TipFactory";
+import { GraphThemeTip } from "./GraphThemeTip";
 
 const AUTOCOMPLETE_TIP = createSimpleTipOfDayMsg(
   ShowcaseEntry.AutocompleteTip,
@@ -50,15 +51,6 @@ const INSERT_NOTE_LINK = createTipOfDayMsgWithDocsLink({
     "https://wiki.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47/#insert-note-link",
 });
 
-const GRAPH_THEME = createTipOfDayMsgWithDocsLink({
-  showcaseEntry: ShowcaseEntry.GraphTheme,
-  displayMessage:
-    "Dendron has different styles for the graph view now, check it out!",
-  confirmText: "See Docs",
-  docsUrl:
-    "https://wiki.dendron.so/notes/587e6d62-3c5b-49b0-aedc-02f62f0448e6#graph-theme",
-});
-
 /**
  * All messages in the rotation to be displayed.
  */
@@ -71,5 +63,5 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   TASK_MANAGEMENT,
   BLOCK_REFS,
   INSERT_NOTE_LINK,
-  GRAPH_THEME,
+  new GraphThemeTip(),
 ];

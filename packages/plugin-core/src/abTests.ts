@@ -70,20 +70,6 @@ export const MEETING_NOTE_TUTORIAL_TEST = new ABTest(
   ]
 );
 
-export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
-  "MeetingNoteFeatureShowcaseTest",
-  [
-    {
-      name: MeetingNoteTestGroups.show,
-      weight: 1,
-    },
-    {
-      name: MeetingNoteTestGroups.noShow,
-      weight: 1,
-    },
-  ]
-);
-
 export enum GraphThemeTestGroups {
   /**
    * New user will get Monokai graph theme by default
@@ -122,6 +108,9 @@ export const CURRENT_AB_TESTS = [
   UPGRADE_TOAST_WORDING_TEST,
   SELF_CONTAINED_VAULTS_TEST,
   MEETING_NOTE_TUTORIAL_TEST,
-  MEETING_NOTE_FEATURE_SHOWCASE_TEST,
   GRAPH_THEME_TEST,
 ];
+
+// Concluded Experiments (NOTE: make sure that you don't re-use these strings as
+// the name of a future AB Test to avoid conflicting strings):
+// - MeetingNoteFeatureShowcaseTest

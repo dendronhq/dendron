@@ -217,12 +217,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
         const { wsRoot, config } = engine;
         const rawConfig = DConfig.getRaw(wsRoot);
-        const detectOut = ConfigUtils.detectDeprecatedConfigs({
+        const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
           config: rawConfig,
           deprecatedPaths: DEPRECATED_PATHS,
         });
-        if (detectOut.needToDelete) {
-          const { pathsToDelete } = detectOut;
+        if (pathsToDelete.length > 0) {
           const backupPath = await this.createBackup(
             wsRoot,
             DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS

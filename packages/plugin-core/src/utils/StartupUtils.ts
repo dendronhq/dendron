@@ -106,12 +106,11 @@ export class StartupUtils {
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
       const wsRoot = opts.ext.getDWorkspace().wsRoot;
       const rawConfig = DConfig.getRaw(wsRoot);
-      const out = ConfigUtils.detectDeprecatedConfigs({
+      const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
         config: rawConfig,
         deprecatedPaths: DEPRECATED_PATHS,
       });
-      const { needToDelete } = out;
-      return needToDelete;
+      return pathsToDelete.length > 0;
     } else {
       return false;
     }

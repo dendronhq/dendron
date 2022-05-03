@@ -1192,9 +1192,7 @@ suite("deprecated config detection", () => {
           config,
           deprecatedPaths: DEPRECATED_PATHS,
         });
-        expect(
-          out.needToDelete && _.isEqual(out.pathsToDelete, ["dev.enableWebUI"])
-        ).toBeTruthy();
+        expect(out).toEqual(["dev.enableWebUI"]);
       });
     }
   );

@@ -23,7 +23,7 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
   getDisplayMessage(displayLocation: DisplayLocation): string {
     switch (displayLocation) {
       case DisplayLocation.InformationMessage:
-        return `New themes for Graph View! Change the appearance...`;
+        return `New themes for Graph View! Change the appearance of the note graph by clicking the config button on the top left corner of the graph view and selecting one of the built-in styles. You can even customize the appearance to your liking with css.`;
       case DisplayLocation.TipOfTheDayView:
         return "Change the appearance of the note graph by clicking the config button on the top left corner of the graph view and selecting one of the built-in styles. You can even customize the appearance to your liking with css";
       default:

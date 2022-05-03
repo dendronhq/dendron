@@ -1446,7 +1446,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await Promise.all(
         _.map(workspaces, async (wsEntry, wsName) => {
           const wsPath = path.join(wsRoot, wsName);
-          if (!fs.existsSync(wsPath)) {
+          if (!(await fs.pathExists(wsPath))) {
             return {
               wsPath: await this.cloneWorkspace({
                 wsName,
@@ -1503,7 +1503,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot }))
+        !fs.existsSync(path.join(wsRoot, vault.fsPath))
     );
     const didClone =
       !_.isEmpty(emptyRemoteVaults) ||

@@ -140,7 +140,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
       });
 
       describe(`WHEN task mode is toggled`, () => {
-        test(`THEN the contents of the quick pick update with 'foo.'`, async () => {
+        test(`THEN the contents of the quick pick update with 'task.'`, async () => {
           const engine = ExtensionProvider.getEngine();
 
           await WSUtilsV2.instance().openNote(engine.notes["foo"]);
@@ -162,7 +162,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
           viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
 
           const qp = controller.quickPick;
-          expect(qp.value.startsWith("foo.")).toBeTruthy();
+          expect(qp.value.startsWith("task.")).toBeTruthy();
 
           // Now untoggle the button:
           viewModel.nameModifierMode.value = LookupNoteTypeEnum.none;

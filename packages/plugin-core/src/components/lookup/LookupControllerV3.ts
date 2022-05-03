@@ -731,7 +731,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
             await editor.edit((builder) => {
               const link = note.fname;
               if (!_.isUndefined(selection) && !selection.isEmpty) {
-                builder.replace(selection, `[[${text}|${link}]]`);
+                builder.replace(
+                  selection,
+                  `[[${text?.replace(/\n/g, "")}|${link}]]`
+                );
               }
             });
           }

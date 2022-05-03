@@ -1,4 +1,4 @@
-import { Time } from "@dendronhq/common-all";
+import { GraphThemeEnum, Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -13,6 +13,7 @@ export enum ShowcaseEntry {
   BlockRefs = "BlockRefs",
   HeaderRefs = "HeaderRefs",
   InsertNoteLink = "InsertNoteLink",
+  GraphTheme = "GraphTheme",
 }
 
 type Metadata = Partial<{
@@ -77,6 +78,10 @@ type Metadata = Partial<{
    * the user tips that they havent seen.
    */
   tipOfTheDayIndex: number;
+  /*
+   * Theme for Note Graph View
+   */
+  graphTheme?: GraphThemeEnum;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -170,6 +175,10 @@ export class MetadataService {
     return this.getMeta().tipOfTheDayIndex;
   }
 
+  getGraphTheme() {
+    return this.getMeta().graphTheme;
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -244,5 +253,12 @@ export class MetadataService {
 
   set TipOfDayIndex(index: number | undefined) {
     this.setMeta("tipOfTheDayIndex", index);
+  }
+
+  setGraphTheme(graphTheme: GraphThemeEnum) {
+    const meta = this.getMeta();
+    if (meta.graphTheme !== graphTheme) {
+      this.setMeta("graphTheme", graphTheme);
+    }
   }
 }

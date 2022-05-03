@@ -55,9 +55,9 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: ''
-        dateFormat: ''
-        addBehavior: childOfCurrent
+        name: task
+        dateFormat: y.MM.dd
+        addBehavior: asOwnDomain
         statusSymbols:
             '': ' '
             wip: w
@@ -204,9 +204,9 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: ''
-        dateFormat: ''
-        addBehavior: childOfCurrent
+        name: task
+        dateFormat: y.MM.dd
+        addBehavior: asOwnDomain
         statusSymbols:
             '': ' '
             wip: w
@@ -343,9 +343,9 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: ''
-        dateFormat: ''
-        addBehavior: childOfCurrent
+        name: task
+        dateFormat: y.MM.dd
+        addBehavior: asOwnDomain
         statusSymbols:
             '': ' '
             wip: w
@@ -449,9 +449,9 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: ''
-        dateFormat: ''
-        addBehavior: childOfCurrent
+        name: task
+        dateFormat: y.MM.dd
+        addBehavior: asOwnDomain
         statusSymbols:
             '': ' '
             wip: w
@@ -572,9 +572,9 @@ workspace:
         dateFormat: y.MM.dd.HHmmss
         addBehavior: asOwnDomain
     task:
-        name: ''
-        dateFormat: ''
-        addBehavior: childOfCurrent
+        name: task
+        dateFormat: y.MM.dd
+        addBehavior: asOwnDomain
         statusSymbols:
             '': ' '
             wip: w

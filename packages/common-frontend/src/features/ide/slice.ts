@@ -4,6 +4,7 @@ import {
   NoteProps,
   LookupModifierStatePayload,
   TreeMenu,
+  GraphThemeEnum,
 } from "@dendronhq/common-all";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // @ts-ignore
@@ -25,6 +26,7 @@ type InitialState = {
   seedsInWorkspace: string[] | undefined; // Contains the seed ID's
   lookupModifiers: LookupModifierStatePayload | undefined;
   tree?: TreeMenu;
+  graphTheme?: GraphThemeEnum;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -36,6 +38,7 @@ const INITIAL_STATE: InitialState = {
   seedsInWorkspace: undefined,
   lookupModifiers: undefined,
   tree: undefined,
+  graphTheme: GraphThemeEnum.Classic,
 };
 
 export { InitialState as IDEState };
@@ -72,6 +75,9 @@ export const ideSlice = createSlice({
     },
     setSeedsInWorkspace: (state, action: PayloadAction<string[]>) => {
       state.seedsInWorkspace = action.payload;
+    },
+    setGraphTheme: (state, action: PayloadAction<GraphThemeEnum>) => {
+      state.graphTheme = action.payload;
     },
   },
 });

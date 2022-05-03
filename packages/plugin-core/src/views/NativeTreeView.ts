@@ -22,7 +22,7 @@ export class NativeTreeView implements Disposable {
   private treeView: TreeView<NoteProps> | undefined;
   private _handler: Disposable | undefined;
   private _createDataProvider: () => EngineNoteProvider;
-  public updateLabelTypeHandler:
+  private _updateLabelTypeHandler:
     | ((opts: {
         labelType: TreeItemLabelTypeEnum;
         noRefresh?: boolean;
@@ -51,7 +51,7 @@ export class NativeTreeView implements Disposable {
    */
   async show() {
     const treeDataProvider = this._createDataProvider();
-    this.updateLabelTypeHandler = _.bind(
+    this._updateLabelTypeHandler = _.bind(
       treeDataProvider.updateLabelType,
       treeDataProvider
     );
@@ -74,6 +74,12 @@ export class NativeTreeView implements Disposable {
         this
       );
     });
+  }
+
+  public updateLabelType(opts: { labelType: TreeItemLabelTypeEnum }) {
+    if (this._updateLabelTypeHandler) {
+      this._updateLabelTypeHandler(opts);
+    }
   }
 
   public expandAll() {

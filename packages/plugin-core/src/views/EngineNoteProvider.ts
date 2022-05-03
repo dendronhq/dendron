@@ -85,6 +85,20 @@ export class EngineNoteProvider
     }
   }
 
+  public getExpandableTreeItems(): TreeItem[] {
+    const candidateItems = _.toArray(
+      _.pickBy(this._tree, (item) => {
+        const isCollapsed =
+          item.collapsibleState === TreeItemCollapsibleState.Collapsed;
+        const isShallow = DNodeUtils.getDepth(item.note) < 3;
+        return isCollapsed && isShallow;
+      })
+    );
+    return _.sortBy(candidateItems, (item) => {
+      return DNodeUtils.getDepth(item.note);
+    });
+  }
+
   getChildren(noteProps?: NoteProps): ProviderResult<NoteProps[]> {
     try {
       const ctx = "TreeView:getChildren";

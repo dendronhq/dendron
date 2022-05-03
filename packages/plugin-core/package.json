@@ -135,6 +135,11 @@
         "icon": "$(list-ordered)"
       },
       {
+        "command": "dendron.treeView.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note"
       },
@@ -482,6 +487,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "dendron.treeView.expandAll",
+          "when": "dendron:devMode"
+        },
+        {
           "command": "dendron.browseNote",
           "when": "dendron:pluginActive"
         },
@@ -795,6 +804,11 @@
           "command": "dendron.treeView.labelByFilename",
           "when": "view == dendron.treeView && dendron:treeviewTreeItemLabelType == title",
           "group": "navigation@1"
+        },
+        {
+          "command": "dendron.treeView.expandAll",
+          "when": "view == dendron.treeView && dendron:devMode",
+          "group": "navigation@2"
         }
       ],
       "explorer/context": [

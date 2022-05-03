@@ -832,6 +832,20 @@ export async function _activate(
         })
       );
 
+      /**
+       * This is a little flaky right now, but it works most of the time.
+       * Leaving this for dev / debug purposes.
+       * Enablement is set to be DendronContext.DEV_MODE
+       *
+       * TODO: fix tree item register issue and flip the dev mode flag.
+       */
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
+        sentryReportingCallback(() => {
+          treeView.expandAll();
+        })
+      );
+
       context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService

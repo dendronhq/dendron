@@ -175,6 +175,11 @@ export const DENDRON_MENUS = {
       when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeItemLabelTypeEnum.title}`,
       group: "navigation@1",
     },
+    {
+      command: "dendron.treeView.expandAll",
+      when: `view == dendron.treeView && ${DendronContext.DEV_MODE}`,
+      group: "navigation@2",
+    },
   ],
   "explorer/context": [
     {
@@ -256,6 +261,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.treeView.labelByFilename",
     title: "Label and sort notes by filename",
     icon: "$(list-ordered)",
+  },
+  TREEVIEW_EXPAND_ALL: {
+    key: "dendron.treeView.expandAll",
+    title: "Expand All",
+    icon: "$(expand-all)",
+    when: DendronContext.DEV_MODE,
   },
   // --- Notes
   BROWSE_NOTE: {

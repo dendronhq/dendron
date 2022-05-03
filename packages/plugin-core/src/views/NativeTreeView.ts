@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   DendronTreeViewKey,
   NoteProps,
   NoteUtils,
@@ -8,9 +9,10 @@ import {
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { Disposable, TextEditor, TreeView, window } from "vscode";
+import { Disposable, TextEditor, TreeItem, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { EngineNoteProvider } from "./EngineNoteProvider";
+import { TreeNote } from "./TreeNote";
 
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
@@ -26,6 +28,7 @@ export class NativeTreeView implements Disposable {
         noRefresh?: boolean;
       }) => void)
     | undefined;
+  private _getExpandableTreeItemsHandler: (() => TreeNote[]) | undefined;
 
   constructor(treeDataProviderFactory: () => EngineNoteProvider) {
     this._createDataProvider = treeDataProviderFactory;
@@ -52,6 +55,10 @@ export class NativeTreeView implements Disposable {
       treeDataProvider.updateLabelType,
       treeDataProvider
     );
+    this._getExpandableTreeItemsHandler = _.bind(
+      treeDataProvider.getExpandableTreeItems,
+      treeDataProvider
+    );
     const result = treeDataProvider.getChildren() as Promise<
       NoteProps | undefined | null
     >;
@@ -67,6 +74,21 @@ export class NativeTreeView implements Disposable {
         this
       );
     });
+  }
+
+  public expandAll() {
+    if (this._getExpandableTreeItemsHandler) {
+      const expandableTreeItems = this._getExpandableTreeItemsHandler();
+      if (this.treeView) {
+        asyncLoopOneAtATime(expandableTreeItems, async (treeItem) => {
+          this.treeView?.reveal(treeItem.note, {
+            expand: true,
+            focus: false,
+            select: false,
+          });
+        });
+      }
+    }
   }
 
   /**

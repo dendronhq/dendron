@@ -237,18 +237,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
   BROWSE_NOTE: {
     key: "dendron.browseNote",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Browse Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Contribute`,
   },
   GOTO: {
     key: "dendron.goto",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Go to`,
     when: DendronContext.PLUGIN_ACTIVE,
     keybindings: {
@@ -257,7 +254,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Go to Note`,
     when: DendronContext.PLUGIN_ACTIVE,
     keybindings: {

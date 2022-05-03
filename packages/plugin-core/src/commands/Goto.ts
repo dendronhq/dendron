@@ -34,6 +34,21 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
     super();
   }
 
+  addAnalyticsPayload?(_opts?: CommandOpts, out?: CommandOutput) {
+    if (!out?.data) {
+      return {};
+    }
+    const kind = out.data.kind;
+    // non-note file has file type
+    if (out.data.kind === TargetKind.NON_NOTE) {
+      return {
+        kind,
+        type: out.data.type,
+      };
+    }
+    return { kind };
+  }
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }
@@ -88,6 +103,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       data: {
         kind: TargetKind.LINK,
         fullPath: note.custom[GOTO_KEY],
+        fromProxy: true,
       },
     };
   }

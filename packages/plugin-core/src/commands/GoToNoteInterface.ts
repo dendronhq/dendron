@@ -32,5 +32,6 @@ export type GoToNoteCommandOutput =
   | { kind: TargetKind.NOTE; note: NoteProps; pos?: Position; source?: string }
   // When opening a non-note file
   | { kind: TargetKind.NON_NOTE; fullPath: string; type: GotoFileType }
-  | { kind: TargetKind.LINK; fullPath: string }
+  // When opening a link to a non txt-file like resource (eg. pdf, website, etc)
+  | { kind: TargetKind.LINK; fullPath: string; fromProxy: boolean }
   | undefined;

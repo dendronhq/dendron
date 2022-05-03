@@ -285,9 +285,9 @@ export async function getLinkFromSelectionWithWorkspace() {
   });
   if (!reference) return;
   return {
-    alias: reference?.label,
-    value: reference?.ref,
-    vaultName: reference?.vaultName,
+    alias: reference.label,
+    value: reference.ref,
+    vaultName: reference.vaultName,
     anchorHeader: reference.anchorStart,
   };
 }

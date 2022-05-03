@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1650354689201
+updated: 1651563961085
 created: 1608518909864
 ---
 
@@ -52,6 +52,8 @@ Vault2
 ### Header
 
 ![[dendron.welcome#header1]]
+
+If the header is capitalized that also should work since they are case insensitive: ![[dendron.welcome#Header1]]
 
 ### With Special Characters
 

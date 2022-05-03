@@ -266,6 +266,8 @@ export type ProcessSelectionOpts = {
  */
 export async function getLinkFromSelectionWithWorkspace() {
   const { selection, editor } = VSCodeUtils.getSelection();
+  // can't just collapse to `selection?.start !== undefined`
+  // because typescript compiler complains that selection might be undefined otherwise inside of the if block
   if (
     _.isEmpty(selection) ||
     _.isUndefined(selection) ||

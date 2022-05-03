@@ -125,6 +125,16 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "dendron.treeView.labelByTitle",
+        "title": "Label and sort notes by title",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.labelByFilename",
+        "title": "Label and sort notes by filename",
+        "icon": "$(list-ordered)"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note"
       },
@@ -775,6 +785,16 @@
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
           "group": "navigation@2"
+        },
+        {
+          "command": "dendron.treeView.labelByTitle",
+          "when": "view == dendron.treeView && dendron:treeviewTreeItemLabelType == filename",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dendron.treeView.labelByFilename",
+          "when": "view == dendron.treeView && dendron:treeviewTreeItemLabelType == title",
+          "group": "navigation@1"
         }
       ],
       "explorer/context": [

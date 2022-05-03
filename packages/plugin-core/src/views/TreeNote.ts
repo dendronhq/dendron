@@ -1,5 +1,4 @@
 import {
-  ConfigUtils,
   DNodeUtils,
   NoteProps,
   VaultUtils,
@@ -28,22 +27,23 @@ export class TreeNote extends vscode.TreeItem {
   constructor({
     note,
     collapsibleState,
+    labelType,
   }: {
     note: NoteProps;
     collapsibleState: vscode.TreeItemCollapsibleState;
+    labelType: TreeItemLabelTypeEnum;
   }) {
     super(DNodeUtils.basename(note.fname, true), collapsibleState);
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
-    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({
       vault: this.note.vault,
       wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
 
-    const labelType = ConfigUtils.getTreeItemLabelType(config);
     const label =
       labelType === TreeItemLabelTypeEnum.filename
         ? _.last(this.note.fname.split("."))

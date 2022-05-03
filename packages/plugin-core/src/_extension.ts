@@ -23,6 +23,8 @@ import {
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   Time,
+  TreeItemLabelTypeEnum,
+  TutorialEvents,
   UpgradeToastWordingTestGroups,
   UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
@@ -808,6 +810,28 @@ export async function _activate(
 
       const treeView = new NativeTreeView(providerConstructor);
       treeView.show();
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
+        sentryReportingCallback(() => {
+          if (treeView.updateLabelTypeHandler) {
+            treeView.updateLabelTypeHandler({
+              labelType: TreeItemLabelTypeEnum.title,
+            });
+          }
+        })
+      );
+
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
+        sentryReportingCallback(() => {
+          if (treeView.updateLabelTypeHandler) {
+            treeView.updateLabelTypeHandler({
+              labelType: TreeItemLabelTypeEnum.filename,
+            });
+          }
+        })
+      );
+
       context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService

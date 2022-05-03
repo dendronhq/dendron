@@ -2,19 +2,15 @@ import {
   DendronTreeViewKey,
   NoteProps,
   NoteUtils,
+  TreeItemLabelTypeEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import {
-  Disposable,
-  TextEditor,
-  TreeDataProvider,
-  TreeView,
-  window,
-} from "vscode";
+import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { EngineNoteProvider } from "./EngineNoteProvider";
 
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
@@ -23,9 +19,15 @@ import { ExtensionProvider } from "../ExtensionProvider";
 export class NativeTreeView implements Disposable {
   private treeView: TreeView<NoteProps> | undefined;
   private _handler: Disposable | undefined;
-  private _createDataProvider: () => TreeDataProvider<NoteProps>;
+  private _createDataProvider: () => EngineNoteProvider;
+  public updateLabelTypeHandler:
+    | ((opts: {
+        labelType: TreeItemLabelTypeEnum;
+        noRefresh?: boolean;
+      }) => void)
+    | undefined;
 
-  constructor(treeDataProviderFactory: () => TreeDataProvider<NoteProps>) {
+  constructor(treeDataProviderFactory: () => EngineNoteProvider) {
     this._createDataProvider = treeDataProviderFactory;
   }
 
@@ -46,6 +48,10 @@ export class NativeTreeView implements Disposable {
    */
   async show() {
     const treeDataProvider = this._createDataProvider();
+    this.updateLabelTypeHandler = _.bind(
+      treeDataProvider.updateLabelType,
+      treeDataProvider
+    );
     const result = treeDataProvider.getChildren() as Promise<
       NoteProps | undefined | null
     >;

@@ -6,6 +6,7 @@ import {
   NotePropsDict,
   NoteUtils,
   TreeUtils,
+  TreeItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -21,9 +22,10 @@ import {
   TreeItemCollapsibleState,
   window,
 } from "vscode";
-import { ICONS } from "../constants";
+import { DendronContext, ICONS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { TreeNote } from "./TreeNote";
 
 /**
@@ -38,7 +40,7 @@ export class EngineNoteProvider
   private _onEngineNoteStateChangedDisposable: Disposable;
   private _tree: { [key: string]: TreeNote } = {};
   private _engineEvents;
-
+  private _labelType: TreeItemLabelTypeEnum;
   /**
    * Signals to vscode UI engine that the tree view needs to be refreshed.
    */
@@ -57,6 +59,12 @@ export class EngineNoteProvider
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
     this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
+    const { config } = ExtensionProvider.getDWorkspace();
+    this._labelType = ConfigUtils.getTreeItemLabelType(config);
+    VSCodeUtils.setContextStringValue(
+      DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE,
+      this._labelType
+    );
   }
 
   dispose(): void {
@@ -88,12 +96,10 @@ export class EngineNoteProvider
         return Promise.resolve([]);
       }
       if (noteProps) {
-        const { config } = ExtensionProvider.getDWorkspace();
-        const labelType = ConfigUtils.getTreeItemLabelType(config);
         const childrenIds = TreeUtils.sortNotesAtLevel({
           noteIds: noteProps.children,
           noteDict: engine.notes,
-          labelType,
+          labelType: this._labelType,
         });
 
         const childrenNoteProps = childrenIds.map((id) => {
@@ -136,6 +142,22 @@ export class EngineNoteProvider
     });
   }
 
+  public updateLabelType(opts: {
+    labelType: TreeItemLabelTypeEnum;
+    noRefresh?: boolean;
+  }) {
+    const { labelType, noRefresh } = opts;
+    this._labelType = labelType;
+
+    VSCodeUtils.setContextStringValue(
+      DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE,
+      labelType
+    );
+    if (!noRefresh) {
+      this.refreshTreeView();
+    }
+  }
+
   /**
    * Tells VSCode to refresh the tree view. Debounced to fire every 250 ms
    */
@@ -147,9 +169,11 @@ export class EngineNoteProvider
     const collapsibleState = _.isEmpty(note.children)
       ? TreeItemCollapsibleState.None
       : TreeItemCollapsibleState.Collapsed;
+
     const tn = new TreeNote({
       note,
       collapsibleState,
+      labelType: this._labelType,
     });
     if (note.stub) {
       tn.iconPath = new ThemeIcon(ICONS.STUB);
@@ -166,8 +190,9 @@ export class EngineNoteProvider
     const ctx = "parseTree";
     const tn = this.createTreeNote(note);
     this._tree[note.id] = tn;
-    const { config } = ExtensionProvider.getDWorkspace();
-    const labelType = ConfigUtils.getTreeItemLabelType(config);
+
+    const labelType = this._labelType;
+
     const children = TreeUtils.sortNotesAtLevel({
       noteIds: note.children,
       noteDict: ndict,

@@ -3,6 +3,7 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
   TREE_VIEWS,
+  TreeItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 
@@ -18,6 +19,7 @@ export enum DendronContext {
   SHOULD_SHOW_LOOKUP_VIEW = "dendron:shouldShowLookupView",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
+  TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewTreeItemLabelType",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -163,6 +165,16 @@ export const DENDRON_MENUS = {
       when: "view == dendron.backlinks",
       group: "navigation@2",
     },
+    {
+      command: "dendron.treeView.labelByTitle",
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeItemLabelTypeEnum.filename}`,
+      group: "navigation@1",
+    },
+    {
+      command: "dendron.treeView.labelByFilename",
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeItemLabelTypeEnum.title}`,
+      group: "navigation@1",
+    },
   ],
   "explorer/context": [
     {
@@ -218,7 +230,7 @@ export const DENDRON_MENUS = {
 };
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
-  // ---
+  // --- backlinks panel buttons
   BACKLINK_SORT_BY_LAST_UPDATED: {
     key: "dendron.backlinks.sortByLastUpdated",
     title: "Sort by last updated (currently sorted by path names)",
@@ -233,6 +245,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.backlinks.expandAll",
     title: "Expand All",
     icon: "$(expand-all)",
+  },
+  // --- tree view panel buttons
+  TREEVIEW_LABEL_BY_TITLE: {
+    key: "dendron.treeView.labelByTitle",
+    title: "Label and sort notes by title",
+    icon: "$(list-ordered)",
+  },
+  TREEVIEW_LABEL_BY_FILENAME: {
+    key: "dendron.treeView.labelByFilename",
+    title: "Label and sort notes by filename",
+    icon: "$(list-ordered)",
   },
   // --- Notes
   BROWSE_NOTE: {

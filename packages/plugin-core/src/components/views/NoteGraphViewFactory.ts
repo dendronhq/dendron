@@ -4,13 +4,19 @@ import {
   DMessageEnum,
   DMessageSource,
   getWebEditorViewEntry,
+  GraphEvents,
+  GraphThemeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  EngineEventEmitter,
+  MetadataService,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -23,6 +29,7 @@ import { WebViewUtils } from "../../views/utils";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
+import { ConfigureGraphStylesCommand } from "../../commands/ConfigureGraphStyles";
 
 export class NoteGraphPanelFactory {
   private static _panel: vscode.WebviewPanel | undefined = undefined;
@@ -30,6 +37,11 @@ export class NoteGraphPanelFactory {
   private static _engineEvents: EngineEventEmitter;
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
+  /**
+   * This property temporarily stores the graph theme selected by user and is written
+   * back to MetadataService once the panel is disposed.
+   */
+  private static defaultGraphTheme: GraphThemeEnum | undefined;
 
   static create(
     ext: DendronExtension,
@@ -93,14 +105,19 @@ export class NoteGraphPanelFactory {
             this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageEnum.onRequestGraphStyle: {
+          case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
-            if (styles) {
+            const graphTheme = MetadataService.instance().getGraphTheme();
+            if (graphTheme) {
+              this.defaultGraphTheme = graphTheme;
+            }
+            if (styles || graphTheme) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphStyleLoad,
+                type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
                 data: {
                   styles,
+                  graphTheme,
                 },
                 source: "vscode",
               });
@@ -141,6 +158,21 @@ export class NoteGraphPanelFactory {
             }
             break;
           }
+          case GraphViewMessageEnum.onGraphThemeChange: {
+            this.defaultGraphTheme = msg.data.graphTheme;
+            AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+              theme: msg.data.graphTheme,
+            });
+            break;
+          }
+
+          case GraphViewMessageEnum.configureCustomStyling: {
+            await new ConfigureGraphStylesCommand().execute();
+            AnalyticsUtils.track(DENDRON_COMMANDS.CONFIGURE_GRAPH_STYLES.key, {
+              source: "graph filter menu",
+            });
+            break;
+          }
           default:
             break;
         }
@@ -150,6 +182,10 @@ export class NoteGraphPanelFactory {
         this._panel = undefined;
         if (this._onEngineNoteStateChangedDisposable) {
           this._onEngineNoteStateChangedDisposable.dispose();
+        }
+        if (this.defaultGraphTheme) {
+          MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
+          this.defaultGraphTheme = undefined;
         }
       });
     }

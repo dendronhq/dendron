@@ -147,6 +147,10 @@ export enum AppNames {
   EXPRESS_SERVER = "express",
 }
 
+export enum GraphEvents {
+  GraphThemeChanged = "GraphThemeChanged",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
@@ -159,4 +163,5 @@ export const DendronEvents = {
   NativeWorkspaceEvents,
   WorkspaceEvents,
   EngagementEvents,
+  GraphEvents,
 };

@@ -59,6 +59,20 @@ const DendronGraphPanel: DendronComponent = (props) => {
     }
   }, [elements]);
 
+  useEffect(() => {
+    if (ide.graphTheme) {
+      logger.log("updating graph config with value: ", ide.graphTheme);
+      setConfig((c) => ({
+        ...c,
+        graphTheme: {
+          ...c.graphTheme,
+          value: ide.graphTheme!,
+        },
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ide.graphTheme]);
+
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;
 

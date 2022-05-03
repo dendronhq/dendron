@@ -9,6 +9,7 @@ import { GraphConfig, GraphConfigItem, GraphElements } from "../utils/graph";
 import {
   ConfigUtils,
   DMessageSource,
+  GraphThemeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
   VaultUtils,
@@ -19,6 +20,10 @@ import useSyncGraphWithIDE from "../hooks/useSyncGraphWithIDE";
 import { Button, Space, Spin, Typography } from "antd";
 import { useCurrentTheme, useWorkspaceProps } from "../hooks";
 import { postVSCodeMessage } from "../utils/vscode";
+import { getStyles } from "../styles/custom";
+import ClassicTheme from "../styles/theme-classic";
+import BlockTheme from "../styles/theme-block";
+import MonokaiTheme from "../styles/theme-monokai";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -29,65 +34,25 @@ export class GraphUtils {
 
 const getCytoscapeStyle = (
   theme: string | undefined,
-  customCSS: string | undefined
+  customCSS: string | undefined,
+  config: GraphConfig
 ) => {
   if (_.isUndefined(theme)) return "";
 
-  // Cytoscape's "diamond" node is smaller than it's "circle" node, so
-  // this modifier adjusts to make parent and child nodes similarly sized.
-  const PARENT_NODE_SIZE_MODIFIER = 1.25;
-
-  return `
-node {
-  width: ${AntThemes[theme].graph.node.size};
-  height: ${AntThemes[theme].graph.node.size};
-  background-color: ${AntThemes[theme].graph.node.color};
-  color: ${AntThemes[theme].graph.node.label.color};
-  label: data(label);
-  font-size: ${AntThemes[theme].graph.node.label.fontSize};
-  min-zoomed-font-size: ${AntThemes[theme].graph.node.label.minZoomedFontSize};
-  font-weight: ${AntThemes[theme].graph.node.label.fontWeight};
-}
-
-node[color] {
-  background-color: data(color);
-}
-
-edge {
-  width: ${AntThemes[theme].graph.edge.width};
-  line-color: ${AntThemes[theme].graph.edge.color};
-  target-arrow-shape: none;
-  curve-style: haystack;
-}
-
-:selected{
-  background-color: ${AntThemes[theme].graph.node._selected.color};
-  color: ${AntThemes[theme].graph.node._selected.color};
-}
-
-.parent {
-  shape: diamond;
-  width: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-  height: ${AntThemes[theme].graph.node.size * PARENT_NODE_SIZE_MODIFIER};
-}
-
-.links {
-  line-style: dashed;
-}
-
-.hidden--labels {
-  label: ;
-}
-
-.hidden--vault,
-.hidden--regex-allowlist,
-.hidden--regex-blocklist,
-.hidden--stub {
-  display: none;
-}
-
-${customCSS || ""}
-`;
+  switch (config.graphTheme.value) {
+    case GraphThemeEnum.Classic: {
+      return getStyles(theme, ClassicTheme);
+    }
+    case GraphThemeEnum.Monokai: {
+      return getStyles(theme, MonokaiTheme);
+    }
+    case GraphThemeEnum.Block: {
+      return getStyles(theme, BlockTheme);
+    }
+    case GraphThemeEnum.Custom: {
+      return getStyles(theme, ClassicTheme, customCSS);
+    }
+  }
 };
 
 export const getEulerConfig = (shouldAnimate: boolean) => ({
@@ -186,7 +151,8 @@ export default function Graph({
 
       const style = getCytoscapeStyle(
         currentTheme || "light",
-        ide.graphStyles
+        ide.graphStyles,
+        config
       ) as any;
       const defaultConfig = ConfigUtils.genDefaultConfig();
 
@@ -236,10 +202,10 @@ export default function Graph({
   };
 
   useEffect(() => {
-    logger.log("Requesting graph style...");
+    logger.log("Requesting graph style and theme...");
     // Get graph style
     postVSCodeMessage({
-      type: GraphViewMessageEnum.onRequestGraphStyle,
+      type: GraphViewMessageEnum.onRequestGraphStyleAndTheme,
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);
@@ -264,6 +230,12 @@ export default function Graph({
     renderGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [graphRef, elements, ide.graphStyles]);
+
+  // re-render graph if graph style is changed.
+  useEffect(() => {
+    renderGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.graphTheme.value]);
 
   useEffect(() => {
     // If initial vault data received
@@ -373,6 +345,7 @@ export default function Graph({
           config={config}
           isGraphReady={isReady}
           updateConfigField={updateConfigField}
+          customCSS={ide.graphStyles}
         />
         {type === "note" && (
           <div

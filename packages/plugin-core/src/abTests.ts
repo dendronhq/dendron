@@ -1,4 +1,5 @@
 // ^xi5t1r2j51ot
+import { GraphThemeEnum } from "@dendronhq/common-all";
 import { ABTest } from "@dendronhq/common-server";
 
 export enum UpgradeToastWordingTestGroups {
@@ -83,6 +84,36 @@ export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
   ]
 );
 
+export enum GraphThemeTestGroups {
+  /**
+   * New user will get Monokai graph theme by default
+   */
+  monokai = GraphThemeEnum.Monokai,
+  /**
+   * New user will get Classic graph theme by default
+   */
+  classic = GraphThemeEnum.Classic,
+  /**
+   * New User will get Block theme by default
+   */
+  block = GraphThemeEnum.Block,
+}
+
+export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
+  {
+    name: GraphThemeTestGroups.monokai,
+    weight: 1,
+  },
+  {
+    name: GraphThemeTestGroups.classic,
+    weight: 1,
+  },
+  {
+    name: GraphThemeTestGroups.block,
+    weight: 1,
+  },
+]);
+
 /** All A/B tests that are currently running.
  *
  * ^tkqhy45hflfd
@@ -92,4 +123,5 @@ export const CURRENT_AB_TESTS = [
   SELF_CONTAINED_VAULTS_TEST,
   MEETING_NOTE_TUTORIAL_TEST,
   MEETING_NOTE_FEATURE_SHOWCASE_TEST,
+  GRAPH_THEME_TEST,
 ];

@@ -5,6 +5,7 @@ import {
   createSimpleTipOfDayMsg,
   createTipOfDayMsgWithDocsLink,
 } from "./TipFactory";
+import { GraphThemeTip } from "./GraphThemeTip";
 
 const AUTOCOMPLETE_TIP = createSimpleTipOfDayMsg(
   ShowcaseEntry.AutocompleteTip,
@@ -62,4 +63,5 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   TASK_MANAGEMENT,
   BLOCK_REFS,
   INSERT_NOTE_LINK,
+  new GraphThemeTip(),
 ];

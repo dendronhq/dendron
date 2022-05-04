@@ -1,25 +1,28 @@
 import {
+  CleanDendronPublishingConfig,
   CleanDendronSiteConfig,
+  configIsV4,
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
+  DeepPartial,
   DendronError,
+  DendronPublishingConfig,
   DendronSiteConfig,
+  ErrorFactory,
   ERROR_STATUS,
   getStage,
-  ConfigUtils,
-  DendronPublishingConfig,
   GithubEditViewModeEnum,
-  CleanDendronPublishingConfig,
-  configIsV4,
+  IntermediateDendronConfig,
+  RespV3,
   StrictConfigV5,
-  DeepPartial,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
+import { cosmiconfigSync } from "cosmiconfig";
 import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
-import os from "os";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
@@ -184,6 +187,64 @@ export class DConfig {
     const { config, cleanConfig } = opts;
     const key = configIsV4(config) ? "site" : "publishing";
     ConfigUtils.setProp(config, key, cleanConfig);
+  }
+
+  /**
+   * See if a local config file is present
+   */
+  static searchLocalConfigSync(
+    wsRoot: string
+  ): RespV3<IntermediateDendronConfig> {
+    const explorerSync = cosmiconfigSync("dendron", {
+      searchPlaces: [CONSTANTS.DENDRON_LOCAL_CONFIG_FILE],
+    });
+    const searchedFor = explorerSync.search(wsRoot);
+    if (searchedFor?.config) {
+      // TODO: do validation in the future
+      return {
+        data: searchedFor.config as IntermediateDendronConfig,
+      };
+    }
+    return {
+      error: ErrorFactory.create404Error({
+        url: CONSTANTS.DENDRON_LOCAL_CONFIG_FILE,
+      }),
+    };
+  }
+
+  /**
+   * Read configuration
+   * @param wsRoot
+   * @returns
+   */
+  static readConfigSync(wsRoot: string) {
+    const configPath = DConfig.configPath(wsRoot);
+    // TODO: validate
+    const config = readYAML(configPath) as IntermediateDendronConfig;
+    return config;
+  }
+
+  /**
+   * Read config and merge with local config
+   * @param wsRoot
+   * @returns
+   */
+  static readConfigAndApplyLocalOverrideSync(wsRoot: string) {
+    const config = this.readConfigSync(wsRoot);
+    const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
+    if (maybeLocalConfig.data) {
+      _.mergeWith(
+        config,
+        maybeLocalConfig.data,
+        (objValue: any, srcValue: any, key: string) => {
+          if (key === "vaults") {
+            return srcValue.concat(objValue);
+          }
+          return;
+        }
+      );
+    }
+    return config;
   }
 
   static writeConfig({

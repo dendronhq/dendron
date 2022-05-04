@@ -708,8 +708,10 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
+      // set vaults now that ws is initialized
+      const vaults = wsService.vaults;
+
       // check for vaults with same name
-      const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";
@@ -811,7 +813,7 @@ export async function _activate(
         return false;
       }
 
-      ExtensionUtils.setWorkspaceContextOnActivate(dendronConfig);
+      ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
 
       MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ws, context, requireActiveWorkspace: true });
@@ -1219,6 +1221,7 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
+// ^qxkkg70u6w0z
 function updateEngineAPI(
   port: number | string,
   ext: DendronExtension

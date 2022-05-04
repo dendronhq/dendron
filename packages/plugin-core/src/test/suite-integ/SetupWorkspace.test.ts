@@ -259,32 +259,6 @@ suite("GIVEN SetupWorkspace Command", function () {
       }
     );
 
-    describeSingleWS("WHEN a workspace exists", {}, () => {
-      test("THEN Dendron initializes", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        DendronExtension.version = () => "0.0.1";
-        // check for meta
-        const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
-        const fpath = getWSMetaFilePath({ wsRoot });
-        const meta = openWSMetaFile({ fpath });
-        expect(
-          _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-        ).toBeTruthy();
-        expect(meta.version).toEqual("0.0.1");
-        expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
-        expect(_.values(engine.notes).length).toEqual(1);
-        const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-
-        const settings = fs.readJSONSync(
-          path.join(wsRoot, "dendron.code-workspace")
-        );
-        expect(settings).toEqual(genDefaultSettings());
-        expect(fs.readdirSync(vault)).toEqual(
-          [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
-        );
-      });
-    });
-
     describeSingleWS(
       "WHEN a workspace exists, but it is missing the root.schema.yml",
       {

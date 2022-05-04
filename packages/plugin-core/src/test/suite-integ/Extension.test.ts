@@ -18,6 +18,16 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { ConfigUtils, InstallStatus, Time } from "@dendronhq/common-all";
 import { DConfig, MetadataService } from "@dendronhq/engine-server";
+  InstallStatus,
+  IntermediateDendronConfig,
+  Time,
+} from "@dendronhq/common-all";
+import {
+  DConfig,
+  LocalConfigScope,
+  MetadataService,
+} from "@dendronhq/engine-server";
+import { VAULTS } from "@dendronhq/engine-test-utils";
 import * as mocha from "mocha";
 import { describe } from "mocha";
 import sinon from "sinon";
@@ -61,6 +71,46 @@ async function inactiveMessageTest(opts: {
   sinon.restore();
   done();
 }
+
+function getDefaultConfig() {
+  const defaultConfig: IntermediateDendronConfig = {
+    ...ConfigUtils.genDefaultConfig(),
+  };
+  defaultConfig.workspace.vaults = VAULTS.MULTI_VAULT_WITH_THREE_VAULTS();
+  return defaultConfig;
+}
+
+suite("GIVEN local config", () => {
+  describe("AND WHEN workspace config is present", () => {
+    const configScope: LocalConfigScope = LocalConfigScope.WORKSPACE;
+    const defaultConfig = getDefaultConfig();
+    const localVaults = [{ fsPath: "vault-local" }];
+
+    describeMultiWS(
+      "AND given additional vaults in local config",
+      {
+        preActivateHook: async ({ wsRoot }) => {
+          await DConfig.writeLocalConfig({
+            wsRoot,
+            config: { workspace: { vaults: localVaults } },
+            configScope,
+          });
+        },
+      },
+      () => {
+        test("THEN engine should load with extra workspace", () => {
+          const ext = ExtensionProvider.getExtension();
+          const _defaultConfig = getDefaultConfig();
+          _defaultConfig.workspace.vaults = localVaults.concat(
+            defaultConfig.workspace.vaults
+          );
+          const config = ext.getDWorkspace().config;
+          expect(config).toEqual(_defaultConfig);
+        });
+      }
+    );
+  });
+});
 
 // These tests run on Windows too actually, but fail on the CI. Skipping for now.
 

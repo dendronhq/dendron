@@ -45,6 +45,7 @@
     "@mapbox/rehype-prism": "^0.5.0",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
+    "cosmiconfig": "^7.0.1",
     "cross-path-sort": "^1.0.0",
     "diff2html": "^3.2.0",
     "execa": "^4.0.3",

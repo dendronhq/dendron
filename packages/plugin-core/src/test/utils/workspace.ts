@@ -60,9 +60,9 @@ export class WorkspaceTestUtils {
           addBehavior: NoteAddBehaviorEnum.asOwnDomain,
         },
         task: {
-          name: "",
-          dateFormat: "",
-          addBehavior: NoteAddBehaviorEnum.childOfCurrent,
+          name: "task",
+          dateFormat: "y.MM.dd",
+          addBehavior: NoteAddBehaviorEnum.asOwnDomain,
           statusSymbols: {
             "": " ",
             wip: "w",

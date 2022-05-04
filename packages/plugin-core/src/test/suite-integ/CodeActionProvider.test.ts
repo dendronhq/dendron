@@ -2,10 +2,15 @@ import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { getHeaderAt, isBrokenWikilink } from "../../utils/editor";
 import { WSUtils } from "../../WSUtils";
-import { expect, LocationTestUtils, runSingleVaultTest } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { expect, LocationTestUtils } from "../testUtilsv2";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("Contextual UI Tests", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -22,12 +27,19 @@ suite("Contextual UI Tests", function () {
             body: "[[foo.bar]]",
           });
         },
-        onInit: async () => {
+        onInit: async ({ engine }) => {
           const editor = await WSUtils.openNote(noteWithLink);
           const start = LocationTestUtils.getPresetWikiLinkPosition();
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
-          expect(await isBrokenWikilink()).toBeTruthy();
+          expect(
+            await isBrokenWikilink({
+              editor,
+              selection: editor.selection,
+              engine,
+              note: noteWithLink,
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -46,10 +58,17 @@ suite("Contextual UI Tests", function () {
               body: "@foo.bar",
             });
           },
-          onInit: async () => {
+          onInit: async ({ engine }) => {
             const editor = await WSUtils.openNote(noteWithLink);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
-            expect(await isBrokenWikilink()).toBeTruthy();
+            expect(
+              await isBrokenWikilink({
+                editor,
+                selection: editor.selection,
+                engine,
+                note: noteWithLink,
+              })
+            ).toBeTruthy();
             done();
           },
         });
@@ -72,10 +91,17 @@ suite("Contextual UI Tests", function () {
               ConfigUtils.setWorkspaceProp(config, "enableUserTags", false);
               return config;
             },
-            onInit: async () => {
+            onInit: async ({ engine }) => {
               const editor = await WSUtils.openNote(noteWithLink);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
-              expect(await isBrokenWikilink()).toBeFalsy();
+              expect(
+                await isBrokenWikilink({
+                  editor,
+                  selection: editor.selection,
+                  engine,
+                  note: noteWithLink,
+                })
+              ).toBeFalsy();
               done();
             },
           });
@@ -84,59 +110,72 @@ suite("Contextual UI Tests", function () {
     });
   });
 
-  describe("GIVEN header is selected in editor", () => {
-    test("THEN code action for rename header is displayed", (done) => {
-      let noteWithLink: NoteProps;
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[0],
-            wsRoot,
-            body: "## Welcome",
-          });
-        },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(noteWithLink);
-          const start = new vscode.Position(7, 2);
-          const end = new vscode.Position(7, 10);
-          editor.selection = new vscode.Selection(start, end);
-          expect(await isBrokenWikilink()).toBeFalsy();
-          expect(
-            getHeaderAt({ document: editor.document, position: start })
-          ).toNotEqual(undefined);
-          done();
-        },
+  let noteWithLink: NoteProps;
+  describeMultiWS(
+    "GIVEN header is selected in editor",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithLink = await NoteTestUtilsV4.createNote({
+          fname: "test",
+          vault: vaults[0],
+          wsRoot,
+          body: "## Welcome",
+        });
+      },
+    },
+    () => {
+      test("THEN code action for rename header is displayed", async () => {
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const editor = await WSUtils.openNote(noteWithLink);
+        const start = new vscode.Position(7, 2);
+        const end = new vscode.Position(7, 10);
+        editor.selection = new vscode.Selection(start, end);
+        expect(
+          await isBrokenWikilink({
+            editor,
+            selection: editor.selection,
+            engine,
+            note: noteWithLink,
+          })
+        ).toBeFalsy();
+        expect(
+          getHeaderAt({ document: editor.document, position: start })
+        ).toNotEqual(undefined);
       });
-    });
-  });
+    }
+  );
 
-  describe("GIVEN some text is selected in editor", () => {
-    test("THEN code action for create note is displayed", (done) => {
-      let noteWithLink: NoteProps;
-      runSingleVaultTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          noteWithLink = await NoteTestUtilsV4.createNote({
-            fname: "test",
-            vault: vaults[0],
-            wsRoot,
-            body: "This is a root page",
-          });
-        },
-        onInit: async () => {
-          const editor = await WSUtils.openNote(noteWithLink);
-          const start = new vscode.Position(7, 0);
-          const end = new vscode.Position(7, 18);
-          editor.selection = new vscode.Selection(start, end);
-          expect(
-            getHeaderAt({ document: editor.document, position: start })
-          ).toEqual(undefined);
-          expect(await isBrokenWikilink()).toBeFalsy();
-          done();
-        },
+  describeMultiWS(
+    "GIVEN some text is selected in editor",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithLink = await NoteTestUtilsV4.createNote({
+          fname: "test",
+          vault: vaults[0],
+          wsRoot,
+          body: "This is a root page",
+        });
+      },
+    },
+    () => {
+      test("THEN code action for create note is displayed", async () => {
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const editor = await WSUtils.openNote(noteWithLink);
+        const start = new vscode.Position(7, 0);
+        const end = new vscode.Position(7, 18);
+        editor.selection = new vscode.Selection(start, end);
+        expect(
+          getHeaderAt({ document: editor.document, position: start })
+        ).toEqual(undefined);
+        expect(
+          await isBrokenWikilink({
+            editor,
+            selection: editor.selection,
+            engine,
+            note: noteWithLink,
+          })
+        ).toBeFalsy();
       });
-    });
-  });
+    }
+  );
 });

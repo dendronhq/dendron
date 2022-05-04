@@ -15,10 +15,9 @@ import { VaultSelectionMode } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
-import { ExtensionProvider } from "../ExtensionProvider";
 import { getAnalyticsPayload } from "../utils/analytics";
+import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
 import { PluginFileUtils } from "../utils/files";
-import { getReferenceAtPosition } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 import { BasicCommand } from "./base";
@@ -55,7 +54,7 @@ export const findAnchorPos = (opts: {
 };
 
 type FoundLinkSelection = NonNullable<
-  Awaited<ReturnType<GotoNoteCommand["getLinkFromSelection"]>>
+  Awaited<ReturnType<typeof getLinkFromSelectionWithWorkspace>>
 >;
 
 /**
@@ -73,34 +72,6 @@ export class GotoNoteCommand extends BasicCommand<
     super();
     this.extension = extension;
     this.wsUtils = extension.wsUtils;
-  }
-
-  async getLinkFromSelection() {
-    const { selection, editor } = VSCodeUtils.getSelection();
-    if (
-      _.isEmpty(selection) ||
-      _.isUndefined(selection) ||
-      _.isUndefined(selection.start) ||
-      !editor
-    )
-      return;
-    const currentLine = editor.document.lineAt(selection.start.line).text;
-    if (!currentLine) return;
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-    const reference = await getReferenceAtPosition({
-      document: editor.document,
-      position: selection.start,
-      opts: { allowInCodeBlocks: true },
-      wsRoot,
-      vaults,
-    });
-    if (!reference) return;
-    return {
-      alias: reference?.label,
-      value: reference?.ref,
-      vaultName: reference?.vaultName,
-      anchorHeader: reference.anchorStart,
-    };
   }
 
   private getQs(
@@ -204,7 +175,7 @@ export class GotoNoteCommand extends BasicCommand<
       return opts;
     }
 
-    const link = await this.getLinkFromSelection();
+    const link = await getLinkFromSelectionWithWorkspace();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
       return null;

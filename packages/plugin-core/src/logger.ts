@@ -1,4 +1,8 @@
-import { DendronError, error2PlainObject, setEnv } from "@dendronhq/common-all";
+import {
+  error2PlainObject,
+  IDendronError,
+  setEnv,
+} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
@@ -19,7 +23,7 @@ export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
 export type LogPayload = Partial<{
   ctx: string;
-  error: DendronError;
+  error: IDendronError;
   msg: string;
 }>;
 

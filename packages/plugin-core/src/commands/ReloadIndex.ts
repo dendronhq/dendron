@@ -1,10 +1,11 @@
 import {
   ConfigEvents,
-  DendronError,
+  DendronCompositeError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
   FOLDERS,
+  IDendronError,
   isNotUndefined,
   NoteUtils,
   SchemaUtils,
@@ -17,7 +18,11 @@ import {
   schemaModuleOpts2File,
   vault2Path,
 } from "@dendronhq/common-server";
-import { DoctorActionsEnum, DoctorService } from "@dendronhq/engine-server";
+import {
+  DoctorActionsEnum,
+  DoctorService,
+  DuplicateNoteError,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -27,7 +32,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 enum AutoFixAction {
@@ -196,7 +201,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = ExtensionProvider.getDWorkspace();
-    let initError: DendronError | undefined;
+    let initError: IDendronError | undefined;
     const { wsRoot, engine } = ws;
 
     // Check if there are any misconfigured self contained vaults.
@@ -234,9 +239,27 @@ export class ReloadIndexCommand extends BasicCommand<
         return;
       }
       if (error) {
-        const msg = "init error";
-        initError = error;
-        this.L.error({ ctx, error, msg });
+        // There may be one or more errors,
+        const errorsList = DendronCompositeError.errorsList(error);
+        errorsList.forEach((error) => {
+          if (DuplicateNoteError.isDuplicateNoteError(error) && error.code) {
+            VSCodeUtils.showMessage(MessageSeverity.WARN, error.message, {});
+            AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound);
+            this.L.info({ ctx, error, msg: "Duplicate note IDs found" });
+          } else {
+            // Warn about any errors not handled above
+            this.L.error({
+              ctx,
+              error,
+              msg: `Initialization error: ${error.message}`,
+            });
+          }
+        });
+        if (errorsList.length === 0) {
+          // For backwards compatibility, warn if there are warnings that are
+          // non-fatal errors not covered by the new error architecture
+          this.L.error({ ctx, error, msg: "init error" });
+        }
       }
       return autoFixActions;
     };

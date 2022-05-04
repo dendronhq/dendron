@@ -98,6 +98,11 @@
           "contextualTitle": "Calendar View",
           "type": "webview",
           "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.help-and-feedback",
+          "name": "Help and Feedback",
+          "when": "dendron:pluginActive"
         }
       ]
     },

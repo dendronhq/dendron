@@ -26,6 +26,7 @@ export enum VSCodeEvents {
   ShowInactiveUserMessage = "Show_Inactive_User_Message",
   FeatureShowcaseDisplayed = "FeatureShowcasedDisplayed",
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
+  HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
 }
 
 export enum CLIEvents {

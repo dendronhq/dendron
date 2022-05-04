@@ -69,6 +69,7 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { CalendarView } from "./views/CalendarView";
 import TipOfTheDayWebview from "./features/TipOfTheDayWebview";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
+import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -522,8 +523,12 @@ export class DendronExtension implements IDendronExtension {
         // Tip of the Day
         const tipOfDayView = this.setupTipOfTheDayView();
 
+        // Help and Feedback
+        const helpAndFeedbackView = setupHelpFeedbackTreeView();
+
         context.subscriptions.push(backlinkTreeView);
         context.subscriptions.push(tipOfDayView);
+        context.subscriptions.push(helpAndFeedbackView);
       }
     });
   }

@@ -17,7 +17,6 @@ import {
   StrictConfigV5,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
-import { cosmiconfigSync } from "cosmiconfig";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -195,15 +194,23 @@ export class DConfig {
   static searchLocalConfigSync(
     wsRoot: string
   ): RespV3<IntermediateDendronConfig> {
-    const explorerSync = cosmiconfigSync("dendron", {
-      searchPlaces: [CONSTANTS.DENDRON_LOCAL_CONFIG_FILE],
-    });
-    const searchedFor = explorerSync.search(wsRoot);
-    if (searchedFor?.config) {
+    const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
+    const globalPath = path.join(
+      os.homedir(),
+      CONSTANTS.DENDRON_LOCAL_CONFIG_FILE
+    );
+    let foundPath: string | undefined;
+
+    if (fs.existsSync(globalPath)) {
+      foundPath = globalPath;
+    }
+    if (fs.existsSync(wsPath)) {
+      foundPath = wsPath;
+    }
+    if (foundPath) {
       // TODO: do validation in the future
-      return {
-        data: searchedFor.config as IntermediateDendronConfig,
-      };
+      const data = readYAML(foundPath) as IntermediateDendronConfig;
+      return { data };
     }
     return {
       error: ErrorFactory.create404Error({
@@ -236,8 +243,9 @@ export class DConfig {
       _.mergeWith(
         config,
         maybeLocalConfig.data,
-        (objValue: any, srcValue: any, key: string) => {
-          if (key === "vaults") {
+        (objValue: any, srcValue: any) => {
+          // TODO: optimize, check for keys of known arrays instead
+          if (_.isArray(objValue)) {
             return srcValue.concat(objValue);
           }
           return;

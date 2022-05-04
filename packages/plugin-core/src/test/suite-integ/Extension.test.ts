@@ -16,22 +16,15 @@ import {
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
+import { ConfigUtils, InstallStatus, Time } from "@dendronhq/common-all";
+import { DConfig, MetadataService } from "@dendronhq/engine-server";
 import * as mocha from "mocha";
 import { describe } from "mocha";
-import path from "path";
-import sinon, { SinonStub } from "sinon";
-import { ExtensionContext } from "vscode";
+import sinon from "sinon";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { StateService } from "../../services/stateService";
 import { StartupUtils } from "../../utils/StartupUtils";
-import { _activate } from "../../_extension";
-import { expect, resetCodeWorkspace } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  runTestButSkipForWindows,
-  setupBeforeAfter,
-} from "../testUtilsV3";
-import { VSCodeTestUtils, WorkspaceTestUtils } from "../utils";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS } from "../testUtilsV3";
 
 async function inactiveMessageTest(opts: {
   done: mocha.Done;
@@ -70,141 +63,6 @@ async function inactiveMessageTest(opts: {
 }
 
 // These tests run on Windows too actually, but fail on the CI. Skipping for now.
-suite("GIVEN a native workspace", function () {
-  this.timeout(6 * 1000);
-  runTestButSkipForWindows()("AND `dendron.yml` is nested in a folder", () => {
-    let homeDirStub: SinonStub;
-    let userConfigDirStub: SinonStub;
-    let wsFoldersStub: SinonStub;
-    const ctx: ExtensionContext = setupBeforeAfter(this, {
-      beforeHook: async () => {
-        // Required for StateService Singleton Init at the moment.
-        // eslint-disable-next-line no-new
-        new StateService({
-          globalState: ctx.globalState,
-          workspaceState: ctx.workspaceState,
-        });
-        await resetCodeWorkspace();
-        homeDirStub = TestEngineUtils.mockHomeDir();
-        userConfigDirStub = VSCodeTestUtils.mockUserConfigDir();
-        const wsRoot = tmpDir().name;
-        const docsRoot = path.join(wsRoot, "docs");
-        await fs.ensureDir(docsRoot);
-        // Initializing with the wsRoot, but `dendron.yml` is under `wsRoot/docs` like it may be in some native workspace setups
-        writeYAML(
-          path.join(docsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
-          ConfigUtils.genDefaultConfig()
-        );
-        wsFoldersStub = VSCodeTestUtils.stubWSFolders(wsRoot);
-      },
-      afterHook: async () => {
-        homeDirStub.restore();
-        userConfigDirStub.restore();
-        wsFoldersStub.restore();
-      },
-      noSetInstallStatus: true,
-    });
-
-    test("THEN it activates correctly", (done) => {
-      _activate(ctx).then((resp) => {
-        expect(resp).toBeTruthy();
-        const dendronState = MetadataService.instance().getMeta();
-        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
-        done();
-      });
-    });
-  });
-
-  runTestButSkipForWindows()("AND `dendron.yml` is in the root", () => {
-    let homeDirStub: SinonStub;
-    let userConfigDirStub: SinonStub;
-    let wsFoldersStub: SinonStub;
-    const ctx: ExtensionContext = setupBeforeAfter(this, {
-      beforeHook: async () => {
-        // Required for StateService Singleton Init at the moment.
-        // eslint-disable-next-line no-new
-        new StateService({
-          globalState: ctx.globalState,
-          workspaceState: ctx.workspaceState,
-        });
-        await resetCodeWorkspace();
-        homeDirStub = TestEngineUtils.mockHomeDir();
-        userConfigDirStub = VSCodeTestUtils.mockUserConfigDir();
-        const wsRoot = tmpDir().name;
-        writeYAML(
-          path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
-          ConfigUtils.genDefaultConfig()
-        );
-        wsFoldersStub = VSCodeTestUtils.stubWSFolders(wsRoot);
-      },
-      afterHook: async () => {
-        homeDirStub.restore();
-        userConfigDirStub.restore();
-        wsFoldersStub.restore();
-      },
-      noSetInstallStatus: true,
-    });
-
-    test("THEN it activates correctly", (done) => {
-      _activate(ctx).then((resp) => {
-        expect(resp).toBeTruthy();
-        const dendronState = MetadataService.instance().getMeta();
-        expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();
-        expect(isNotUndefined(dendronState.firstWsInitialize)).toBeFalsy();
-        done();
-      });
-    });
-  });
-});
-
-suite("GIVEN regular activation", () => {
-  describe.skip("AND WHEN local override is present", () => {
-    const configOverride: DeepPartial<IntermediateDendronConfig> = {
-      workspace: {
-        enableAutoCreateOnDefinition: true,
-        enableUserTags: false,
-      },
-    };
-    let mockHomeDirStub: sinon.SinonStub;
-
-    async function afterHook() {
-      mockHomeDirStub.restore();
-      sinon.restore();
-    }
-
-    describeMultiWS(
-      "AND WHEN override is in workspace",
-      {
-        preActivateHook: async ({ wsRoot }) => {
-          mockHomeDirStub = TestEngineUtils.mockHomeDir();
-          await DConfig.writeLocalConfig({
-            wsRoot,
-            config: configOverride,
-            configScope: LocalConfigScope.WORKSPACE,
-          });
-        },
-        afterHook,
-      },
-      () => {
-        // we prevent this from happening in new vscode instances.
-        test("THEN merge workspace config", () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
-          const expectedConfig = WorkspaceTestUtils.generateDefaultConfig({
-            vaults,
-          });
-          // TODO: remove this
-          // @ts-ignore
-          expectedConfig.workspace = {
-            ...expectedConfig.workspace,
-            ...configOverride.workspace,
-          };
-          expect(engine.config).toEqual(expectedConfig);
-        });
-      }
-    );
-  });
-});
 
 describe("shouldDisplayInactiveUserSurvey", () => {
   const ONE_WEEK = 604800;

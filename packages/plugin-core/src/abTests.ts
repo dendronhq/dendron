@@ -114,6 +114,25 @@ export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
   },
 ]);
 
+export enum GraphThemeFeatureShowcaseTestGroups {
+  showMeHow = "showMeHow",
+  openGraph = "openGraphView",
+}
+
+export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
+  "GraphThemeFeatureShowcaseTest",
+  [
+    {
+      name: GraphThemeFeatureShowcaseTestGroups.openGraph,
+      weight: 1,
+    },
+    {
+      name: GraphThemeFeatureShowcaseTestGroups.showMeHow,
+      weight: 1,
+    },
+  ]
+);
+
 /** All A/B tests that are currently running.
  *
  * ^tkqhy45hflfd
@@ -124,4 +143,5 @@ export const CURRENT_AB_TESTS = [
   MEETING_NOTE_TUTORIAL_TEST,
   MEETING_NOTE_FEATURE_SHOWCASE_TEST,
   GRAPH_THEME_TEST,
+  GRAPH_THEME_FEATURE_SHOWCASE_TEST,
 ];

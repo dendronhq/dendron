@@ -1097,9 +1097,17 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ message: "cloning non-git vault" });
+      throw new DendronError({
+        message: "Internal error: cloning non-git vault",
+      });
     }
-    const repoPath = vault2Path({ wsRoot, vault });
+    if (vault.workspace !== undefined || vault.seed !== undefined) {
+      throw new DendronError({
+        message:
+          "Internal error: can't clone workspace and seed vaults directly",
+      });
+    }
+    const repoPath = path.join(wsRoot, vault.fsPath);
     this.logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);

@@ -15,6 +15,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import { MessageItem, window } from "vscode";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files are missing", {}, () => {
@@ -67,6 +68,112 @@ suite("GIVEN ReloadIndex", function () {
       ).toBeTruthy();
     });
   });
+
+  describeSingleWS("WHEN there are 2 notes with duplicate note IDs", {}, () => {
+    const duplicateId = "duplicate";
+    const firstNote = "first";
+    const secondNote = "second";
+    let showMessage: sinon.SinonStub<
+      Parameters<typeof VSCodeUtils["showMessage"]>
+    >;
+    before(async () => {
+      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      await NoteTestUtilsV4.createNote({
+        fname: firstNote,
+        vault: vaults[0],
+        wsRoot,
+        props: {
+          id: duplicateId,
+        },
+      });
+      await NoteTestUtilsV4.createNote({
+        fname: secondNote,
+        vault: vaults[0],
+        wsRoot,
+        props: {
+          id: duplicateId,
+        },
+      });
+      showMessage = sinon.stub(VSCodeUtils, "showMessage").resolves(undefined);
+
+      await new ReloadIndexCommand().run();
+    });
+
+    test("THEN warns that there are notes with duplicated IDs", async () => {
+      const { vaults } = ExtensionProvider.getDWorkspace();
+      expect(showMessage.callCount).toEqual(1);
+      expect(showMessage.firstCall.args[1].includes(firstNote)).toBeTruthy();
+      expect(showMessage.firstCall.args[1].includes(secondNote)).toBeTruthy();
+      expect(
+        showMessage.firstCall.args[1].includes(VaultUtils.getName(vaults[0]))
+      ).toBeTruthy();
+    });
+  });
+
+  describeSingleWS(
+    "WHEN there are many notes with duplicate note IDs",
+    {},
+    () => {
+      const duplicateId = "duplicate";
+      const firstNote = "first";
+      const secondNote = "second";
+      const thirdNote = "third";
+      let showMessage: sinon.SinonStub<
+        Parameters<typeof VSCodeUtils["showMessage"]>
+      >;
+      before(async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        await NoteTestUtilsV4.createNote({
+          fname: firstNote,
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            id: duplicateId,
+          },
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: secondNote,
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            id: duplicateId,
+          },
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: thirdNote,
+          vault: vaults[0],
+          wsRoot,
+          props: {
+            id: duplicateId,
+          },
+        });
+        showMessage = sinon
+          .stub(VSCodeUtils, "showMessage")
+          .resolves(undefined);
+
+        await new ReloadIndexCommand().run();
+      });
+
+      test("THEN warns multiple times that there are notes with duplicated IDs", async () => {
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        expect(showMessage.callCount).toEqual(2);
+        expect(showMessage.getCall(0).args[1].includes(firstNote)).toBeTruthy();
+        expect(
+          showMessage.getCall(0).args[1].includes(secondNote)
+        ).toBeTruthy();
+        expect(
+          showMessage.getCall(0).args[1].includes(VaultUtils.getName(vaults[0]))
+        ).toBeTruthy();
+        expect(
+          showMessage.getCall(1).args[1].includes(secondNote)
+        ).toBeTruthy();
+        expect(showMessage.getCall(1).args[1].includes(thirdNote)).toBeTruthy();
+        expect(
+          showMessage.getCall(1).args[1].includes(VaultUtils.getName(vaults[0]))
+        ).toBeTruthy();
+      });
+    }
+  );
 
   describeMultiWS("WHEN there is a single vault missing", {}, () => {
     before(async () => {

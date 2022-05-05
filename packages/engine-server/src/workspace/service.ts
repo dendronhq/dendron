@@ -32,6 +32,7 @@ import {
   DLogger,
   GitUtils,
   note2File,
+  pathForVaultRoot,
   readJSONWithComments,
   schemaModuleOpts2File,
   simpleGit,
@@ -1097,9 +1098,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ message: "cloning non-git vault" });
+      throw new DendronError({
+        message: "Internal error: cloning non-git vault",
+      });
     }
-    const repoPath = vault2Path({ wsRoot, vault });
+    const repoPath = pathForVaultRoot({ vault, wsRoot });
     this.logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);
@@ -1446,7 +1449,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await Promise.all(
         _.map(workspaces, async (wsEntry, wsName) => {
           const wsPath = path.join(wsRoot, wsName);
-          if (!fs.existsSync(wsPath)) {
+          if (!(await fs.pathExists(wsPath))) {
             return {
               wsPath: await this.cloneWorkspace({
                 wsName,
@@ -1503,7 +1506,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot }))
+        !fs.existsSync(path.join(wsRoot, vault.fsPath))
     );
     const didClone =
       !_.isEmpty(emptyRemoteVaults) ||

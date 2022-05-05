@@ -101,8 +101,7 @@
         },
         {
           "id": "dendron.help-and-feedback",
-          "name": "Help and Feedback",
-          "when": "dendron:pluginActive"
+          "name": "Help and Feedback"
         }
       ]
     },

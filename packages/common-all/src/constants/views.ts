@@ -29,6 +29,7 @@ export enum DendronTreeViewKey {
   CALENDAR_VIEW = "dendron.calendar-view",
   LOOKUP_VIEW = "dendron.lookup-view",
   TIP_OF_THE_DAY = "dendron.tip-of-the-day",
+  HELP_AND_FEEDBACK = "dendron.help-and-feedback",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -97,6 +98,11 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
   [DendronTreeViewKey.TIP_OF_THE_DAY]: {
     desc: "Feature Showcase",
     label: "Feature Showcase",
+    type: "nativeview",
+  },
+  [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
+    desc: "Help and Feedback",
+    label: "Help and Feedback",
     type: "nativeview",
   },
 };

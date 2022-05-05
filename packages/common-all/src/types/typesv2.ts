@@ -249,7 +249,7 @@ export type RespV3<T> =
 
 export type BooleanResp =
   | { data: true; error: null }
-  | { data: false; error: DendronError };
+  | { data: false; error: IDendronError };
 
 export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
@@ -263,7 +263,7 @@ export type RespRequired<T> =
       error: null | undefined;
       data: T;
     }
-  | { error: DendronError; data: undefined };
+  | { error: IDendronError; data: undefined };
 
 export interface QueryOptsV2 {
   /**

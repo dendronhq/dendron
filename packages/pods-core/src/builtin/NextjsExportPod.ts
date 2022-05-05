@@ -12,6 +12,7 @@ import {
   configIsV4,
   DendronPublishingConfig,
   TreeUtils,
+  RespV3,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -81,6 +82,11 @@ function getSiteConfig({
       enablePrettyLinks: true,
     } as DendronPublishingConfig;
   }
+}
+
+function validateSiteConfig(config: any): RespV3<boolean> {
+  // TODO: implement
+  return { data: true };
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
@@ -335,13 +341,23 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       const logoPath = path.join(wsRoot, logo);
       fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
-    // /get cname
+    // get cname
     const githubConfig = ConfigUtils.getGithubConfig(config);
     const githubCname = githubConfig.cname;
     if (githubCname) {
       fs.writeFileSync(path.join(destPublicPath, "CNAME"), githubCname, {
         encoding: "utf8",
       });
+    }
+
+    // copy over custom theme if it exists
+    if (fs.existsSync(path.join(wsRoot, "custom.css"))) {
+      const themesRoot = path.join(destPublicPath, "themes");
+      fs.ensureDirSync(themesRoot);
+      fs.copySync(
+        path.join(wsRoot, "custom.css"),
+        path.join(themesRoot, "custom.css")
+      );
     }
   }
 
@@ -404,6 +420,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       config: engine.config,
       overrides: podConfig.overrides,
     });
+
+    const { error } = validateSiteConfig(siteConfig);
+    if (error) {
+      throw error;
+    }
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 

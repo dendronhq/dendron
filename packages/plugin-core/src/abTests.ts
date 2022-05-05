@@ -11,6 +11,13 @@ export enum UpgradeToastWordingTestGroups {
   openChangelog = "openChangelog",
 }
 
+/**
+ * Section: Tests (Active or soon to be active)
+ *
+ * NOTE: please follow this convention for naming future tests:
+ * YYYY-MM-TEST_NAME.  For example, 2022-04-MEETING_NOTE_FEATURE_SHOWCASE
+ */
+
 /** Test if showing a web view on an upgrade is more successful than showing a toast notification. */
 export const UPGRADE_TOAST_WORDING_TEST = new ABTest(
   "UpgradeToastWordingTest",
@@ -110,7 +117,3 @@ export const CURRENT_AB_TESTS = [
   MEETING_NOTE_TUTORIAL_TEST,
   GRAPH_THEME_TEST,
 ];
-
-// Concluded Experiments (NOTE: make sure that you don't re-use these strings as
-// the name of a future AB Test to avoid conflicting strings):
-// - MeetingNoteFeatureShowcaseTest

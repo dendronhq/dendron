@@ -84,6 +84,7 @@ workspace:
         todoIntegration: false
         createTaskSelectionType: selection2link
     enableEditorDecorations: true
+    enableFullHierarchyNoteTitle: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true

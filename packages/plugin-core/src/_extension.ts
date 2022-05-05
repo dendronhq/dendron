@@ -681,6 +681,12 @@ export async function _activate(
         extensionInstallStatus,
       });
 
+      // check for deprecated config keys and prompt for removal.
+      StartupUtils.showDeprecatedConfigMessageIfNecessary({
+        ext: ws,
+        extensionInstallStatus,
+      });
+
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 

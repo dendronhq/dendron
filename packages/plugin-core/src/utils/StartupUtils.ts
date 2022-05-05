@@ -13,6 +13,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   DConfig,
+  DEPRECATED_PATHS,
   DoctorActionsEnum,
   InactvieUserMsgStatusEnum,
   LapsedUserSurveyStatusEnum,
@@ -87,6 +88,57 @@ export class StartupUtils {
         currentVersion,
       });
     }
+  }
+
+  static showDeprecatedConfigMessageIfNecessary(opts: {
+    ext: IDendronExtension;
+    extensionInstallStatus: InstallStatus;
+  }) {
+    if (StartupUtils.shouldDisplayDeprecatedConfigMessage(opts)) {
+      StartupUtils.showDeprecatedConfigMessage({ ext: opts.ext });
+    }
+  }
+
+  static shouldDisplayDeprecatedConfigMessage(opts: {
+    ext: IDendronExtension;
+    extensionInstallStatus: InstallStatus;
+  }): boolean {
+    if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
+      const wsRoot = opts.ext.getDWorkspace().wsRoot;
+      const rawConfig = DConfig.getRaw(wsRoot);
+      const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
+        config: rawConfig,
+        deprecatedPaths: DEPRECATED_PATHS,
+      });
+      return pathsToDelete.length > 0;
+    } else {
+      return false;
+    }
+  }
+
+  static showDeprecatedConfigMessage(opts: { ext: IDendronExtension }) {
+    AnalyticsUtils.track(ConfigEvents.DeprecatedConfigMessageShow);
+    const REMOVE_CONFIG = "Remove Deprecated Configuration";
+    const MESSAGE =
+      "We have detected some deprecated configurations. Would you like to remove them from dendron.yml?";
+    vscode.window
+      .showInformationMessage(MESSAGE, REMOVE_CONFIG)
+      .then(async (resp) => {
+        if (resp === REMOVE_CONFIG) {
+          AnalyticsUtils.track(ConfigEvents.DeprecatedConfigMessageConfirm, {
+            status: ConfirmStatus.accepted,
+          });
+          const cmd = new DoctorCommand(opts.ext);
+          await cmd.execute({
+            action: DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS,
+            scope: "workspace",
+          });
+        } else {
+          AnalyticsUtils.track(ConfigEvents.DeprecatedConfigMessageConfirm, {
+            status: ConfirmStatus.rejected,
+          });
+        }
+      });
   }
 
   static showMissingDefaultConfigMessageIfNecessary(opts: {

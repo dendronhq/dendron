@@ -10,6 +10,7 @@ import {
 import { readYAMLAsync, tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
   DConfig,
+  DEPRECATED_PATHS,
   EngineUtils,
   getWSMetaFilePath,
   MetadataService,
@@ -1160,6 +1161,110 @@ suite("missing default config detection", () => {
         [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
           (extensionInstallStatus) => {
             const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+              ext,
+              extensionInstallStatus,
+            });
+            expect(out).toBeFalsy();
+          }
+        );
+      });
+    });
+  });
+});
+
+suite("deprecated config detection", () => {
+  describeMultiWS(
+    "GIVEN dendron.yml with deprecated key",
+    {
+      modConfigCb: (config) => {
+        // @ts-ignore
+        config.dev = { enableWebUI: true };
+        return config;
+      },
+      timeout: 1e5,
+    },
+    () => {
+      test("THEN deprecated key is detected", () => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getRaw(ws.wsRoot);
+        expect((config.dev as any).enableWebUI).toBeTruthy();
+        const out = ConfigUtils.detectDeprecatedConfigs({
+          config,
+          deprecatedPaths: DEPRECATED_PATHS,
+        });
+        expect(out).toEqual(["dev.enableWebUI"]);
+      });
+    }
+  );
+
+  describe("GIVEN upgraded", () => {
+    describeMultiWS(
+      "AND deprecated key exists",
+      {
+        modConfigCb: (config) => {
+          // @ts-ignore
+          config.dev = { enableWebUI: true };
+          return config;
+        },
+        timeout: 1e5,
+      },
+      () => {
+        test("THEN prompted to remove deprecated config", () => {
+          const ext = ExtensionProvider.getExtension();
+          const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
+            ext,
+            extensionInstallStatus: InstallStatus.UPGRADED,
+          });
+          expect(out).toBeTruthy();
+        });
+      }
+    );
+
+    describeMultiWS("AND deprecated key doesn't exist", {}, () => {
+      test("THEN not prompted to remove deprecated config", () => {
+        const ext = ExtensionProvider.getExtension();
+        const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
+          ext,
+          extensionInstallStatus: InstallStatus.UPGRADED,
+        });
+        expect(out).toBeFalsy();
+      });
+    });
+  });
+
+  describe("GIVEN not upgraded", () => {
+    describeMultiWS(
+      "AND deprecated key exists",
+      {
+        modConfigCb: (config) => {
+          // @ts-ignore
+          config.dev = { enableWebUI: true };
+          return config;
+        },
+        timeout: 1e5,
+      },
+      () => {
+        test("THEN not prompted to remove deprecated config", () => {
+          const ext = ExtensionProvider.getExtension();
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+            (extensionInstallStatus) => {
+              const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
+                ext,
+                extensionInstallStatus,
+              });
+              expect(out).toBeFalsy();
+            }
+          );
+        });
+      }
+    );
+
+    describeMultiWS("AND deprecated key doesn't exist", {}, () => {
+      test("THEN not prompted to remove deprecated config", () => {
+        const ext = ExtensionProvider.getExtension();
+        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
+          (extensionInstallStatus) => {
+            const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
               ext,
               extensionInstallStatus,
             });

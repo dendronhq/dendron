@@ -30,6 +30,7 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
+  DConfig,
   HistoryService,
   MetadataService,
   WorkspaceService,
@@ -292,9 +293,19 @@ class ExtensionUtils {
       workspaceFolders: _.isUndefined(workspaceFolders)
         ? 0
         : workspaceFolders.length,
+      hasLocalConfig: false,
+      numLocalConfigVaults: 0,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
+    }
+    const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
+    if (maybeLocalConfig.data) {
+      trackProps.hasLocalConfig = true;
+      if (maybeLocalConfig.data.workspace.vaults) {
+        trackProps.numLocalConfigVaults =
+          maybeLocalConfig.data.workspace.vaults.length;
+      }
     }
 
     AnalyticsUtils.identify({

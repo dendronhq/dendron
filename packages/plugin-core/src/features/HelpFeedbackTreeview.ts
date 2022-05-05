@@ -20,6 +20,7 @@ enum MenuItem {
   reviewIssues = "Review Issues",
   reportIssue = "Report Issue",
   joinCommunity = "Join our Community!",
+  followUs = "Follow our Progress",
 }
 
 class HelpFeedbackTreeDataProvider implements TreeDataProvider<MenuItem> {
@@ -49,6 +50,10 @@ class HelpFeedbackTreeDataProvider implements TreeDataProvider<MenuItem> {
 
       case MenuItem.joinCommunity:
         iconPath = new ThemeIcon("organization");
+        break;
+
+      case MenuItem.followUs:
+        iconPath = new ThemeIcon("twitter");
         break;
 
       default:
@@ -103,7 +108,7 @@ export default function setupHelpFeedbackTreeView(): vscode.TreeView<MenuItem> {
         break;
 
       case MenuItem.readDocs:
-        openUrl("https://wiki.dendron.so/notes/F5ly88oU0ecUiACLxET5E/");
+        openUrl("https://wiki.dendron.so/notes/FWtrGfE4YJc3j0yMNjBn5/");
         break;
 
       case MenuItem.reviewIssues:
@@ -115,7 +120,11 @@ export default function setupHelpFeedbackTreeView(): vscode.TreeView<MenuItem> {
         break;
 
       case MenuItem.joinCommunity:
-        openUrl("https://discord.gg/S5MQrwZD7R");
+        openUrl("https://discord.com/invite/xrKTUStHNZ");
+        break;
+
+      case MenuItem.followUs:
+        openUrl("https://twitter.com/dendronhq");
         break;
 
       default:

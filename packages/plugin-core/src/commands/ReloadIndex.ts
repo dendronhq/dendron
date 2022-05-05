@@ -1,6 +1,5 @@
 import {
   ConfigEvents,
-  DendronCompositeError,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
@@ -11,6 +10,8 @@ import {
   SchemaUtils,
   VaultUtils,
   WorkspaceEvents,
+  DuplicateNoteError,
+  errorsList,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -18,11 +19,7 @@ import {
   schemaModuleOpts2File,
   vault2Path,
 } from "@dendronhq/common-server";
-import {
-  DoctorActionsEnum,
-  DoctorService,
-  DuplicateNoteError,
-} from "@dendronhq/engine-server";
+import { DoctorActionsEnum, DoctorService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -240,8 +237,8 @@ export class ReloadIndexCommand extends BasicCommand<
       }
       if (error) {
         // There may be one or more errors,
-        const errorsList = DendronCompositeError.errorsList(error);
-        errorsList.forEach((error) => {
+        const errors = errorsList(error);
+        errors.forEach((error) => {
           if (DuplicateNoteError.isDuplicateNoteError(error) && error.code) {
             VSCodeUtils.showMessage(MessageSeverity.WARN, error.message, {});
             AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound);
@@ -255,7 +252,7 @@ export class ReloadIndexCommand extends BasicCommand<
             });
           }
         });
-        if (errorsList.length === 0) {
+        if (errors.length === 0) {
           // For backwards compatibility, warn if there are warnings that are
           // non-fatal errors not covered by the new error architecture
           this.L.error({ ctx, error, msg: "init error" });

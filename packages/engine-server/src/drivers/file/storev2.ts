@@ -47,9 +47,7 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
-  BaseDendronError,
-  StatusCodes,
-  DendronErrorProps,
+  DuplicateNoteError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -69,60 +67,6 @@ import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
-
-export enum EngineInitErrorType {
-  DUPLICATE_NOTE_ID = "duplicate note id",
-}
-
-export class DuplicateNoteError extends BaseDendronError<EngineInitErrorType.DUPLICATE_NOTE_ID> {
-  translateToHTTPErrorCode(): StatusCodes | undefined {
-    return StatusCodes.INTERNAL_SERVER_ERROR;
-  }
-
-  constructor(
-    opts: Omit<
-      DendronErrorProps<EngineInitErrorType.DUPLICATE_NOTE_ID>,
-      "name" | "message" | "severity"
-    > & {
-      noteA: NoteProps;
-      noteB: NoteProps;
-    }
-  ) {
-    super({
-      ...opts,
-      severity: ERROR_SEVERITY.MINOR,
-      message: `Notes ${opts.noteA.fname} in ${VaultUtils.getName(
-        opts.noteA.vault
-      )} and ${opts.noteB.fname} in ${VaultUtils.getName(
-        opts.noteB.vault
-      )} have duplicate IDs.`,
-      code: EngineInitErrorType.DUPLICATE_NOTE_ID,
-    });
-    this.noteA = {
-      fname: opts.noteA.fname,
-      vault: opts.noteA.vault,
-    };
-    this.noteB = {
-      fname: opts.noteB.fname,
-      vault: opts.noteB.vault,
-    };
-  }
-
-  public noteA: {
-    fname: string;
-    vault: DVault;
-  };
-  public noteB: {
-    fname: string;
-    vault: DVault;
-  };
-
-  static isDuplicateNoteError(
-    error: IDendronError<any>
-  ): error is DuplicateNoteError {
-    return Object.values(EngineInitErrorType).includes(error.code);
-  }
-}
 
 export class FileStorage implements DStore {
   public vaults: DVault[];

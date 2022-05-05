@@ -47,7 +47,7 @@ type ServerErrorProps = {
 export type IDendronError<TCode = StatusCodes | undefined> =
   DendronErrorProps<TCode>;
 
-export abstract class BaseDendronError<TCode = StatusCodes | undefined>
+export class DendronError<TCode = StatusCodes | undefined>
   extends Error
   implements IDendronError<TCode>
 {
@@ -93,14 +93,8 @@ export abstract class BaseDendronError<TCode = StatusCodes | undefined>
     return this.stringifyForLogs();
   }
 
-  /** Returns the HTTP error code equivalent for this error.
-   *
-   * Override this to change
-   */
-  abstract translateToHTTPErrorCode(): StatusCodes | undefined;
-
   /** If false, this error does not necessarily mean the operation failed. It should be possible to recover and resume. */
-  public isFatal() {
+  public get isFatal() {
     return this.severity === ERROR_SEVERITY.FATAL;
   }
 
@@ -159,15 +153,6 @@ export abstract class BaseDendronError<TCode = StatusCodes | undefined>
   }
 }
 
-export class DendronError
-  extends BaseDendronError
-  implements IDendronError<StatusCodes>
-{
-  translateToHTTPErrorCode(): StatusCodes | undefined {
-    return this.code;
-  }
-}
-
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: DendronErrorProps[];
   public severity?: ERROR_SEVERITY;
@@ -218,22 +203,22 @@ export class DendronCompositeError extends Error implements IDendronError {
 
     return (
       _.isArray(error.payload) &&
-      error.payload.every(BaseDendronError.isDendronError)
+      error.payload.every(DendronError.isDendronError)
     );
   }
+}
 
-  /** If the error is a composite error, then returns the list of errors inside it.
-   *
-   * If it is a single error, then returns that single error in a list.
-   *
-   * If this was not a Dendron error, then returns an empty list.
-   */
-  static errorsList(error: any) {
-    if (DendronCompositeError.isDendronCompositeError(error))
-      return error.payload;
-    if (BaseDendronError.isDendronError(error)) return [error];
-    return [];
-  }
+/** If the error is a composite error, then returns the list of errors inside it.
+ *
+ * If it is a single error, then returns that single error in a list.
+ *
+ * If this was not a Dendron error, then returns an empty list.
+ */
+export function errorsList(error: any) {
+  if (DendronCompositeError.isDendronCompositeError(error))
+    return error.payload;
+  if (DendronError.isDendronError(error)) return [error];
+  return [];
 }
 
 export class DendronServerError

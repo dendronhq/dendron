@@ -440,6 +440,13 @@ export function tmpDir(): DirResult {
   return dirPath;
 }
 
+/** Returns the path to where the notes are stored inside the vault.
+ *
+ * For self contained vaults, this is the `notes` folder inside of the vault.
+ * For other vault types, this is the root of the vault itself.
+ *
+ * If you always need the root of the vault, use {@link pathForVaultRoot} instead.
+ */
 export const vault2Path = ({
   vault,
   wsRoot,
@@ -449,6 +456,24 @@ export const vault2Path = ({
 }) => {
   return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
+
+/** Returns the root of the vault.
+ *
+ * This is similar to {@link vault2Path}, the only difference is that for self
+ * contained vaults `vault2Path` returns the `notes` folder inside the vault,
+ * while this returns the root of the vault.
+ */
+export function pathForVaultRoot({
+  vault,
+  wsRoot,
+}: {
+  vault: DVault;
+  wsRoot: string;
+}) {
+  if (VaultUtils.isSelfContained(vault))
+    return resolvePath(path.join(wsRoot, vault.fsPath));
+  return vault2Path({ vault, wsRoot });
+}
 
 export function writeJSONWithCommentsSync(fpath: string, data: any) {
   const payload = stringify(data, null, 4);

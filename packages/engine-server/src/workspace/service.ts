@@ -32,6 +32,7 @@ import {
   DLogger,
   GitUtils,
   note2File,
+  pathForVaultRoot,
   readJSONWithComments,
   schemaModuleOpts2File,
   simpleGit,
@@ -1101,13 +1102,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         message: "Internal error: cloning non-git vault",
       });
     }
-    let repoPath: string;
-    if (vault.selfContained) {
-      // vault2Path gives the path to the `notes` folder for self contained vaults
-      repoPath = path.join(wsRoot, vault.fsPath);
-    } else {
-      repoPath = vault2Path({ vault, wsRoot });
-    }
+    const repoPath = pathForVaultRoot({ vault, wsRoot });
     this.logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);

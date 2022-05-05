@@ -37,6 +37,7 @@ data
 public/assets
 public/CNAME
 public/logo.*
+public/themes
 local
 
 # generated

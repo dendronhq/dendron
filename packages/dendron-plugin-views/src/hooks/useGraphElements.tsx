@@ -625,9 +625,18 @@ const useGraphElements = ({
   }, [noteActive, engine.notes, isLocalGraph]);
 
   useEffect(() => {
-    if (type === "note" && !isLocalGraph && !fullGraphVisited) {
+    if (
+      type === "note" &&
+      !isLocalGraph &&
+      !fullGraphVisited &&
+      noteCount > 0
+    ) {
       message.info({
-        content: `Your second brain is evolving... You have ${noteCount} notes connected internally with ${elements.edges.links?.length} links.`,
+        content: `Your second brain is evolving... You have ${noteCount} notes ${
+          elements.edges.links
+            ? `connected internally with ${elements.edges.links?.length} links`
+            : "."
+        }`,
         duration: 5,
         icon: <RiseOutlined />,
       });

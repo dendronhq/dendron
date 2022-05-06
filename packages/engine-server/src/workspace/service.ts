@@ -184,12 +184,17 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
-    // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
-    return WorkspaceService.getOrCreateConfig(this.wsRoot);
+    // TODO: don't read all the time but cache
+    return DConfig.readConfigAndApplyLocalOverrideSync(this.wsRoot);
   }
 
   get seedService(): SeedService {
     return this._seedService;
+  }
+
+  // NOTE: this is not accurate until the workspace is initialized
+  get vaults(): DVault[] {
+    return this.config.workspace.vaults;
   }
 
   async setConfig(config: IntermediateDendronConfig) {
@@ -875,9 +880,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   createConfig() {
-    // This line actually does something: it will create a config if one doesn't exist.
-    // eslint-disable-next-line no-unused-expressions
-    this.config;
+    return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
   static async createGitIgnore(wsRoot: string) {

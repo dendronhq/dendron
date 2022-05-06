@@ -60,6 +60,7 @@ import {
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
 import { VaultAddCommand } from "../commands/VaultAddCommand";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
@@ -68,7 +69,6 @@ import { DendronExtension, getDWorkspace } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
-import { ExtensionProvider } from "../ExtensionProvider";
 import {
   cleanupVSCodeContextSubscriptions,
   setupCodeConfiguration,

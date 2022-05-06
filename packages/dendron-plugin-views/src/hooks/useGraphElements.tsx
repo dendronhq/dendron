@@ -11,6 +11,7 @@ import {
   milliseconds,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
+import { message } from "antd";
 import { EdgeDefinition } from "cytoscape";
 import _ from "lodash";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import {
   GraphElements,
   GraphNodes,
 } from "../utils/graph";
+import { RiseOutlined } from "@ant-design/icons";
 
 const getVaultClass = (vault: DVault) => {
   const vaultName = VaultUtils.getName(vault);
@@ -576,7 +578,7 @@ const useGraphElements = ({
   logger.log({ msg: "enter", activeNoteId: noteActive?.id });
   const [noteCount, setNoteCount] = useState(0);
   const [schemaCount, setSchemaCount] = useState(0);
-
+  const [fullGraphVisited, setFullGraphVisited] = useState(false);
   const isLocalGraph = GraphUtils.isLocalGraph(config);
 
   // Prevent unnecessary parsing if no notes have been added/deleted and toggle Full NoteGraph on config change
@@ -621,6 +623,18 @@ const useGraphElements = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteActive, engine.notes, isLocalGraph]);
+
+  useEffect(() => {
+    if (type === "note" && !isLocalGraph && !fullGraphVisited) {
+      message.info({
+        content: `Your second brain is evolving... You have ${noteCount} notes connected internally with ${elements.edges.links?.length} links.`,
+        duration: 5,
+        icon: <RiseOutlined />,
+      });
+      setFullGraphVisited(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elements]);
 
   // Prevent unnecessary parsing if no schemas have been added/deleted
   useEffect(() => {

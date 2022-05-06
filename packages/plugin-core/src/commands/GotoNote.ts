@@ -18,6 +18,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
 import { PluginFileUtils } from "../utils/files";
+import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 import { BasicCommand } from "./base";
@@ -274,6 +275,13 @@ export class GotoNoteCommand extends BasicCommand<
     let pos: undefined | Position;
     const out = await this.extension.pauseWatchers<GoToNoteCommandOutput>(
       async () => {
+        const existing = await client.getNoteByPath({
+          npath: qs,
+          createIfNew: false,
+          vault,
+          overrides,
+        });
+
         const { data } = await client.getNoteByPath({
           npath: qs,
           createIfNew: true,
@@ -281,6 +289,19 @@ export class GotoNoteCommand extends BasicCommand<
           overrides,
         });
         const note = data?.note as NoteProps;
+
+        // If a new note is going to be created, check if we should send meeting
+        // note telemetry.
+        if (!existing.data?.note) {
+          let type = "general";
+
+          if (qs.startsWith("user.")) {
+            type = "userTag";
+          }
+
+          maybeSendMeetingNoteTelemetry(type);
+        }
+
         const npath = NoteUtils.getFullPath({
           note,
           wsRoot,

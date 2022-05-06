@@ -266,6 +266,7 @@ class ExtensionUtils {
     );
     const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
     const siteUrl = publishigConfig.siteUrl;
+    const publishingTheme = dendronConfig?.publishing?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
 
@@ -295,6 +296,9 @@ class ExtensionUtils {
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
+    }
+    if (publishingTheme !== undefined) {
+      _.set(trackProps, "publishingTheme", publishingTheme);
     }
 
     AnalyticsUtils.identify({

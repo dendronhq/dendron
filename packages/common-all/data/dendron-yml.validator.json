@@ -1133,6 +1133,9 @@
         "github": {
           "$ref": "#/definitions/GithubConfig"
         },
+        "theme": {
+          "$ref": "#/definitions/Theme"
+        },
         "segmentKey": {
           "type": "string"
         },
@@ -1328,6 +1331,14 @@
       "enum": [
         "tree",
         "edit"
+      ]
+    },
+    "Theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light",
+        "custom"
       ]
     }
   }

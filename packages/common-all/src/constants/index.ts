@@ -43,6 +43,8 @@ export const CONSTANTS = {
   DENDRON_INIT_VERSION: "0.0.0",
   /** Default for the `maxNoteLength` config. */
   DENDRON_DEFAULT_MAX_NOTE_LENGTH: 204800,
+  /** The file containing the custom theme CSS. Located at the workspace root. */
+  CUSTOM_THEME_CSS: "custom.css",
 };
 
 export const FOLDERS = {

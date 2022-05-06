@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  CONSTANTS,
   IntermediateDendronConfig,
   Theme,
 } from "@dendronhq/common-all";
@@ -30,7 +31,7 @@ import { NoteData } from "../utils/types";
 const themes: { [key in Theme]: string } = {
   dark: getAssetUrl(`/assets-dendron/css/dark.css`),
   light: getAssetUrl(`/assets-dendron/css/light.css`),
-  custom: getAssetUrl(`/themes/custom.css`),
+  custom: getAssetUrl(`/themes/${CONSTANTS.CUSTOM_THEME_CSS}`),
 };
 
 function AppContainer(appProps: AppProps) {

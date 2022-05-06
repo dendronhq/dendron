@@ -13,6 +13,10 @@ import {
   DendronPublishingConfig,
   TreeUtils,
   RespV3,
+  DendronError,
+  ERROR_SEVERITY,
+  Theme,
+  CONSTANTS,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -84,9 +88,28 @@ function getSiteConfig({
   }
 }
 
-function validateSiteConfig(config: any): RespV3<boolean> {
-  // TODO: implement
-  return { data: true };
+async function validateSiteConfig({
+  config,
+  wsRoot,
+}: {
+  config: DendronSiteConfig | DendronPublishingConfig;
+  wsRoot: string;
+}): Promise<RespV3<undefined>> {
+  if (ConfigUtils.isDendronPublishingConfig(config)) {
+    if (config.theme === Theme.CUSTOM) {
+      if (
+        !(await fs.pathExists(path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS)))
+      ) {
+        return {
+          error: new DendronError({
+            message: "A custom theme is set in ",
+            severity: ERROR_SEVERITY.FATAL,
+          }),
+        };
+      }
+    }
+  }
+  return { data: undefined };
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
@@ -350,13 +373,14 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       });
     }
 
-    // copy over custom theme if it exists
-    if (fs.existsSync(path.join(wsRoot, "custom.css"))) {
-      const themesRoot = path.join(destPublicPath, "themes");
-      fs.ensureDirSync(themesRoot);
+    // copy over the custom theme if it exists
+    const customThemePath = path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS);
+    if (await fs.pathExists(customThemePath)) {
+      const publishedThemeRoot = path.join(destPublicPath, "themes");
+      fs.ensureDirSync(publishedThemeRoot);
       fs.copySync(
-        path.join(wsRoot, "custom.css"),
-        path.join(themesRoot, "custom.css")
+        customThemePath,
+        path.join(publishedThemeRoot, CONSTANTS.CUSTOM_THEME_CSS)
       );
     }
   }
@@ -421,7 +445,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       overrides: podConfig.overrides,
     });
 
-    const { error } = validateSiteConfig(siteConfig);
+    const { error } = await validateSiteConfig({ config: siteConfig, wsRoot });
     if (error) {
       throw error;
     }

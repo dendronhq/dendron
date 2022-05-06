@@ -275,7 +275,9 @@ export class GotoNoteCommand extends BasicCommand<
     let pos: undefined | Position;
     const out = await this.extension.pauseWatchers<GoToNoteCommandOutput>(
       async () => {
-        const existing = await client.getNoteByPath({
+        // First query to see if the note exists to determine if we will send
+        // telemetry, createIfNew set to false
+        const respFromExistenceCheck = await client.getNoteByPath({
           npath: qs,
           createIfNew: false,
           vault,
@@ -292,7 +294,7 @@ export class GotoNoteCommand extends BasicCommand<
 
         // If a new note is going to be created, check if we should send meeting
         // note telemetry.
-        if (!existing.data?.note) {
+        if (!respFromExistenceCheck.data?.note) {
           let type = "general";
 
           if (qs.startsWith("user.")) {

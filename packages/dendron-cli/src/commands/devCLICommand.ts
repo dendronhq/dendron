@@ -20,7 +20,7 @@ import {
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
+import path, { basename } from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
 import {
@@ -42,6 +42,7 @@ export enum DevCommands {
   BUMP_VERSION = "bump_version",
   PUBLISH = "publish",
   SYNC_ASSETS = "sync_assets",
+  SYNC_TUTORIAL = "sync_tutorial",
   PREP_PLUGIN = "prep_plugin",
   PACKAGE_PLUGIN = "package_plugin",
   INSTALL_PLUGIN = "install_plugin",
@@ -223,6 +224,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case DevCommands.SYNC_ASSETS: {
           await this.syncAssets(opts);
+          return { error: null };
+        }
+        case DevCommands.SYNC_TUTORIAL: {
+          this.syncTutorial();
           return { error: null };
         }
         case DevCommands.PUBLISH: {
@@ -410,6 +415,57 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { staticPath } = await BuildUtils.syncStaticAssets();
     await BuildUtils.syncStaticAssetsToNextjsTemplate();
     return { staticPath };
+  }
+
+  syncTutorial() {
+    const pluginAssetPath = path.join(BuildUtils.getPluginRootPath(), "assets");
+    const tutorialAssetDirPath = path.join(
+      pluginAssetPath,
+      "dendron-ws",
+      "tutorial"
+    );
+    const lernaRoot = BuildUtils.getLernaRoot();
+    const dendronSitePath = path.join(
+      lernaRoot,
+      "docs",
+      "seeds",
+      "dendron.dendron-site"
+    );
+
+    // remove everything under tutorial.* in asset dir
+    const tutorialNotePaths = fs
+      .readdirSync(tutorialAssetDirPath)
+      .filter((basename) => {
+        return basename.startsWith("tutorial.") && basename.endsWith(".md");
+      })
+      .map((basename) => {
+        return path.join(tutorialAssetDirPath, basename);
+      });
+
+    tutorialNotePaths.forEach((path) => {
+      fs.unlinkSync(path);
+    });
+
+    // grab the tutorials from dendron-site
+    const dendronSiteVaultPath = path.join(dendronSitePath, "vault");
+    const newTutorialNotePathsCopyOpts = fs
+      .readdirSync(dendronSiteVaultPath)
+      .filter((basename) => {
+        return (
+          basename.startsWith("dendron.tutorial.") && basename.endsWith(".md")
+        );
+      })
+      .map((basename) => {
+        const destBasename = basename.split(".").slice(1).join(".");
+        return {
+          src: path.join(dendronSiteVaultPath, basename),
+          dest: path.join(tutorialAssetDirPath, destBasename),
+        };
+      });
+    newTutorialNotePathsCopyOpts.forEach((opts) => {
+      const { src, dest } = opts;
+      fs.copyFileSync(src, dest);
+    });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

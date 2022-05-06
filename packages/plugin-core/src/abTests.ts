@@ -15,7 +15,9 @@ export enum UpgradeToastWordingTestGroups {
  * Section: Tests (Active or soon to be active)
  *
  * NOTE: please follow this convention for naming future tests:
- * YYYY-MM-TEST_NAME.  For example, 2022-04-MEETING_NOTE_FEATURE_SHOWCASE
+ * YYYY-MM-TEST_NAME.  For example, 2022-04-MEETING_NOTE_FEATURE_SHOWCASE.
+ *
+ * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
  */
 
 /** Test if showing a web view on an upgrade is more successful than showing a toast notification. */

@@ -47,10 +47,6 @@ const useSyncGraphWithIDE = ({ graph, ide, engine, config }: Props) => {
       ) {
         graphActiveNode.select();
         graph.center(graphActiveNode);
-        graph.zoom({
-          level: 1.5, // the zoom level
-          renderedPosition: graphActiveNode.position(),
-        });
 
         setLastSelectedID(graphActiveNode.id());
       }

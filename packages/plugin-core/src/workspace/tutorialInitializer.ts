@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   DendronError,
   DVault,
   DWorkspaceV2,
@@ -16,7 +17,6 @@ import {
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
-import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
@@ -31,12 +31,6 @@ import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
-const MeetingNoteTutorialText = `
-### Meeting Notes
-
-Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the \`Dendron: Create Meeting Note\` command to create a note with a pre-built template for meetings.  Try it out!
-`;
-
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
  * launches the user into the tutorial layout after the workspace is opened.
@@ -49,7 +43,6 @@ export class TutorialInitializer
     vaults: DVault[];
     wsRoot: string;
   }): Promise<void> {
-    const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
     MetadataService.instance().setActivationContext(
@@ -61,35 +54,59 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
-
+    // this is the currently active tutorial AB testing group.
     const ABUserGroup = MEETING_NOTE_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 
-    const replaceString =
-      ABUserGroup === MeetingNoteTestGroups.show ? MeetingNoteTutorialText : "";
+    // this is the hierarchy of the treated tutorial.
+    // e.g. for the meeting note test group,
+    // the treated tutorial is in `dendron.tutorial.meeting-note.*`,
+    // so TREATMENT_NAME is `meeting-note`.
+    const TREATMENT_NAME = "meeting-note";
 
-    // Tailor the tutorial text to the particular OS and for their workspace location.
-    const options = {
-      files: [path.join(vpath, "*.md")],
+    let filter: fs.CopyFilterSync;
+    let replacePattern: string;
+    switch (ABUserGroup) {
+      // swap out to appropriate enum case for current AB testing group
+      case MeetingNoteTestGroups.show: {
+        filter = (filePath) => {
+          if (path.extname(filePath) === ".md") {
+            const basename = path.basename(filePath);
+            return (
+              basename === "root.md" ||
+              basename.startsWith(`tutorial.alt.${TREATMENT_NAME}`)
+            );
+          } else {
+            return true;
+          }
+        };
+        replacePattern = `tutorial.alt.${TREATMENT_NAME}`;
+        break;
+      }
+      // swap out to appropriate enum case for current AB testing group
+      case MeetingNoteTestGroups.noShow: {
+        filter = (filePath) => {
+          return !path.basename(filePath).startsWith("tutorial.alt.");
+        };
+        replacePattern = "tutorial.main";
+        break;
+      }
+      default:
+        assertUnreachable(ABUserGroup);
+    }
 
-      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g, /%MEETING_NOTE_CONTENT%/g],
-      to: [
-        process.platform === "darwin" ? "Cmd" : "Ctrl",
-        path.join(opts.wsRoot, "dendron.code-workspace"),
-        replaceString,
-      ],
-    };
+    fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath, {
+      filter,
+    });
 
-    rif.replaceInFile(options).catch((err: Error) => {
-      Logger.error({
-        ctx,
-        error: new DendronError({
-          innerError: err,
-          message: "error replacing tutorial placeholder text",
-        }),
-      });
+    const notesToRename = fs
+      .readdirSync(vpath)
+      .filter((basename) => basename.startsWith(replacePattern));
+
+    notesToRename.forEach((basename) => {
+      const newName = basename.replace(replacePattern, "tutorial");
+      fs.renameSync(path.join(vpath, basename), path.join(vpath, newName));
     });
   }
 

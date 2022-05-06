@@ -9,6 +9,7 @@ import { BasicCommand } from "./base";
 import { CommandOutput as NoteLookupOutput } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 
 type CommandOpts = {};
 
@@ -37,6 +38,8 @@ export class CreateTaskCommand extends BasicCommand<
     const { config } = ExtensionProvider.getDWorkspace();
     const { createTaskSelectionType, addBehavior } =
       ConfigUtils.getTask(config);
+
+    maybeSendMeetingNoteTelemetry("task");
 
     return {
       lookup: AutoCompletableRegistrar.getNoteLookupCmd().run({

@@ -20,7 +20,7 @@ import {
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path, { basename } from "path";
+import path from "path";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "..";
 import {

@@ -879,7 +879,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   createConfig() {
-    // eslint-disable-next-line no-unused-expressions
     return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 

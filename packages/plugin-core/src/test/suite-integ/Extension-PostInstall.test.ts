@@ -1,13 +1,19 @@
 import { Time } from "@dendronhq/common-all";
 import { MetadataService } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
-import sinon from "sinon";
+import { after, afterEach, beforeEach, describe } from "mocha";
+import sinon, { SinonSpy, SinonStub } from "sinon";
 import { ExtensionContext } from "vscode";
 import { GLOBAL_STATE } from "../../constants";
+import { KeybindingUtils } from "../../KeybindingUtils";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
+
+/**
+ * This is for testing functionality that is only triggered when activating
+ * a workspace after installation
+ */
 
 suite("GIVEN Dendron plugin activation", function () {
   let setInitialInstallSpy: sinon.SinonSpy;
@@ -152,4 +158,73 @@ suite("GIVEN Dendron plugin activation", function () {
       }
     );
   });
+});
+
+suite("GIVEN keybindings conflict", function () {
+  let promptSpy: SinonSpy;
+  describeMultiWS(
+    "GIVEN initial install",
+    {
+      beforeHook: async ({ ctx }) => {
+        ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
+      },
+      noSetInstallStatus: true,
+    },
+    () => {
+      let installStatusStub: SinonStub;
+      beforeEach(() => {
+        installStatusStub = sinon
+          .stub(
+            KeybindingUtils,
+            "getInstallStatusForKnownConflictingExtensions"
+          )
+          .returns([{ id: "dummyExt", installed: true }]);
+      });
+
+      afterEach(() => {
+        installStatusStub.restore();
+      });
+
+      after(() => {
+        promptSpy.restore();
+      });
+
+      test("THEN maybePromptKeybindingConflict is called", async () => {
+        expect(promptSpy.called).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN not initial install",
+    {
+      beforeHook: async () => {
+        promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
+      },
+    },
+    () => {
+      let installStatusStub: SinonStub;
+      beforeEach(() => {
+        installStatusStub = sinon
+          .stub(
+            KeybindingUtils,
+            "getInstallStatusForKnownConflictingExtensions"
+          )
+          .returns([{ id: "dummyExt", installed: true }]);
+      });
+
+      afterEach(() => {
+        installStatusStub.restore();
+      });
+
+      after(() => {
+        promptSpy.restore();
+      });
+
+      test("THEN maybePromptKeybindingConflict is not called", async () => {
+        expect(promptSpy.called).toBeFalsy();
+      });
+    }
+  );
 });

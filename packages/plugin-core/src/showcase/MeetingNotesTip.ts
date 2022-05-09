@@ -7,6 +7,7 @@ import {
   MEETING_NOTE_FEATURE_SHOWCASE_TEST,
 } from "../abTests";
 import { AnalyticsUtils } from "../utils/analytics";
+import * as vscode from "vscode";
 import {
   DisplayLocation,
   IFeatureShowcaseMessage,

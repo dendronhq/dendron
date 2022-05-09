@@ -143,6 +143,7 @@ export enum NativeWorkspaceEvents {
 export enum EngagementEvents {
   NoteViewed = "NoteViewed",
   EngineStateChanged = "EngineStateChanged",
+  AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
 }
 
 export enum AppNames {

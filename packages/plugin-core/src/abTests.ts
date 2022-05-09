@@ -11,6 +11,15 @@ export enum UpgradeToastWordingTestGroups {
   openChangelog = "openChangelog",
 }
 
+/**
+ * Section: Tests (Active or soon to be active)
+ *
+ * NOTE: please follow this convention for naming future tests:
+ * YYYY-MM-TEST_NAME.  For example, 2022-04-MEETING_NOTE_FEATURE_SHOWCASE.
+ *
+ * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
+ */
+
 /** Test if showing a web view on an upgrade is more successful than showing a toast notification. */
 export const UPGRADE_TOAST_WORDING_TEST = new ABTest(
   "UpgradeToastWordingTest",
@@ -42,7 +51,7 @@ export const SELF_CONTAINED_VAULTS_TEST = new ABTest(
   [
     {
       name: SelfContainedVaultsTestGroups.regular,
-      weight: 9,
+      weight: 1,
     },
     {
       name: SelfContainedVaultsTestGroups.selfContained,
@@ -70,15 +79,50 @@ export const MEETING_NOTE_TUTORIAL_TEST = new ABTest(
   ]
 );
 
-export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
-  "MeetingNoteFeatureShowcaseTest",
+export enum GraphThemeTestGroups {
+  /**
+   * New user will get Monokai graph theme by default
+   */
+  monokai = GraphThemeEnum.Monokai,
+  /**
+   * New user will get Classic graph theme by default
+   */
+  classic = GraphThemeEnum.Classic,
+  /**
+   * New User will get Block theme by default
+   */
+  block = GraphThemeEnum.Block,
+}
+
+export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
+  {
+    name: GraphThemeTestGroups.monokai,
+    weight: 1,
+  },
+  {
+    name: GraphThemeTestGroups.classic,
+    weight: 1,
+  },
+  {
+    name: GraphThemeTestGroups.block,
+    weight: 1,
+  },
+]);
+
+export enum GraphThemeFeatureShowcaseTestGroups {
+  showMeHow = "showMeHow",
+  openGraph = "openGraphView",
+}
+
+export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
+  "GraphThemeFeatureShowcaseTest",
   [
     {
-      name: MeetingNoteTestGroups.show,
+      name: GraphThemeFeatureShowcaseTestGroups.openGraph,
       weight: 1,
     },
     {
-      name: MeetingNoteTestGroups.noShow,
+      name: GraphThemeFeatureShowcaseTestGroups.showMeHow,
       weight: 1,
     },
   ]

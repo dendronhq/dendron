@@ -1,0 +1,148 @@
+import {
+  DendronTreeViewKey,
+  DMessage,
+  DMessageEnum,
+  GraphViewMessage,
+  GraphViewMessageEnum,
+  NoteProps,
+  NoteUtils,
+  OnDidChangeActiveTextEditorMsg,
+} from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
+import _ from "lodash";
+import * as vscode from "vscode";
+import { GotoNoteCommand } from "../commands/GotoNote";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { Logger } from "../logger";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { WebViewUtils } from "./utils";
+
+export class LocalGraphView implements vscode.WebviewViewProvider {
+  public static readonly viewType = DendronTreeViewKey.LOCAL_GRAPH_VIEW;
+  private _view?: vscode.WebviewView;
+  private _ext: IDendronExtension;
+  constructor(extension: IDendronExtension) {
+    this._ext = extension;
+    this._ext.context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+    );
+  }
+
+  public postMessage(msg: DMessage) {
+    this._view?.webview.postMessage(msg);
+  }
+
+  public async resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    _context: vscode.WebviewViewResolveContext<unknown>,
+    _token: vscode.CancellationToken
+  ) {
+    this._view = webviewView;
+    await WebViewUtils.prepareTreeView({
+      ext: this._ext,
+      key: DendronTreeViewKey.LOCAL_GRAPH_VIEW,
+      webviewView,
+    });
+    webviewView.webview.onDidReceiveMessage(
+      this.onDidReceiveMessageHandler,
+      this
+    );
+  }
+  async onDidReceiveMessageHandler(msg: GraphViewMessage) {
+    const ctx = "LocalGraphView:onDidReceiveMessage";
+    Logger.info({ ctx, data: msg });
+    switch (msg.type) {
+      case GraphViewMessageEnum.onSelect: {
+        const note = this._ext.getEngine().notes[msg.data.id];
+        await new GotoNoteCommand(this._ext).execute({
+          qs: note.fname,
+          vault: note.vault,
+        });
+        break;
+      }
+      case GraphViewMessageEnum.onGetActiveEditor: {
+        const editor = VSCodeUtils.getActiveTextEditor();
+        this.onOpenTextDocument(editor);
+        break;
+      }
+      case DMessageEnum.MESSAGE_DISPATCHER_READY: {
+        // if ready, get current note
+        const note = this._ext.wsUtils.getActiveNote();
+        if (note) {
+          Logger.debug({
+            ctx,
+            msg: "got active note",
+            note: NoteUtils.toLogObj(note),
+          });
+        }
+        if (note) {
+          this.refresh(note);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  async onActiveTextEditorChangeHandler() {
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (editor?.document) {
+      this.onOpenTextDocument(editor);
+    } else {
+      this.refresh(); // call refresh without note so that `noteActive` gets unset.
+    }
+  }
+
+  onOpenTextDocument(editor: vscode.TextEditor | undefined) {
+    const document = editor?.document;
+    if (_.isUndefined(document) || _.isUndefined(this._view)) {
+      return;
+    }
+    if (!this._view.visible) {
+      return;
+    }
+    const ctx = "LocalGraphView:openTextDocument";
+    const { wsRoot, vaults } = this._ext.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({
+        wsRoot,
+        vaults,
+        fpath: document.uri.fsPath,
+      })
+    ) {
+      Logger.info({
+        ctx,
+        uri: document.uri.fsPath,
+        msg: "not in workspace",
+      });
+      return;
+    }
+    const note = this._ext.wsUtils.getNoteFromDocument(document);
+    if (note) {
+      Logger.info({
+        ctx,
+        msg: "refresh note",
+        note: NoteUtils.toLogObj(note),
+      });
+      this.refresh(note);
+    }
+  }
+
+  public refresh(note?: NoteProps) {
+    if (this._view) {
+      if (note) {
+        this._view.show?.(true);
+      }
+      this._view.webview.postMessage({
+        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+        data: {
+          note,
+          syncChangedNote: true,
+          activeNote: this._ext.wsUtils.getActiveNote(),
+        },
+        source: "vscode",
+      } as OnDidChangeActiveTextEditorMsg);
+    }
+  }
+}

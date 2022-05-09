@@ -102,6 +102,13 @@
         {
           "id": "dendron.help-and-feedback",
           "name": "Help and Feedback"
+        }, 
+        {
+          "id": "dendron.local-graph-view",
+          "name": "Local Graph",
+          "contextualTitle": "Local Graph",
+          "type": "webview",
+          "when": "dendron:pluginActive"
         }
       ]
     },

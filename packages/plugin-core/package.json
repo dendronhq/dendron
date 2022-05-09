@@ -95,6 +95,7 @@
           "name": "Calendar View",
           "type": "webview",
           "when": "dendron:pluginActive"
+<<<<<<< HEAD
         },
         {
           "id": "dendron.recent-workspaces",
@@ -110,6 +111,8 @@
           "name": "Graph Panel",
           "type": "webview",
           "when": "dendron:pluginActive"
+=======
+>>>>>>> 541cc19d2 (feat: add schema validator entry)
         }
       ]
     },
@@ -568,6 +571,7 @@
         "title": "Dendron: Open Backup"
       },
       {
+<<<<<<< HEAD
         "command": "dendron.instrumentedWrapperCommand",
         "title": "Dendron: Instrumented Wrapper Command"
       },
@@ -578,6 +582,10 @@
       {
         "command": "dendron.openSchemaValidator",
         "title": "Dendron: Open Schema Validator"
+=======
+        "command": "dendron.showSchemaValidator",
+        "title": "Dendron: Show Schema Validator"
+>>>>>>> 541cc19d2 (feat: add schema validator entry)
       }
     ],
     "menus": {
@@ -907,6 +915,7 @@
           "when": "dendron:pluginActive"
         },
         {
+<<<<<<< HEAD
           "command": "dendron.instrumentedWrapperCommand",
           "when": "false"
         },
@@ -916,6 +925,9 @@
         },
         {
           "command": "dendron.openSchemaValidator",
+=======
+          "command": "dendron.showSchemaValidator",
+>>>>>>> 541cc19d2 (feat: add schema validator entry)
           "when": "dendron:pluginActive"
         }
       ],

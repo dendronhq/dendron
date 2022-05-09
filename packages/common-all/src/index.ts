@@ -24,6 +24,8 @@ export * from "./util";
 export * from "./timing";
 export * from "./config";
 export * from "./schema";
+export * from "./abTesting";
+export * from "./abTests";
 export { axios, AxiosError };
 export { DateTime };
 

@@ -8,17 +8,24 @@ import {
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
+  CURRENT_AB_TESTS,
   DendronError,
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
   GraphEvents,
   GraphThemeEnum,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
+  SelfContainedVaultsTestGroups,
+  SELF_CONTAINED_VAULTS_TEST,
   Time,
   TutorialEvents,
+  UpgradeToastWordingTestGroups,
+  UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -44,15 +51,6 @@ import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import {
-  CURRENT_AB_TESTS,
-  GraphThemeTestGroups,
-  GRAPH_THEME_TEST,
-  SelfContainedVaultsTestGroups,
-  SELF_CONTAINED_VAULTS_TEST,
-  UpgradeToastWordingTestGroups,
-  UPGRADE_TOAST_WORDING_TEST,
-} from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";

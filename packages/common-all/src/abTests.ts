@@ -128,6 +128,25 @@ export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
   ]
 );
 
+export enum RefactorMentionTestGroups {
+  mention = "mention",
+  noMention = "noMention",
+}
+
+export const _2022_05_REFACTOR_MENTION = new ABTest(
+  "_2022_05_REFACTOR_MENTION",
+  [
+    {
+      name: RefactorMentionTestGroups.mention,
+      weight: 1,
+    },
+    {
+      name: RefactorMentionTestGroups.noMention,
+      weight: 1,
+    },
+  ]
+);
+
 /** All A/B tests that are currently running.
  *
  * ^tkqhy45hflfd
@@ -138,4 +157,5 @@ export const CURRENT_AB_TESTS = [
   MEETING_NOTE_TUTORIAL_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
+  _2022_05_REFACTOR_MENTION,
 ];

@@ -54,22 +54,21 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    // this is the currently active tutorial AB testing group.
-    const ABUserGroup = MEETING_NOTE_TUTORIAL_TEST.getUserGroup(
+    const ABUserGroup = _2022_05_REFACTOR_MENTION.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 
     switch (ABUserGroup) {
-      case MeetingNoteTestGroups.show: {
+      case RefactorMentionTestGroups.mention: {
         fs.copySync(
-          path.join(dendronWSTemplate.fsPath, "tutorial", "alt"),
+          path.join(dendronWSTemplate.fsPath, "tutorial", "main"),
           vpath
         );
         break;
       }
-      case MeetingNoteTestGroups.noShow: {
+      case RefactorMentionTestGroups.noMention: {
         fs.copySync(
-          path.join(dendronWSTemplate.fsPath, "tutorial", "main"),
+          path.join(dendronWSTemplate.fsPath, "tutorial", "alt"),
           vpath
         );
         break;
@@ -77,63 +76,6 @@ export class TutorialInitializer
       default:
         assertUnreachable(ABUserGroup);
     }
-
-    // // this is the hierarchy of the treated tutorial.
-    // // e.g. for the meeting note test group,
-    // // the treated tutorial is in `dendron.tutorial.meeting-note.*`,
-    // // so TREATMENT_NAME is `meeting-note`.
-    // const TREATMENT_NAME = "meeting-note";
-
-    // let filter: fs.CopyFilterSync;
-    // let replacePattern: string;
-    // switch (ABUserGroup) {
-    //   // swap out to appropriate enum case for current AB testing group
-    //   case MeetingNoteTestGroups.show: {
-    //     filter = (filePath) => {
-    //       if (path.extname(filePath) === ".md") {
-    //         const basename = path.basename(filePath);
-    //         return (
-    //           basename === "root.md" ||
-    //           basename.startsWith(`tutorial.alt.${TREATMENT_NAME}`)
-    //         );
-    //       } else {
-    //         return true;
-    //       }
-    //     };
-    //     replacePattern = `tutorial.alt.${TREATMENT_NAME}`;
-    //     break;
-    //   }
-    //   // swap out to appropriate enum case for current AB testing group
-    //   case MeetingNoteTestGroups.noShow: {
-    //     filter = (filePath) => {
-    //       if (path.extname(filePath) === ".md") {
-    //         const basename = path.basename(filePath);
-    //         return (
-    //           basename === "root.md" || basename.startsWith(`tutorial.main`)
-    //         );
-    //       } else {
-    //         return true;
-    //       }
-    //     };
-    //     replacePattern = "tutorial.main";
-    //     break;
-    //   }
-    //   default:
-    //     assertUnreachable(ABUserGroup);
-    // }
-
-    // fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath, {
-    //   filter,
-    // });
-
-    // const notesToRename = fs
-    //   .readdirSync(vpath)
-    //   .filter((basename) => basename.startsWith(replacePattern));
-
-    // notesToRename.forEach((basename) => {
-    //   const newName = basename.replace(replacePattern, "tutorial");
-    //   fs.renameSync(path.join(vpath, basename), path.join(vpath, newName));
-    // });
   }
 
   async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {

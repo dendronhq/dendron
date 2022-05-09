@@ -1013,6 +1013,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   VALIDATE_ENGINE: {
     key: "dendron.dev.validateEngine",
     title: `${CMD_PREFIX}Dev: Validate Engine`,
+  },
+  OPEN_SCHEMA_VALIDATOR: {
+    key: "dendron.openSchemaValidator",
+    title: `${CMD_PREFIX} Open Schema Validator`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
 };

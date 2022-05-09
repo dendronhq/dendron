@@ -45,22 +45,28 @@ function SchemaBox({
   currentMatch: string | null;
   partialMatch: boolean;
 }) {
+  const match = currentMatch === schema.id;
   return (
     <div
       style={{
         backgroundColor:
-          currentMatch !== schema.id
-            ? "#FFFFFF"
-            : partialMatch
+          match && !partialMatch
+            ? "#b1ffb6"
+            : match && partialMatch
             ? "#e4ffb1"
-            : "#b1ffb6",
+            : "#FFFFFF",
         borderRadius: "15px",
         border: "1px solid #a9a9a9",
         padding: "1em",
         margin: "1em",
       }}
     >
-      <h2>{schema.title}</h2>
+      <h2>
+        {schema.title}{" "}
+        <span style={{ color: "#a9a9a9" }}>
+          {match && (partialMatch ? "(partial match)" : "(match)")}
+        </span>
+      </h2>
       <h3>({generatePath(schemaModule, schema)})</h3>
       <div style={{ paddingLeft: "1em" }}>
         {schema.children.map((childID) => (
@@ -129,6 +135,7 @@ export default function DendronSchemaPage({ engine }: DendronProps) {
       </div>
       {schemaModule !== null && (
         <div style={{ padding: "1em" }}>
+          <div>enter a schema path</div>
           <div>
             <AutoComplete
               placeholder={`type a schema hierarchy starting with ${selectedDomain}`}

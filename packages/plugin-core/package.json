@@ -70,18 +70,12 @@
           "name": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
-        }
-      ],
-      "dendron-view": [
-        {
-          "id": "dendron.tip-of-the-day",
-          "name": "Tip of the Day",
-          "when": "dendron:pluginActive",
-          "type": "webview"
         },
         {
-          "id": "dendron.backlinks",
-          "name": "Backlinks",
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "contextualTitle": "Calendar View",
+          "type": "webview",
           "when": "dendron:pluginActive"
         },
         {
@@ -580,6 +574,10 @@
       {
         "command": "dendron.dev.validateEngine",
         "title": "Dendron:Dev: Validate Engine"
+      },
+      {
+        "command": "dendron.openSchemaValidator",
+        "title": "Dendron: Open Schema Validator"
       }
     ],
     "menus": {
@@ -914,6 +912,10 @@
         },
         {
           "command": "dendron.dev.validateEngine",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.openSchemaValidator",
           "when": "dendron:pluginActive"
         }
       ],

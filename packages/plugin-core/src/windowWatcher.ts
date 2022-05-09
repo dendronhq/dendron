@@ -1,8 +1,11 @@
-import { EngagementEvents } from "@dendronhq/common-all";
+import { EngagementEvents, Time } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
+import _ from "lodash";
+import { Duration } from "luxon";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -59,46 +62,60 @@ export class WindowWatcher {
   private onDidChangeActiveTextEditor = sentryReportingCallback(
     async (editor: TextEditor | undefined) => {
       const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
+
       if (
-        editor &&
-        editor.document.uri.fsPath ===
+        !editor ||
+        editor.document.uri.fsPath !==
           window.activeTextEditor?.document.uri.fsPath
       ) {
-        const uri = editor.document.uri;
-        if (
-          !WorkspaceUtils.isPathInWorkspace({
-            wsRoot: this._extension.getDWorkspace().wsRoot,
-            vaults: this._extension.getDWorkspace().vaults,
-            fpath: uri.fsPath,
-          })
-        ) {
-          return;
-        }
-        Logger.info({ ctx, editor: uri.fsPath });
-        this.triggerUpdateDecorations(editor);
-
-        // If automatically show preview is enabled, then open the preview
-        // whenever text editor changed, as long as it's not already opened:
-        if (
-          this._extension.workspaceService?.config.preview
-            ?.automaticallyShowPreview
-        ) {
-          if (!this._preview.isOpen()) {
-            await this._preview.show();
-          }
-        }
-
-        // If the opened note is still the active text editor 5 seconds after
-        // opening, then count it as a valid 'viewed' event
-        setTimeout(() => {
-          if (
-            editor.document.uri.fsPath ===
-            window.activeTextEditor?.document.uri.fsPath
-          ) {
-            AnalyticsUtils.track(EngagementEvents.NoteViewed);
-          }
-        }, 5000);
+        return;
       }
+
+      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+        editor.document
+      );
+      if (_.isUndefined(note)) {
+        return;
+      }
+
+      Logger.info({ ctx, editor: editor.document.uri.fsPath });
+
+      this.triggerUpdateDecorations(editor);
+
+      // If automatically show preview is enabled, then open the preview
+      // whenever text editor changed, as long as it's not already opened:
+      if (
+        this._extension.workspaceService?.config.preview
+          ?.automaticallyShowPreview
+      ) {
+        if (!this._preview.isOpen()) {
+          await this._preview.show();
+        }
+      }
+
+      // If the opened note is still the active text editor 5 seconds after
+      // opening, then count it as a valid 'viewed' event
+      setTimeout(() => {
+        if (
+          editor.document.uri.fsPath ===
+          window.activeTextEditor?.document.uri.fsPath
+        ) {
+          const now = Time.now().toMillis();
+
+          const daysSinceCreated = Math.round(
+            Duration.fromMillis(now - note.created).as("days")
+          );
+
+          const daysSinceUpdated = Math.round(
+            Duration.fromMillis(now - note.updated).as("days")
+          );
+
+          AnalyticsUtils.track(EngagementEvents.NoteViewed, {
+            daysSinceCreation: daysSinceCreated,
+            daysSinceUpdate: daysSinceUpdated,
+          });
+        }
+      }, 5000);
     }
   );
 

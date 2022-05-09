@@ -3,7 +3,6 @@ import { renderOnDOM } from "./bootstrap";
 const VALID_NAMES = [
   "DendronNotePreview",
   "SampleComponent",
-  "DendronTreeExplorerPanel",
   "DendronLookupPanel",
   "DendronCalendarPanel",
   "DendronGraphPanel",

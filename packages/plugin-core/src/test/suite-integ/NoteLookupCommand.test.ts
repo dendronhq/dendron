@@ -70,6 +70,7 @@ import { createMockQuickPick, getActiveEditorBasename } from "../testUtils";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import {
   describeMultiWS,
+  describeSingleWS,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
   waitInMilliseconds,
@@ -1594,7 +1595,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          expect(out.quickpick.value.startsWith(`foo`)).toBeTruthy();
+          expect(out.quickpick.value.startsWith(`task`)).toBeTruthy();
 
           cmd.cleanUp();
           done();
@@ -1849,6 +1850,55 @@ suite("NoteLookupCommand", function () {
         },
       });
     });
+
+    describeSingleWS(
+      "WHEN selection2link is used with a multi-line string",
+      {
+        ctx,
+        postSetupHook: async ({ vaults, wsRoot }) => {
+          NoteTestUtilsV4.createNote({
+            fname: "multi-line",
+            vault: vaults[0],
+            wsRoot,
+            body: "test\ning\n",
+          });
+        },
+      },
+      () => {
+        test("THEN it produces a valid string", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const fooNoteEditor = await ExtensionProvider.getWSUtils().openNote(
+            engine.notes["multi-line"]
+          );
+
+          // selects "test \n ing \n"
+          fooNoteEditor.selection = new vscode.Selection(7, 0, 9, 0);
+          const { text } = VSCodeUtils.getSelection();
+          expect(text).toEqual("test\ning\n");
+
+          await cmd.run({
+            selectionType: "selection2link",
+            noConfirm: true,
+          });
+
+          // should create foo.foo-body.md with an empty body.
+          expect(getActiveEditorBasename().endsWith("multi-line.testing.md"));
+          const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const newNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+            newNoteEditor.document
+          );
+          expect(newNote?.body).toEqual("");
+
+          // should change selection to link with alais.
+          const changedText = fooNoteEditor.document.getText();
+          expect(changedText.endsWith("[[testing|multi-line.testing]]\n"));
+
+          cmd.cleanUp();
+        });
+      }
+    );
 
     test("selection2link modifier toggle", (done) => {
       runLegacyMultiWorkspaceTest({
@@ -2275,7 +2325,7 @@ suite("NoteLookupCommand", function () {
             expect(selection2linkBtn.pressed).toBeTruthy();
 
             const quickpickValue = controller.quickPick.value;
-            expect(quickpickValue.startsWith(`foo.`)).toBeTruthy();
+            expect(quickpickValue.startsWith(`task.`)).toBeTruthy();
             expect(quickpickValue.endsWith(".foo-body")).toBeTruthy();
 
             controller.onHide();

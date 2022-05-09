@@ -25,11 +25,11 @@ export enum DendronEditorViewKey {
 export enum DendronTreeViewKey {
   SAMPLE_VIEW = "dendron.sample",
   TREE_VIEW = "dendron.treeView",
-  /** @deprecated: We will be deprecating treeview v2 and going back to v1 **/
-  TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
   CALENDAR_VIEW = "dendron.calendar-view",
   LOOKUP_VIEW = "dendron.lookup-view",
+  TIP_OF_THE_DAY = "dendron.tip-of-the-day",
+  HELP_AND_FEEDBACK = "dendron.help-and-feedback",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -67,12 +67,6 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
  * Value is the name of webpack bundle for webview based tree views
  */
 export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
-  [DendronTreeViewKey.TREE_VIEW_V2]: {
-    desc: "Tree View",
-    label: "Tree View",
-    bundleName: "DendronTreeExplorerPanel",
-    type: "webview",
-  },
   [DendronTreeViewKey.SAMPLE_VIEW]: {
     desc: "A view used for prototyping",
     label: "Sample View",
@@ -100,6 +94,16 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     label: "Lookup View",
     type: "webview",
     bundleName: "DendronLookupPanel",
+  },
+  [DendronTreeViewKey.TIP_OF_THE_DAY]: {
+    desc: "Feature Showcase",
+    label: "Feature Showcase",
+    type: "nativeview",
+  },
+  [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
+    desc: "Help and Feedback",
+    label: "Help and Feedback",
+    type: "nativeview",
   },
 };
 

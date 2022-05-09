@@ -105,7 +105,7 @@ function checkIfAnchorIsValid({
   // wildcard header anchor or line anchor. These are hard to check, so let's just say they exist.
   if (anchor && /^[*L]/.test(anchor)) return true;
   // otherwise, check that the anchor actually exists inside the note
-  return allAnchors.includes(anchor);
+  return allAnchors.includes(anchor.toLowerCase());
 }
 
 export async function linkedNoteType({

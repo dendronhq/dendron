@@ -13,8 +13,6 @@ export enum VSCodeEvents {
   SchemaLookup_Update = "SchemaLookup_Update",
   NoteLookup_Accept = "NoteLookup_Accept",
   SchemaLookup_Accept = "SchemaLookup_Accept",
-  /** @deprecated: treeview v2 is deprecated. */
-  TreeView_Ready = "TreeView_Ready",
   Upgrade = "Upgrade",
   UpgradeSeeWhatsChangedClicked = "UpgradeSeeWhatsChangedClicked",
   UpgradeViewClosed = "UpgradeViewClosed",
@@ -28,6 +26,7 @@ export enum VSCodeEvents {
   ShowInactiveUserMessage = "Show_Inactive_User_Message",
   FeatureShowcaseDisplayed = "FeatureShowcasedDisplayed",
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
+  HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
 }
 
 export enum CLIEvents {
@@ -113,6 +112,8 @@ export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
   ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
+  DeprecatedConfigMessageConfirm = "DeprecatedConfigMessageConfirm",
+  DeprecatedConfigMessageShow = "ShowDeprecatedConfigMessage",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
@@ -132,6 +133,7 @@ export enum ContextualUIEvents {
 
 export enum WorkspaceEvents {
   AutoFix = "AutoFix",
+  DuplicateNoteFound = "DuplicateNoteFound",
 }
 
 export enum NativeWorkspaceEvents {
@@ -149,6 +151,10 @@ export enum AppNames {
   EXPRESS_SERVER = "express",
 }
 
+export enum GraphEvents {
+  GraphThemeChanged = "GraphThemeChanged",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
@@ -161,4 +167,5 @@ export const DendronEvents = {
   NativeWorkspaceEvents,
   WorkspaceEvents,
   EngagementEvents,
+  GraphEvents,
 };

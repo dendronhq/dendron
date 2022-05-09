@@ -1,6 +1,10 @@
 import { NoteTestUtilsV4, TestPresetEntry } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { getActiveEditorBasename } from "../testUtils";
+import { LocationTestUtils } from "../testUtilsv2";
 
 const ANCHOR = new TestPresetEntry({
   label: "anchor",
@@ -70,7 +74,121 @@ const ANCHOR_WITH_SPECIAL_CHARS = new TestPresetEntry({
   },
 });
 
+const LINK_TO_NOTE_IN_SAME_VAULT = new TestPresetEntry<{
+  ext: IDendronExtension;
+}>({
+  label: "WHEN link to note in same vault",
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupLinks(opts);
+  },
+
+  beforeTestResults: async ({ ext }) => {
+    const { engine } = ext.getDWorkspace();
+    const note = engine.notes["alpha"];
+    const editor = await new WSUtilsV2(ext).openNote(note);
+    editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+      line: 7,
+      char: 23,
+    });
+  },
+
+  results: async () => {
+    return [
+      {
+        actual: getActiveEditorBasename(),
+        expected: "beta.md",
+      },
+    ];
+  },
+});
+
+const LINK_IN_CODE_BLOCK = new TestPresetEntry<{
+  ext: IDendronExtension;
+}>({
+  label: "WHEN link in code block",
+
+  preSetupHook: async ({ wsRoot, vaults }) => {
+    await NoteTestUtilsV4.createNote({
+      fname: "test.target",
+      vault: vaults[0],
+      wsRoot,
+      body: "In aut veritatis odit tempora aut ipsa quo.",
+    });
+    await NoteTestUtilsV4.createNote({
+      fname: "test.note",
+      vault: vaults[0],
+      wsRoot,
+      body: [
+        "```tsx",
+        "const x = 1;",
+        "// see [[test target|test.target]]",
+        "const y = x + 1;",
+        "```",
+      ].join("\n"),
+    });
+  },
+
+  beforeTestResults: async ({ ext }) => {
+    const { engine } = ext.getDWorkspace();
+    const note = engine.notes["test.note"];
+    const editor = await new WSUtilsV2(ext).openNote(note);
+    editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+      line: 9,
+      char: 23,
+    });
+  },
+
+  results: async () => {
+    return [
+      {
+        actual: getActiveEditorBasename(),
+        expected: "test.target.md",
+      },
+    ];
+  },
+});
+
+const LINK_TO_NOTE_WITH_URI_HTTP = new TestPresetEntry<{
+  ext: IDendronExtension;
+}>({
+  label: "WHEN uri is present",
+
+  preSetupHook: async ({ wsRoot, vaults }) => {
+    await NoteTestUtilsV4.createNote({
+      fname: "alpha",
+      vault: vaults[0],
+      wsRoot,
+      custom: {
+        uri: "http://example.com",
+      },
+    });
+    await NoteTestUtilsV4.createNote({
+      fname: "beta",
+      vault: vaults[0],
+      wsRoot,
+      body: "[[alpha]]",
+    });
+  },
+
+  beforeTestResults: async ({ ext }) => {
+    const { engine } = ext.getDWorkspace();
+    const note = engine.notes["beta"];
+    const editor = await new WSUtilsV2(ext).openNote(note);
+    editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
+      line: 7,
+      char: 0,
+    });
+  },
+
+  results: async () => {
+    return [];
+  },
+});
+
 export const GOTO_NOTE_PRESETS = {
   ANCHOR,
   ANCHOR_WITH_SPECIAL_CHARS,
+  LINK_TO_NOTE_IN_SAME_VAULT,
+  LINK_IN_CODE_BLOCK,
+  LINK_TO_NOTE_WITH_URI_HTTP,
 };

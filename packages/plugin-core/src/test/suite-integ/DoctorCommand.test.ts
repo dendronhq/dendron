@@ -629,7 +629,6 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
         });
 
         const out = await previewSpy.returnValues[0];
-        expect(out.installStatus.length).toEqual(10);
         expect(
           out.installStatus.every((status) => !status.installed)
         ).toBeTruthy();
@@ -654,7 +653,6 @@ suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {
         });
 
         const out = await previewSpy.returnValues[0];
-        expect(out.installStatus.length).toEqual(10);
         expect(
           out.installStatus.every((status) => status.installed)
         ).toBeTruthy();

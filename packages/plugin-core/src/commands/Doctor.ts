@@ -501,6 +501,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         break;
       }
+      case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS:
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const ds = new DoctorService();
         const out = await ds.executeDoctorActions({
@@ -514,11 +515,12 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
         if (out.resp) {
           const OPEN_CONFIG = "Open dendron.yml and Backup";
+          const message =
+            opts.action === DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS
+              ? `Deprecated configs removed. Backup of dendron.yml created in ${out.resp.backupPath}`
+              : `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`;
           window
-            .showInformationMessage(
-              `Missing defaults added. Backup of dendron.yml created in ${out.resp.backupPath}`,
-              OPEN_CONFIG
-            )
+            .showInformationMessage(message, OPEN_CONFIG)
             .then(async (resp) => {
               if (resp === OPEN_CONFIG) {
                 const configPath = DConfig.configPath(wsRoot);
@@ -534,9 +536,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           break;
         } else {
           // nothing happened.
-          window.showInformationMessage(
-            "There are no missing defaults. Exiting."
-          );
+          const message =
+            opts.action === DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS
+              ? "There are no deprecated configs. Exiting."
+              : "There are no missing defaults. Exiting";
+          window.showInformationMessage(message);
         }
 
         ds.dispose();

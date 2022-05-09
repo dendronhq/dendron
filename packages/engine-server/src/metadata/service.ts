@@ -1,4 +1,4 @@
-import { FOLDERS, Time } from "@dendronhq/common-all";
+import { FOLDERS, GraphThemeEnum, Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -6,6 +6,14 @@ import path from "path";
 
 export enum ShowcaseEntry {
   TryMeetingNotes = "TryMeetingNotes",
+  AutocompleteTip = "AutocompleteTip",
+  TagsTip = "TagsTip",
+  RenameHeader = "RenameHeader",
+  TaskManagement = "TaskManagement",
+  BlockRefs = "BlockRefs",
+  HeaderRefs = "HeaderRefs",
+  InsertNoteLink = "InsertNoteLink",
+  GraphTheme = "GraphTheme",
 }
 
 type Metadata = Partial<{
@@ -65,6 +73,15 @@ type Metadata = Partial<{
    *
    */
   workspaceActivationContext: WorkspaceActivationContext;
+  /**
+   * Which index of tip-of-the-day the user has last seen so that we can show
+   * the user tips that they havent seen.
+   */
+  tipOfTheDayIndex: number;
+  /*
+   * Theme for Note Graph View
+   */
+  graphTheme?: GraphThemeEnum;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -145,6 +162,14 @@ export class MetadataService {
     );
   }
 
+  get TipOfDayIndex(): number | undefined {
+    return this.getMeta().tipOfTheDayIndex;
+  }
+
+  getGraphTheme() {
+    return this.getMeta().graphTheme;
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -215,5 +240,16 @@ export class MetadataService {
 
   setActivationContext(context: WorkspaceActivationContext) {
     this.setMeta("workspaceActivationContext", context);
+  }
+
+  set TipOfDayIndex(index: number | undefined) {
+    this.setMeta("tipOfTheDayIndex", index);
+  }
+
+  setGraphTheme(graphTheme: GraphThemeEnum) {
+    const meta = this.getMeta();
+    if (meta.graphTheme !== graphTheme) {
+      this.setMeta("graphTheme", graphTheme);
+    }
   }
 }

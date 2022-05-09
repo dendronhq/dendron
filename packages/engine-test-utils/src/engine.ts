@@ -1,16 +1,16 @@
 import { Server } from "@dendronhq/api-server";
 import {
   CleanDendronSiteConfig,
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
   DEngineClient,
   DVault,
   DWorkspace,
+  IntermediateDendronConfig,
+  NoteUtils,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
-  ConfigUtils,
-  NoteUtils,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -18,23 +18,19 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import {
-  GenTestResults,
   NoteTestUtilsV4,
-  PostSetupHookFunction,
-  PreSetupHookFunction,
   RunEngineTestFunctionOpts,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
   SetupHookFunction,
-  SetupTestFunctionV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
   DConfig,
-  WorkspaceService,
   WorkspaceConfig,
+  WorkspaceService,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -105,7 +101,8 @@ export async function createServer(opts: WorkspaceOpts & { port?: number }) {
  */
 export async function createEngineFromServer(
   opts: WorkspaceOpts
-): Promise<any> {  const { engine, port, server } = await createServer(opts);
+): Promise<any> {
+  const { engine, port, server } = await createServer(opts);
   return { engine, port, server };
 }
 
@@ -217,55 +214,6 @@ export type RunEngineTestFunctionV5<T = any> = (
     port?: number;
   }
 ) => Promise<TestResult[] | void | T>;
-
-export class TestPresetEntryV5 {
-  public preSetupHook: PreSetupHookFunction;
-  public postSetupHook: PostSetupHookFunction;
-  public testFunc: RunEngineTestFunctionV4;
-  public extraOpts: any;
-  public setupTest?: SetupTestFunctionV4;
-  public genTestResults?: GenTestResults;
-  public vaults: DVault[];
-  public workspaces: DWorkspace[];
-
-  constructor(
-    func: RunEngineTestFunctionV5,
-    opts?: {
-      preSetupHook?: PreSetupHookFunction;
-      postSetupHook?: PostSetupHookFunction;
-      extraOpts?: any;
-      setupTest?: SetupTestFunctionV4;
-      genTestResults?: GenTestResults;
-      vaults?: DVault[];
-    }
-  ) {
-    const {
-      preSetupHook,
-      postSetupHook,
-      extraOpts,
-      setupTest,
-      genTestResults,
-      workspaces,
-    } = _.defaults(opts, {
-      workspaces: [],
-    });
-    this.preSetupHook = preSetupHook || (async () => {});
-    this.postSetupHook = postSetupHook || (async () => {});
-    this.testFunc = _.bind(func, this);
-    this.extraOpts = extraOpts;
-    this.setupTest = setupTest;
-    this.genTestResults = _.bind(genTestResults || (async () => []), this);
-    this.workspaces = workspaces;
-    this.vaults = opts?.vaults || [
-      { fsPath: "vault1" },
-      { fsPath: "vault2" },
-      {
-        name: "vaultThree",
-        fsPath: "vault3",
-      },
-    ];
-  }
-}
 
 /**
  *

@@ -11,7 +11,6 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
-  WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
@@ -52,13 +51,7 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
-    where: "explorer",
-    icon: "media/icons/dendron-vscode.svg",
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW_V2),
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.WEB_UI_ENABLED}`,
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
     where: "explorer",
     icon: "media/icons/dendron-vscode.svg",
   },
@@ -244,18 +237,23 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
   BROWSE_NOTE: {
     key: "dendron.browseNote",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Browse Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Contribute`,
+  },
+  GOTO: {
+    key: "dendron.goto",
+    title: `${CMD_PREFIX} Go to`,
+    when: DendronContext.PLUGIN_ACTIVE,
+    keybindings: {
+      when: "editorFocus",
+    },
   },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
-    // no prefix, we don't want to show this command
     title: `${CMD_PREFIX} Go to Note`,
     when: DendronContext.PLUGIN_ACTIVE,
     keybindings: {
@@ -987,6 +985,8 @@ export const INCOMPATIBLE_EXTENSIONS = [
   "kortina.vscode-markdown-notes",
   "maxedmands.vscode-zettel-markdown-notes",
   "tchayen.markdown-links",
+  // Note graph is now built into Dendron, and having this extension enabled breaks it.
+  "dendron.dendron-markdown-links",
 ];
 
 export type osType = "Linux" | "Darwin" | "Windows_NT";

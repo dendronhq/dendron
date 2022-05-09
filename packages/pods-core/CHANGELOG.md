@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.93.0 (2022-05-03)
+
+
+### Features Dendron
+
+* **views:** Dendron Side Panel ([#2832](https://github.com/dendronhq/dendron/issues/2832)) ([158ed1d](https://github.com/dendronhq/dendron/commit/158ed1d748448c611146900915c6299a0730bbf9))
+
+
+
+
+
+## 0.92.1 (2022-04-28)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
 # 0.92.0 (2022-04-26)
 
 **Note:** Version bump only for package @dendronhq/pods-core

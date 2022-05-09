@@ -12,6 +12,8 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
+  GraphEvents,
+  GraphThemeEnum,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
@@ -42,6 +44,8 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CURRENT_AB_TESTS,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   UpgradeToastWordingTestGroups,
@@ -71,7 +75,7 @@ import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeP
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { FeatureShowcase } from "./FeatureShowcase";
+import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -583,6 +587,28 @@ export async function _activate(
           vscode.ConfigurationTarget.Global
         );
       }
+
+      // For new users, we want to load graph with new graph themes as default
+      let graphTheme;
+      const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+      switch (ABUserGroup) {
+        case GraphThemeTestGroups.monokai: {
+          graphTheme = GraphThemeEnum.Monokai;
+          break;
+        }
+        case GraphThemeTestGroups.block: {
+          graphTheme = GraphThemeEnum.Block;
+          break;
+        }
+        default:
+          graphTheme = GraphThemeEnum.Classic;
+      }
+      AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+        setDuringInstall: true,
+      });
+      MetadataService.instance().setGraphTheme(graphTheme);
     }
     const assetUri = VSCodeUtils.getAssetUri(context);
 
@@ -638,6 +664,12 @@ export async function _activate(
 
       // check for missing default config keys and prompt for a backfill.
       StartupUtils.showMissingDefaultConfigMessageIfNecessary({
+        ext: ws,
+        extensionInstallStatus,
+      });
+
+      // check for deprecated config keys and prompt for removal.
+      StartupUtils.showDeprecatedConfigMessageIfNecessary({
         ext: ws,
         extensionInstallStatus,
       });
@@ -722,16 +754,13 @@ export async function _activate(
       // logic as in workspace.ts, but right now this needs an instance of
       // EngineAPIService for init
 
-      // If the web UI dev flag is not set, then setup a native tree view:
-      if (!ws.workspaceService?.config.dev?.enableWebUI) {
-        const providerConstructor = function () {
-          return new EngineNoteProvider(engineAPIService);
-        };
+      const providerConstructor = function () {
+        return new EngineNoteProvider(engineAPIService);
+      };
 
-        const treeView = new NativeTreeView(providerConstructor);
-        treeView.show();
-        context.subscriptions.push(treeView);
-      }
+      const treeView = new NativeTreeView(providerConstructor);
+      treeView.show();
+      context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
@@ -802,8 +831,8 @@ export async function _activate(
       // Show the feature showcase toast one minute after initialization.
       const ONE_MINUTE_IN_MS = 60_000;
       setTimeout(() => {
-        const showcase = new FeatureShowcase();
-        showcase.show();
+        const showcase = new FeatureShowcaseToaster();
+        showcase.showToast();
       }, ONE_MINUTE_IN_MS);
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });

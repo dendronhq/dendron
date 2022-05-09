@@ -61,18 +61,18 @@ export default class TipOfTheDayWebview implements vscode.WebviewViewProvider {
     webviewView.webview.html = this.getContent(this._currentTip);
 
     webviewView.webview.onDidReceiveMessage(
-      async (message) => {
-        switch (message.command) {
+      async (messageFromWebview) => {
+        switch (messageFromWebview.command) {
           case this.TIP_SHOWN_MSG:
             AnalyticsUtils.track(VSCodeEvents.FeatureShowcaseDisplayed, {
-              messageType: message.showcaseEntry,
+              messageType: this._currentTip.showcaseEntry,
               displayLocation: DisplayLocation.TipOfTheDayView,
             });
             return;
 
           case this.BUTTON_CLICKED_MSG: {
             AnalyticsUtils.track(VSCodeEvents.FeatureShowcaseResponded, {
-              messageType: message.showcaseEntry,
+              messageType: this._currentTip.showcaseEntry,
               displayLocation: DisplayLocation.TipOfTheDayView,
               userResponse: FeatureShowcaseUserResponse.confirmed,
             });

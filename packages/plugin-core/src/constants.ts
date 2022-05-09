@@ -770,9 +770,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Open Backup`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  OPEN_SCHEMA_VALIDATOR: {
-    key: "dendron.openSchemaValidator",
-    title: `${CMD_PREFIX} Open Schema Validator`,
+  SHOW_SCHEMA_VALIDATOR: {
+    key: "dendron.showSchemaValidator",
+    title: `${CMD_PREFIX} Show Schema Validator`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
 };

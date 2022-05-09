@@ -75,10 +75,6 @@
           "id": "dendron.backlinks",
           "name": "Backlinks",
           "when": "dendron:pluginActive"
-        },
-        {
-          "id": "dendron.help-and-feedback",
-          "name": "Help and Feedback"
         }
       ]
     },
@@ -446,8 +442,8 @@
         "title": "Dendron: Open Backup"
       },
       {
-        "command": "dendron.openSchemaValidator",
-        "title": "Dendron: Open Schema Validator"
+        "command": "dendron.showSchemaValidator",
+        "title": "Dendron: Show Schema Validator"
       }
     ],
     "menus": {
@@ -741,7 +737,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.openSchemaValidator",
+          "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
         }
       ],

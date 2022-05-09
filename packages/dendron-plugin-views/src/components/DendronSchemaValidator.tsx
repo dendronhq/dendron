@@ -83,7 +83,7 @@ function SchemaBox({
   );
 }
 
-export default function DendronSchemaPage({ engine }: DendronProps) {
+export default function DendronSchemaValidator({ engine }: DendronProps) {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [inputtedHierarchy, setInputtedHierarchy] = useState<string>("");
   useEffect(() => {

@@ -56,7 +56,8 @@ export enum DevCommands {
 type CommandOpts = CommandCLIOpts &
   CommandCommonProps &
   Partial<BuildCmdOpts> &
-  Partial<RunMigrationOpts>;
+  Partial<RunMigrationOpts> &
+  Partial<SyncTutorialOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -79,6 +80,10 @@ type PrepPluginOpts = {
 type RunMigrationOpts = {
   migrationVersion: string;
   wsRoot: string;
+} & CommandCLIOpts;
+
+type SyncTutorialOpts = {
+  treatmentName: string;
 } & CommandCLIOpts;
 
 export { CommandOpts as DevCLICommandOpts };
@@ -136,6 +141,9 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("wsRoot", {
       describe: "root directory of the Dendron workspace",
+    });
+    args.option("treatmentName", {
+      describe: "tutorial treatment name",
     });
   }
 
@@ -227,7 +235,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.SYNC_TUTORIAL: {
-          this.syncTutorial();
+          if (!opts.treatmentName) {
+            return {
+              error: new DendronError({
+                message: "sync_tutorial requires a treatmentName",
+              }),
+            };
+          }
+          this.syncTutorial({ treatmentName: opts.treatmentName });
           return { error: null };
         }
         case DevCommands.PUBLISH: {
@@ -417,7 +432,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { staticPath };
   }
 
-  syncTutorial() {
+  syncTutorial(opts: { treatmentName: string }) {
+    const { treatmentName } = opts;
     const pluginAssetPath = path.join(BuildUtils.getPluginRootPath(), "assets");
     const tutorialAssetDirPath = path.join(
       pluginAssetPath,
@@ -431,41 +447,116 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "seeds",
       "dendron.dendron-site"
     );
-
-    // remove everything under tutorial.* in asset dir
-    const tutorialNotePaths = fs
-      .readdirSync(tutorialAssetDirPath)
-      .filter((basename) => {
-        return basename.startsWith("tutorial.") && basename.endsWith(".md");
-      })
-      .map((basename) => {
-        return path.join(tutorialAssetDirPath, basename);
-      });
-
-    tutorialNotePaths.forEach((path) => {
-      fs.unlinkSync(path);
-    });
-
-    // grab the tutorials from dendron-site
     const dendronSiteVaultPath = path.join(dendronSitePath, "vault");
-    const newTutorialNotePathsCopyOpts = fs
+
+    // sync main tutorial (assets/dendron-ws/tutorial/main)
+    const mainTutorialAssetDirPath = path.join(tutorialAssetDirPath, "main");
+
+    const mainTutorialNotePaths = fs
+      .readdirSync(mainTutorialAssetDirPath)
+      .filter(
+        (basename) =>
+          basename.startsWith("tutorial.") && basename.endsWith(".md")
+      )
+      .map((basename) => path.join(mainTutorialAssetDirPath, basename));
+
+    mainTutorialNotePaths.forEach((path) => fs.unlinkSync(path));
+
+    const newMainTutorialNotePathsCopyOpts = fs
       .readdirSync(dendronSiteVaultPath)
-      .filter((basename) => {
-        return (
-          basename.startsWith("dendron.tutorial.") && basename.endsWith(".md")
-        );
-      })
+      .filter(
+        (basename) =>
+          basename.startsWith("dendron.tutorial.main") &&
+          basename.endsWith(".md")
+      )
       .map((basename) => {
-        const destBasename = basename.split(".").slice(1).join(".");
+        const destBaseName = basename.replace(
+          "dendron.tutorial.main",
+          "tutorial"
+        );
         return {
           src: path.join(dendronSiteVaultPath, basename),
-          dest: path.join(tutorialAssetDirPath, destBasename),
+          dest: path.join(mainTutorialAssetDirPath, destBaseName),
         };
       });
-    newTutorialNotePathsCopyOpts.forEach((opts) => {
+    newMainTutorialNotePathsCopyOpts.forEach((opts) => {
       const { src, dest } = opts;
       fs.copyFileSync(src, dest);
     });
+
+    // sync treated tutorials (assets/dendron-ws/tutorial/alt/)
+    // there could be only one treated tutorial that could be loaded at a time.
+    const altTutorialAssetDirPath = path.join(tutorialAssetDirPath, "alt");
+
+    const altTutorialNotePaths = fs
+      .readdirSync(altTutorialAssetDirPath)
+      .filter(
+        (basename) =>
+          basename.startsWith("tutorial.") && basename.endsWith(".md")
+      )
+      .map((basename) => path.join(altTutorialAssetDirPath, basename));
+
+    altTutorialNotePaths.forEach((path) => fs.unlinkSync(path));
+
+    const newAltTutorialNotePathsCopyOpts = fs
+      .readdirSync(dendronSiteVaultPath)
+      .filter(
+        (basename) =>
+          basename.startsWith(`dendron.tutorial.alt.${treatmentName}`) &&
+          basename.endsWith(".md")
+      )
+      .map((basename) => {
+        const destBaseName = basename.replace(
+          `dendron.tutorial.alt.${treatmentName}`,
+          "tutorial"
+        );
+        return {
+          src: path.join(dendronSiteVaultPath, basename),
+          dest: path.join(altTutorialAssetDirPath, destBaseName),
+        };
+      });
+
+    newAltTutorialNotePathsCopyOpts.forEach((opts) => {
+      const { src, dest } = opts;
+      fs.copyFileSync(src, dest);
+    });
+
+    // // remove everything under tutorial.* in asset dir
+    // const tutorialNotePaths = fs
+    //   .readdirSync(tutorialAssetDirPath)
+    //   .filter((basename) => {
+    //     return basename.startsWith("tutorial.") && basename.endsWith(".md");
+    //   })
+    //   .map((basename) => {
+    //     return path.join(tutorialAssetDirPath, basename);
+    //   });
+
+    // tutorialNotePaths.forEach((path) => {
+    //   fs.unlinkSync(path);
+    // });
+
+    // // grab the tutorials from dendron-site
+    // // const dendronSiteVaultPath = path.join(dendronSitePath, "vault");
+    // const newTutorialNotePathsCopyOpts = fs
+    //   .readdirSync(dendronSiteVaultPath)
+    //   .filter((basename) => {
+    //     return (
+    //       (basename.startsWith("dendron.tutorial.main") ||
+    //         basename.startsWith("dendron.tutorial.alt")) &&
+    //       basename.endsWith(".md")
+    //     );
+    //   })
+    //   .map((basename) => {
+    //     const destBasename = basename.split(".").slice(1).join(".");
+    //     return {
+    //       src: path.join(dendronSiteVaultPath, basename),
+    //       dest: path.join(tutorialAssetDirPath, destBasename),
+    //     };
+    //   });
+    // newTutorialNotePathsCopyOpts.forEach((opts) => {
+    //   const { src, dest } = opts;
+    //   fs.copyFileSync(src, dest);
+    // });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

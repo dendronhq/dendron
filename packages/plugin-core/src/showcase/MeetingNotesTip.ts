@@ -1,12 +1,5 @@
 import { assertUnreachable } from "@dendronhq/common-all";
-import { SegmentClient } from "@dendronhq/common-server";
 import { ShowcaseEntry } from "@dendronhq/engine-server";
-import * as vscode from "vscode";
-import {
-  MeetingNoteTestGroups,
-  MEETING_NOTE_FEATURE_SHOWCASE_TEST,
-} from "../abTests";
-import { AnalyticsUtils } from "../utils/analytics";
 import * as vscode from "vscode";
 import {
   DisplayLocation,
@@ -14,23 +7,8 @@ import {
 } from "./IFeatureShowcaseMessage";
 
 export class MeetingNotesTip implements IFeatureShowcaseMessage {
-  shouldShow(displayLocation: DisplayLocation): boolean {
-    switch (displayLocation) {
-      case DisplayLocation.InformationMessage: {
-        const ABUserGroup = MEETING_NOTE_FEATURE_SHOWCASE_TEST.getUserGroup(
-          SegmentClient.instance().anonymousId
-        );
-
-        return (
-          ABUserGroup === MeetingNoteTestGroups.show &&
-          !AnalyticsUtils.isFirstWeek()
-        );
-      }
-      case DisplayLocation.TipOfTheDayView:
-        return true;
-      default:
-        assertUnreachable(displayLocation);
-    }
+  shouldShow(_displayLocation: DisplayLocation): boolean {
+    return true;
   }
   get showcaseEntry(): ShowcaseEntry {
     return ShowcaseEntry.TryMeetingNotes;

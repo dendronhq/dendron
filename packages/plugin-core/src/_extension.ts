@@ -302,6 +302,7 @@ class ExtensionUtils {
     }
     if (publishingTheme !== undefined) {
       _.set(trackProps, "publishingTheme", publishingTheme);
+    }
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
     if (maybeLocalConfig.data) {
       trackProps.hasLocalConfig = true;

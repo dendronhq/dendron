@@ -169,7 +169,10 @@ export class AnalyticsUtils {
     await fs.ensureDir(telemetryDir);
     await fs.writeFile(
       path.join(telemetryDir, `${genUUID()}.json`),
-      JSON.stringify(analyticsProps)
+      JSON.stringify({
+        ...analyticsProps,
+        timestamp: analyticsProps.timestamp?.toISOString(),
+      })
     );
   }
 
@@ -198,19 +201,10 @@ export class AnalyticsUtils {
         const filePath = path.join(telemetryDir, filename);
         try {
           const contents = await fs.readFile(filePath, { encoding: "utf-8" });
-          const payload = JSON.parse(contents, (_key, value) => {
-            // If we have a timestamp, that will get serialized as a string. We have to deserialize it here.
-            if (
-              _.isString(value) &&
-              // yyyy-mm-ddThh:mm:ss.msZ
-              value.match(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d[.]\d+Z/)
-            ) {
-              return new Date(value);
-            }
-            return value;
-          });
+          const payload = JSON.parse(contents);
+          payload.timestamp = new Date(payload.timestamp);
+          await SegmentUtils.trackSync(payload);
           await fs.rm(filePath);
-          return SegmentUtils.trackSync(payload);
         } catch (err) {
           Logger.warn({
             ctx,

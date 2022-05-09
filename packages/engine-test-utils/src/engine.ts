@@ -148,7 +148,6 @@ export async function setupWS(opts: {
   ws.createConfig();
   // create dendron.code-workspace
   WorkspaceConfig.write(wsRoot, opts.vaults);
-
   let config = ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
@@ -256,6 +255,7 @@ export async function runEngineTestV5(
   let server: Server | undefined;
 
   try {
+    // --- begin ws setup
     // make sure tests don't overwrite local homedir contents
     homeDirStub = TestEngineUtils.mockHomeDir();
     const { wsRoot, vaults } = await setupWS({
@@ -267,12 +267,6 @@ export async function runEngineTestV5(
     if ((opts.initHooks, vaults)) {
       fs.ensureDirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
     }
-    await preSetupHook({ wsRoot, vaults });
-    const resp = await createEngine({ wsRoot, vaults });
-    const engine = resp.engine;
-    server = resp.server;
-    const start = process.hrtime();
-    const initResp = await engine.init();
     if (addVSWorkspace) {
       fs.writeJSONSync(
         path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME),
@@ -287,6 +281,14 @@ export async function runEngineTestV5(
         { spaces: 4 }
       );
     }
+
+    // --- begin engine setup
+    await preSetupHook({ wsRoot, vaults });
+    const resp = await createEngine({ wsRoot, vaults });
+    const engine = resp.engine;
+    server = resp.server;
+    const start = process.hrtime();
+    const initResp = await engine.init();
     const engineInitDuration = getDurationMilliseconds(start);
     const testOpts = {
       wsRoot,

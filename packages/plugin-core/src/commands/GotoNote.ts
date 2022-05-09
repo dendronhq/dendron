@@ -18,6 +18,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { getAnalyticsPayload } from "../utils/analytics";
 import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
 import { PluginFileUtils } from "../utils/files";
+import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 import { BasicCommand } from "./base";
@@ -281,6 +282,25 @@ export class GotoNoteCommand extends BasicCommand<
           overrides,
         });
         const note = data?.note as NoteProps;
+
+        const noteCreated =
+          undefined !==
+          _.find(
+            data?.changed,
+            (ent) => ent.status === "create" && ent.note.fname === qs
+          );
+        // If a new note was created, check if we should send meeting
+        // note telemetry.
+        if (noteCreated) {
+          let type = "general";
+
+          if (qs.startsWith("user.")) {
+            type = "userTag";
+          }
+
+          maybeSendMeetingNoteTelemetry(type);
+        }
+
         const npath = NoteUtils.getFullPath({
           note,
           wsRoot,

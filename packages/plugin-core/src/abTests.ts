@@ -11,6 +11,15 @@ export enum UpgradeToastWordingTestGroups {
   openChangelog = "openChangelog",
 }
 
+/**
+ * Section: Tests (Active or soon to be active)
+ *
+ * NOTE: please follow this convention for naming future tests:
+ * YYYY-MM-TEST_NAME.  For example, 2022-04-MEETING_NOTE_FEATURE_SHOWCASE.
+ *
+ * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
+ */
+
 /** Test if showing a web view on an upgrade is more successful than showing a toast notification. */
 export const UPGRADE_TOAST_WORDING_TEST = new ABTest(
   "UpgradeToastWordingTest",
@@ -42,7 +51,7 @@ export const SELF_CONTAINED_VAULTS_TEST = new ABTest(
   [
     {
       name: SelfContainedVaultsTestGroups.regular,
-      weight: 9,
+      weight: 1,
     },
     {
       name: SelfContainedVaultsTestGroups.selfContained,
@@ -58,20 +67,6 @@ export enum MeetingNoteTestGroups {
 
 export const MEETING_NOTE_TUTORIAL_TEST = new ABTest(
   "MeetingNoteTutorialTest",
-  [
-    {
-      name: MeetingNoteTestGroups.show,
-      weight: 1,
-    },
-    {
-      name: MeetingNoteTestGroups.noShow,
-      weight: 1,
-    },
-  ]
-);
-
-export const MEETING_NOTE_FEATURE_SHOWCASE_TEST = new ABTest(
-  "MeetingNoteFeatureShowcaseTest",
   [
     {
       name: MeetingNoteTestGroups.show,
@@ -141,7 +136,6 @@ export const CURRENT_AB_TESTS = [
   UPGRADE_TOAST_WORDING_TEST,
   SELF_CONTAINED_VAULTS_TEST,
   MEETING_NOTE_TUTORIAL_TEST,
-  MEETING_NOTE_FEATURE_SHOWCASE_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
 ];

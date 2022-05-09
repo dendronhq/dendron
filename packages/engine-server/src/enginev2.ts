@@ -208,11 +208,7 @@ export class DendronEngineV2 implements DEngine {
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
-    const cpath = DConfig.configPath(wsRoot);
-    const config = _.defaultsDeep(
-      readYAML(cpath) as IntermediateDendronConfig,
-      ConfigUtils.genDefaultConfig()
-    );
+    const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
 
     return new DendronEngineV2({
       wsRoot,

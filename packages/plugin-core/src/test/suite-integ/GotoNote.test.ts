@@ -4,11 +4,12 @@ import {
   AssertUtils,
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
+  runMochaHarness,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { describe, before } from "mocha";
+import { before, describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -35,14 +36,17 @@ function createGoToNoteCmd() {
 }
 
 suite("GotoNote", function () {
-  const ctx = setupBeforeAfter(this, {});
+  describe("new style tests", () => {
+    const preSetupHook = ENGINE_HOOKS.setupBasic;
 
-  describe("using args", () => {
-    test("basic", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async ({ vaults, engine }) => {
+    describeMultiWS(
+      "WHEN pass in note",
+      {
+        preSetupHook,
+      },
+      () => {
+        test("THEN goto note", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           const note = engine.notes["foo"];
           const { note: out } = (await createGoToNoteCmd().run({
@@ -51,21 +55,23 @@ suite("GotoNote", function () {
           })) as { note: NoteProps };
           expect(out).toEqual(note);
           expect(getActiveEditorBasename()).toEqual("foo.md");
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("go to a stub ", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "WHEN goto stub",
+      {
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           const vpath = vault2Path({ vault, wsRoot });
           fs.removeSync(path.join(vpath, "foo.md"));
         },
-        onInit: async ({ vaults, engine }) => {
+      },
+      () => {
+        test("THEN get note", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           const note = NoteUtils.getNoteByFnameV5({
             fname: "foo",
@@ -87,16 +93,18 @@ suite("GotoNote", function () {
             id: note.id,
           });
           expect(getActiveEditorBasename()).toEqual("foo.md");
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("go to new note", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-        onInit: async ({ vaults }) => {
+    describeMultiWS(
+      "WHEN goto new note",
+      {
+        preSetupHook,
+      },
+      () => {
+        test("THEN note created", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           const { note: out } = (await createGoToNoteCmd().run({
             qs: "foo.ch2",
@@ -106,19 +114,21 @@ suite("GotoNote", function () {
             fname: "foo.ch2",
           });
           expect(getActiveEditorBasename()).toEqual("foo.ch2.md");
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("go to new note with template", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
+    describeMultiWS(
+      "WHEN goto note with template",
+      {
+        preSetupHook,
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
         },
-        onInit: async ({ vaults }) => {
+      },
+      () => {
+        test("THEN apply template", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -128,15 +138,13 @@ suite("GotoNote", function () {
           const content =
             VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
           expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     describeMultiWS(
       "GIVEN a new note and a template in different vaults",
       {
-        ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
@@ -162,7 +170,6 @@ suite("GotoNote", function () {
     describeMultiWS(
       "GIVEN a new note and multiple templates in different vaults with the same name",
       {
-        ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         postSetupHook: async ({ wsRoot, vaults }) => {
           // Template is in vault 1 and 3
@@ -195,13 +202,16 @@ suite("GotoNote", function () {
       }
     );
 
-    test("go to note with anchor", (done) => {
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "WHEN goto note with anchor",
+      {
         preSetupHook: async (opts) => {
           await ANCHOR.preSetupHook(opts);
         },
-        onInit: async ({ vaults }) => {
+      },
+      () => {
+        test("THEN goto anchor", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",
@@ -215,15 +225,13 @@ suite("GotoNote", function () {
           const selection = VSCodeUtils.getActiveTextEditor()?.selection;
           expect(selection?.start.line).toEqual(9);
           expect(selection?.start.character).toEqual(0);
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("go to note header with wikilink and unicode characters", (done) => {
-      // ## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    describeMultiWS(
+      "WHEN go to note header with wikilink and unicode characters",
+      {
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
             wsRoot,
@@ -232,7 +240,10 @@ suite("GotoNote", function () {
             body: "\n\n## Lörem [[Foo：Bar🙂Baz|foo：bar🙂baz]] Ipsum\n\nlorem ipsum",
           });
         },
-        onInit: async ({ vaults }) => {
+      },
+      () => {
+        test("THEN goto ehader", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "target-note",
@@ -246,20 +257,22 @@ suite("GotoNote", function () {
           const selection = VSCodeUtils.getActiveTextEditor()?.selection;
           expect(selection?.start.line).toEqual(9);
           expect(selection?.start.character).toEqual(0);
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
-    test("anchor with special chars", (done) => {
-      let specialCharsHeader: string;
-      runLegacyMultiWorkspaceTest({
-        ctx,
+    let specialCharsHeader: string;
+    describeMultiWS(
+      "WHEN anchor with special chars",
+      {
         preSetupHook: async (opts) => {
           ({ specialCharsHeader } =
             await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook(opts));
         },
-        onInit: async ({ vaults }) => {
+      },
+      () => {
+        test("THEN goto anchor", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",
@@ -273,11 +286,13 @@ suite("GotoNote", function () {
           const selection = VSCodeUtils.getActiveTextEditor()?.selection;
           expect(selection?.start.line).toEqual(9);
           expect(selection?.start.character).toEqual(0);
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
+  });
 
+  const ctx = setupBeforeAfter(this, {});
+  describe("using args", () => {
     test("block anchor", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -461,41 +476,17 @@ suite("GotoNote", function () {
   });
 
   describe("using selection", () => {
-    let note: NoteProps;
     describeMultiWS(
-      "WHEN in a code block",
+      "WHEN link in code block",
       {
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          await NoteTestUtilsV4.createNote({
-            fname: "test.target",
-            vault: vaults[0],
-            wsRoot,
-            body: "In aut veritatis odit tempora aut ipsa quo.",
-          });
-          note = await NoteTestUtilsV4.createNote({
-            fname: "test.note",
-            vault: vaults[0],
-            wsRoot,
-            body: [
-              "```tsx",
-              "const x = 1;",
-              "// see [[test target|test.target]]",
-              "const y = x + 1;",
-              "```",
-            ].join("\n"),
-          });
-        },
+        preSetupHook: GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.preSetupHook,
       },
       () => {
         test("THEN opens the note", async () => {
-          const editor = await WSUtils.openNote(note);
-          editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
-            line: 9,
-            char: 23,
-          });
+          const ext = ExtensionProvider.getExtension();
+          await GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.beforeTestResults({ ext });
           await createGoToNoteCmd().run();
-          expect(getActiveEditorBasename()).toEqual("test.target.md");
+          await runMochaHarness(GOTO_NOTE_PRESETS.LINK_IN_CODE_BLOCK.results);
         });
       }
     );

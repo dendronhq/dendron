@@ -1,4 +1,10 @@
-import { ConfigUtils, DVault, NoteProps } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  CONSTANTS,
+  DVault,
+  FOLDERS,
+  NoteProps,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
@@ -158,6 +164,88 @@ describe("WorkspaceService", () => {
         {
           expect,
           addVSWorkspace: true,
+        }
+      );
+    });
+
+    test("remote self contained vaults present", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          // Create a self contained vault that we can add to this workspace
+          const tmp = tmpDir().name;
+          const vaultName = "test";
+          await WorkspaceService.createWorkspace({
+            wsRoot: tmp,
+            useSelfContainedVault: true,
+            vaults: [
+              {
+                fsPath: ".",
+                name: vaultName,
+              },
+            ],
+          });
+          const vaultFsPath = path.join(
+            FOLDERS.DEPENDENCIES,
+            "example.com",
+            "example",
+            vaultName
+          );
+          await GitTestUtils.addRepoToWorkspace(tmp);
+          // Add the created self contained vault into the workspace config without actually cloning the folder
+          const config = engine.config;
+          config.workspace.vaults?.push({
+            fsPath: vaultFsPath,
+            name: vaultName,
+            remote: {
+              type: "git",
+              url: tmp,
+            },
+          });
+          await engine.writeConfig({ config });
+
+          // Run the workspace initialization, workspace service should discover the missing vault and clone it
+          const wsService = new WorkspaceService({ wsRoot });
+          const didClone = await wsService.initialize({
+            onSyncVaultsProgress: () => {},
+            onSyncVaultsEnd: () => {},
+          });
+          expect(didClone).toEqual(true);
+
+          // Cloned vault should have all the files we expect
+          const vaultClonedPath = path.join(wsRoot, vaultFsPath);
+          // vault should have been cloned
+          await checkDir(
+            { fpath: vaultClonedPath },
+            CONSTANTS.DENDRON_WS_NAME,
+            CONSTANTS.DENDRON_CONFIG_FILE,
+            FOLDERS.NOTES
+          );
+
+          // Notes go under `vault/notes/`, so they shouldn't exist in the root
+          await checkNotInDir(
+            {
+              fpath: vaultClonedPath,
+            },
+            "root.md"
+          );
+          // It should avoid the bug where the vault is cloned into `notes`, ending up with `vault/notes/notes`
+          await checkNotInDir(
+            {
+              fpath: path.join(vaultClonedPath, FOLDERS.NOTES),
+            },
+            FOLDERS.NOTES
+          );
+
+          // The notes should exist
+          await checkDir(
+            {
+              fpath: path.join(vaultClonedPath, FOLDERS.NOTES),
+            },
+            "root.md"
+          );
+        },
+        {
+          expect,
         }
       );
     });

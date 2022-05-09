@@ -1,28 +1,42 @@
 import {
+  CleanDendronPublishingConfig,
   CleanDendronSiteConfig,
+  configIsV4,
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
+  DeepPartial,
   DendronError,
+  DendronPublishingConfig,
   DendronSiteConfig,
+  ErrorFactory,
   ERROR_STATUS,
   getStage,
-  ConfigUtils,
-  DendronPublishingConfig,
   GithubEditViewModeEnum,
-  CleanDendronPublishingConfig,
-  configIsV4,
+  IntermediateDendronConfig,
+  RespV3,
   StrictConfigV5,
-  DeepPartial,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
+
+export enum LocalConfigScope {
+  WORKSPACE = "WORKSPACE",
+  GLOBAL = "GLOBAL",
+}
 
 export class DConfig {
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  }
+
+  static configOverridePath(wsRoot: string, scope: LocalConfigScope): string {
+    const configPath =
+      scope === LocalConfigScope.GLOBAL ? os.homedir() : wsRoot;
+    return path.join(configPath, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
   }
 
   /**
@@ -174,6 +188,73 @@ export class DConfig {
     ConfigUtils.setProp(config, key, cleanConfig);
   }
 
+  /**
+   * See if a local config file is present
+   */
+  static searchLocalConfigSync(
+    wsRoot: string
+  ): RespV3<IntermediateDendronConfig> {
+    const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
+    const globalPath = path.join(
+      os.homedir(),
+      CONSTANTS.DENDRON_LOCAL_CONFIG_FILE
+    );
+    let foundPath: string | undefined;
+
+    if (fs.existsSync(globalPath)) {
+      foundPath = globalPath;
+    }
+    if (fs.existsSync(wsPath)) {
+      foundPath = wsPath;
+    }
+    if (foundPath) {
+      // TODO: do validation in the future
+      const data = readYAML(foundPath) as IntermediateDendronConfig;
+      return { data };
+    }
+    return {
+      error: ErrorFactory.create404Error({
+        url: CONSTANTS.DENDRON_LOCAL_CONFIG_FILE,
+      }),
+    };
+  }
+
+  /**
+   * Read configuration
+   * @param wsRoot
+   * @returns
+   */
+  static readConfigSync(wsRoot: string) {
+    const configPath = DConfig.configPath(wsRoot);
+    // TODO: validate
+    const config = readYAML(configPath) as IntermediateDendronConfig;
+    return config;
+  }
+
+  /**
+   * Read config and merge with local config
+   * @param wsRoot
+   * @returns
+   */
+  static readConfigAndApplyLocalOverrideSync(wsRoot: string) {
+    const config = this.readConfigSync(wsRoot);
+    const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
+    if (maybeLocalConfig.data) {
+      _.mergeWith(
+        config,
+        maybeLocalConfig.data,
+        (objValue: any, srcValue: any) => {
+          // TODO: optimize, check for keys of known arrays instead
+          if (_.isArray(objValue)) {
+            return srcValue.concat(objValue);
+          }
+          return;
+        }
+      );
+    }
+    return config;
+  }
+
   static writeConfig({
     wsRoot,
     config,
@@ -182,6 +263,19 @@ export class DConfig {
     config: IntermediateDendronConfig;
   }): Promise<void> {
     const configPath = DConfig.configPath(wsRoot);
+    return writeYAMLAsync(configPath, config);
+  }
+
+  static writeLocalConfig({
+    wsRoot,
+    config,
+    configScope,
+  }: {
+    wsRoot: string;
+    config: DeepPartial<IntermediateDendronConfig>;
+    configScope: LocalConfigScope;
+  }): Promise<void> {
+    const configPath = DConfig.configOverridePath(wsRoot, configScope);
     return writeYAMLAsync(configPath, config);
   }
 

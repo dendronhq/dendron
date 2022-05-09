@@ -16,6 +16,7 @@ import {
   VaultUtils,
   ConfigUtils,
   DEngineClient,
+  IDendronError,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { RemarkUtils } from "../remark";
@@ -241,7 +242,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   data: string | undefined;
 } {
   let data: string | undefined;
-  const errors: DendronError[] = [];
+  const errors: IDendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl, dest, config, fname } = procData;
@@ -478,7 +479,7 @@ export function convertNoteRefASTV2(
     }
   }
 
-  const errors: DendronError[] = [];
+  const errors: IDendronError[] = [];
   const { link, proc, compilerOpts, procOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl } = procData;

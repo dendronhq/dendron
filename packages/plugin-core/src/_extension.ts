@@ -12,6 +12,8 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
+  GraphEvents,
+  GraphThemeEnum,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
@@ -28,6 +30,7 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
+  DConfig,
   HistoryService,
   MetadataService,
   WorkspaceService,
@@ -43,6 +46,8 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CURRENT_AB_TESTS,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   UpgradeToastWordingTestGroups,
@@ -288,9 +293,19 @@ class ExtensionUtils {
       workspaceFolders: _.isUndefined(workspaceFolders)
         ? 0
         : workspaceFolders.length,
+      hasLocalConfig: false,
+      numLocalConfigVaults: 0,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
+    }
+    const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
+    if (maybeLocalConfig.data) {
+      trackProps.hasLocalConfig = true;
+      if (maybeLocalConfig.data.workspace.vaults) {
+        trackProps.numLocalConfigVaults =
+          maybeLocalConfig.data.workspace.vaults.length;
+      }
     }
 
     AnalyticsUtils.identify({
@@ -595,6 +610,28 @@ export async function _activate(
           vscode.ConfigurationTarget.Global
         );
       }
+
+      // For new users, we want to load graph with new graph themes as default
+      let graphTheme;
+      const ABUserGroup = GRAPH_THEME_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+      switch (ABUserGroup) {
+        case GraphThemeTestGroups.monokai: {
+          graphTheme = GraphThemeEnum.Monokai;
+          break;
+        }
+        case GraphThemeTestGroups.block: {
+          graphTheme = GraphThemeEnum.Block;
+          break;
+        }
+        default:
+          graphTheme = GraphThemeEnum.Classic;
+      }
+      AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+        setDuringInstall: true,
+      });
+      MetadataService.instance().setGraphTheme(graphTheme);
     }
     const assetUri = VSCodeUtils.getAssetUri(context);
 
@@ -655,6 +692,12 @@ export async function _activate(
         extensionInstallStatus,
       });
 
+      // check for deprecated config keys and prompt for removal.
+      StartupUtils.showDeprecatedConfigMessageIfNecessary({
+        ext: ws,
+        extensionInstallStatus,
+      });
+
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
@@ -676,8 +719,10 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
+      // set vaults now that ws is initialized
+      const vaults = wsService.vaults;
+
       // check for vaults with same name
-      const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";
@@ -729,7 +774,7 @@ export async function _activate(
       });
 
       // Setup the Engine API Service and the tree view
-      const engineAPIService = updateEngineAPI(port);
+      const engineAPIService = updateEngineAPI(port, ws);
 
       // TODO: This should eventually be consolidated with other view setup
       // logic as in workspace.ts, but right now this needs an instance of
@@ -779,7 +824,7 @@ export async function _activate(
         return false;
       }
 
-      ExtensionUtils.setWorkspaceContextOnActivate(dendronConfig);
+      ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
 
       MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ws, context, requireActiveWorkspace: true });
@@ -1187,9 +1232,11 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
-function updateEngineAPI(port: number | string): EngineAPIService {
-  const ext = getExtension();
-
+// ^qxkkg70u6w0z
+function updateEngineAPI(
+  port: number | string,
+  ext: DendronExtension
+): EngineAPIService {
   // set engine api ^9dr6chh7ah9v
   const svc = EngineAPIService.createEngine({
     port,

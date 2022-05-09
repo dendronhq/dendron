@@ -1,14 +1,22 @@
-import { ConfigUtils, LookupNoteTypeEnum } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  LookupNoteTypeEnum,
+  NoteAddBehaviorEnum,
+} from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { CommandOutput as NoteLookupOutput } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 
 type CommandOpts = {};
 
-type CommandOutput = NoteLookupOutput | undefined;
+type CommandOutput = {
+  lookup: Promise<NoteLookupOutput | undefined>;
+  addBehavior: NoteAddBehaviorEnum;
+};
 
 export { CommandOpts as CreateTaskOpts };
 
@@ -27,12 +35,24 @@ export class CreateTaskCommand extends BasicCommand<
     const ctx = "CreateTask";
 
     Logger.info({ ctx, msg: "enter", opts });
-    const { config } = getDWorkspace();
-    const { createTaskSelectionType } = ConfigUtils.getTask(config);
+    const { config } = ExtensionProvider.getDWorkspace();
+    const { createTaskSelectionType, addBehavior } =
+      ConfigUtils.getTask(config);
 
-    return AutoCompletableRegistrar.getNoteLookupCmd().run({
-      noteType: LookupNoteTypeEnum.task,
-      selectionType: createTaskSelectionType,
-    });
+    maybeSendMeetingNoteTelemetry("task");
+
+    return {
+      lookup: AutoCompletableRegistrar.getNoteLookupCmd().run({
+        noteType: LookupNoteTypeEnum.task,
+        selectionType: createTaskSelectionType,
+      }),
+      addBehavior,
+    };
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, res: CommandOutput) {
+    return {
+      addBehavior: res.addBehavior,
+    };
   }
 }

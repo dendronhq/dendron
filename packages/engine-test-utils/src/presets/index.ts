@@ -4,6 +4,7 @@ import { WorkspaceOpts } from "../engine";
 
 export * from "./engine-server";
 export * from "./pods-core";
+export * from "./vaults";
 
 export enum SETUP_HOOK_KEYS {
   /**

@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.92.1",
+  "version": "0.93.0",
   "engines": {
     "vscode": "^1.58.0"
   },
@@ -75,6 +75,10 @@
           "id": "dendron.backlinks",
           "name": "Backlinks",
           "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.help-and-feedback",
+          "name": "Help and Feedback"
         }
       ]
     },
@@ -104,6 +108,10 @@
       {
         "command": "dendron.contributeToCause",
         "title": "Dendron: Contribute"
+      },
+      {
+        "command": "dendron.goto",
+        "title": "Dendron: Go to"
       },
       {
         "command": "dendron.gotoNote",
@@ -446,6 +454,10 @@
       "commandPalette": [
         {
           "command": "dendron.browseNote",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.goto",
           "when": "dendron:pluginActive"
         },
         {
@@ -942,6 +954,10 @@
     },
     "keybindings": [
       {
+        "command": "dendron.goto",
+        "when": "editorFocus"
+      },
+      {
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",
         "when": "editorFocus"
@@ -1081,8 +1097,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.92.1",
-    "@dendronhq/engine-test-utils": "^0.92.1",
+    "@dendronhq/common-test-utils": "^0.93.0",
+    "@dendronhq/engine-test-utils": "^0.93.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1118,11 +1134,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.92.1",
-    "@dendronhq/common-all": "^0.92.1",
-    "@dendronhq/common-server": "^0.92.1",
-    "@dendronhq/engine-server": "^0.92.1",
-    "@dendronhq/pods-core": "^0.92.1",
+    "@dendronhq/api-server": "^0.93.0",
+    "@dendronhq/common-all": "^0.93.0",
+    "@dendronhq/common-server": "^0.93.0",
+    "@dendronhq/engine-server": "^0.93.0",
+    "@dendronhq/pods-core": "^0.93.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

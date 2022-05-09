@@ -1,17 +1,12 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
-import title from "title";
 import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
+import title from "title";
 import { URI } from "vscode-uri";
-import {
-  CONSTANTS,
-  ERROR_STATUS,
-  TAGS_HIERARCHY,
-  TAGS_HIERARCHY_BASE,
-} from "./constants";
+import { CONSTANTS, ERROR_STATUS, TAGS_HIERARCHY } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -573,7 +568,7 @@ export class NoteUtils {
     const { fname, vault } = note;
     let title = note.title;
 
-    if (note.fname.startsWith(TAGS_HIERARCHY_BASE)) {
+    if (note.fname.startsWith(TAGS_HIERARCHY)) {
       const tag = note.fname.split(TAGS_HIERARCHY)[1];
       return `#${tag}`;
     }

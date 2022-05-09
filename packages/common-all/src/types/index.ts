@@ -18,6 +18,7 @@ export * from "./lookup";
 export * from "./unified";
 export * from "./events";
 export * from "./cacheData";
+export * from "./errorTypes";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {

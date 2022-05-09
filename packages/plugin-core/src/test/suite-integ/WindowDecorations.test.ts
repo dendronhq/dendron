@@ -104,6 +104,12 @@ suite("GIVEN a text document with decorations", function () {
       {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await NoteTestUtilsV4.createNote({
+            fname: "withHeader",
+            vault: vaults[0],
+            wsRoot,
+            body: "## ipsam adipisci",
+          });
+          await NoteTestUtilsV4.createNote({
             fname: "tags.bar",
             vault: vaults[0],
             wsRoot,
@@ -128,6 +134,9 @@ suite("GIVEN a text document with decorations", function () {
               "[[with alias|root]]",
               "",
               "![[root.*#head]]",
+              "",
+              "[[withHeader#ipsam-adipisci]]",
+              "[[withHeader#does-not-exist]]",
               "",
               "[[does.not.exist]]",
               "",
@@ -177,7 +186,7 @@ suite("GIVEN a text document with decorations", function () {
             allDecorations,
             decorationType: EDITOR_DECORATION_TYPES.wikiLink,
           });
-          expect(wikilinkDecorations!.length).toEqual(7);
+          expect(wikilinkDecorations!.length).toEqual(8);
           expect(
             isTextDecorated("[[root]]", wikilinkDecorations!, document)
           ).toBeTruthy();
@@ -193,6 +202,13 @@ suite("GIVEN a text document with decorations", function () {
           ).toBeTruthy();
           expect(
             isTextDecorated("![[root.*#head]]", wikilinkDecorations!, document)
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "[[withHeader#ipsam-adipisci]]",
+              wikilinkDecorations!,
+              document
+            )
           ).toBeTruthy();
           expect(
             isTextDecorated("[[/test.txt]]", wikilinkDecorations!, document)
@@ -216,6 +232,13 @@ suite("GIVEN a text document with decorations", function () {
           expect(
             isTextDecorated(
               "[[does.not.exist]]",
+              brokenWikilinkDecorations!,
+              document
+            )
+          ).toBeTruthy();
+          expect(
+            isTextDecorated(
+              "[[withHeader#does-not-exist]]",
               brokenWikilinkDecorations!,
               document
             )

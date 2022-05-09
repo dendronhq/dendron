@@ -22,7 +22,7 @@ import {
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import path from "path";
-import { Git, WorkspaceService } from "..";
+import { DEPRECATED_PATHS, Git, WorkspaceService } from "..";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
 import { MDUtilsV4 } from "../markdown/utils";
@@ -40,6 +40,7 @@ export enum DoctorActionsEnum {
   FIX_REMOTE_VAULTS = "fixRemoteVaults",
   FIX_AIRTABLE_METADATA = "fixAirtableMetadata",
   ADD_MISSING_DEFAULT_CONFIGS = "addMissingDefaultConfigs",
+  REMOVE_DEPRECATED_CONFIGS = "removeDeprecatedConfigs",
   FIX_SELF_CONTAINED_VAULT_CONFIG = "fixSelfContainedVaultsInConfig",
 }
 
@@ -213,6 +214,42 @@ export class DoctorService implements Disposable {
 
     let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
+      case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
+        const { wsRoot, config } = engine;
+        const rawConfig = DConfig.getRaw(wsRoot);
+        const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
+          config: rawConfig,
+          deprecatedPaths: DEPRECATED_PATHS,
+        });
+        if (pathsToDelete.length > 0) {
+          const backupPath = await this.createBackup(
+            wsRoot,
+            DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS
+          );
+          if (backupPath instanceof DendronError) {
+            return {
+              exit: true,
+              error: backupPath,
+            };
+          }
+
+          const configDeepCopy = _.cloneDeep(config);
+          pathsToDelete.forEach((path) => {
+            _.unset(configDeepCopy, path);
+          });
+
+          await DConfig.writeConfig({ wsRoot, config: configDeepCopy });
+
+          return {
+            exit: true,
+            resp: {
+              backupPath,
+            },
+          };
+        }
+
+        return { exit: true };
+      }
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const { wsRoot } = engine;
         const rawConfig = DConfig.getRaw(wsRoot);

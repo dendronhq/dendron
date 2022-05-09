@@ -25,7 +25,7 @@ import {
   WriteNoteResp,
 } from ".";
 import { ThemeTarget, ThemeType } from "./constants";
-import { DendronError } from "./error";
+import { DendronError, IDendronError } from "./error";
 import {
   DEngineInitPayload,
   GetDecorationsPayload,
@@ -112,7 +112,7 @@ interface IDoRequestArgs {
  @deprecated - use RespV2 instead
   */
 type APIPayload<T = any> = {
-  error: DendronError | null;
+  error: IDendronError | null;
   data?: T;
 };
 

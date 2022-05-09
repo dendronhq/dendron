@@ -1,4 +1,5 @@
 import { EdgeDefinition, NodeDefinition } from "cytoscape";
+import { GraphThemeEnum } from "@dendronhq/common-all";
 
 export type GraphNodes = NodeDefinition[];
 export type GraphEdges = {
@@ -15,6 +16,7 @@ export type GraphConfigItem<T> = {
   label?: string;
   color?: string;
   placeholder?: string;
+  singleSelect?: boolean;
 };
 
 export type CoreGraphConfig = {
@@ -28,6 +30,8 @@ export type CoreGraphConfig = {
 
   "options.allow-relayout": GraphConfigItem<boolean>;
   "options.show-labels": GraphConfigItem<boolean>;
+
+  graphTheme: GraphConfigItem<GraphThemeEnum>;
 };
 
 export type NoteGraphConfig = {
@@ -79,6 +83,11 @@ const coreGraphConfig: CoreGraphConfig = {
   "options.show-labels": {
     value: true,
     mutable: true,
+  },
+  graphTheme: {
+    value: GraphThemeEnum.Classic,
+    mutable: true,
+    singleSelect: true,
   },
 };
 

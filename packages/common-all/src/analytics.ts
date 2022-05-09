@@ -26,6 +26,7 @@ export enum VSCodeEvents {
   ShowInactiveUserMessage = "Show_Inactive_User_Message",
   FeatureShowcaseDisplayed = "FeatureShowcasedDisplayed",
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
+  HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
 }
 
 export enum CLIEvents {
@@ -111,6 +112,8 @@ export enum ConfigEvents {
   ConfigNotMigrated = "Config_Not_Migrated",
   EnabledExportPodV2 = "Enabled_Export_Pod_V2",
   ShowMissingDefaultConfigMessage = "Show_Missing_Default_Config_Message",
+  DeprecatedConfigMessageConfirm = "DeprecatedConfigMessageConfirm",
+  DeprecatedConfigMessageShow = "ShowDeprecatedConfigMessage",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
@@ -130,6 +133,7 @@ export enum ContextualUIEvents {
 
 export enum WorkspaceEvents {
   AutoFix = "AutoFix",
+  DuplicateNoteFound = "DuplicateNoteFound",
 }
 
 export enum NativeWorkspaceEvents {
@@ -139,12 +143,17 @@ export enum NativeWorkspaceEvents {
 export enum EngagementEvents {
   NoteViewed = "NoteViewed",
   EngineStateChanged = "EngineStateChanged",
+  AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
 }
 
 export enum AppNames {
   CODE = "vscode",
   CLI = "cli",
   EXPRESS_SERVER = "express",
+}
+
+export enum GraphEvents {
+  GraphThemeChanged = "GraphThemeChanged",
 }
 
 export const DendronEvents = {
@@ -159,4 +168,5 @@ export const DendronEvents = {
   NativeWorkspaceEvents,
   WorkspaceEvents,
   EngagementEvents,
+  GraphEvents,
 };

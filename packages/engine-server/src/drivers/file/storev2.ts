@@ -47,6 +47,7 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
+  DuplicateNoteError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -104,7 +105,7 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
-    let errors: DendronError[] = [];
+    let errors: IDendronError<any>[] = [];
     try {
       const resp = await this.initSchema();
       if (ResponseUtil.hasError(resp)) {
@@ -116,6 +117,16 @@ export class FileStorage implements DStore {
       const { notes: _notes, errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
       _notes.map((ent) => {
+        // Check for duplicate IDs when adding notes to the map
+        if (this.notes[ent.id] !== undefined) {
+          const duplicate = this.notes[ent.id];
+          errors.push(
+            new DuplicateNoteError({
+              noteA: duplicate,
+              noteB: ent,
+            })
+          );
+        }
         this.notes[ent.id] = ent;
         this.noteFnames.add(ent);
       });

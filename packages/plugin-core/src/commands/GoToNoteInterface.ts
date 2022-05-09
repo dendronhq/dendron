@@ -4,6 +4,7 @@ import { Position, ViewColumn } from "vscode";
 export enum TargetKind {
   NOTE = "note",
   NON_NOTE = "nonNote",
+  LINK = "link",
 }
 
 export type GoToNoteCommandOpts = {
@@ -31,4 +32,6 @@ export type GoToNoteCommandOutput =
   | { kind: TargetKind.NOTE; note: NoteProps; pos?: Position; source?: string }
   // When opening a non-note file
   | { kind: TargetKind.NON_NOTE; fullPath: string; type: GotoFileType }
+  // When opening a link to a non txt-file like resource (eg. pdf, website, etc)
+  | { kind: TargetKind.LINK; fullPath: string; fromProxy: boolean }
   | undefined;

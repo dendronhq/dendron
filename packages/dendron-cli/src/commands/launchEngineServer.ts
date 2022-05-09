@@ -14,6 +14,7 @@ import _ from "lodash";
 import { Socket } from "net";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
+import { CLIUtils } from "../utils/cli";
 import { CLICommand, CommandCommonProps } from "./base";
 
 type CommandOutput = { port: number; server: any } & CommandCommonProps;
@@ -96,7 +97,7 @@ export class LaunchEngineServerCommand extends CLICommand<
       nextServerUrl: dev?.nextServerUrl,
       nextStaticRoot: dev?.nextStaticRoot,
     });
-    ws.writeMeta({ version: "dendron-cli" });
+    ws.writeMeta({ version: CLIUtils.getClientVersion() });
 
     if (!noWritePort) {
       EngineUtils.writeEnginePortForCLI({ port: _port, wsRoot });

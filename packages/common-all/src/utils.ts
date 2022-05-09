@@ -1304,6 +1304,21 @@ export class ConfigUtils {
       backfilledConfig,
     };
   }
+
+  static detectDeprecatedConfigs(opts: {
+    config: Partial<IntermediateDendronConfig>;
+    deprecatedPaths: string[];
+  }): string[] {
+    const { config, deprecatedPaths } = opts;
+    const foundDeprecatedPaths = deprecatedPaths.filter((path) =>
+      _.has(config, path)
+    );
+
+    if (foundDeprecatedPaths.length === 0) {
+      return [];
+    }
+    return foundDeprecatedPaths;
+  }
 }
 
 /**

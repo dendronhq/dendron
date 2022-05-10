@@ -133,8 +133,8 @@ export enum RefactorMentionTestGroups {
   noMention = "noMention",
 }
 
-export const _2022_05_REFACTOR_MENTION = new ABTest(
-  "_2022_05_REFACTOR_MENTION",
+export const AB_2022_05_REFACTOR_MENTION = new ABTest(
+  "AB_2022_05_REFACTOR_MENTION",
   [
     {
       name: RefactorMentionTestGroups.mention,
@@ -157,5 +157,5 @@ export const CURRENT_AB_TESTS = [
   MEETING_NOTE_TUTORIAL_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
-  _2022_05_REFACTOR_MENTION,
+  AB_2022_05_REFACTOR_MENTION,
 ];

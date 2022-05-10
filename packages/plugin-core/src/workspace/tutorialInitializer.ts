@@ -4,10 +4,10 @@ import {
   DVault,
   DWorkspaceV2,
   getStage,
-  MeetingNoteTestGroups,
-  MEETING_NOTE_TUTORIAL_TEST,
+  RefactorMentionTestGroups,
   TutorialEvents,
   VaultUtils,
+  AB_2022_05_REFACTOR_MENTION,
 } from "@dendronhq/common-all";
 import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -54,7 +54,7 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    const ABUserGroup = _2022_05_REFACTOR_MENTION.getUserGroup(
+    const ABUserGroup = AB_2022_05_REFACTOR_MENTION.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 

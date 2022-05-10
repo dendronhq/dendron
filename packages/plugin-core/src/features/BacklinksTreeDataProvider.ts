@@ -15,7 +15,7 @@ import {
   Uri,
   window,
 } from "vscode";
-import { DendronContext, ICONS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { BacklinkSortOrder } from "../types";
 import {
@@ -254,8 +254,12 @@ export default class BacklinksTreeDataProvider
       backlink.description = `on line ${lineNum + 1}`;
       backlink.tooltip = ref.matchText;
       backlink.command = {
-        command: "vscode.open",
-        arguments: [ref.location.uri, { selection: ref.location.range }],
+        command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
+        arguments: [
+          ref.location.uri,
+          { selection: ref.location.range },
+          ref.isCandidate ?? false,
+        ],
         title: "Open File",
       };
       if (ref.isCandidate) {
@@ -339,8 +343,12 @@ export default class BacklinksTreeDataProvider
       )})`;
       backlink.tooltip = pathParam;
       backlink.command = {
-        command: "vscode.open",
-        arguments: [Uri.file(pathParam), { selection: new Range(0, 0, 0, 0) }],
+        command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
+        arguments: [
+          Uri.file(pathParam),
+          { selection: new Range(0, 0, 0, 0) },
+          false,
+        ],
         title: "Open File",
       };
       return backlink;

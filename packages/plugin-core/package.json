@@ -261,6 +261,10 @@
         "title": "Dendron: Go Down"
       },
       {
+        "command": "dendron.gotoBacklink",
+        "title": "Dendron: Go To Backlink"
+      },
+      {
         "command": "dendron.addAndCommit",
         "title": "Dendron: Workspace: Add and Commit"
       },

@@ -346,6 +346,7 @@ export default function Graph({
           isGraphReady={isReady}
           updateConfigField={updateConfigField}
           customCSS={ide.graphStyles}
+          type={type}
         />
         {type === "note" && (
           <div
@@ -376,6 +377,7 @@ export default function Graph({
             width: "100%",
             height: "100%",
             zIndex: 1,
+            display: showNoteGraphMessage ? "none" : "block",
           }}
         />
       </div>

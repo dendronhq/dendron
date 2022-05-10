@@ -93,7 +93,7 @@ const coreGraphConfig: CoreGraphConfig = {
 
 const noteGraphConfig: NoteGraphConfig = {
   "connections.links": {
-    value: true,
+    value: false,
     mutable: true,
   },
   "information.edges-links": {
@@ -105,7 +105,7 @@ const noteGraphConfig: NoteGraphConfig = {
     mutable: true,
   },
   "options.show-local-graph": {
-    value: true,
+    value: false,
     mutable: true,
   },
 };

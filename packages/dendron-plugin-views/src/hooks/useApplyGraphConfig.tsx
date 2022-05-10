@@ -15,7 +15,7 @@ const useApplyGraphConfig = ({
 }) => {
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
-  const [wasLocalGraph, setWasLocalGraph] = useState(true);
+  const [wasLocalGraph, setWasLocalGraph] = useState(false);
 
   const applyDisplayConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;

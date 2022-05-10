@@ -432,91 +432,69 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { staticPath };
   }
 
-  syncTutorial(opts: { treatmentName: string }) {
-    const { treatmentName } = opts;
-    const pluginAssetPath = path.join(BuildUtils.getPluginRootPath(), "assets");
-    const tutorialAssetDirPath = path.join(
-      pluginAssetPath,
-      "dendron-ws",
-      "tutorial"
-    );
-    const lernaRoot = BuildUtils.getLernaRoot();
-    const dendronSitePath = path.join(
-      lernaRoot,
+  _syncTutorial(opts: { treatmentName: string; tutorialType: "main" | "alt" }) {
+    const { treatmentName, tutorialType } = opts;
+
+    const dendronSiteVaultPath = path.join(
+      BuildUtils.getLernaRoot(),
       "docs",
       "seeds",
-      "dendron.dendron-site"
+      "dendron.dendron-site",
+      "vault"
     );
-    const dendronSiteVaultPath = path.join(dendronSitePath, "vault");
 
-    // sync main tutorial (assets/dendron-ws/tutorial/main)
-    const mainTutorialAssetDirPath = path.join(tutorialAssetDirPath, "main");
+    const tutorialTypeAssetDirPath = path.join(
+      BuildUtils.getPluginRootPath(),
+      "assets",
+      "dendron-ws",
+      "tutorial",
+      tutorialType
+    );
 
-    const mainTutorialNotePaths = fs
-      .readdirSync(mainTutorialAssetDirPath)
+    // clean up existing assets
+    const tutorialTypeNotePaths = fs
+      .readdirSync(tutorialTypeAssetDirPath)
       .filter(
         (basename) =>
           basename.startsWith("tutorial.") && basename.endsWith(".md")
       )
-      .map((basename) => path.join(mainTutorialAssetDirPath, basename));
+      .map((basename) => path.join(tutorialTypeAssetDirPath, basename));
 
-    mainTutorialNotePaths.forEach((path) => fs.unlinkSync(path));
+    tutorialTypeNotePaths.forEach((path) => fs.unlinkSync(path));
 
-    const newMainTutorialNotePathsCopyOpts = fs
+    // copy new tutorial assets
+    const newTutorialNotePathsCopyOpts = fs
       .readdirSync(dendronSiteVaultPath)
-      .filter(
-        (basename) =>
-          basename.startsWith("tutorial") &&
-          !basename.startsWith("tutorial-alt") &&
-          basename.endsWith(".md")
-      )
+      .filter((basename) => {
+        const startsWithCond =
+          tutorialType === "main"
+            ? basename.startsWith("tutorial") &&
+              !basename.startsWith("tutorial-alt")
+            : basename.startsWith(`tutorial-alt.${treatmentName}`);
+
+        return startsWithCond && basename.endsWith(".md");
+      })
       .map((basename) => {
+        const destBasename =
+          tutorialType === "main"
+            ? basename
+            : basename.replace(`tutorial-alt.${treatmentName}`, "tutorial");
         return {
           src: path.join(dendronSiteVaultPath, basename),
-          dest: path.join(mainTutorialAssetDirPath, basename),
-        };
-      });
-    newMainTutorialNotePathsCopyOpts.forEach((opts) => {
-      const { src, dest } = opts;
-      fs.copyFileSync(src, dest);
-    });
-
-    // sync treated tutorials (assets/dendron-ws/tutorial/alt/)
-    // there could be only one treated tutorial that could be loaded at a time.
-    const altTutorialAssetDirPath = path.join(tutorialAssetDirPath, "alt");
-
-    const altTutorialNotePaths = fs
-      .readdirSync(altTutorialAssetDirPath)
-      .filter(
-        (basename) =>
-          basename.startsWith("tutorial.") && basename.endsWith(".md")
-      )
-      .map((basename) => path.join(altTutorialAssetDirPath, basename));
-
-    altTutorialNotePaths.forEach((path) => fs.unlinkSync(path));
-
-    const newAltTutorialNotePathsCopyOpts = fs
-      .readdirSync(dendronSiteVaultPath)
-      .filter(
-        (basename) =>
-          basename.startsWith(`tutorial-alt.${treatmentName}`) &&
-          basename.endsWith(".md")
-      )
-      .map((basename) => {
-        const destBaseName = basename.replace(
-          `tutorial-alt.${treatmentName}`,
-          "tutorial"
-        );
-        return {
-          src: path.join(dendronSiteVaultPath, basename),
-          dest: path.join(altTutorialAssetDirPath, destBaseName),
+          dest: path.join(tutorialTypeAssetDirPath, destBasename),
         };
       });
 
-    newAltTutorialNotePathsCopyOpts.forEach((opts) => {
+    newTutorialNotePathsCopyOpts.forEach((opts) => {
       const { src, dest } = opts;
       fs.copyFileSync(src, dest);
     });
+  }
+
+  syncTutorial(opts: { treatmentName: string }) {
+    const { treatmentName } = opts;
+    this._syncTutorial({ treatmentName, tutorialType: "main" });
+    this._syncTutorial({ treatmentName, tutorialType: "alt" });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

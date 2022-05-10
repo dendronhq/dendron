@@ -8,17 +8,24 @@ import {
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
+  CURRENT_AB_TESTS,
   DendronError,
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
   GraphEvents,
   GraphThemeEnum,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
+  SelfContainedVaultsTestGroups,
+  SELF_CONTAINED_VAULTS_TEST,
   Time,
   TutorialEvents,
+  UpgradeToastWordingTestGroups,
+  UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -30,6 +37,7 @@ import {
   SegmentClient,
 } from "@dendronhq/common-server";
 import {
+  DConfig,
   HistoryService,
   MetadataService,
   WorkspaceService,
@@ -43,15 +51,6 @@ import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import {
-  CURRENT_AB_TESTS,
-  GraphThemeTestGroups,
-  GRAPH_THEME_TEST,
-  SelfContainedVaultsTestGroups,
-  SELF_CONTAINED_VAULTS_TEST,
-  UpgradeToastWordingTestGroups,
-  UPGRADE_TOAST_WORDING_TEST,
-} from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
@@ -292,9 +291,19 @@ class ExtensionUtils {
       workspaceFolders: _.isUndefined(workspaceFolders)
         ? 0
         : workspaceFolders.length,
+      hasLocalConfig: false,
+      numLocalConfigVaults: 0,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
+    }
+    const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
+    if (maybeLocalConfig.data) {
+      trackProps.hasLocalConfig = true;
+      if (maybeLocalConfig.data.workspace.vaults) {
+        trackProps.numLocalConfigVaults =
+          maybeLocalConfig.data.workspace.vaults.length;
+      }
     }
 
     AnalyticsUtils.identify({
@@ -708,8 +717,10 @@ export async function _activate(
       }
 
       ws.workspaceService = wsService;
+      // set vaults now that ws is initialized
+      const vaults = wsService.vaults;
+
       // check for vaults with same name
-      const vaults = ConfigUtils.getVaults(dendronConfig);
       const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
       if (_.size(uniqVaults) < _.size(vaults)) {
         const txt = "Fix it";
@@ -761,7 +772,7 @@ export async function _activate(
       });
 
       // Setup the Engine API Service and the tree view
-      const engineAPIService = updateEngineAPI(port);
+      const engineAPIService = updateEngineAPI(port, ws);
 
       // TODO: This should eventually be consolidated with other view setup
       // logic as in workspace.ts, but right now this needs an instance of
@@ -811,7 +822,7 @@ export async function _activate(
         return false;
       }
 
-      ExtensionUtils.setWorkspaceContextOnActivate(dendronConfig);
+      ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
 
       MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ws, context, requireActiveWorkspace: true });
@@ -1219,9 +1230,11 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   codeActionProvider.activate(context);
 }
 
-function updateEngineAPI(port: number | string): EngineAPIService {
-  const ext = getExtension();
-
+// ^qxkkg70u6w0z
+function updateEngineAPI(
+  port: number | string,
+  ext: DendronExtension
+): EngineAPIService {
   // set engine api ^9dr6chh7ah9v
   const svc = EngineAPIService.createEngine({
     port,

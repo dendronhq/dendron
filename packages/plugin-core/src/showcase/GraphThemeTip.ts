@@ -1,12 +1,12 @@
-import { assertUnreachable } from "@dendronhq/common-all";
-import { SegmentClient } from "@dendronhq/common-server";
-import { ShowcaseEntry } from "@dendronhq/engine-server";
 import {
+  assertUnreachable,
   GraphThemeFeatureShowcaseTestGroups,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
-} from "../abTests";
-import { showMeHowView } from "../views/ShowMeHowView";
+} from "@dendronhq/common-all";
+import { SegmentClient } from "@dendronhq/common-server";
+import { ShowcaseEntry } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
+import { showMeHowView } from "../views/ShowMeHowView";
 import {
   DisplayLocation,
   IFeatureShowcaseMessage,

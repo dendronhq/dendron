@@ -1,6 +1,6 @@
-import { DendronServerError } from "@dendronhq/common-all";
 import _ from "lodash";
 import SparkMD5 from "spark-md5";
+import { DendronServerError } from "./error";
 
 /** One group in an A/B test. Describes one group of users. */
 type ABTestGroup<GroupNames> = {

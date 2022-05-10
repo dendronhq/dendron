@@ -1,0 +1,6 @@
+workspace:
+    vaults:
+        -
+            fsPath: dependencies/localhost/local-vault
+            selfContained: true
+            name: local-vault

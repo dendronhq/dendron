@@ -32,6 +32,7 @@ import {
   DLogger,
   GitUtils,
   note2File,
+  pathForVaultRoot,
   readJSONWithComments,
   schemaModuleOpts2File,
   simpleGit,
@@ -183,12 +184,17 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   get config(): IntermediateDendronConfig {
-    // `createConfig` function relies on this creating a config. If revising the code, make sure to update that function as well.
-    return WorkspaceService.getOrCreateConfig(this.wsRoot);
+    // TODO: don't read all the time but cache
+    return DConfig.readConfigAndApplyLocalOverrideSync(this.wsRoot);
   }
 
   get seedService(): SeedService {
     return this._seedService;
+  }
+
+  // NOTE: this is not accurate until the workspace is initialized
+  get vaults(): DVault[] {
+    return this.config.workspace.vaults;
   }
 
   async setConfig(config: IntermediateDendronConfig) {
@@ -874,9 +880,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   createConfig() {
-    // This line actually does something: it will create a config if one doesn't exist.
-    // eslint-disable-next-line no-unused-expressions
-    this.config;
+    return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
   static async createGitIgnore(wsRoot: string) {
@@ -1097,9 +1101,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ message: "cloning non-git vault" });
+      throw new DendronError({
+        message: "Internal error: cloning non-git vault",
+      });
     }
-    const repoPath = vault2Path({ wsRoot, vault });
+    const repoPath = pathForVaultRoot({ vault, wsRoot });
     this.logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);
@@ -1446,7 +1452,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       await Promise.all(
         _.map(workspaces, async (wsEntry, wsName) => {
           const wsPath = path.join(wsRoot, wsName);
-          if (!fs.existsSync(wsPath)) {
+          if (!(await fs.pathExists(wsPath))) {
             return {
               wsPath: await this.cloneWorkspace({
                 wsName,
@@ -1503,7 +1509,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const emptyRemoteVaults = vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot }))
+        !fs.existsSync(path.join(wsRoot, vault.fsPath))
     );
     const didClone =
       !_.isEmpty(emptyRemoteVaults) ||

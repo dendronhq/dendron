@@ -15,6 +15,7 @@ import {
   DWorkspace,
   DWorkspaceEntry,
   FOLDERS,
+  genUUID,
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -467,6 +468,53 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return vault;
   }
 
+  async migrateVaultToSelfContained({ vault }: { vault: DVault }) {
+    if (vault.seed || vault.workspace) {
+      // Unsupported vaults are filtered in the commands that use this function,
+      // but also adding a sanity check here.
+      throw new DendronError({
+        message:
+          "Seed vaults and workspace vaults are not yet supported for automated migration.",
+      });
+    }
+    const newVault: SelfContainedVault = { ...vault, selfContained: true };
+
+    const vaultFolder = path.join(this.wsRoot, vault.fsPath);
+    const tmpFolder = `${vault.fsPath}-migrate-${genUUID()}`;
+    // Rename the vault temporarily, create a new folder with the same name,
+    // then move the vault into the `notes` folder inside the new folder. This
+    // is the fastest and most reliable way to move all notes and assets into
+    // the new folder, since we don't have to move each file individually.
+    await fs.move(vaultFolder, tmpFolder);
+    await fs.ensureDir(vaultFolder);
+    await fs.move(tmpFolder, path.join(vaultFolder, FOLDERS.NOTES));
+
+    // Update the config to mark this vault as self contained
+    const config = DConfig.getRaw(this.wsRoot) as IntermediateDendronConfig;
+    const configVault = ConfigUtils.getVaults(config).find((confVault) =>
+      VaultUtils.isEqualV2(confVault, vault)
+    );
+    if (configVault) configVault.selfContained = true;
+    await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
+
+    // Add the config file into the vault make it self contained
+    await this.createSelfContainedVault({
+      addToCodeWorkspace: false,
+      addToConfig: false,
+      vault: newVault,
+    });
+    // Except if there's `.git` inside the vault, that has to stay at the root of the vault
+    if (await fs.pathExists(path.join(vaultFolder, FOLDERS.NOTES, ".git"))) {
+      await fs.move(
+        path.join(vaultFolder, FOLDERS.NOTES, ".git"),
+        path.join(vaultFolder, ".git")
+      );
+    }
+    // Update the config for the vault
+    vault.selfContained = true;
+    return vault;
+  }
+
   markVaultAsRemoteInConfig(
     targetVault: DVault,
     remoteUrl: string
@@ -848,8 +896,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     if (updateConfig) {
       await this.setConfig(config);
     }
-    if (updateWorkspace) {
-      const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+
+    const wsPath = path.join(this.wsRoot, DENDRON_WS_NAME);
+    if (updateWorkspace && (await fs.pathExists(wsPath))) {
       let settings = (await readJSONWithComments(
         wsPath
       )) as unknown as WorkspaceSettings;

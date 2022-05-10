@@ -752,6 +752,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX}Dev: Run Migration`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  MIGRATE_SELF_CONTAINED: {
+    key: "dendron.dev.migrateSelfContained",
+    title: `${CMD_PREFIX} Migrate to Self Contained Vault`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
     title: `${CMD_PREFIX}Dev: Open Logs`,

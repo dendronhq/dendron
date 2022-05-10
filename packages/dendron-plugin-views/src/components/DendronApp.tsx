@@ -99,7 +99,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       case GraphViewMessageEnum.onGraphStyleAndThemeLoad: {
         const cmsg = msg;
-        const { styles, graphTheme } = cmsg.data;
+        const { styles, graphTheme, isSidePanel } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
           ideDispatch(ideSlice.actions.setGraphStyles(styles));
@@ -111,6 +111,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         if (!graphTheme && styles) {
           ideDispatch(ideSlice.actions.setGraphTheme(GraphThemeEnum.Custom));
         }
+        ideDispatch(ideSlice.actions.setIsSidePanel(isSidePanel));
         break;
       }
       default:

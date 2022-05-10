@@ -27,6 +27,7 @@ type InitialState = {
   lookupModifiers: LookupModifierStatePayload | undefined;
   tree?: TreeMenu;
   graphTheme?: GraphThemeEnum;
+  isSidePanel?: boolean;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -39,6 +40,7 @@ const INITIAL_STATE: InitialState = {
   lookupModifiers: undefined,
   tree: undefined,
   graphTheme: GraphThemeEnum.Classic,
+  isSidePanel: false,
 };
 
 export { InitialState as IDEState };
@@ -59,6 +61,9 @@ export const ideSlice = createSlice({
     },
     setGraphStyles: (state, action: PayloadAction<string>) => {
       state.graphStyles = action.payload;
+    },
+    setIsSidePanel: (state, action: PayloadAction<boolean>) => {
+      state.isSidePanel = action.payload;
     },
     setViewReady: (
       state,

@@ -8,12 +8,13 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
+import { GraphStyleService } from "../styles";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "./utils";
 
@@ -77,6 +78,23 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
         }
         if (note) {
           this.refresh(note);
+        }
+        break;
+      }
+      case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
+        // Set graph styles
+        const styles = GraphStyleService.getParsedStyles();
+        const graphTheme = MetadataService.instance().getGraphTheme();
+        if (this._view && (styles || graphTheme)) {
+          this._view.webview.postMessage({
+            type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
+            data: {
+              styles,
+              graphTheme,
+              isSidePanel: true,
+            },
+            source: "vscode",
+          });
         }
         break;
       }

@@ -14,6 +14,7 @@ export enum ShowcaseEntry {
   HeaderRefs = "HeaderRefs",
   InsertNoteLink = "InsertNoteLink",
   GraphTheme = "GraphTheme",
+  PublishTheme = "PublishTheme",
 }
 
 type Metadata = Partial<{

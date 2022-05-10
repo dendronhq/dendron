@@ -1,4 +1,4 @@
-/* Customizing the theme for the published Dendron site.
+/* Customizing the theme for the published Dendron site. This is a theme that darkens the background slightly, and uses blue for links and highlights.
 
 The custom styles are at a
 [seed stage](https://wiki.dendron.so/notes/gE61aypBFWOeV0SP1qFz3/),
@@ -96,9 +96,14 @@ footer .ant-typography.ant-typography-secondary {
   color: #002b5c;
 }
 
-.dendron-tree-menu.ant-menu .ant-menu-submenu > .ant-menu-submenu-title::after {
+.dendron-tree-menu.ant-menu .ant-menu-inline .ant-menu-item-selected::after {
   /* The color for the bar on the right side of the currently selected sidebar item. */
   border-color: #002b5c;
+}
+
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  /* The color for the background of the currently selected sidebar item. */
+  background-color: #c3cbdb;
 }
 
 .dendron-toc .ant-anchor-ink-ball {

@@ -102,7 +102,7 @@ async function validateSiteConfig({
       ) {
         return {
           error: new DendronError({
-            message: "A custom theme is set in ",
+            message: `A custom theme is set in the publishing config, but ${CONSTANTS.CUSTOM_THEME_CSS} does not exist in ${wsRoot}`,
             severity: ERROR_SEVERITY.FATAL,
           }),
         };

@@ -1,39 +1,31 @@
 ---
-id: 01u0co3RYjOM1bjpc2qIU
-title: Tutorial
-desc: 'Tutorial Home Page'
-updated: 1624864763249
-created: 1624333847315
+id: 4u6pv56mnt25d8l2wzfygu7
+title: Getting Started
+desc: ""
+updated: 1652122742329
+created: 1608051264282
+nav_order: 1.1
 ---
 
-## Welcome to Dendron
+## Pre-requisites
 
-This guide will help you learn the basics of Dendron. You can also follow the Getting Started guides on our [website](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1.html).
+This walkthrough will help you get started with the basics of Dendron. Before you start, make sure you do the following:
 
-By the end of the tutorial, you will also see how Dendron can help you manage your knowledge with super fast lookup, flexible hierarchies, and powerful linking.
+- Install [VS Code](https://code.visualstudio.com/download) or a VS Code compatible editor like [VSCodium](https://vscodium.com/)
+- Install [Dendron](https://link.dendron.so/vscode) from the code marketplace
 
-If you close VS Code, you can always get back to this workspace by going to `File > Open Workspace` in VS Code's menu and then selecting your workspace file: `%WORKSPACE_ROOT%`
+## Initialize your first workspace
 
-The tutorial steps take about 10 minutes to complete. Let's get started!
+A Dendron workspace is a collection of one or more [vaults](https://wiki.dendron.so/notes/6682fca0-65ed-402c-8634-94cd51463cc4) (folders with notes).
 
-#### Steps to get started with Dendron:
+When you install Dendron, you'll see the following page. Click the `Get Started` button to begin, and it will initialize your first **[workspace](https://wiki.dendron.so/notes/c4cf5519-f7c2-4a23-b93b-1c9a02880f6b)**.
 
-- [x] Install Dendron
-- [x] Create your first workspace
-- [ ] Complete the Tutorial (%KEYBINDING%+Click on the links to go to each tutorial note)
-  - [ ] One: [[tutorial.1-navigation-basics]]
-	- [ ] Two: [[tutorial.2-taking-notes]]
-	- [ ] Three: [[tutorial.3-linking-your-notes]]
-	- [ ] Four:  [[tutorial.4-rich-formatting]]
-	- [ ] Five:  [[tutorial.5-conclusion]]
+![Tutorial Welcome Screen](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-welcome-screen-2.png)
 
-#### Getting Help
+> 💡 **TIP:** If you don't see this Welcome screen, you can open it up by typing `Ctrl+Shift+P` / `Cmd+Shift+P` to bring up the [command palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette), and then running `Dendron: Launch Tutorial` to create a workspace.
+>
+> ![Tutorial Launch Command](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-launch-tutorial-cmd-2.gif)
 
-- If you get stuck, take a look at our full documentation on our [wiki](https://wiki.dendron.so/). Don't hesitate to reach out to our community of Dendrologists on [Discord](https://discord.com/invite/AE3NRw9) or message us on Twitter at [@dendronhq](https://twitter.com/dendronhq)
+## Start the Tutorial
 
----
-
-##### Icon Guide
-
-🌱 - Try out this feature now in the editor!
-💡 - Important to note
+1. [[Learn the basics of the Dendron UI|tutorial.user-interface]]

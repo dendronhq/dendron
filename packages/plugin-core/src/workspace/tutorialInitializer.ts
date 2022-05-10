@@ -3,6 +3,8 @@ import {
   DVault,
   DWorkspaceV2,
   getStage,
+  MeetingNoteTestGroups,
+  MEETING_NOTE_TUTORIAL_TEST,
   TutorialEvents,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -16,7 +18,6 @@ import fs from "fs-extra";
 import path from "path";
 import rif from "replace-in-file";
 import * as vscode from "vscode";
-import { MeetingNoteTestGroups, MEETING_NOTE_TUTORIAL_TEST } from "../abTests";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE } from "../constants";

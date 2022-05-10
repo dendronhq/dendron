@@ -1,6 +1,6 @@
 // ^xi5t1r2j51ot
-import { GraphThemeEnum } from "@dendronhq/common-all";
-import { ABTest } from "@dendronhq/common-server";
+import { ABTest } from "./abTesting";
+import { GraphThemeEnum } from "./types/typesv2";
 
 export enum UpgradeToastWordingTestGroups {
   /** The button on the upgrade toast will say "see what changed" */

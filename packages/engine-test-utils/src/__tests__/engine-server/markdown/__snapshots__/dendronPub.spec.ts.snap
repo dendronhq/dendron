@@ -686,7 +686,7 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) prefix imagePrefix 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><img src=\\"image-url.jpg\\" alt=\\"alt-text\\"></p>
+<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>
 <hr>
 <strong>Children</strong>
 <ol>

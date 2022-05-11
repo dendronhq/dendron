@@ -599,9 +599,10 @@ export class DendronExtension implements IDendronExtension {
       });
     });
 
-    backlinkTreeView.onDidChangeVisibility(() => {
+    backlinkTreeView.onDidChangeVisibility((e) => {
       AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
-        type: "MadeVisible",
+        type: "VisibilityChanged",
+        state: e.visible ? "Visible" : "Collapsed",
       });
     });
 
@@ -613,6 +614,7 @@ export class DendronExtension implements IDendronExtension {
       sentryReportingCallback(() => {
         AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
           type: "SortOrderChanged",
+          state: "SortByLastUpdated",
         });
 
         backlinksTreeDataProvider.updateSortOrder(
@@ -626,6 +628,7 @@ export class DendronExtension implements IDendronExtension {
       sentryReportingCallback(() => {
         AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
           type: "SortOrderChanged",
+          state: "SortByPathName",
         });
 
         backlinksTreeDataProvider.updateSortOrder(BacklinkSortOrder.PathNames);

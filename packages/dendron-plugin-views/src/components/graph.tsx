@@ -358,6 +358,7 @@ export default function Graph({
             isGraphReady={isReady}
             updateConfigField={updateConfigField}
             customCSS={ide.graphStyles}
+            type={type}
           />
         )}
         {type === "note" && !ide.isSidePanel && (

@@ -73,6 +73,22 @@ const DendronGraphPanel: DendronComponent = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ide.graphTheme]);
 
+  useEffect(() => {
+    if (ide.isSidePanel) {
+      setConfig((c) => ({
+        ...c,
+        "connections.links": {
+          value: true,
+          mutable: true,
+        },
+        "options.show-local-graph": {
+          value: true,
+          mutable: true,
+        },
+      }));
+    }
+  }, [ide.isSidePanel]);
+
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;
 

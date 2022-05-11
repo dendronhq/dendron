@@ -418,78 +418,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { staticPath };
   }
 
-  _syncTutorial() {
-    const lernaRoot = BuildUtils.getLernaRoot();
-    const dendronSiteVaultPath = path.join(
-      lernaRoot,
-      "docs",
-      "seeds",
-      "dendron.dendron-site",
-      "vault"
-    );
-
-    // wipe everything in /assets/dendron-ws/tutorial/treatments
-    const treatmentsDirPath = path.join(
-      lernaRoot,
-      "assets",
-      "dendron-ws",
-      "tutorial",
-      "treatments"
-    );
-
-    // fs.removeSync(treatmentsDirPath);
-    // fs.ensureDirSync(treatmentsDirPath);
-
-    // grab everything from `tutorial.*` hierarchy
-    const tutorialNotePaths = fs
-      .readdirSync(dendronSiteVaultPath)
-      .filter((basename) => {
-        return basename.startsWith("tutorial.") && basename.endsWith(".md");
-      });
-    // determine treatment name
-    const treatmentNames = _.uniq(
-      tutorialNotePaths.map((basename) => {
-        const out = basename.split(".")[1];
-        console.log({ out });
-        return out;
-      })
-    );
-    console.log({ treatmentNames });
-    process.exit();
-    // create directories for each treatment name
-    // copy in commons (root, schema, assetdir)
-    // copy in individual treated tutorial notes
-    // rename copied in tutorial notes
-
-    // copy new tutorial assets
-    // const newTutorialNotePathsCopyOpts = fs
-    //   .readdirSync(dendronSiteVaultPath)
-    //   .filter((basename) => {
-    //     const startsWithCond =
-    //       tutorialType === "main"
-    //         ? basename.startsWith("tutorial") &&
-    //           !basename.startsWith("tutorial-alt")
-    //         : basename.startsWith(`tutorial-alt.${treatmentName}`);
-
-    //     return startsWithCond && basename.endsWith(".md");
-    //   })
-    //   .map((basename) => {
-    //     const destBasename =
-    //       tutorialType === "main"
-    //         ? basename
-    //         : basename.replace(`tutorial-alt.${treatmentName}`, "tutorial");
-    //     return {
-    //       src: path.join(dendronSiteVaultPath, basename),
-    //       dest: path.join(tutorialTypeAssetDirPath, destBasename),
-    //     };
-    //   });
-
-    // newTutorialNotePathsCopyOpts.forEach((opts) => {
-    //   const { src, dest } = opts;
-    //   fs.copyFileSync(src, dest);
-    // });
-  }
-
   syncTutorial() {
     const lernaRoot = BuildUtils.getLernaRoot();
     const dendronSiteVaultPath = path.join(
@@ -500,17 +428,20 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       "vault"
     );
 
-    // wipe everything in /assets/dendron-ws/tutorial/treatments
-    // const treatmentsDirPath = path.join(
-    //   lernaRoot,
-    //   "assets",
-    //   "dendron-ws",
-    //   "tutorial",
-    //   "treatments"
-    // );
+    const tutorialDirPath = path.join(
+      lernaRoot,
+      "assets",
+      "dendron-ws",
+      "tutorial"
+    );
 
-    // fs.removeSync(treatmentsDirPath);
-    // fs.ensureDirSync(treatmentsDirPath);
+    const commonDirPath = path.join(tutorialDirPath, "common");
+
+    // wipe everything in /assets/dendron-ws/tutorial/treatments
+    const treatmentsDirPath = path.join(tutorialDirPath, "treatments");
+
+    fs.removeSync(treatmentsDirPath);
+    fs.ensureDirSync(treatmentsDirPath);
 
     // grab everything from `tutorial.*` hierarchy
     const tutorialNotePaths = fs
@@ -522,7 +453,25 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const treatmentNames = _.uniq(
       tutorialNotePaths.map((basename) => basename.split(".")[1])
     );
-    console.log({ treatmentNames });
+
+    treatmentNames.forEach((treatmentName) => {
+      // create directories for treatment
+      const treatmentNameDirPath = path.join(treatmentsDirPath, treatmentName);
+      fs.ensureDirSync(treatmentNameDirPath);
+      // copy in commons (root, schema, assetdir)
+      fs.copySync(commonDirPath, treatmentNameDirPath);
+      // copy in individual treated tutorial notes
+      tutorialNotePaths
+        .filter((basename) => basename.startsWith(`tutorial.${treatmentName}`))
+        .forEach((basename) => {
+          const src = path.join(dendronSiteVaultPath, basename);
+          const dest = path.join(
+            treatmentNameDirPath,
+            basename.replace(`tutorial.${treatmentName}`, "tutorial")
+          );
+          fs.copyFileSync(src, dest);
+        });
+    });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

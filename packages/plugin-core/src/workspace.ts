@@ -588,6 +588,7 @@ export class DendronExtension implements IDendronExtension {
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       this.getEngine(),
+      this.getEngine(),
       this.getDWorkspace().config.dev?.enableLinkCandidates
     );
 

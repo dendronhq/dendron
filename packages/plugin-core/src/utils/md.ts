@@ -615,3 +615,69 @@ export const fsPathToRef = ({
 
 export const containsImageExt = (pathParam: string): boolean =>
   !!imageExtsRegex.exec(path.parse(pathParam).ext);
+
+export function getSurroundingContextForNoteRef(
+  ref: FoundRefT,
+  linesOfContext: number
+): string {
+  const note = ref.note!;
+
+  const fsPath = NoteUtils.getFullPath({
+    note,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+  });
+  const fileContent = fs.readFileSync(fsPath).toString();
+
+  // ref.location.range.start.
+  // const startOffset = link.position?.start.offset || 0;
+  const lines = fileContent.split("\n");
+
+  const finalLines = [];
+
+  const fmEndLineNumber = lines.indexOf("---", 1);
+
+  const linkLineNumber = ref.location.range.start.line;
+
+  const lowerBound = Math.max(
+    0,
+    lines.indexOf("---", 1) + 1, // FM Offset
+    linkLineNumber - linesOfContext
+  );
+
+  const lowerBoundText =
+    lowerBound <= fmEndLineNumber + 1
+      ? "---_Start of Note_---"
+      : `---_line ${lowerBound}_---`;
+
+  const markdownBlockStartText = "```markdown";
+  const markdownBlockEndText = "```";
+
+  const upperBound = Math.min(
+    lines.length - 1,
+    ref.location.range.start.line + linesOfContext + 1
+  );
+
+  const upperBoundText =
+    upperBound === lines.length - 1
+      ? "---_End of Note_---"
+      : `---_line ${upperBound}_---`;
+
+  // if (lowerBound > fmEndLineNumber + 1) {
+  //   finalLines.push(`_line ${lowerBound}_`);
+  // }
+  finalLines.push(lowerBoundText);
+  finalLines.push(markdownBlockStartText);
+  finalLines.push(...lines.slice(lowerBound, linkLineNumber));
+  finalLines.push(markdownBlockEndText);
+  finalLines.push(`**${_.trim(lines[linkLineNumber], "*")}**`);
+  finalLines.push(markdownBlockStartText);
+  finalLines.push(...lines.slice(linkLineNumber + 1, upperBound));
+  finalLines.push(markdownBlockEndText);
+  finalLines.push(upperBoundText);
+  // if (upperBound < lines.length - 1) {
+  //   finalLines.push(`_line ${upperBound}_`);
+  // }
+
+  return finalLines.join("\n");
+  // return lines.slice(lowerBound, upperBound).join("\n");
+}

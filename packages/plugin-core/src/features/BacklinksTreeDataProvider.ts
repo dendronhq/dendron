@@ -1,27 +1,42 @@
-import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DateFormatUtil,
+  DendronASTDest,
+  DendronError,
+  NoteProps,
+  NoteUtils,
+  ProcFlavor,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _, { Dictionary } from "lodash";
 import path from "path";
 import {
+  CancellationToken,
   Disposable,
   Event,
   EventEmitter,
+  MarkdownString,
   ProviderResult,
   Range,
   ThemeIcon,
   TreeDataProvider,
+  TreeItem,
   TreeItemCollapsibleState,
   Uri,
   window,
 } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DendronContext, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { BacklinkSortOrder } from "../types";
 import {
   containsMarkdownExt,
   findReferences,
   FoundRefT,
+  getSurroundingContextForNoteRef,
   sortPaths,
 } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -50,6 +65,7 @@ export default class BacklinksTreeDataProvider
    * engine
    */
   constructor(
+    private _engine: IEngineAPIService,
     engineEvents: EngineEventEmitter,
     isLinkCandidateEnabled: boolean | undefined
   ) {
@@ -141,6 +157,7 @@ export default class BacklinksTreeDataProvider
   // report errors to Sentry in the catch block
   public async getChildren(element?: Backlink) {
     try {
+      // TODO: Make the backlinks panel also work when preview is the active editor.
       const fsPath = window.activeTextEditor?.document.uri.fsPath;
 
       if (!element) {
@@ -154,7 +171,7 @@ export default class BacklinksTreeDataProvider
           this._isLinkCandidateEnabled,
           this._sortOrder
         );
-      } else if (element.label === "Linked" || element.label === "Candidates") {
+      } else {
         // 3rd-level children.
         const refs = element?.refs;
         if (!refs) {
@@ -165,23 +182,38 @@ export default class BacklinksTreeDataProvider
           return [];
         }
         return this.refsToBacklinkTreeItems(refs, fsPath!, element);
-      } else {
-        // 2nd-level children.
-        const refs = element?.refs;
-        if (!refs) {
-          return [];
-        }
-        return this.getSecondLevelRefsToBacklinks(refs);
       }
+
+      // else {
+      //   // 2nd-level children.
+      //   const refs = element?.refs;
+      //   if (!refs) {
+      //     return [];
+      //   }
+      //   return this.getSecondLevelRefsToBacklinks(refs);
+      // }
     } catch (error) {
       Sentry.captureException(error);
       throw error;
     }
   }
 
+  resolveTreeItem(
+    _item: TreeItem,
+    element: Backlink,
+    _token: CancellationToken
+  ): ProviderResult<TreeItem> {
+    return this.getMarkdownPreviewString(element.label).then((tooltip) => {
+      return {
+        tooltip: new MarkdownString(tooltip),
+      };
+    });
+  }
+
   /**
-   * Given all the found references to this note, return tree item(s) showing the type of backlinks.
-   * If `isLinkCandidateEnabled` is set, the tree item will not be added regardless of the existence of link candidates.
+   * Given all the found references to this note, return tree item(s) showing
+   * the type of backlinks. If `isLinkCandidateEnabled` is not set, the tree
+   * item will not be added regardless of the existence of link candidates.
    * @param refs list of found references to this note
    * @returns list of tree item(s) for the type of backlinks
    */
@@ -250,9 +282,17 @@ export default class BacklinksTreeDataProvider
         undefined,
         TreeItemCollapsibleState.None
       );
+
+      backlink.iconPath = ref.isCandidate
+        ? new ThemeIcon(ICONS.LINK_CANDIDATE)
+        : new ThemeIcon(ICONS.WIKILINK);
       backlink.parentBacklink = parent;
       backlink.description = `on line ${lineNum + 1}`;
-      backlink.tooltip = ref.matchText;
+
+      backlink.tooltip = new MarkdownString(
+        getSurroundingContextForNoteRef(ref, 5)
+      );
+
       backlink.command = {
         command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
         arguments: [
@@ -328,20 +368,54 @@ export default class BacklinksTreeDataProvider
 
     const out = pathsSorted.map((pathParam) => {
       const backlink = new Backlink(
-        path.basename(pathParam),
+        _.trimEnd(path.basename(pathParam), path.extname(pathParam)),
         referencesByPath[pathParam],
         collapsibleState
       );
+
+      const totalCount = referencesByPath[pathParam].length;
+      const linkCount = referencesByPath[pathParam].filter(
+        (ref) => !ref.isCandidate
+      ).length;
+      const candidateCount = isLinkCandidateEnabled
+        ? totalCount - linkCount
+        : 0;
+
       const backlinkCount = isLinkCandidateEnabled
         ? referencesByPath[pathParam].length
         : referencesByPath[pathParam].filter((ref) => !ref.isCandidate).length;
 
       if (backlinkCount === 0) return undefined;
 
-      backlink.description = `(${backlinkCount}) - (${path.basename(
-        pathParam
-      )})`;
-      backlink.tooltip = pathParam;
+      let linkCountDescription;
+
+      if (linkCount === 1) {
+        linkCountDescription = "1 link";
+      } else if (linkCount > 1) {
+        linkCountDescription = `${linkCount} links`;
+      }
+
+      let candidateCountDescription;
+
+      if (candidateCount === 1) {
+        candidateCountDescription = "1 candidate";
+      } else if (candidateCount > 1) {
+        candidateCountDescription = `${candidateCountDescription} candidates`;
+      }
+
+      const description = _.compact([
+        linkCountDescription,
+        candidateCountDescription,
+      ]).join(", ");
+
+      const updatedTime = referencesByPath[pathParam][0].note?.updated;
+      const suffix =
+        updatedTime !== undefined
+          ? `. Note updated: ${DateFormatUtil.formatDate(updatedTime)}`
+          : ``;
+
+      backlink.description = `${description}${suffix}`;
+
       backlink.command = {
         command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
         arguments: [
@@ -362,5 +436,80 @@ export default class BacklinksTreeDataProvider
     return sortPaths(Object.keys(referencesByPath), {
       shallowFirst: true,
     });
+  }
+
+  private async getMarkdownPreviewString(
+    fname: string
+  ): Promise<string | undefined> {
+    const ctx = "";
+    // Check if what's being referenced is a note.
+    let note: NoteProps;
+    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
+      fname,
+      engine: this._engine,
+    });
+    if (maybeNotes.length === 0) {
+      return;
+    } else if (maybeNotes.length > 1) {
+      // If there are multiple notes with this fname, default to one that's in the same vault first.
+      const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+      const sameVaultNote = _.filter(maybeNotes, (note) =>
+        VaultUtils.isEqual(note.vault, currentVault, this._engine.wsRoot)
+      )[0];
+      if (!_.isUndefined(sameVaultNote)) {
+        // There is a note that's within the same vault, let's go with that.
+        note = sameVaultNote;
+      } else {
+        // Otherwise, just pick one, doesn't matter which.
+        note = maybeNotes[0];
+      }
+    } else {
+      // Just 1 note, use that.
+      note = maybeNotes[0];
+    }
+
+    // For notes, let's use the noteRef functionality to render the referenced portion.
+    const referenceText = ["![["];
+    // if (vaultName) referenceText.push(`dendron://${vaultName}/`);
+    referenceText.push(fname);
+
+    referenceText.push("]]");
+    const reference = referenceText.join("");
+    // now we create a fake note so we can pass this to the engine
+    const id = `note.id-${reference}`;
+    const fakeNote = NoteUtils.createForFake({
+      // Mostly same as the note...
+      fname: note.fname,
+      vault: note.vault,
+      // except the changed ID to avoid caching
+      id,
+      // And using the reference as the text of the note
+      contents: reference,
+    });
+    const rendered = await this._engine.renderNote({
+      id: fakeNote.id,
+      note: fakeNote,
+      dest: DendronASTDest.MD_REGULAR,
+      flavor: ProcFlavor.HOVER_PREVIEW,
+    });
+    if (rendered.error) {
+      const error =
+        rendered.error instanceof DendronError
+          ? rendered.error
+          : new DendronError({
+              message: "Error while rendering backlinks hover",
+              payload: rendered.error,
+            });
+      Sentry.captureException(error);
+      Logger.error({
+        ctx,
+        msg: "Error while rendering the backlinks hover",
+        error,
+      });
+    }
+    if (rendered.data) {
+      return rendered.data;
+    }
+    return;
   }
 }

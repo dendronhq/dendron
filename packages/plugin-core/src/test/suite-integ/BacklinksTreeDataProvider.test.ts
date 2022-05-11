@@ -35,6 +35,7 @@ type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
   const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+    ExtensionProvider.getEngine(),
     mockEvents,
     ExtensionProvider.getDWorkspace().config.dev?.enableLinkCandidates
   );
@@ -170,7 +171,6 @@ suite("BacklinksTreeDataProvider", function () {
         // The provider will give just the backlink hence we will remove the
         // children from the structure that will be used to assert equality.
         const parentBacklinkForAssert = { ...parentBacklink };
-        delete parentBacklinkForAssert.children;
 
         // Validate children added by the test setup are able to getParent()
         expect(parentBacklink.children).toBeTruthy();
@@ -770,6 +770,7 @@ suite("BacklinksTreeDataProvider", function () {
       beforeEach(() => {
         mockEvents = new MockEngineEvents();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
+          ExtensionProvider.getEngine(),
           mockEvents,
           ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
         );

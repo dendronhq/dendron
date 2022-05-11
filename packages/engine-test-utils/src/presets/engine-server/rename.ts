@@ -18,7 +18,10 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -530,7 +533,10 @@ const NOTES = {
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({
+        cachePath,
+        logger: (engine as DendronEngineClient).logger,
+      });
       const keySet = notesCache.getCacheEntryKeys();
       return [
         {

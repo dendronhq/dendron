@@ -447,7 +447,8 @@ export class FileStorage implements DStore {
       })
     );
     this.notes = Object.assign({}, ...out);
-    this.noteFnames = new NoteFNamesDict(_.values(this.notes));
+    const allNotes = _.values(this.notes);
+    this.noteFnames = new NoteFNamesDict(allNotes);
     if (_.size(this.notes) === 0) {
       errors.push(
         new DendronError({
@@ -457,7 +458,7 @@ export class FileStorage implements DStore {
       );
     }
 
-    this._addBacklinks({ notesWithLinks, allNotes: _.values(this.notes) });
+    this._addBacklinks({ notesWithLinks, allNotes });
 
     return { errors };
   }
@@ -567,6 +568,7 @@ export class FileStorage implements DStore {
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
       noCaching: this.engine.config.noCaching,
+      logger: this.logger,
     });
     if (!out.data) {
       return {

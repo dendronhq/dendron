@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   createCacheEntry,
+  DendronEngineClient,
   NotesFileSystemCache,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -44,11 +45,12 @@ const NOTES = {
   GRANDCHILD_WITH_ALL_STUB_PARENTS: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
       const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
@@ -94,8 +96,10 @@ const NOTES = {
           expected: 2,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 1,
         },
       ];
@@ -114,12 +118,13 @@ const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const notes = engine.notes;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
       const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
@@ -144,8 +149,10 @@ const NOTES = {
           expected: 3,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 2,
         },
       ];
@@ -221,11 +228,12 @@ const NOTES = {
   DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
       const keySet = notesCache.getCacheEntryKeys();
       const noteToDelete = NoteUtils.getNoteByFnameFromEngine({
         fname: "foo",
@@ -259,8 +267,10 @@ const NOTES = {
           expected: 2,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 1,
         },
       ];
@@ -278,11 +288,12 @@ const NOTES = {
   STALE_CACHE_ENTRY: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
 
       // Create random note and write to cache
       const staleNote = await NoteTestUtilsV4.createNote({
@@ -311,12 +322,14 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 4,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath })
+          actual: new NotesFileSystemCache({ cachePath, logger })
             .getCacheEntryKeys()
             .has("my-new-note"),
           expected: false,
@@ -332,12 +345,13 @@ const NOTES = {
   MULTIPLE_DELETES: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const notes = engine.notes;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
       const keySet = notesCache.getCacheEntryKeys();
       const resp = await engine.deleteNote(
         NoteUtils.getNoteByFnameFromEngine({
@@ -377,8 +391,10 @@ const NOTES = {
           expected: 3,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 1,
         },
       ];

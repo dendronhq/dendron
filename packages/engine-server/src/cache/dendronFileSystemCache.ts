@@ -1,4 +1,5 @@
 import { Cache, FileSystemCache } from "@dendronhq/common-all";
+import { DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 
@@ -8,16 +9,20 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
   protected _cacheContents: T;
   private _cachePath: string;
   private _noCaching: boolean | undefined;
+  private _logger: DLogger;
 
   constructor({
     cachePath,
     noCaching,
+    logger,
   }: {
     cachePath: string;
+    logger: DLogger;
     noCaching?: boolean;
   }) {
     this._cachePath = cachePath;
     this._noCaching = noCaching;
+    this._logger = logger;
     if (this._noCaching) {
       this._cacheContents = this.createEmptyCacheContents();
     } else {
@@ -30,10 +35,12 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
    * @returns cache contents
    */
   private readFromFileSystem(): T {
+    const ctx = "DendronFileSystemCache:readFromFileSystem";
     if (fs.existsSync(this._cachePath)) {
       try {
         return fs.readJSONSync(this._cachePath) as T;
       } catch (_err: any) {
+        this._logger.error({ ctx, _err });
         return this.createEmptyCacheContents();
       }
     } else {

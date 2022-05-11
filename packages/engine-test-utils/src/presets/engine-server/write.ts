@@ -15,7 +15,10 @@ import {
   SCHEMA_PRESETS_V4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { setupBasic } from "./utils";
@@ -111,11 +114,12 @@ const SCHEMAS = {
 const NOTES = {
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const vault = vaults[0];
+    const logger = (engine as DendronEngineClient).logger;
     const cachePath = path.join(
       vault2Path({ wsRoot, vault }),
       CONSTANTS.DENDRON_CACHE_FILE
     );
-    const notesCache = new NotesFileSystemCache({ cachePath });
+    const notesCache = new NotesFileSystemCache({ cachePath, logger });
     const keySet = notesCache.getCacheEntryKeys();
     const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
       wsRoot,
@@ -143,8 +147,10 @@ const NOTES = {
         expected: 1,
       },
       {
-        actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-          .size,
+        actual: new NotesFileSystemCache({
+          cachePath,
+          logger,
+        }).getCacheEntryKeys().size,
         expected: 2,
       },
     ];

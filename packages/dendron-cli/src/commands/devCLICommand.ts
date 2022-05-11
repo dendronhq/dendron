@@ -82,10 +82,6 @@ type RunMigrationOpts = {
   wsRoot: string;
 } & CommandCLIOpts;
 
-type SyncTutorialOpts = {
-  treatmentName: string;
-} & CommandCLIOpts;
-
 export { CommandOpts as DevCLICommandOpts };
 
 /**
@@ -141,9 +137,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     args.option("wsRoot", {
       describe: "root directory of the Dendron workspace",
-    });
-    args.option("treatmentName", {
-      describe: "tutorial treatment name",
     });
   }
 
@@ -235,14 +228,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { error: null };
         }
         case DevCommands.SYNC_TUTORIAL: {
-          if (!opts.treatmentName) {
-            return {
-              error: new DendronError({
-                message: "sync_tutorial requires a treatmentName",
-              }),
-            };
-          }
-          this.syncTutorial({ treatmentName: opts.treatmentName });
+          this.syncTutorial();
           return { error: null };
         }
         case DevCommands.PUBLISH: {
@@ -432,69 +418,111 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { staticPath };
   }
 
-  _syncTutorial(opts: { treatmentName: string; tutorialType: "main" | "alt" }) {
-    const { treatmentName, tutorialType } = opts;
-
+  _syncTutorial() {
+    const lernaRoot = BuildUtils.getLernaRoot();
     const dendronSiteVaultPath = path.join(
-      BuildUtils.getLernaRoot(),
+      lernaRoot,
       "docs",
       "seeds",
       "dendron.dendron-site",
       "vault"
     );
 
-    const tutorialTypeAssetDirPath = path.join(
-      BuildUtils.getPluginRootPath(),
+    // wipe everything in /assets/dendron-ws/tutorial/treatments
+    const treatmentsDirPath = path.join(
+      lernaRoot,
       "assets",
       "dendron-ws",
       "tutorial",
-      tutorialType
+      "treatments"
     );
 
-    // clean up existing assets
-    const tutorialTypeNotePaths = fs
-      .readdirSync(tutorialTypeAssetDirPath)
-      .filter(
-        (basename) =>
-          basename.startsWith("tutorial.") && basename.endsWith(".md")
-      )
-      .map((basename) => path.join(tutorialTypeAssetDirPath, basename));
+    // fs.removeSync(treatmentsDirPath);
+    // fs.ensureDirSync(treatmentsDirPath);
 
-    tutorialTypeNotePaths.forEach((path) => fs.unlinkSync(path));
-
-    // copy new tutorial assets
-    const newTutorialNotePathsCopyOpts = fs
+    // grab everything from `tutorial.*` hierarchy
+    const tutorialNotePaths = fs
       .readdirSync(dendronSiteVaultPath)
       .filter((basename) => {
-        const startsWithCond =
-          tutorialType === "main"
-            ? basename.startsWith("tutorial") &&
-              !basename.startsWith("tutorial-alt")
-            : basename.startsWith(`tutorial-alt.${treatmentName}`);
-
-        return startsWithCond && basename.endsWith(".md");
-      })
-      .map((basename) => {
-        const destBasename =
-          tutorialType === "main"
-            ? basename
-            : basename.replace(`tutorial-alt.${treatmentName}`, "tutorial");
-        return {
-          src: path.join(dendronSiteVaultPath, basename),
-          dest: path.join(tutorialTypeAssetDirPath, destBasename),
-        };
+        return basename.startsWith("tutorial.") && basename.endsWith(".md");
       });
+    // determine treatment name
+    const treatmentNames = _.uniq(
+      tutorialNotePaths.map((basename) => {
+        const out = basename.split(".")[1];
+        console.log({ out });
+        return out;
+      })
+    );
+    console.log({ treatmentNames });
+    process.exit();
+    // create directories for each treatment name
+    // copy in commons (root, schema, assetdir)
+    // copy in individual treated tutorial notes
+    // rename copied in tutorial notes
 
-    newTutorialNotePathsCopyOpts.forEach((opts) => {
-      const { src, dest } = opts;
-      fs.copyFileSync(src, dest);
-    });
+    // copy new tutorial assets
+    // const newTutorialNotePathsCopyOpts = fs
+    //   .readdirSync(dendronSiteVaultPath)
+    //   .filter((basename) => {
+    //     const startsWithCond =
+    //       tutorialType === "main"
+    //         ? basename.startsWith("tutorial") &&
+    //           !basename.startsWith("tutorial-alt")
+    //         : basename.startsWith(`tutorial-alt.${treatmentName}`);
+
+    //     return startsWithCond && basename.endsWith(".md");
+    //   })
+    //   .map((basename) => {
+    //     const destBasename =
+    //       tutorialType === "main"
+    //         ? basename
+    //         : basename.replace(`tutorial-alt.${treatmentName}`, "tutorial");
+    //     return {
+    //       src: path.join(dendronSiteVaultPath, basename),
+    //       dest: path.join(tutorialTypeAssetDirPath, destBasename),
+    //     };
+    //   });
+
+    // newTutorialNotePathsCopyOpts.forEach((opts) => {
+    //   const { src, dest } = opts;
+    //   fs.copyFileSync(src, dest);
+    // });
   }
 
-  syncTutorial(opts: { treatmentName: string }) {
-    const { treatmentName } = opts;
-    this._syncTutorial({ treatmentName, tutorialType: "main" });
-    this._syncTutorial({ treatmentName, tutorialType: "alt" });
+  syncTutorial() {
+    const lernaRoot = BuildUtils.getLernaRoot();
+    const dendronSiteVaultPath = path.join(
+      lernaRoot,
+      "docs",
+      "seeds",
+      "dendron.dendron-site",
+      "vault"
+    );
+
+    // wipe everything in /assets/dendron-ws/tutorial/treatments
+    // const treatmentsDirPath = path.join(
+    //   lernaRoot,
+    //   "assets",
+    //   "dendron-ws",
+    //   "tutorial",
+    //   "treatments"
+    // );
+
+    // fs.removeSync(treatmentsDirPath);
+    // fs.ensureDirSync(treatmentsDirPath);
+
+    // grab everything from `tutorial.*` hierarchy
+    const tutorialNotePaths = fs
+      .readdirSync(dendronSiteVaultPath)
+      .filter((basename) => {
+        return basename.startsWith("tutorial.") && basename.endsWith(".md");
+      });
+    // determine treatment name
+    const treatmentNames = _.uniq(
+      tutorialNotePaths.map((basename) => basename.split(".")[1])
+    );
+    console.log({ treatmentNames });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

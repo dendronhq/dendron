@@ -27,15 +27,8 @@
     {
       "label": "sync:tutorial",
       "type": "shell",
-      "command": "node ../dendron-cli/lib/bin/dendron-cli.js dev sync_tutorial --treatmentName ${input:treatmentName}",
+      "command": "node ../dendron-cli/lib/bin/dendron-cli.js dev sync_tutorial",
       "problemMatcher": []
-    }
-  ],
-  "inputs": [
-    {
-      "type": "promptString",
-      "id": "treatmentName",
-      "description": "Type in the tutorial treatment name"
     }
   ]
 }

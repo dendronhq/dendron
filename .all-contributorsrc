@@ -1741,6 +1741,15 @@
         "bug",
         "data"
       ]
+    },
+    {
+      "login": "ShanePerry",
+      "name": "Shane Perry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2213561?v=4",
+      "profile": "https://github.com/ShanePerry",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

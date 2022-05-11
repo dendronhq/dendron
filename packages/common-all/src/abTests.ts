@@ -65,20 +65,6 @@ export enum MeetingNoteTestGroups {
   noShow = "noShow",
 }
 
-export const MEETING_NOTE_TUTORIAL_TEST = new ABTest(
-  "MeetingNoteTutorialTest",
-  [
-    {
-      name: MeetingNoteTestGroups.show,
-      weight: 1,
-    },
-    {
-      name: MeetingNoteTestGroups.noShow,
-      weight: 1,
-    },
-  ]
-);
-
 export enum GraphThemeTestGroups {
   /**
    * New user will get Monokai graph theme by default
@@ -128,24 +114,49 @@ export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
   ]
 );
 
-export enum RefactorMentionTestGroups {
-  mention = "mention",
-  noMention = "noMention",
+/**
+ *
+ * These enums correspond to the alt treatment hierarchy, and will have to match
+ * in order to be synced correctly / loaded by the tutorial initializer.
+ *
+ * e.g.)
+ *  1. in `dendron-site`, prepare tutorials in `tutorial.main.*`, `tutorial.my-treatment-1.*`, and `tutorial.my-treatment-2.*`,
+ *  2. in this case, the enum kvps should match the second level hierarchy:
+ *     export enum TutorialTestGroups {
+ *       "main" = "main",
+ *       "my-treatment-1" = "my-treatment-1",
+ *       "my-treatment-2" = "my-treatment-2"
+ *     }
+ */
+export enum TutorialTestGroups {
+  "main" = "main", // shows main tutorial
+  "no-refactor" = "no-refactor", // shows main tutorial, minus mentions to refactoring
+  "original" = "original", // shows old (origianl) tutorial
 }
 
-export const AB_2022_05_REFACTOR_MENTION = new ABTest(
-  "AB_2022_05_REFACTOR_MENTION",
-  [
-    {
-      name: RefactorMentionTestGroups.mention,
-      weight: 1,
-    },
-    {
-      name: RefactorMentionTestGroups.noMention,
-      weight: 1,
-    },
-  ]
-);
+/**
+ * Long running A/B test for differently treated tutorials.
+ * See instructions for how to set up treatments in the comments for {@link TutorialTestGroups}
+ *
+ * Currently running test:
+ *   - old tutorial (including meeting note mention) as baseline
+ *   - one group that will get the updated tutorial that is presented in our wiki
+ *   - one group that will get the updated tutorial that is presented in our wiki, minus the mentions to refactoring.
+ */
+export const AB_TUTORIAL_TEST = new ABTest("AB_TUTORIAL_TEST", [
+  {
+    name: TutorialTestGroups["main"],
+    weight: 1,
+  },
+  {
+    name: TutorialTestGroups["no-refactor"],
+    weight: 1,
+  },
+  {
+    name: TutorialTestGroups["original"],
+    weight: 1,
+  },
+]);
 
 /** All A/B tests that are currently running.
  *
@@ -154,8 +165,7 @@ export const AB_2022_05_REFACTOR_MENTION = new ABTest(
 export const CURRENT_AB_TESTS = [
   UPGRADE_TOAST_WORDING_TEST,
   SELF_CONTAINED_VAULTS_TEST,
-  MEETING_NOTE_TUTORIAL_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
-  AB_2022_05_REFACTOR_MENTION,
+  AB_TUTORIAL_TEST,
 ];

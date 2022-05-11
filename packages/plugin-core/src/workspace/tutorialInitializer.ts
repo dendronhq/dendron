@@ -1,13 +1,11 @@
 import {
-  assertUnreachable,
   DendronError,
   DVault,
   DWorkspaceV2,
   getStage,
-  RefactorMentionTestGroups,
   TutorialEvents,
   VaultUtils,
-  AB_2022_05_REFACTOR_MENTION,
+  AB_TUTORIAL_TEST,
 } from "@dendronhq/common-all";
 import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -54,28 +52,14 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    const ABUserGroup = AB_2022_05_REFACTOR_MENTION.getUserGroup(
+    const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 
-    switch (ABUserGroup) {
-      case RefactorMentionTestGroups.mention: {
-        fs.copySync(
-          path.join(dendronWSTemplate.fsPath, "tutorial", "main"),
-          vpath
-        );
-        break;
-      }
-      case RefactorMentionTestGroups.noMention: {
-        fs.copySync(
-          path.join(dendronWSTemplate.fsPath, "tutorial", "alt"),
-          vpath
-        );
-        break;
-      }
-      default:
-        assertUnreachable(ABUserGroup);
-    }
+    fs.copySync(
+      path.join(dendronWSTemplate.fsPath, "tutorial", ABUserGroup),
+      vpath
+    );
   }
 
   async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {

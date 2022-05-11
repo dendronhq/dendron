@@ -1750,6 +1750,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "aodhagan",
+      "name": "aodhagan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59316063?v=4",
+      "profile": "https://github.com/Aodhagan",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

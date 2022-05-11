@@ -31,7 +31,11 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
    */
   private readFromFileSystem(): T {
     if (fs.existsSync(this._cachePath)) {
-      return fs.readJSONSync(this._cachePath) as T;
+      try {
+        return fs.readJSONSync(this._cachePath) as T;
+      } catch (_err: any) {
+        return this.createEmptyCacheContents();
+      }
     } else {
       return this.createEmptyCacheContents();
     }
@@ -57,6 +61,7 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
    * Delete cache file if it exists
    */
   removeFromFileSystem(): void {
+    this.createEmptyCacheContents();
     if (fs.pathExistsSync(this._cachePath)) {
       return fs.removeSync(this._cachePath);
     }

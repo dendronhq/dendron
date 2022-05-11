@@ -40,6 +40,7 @@ import {
   getSlugger,
   isNotUndefined,
   normalizeUnixPath,
+  NoteFNamesDict,
   randomColor,
 } from "./utils";
 import { genUUID } from "./uuid";
@@ -156,7 +157,8 @@ export class DNodeUtils {
 
   static findClosestParent(
     fpath: string,
-    nodes: DNodeProps[],
+    nodes: NotePropsDict,
+    notesByFnameDict: NoteFNamesDict,
     opts: {
       noStubs?: boolean;
       vault: DVault;
@@ -166,30 +168,25 @@ export class DNodeUtils {
     const { vault } = opts;
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
-      const _node = _.find(
-        nodes,
-        (ent) =>
-          ent.fname === "root" &&
-          VaultUtils.isEqual(ent.vault, vault, opts.wsRoot)
-      );
+      const _node = notesByFnameDict.get(nodes, "root", vault)[0];
       if (_.isUndefined(_node)) {
         throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = NoteUtils.getNoteByFnameV5({
-      fname: dirname,
-      notes: nodes,
-      vault,
-      wsRoot: opts.wsRoot,
-    });
+    const maybeNode = notesByFnameDict.get(nodes, dirname, vault)[0];
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
     ) {
       return maybeNode;
     } else {
-      return DNodeUtils.findClosestParent(dirname, nodes, opts);
+      return DNodeUtils.findClosestParent(
+        dirname,
+        nodes,
+        notesByFnameDict,
+        opts
+      );
     }
   }
 
@@ -376,19 +373,15 @@ export class NoteUtils {
    */
   static addOrUpdateParents(opts: {
     note: NoteProps;
-    notesList: NoteProps[];
+    notesDict: NotePropsDict;
+    notesByFnameDict: NoteFNamesDict;
     createStubs: boolean;
     wsRoot: string;
   }): NoteChangeEntry[] {
-    const { note, notesList, createStubs, wsRoot } = opts;
+    const { note, notesDict, notesByFnameDict, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    const parent =
-      _.find(
-        notesList,
-        (p) =>
-          p.fname.toLowerCase() === parentPath &&
-          VaultUtils.isEqual(p.vault.fsPath, note.vault.fsPath, wsRoot)
-      ) || null;
+    const parent = notesByFnameDict.get(notesDict, parentPath, note.vault)[0];
+
     const changed: NoteChangeEntry[] = [];
     if (parent) {
       const prevParentState = { ...parent };
@@ -409,10 +402,15 @@ export class NoteUtils {
       throw DendronError.createFromStatus(err);
     }
     if (!parent) {
-      const ancestor = DNodeUtils.findClosestParent(note.fname, notesList, {
-        vault: note.vault,
-        wsRoot,
-      }) as NoteProps;
+      const ancestor = DNodeUtils.findClosestParent(
+        note.fname,
+        notesDict,
+        notesByFnameDict,
+        {
+          vault: note.vault,
+          wsRoot,
+        }
+      ) as NoteProps;
 
       const prevAncestorState = { ...ancestor };
 
@@ -853,10 +851,7 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    let notes = engine.noteFnames.get(engine.notes, fname);
-    if (vault)
-      notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
-    return notes;
+    return engine.noteFnames.get(engine.notes, fname, vault);
   }
 
   /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */

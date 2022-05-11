@@ -14,6 +14,9 @@ import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 // @ts-ignore
 import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
+
+let NOTE_FNAMES_DICT: NoteFNamesDict | undefined;
+
 /**
  * Equivalent to engine.init
  */
@@ -161,12 +164,13 @@ export const engineSlice = createSlice({
   reducers: {
     setFromInit: (state, action: PayloadAction<DEngineInitPayload>) => {
       const { notes, wsRoot, schemas, vaults, config } = action.payload;
+      NOTE_FNAMES_DICT = new NoteFNamesDict(_.values(notes));
       state.notes = notes;
       state.wsRoot = wsRoot;
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = new NoteFNamesDict(_.values(notes));
+      state.noteFName = NOTE_FNAMES_DICT;
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
@@ -203,9 +207,13 @@ export const engineSlice = createSlice({
       }
       // this is a new node
       if (!state.notes[note.id]) {
+        const notesByFnameDict = _.isUndefined(NOTE_FNAMES_DICT)
+          ? new NoteFNamesDict(_.values(state.notes))
+          : NOTE_FNAMES_DICT;
         NoteUtils.addOrUpdateParents({
           note,
-          notesList: _.values(state.notes),
+          notesDict: state.notes,
+          notesByFnameDict,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });

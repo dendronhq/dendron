@@ -255,10 +255,39 @@ class ExtensionUtils {
       type: workspaceType,
       config: dendronConfig,
     } = workspace;
-    let numNotes = _.size(engine.notes);
-    if (numNotes > 10) {
-      numNotes = Math.round(numNotes / 10) * 10;
-    }
+    const numNotes = _.size(engine.notes);
+
+    let numNoteRefs = 0;
+    let numWikilinks = 0;
+    let numBacklinks = 0;
+    let numLinkCandidates = 0;
+    let numFrontmatterTags = 0;
+
+    // Takes about ~10 ms to compute in org-workspace
+    Object.values(engine.notes).forEach((val) => {
+      val.links.forEach((link) => {
+        switch (link.type) {
+          case "ref":
+            numNoteRefs += 1;
+            break;
+          case "wiki":
+            numWikilinks += 1;
+            break;
+          case "backlink":
+            numBacklinks += 1;
+            break;
+          case "linkCandidate":
+            numLinkCandidates += 1;
+            break;
+          case "frontmatterTag":
+            numFrontmatterTags += 1;
+            break;
+          default:
+            break;
+        }
+      });
+    });
+
     const numSchemas = _.size(engine.schemas);
     const codeWorkspacePresent = await fs.pathExists(
       path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
@@ -267,11 +296,15 @@ class ExtensionUtils {
     const siteUrl = publishigConfig.siteUrl;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
-
     const trackProps = {
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
       numNotes,
+      numNoteRefs,
+      numWikilinks,
+      numBacklinks,
+      numLinkCandidates,
+      numFrontmatterTags,
       numSchemas,
       numVaults: vaults.length,
       workspaceType,

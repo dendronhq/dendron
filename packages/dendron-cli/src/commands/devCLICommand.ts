@@ -419,9 +419,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   syncTutorial() {
-    const lernaRoot = BuildUtils.getLernaRoot();
     const dendronSiteVaultPath = path.join(
-      lernaRoot,
+      BuildUtils.getLernaRoot(),
       "docs",
       "seeds",
       "dendron.dendron-site",
@@ -429,7 +428,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     );
 
     const tutorialDirPath = path.join(
-      lernaRoot,
+      BuildUtils.getPluginRootPath(),
       "assets",
       "dendron-ws",
       "tutorial"

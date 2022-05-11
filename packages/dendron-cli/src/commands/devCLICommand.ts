@@ -56,8 +56,7 @@ export enum DevCommands {
 type CommandOpts = CommandCLIOpts &
   CommandCommonProps &
   Partial<BuildCmdOpts> &
-  Partial<RunMigrationOpts> &
-  Partial<SyncTutorialOpts>;
+  Partial<RunMigrationOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 

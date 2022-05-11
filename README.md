@@ -4,7 +4,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-182-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-183-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -433,6 +433,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/paolodina"><img src="https://avatars.githubusercontent.com/u/1157401?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paolo Dina</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=paolodina" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/agichim"><img src="https://avatars.githubusercontent.com/u/51931067?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexandru Ichim</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=agichim" title="Documentation">📖</a></td>
     <td align="center"><a href="http://icanteven.io"><img src="https://avatars.githubusercontent.com/u/5951023?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Derek Ardolf</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=ScriptAutomate" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/huland"><img src="https://avatars.githubusercontent.com/u/4936652?v=4?s=100" width="100px;" alt=""/><br /><sub><b>huland</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=huland" title="Code">💻</a></td>
   </tr>
 </table>
 

@@ -128,15 +128,15 @@ export class TutorialInitializer
 
       if (fileName?.endsWith("tutorial.md")) {
         eventName = TutorialEvents.Tutorial_0_Show;
-      } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+      } else if (fileName?.endsWith("tutorial.user-interface.md")) {
         eventName = TutorialEvents.Tutorial_1_Show;
-      } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+      } else if (fileName?.endsWith("tutorial.taking-notes.md")) {
         eventName = TutorialEvents.Tutorial_2_Show;
-      } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+      } else if (fileName?.endsWith("tutorial.linking-notes.md")) {
         eventName = TutorialEvents.Tutorial_3_Show;
-      } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+      } else if (fileName?.endsWith("tutorial.rich-formatting.md")) {
         eventName = TutorialEvents.Tutorial_4_Show;
-      } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+      } else if (fileName?.endsWith("tutorial.conclusion.md")) {
         eventName = TutorialEvents.Tutorial_5_Show;
       }
 

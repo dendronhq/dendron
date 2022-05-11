@@ -1,7 +1,7 @@
 ---
 id: kyjfnf2rnc6vn71iyn9liz7
 title: Conclusion
-desc: ""
+desc: ''
 updated: 1652123184798
 created: 1625564254964
 nav_order: 4

@@ -2,7 +2,7 @@
 id: rjnqumna1ye82u9u76ni42k
 title: Linking Notes
 desc: Linking Notes
-updated: 1652126857106
+updated: 1652280770996
 created: 1625563999532
 nav_order: 2
 ---

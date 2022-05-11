@@ -2,7 +2,7 @@
 id: lxrp006mal1tfsd7nxmsobe
 title: Rich Formatting
 desc: ""
-updated: 1652123135299
+updated: 1652280916969
 created: 1625573403967
 nav_order: 3
 ---

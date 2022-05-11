@@ -1,0 +1,14 @@
+-
+    id: root
+    title: root
+    desc: ""
+    type: schema
+    updated: 1594075339610
+    created: 1594075339610
+    body: ""
+    fname: root.schema
+    data: {}
+    stub: false
+    custom: {}
+    parent: root
+    children: []

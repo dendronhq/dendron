@@ -2,7 +2,7 @@
 id: ie5x2bq5yj7uvenylblnhyr
 title: Rich Formatting
 desc: ""
-updated: 1652280786678
+updated: 1652290942993
 created: 1625573403967
 nav_order: 3
 ---
@@ -46,7 +46,7 @@ Result:
 Math typesetting can be written through [Katex](https://wiki.dendron.so/notes/b1919663-cc48-4054-b0cf-4b26fe444907.html)
 
 $$
-\\int\_{-\\infty}^\\infty f(x)dx
+\int\_{-\infty}^\infty f(x)dx
 $$
 
 ## Diagrams

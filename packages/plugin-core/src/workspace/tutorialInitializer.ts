@@ -52,11 +52,10 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    // const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
-    //   SegmentClient.instance().anonymousId
-    // );
+    const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
 
-    const ABUserGroup = "original";
     fs.copySync(
       path.join(
         dendronWSTemplate.fsPath,

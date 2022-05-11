@@ -1,4 +1,5 @@
 import { DEngineClient, DVault, WorkspaceOpts } from "@dendronhq/common-all";
+import { SinonStub } from "sinon";
 
 export type TestResult = {
   actual: any;
@@ -35,3 +36,17 @@ export type PostSetupHookFunction<T = any> = (
     extra?: any;
   } & WorkspaceOpts
 ) => Promise<T>;
+
+/** The type for a function stubbed by sinon.
+ *
+ * Examples:
+ *
+ * ```ts
+ * let function: SinonStubbedFn<typeof exampleFn>;
+ * let method: SinonStubbedFn<typeof VSCodeUtils["reloadWindow"]>;
+ * ```
+ */
+export type SinonStubbedFn<T extends (...args: any[]) => any> = SinonStub<
+  Parameters<T>,
+  ReturnType<T>
+>;

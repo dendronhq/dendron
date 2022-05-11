@@ -197,4 +197,9 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Enable Pretty Links",
       desc: "Note links are published without the .html file extension.",
     },
+    theme: {
+      value: undefined,
+      label: "The theme to use when publishing.",
+      desc: "The theme to use when publishing the site. If you are using a custom theme, make sure to create the CSS file too.",
+    },
   };

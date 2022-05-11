@@ -2,6 +2,12 @@ import { DVault } from "../../workspace";
 import { GithubConfig, genDefaultGithubConfig } from "./github";
 import { SEOConfig, genDefaultSEOConfig } from "./seo";
 
+export enum Theme {
+  DARK = "dark",
+  LIGHT = "light",
+  CUSTOM = "custom",
+}
+
 /**
  * Namespace for all publishing related configurations
  */
@@ -36,7 +42,7 @@ export type DendronPublishingConfig = {
   writeStubs: boolean;
   seo: SEOConfig;
   github: GithubConfig;
-
+  theme?: Theme;
   segmentKey?: string;
   cognitoUserPoolId?: string;
   cognitoClientId?: string;

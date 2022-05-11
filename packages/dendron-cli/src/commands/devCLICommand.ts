@@ -445,7 +445,11 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const tutorialNotePaths = fs
       .readdirSync(dendronSiteVaultPath)
       .filter((basename) => {
-        return basename.startsWith("tutorial.") && basename.endsWith(".md");
+        return (
+          basename.startsWith("tutorial.") &&
+          basename.endsWith(".md") &&
+          basename !== "tutorial.md"
+        );
       });
     // determine treatment name
     const treatmentNames = _.uniq(

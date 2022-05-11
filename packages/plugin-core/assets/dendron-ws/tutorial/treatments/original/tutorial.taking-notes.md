@@ -2,7 +2,7 @@
 id: mycf53kz1r7swcttcobwbdl
 title: Taking Notes
 desc: ""
-updated: 1652280247440
+updated: 1652289075949
 created: 1652278083208
 ---
 
@@ -11,7 +11,8 @@ created: 1652278083208
 To create a note, use `Cmd / Ctrl + L` to bring up Dendron's lookup. This is a shortcut for the `Dendron: Lookup Note` command.
 
 > 💡 The lookup command is the main way to interact with Dendron. It is used for both looking up your notes and creating new notes. When you do a lookup on a note that hasn't been created, Dendron will create it for you. Remember the `Cmd / Ctrl + L` shortcut.
-> 🌱 Try it yourself - bring up the lookup bar with %KEYBINDING%+L. Type `recipes` and hit Enter. Afterward, you can use the `Ctrl + Tab` shortcut to get back to this note.
+
+> 🌱 Try it yourself - bring up the lookup bar with `Cmd / Ctrl + L`. Type `recipes` and hit Enter. Afterward, you can use the `Ctrl + Tab` shortcut to get back to this note.
 > This should have created a note named `recipes.md`. Notes in Dendron are just plaintext markdown. They live in your file system and are portable across any platform, which makes it very easy to import/ export your notes and even to publish your notes to a hosted website. You can try to add some content to the body of your `recipes` note now.
 
 The --- section at the top of each note is frontmatter. Frontmatter are custom attributes at the top of each markdown file. Dendron uses it to store metadata about each note for features like publishing. Don't modify the id attribute on the front matter.

@@ -669,8 +669,9 @@ export class DendronExtension implements IDendronExtension {
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.GOTO_BACKLINK.key,
       (uri, options, isCandidate) => {
-        AnalyticsUtils.track(VSCodeEvents.BacklinkClicked, {
-          isCandidate,
+        AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
+          type: "BacklinkClicked",
+          state: isCandidate === true ? "Candidate" : "Link",
         });
 
         vscode.commands.executeCommand("vscode.open", uri, options);

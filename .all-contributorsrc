@@ -1731,6 +1731,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "vmasrani",
+      "name": "Vaden Masrani",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3288149?v=4",
+      "profile": "https://vmasrani.github.io/",
+      "contributions": [
+        "bug",
+        "data"
+      ]
     }
   ],
   "contributorsPerLine": 7,

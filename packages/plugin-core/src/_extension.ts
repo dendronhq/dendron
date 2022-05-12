@@ -23,7 +23,6 @@ import {
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   Time,
-  TutorialEvents,
   UpgradeToastWordingTestGroups,
   UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
@@ -100,6 +99,11 @@ import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
+
+/** Before sending saved telemetry events, wait this long (in ms) to make sure
+ * the workspace will likely remain open long enough for us to send everything.
+ */
+const DELAY_TO_SEND_SAVED_TELEMETRY = 15 * 1000;
 
 class ExtensionUtils {
   static addCommand = ({
@@ -355,26 +359,10 @@ class ExtensionUtils {
       ),
     });
     AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, trackProps);
-  }
-
-  /**
-   * Track if welcome button was clicked
-   */
-  static trackWelcomeClicked() {
-    const welcomeClickedTime = MetadataService.instance().getWelcomeClicked();
-    // check if we have a welcome click message
-    // see [[../packages/plugin-core/src/WelcomeUtils.ts#^z5hpzc3fdkxs]] where this property is set
-    if (welcomeClickedTime) {
-      AnalyticsUtils.track(
-        TutorialEvents.ClickStart,
-        {},
-        {
-          timestamp: welcomeClickedTime,
-        }
-      ).then(() => {
-        MetadataService.instance().deleteMeta("welcomeClickedTime");
-      });
-    }
+    setTimeout(() => {
+      Logger.info("sendSavedAnalytics"); // TODO
+      AnalyticsUtils.sendSavedAnalytics();
+    }, DELAY_TO_SEND_SAVED_TELEMETRY);
   }
 }
 
@@ -708,7 +696,6 @@ export async function _activate(
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
-      ExtensionUtils.trackWelcomeClicked();
       const maybeWsSettings =
         ws.type === WorkspaceType.CODE
           ? wsService.getCodeWorkspaceSettingsSync()

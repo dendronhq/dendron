@@ -57,6 +57,10 @@ export const FOLDERS = {
   NOTES: "notes",
   /** The folder where the assets are stored, this will be under {@link FOLDERS.NOTES}. */
   ASSETS: "assets",
+  /** The system-wide folder where Dendron stores metadata and other system-wide files. */
+  DENDRON_SYSTEM_ROOT: ".dendron",
+  /** The folder where telemetry payloads that will be sent during next run are temporarily saved. Under {@link FOLDERS.DENDRON_SYSTEM_ROOT}. */
+  SAVED_TELEMETRY: "saved-telemetry",
 };
 
 export enum ERROR_STATUS {

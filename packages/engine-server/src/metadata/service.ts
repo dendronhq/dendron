@@ -1,4 +1,4 @@
-import { GraphThemeEnum, Time } from "@dendronhq/common-all";
+import { FOLDERS, GraphThemeEnum, Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -118,7 +118,7 @@ export class MetadataService {
   }
 
   static metaFilePath() {
-    return path.join(os.homedir(), ".dendron", "meta.json");
+    return path.join(os.homedir(), FOLDERS.DENDRON_SYSTEM_ROOT, "meta.json");
   }
 
   deleteMeta(key: keyof Metadata) {
@@ -137,15 +137,6 @@ export class MetadataService {
       return {};
     }
     return fs.readJSONSync(MetadataService.metaFilePath()) as Metadata;
-  }
-
-  getWelcomeClicked(): Date | false {
-    const welcomeClickedTime =
-      MetadataService.instance().getMeta()["welcomeClickedTime"];
-    if (_.isNumber(welcomeClickedTime)) {
-      return Time.DateTime.fromMillis(welcomeClickedTime).toJSDate();
-    }
-    return false;
   }
 
   getFeatureShowcaseStatus(key: ShowcaseEntry) {

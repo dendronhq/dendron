@@ -37,6 +37,9 @@ module.exports = {
       displayName: "non-plugin-tests",
       testMatch: [
         "<rootDir>/packages/engine-test-utils/**/?(*.)+(spec|test).[jt]s?(x)",
+        // see https://github.com/facebook/jest/issues/7914
+        "<rootDir>/packages/engine-test-utils/**/__tests__/**/*.[jt]s?(x)",
+        "<rootDir>/packages/engine-test-utils/**/*(*.)@(spec|test).[tj]s?(x)",
       ],
       ...commonConfig,
     },

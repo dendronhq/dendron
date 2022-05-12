@@ -104,9 +104,9 @@
           "name": "Help and Feedback"
         }, 
         {
-          "id": "dendron.local-graph-view",
-          "name": "Local Graph",
-          "contextualTitle": "Local Graph",
+          "id": "dendron.graph-panel",
+          "name": "Graph Panel",
+          "contextualTitle": "Graph Panel",
           "type": "webview",
           "when": "dendron:pluginActive"
         }

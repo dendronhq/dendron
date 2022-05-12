@@ -71,7 +71,7 @@ import { CalendarView } from "./views/CalendarView";
 import TipOfTheDayWebview from "./features/TipOfTheDayWebview";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
 import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
-import { LocalGraphView } from "./views/LocalGraphView";
+import { GraphPanel } from "./views/GraphPanel";
 
 let _DendronWorkspace: DendronExtension | null;
 
@@ -528,13 +528,13 @@ export class DendronExtension implements IDendronExtension {
         // Help and Feedback
         const helpAndFeedbackView = setupHelpFeedbackTreeView();
 
-        // Local graph view
-        const localgraphView = new LocalGraphView(this);
-        this.treeViews[DendronTreeViewKey.LOCAL_GRAPH_VIEW] = localgraphView;
+        // Graph panel (side)
+        const graphPanel = new GraphPanel(this);
+        this.treeViews[DendronTreeViewKey.GRAPH_PANEL] = graphPanel;
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
-            LocalGraphView.viewType,
-            localgraphView
+            GraphPanel.viewType,
+            graphPanel
           )
         );
 

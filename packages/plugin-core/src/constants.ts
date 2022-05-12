@@ -98,7 +98,7 @@ export const DENDRON_VIEWS = [
     where: "dendron-view",
   },
   {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOCAL_GRAPH_VIEW),
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
     when: DendronContext.PLUGIN_ACTIVE,
     where: "explorer",
   },

@@ -21,8 +21,8 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "./utils";
 
-export class LocalGraphView implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronTreeViewKey.LOCAL_GRAPH_VIEW;
+export class GraphPanel implements vscode.WebviewViewProvider {
+  public static readonly viewType = DendronTreeViewKey.GRAPH_PANEL;
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
   constructor(extension: IDendronExtension) {
@@ -44,7 +44,7 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
     this._view = webviewView;
     await WebViewUtils.prepareTreeView({
       ext: this._ext,
-      key: DendronTreeViewKey.LOCAL_GRAPH_VIEW,
+      key: DendronTreeViewKey.GRAPH_PANEL,
       webviewView,
     });
     webviewView.webview.onDidReceiveMessage(
@@ -59,7 +59,7 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
     });
   }
   async onDidReceiveMessageHandler(msg: GraphViewMessage) {
-    const ctx = "LocalGraphView:onDidReceiveMessage";
+    const ctx = "GraphPanel(side):onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
     switch (msg.type) {
       case GraphViewMessageEnum.onSelect: {
@@ -132,7 +132,7 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
     if (!this._view.visible) {
       return;
     }
-    const ctx = "LocalGraphView:openTextDocument";
+    const ctx = "GraphPanel(side):openTextDocument";
     const { wsRoot, vaults } = this._ext.getDWorkspace();
     if (
       !WorkspaceUtils.isPathInWorkspace({

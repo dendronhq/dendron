@@ -173,6 +173,13 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
+
+          case GraphViewMessageEnum.toggleGraphView: {
+            AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
+              type: msg.data.graphType,
+            });
+            break;
+          }
           default:
             break;
         }
@@ -184,6 +191,9 @@ export class NoteGraphPanelFactory {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
         if (this.defaultGraphTheme) {
+          AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+            defaultTheme: this.defaultGraphTheme,
+          });
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
           this.defaultGraphTheme = undefined;
         }

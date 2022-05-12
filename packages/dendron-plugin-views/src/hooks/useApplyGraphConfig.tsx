@@ -58,7 +58,7 @@ const useApplyGraphConfig = ({
           }
         });
     } catch (err) {
-      logger._log(`Couldn't find the edge for target note ${err}`);
+      logger.error(`Couldn't find the edge for target note ${err}`);
     }
   };
   const applyVaultConfig = (allowRelayout: boolean) => {

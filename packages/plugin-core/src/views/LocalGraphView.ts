@@ -2,6 +2,7 @@ import {
   DendronTreeViewKey,
   DMessage,
   DMessageEnum,
+  GraphEvents,
   GraphViewMessage,
   GraphViewMessageEnum,
   NoteProps,
@@ -15,6 +16,7 @@ import { GotoNoteCommand } from "../commands/GotoNote";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { GraphStyleService } from "../styles";
+import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WebViewUtils } from "./utils";
 
@@ -59,6 +61,9 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
           qs: note.fname,
           vault: note.vault,
         });
+        AnalyticsUtils.track(GraphEvents.LocalGraphSidePanel, {
+          message: GraphViewMessageEnum.onSelect,
+        });
         break;
       }
       case GraphViewMessageEnum.onGetActiveEditor: {
@@ -96,6 +101,13 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
             source: "vscode",
           });
         }
+        break;
+      }
+
+      case GraphViewMessageEnum.onLocalGraphVisible: {
+        AnalyticsUtils.track(GraphEvents.LocalGraphSidePanel, {
+          visible: true,
+        });
         break;
       }
       default:

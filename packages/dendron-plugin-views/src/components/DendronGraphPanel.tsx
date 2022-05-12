@@ -86,6 +86,10 @@ const DendronGraphPanel: DendronComponent = (props) => {
           mutable: true,
         },
       }));
+      postVSCodeMessage({
+        type: GraphViewMessageEnum.onLocalGraphVisible,
+        source: DMessageSource.webClient,
+      } as GraphViewMessage);
     }
   }, [ide.isSidePanel]);
 
@@ -101,7 +105,6 @@ const DendronGraphPanel: DendronComponent = (props) => {
       source: DMessageSource.webClient,
     } as GraphViewMessage);
   };
-
   return (
     <Graph
       elements={elements}

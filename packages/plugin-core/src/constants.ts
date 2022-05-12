@@ -498,6 +498,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  GOTO_BACKLINK: {
+    key: "dendron.gotoBacklink",
+    title: `${CMD_PREFIX} Go To Backlink`,
+  },
   // --- Workspace
   ADD_AND_COMMIT: {
     key: "dendron.addAndCommit",

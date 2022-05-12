@@ -8,16 +8,24 @@ import {
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
+  CURRENT_AB_TESTS,
   DendronError,
   DENDRON_VSCODE_CONFIG_KEYS,
   getStage,
   GitEvents,
   GraphEvents,
   GraphThemeEnum,
+  GraphThemeTestGroups,
+  GRAPH_THEME_TEST,
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
+  SelfContainedVaultsTestGroups,
+  SELF_CONTAINED_VAULTS_TEST,
   Time,
+  TutorialEvents,
+  UpgradeToastWordingTestGroups,
+  UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -43,15 +51,6 @@ import os from "os";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import {
-  CURRENT_AB_TESTS,
-  GraphThemeTestGroups,
-  GRAPH_THEME_TEST,
-  SelfContainedVaultsTestGroups,
-  SELF_CONTAINED_VAULTS_TEST,
-  UpgradeToastWordingTestGroups,
-  UPGRADE_TOAST_WORDING_TEST,
-} from "./abTests";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { MoveNoteCommand } from "./commands/MoveNoteCommand";
@@ -261,23 +260,57 @@ class ExtensionUtils {
       type: workspaceType,
       config: dendronConfig,
     } = workspace;
-    let numNotes = _.size(engine.notes);
-    if (numNotes > 10) {
-      numNotes = Math.round(numNotes / 10) * 10;
-    }
+    const numNotes = _.size(engine.notes);
+
+    let numNoteRefs = 0;
+    let numWikilinks = 0;
+    let numBacklinks = 0;
+    let numLinkCandidates = 0;
+    let numFrontmatterTags = 0;
+
+    // Takes about ~10 ms to compute in org-workspace
+    Object.values(engine.notes).forEach((val) => {
+      val.links.forEach((link) => {
+        switch (link.type) {
+          case "ref":
+            numNoteRefs += 1;
+            break;
+          case "wiki":
+            numWikilinks += 1;
+            break;
+          case "backlink":
+            numBacklinks += 1;
+            break;
+          case "linkCandidate":
+            numLinkCandidates += 1;
+            break;
+          case "frontmatterTag":
+            numFrontmatterTags += 1;
+            break;
+          default:
+            break;
+        }
+      });
+    });
+
     const numSchemas = _.size(engine.schemas);
     const codeWorkspacePresent = await fs.pathExists(
       path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
     );
     const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
     const siteUrl = publishigConfig.siteUrl;
+    const publishingTheme = dendronConfig?.publishing?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
-
     const trackProps = {
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
       numNotes,
+      numNoteRefs,
+      numWikilinks,
+      numBacklinks,
+      numLinkCandidates,
+      numFrontmatterTags,
       numSchemas,
       numVaults: vaults.length,
       workspaceType,
@@ -302,6 +335,9 @@ class ExtensionUtils {
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
+    }
+    if (publishingTheme !== undefined) {
+      _.set(trackProps, "publishingTheme", publishingTheme);
     }
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
     if (maybeLocalConfig.data) {

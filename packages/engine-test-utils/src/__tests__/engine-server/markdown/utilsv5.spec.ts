@@ -74,7 +74,7 @@ describe("MDUtils.proc", () => {
           } = cleanVerifyOpts(opts);
           await checkString(
             resp.contents,
-            `<img src="assets/foo.jpg" alt="foo alt txt">`
+            `<img src="/assets/foo.jpg" alt="foo alt txt">`
           );
         },
         [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,

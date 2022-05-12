@@ -282,7 +282,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
           assetsPrefix: "bond/",
         }
       ).processSync(`![alt-text](image-url.jpg)`);
-      await checkVFile(out, '<img src="image-url.jpg" alt="alt-text">');
+      await checkVFile(out, '<img src="/image-url.jpg" alt="alt-text">');
     });
 
     testWithEngine(

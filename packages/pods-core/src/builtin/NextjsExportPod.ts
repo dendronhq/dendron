@@ -12,6 +12,11 @@ import {
   configIsV4,
   DendronPublishingConfig,
   TreeUtils,
+  RespV3,
+  DendronError,
+  ERROR_SEVERITY,
+  Theme,
+  CONSTANTS,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -81,6 +86,30 @@ function getSiteConfig({
       enablePrettyLinks: true,
     } as DendronPublishingConfig;
   }
+}
+
+async function validateSiteConfig({
+  config,
+  wsRoot,
+}: {
+  config: DendronSiteConfig | DendronPublishingConfig;
+  wsRoot: string;
+}): Promise<RespV3<undefined>> {
+  if (ConfigUtils.isDendronPublishingConfig(config)) {
+    if (config.theme === Theme.CUSTOM) {
+      if (
+        !(await fs.pathExists(path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS)))
+      ) {
+        return {
+          error: new DendronError({
+            message: `A custom theme is set in the publishing config, but ${CONSTANTS.CUSTOM_THEME_CSS} does not exist in ${wsRoot}`,
+            severity: ERROR_SEVERITY.FATAL,
+          }),
+        };
+      }
+    }
+  }
+  return { data: undefined };
 }
 
 export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
@@ -335,13 +364,24 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       const logoPath = path.join(wsRoot, logo);
       fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
     }
-    // /get cname
+    // get cname
     const githubConfig = ConfigUtils.getGithubConfig(config);
     const githubCname = githubConfig.cname;
     if (githubCname) {
       fs.writeFileSync(path.join(destPublicPath, "CNAME"), githubCname, {
         encoding: "utf8",
       });
+    }
+
+    // copy over the custom theme if it exists
+    const customThemePath = path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS);
+    if (await fs.pathExists(customThemePath)) {
+      const publishedThemeRoot = path.join(destPublicPath, "themes");
+      fs.ensureDirSync(publishedThemeRoot);
+      fs.copySync(
+        customThemePath,
+        path.join(publishedThemeRoot, CONSTANTS.CUSTOM_THEME_CSS)
+      );
     }
   }
 
@@ -404,6 +444,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       config: engine.config,
       overrides: podConfig.overrides,
     });
+
+    const { error } = await validateSiteConfig({ config: siteConfig, wsRoot });
+    if (error) {
+      throw error;
+    }
 
     await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
 

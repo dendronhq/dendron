@@ -33,6 +33,7 @@ type FilterProps = {
   updateConfigField: (key: string, value: string | number | boolean) => void;
   isGraphReady: boolean;
   customCSS?: string;
+  type?: "note" | "schema";
 };
 
 const GraphFilterView = ({
@@ -40,6 +41,7 @@ const GraphFilterView = ({
   updateConfigField,
   isGraphReady,
   customCSS,
+  type,
 }: FilterProps) => {
   const [showView, setShowView] = useState(false);
   const { currentTheme } = useCurrentTheme();
@@ -115,14 +117,16 @@ const GraphFilterView = ({
             updateConfigField={updateConfigField}
           />
         </Panel>
-        <Panel header="Graph Theme" key="graphTheme">
-          <FilterViewSection
-            section="graphTheme"
-            config={config}
-            updateConfigField={updateConfigField}
-            customCSS={customCSS}
-          />
-        </Panel>
+        {type === "note" && (
+          <Panel header="Graph Theme" key="graphTheme">
+            <FilterViewSection
+              section="graphTheme"
+              config={config}
+              updateConfigField={updateConfigField}
+              customCSS={customCSS}
+            />
+          </Panel>
+        )}
       </Collapse>
     </Space>
   );

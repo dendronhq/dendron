@@ -31,7 +31,6 @@
     "buildCI": "yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
     "test": "echo 0",
-    "coverage": "jest --coverage",
     "watch": "yarn compile --watch",
     "test:unit": "echo 0",
     "test:unit:debug": "echo 0",
@@ -64,9 +63,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jest": {
-    "preset": "ts-jest"
-  },
-  "gitHead": "b9b209acf808ad7a581bf98b1d0f90ef2bf4b833"
+  }
 }

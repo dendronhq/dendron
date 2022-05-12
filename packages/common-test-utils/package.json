@@ -40,7 +40,6 @@
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.161",
     "@types/node": "13.11.0",
-    "jest": "26.6.0",
     "rimraf": "^2.6.2",
     "ts-node": "^8.10.2"
   },

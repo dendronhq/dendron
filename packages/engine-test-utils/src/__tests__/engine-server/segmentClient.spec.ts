@@ -220,7 +220,7 @@ describe("GIVEN a SegmentClient", () => {
       }
     });
 
-    test("THEN residual cache should be empty", async (done) => {
+    test("THEN residual cache should be empty", (done) => {
       expect(fs.pathExistsSync(filepath)).toBeFalsy();
       done();
     });
@@ -242,7 +242,7 @@ describe("GIVEN a SegmentClient", () => {
       }
     });
 
-    test("THEN residual cache should be non-empty", async (done) => {
+    test("THEN residual cache should be non-empty", (done) => {
       const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
       done();
@@ -270,7 +270,7 @@ describe("GIVEN a SegmentClient", () => {
       done();
     });
 
-    test("AND the file should be empty afterward", async (done) => {
+    test("AND the file should be empty afterward", (done) => {
       const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toEqual("");
       done();
@@ -291,14 +291,14 @@ describe("GIVEN a SegmentClient", () => {
       }
     });
 
-    test("THEN data should not be sent", async (done) => {
+    test("THEN data should not be sent", (done) => {
       expect(results.successCount).toEqual(0);
       expect(results.nonRetryableErrorCount).toEqual(0);
       expect(results.retryableErrorCount).toEqual(1);
       done();
     });
 
-    test("AND the file should keep the payload contents (for a later retry)", async (done) => {
+    test("AND the file should keep the payload contents (for a later retry)", (done) => {
       const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
 
@@ -324,7 +324,7 @@ describe("GIVEN a SegmentClient", () => {
       }
     });
 
-    test("THEN data should not be sent", async (done) => {
+    test("THEN data should not be sent", (done) => {
       expect(results.successCount).toEqual(0);
       expect(results.nonRetryableErrorCount).toEqual(1);
       expect(results.retryableErrorCount).toEqual(0);

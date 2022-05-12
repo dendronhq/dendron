@@ -51,7 +51,7 @@ describe("GIVEN an Event Emitter", () => {
       disposable.dispose();
       testEmitter.fire(TEST_STR);
 
-      setTimeout(done(), 50);
+      setTimeout(done, 50);
     });
   });
 
@@ -89,7 +89,7 @@ describe("GIVEN an Event Emitter", () => {
       testEmitter.dispose();
       testEmitter.fire(TEST_STR);
 
-      setTimeout(done(), 50);
+      setTimeout(done, 50);
     });
   });
 

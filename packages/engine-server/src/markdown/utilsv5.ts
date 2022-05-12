@@ -26,7 +26,7 @@ import katex from "rehype-katex";
 import raw from "rehype-raw";
 import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
-import remark from "remark";
+import { remark } from "remark";
 import abbrPlugin from "remark-abbr";
 import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
@@ -248,7 +248,8 @@ export class MDUtilsV5 {
     const errors: DendronError[] = [];
     opts = _.defaults(opts, { flavor: ProcFlavor.REGULAR });
     let proc = remark()
-      .use(remarkParse, { gfm: true })
+      .use(remarkParse)
+      .use(remarkGfm)
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })

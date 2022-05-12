@@ -2,15 +2,6 @@
 import { ABTest } from "./abTesting";
 import { GraphThemeEnum } from "./types/typesv2";
 
-export enum UpgradeToastWordingTestGroups {
-  /** The button on the upgrade toast will say "see what changed" */
-  seeWhatChanged = "seeWhatChanged",
-  /** The button on the upgrade toast will say "see what's new" */
-  seeWhatsNew = "seeWhatsNew",
-  /** The button on the upgrade toast will say "open the changelog" */
-  openChangelog = "openChangelog",
-}
-
 /**
  * Section: Tests (Active or soon to be active)
  *
@@ -19,25 +10,6 @@ export enum UpgradeToastWordingTestGroups {
  *
  * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
  */
-
-/** Test if showing a web view on an upgrade is more successful than showing a toast notification. */
-export const UPGRADE_TOAST_WORDING_TEST = new ABTest(
-  "UpgradeToastWordingTest",
-  [
-    {
-      name: UpgradeToastWordingTestGroups.seeWhatChanged,
-      weight: 1,
-    },
-    {
-      name: UpgradeToastWordingTestGroups.seeWhatsNew,
-      weight: 1,
-    },
-    {
-      name: UpgradeToastWordingTestGroups.openChangelog,
-      weight: 1,
-    },
-  ]
-);
 
 export enum SelfContainedVaultsTestGroups {
   /** User will get a regular workspace and vaults set up, like before. */
@@ -163,7 +135,6 @@ export const AB_TUTORIAL_TEST = new ABTest("AB_TUTORIAL_TEST", [
  * ^tkqhy45hflfd
  */
 export const CURRENT_AB_TESTS = [
-  UPGRADE_TOAST_WORDING_TEST,
   SELF_CONTAINED_VAULTS_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,

@@ -1,7 +1,10 @@
 import { CONSTANTS, DVault, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -37,7 +40,7 @@ describe("engine, schemas/", () => {
 describe("engine, cache", () => {
   test("basic", async () => {
     await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
+      async ({ wsRoot, vaults, engine }) => {
         let cache = new Set();
         vaults.map((vault) => {
           const cachePath = path.join(
@@ -46,6 +49,7 @@ describe("engine, cache", () => {
           );
           const notesCache = new NotesFileSystemCache({
             cachePath,
+            logger: (engine as DendronEngineClient).logger,
           });
           cache = new Set([...cache, ...notesCache.getCacheEntryKeys()]);
         });
@@ -70,6 +74,7 @@ describe("engine, cache", () => {
         );
         const notesCache = new NotesFileSystemCache({
           cachePath,
+          logger: (engine as DendronEngineClient).logger,
         });
         const alpha = { ...engine.notes["alpha"] };
         const omitKeys = ["body", "links", "parent", "children"];

@@ -47,7 +47,6 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
-  DuplicateNoteError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -114,22 +113,9 @@ export class FileStorage implements DStore {
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
-      const { notes: _notes, errors: initErrors } = await this.initNotes();
+      const { errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
-      _notes.map((ent) => {
-        // Check for duplicate IDs when adding notes to the map
-        if (this.notes[ent.id] !== undefined) {
-          const duplicate = this.notes[ent.id];
-          errors.push(
-            new DuplicateNoteError({
-              noteA: duplicate,
-              noteB: ent,
-            })
-          );
-        }
-        this.notes[ent.id] = ent;
-        this.noteFnames.add(ent);
-      });
+
       // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
       if (this.engine.config.dev?.enableLinkCandidates) {
         const ctx = "_addLinkCandidates";
@@ -430,36 +416,40 @@ export class FileStorage implements DStore {
     };
   }
 
-  async initNotes(): Promise<{ notes: NoteProps[]; errors: DendronError[] }> {
+  async initNotes(): Promise<{
+    errors: IDendronError[];
+  }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
 
     let notesWithLinks: NoteProps[] = [];
-    let errors: DendronError[] = [];
+    let errors: IDendronError<any>[] = [];
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
-          notes,
+          notesById,
           cacheUpdates,
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
         notesWithLinks = notesWithLinks.concat(
-          _.filter(notes, (n) => !_.isEmpty(n.links))
+          _.filter(notesById, (n) => !_.isEmpty(n.links))
         );
 
         this.logger.info({
           ctx,
           vault,
-          numEntries: _.size(notes),
+          numEntries: _.size(notesById),
           numCacheUpdates: _.size(cacheUpdates),
         });
 
-        return notes;
+        return notesById;
       })
     );
-    const allNotes = _.flatten(out);
-    if (allNotes.length === 0) {
+    this.notes = Object.assign({}, ...out);
+    const allNotes = _.values(this.notes);
+    this.noteFnames = new NoteFNamesDict(allNotes);
+    if (_.size(this.notes) === 0) {
       errors.push(
         new DendronError({
           message: "No vaults initialized!",
@@ -470,7 +460,7 @@ export class FileStorage implements DStore {
 
     this._addBacklinks({ notesWithLinks, allNotes });
 
-    return { notes: allNotes, errors };
+    return { errors };
   }
 
   /** Adds backlinks mutating 'allNotes' argument in place. */
@@ -549,12 +539,12 @@ export class FileStorage implements DStore {
   }
 
   async _initNotes(vault: DVault): Promise<{
-    notes: NoteProps[];
+    notesById: NotePropsDict;
     cacheUpdates: NotesCacheEntryMap;
-    errors: DendronError[];
+    errors: IDendronError[];
   }> {
     const ctx = "initNotes";
-    let errors: DendronError[] = [];
+    let errors: IDendronError[] = [];
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
@@ -578,19 +568,20 @@ export class FileStorage implements DStore {
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
       noCaching: this.engine.config.noCaching,
+      logger: this.logger,
     });
     if (!out.data) {
       return {
         cacheUpdates: {},
         errors,
-        notes: [],
+        notesById: {},
       };
     }
     const noteFiles = out.data;
     const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
 
     const {
-      notes,
+      notesById,
       cacheUpdates,
       errors: parseErrors,
     } = await new NoteParser({
@@ -604,7 +595,7 @@ export class FileStorage implements DStore {
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
-    return { notes, cacheUpdates, errors };
+    return { notesById, cacheUpdates, errors };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
@@ -971,9 +962,10 @@ export class FileStorage implements DStore {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
     if (opts?.newNode) {
-      NoteUtils.addOrUpdateParents({
+      NoteUtils.addOrUpdateParentsWithDict({
         note,
-        notesList: _.values(this.notes),
+        notesDict: this.notes,
+        notesByFnameDict: this.noteFnames,
         createStubs: true,
         wsRoot: this.wsRoot,
       });
@@ -1072,9 +1064,10 @@ export class FileStorage implements DStore {
     // this is the default behavior
     // only do this if we aren't writing to existing note. we never hit this case in that situation.
     if (!opts?.noAddParent && !existingNote) {
-      const out = NoteUtils.addOrUpdateParents({
+      const out = NoteUtils.addOrUpdateParentsWithDict({
         note,
-        notesList: _.values(this.notes),
+        notesDict: this.notes,
+        notesByFnameDict: this.noteFnames,
         createStubs: true,
         wsRoot: this.wsRoot,
       });
@@ -1102,11 +1095,10 @@ export class FileStorage implements DStore {
       note: NoteUtils.toLogObj(note),
     });
     // check if note might already exist
-    const maybeNote = NoteUtils.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
       fname: note.fname,
-      notes: this.notes,
       vault: note.vault,
-      wsRoot: this.wsRoot,
+      engine: this.engine,
     });
     this.logger.info({
       ctx,

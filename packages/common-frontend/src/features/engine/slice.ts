@@ -14,6 +14,7 @@ import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 // @ts-ignore
 import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
+
 /**
  * Equivalent to engine.init
  */
@@ -188,6 +189,7 @@ export const engineSlice = createSlice({
       state.schemas = {};
       state.notesRendered = {};
       state.error = null;
+      state.noteFName = new NoteFNamesDict([]);
     },
     setRenderNote: (
       state,
@@ -203,12 +205,19 @@ export const engineSlice = createSlice({
       }
       // this is a new node
       if (!state.notes[note.id]) {
-        NoteUtils.addOrUpdateParents({
+        // TODO: Support passing in fname dictionary
+        const stubs = NoteUtils.addOrUpdateParents({
           note,
-          notesList: _.values(state.notes),
+          notesDict: state.notes,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
+        state.noteFName.add(note);
+        stubs
+          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
+          .forEach((noteChangeEntry) =>
+            state.noteFName.add(noteChangeEntry.note)
+          );
       }
       state.notes[note.id] = note;
     },

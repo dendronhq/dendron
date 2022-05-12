@@ -323,10 +323,16 @@ export class NoteFNamesDict {
     if (initialNotes) this.addAll(initialNotes);
   }
 
-  public get(notes: Readonly<NotePropsDict>, fname: string) {
+  public get(notes: Readonly<NotePropsDict>, fname: string, vault?: DVault) {
     const keys = this._internalMap.get(cleanName(fname));
     if (keys === undefined) return [];
-    return keys.map((key) => notes[key]).filter(isNotUndefined);
+    let matchedNotes = keys.map((key) => notes[key]).filter(isNotUndefined);
+    if (vault) {
+      matchedNotes = matchedNotes.filter((note) =>
+        VaultUtils.isEqualV2(note.vault, vault)
+      );
+    }
+    return matchedNotes;
   }
 
   /** Returns true if dict has `note` exactly with this fname and id. */

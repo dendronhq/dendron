@@ -23,7 +23,6 @@ import {
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   Time,
-  TutorialEvents,
   UpgradeToastWordingTestGroups,
   UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,

@@ -28,6 +28,7 @@ export enum VSCodeEvents {
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
   HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
   BacklinksPanelUsed = "BacklinksPanelUsed",
+  GraphPanelClicked = "GraphPanelClicked",
 }
 
 export enum CLIEvents {
@@ -156,6 +157,7 @@ export enum AppNames {
 export enum GraphEvents {
   GraphThemeChanged = "GraphThemeChanged",
   GraphViewUsed = "GraphViewUsed",
+  GraphPanelUsed = "GraphPanelUsed",
 }
 
 export const DendronEvents = {

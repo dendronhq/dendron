@@ -8,6 +8,7 @@ import {
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -50,6 +51,12 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
       this.onDidReceiveMessageHandler,
       this
     );
+
+    webviewView.onDidChangeVisibility(() => {
+      AnalyticsUtils.track(VSCodeEvents.GraphPanelClicked, {
+        visible: webviewView.visible,
+      });
+    });
   }
   async onDidReceiveMessageHandler(msg: GraphViewMessage) {
     const ctx = "LocalGraphView:onDidReceiveMessage";
@@ -61,8 +68,8 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
           qs: note.fname,
           vault: note.vault,
         });
-        AnalyticsUtils.track(GraphEvents.LocalGraphSidePanel, {
-          message: GraphViewMessageEnum.onSelect,
+        AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
+          type: "NodeClicked",
         });
         break;
       }
@@ -101,13 +108,6 @@ export class LocalGraphView implements vscode.WebviewViewProvider {
             source: "vscode",
           });
         }
-        break;
-      }
-
-      case GraphViewMessageEnum.onLocalGraphVisible: {
-        AnalyticsUtils.track(GraphEvents.LocalGraphSidePanel, {
-          visible: true,
-        });
         break;
       }
       default:

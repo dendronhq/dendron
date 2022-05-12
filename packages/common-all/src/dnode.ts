@@ -371,7 +371,7 @@ export class NoteUtils {
    * @param opts
    * @returns All notes that were changed including the parents
    */
-  static addOrUpdateParents(opts: {
+  static addOrUpdateParentsWithDict(opts: {
     note: NoteProps;
     notesDict: NotePropsDict;
     notesByFnameDict: NoteFNamesDict;
@@ -429,6 +429,22 @@ export class NoteUtils {
       });
     }
     return changed;
+  }
+
+  static addOrUpdateParents(opts: {
+    note: NoteProps;
+    notesDict: NotePropsDict;
+    createStubs: boolean;
+    wsRoot: string;
+  }): NoteChangeEntry[] {
+    const { note, notesDict, createStubs, wsRoot } = opts;
+    return NoteUtils.addOrUpdateParentsWithDict({
+      note,
+      notesDict,
+      notesByFnameDict: new NoteFNamesDict(_.values(notesDict)),
+      createStubs,
+      wsRoot,
+    });
   }
 
   static addSchema(opts: {

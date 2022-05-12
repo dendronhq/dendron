@@ -962,7 +962,7 @@ export class FileStorage implements DStore {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
     if (opts?.newNode) {
-      NoteUtils.addOrUpdateParents({
+      NoteUtils.addOrUpdateParentsWithDict({
         note,
         notesDict: this.notes,
         notesByFnameDict: this.noteFnames,
@@ -1064,7 +1064,7 @@ export class FileStorage implements DStore {
     // this is the default behavior
     // only do this if we aren't writing to existing note. we never hit this case in that situation.
     if (!opts?.noAddParent && !existingNote) {
-      const out = NoteUtils.addOrUpdateParents({
+      const out = NoteUtils.addOrUpdateParentsWithDict({
         note,
         notesDict: this.notes,
         notesByFnameDict: this.noteFnames,

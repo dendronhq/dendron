@@ -15,8 +15,6 @@ import { createLogger } from "../../utils";
 // @ts-ignore
 import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
 
-let NOTE_FNAMES_DICT: NoteFNamesDict | undefined;
-
 /**
  * Equivalent to engine.init
  */
@@ -164,13 +162,12 @@ export const engineSlice = createSlice({
   reducers: {
     setFromInit: (state, action: PayloadAction<DEngineInitPayload>) => {
       const { notes, wsRoot, schemas, vaults, config } = action.payload;
-      NOTE_FNAMES_DICT = new NoteFNamesDict(_.values(notes));
       state.notes = notes;
       state.wsRoot = wsRoot;
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = NOTE_FNAMES_DICT;
+      state.noteFName = new NoteFNamesDict(_.values(notes));
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
@@ -192,6 +189,7 @@ export const engineSlice = createSlice({
       state.schemas = {};
       state.notesRendered = {};
       state.error = null;
+      state.noteFName = new NoteFNamesDict([]);
     },
     setRenderNote: (
       state,
@@ -207,16 +205,19 @@ export const engineSlice = createSlice({
       }
       // this is a new node
       if (!state.notes[note.id]) {
-        const notesByFnameDict = _.isUndefined(NOTE_FNAMES_DICT)
-          ? new NoteFNamesDict(_.values(state.notes))
-          : NOTE_FNAMES_DICT;
-        NoteUtils.addOrUpdateParents({
+        // TODO: Support passing in fname dictionary
+        const stubs = NoteUtils.addOrUpdateParents({
           note,
           notesDict: state.notes,
-          notesByFnameDict,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
+        state.noteFName.add(note);
+        stubs
+          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
+          .forEach((noteChangeEntry) =>
+            state.noteFName.add(noteChangeEntry.note)
+          );
       }
       state.notes[note.id] = note;
     },

@@ -338,7 +338,7 @@ export class NoteParser extends ParserBase {
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addOrUpdateParents({
+      const stubs = NoteUtils.addOrUpdateParentsWithDict({
         note: noteProps,
         notesDict,
         notesByFnameDict: notesByFname,

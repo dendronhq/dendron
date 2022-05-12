@@ -4,7 +4,7 @@ title: Taking Notes
 desc: >-
   Creating notes, understanding hierarchy, and using Lookup to quickly find your
   notes
-updated: 1652280942126
+updated: 1652388453215
 created: 1625563944736
 nav_order: 1
 ---
@@ -135,6 +135,8 @@ To find your notes, do the following:
 
 > 💡 **TIP:** Read [Finding Notes](https://wiki.dendron.so/notes/84a0366a-eab5-4862-9bef-360f92a196dc) to understand the different ways of querying the lookup.
 > Most queries can be satisfied using [lookup](https://wiki.dendron.so/notes/84a0366a-eab5-4862-9bef-360f92a196dc), but sometimes you want to do a full text search across the **contents** of your notes. This can be done with `Search: Find in Files` (`Ctrl+Shift+F` / `Cmd+Shift+F`), which leverages VS Code [built-in search](https://code.visualstudio.com/docs/editor/codebasics#_search-across-files) capabilities.
+
+### Meeting Notes
 
 Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the `Dendron: Create Meeting Note` command to create a note with a pre-built template for meetings. Try it out!
 

@@ -4,7 +4,6 @@ import {
   LegacyLookupSelectionType,
   NoteAddBehaviorEnum,
   StrictConfigV5,
-  TreeItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 
 export class WorkspaceTestUtils {
@@ -85,11 +84,6 @@ export class WorkspaceTestUtils {
         },
         graph: {
           zoomSpeed: 1,
-        },
-        views: {
-          treeView: {
-            treeItemLabelType: TreeItemLabelTypeEnum.title,
-          },
         },
         enableAutoCreateOnDefinition: false,
         enableXVaultWikiLink: false,

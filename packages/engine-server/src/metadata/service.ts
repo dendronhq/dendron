@@ -1,4 +1,9 @@
-import { FOLDERS, GraphThemeEnum, Time } from "@dendronhq/common-all";
+import {
+  FOLDERS,
+  GraphThemeEnum,
+  Time,
+  TreeViewItemLabelTypeEnum,
+} from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -83,10 +88,10 @@ type Metadata = Partial<{
    * Theme for Note Graph View
    */
   graphTheme?: GraphThemeEnum;
-  /*
-   * status of info message when toggling tree view update label button.
+  /**
+   * tree view item label type
    */
-  showTreeViewUpdateLabelMsg: boolean;
+  treeViewItemLabelType: TreeViewItemLabelTypeEnum;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -175,8 +180,10 @@ export class MetadataService {
     return this.getMeta().graphTheme;
   }
 
-  getShowTreeViewUpdateLabelMsg() {
-    return this.getMeta().showTreeViewUpdateLabelMsg ?? true;
+  getTreeViewItemLabelType() {
+    return (
+      this.getMeta().treeViewItemLabelType || TreeViewItemLabelTypeEnum.title
+    );
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -262,7 +269,7 @@ export class MetadataService {
     }
   }
 
-  setShowTreeViewUpdateLabelMsg(value: boolean) {
-    return this.setMeta("showTreeViewUpdateLabelMsg", value);
+  setTreeViewItemLabelType(labelType: TreeViewItemLabelTypeEnum) {
+    this.setMeta("treeViewItemLabelType", labelType);
   }
 }

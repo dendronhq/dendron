@@ -1,14 +1,13 @@
 import {
-  ConfigUtils,
   DendronError,
   DNodeUtils,
   NoteProps,
   NotePropsDict,
   NoteUtils,
   TreeUtils,
-  TreeItemLabelTypeEnum,
+  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter } from "@dendronhq/engine-server";
+import { EngineEventEmitter, MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import {
@@ -40,7 +39,7 @@ export class EngineNoteProvider
   private _onEngineNoteStateChangedDisposable: Disposable;
   private _tree: { [key: string]: TreeNote } = {};
   private _engineEvents;
-  private _labelType: TreeItemLabelTypeEnum;
+  private _labelType: TreeViewItemLabelTypeEnum;
   /**
    * Signals to vscode UI engine that the tree view needs to be refreshed.
    */
@@ -59,8 +58,7 @@ export class EngineNoteProvider
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
     this._onEngineNoteStateChangedDisposable = this.setupSubscriptions();
-    const { config } = ExtensionProvider.getDWorkspace();
-    this._labelType = ConfigUtils.getTreeItemLabelType(config);
+    this._labelType = MetadataService.instance().getTreeViewItemLabelType();
     VSCodeUtils.setContextStringValue(
       DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE,
       this._labelType
@@ -157,7 +155,7 @@ export class EngineNoteProvider
   }
 
   public updateLabelType(opts: {
-    labelType: TreeItemLabelTypeEnum;
+    labelType: TreeViewItemLabelTypeEnum;
     noRefresh?: boolean;
   }) {
     const { labelType, noRefresh } = opts;
@@ -167,6 +165,8 @@ export class EngineNoteProvider
       DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE,
       labelType
     );
+
+    MetadataService.instance().setTreeViewItemLabelType(labelType);
     if (!noRefresh) {
       this.refreshTreeView();
     }

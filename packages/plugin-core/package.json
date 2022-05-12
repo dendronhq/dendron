@@ -797,12 +797,12 @@
         },
         {
           "command": "dendron.treeView.labelByTitle",
-          "when": "view == dendron.treeView && dendron:treeviewTreeItemLabelType == filename",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == filename",
           "group": "navigation@1"
         },
         {
           "command": "dendron.treeView.labelByFilename",
-          "when": "view == dendron.treeView && dendron:treeviewTreeItemLabelType == title",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == title",
           "group": "navigation@1"
         },
         {

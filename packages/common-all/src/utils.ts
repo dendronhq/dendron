@@ -45,7 +45,6 @@ import {
   JournalConfig,
   LookupConfig,
   NonNoteFileLinkAnchorType,
-  TreeItemLabelTypeEnum,
   NoteLookupConfig,
   ScratchConfig,
   StrictConfigV4,
@@ -1020,10 +1019,6 @@ export class ConfigUtils {
     );
   }
 
-  static getTreeItemLabelType(config: IntermediateDendronConfig) {
-    return this.getWorkspace(config).views.treeView.treeItemLabelType;
-  }
-
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,
@@ -1219,13 +1214,6 @@ export class ConfigUtils {
     value: NonNoteFileLinkAnchorType
   ) {
     _.set(config, "commands.copyNoteLink.nonNoteFile.anchorType", value);
-  }
-
-  static setTreeItemLabelType(
-    config: IntermediateDendronConfig,
-    value: TreeItemLabelTypeEnum
-  ) {
-    _.set(config, "workspace.views.treeView.treeItemLabelType", value);
   }
 
   static configIsValid(opts: {

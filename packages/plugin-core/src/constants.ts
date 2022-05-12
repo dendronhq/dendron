@@ -3,7 +3,7 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
   TREE_VIEWS,
-  TreeItemLabelTypeEnum,
+  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 
@@ -19,7 +19,7 @@ export enum DendronContext {
   SHOULD_SHOW_LOOKUP_VIEW = "dendron:shouldShowLookupView",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
-  TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewTreeItemLabelType",
+  TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewItemLabelType",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -167,12 +167,12 @@ export const DENDRON_MENUS = {
     },
     {
       command: "dendron.treeView.labelByTitle",
-      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeItemLabelTypeEnum.filename}`,
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.filename}`,
       group: "navigation@1",
     },
     {
       command: "dendron.treeView.labelByFilename",
-      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeItemLabelTypeEnum.title}`,
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.title}`,
       group: "navigation@1",
     },
     {

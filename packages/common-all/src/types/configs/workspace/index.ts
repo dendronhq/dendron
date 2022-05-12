@@ -4,4 +4,3 @@ export * from "./scratch";
 export * from "./types";
 export * from "./workspace";
 export * from "./task";
-export * from "./views";

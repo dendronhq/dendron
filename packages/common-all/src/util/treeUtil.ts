@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { NotePropsDict, NoteProps, TreeItemLabelTypeEnum } from "../types";
+import { NotePropsDict, NoteProps } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 
@@ -24,6 +24,11 @@ export type TreeMenu = {
   roots: TreeMenuNode[];
   child2parent: { [key: string]: string | null };
 };
+
+export enum TreeViewItemLabelTypeEnum {
+  title = "title",
+  filename = "filename",
+}
 
 export class TreeUtils {
   static generateTreeData(
@@ -117,7 +122,7 @@ export class TreeUtils {
     noteIds: string[];
     noteDict: NotePropsDict;
     reverse?: boolean;
-    labelType?: TreeItemLabelTypeEnum;
+    labelType?: TreeViewItemLabelTypeEnum;
   }): string[] => {
     const out = _.sortBy(
       noteIds,
@@ -126,7 +131,7 @@ export class TreeUtils {
       // Sort by titles
       (noteId) => {
         if (labelType) {
-          return labelType === TreeItemLabelTypeEnum.filename
+          return labelType === TreeViewItemLabelTypeEnum.filename
             ? _.last(noteDict[noteId]?.fname.split("."))
             : noteDict[noteId]?.title;
         } else {

@@ -1,30 +1,16 @@
 import {
   asyncLoopOneAtATime,
-  ConfigUtils,
-  DendronError,
   DendronTreeViewKey,
   NoteProps,
   NoteUtils,
-  TreeItemLabelTypeEnum,
+  TreeViewItemLabelTypeEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  MetadataService,
-  WorkspaceUtils,
-} from "@dendronhq/engine-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import {
-  Disposable,
-  TextEditor,
-  TreeView,
-  Uri,
-  ViewColumn,
-  window,
-} from "vscode";
+import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { VSCodeUtils } from "../vsCodeUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 import { TreeNote } from "./TreeNote";
 
@@ -38,7 +24,7 @@ export class NativeTreeView implements Disposable {
   private _createDataProvider: () => EngineNoteProvider;
   private _updateLabelTypeHandler:
     | ((opts: {
-        labelType: TreeItemLabelTypeEnum;
+        labelType: TreeViewItemLabelTypeEnum;
         noRefresh?: boolean;
       }) => void)
     | undefined;
@@ -90,58 +76,13 @@ export class NativeTreeView implements Disposable {
     });
   }
 
-  public updateLabelType(opts: { labelType: TreeItemLabelTypeEnum }) {
+  public updateLabelType(opts: { labelType: TreeViewItemLabelTypeEnum }) {
     const { labelType } = opts;
     if (this._updateLabelTypeHandler) {
       this._updateLabelTypeHandler(opts);
-      const SET_AS_DEFAULT = "Set as default";
-      const DONT_SHOW = "Don't show this again";
-      const OPEN_CONFIG = "Open dendron.yml and Backup";
-      const metadataService = MetadataService.instance();
-      const showMsg = metadataService.getShowTreeViewUpdateLabelMsg();
-      if (showMsg) {
-        window
-          .showInformationMessage(
-            `Tree view items are now labeled with ${labelType}. Sorting order will follow the label type. This setting will only apply until you close VSCode.`,
-            SET_AS_DEFAULT,
-            DONT_SHOW
-          )
-          .then(async (resp) => {
-            if (resp === SET_AS_DEFAULT) {
-              const infix = "treeItemLabelType";
-              try {
-                const { wsRoot, config } = ExtensionProvider.getDWorkspace();
-                const backupPath = await DConfig.createBackup(wsRoot, infix);
-                ConfigUtils.setTreeItemLabelType(config, labelType);
-                await DConfig.writeConfig({ wsRoot, config });
-                window
-                  .showInformationMessage(
-                    `treeItemLabelType set to ${labelType}. Backup of dendron.yml created in ${backupPath}`,
-                    OPEN_CONFIG
-                  )
-                  .then(async (resp) => {
-                    if (resp === OPEN_CONFIG) {
-                      const configPath = DConfig.configPath(wsRoot);
-                      const configUri = Uri.file(configPath);
-                      await VSCodeUtils.openFileInEditor(configUri);
-
-                      const backupUri = Uri.file(backupPath);
-                      await VSCodeUtils.openFileInEditor(backupUri, {
-                        column: ViewColumn.Beside,
-                      });
-                    }
-                  });
-              } catch (error) {
-                throw new DendronError({
-                  message: `Backup ${infix} failed. Failed to set default.`,
-                  payload: error,
-                });
-              }
-            } else {
-              metadataService.setShowTreeViewUpdateLabelMsg(false);
-            }
-          });
-      }
+      window.showInformationMessage(
+        `Tree view items are now labeled and sorted by ${labelType}.`
+      );
     }
   }
 

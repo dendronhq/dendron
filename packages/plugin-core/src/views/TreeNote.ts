@@ -2,7 +2,7 @@ import {
   DNodeUtils,
   NoteProps,
   VaultUtils,
-  TreeItemLabelTypeEnum,
+  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -31,7 +31,7 @@ export class TreeNote extends vscode.TreeItem {
   }: {
     note: NoteProps;
     collapsibleState: vscode.TreeItemCollapsibleState;
-    labelType: TreeItemLabelTypeEnum;
+    labelType: TreeViewItemLabelTypeEnum;
   }) {
     super(DNodeUtils.basename(note.fname, true), collapsibleState);
     this.note = note;
@@ -45,7 +45,7 @@ export class TreeNote extends vscode.TreeItem {
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
 
     const label =
-      labelType === TreeItemLabelTypeEnum.filename
+      labelType === TreeViewItemLabelTypeEnum.filename
         ? _.last(this.note.fname.split("."))
         : this.note.title;
 

@@ -23,13 +23,13 @@ import {
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   Time,
-  TreeItemLabelTypeEnum,
   TutorialEvents,
   UpgradeToastWordingTestGroups,
   UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -810,7 +810,8 @@ export async function _activate(
 
       const treeView = new NativeTreeView(providerConstructor);
       treeView.show();
-      _setupTreeViewCommands(treeView);
+      const existingCommands = await vscode.commands.getCommands();
+      _setupTreeViewCommands(treeView, existingCommands);
 
       context.subscriptions.push(treeView);
 
@@ -818,7 +819,6 @@ export async function _activate(
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
 
       // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
-      const existingCommands = await vscode.commands.getCommands();
       if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
         context.subscriptions.push(
           vscode.commands.registerCommand(
@@ -1260,24 +1260,35 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 
 // ^qxkkg70u6w0z
 
-function _setupTreeViewCommands(treeView: NativeTreeView) {
-  vscode.commands.registerCommand(
-    DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
-    sentryReportingCallback(() => {
-      treeView.updateLabelType({
-        labelType: TreeItemLabelTypeEnum.title,
-      });
-    })
-  );
+function _setupTreeViewCommands(
+  treeView: NativeTreeView,
+  existingCommands: string[]
+) {
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.title,
+        });
+      })
+    );
+  }
 
-  vscode.commands.registerCommand(
-    DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
-    sentryReportingCallback(() => {
-      treeView.updateLabelType({
-        labelType: TreeItemLabelTypeEnum.filename,
-      });
-    })
-  );
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.filename,
+        });
+      })
+    );
+  }
 
   /**
    * This is a little flaky right now, but it works most of the time.
@@ -1286,12 +1297,14 @@ function _setupTreeViewCommands(treeView: NativeTreeView) {
    *
    * TODO: fix tree item register issue and flip the dev mode flag.
    */
-  vscode.commands.registerCommand(
-    DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
-    sentryReportingCallback(async () => {
-      await treeView.expandAll();
-    })
-  );
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key)) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
+      sentryReportingCallback(async () => {
+        await treeView.expandAll();
+      })
+    );
+  }
 }
 
 function updateEngineAPI(

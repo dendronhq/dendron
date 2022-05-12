@@ -6,7 +6,6 @@ import { SeedSite } from "../../seed";
 import { DHookDict } from "../../hooks";
 import { VaultSyncMode, VaultSyncModeEnum } from "../base";
 import { genDefaultTaskConfig, TaskConfig } from "./task";
-import { DendronViewsConfig, genDefaultDendronViewsConfig } from "./views";
 
 /**
  * Namespace for configurations that affect the workspace
@@ -23,7 +22,6 @@ export type DendronWorkspaceConfig = {
   scratch: ScratchConfig;
   task: TaskConfig;
   graph: DendronGraphConfig;
-  views: DendronViewsConfig;
   disableTelemetry?: boolean;
   enableAutoCreateOnDefinition: boolean;
   enableXVaultWikiLink: boolean;
@@ -66,7 +64,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     scratch: genDefaultScratchConfig(),
     task: genDefaultTaskConfig(),
     graph: genDefaultGraphConfig(),
-    views: genDefaultDendronViewsConfig(),
     enableAutoCreateOnDefinition: false,
     enableXVaultWikiLink: false,
     enableRemoteVaultInit: true,

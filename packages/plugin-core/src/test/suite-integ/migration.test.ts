@@ -20,7 +20,6 @@ import {
   DendronCommandConfig,
   LookupSelectVaultModeOnCreateEnum,
   InsertNoteLinkAliasModeEnum,
-  TreeItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import {
   CONFIG_MIGRATIONS,
@@ -712,11 +711,6 @@ suite("Migration", function () {
               task: genDefaultTaskConfig(),
               graph: {
                 zoomSpeed: 10,
-              },
-              views: {
-                treeView: {
-                  treeItemLabelType: TreeItemLabelTypeEnum.title,
-                },
               },
               disableTelemetry: true,
               enableAutoCreateOnDefinition: false,

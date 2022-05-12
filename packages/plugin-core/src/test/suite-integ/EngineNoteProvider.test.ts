@@ -1,17 +1,16 @@
 import {
-  ConfigUtils,
   DendronError,
   NoteChangeEntry,
   NoteProps,
-  TreeItemLabelTypeEnum,
+  TreeViewItemLabelTypeEnum,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe } from "mocha";
+import { describe, after } from "mocha";
 import * as vscode from "vscode";
-import { ExtensionProvider } from "../../ExtensionProvider";
 import { EngineNoteProvider } from "../../views/EngineNoteProvider";
 import { expect } from "../testUtilsv2";
 import {
@@ -149,50 +148,50 @@ suite("EngineNoteProvider Tests", function testSuite() {
     };
     describe("sort / label config", function () {
       describeMultiWS(
-        "WHEN treeItemLabelType is omitted",
+        "WHEN treeViewItemLabelType is omitted",
         {
-          preSetupHook: preSetupHookFunc,
-          modConfigCb: (config) => {
-            // @ts-ignore
-            delete config.workspace.views;
-            return config;
+          preSetupHook: async (opts) => {
+            await preSetupHookFunc(opts);
+            MetadataService.instance().deleteMeta("treeViewItemLabelType");
           },
         },
         () => {
           test("THEN label and sort tree items by title", async () => {
-            const { config } = ExtensionProvider.getDWorkspace();
-            expect(ConfigUtils.getTreeItemLabelType(config)).toEqual(
-              TreeItemLabelTypeEnum.title
+            expect(
+              MetadataService.instance().getTreeViewItemLabelType()
+            ).toEqual(TreeViewItemLabelTypeEnum.title);
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
+
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
+
+            const vault1RootProps = props[0];
+            const children = await provider.getChildren(vault1RootProps);
+            expect(children?.map((child) => child.title)).toEqual([
+              "Zebra", // nav_order: 1
+              "Aardvark", // uppercase alphabets comes before underscore alphabets
+              "_underscore", // underscore comes before lowercase alphabets
+              "aaron",
+            ]);
+          });
+        }
+      );
+      describeMultiWS(
+        "WHEN treeViewItemLabelType is title",
+        {
+          preSetupHook: async (opts) => {
+            await preSetupHookFunc(opts);
+            MetadataService.instance().setTreeViewItemLabelType(
+              TreeViewItemLabelTypeEnum.title
             );
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
-
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-
-            const vault1RootProps = props[0];
-            const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
-              "Zebra", // nav_order: 1
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
-              "aaron",
-            ]);
-          });
-        }
-      );
-      describeMultiWS(
-        "WHEN treeItemLabelType is title",
-        {
-          preSetupHook: preSetupHookFunc,
-          modConfigCb: (config) => {
-            config.workspace.views.treeView.treeItemLabelType =
-              TreeItemLabelTypeEnum.title;
-            return config;
           },
         },
         () => {
+          after(() => {
+            MetadataService.instance().deleteMeta("treeViewItemLabelType");
+          });
           test("THEN label and sort tree items by title", async () => {
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(mockEvents);
@@ -214,16 +213,19 @@ suite("EngineNoteProvider Tests", function testSuite() {
       );
 
       describeMultiWS(
-        "WHEN treeItemLabelType is filename",
+        "WHEN treeViewItemLabelType is filename",
         {
-          preSetupHook: preSetupHookFunc,
-          modConfigCb: (config) => {
-            config.workspace.views.treeView.treeItemLabelType =
-              TreeItemLabelTypeEnum.filename;
-            return config;
+          preSetupHook: async (opts) => {
+            await preSetupHookFunc(opts);
+            MetadataService.instance().setTreeViewItemLabelType(
+              TreeViewItemLabelTypeEnum.filename
+            );
           },
         },
         () => {
+          after(() => {
+            MetadataService.instance().deleteMeta("treeViewItemLabelType");
+          });
           test("THEN label and sort tree items by filename", async () => {
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(mockEvents);
@@ -321,6 +323,9 @@ suite("EngineNoteProvider Tests", function testSuite() {
         },
         () => {
           test("THEN tree item sort order is correct", async () => {
+            console.log({
+              bond: MetadataService.instance().getTreeViewItemLabelType(),
+            });
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(mockEvents);
 

@@ -77,12 +77,8 @@ export class NativeTreeView implements Disposable {
   }
 
   public updateLabelType(opts: { labelType: TreeViewItemLabelTypeEnum }) {
-    const { labelType } = opts;
     if (this._updateLabelTypeHandler) {
       this._updateLabelTypeHandler(opts);
-      window.showInformationMessage(
-        `Tree view items are now labeled and sorted by ${labelType}.`
-      );
     }
   }
 

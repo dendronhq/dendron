@@ -40,6 +40,23 @@ const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
   return out;
 };
 
+export const DENDRON_VIEWS_WELCOME = [
+  {
+    view: "dendron.backlinks",
+    contents: "There are no backlinks to this note.",
+  },
+];
+
+export const DENDRON_VIEWS_CONTAINERS = {
+  activitybar: [
+    {
+      id: "dendron-view",
+      title: "Dendron",
+      icon: "media/icons/dendron-activity-bar-icon.svg",
+    },
+  ],
+};
+
 export const DENDRON_VIEWS = [
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.SAMPLE_VIEW),
@@ -47,26 +64,38 @@ export const DENDRON_VIEWS = [
     where: "explorer",
   },
   {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
-    where: "explorer",
+    id: "dendron.tip-of-the-day",
+    name: "Tip of the Day",
     when: DendronContext.PLUGIN_ACTIVE,
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE}`,
-    where: "explorer",
-    icon: "media/icons/dendron-vscode.svg",
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
-    where: "explorer",
+    type: "webview",
+    where: "dendron-view",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
     when: DendronContext.PLUGIN_ACTIVE,
-    where: "explorer",
+    where: "dendron-view",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
+    where: "dendron-view",
+    icon: "media/icons/dendron-vscode.svg",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
+    where: "dendron-view",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "dendron-view",
+  },
+  {
+    id: "dendron.help-and-feedback",
+    name: "Help and Feedback",
+    where: "dendron-view",
   },
 ];
 
@@ -168,12 +197,10 @@ export const DENDRON_MENUS = {
     {
       command: "dendron.treeView.labelByTitle",
       when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.filename}`,
-      group: "navigation@1",
     },
     {
       command: "dendron.treeView.labelByFilename",
       when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.title}`,
-      group: "navigation@1",
     },
     {
       command: "dendron.treeView.expandAll",
@@ -535,6 +562,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GOTO_BACKLINK: {
     key: "dendron.gotoBacklink",
     title: `${CMD_PREFIX} Go To Backlink`,
+    when: "false",
   },
   // --- Workspace
   ADD_AND_COMMIT: {

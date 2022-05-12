@@ -2,18 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "test:watch",
-      "command": "yarn test:watch ${relativeFile} --bail -u",
-      "type": "shell",
-      "problemMatcher": [],
-      "options": {
-        "env": {
-          "LOG_LEVEL": "info",
-          "LOG_DST": "${workspaceFolder}/engine-test-utils.log",
-        }
-      }
-    },
-    {
       "type": "npm",
       "label": "test:updateSnapshots",
       "script": "test:updateSnapshots",

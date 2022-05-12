@@ -4,6 +4,7 @@ import {
   DendronError,
   error2PlainObject,
   ERROR_STATUS,
+  TimeUtils,
 } from "@dendronhq/common-all";
 import {
   readYAML,
@@ -361,10 +362,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       this.print(
         "sleeping 2 mins for remote npm registry to have packages ready"
       );
-      await new Promise((r) => setTimeout(r, 120000));
+      await TimeUtils.sleep(2 * 60 * 1000);
     } else {
       this.print("sleeping 6s for local npm registry to have packages ready");
-      await new Promise((r) => setTimeout(r, 60000));
+      await TimeUtils.sleep(6 * 1000);
     }
 
     this.print("install deps...");

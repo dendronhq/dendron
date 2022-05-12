@@ -323,9 +323,6 @@ suite("EngineNoteProvider Tests", function testSuite() {
         },
         () => {
           test("THEN tree item sort order is correct", async () => {
-            console.log({
-              bond: MetadataService.instance().getTreeViewItemLabelType(),
-            });
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(mockEvents);
 

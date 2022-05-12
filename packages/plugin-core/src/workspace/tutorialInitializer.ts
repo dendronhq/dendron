@@ -3,10 +3,9 @@ import {
   DVault,
   DWorkspaceV2,
   getStage,
-  MeetingNoteTestGroups,
-  MEETING_NOTE_TUTORIAL_TEST,
   TutorialEvents,
   VaultUtils,
+  AB_TUTORIAL_TEST,
 } from "@dendronhq/common-all";
 import { SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -16,7 +15,6 @@ import {
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
-import rif from "replace-in-file";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
@@ -31,12 +29,6 @@ import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 
-const MeetingNoteTutorialText = `
-### Meeting Notes
-
-Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the \`Dendron: Create Meeting Note\` command to create a note with a pre-built template for meetings.  Try it out!
-`;
-
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
  * launches the user into the tutorial layout after the workspace is opened.
@@ -49,7 +41,6 @@ export class TutorialInitializer
     vaults: DVault[];
     wsRoot: string;
   }): Promise<void> {
-    const ctx = "TutorialInitializer.onWorkspaceCreation";
     super.onWorkspaceCreation(opts);
 
     MetadataService.instance().setActivationContext(
@@ -61,36 +52,19 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    fs.copySync(path.join(dendronWSTemplate.fsPath, "tutorial"), vpath);
-
-    const ABUserGroup = MEETING_NOTE_TUTORIAL_TEST.getUserGroup(
+    const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 
-    const replaceString =
-      ABUserGroup === MeetingNoteTestGroups.show ? MeetingNoteTutorialText : "";
-
-    // Tailor the tutorial text to the particular OS and for their workspace location.
-    const options = {
-      files: [path.join(vpath, "*.md")],
-
-      from: [/%KEYBINDING%/g, /%WORKSPACE_ROOT%/g, /%MEETING_NOTE_CONTENT%/g],
-      to: [
-        process.platform === "darwin" ? "Cmd" : "Ctrl",
-        path.join(opts.wsRoot, "dendron.code-workspace"),
-        replaceString,
-      ],
-    };
-
-    rif.replaceInFile(options).catch((err: Error) => {
-      Logger.error({
-        ctx,
-        error: new DendronError({
-          innerError: err,
-          message: "error replacing tutorial placeholder text",
-        }),
-      });
-    });
+    fs.copySync(
+      path.join(
+        dendronWSTemplate.fsPath,
+        "tutorial",
+        "treatments",
+        ABUserGroup
+      ),
+      vpath
+    );
   }
 
   async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {
@@ -154,15 +128,15 @@ export class TutorialInitializer
 
       if (fileName?.endsWith("tutorial.md")) {
         eventName = TutorialEvents.Tutorial_0_Show;
-      } else if (fileName?.endsWith("tutorial.1-navigation-basics.md")) {
+      } else if (fileName?.endsWith("tutorial.user-interface.md")) {
         eventName = TutorialEvents.Tutorial_1_Show;
-      } else if (fileName?.endsWith("tutorial.2-taking-notes.md")) {
+      } else if (fileName?.endsWith("tutorial.taking-notes.md")) {
         eventName = TutorialEvents.Tutorial_2_Show;
-      } else if (fileName?.endsWith("tutorial.3-linking-your-notes.md")) {
+      } else if (fileName?.endsWith("tutorial.linking-notes.md")) {
         eventName = TutorialEvents.Tutorial_3_Show;
-      } else if (fileName?.endsWith("tutorial.4-rich-formatting.md")) {
+      } else if (fileName?.endsWith("tutorial.rich-formatting.md")) {
         eventName = TutorialEvents.Tutorial_4_Show;
-      } else if (fileName?.endsWith("tutorial.5-conclusion.md")) {
+      } else if (fileName?.endsWith("tutorial.conclusion.md")) {
         eventName = TutorialEvents.Tutorial_5_Show;
       }
 

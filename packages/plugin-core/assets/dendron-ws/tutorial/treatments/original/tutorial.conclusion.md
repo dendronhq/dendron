@@ -1,9 +1,9 @@
 ---
-id: Jwq6452yNKOVw6WZhvQQd
+id: 5pz82kyfhp2whlzfldxmkzu
 title: Conclusion
 desc: ""
-updated: 1624934419858
-created: 1624332987705
+updated: 1652279068668
+created: 1652278009760
 ---
 
 **Congratulations!** You've completed the Dendron Tutorial 🙌.
@@ -33,4 +33,4 @@ A complete set of our documentation can be found on our [Wiki Site](https://wiki
 
 ---
 
-[[Tutorial Home Page| tutorial]]
+[[Tutorial Home Page|tutorial]]

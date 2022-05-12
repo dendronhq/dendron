@@ -1,18 +1,17 @@
 ---
-id: vXh-HmSTsmgGA9j9IzcZh
+id: ks3b4u7gnd6yiw68qu6ba4m
 title: Navigation Basics
-desc: ''
-updated: 1624934444826
-created: 1624332288808
+desc: ""
+updated: 1652279527689
+created: 1652278075049
 ---
 
 Let's do a brief overview on how to navigate the Dendron UI.
 
 _Quick note on running commands in VS Code:_
 
->If you're unfamiliar with VS Code, the command palette is used to quickly run commands, including the commands for Dendron. To bring up the command palette, use `%KEYBINDING%+Shift+P` and start typing the command. Throughout the tutorial, if you see instructions telling you to run a command, remember to bring up the command palette and then type the command name to run it.
-
-![Basic UI](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-layout.png)
+> If you're unfamiliar with VS Code, the command palette is used to quickly run commands, including the commands for Dendron. To bring up the command palette, use `Cmd / Ctrl + Shift + P` and start typing the command. Throughout the tutorial, if you see instructions telling you to run a command, remember to bring up the command palette and then type the command name to run it.
+> ![Basic UI](https://org-dendron-public-assets.s3.amazonaws.com/images/tutorial-layout.png)
 
 #### 1. Editor Pane
 
@@ -20,9 +19,9 @@ This is where you can write and edit your notes. Notes in Dendron are Markdown f
 
 #### 2. Preview Pane
 
-This shows the rendered Markdown of what your currently opened note looks like. If you close this pane, you can always bring it back by opening the command palette `%KEYBINDING%+Shift+P` and running the `Dendron: Show Preview` command.
+This shows the rendered Markdown of what your currently opened note looks like. If you close this pane, you can always bring it back by opening the command palette `Cmd / Ctrl + Shift + P` and running the `Dendron: Show Preview` command.
 
->💡 The preview pane is read-only and cannot be used to edit notes. All editing must be done in the editor pane.
+> 💡 The preview pane is read-only and cannot be used to edit notes. All editing must be done in the editor pane.
 
 #### 3. Dendron Workspace
 
@@ -45,7 +44,8 @@ This shows a list of other notes that have links to the current note. More on li
 ### Next Steps
 
 - You've completed navigation basics! You can go back to the [[tutorial]] page and check off the Navigation Basics checkbox to mark your progress.
-- Next is Tutorial Step 2: [[tutorial.2-taking-notes]]
+- Next is Tutorial Step 2: [[tutorial.taking-notes]]
 
 ---
-[[Tutorial Home Page| tutorial]]
+
+[[Tutorial Home Page|tutorial]]

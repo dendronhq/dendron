@@ -1,9 +1,9 @@
 ---
-id: vAy0awBTwDaxKGHWUdSaP
+id: kzry3qcy2y4ey1jcf1llajg
 title: Rich Formatting
 desc: "Text Formatting, Images, Formulas, and Diagrams"
-updated: 1624865905667
-created: 1624352425213
+updated: 1652280413439
+created: 1652278089118
 ---
 
 Dendron supports an extended Markdown syntax, which provides a lot of options for rich formatting. Take a look at some examples in this note to see what's possible. Have the preview pane opened (`Dendron: Show Preview`) to see how these will get rendered.
@@ -19,9 +19,8 @@ Dendron supports an extended Markdown syntax, which provides a lot of options fo
 #### Images
 
 > 🌱 Copy any image onto your clipboard, and then use the `Paste Image` command while focused in your editor pane. This will automatically create a link for you and copy the file contents into the assets directory in your workspace.
-
-Sample Image Link:
-![Dendron Logo](/assets/images/logo_small.png)
+> Sample Image Link:
+> ![Dendron Logo](/assets/images/logo_small.png)
 
 #### Equations
 
@@ -65,8 +64,8 @@ You can link to a specific section of a different note and have the content in-l
 
 ### Next Steps
 
-- [[Conclude the Tutorial|tutorial.5-conclusion]]
+- [[Conclude the Tutorial|tutorial.conclusion]]
 
 ---
 
-[[Tutorial Home Page| tutorial]]
+[[Tutorial Home Page|tutorial]]

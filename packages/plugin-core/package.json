@@ -1167,7 +1167,6 @@
     "open": "^8.2.1",
     "open-graph-scraper": "^4.7.1",
     "query-string": "^7.0.1",
-    "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
     "textextensions": "^5.15.0",

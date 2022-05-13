@@ -4,7 +4,6 @@ import {
   SubProcessExitType,
 } from "@dendronhq/api-server";
 import {
-  assertUnreachable,
   ConfigEvents,
   ConfigUtils,
   CONSTANTS,
@@ -23,8 +22,6 @@ import {
   SelfContainedVaultsTestGroups,
   SELF_CONTAINED_VAULTS_TEST,
   Time,
-  UpgradeToastWordingTestGroups,
-  UPGRADE_TOAST_WORDING_TEST,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -999,31 +996,12 @@ async function showWelcomeOrWhatsNew({
 
       metadataService.setGlobalVersion(version);
 
-      // ^t6dxodie048o
-      const toastWording = UPGRADE_TOAST_WORDING_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
-
       AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion: previousExtensionVersion,
         duration: getDurationMilliseconds(start),
-        toastWording,
       });
 
-      let buttonAction: string;
-      switch (toastWording) {
-        case UpgradeToastWordingTestGroups.openChangelog:
-          buttonAction = "Open the changelog";
-          break;
-        case UpgradeToastWordingTestGroups.seeWhatChanged:
-          buttonAction = "See what changed";
-          break;
-        case UpgradeToastWordingTestGroups.seeWhatsNew:
-          buttonAction = "See what's new";
-          break;
-        default:
-          assertUnreachable(toastWording);
-      }
+      const buttonAction = "See what's new";
 
       vscode.window
         .showInformationMessage(
@@ -1035,7 +1013,6 @@ async function showWelcomeOrWhatsNew({
             AnalyticsUtils.track(VSCodeEvents.UpgradeSeeWhatsChangedClicked, {
               previousVersion: previousExtensionVersion,
               duration: getDurationMilliseconds(start),
-              toastWording,
             });
             vscode.commands.executeCommand(
               "vscode.open",

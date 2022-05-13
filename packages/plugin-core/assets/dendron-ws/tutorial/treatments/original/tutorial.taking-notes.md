@@ -2,7 +2,7 @@
 id: mycf53kz1r7swcttcobwbdl
 title: Taking Notes
 desc: ""
-updated: 1652289075949
+updated: 1652388439051
 created: 1652278083208
 ---
 
@@ -51,6 +51,8 @@ To find notes, we use the same lookup interface that we used to create them.
 When combined with hierarchies, this fast lookup system enables you to find your notes very quickly, even if you have thousands of notes in your vaults.
 
 If you want to search for content within the notes, you can use VS Code's built-in search tools with `Cmd / Ctrl + Shift + F`.
+
+### Meeting Notes
 
 Dendron also has a few built-in note types. For example, if you find yourself taking meeting notes often, you can use the `Dendron: Create Meeting Note` command to create a note with a pre-built template for meetings. Try it out!
 

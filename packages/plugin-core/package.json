@@ -125,6 +125,21 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "dendron.treeView.labelByTitle",
+        "title": "Label and sort notes by title",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.labelByFilename",
+        "title": "Label and sort notes by filename",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note"
       },
@@ -259,6 +274,10 @@
       {
         "command": "dendron.goDownHierarchy",
         "title": "Dendron: Go Down"
+      },
+      {
+        "command": "dendron.gotoBacklink",
+        "title": "Dendron: Go To Backlink"
       },
       {
         "command": "dendron.addAndCommit",
@@ -472,6 +491,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "dendron.treeView.expandAll",
+          "when": "dendron:devMode"
+        },
+        {
           "command": "dendron.browseNote",
           "when": "dendron:pluginActive"
         },
@@ -602,6 +625,10 @@
         {
           "command": "dendron.goDownHierarchy",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.gotoBacklink",
+          "when": "false"
         },
         {
           "command": "dendron.addAndCommit",
@@ -774,6 +801,19 @@
         {
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.treeView.labelByTitle",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == filename"
+        },
+        {
+          "command": "dendron.treeView.labelByFilename",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == title"
+        },
+        {
+          "command": "dendron.treeView.expandAll",
+          "when": "view == dendron.treeView && dendron:devMode",
           "group": "navigation@2"
         }
       ],

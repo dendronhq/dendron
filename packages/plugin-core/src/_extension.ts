@@ -28,6 +28,7 @@ import {
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
+  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -808,13 +809,15 @@ export async function _activate(
 
       const treeView = new NativeTreeView(providerConstructor);
       treeView.show();
+      const existingCommands = await vscode.commands.getCommands();
+      _setupTreeViewCommands(treeView, existingCommands);
+
       context.subscriptions.push(treeView);
 
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
 
       // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
-      const existingCommands = await vscode.commands.getCommands();
       if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
         context.subscriptions.push(
           vscode.commands.registerCommand(
@@ -1255,6 +1258,54 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 }
 
 // ^qxkkg70u6w0z
+
+function _setupTreeViewCommands(
+  treeView: NativeTreeView,
+  existingCommands: string[]
+) {
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.title,
+        });
+      })
+    );
+  }
+
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.filename,
+        });
+      })
+    );
+  }
+
+  /**
+   * This is a little flaky right now, but it works most of the time.
+   * Leaving this for dev / debug purposes.
+   * Enablement is set to be DendronContext.DEV_MODE
+   *
+   * TODO: fix tree item register issue and flip the dev mode flag.
+   */
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key)) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
+      sentryReportingCallback(async () => {
+        await treeView.expandAll();
+      })
+    );
+  }
+}
+
 function updateEngineAPI(
   port: number | string,
   ext: DendronExtension

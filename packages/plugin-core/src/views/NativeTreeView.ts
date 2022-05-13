@@ -1,20 +1,18 @@
 import {
+  asyncLoopOneAtATime,
   DendronTreeViewKey,
   NoteProps,
   NoteUtils,
+  TreeViewItemLabelTypeEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import {
-  Disposable,
-  TextEditor,
-  TreeDataProvider,
-  TreeView,
-  window,
-} from "vscode";
+import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { EngineNoteProvider } from "./EngineNoteProvider";
+import { TreeNote } from "./TreeNote";
 
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
@@ -23,9 +21,16 @@ import { ExtensionProvider } from "../ExtensionProvider";
 export class NativeTreeView implements Disposable {
   private treeView: TreeView<NoteProps> | undefined;
   private _handler: Disposable | undefined;
-  private _createDataProvider: () => TreeDataProvider<NoteProps>;
+  private _createDataProvider: () => EngineNoteProvider;
+  private _updateLabelTypeHandler:
+    | ((opts: {
+        labelType: TreeViewItemLabelTypeEnum;
+        noRefresh?: boolean;
+      }) => void)
+    | undefined;
+  private _getExpandableTreeItemsHandler: (() => TreeNote[]) | undefined;
 
-  constructor(treeDataProviderFactory: () => TreeDataProvider<NoteProps>) {
+  constructor(treeDataProviderFactory: () => EngineNoteProvider) {
     this._createDataProvider = treeDataProviderFactory;
   }
 
@@ -46,6 +51,14 @@ export class NativeTreeView implements Disposable {
    */
   async show() {
     const treeDataProvider = this._createDataProvider();
+    this._updateLabelTypeHandler = _.bind(
+      treeDataProvider.updateLabelType,
+      treeDataProvider
+    );
+    this._getExpandableTreeItemsHandler = _.bind(
+      treeDataProvider.getExpandableTreeItems,
+      treeDataProvider
+    );
     const result = treeDataProvider.getChildren() as Promise<
       NoteProps | undefined | null
     >;
@@ -61,6 +74,27 @@ export class NativeTreeView implements Disposable {
         this
       );
     });
+  }
+
+  public updateLabelType(opts: { labelType: TreeViewItemLabelTypeEnum }) {
+    if (this._updateLabelTypeHandler) {
+      this._updateLabelTypeHandler(opts);
+    }
+  }
+
+  public async expandAll() {
+    if (this._getExpandableTreeItemsHandler) {
+      const expandableTreeItems = this._getExpandableTreeItemsHandler();
+      if (this.treeView) {
+        await asyncLoopOneAtATime(expandableTreeItems, async (treeItem) => {
+          await this.treeView?.reveal(treeItem.note, {
+            expand: true,
+            focus: false,
+            select: false,
+          });
+        });
+      }
+    }
   }
 
   /**

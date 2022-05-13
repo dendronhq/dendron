@@ -1,4 +1,9 @@
-import { FOLDERS, GraphThemeEnum, Time } from "@dendronhq/common-all";
+import {
+  FOLDERS,
+  GraphThemeEnum,
+  Time,
+  TreeViewItemLabelTypeEnum,
+} from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
@@ -83,6 +88,10 @@ type Metadata = Partial<{
    * Theme for Note Graph View
    */
   graphTheme?: GraphThemeEnum;
+  /**
+   * tree view item label type
+   */
+  treeViewItemLabelType: TreeViewItemLabelTypeEnum;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -171,6 +180,12 @@ export class MetadataService {
     return this.getMeta().graphTheme;
   }
 
+  getTreeViewItemLabelType() {
+    return (
+      this.getMeta().treeViewItemLabelType || TreeViewItemLabelTypeEnum.title
+    );
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -252,5 +267,9 @@ export class MetadataService {
     if (meta.graphTheme !== graphTheme) {
       this.setMeta("graphTheme", graphTheme);
     }
+  }
+
+  setTreeViewItemLabelType(labelType: TreeViewItemLabelTypeEnum) {
+    this.setMeta("treeViewItemLabelType", labelType);
   }
 }

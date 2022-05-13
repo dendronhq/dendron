@@ -5,6 +5,8 @@ import {
   DENDRON_COMMANDS,
   DENDRON_VIEWS,
   DENDRON_MENUS,
+  DENDRON_VIEWS_WELCOME,
+  DENDRON_VIEWS_CONTAINERS,
 } from "../src/constants";
 
 function genEntry(entryDict: any) {
@@ -97,6 +99,8 @@ function main() {
   const commands = updateCommands();
   const menus = updateMenus();
   const keybindings = updateKeybindings();
+  const viewsWelcome = DENDRON_VIEWS_WELCOME;
+  const viewsContainers = DENDRON_VIEWS_CONTAINERS;
   const views = updateViews();
   const languages = [
     {
@@ -119,6 +123,8 @@ function main() {
   const categories = ["Other"];
   const contributes = {
     languages,
+    viewsWelcome,
+    viewsContainers,
     views,
     categories,
     commands,

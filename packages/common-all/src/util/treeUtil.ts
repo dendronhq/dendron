@@ -25,6 +25,11 @@ export type TreeMenu = {
   child2parent: { [key: string]: string | null };
 };
 
+export enum TreeViewItemLabelTypeEnum {
+  title = "title",
+  filename = "filename",
+}
+
 export class TreeUtils {
   static generateTreeData(
     allNotes: NotePropsDict,
@@ -112,17 +117,27 @@ export class TreeUtils {
     noteIds,
     noteDict,
     reverse,
+    labelType,
   }: {
     noteIds: string[];
     noteDict: NotePropsDict;
     reverse?: boolean;
+    labelType?: TreeViewItemLabelTypeEnum;
   }): string[] => {
     const out = _.sortBy(
       noteIds,
       // Sort by nav order if set
       (noteId) => noteDict[noteId]?.custom?.nav_order,
       // Sort by titles
-      (noteId) => noteDict[noteId]?.title,
+      (noteId) => {
+        if (labelType) {
+          return labelType === TreeViewItemLabelTypeEnum.filename
+            ? _.last(noteDict[noteId]?.fname.split("."))
+            : noteDict[noteId]?.title;
+        } else {
+          return noteDict[noteId]?.title;
+        }
+      },
       // If titles are identical, sort by last updated date
       (noteId) => noteDict[noteId]?.updated
     );

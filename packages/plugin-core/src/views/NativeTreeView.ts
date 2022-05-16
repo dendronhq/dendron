@@ -9,7 +9,13 @@ import {
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { Disposable, TextEditor, TreeView, window } from "vscode";
+import {
+  Disposable,
+  TextEditor,
+  TreeDataProvider,
+  TreeView,
+  window,
+} from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 import { TreeNote } from "./TreeNote";
@@ -22,6 +28,7 @@ export class NativeTreeView implements Disposable {
   private treeView: TreeView<NoteProps> | undefined;
   private _handler: Disposable | undefined;
   private _createDataProvider: () => EngineNoteProvider;
+  private _provider: EngineNoteProvider | undefined;
   private _updateLabelTypeHandler:
     | ((opts: {
         labelType: TreeViewItemLabelTypeEnum;
@@ -51,6 +58,7 @@ export class NativeTreeView implements Disposable {
    */
   async show() {
     const treeDataProvider = this._createDataProvider();
+    this._provider = treeDataProvider;
     this._updateLabelTypeHandler = _.bind(
       treeDataProvider.updateLabelType,
       treeDataProvider
@@ -107,6 +115,7 @@ export class NativeTreeView implements Disposable {
     if (
       _.isUndefined(editor) ||
       _.isUndefined(this.treeView) ||
+      _.isUndefined(this._provider) ||
       !this.treeView.visible
     ) {
       return;
@@ -140,6 +149,25 @@ export class NativeTreeView implements Disposable {
       });
 
       if (note) {
+        let waitForTree = true;
+        setTimeout(() => {
+          waitForTree = false;
+        }, 500);
+
+        // This is a hack to prevent race condition between tree view reveal
+        // and tree data provider.
+        // without this `reveal` is called before tree items are reconstructed,
+        // causing an exception.
+        // we only wait for 500ms to prevent this from running indefinitely
+        // in case of a faulty engine event that leads to the tree view
+        // never creating a tree item for a note.
+        while (
+          waitForTree &&
+          !_.keys(this._provider.getTree()).includes(note.id)
+        ) {
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
         this.treeView.reveal(note);
       }
     }

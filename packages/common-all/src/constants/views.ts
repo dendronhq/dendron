@@ -109,7 +109,7 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
   [DendronTreeViewKey.GRAPH_PANEL]: {
     desc: "Graph Panel (side)",
     label: "Graph Panel",
-    bundleName: "DendronGraphPanel",
+    bundleName: "DendronSideGraphPanel",
     type: "webview",
   },
 };

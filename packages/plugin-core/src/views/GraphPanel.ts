@@ -103,7 +103,6 @@ export class GraphPanel implements vscode.WebviewViewProvider {
             data: {
               styles,
               graphTheme,
-              isSidePanel: true,
             },
             source: "vscode",
           });

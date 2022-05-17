@@ -8,7 +8,6 @@ import {
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
-  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -53,8 +52,9 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
 
     webviewView.onDidChangeVisibility(() => {
-      AnalyticsUtils.track(VSCodeEvents.GraphPanelClicked, {
-        visible: webviewView.visible,
+      AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
+        type: "VisibilityChanged",
+        state: webviewView.visible ? "Visible" : "Collapsed",
       });
     });
   }

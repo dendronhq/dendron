@@ -679,7 +679,15 @@ export async function _activate(
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
       let previousWorkspaceVersionFromWSService = wsService.getMeta().version;
+
+      // Fix a temporary issue where CLI was writing an invalid version number
+      // to .dendron.ws:
+      if (previousWorkspaceVersionFromWSService === "dendron-cli") {
+        previousWorkspaceVersionFromWSService = "0.91.0";
+      }
+
       if (
+        !semver.valid(previousWorkspaceVersionFromWSService) ||
         semver.gt(
           previousWorkspaceVersionFromState,
           previousWorkspaceVersionFromWSService

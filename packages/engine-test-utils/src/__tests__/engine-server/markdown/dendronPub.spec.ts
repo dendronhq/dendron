@@ -155,6 +155,50 @@ describe("GIVEN dendronPub", () => {
         await verifyPublicLink(resp, fnameAlpha);
       });
     });
+
+    describe("WHEN publishing links to task notes", () => {
+      const taskNote = "alpha.task";
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[${taskNote}]]`,
+            });
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupLinks(opts);
+              const { vaults, wsRoot } = opts;
+              await NoteTestUtilsV4.createNote({
+                fname: taskNote,
+                vault: vaults[0],
+                wsRoot,
+                custom: {
+                  status: "x",
+                  due: "2022-08-28",
+                  owner: "turing",
+                  priority: "high",
+                },
+              });
+            },
+            expect,
+          }
+        );
+      });
+      test("THEN all links are rendered", async () => {
+        await checkVFile(
+          resp,
+          "x",
+          "priority:high",
+          "due:2022-08-28",
+          "@turing"
+        );
+      });
+    });
   });
 
   describe("WHEN publish and private hierarchies", () => {

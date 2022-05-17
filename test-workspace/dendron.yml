@@ -97,6 +97,7 @@ publishing:
     - dendron
     - bar
     - tags
+    - task
   enableSiteLastModified: true
   siteRootDir: docs
   siteUrl: https://foo.dev.dendron.so

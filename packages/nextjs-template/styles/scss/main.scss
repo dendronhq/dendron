@@ -123,3 +123,26 @@ $text-color: rgba(0, 0, 0, 0.85); // @text-color
     white-space: normal;
   }
 }
+
+// for task links, the decorations around the links
+.task-before {
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+.task-after {
+  margin-left: 0.5rem;
+  opacity: 0.8;
+}
+.task-status {
+  border: 1px solid;
+  min-width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0 0.15rem;
+}
+.task-status-text {
+  position: relative;
+  top: -0.45rem;
+}

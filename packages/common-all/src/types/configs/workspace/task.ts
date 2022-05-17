@@ -89,7 +89,7 @@ export class TaskNoteUtils {
     return props;
   }
 
-  static getStatusSymbol({
+  static getStatusSymbolRaw({
     note,
     taskConfig,
   }: {
@@ -99,11 +99,20 @@ export class TaskNoteUtils {
     const { status } = note.custom;
     if (status === undefined) return undefined;
     // If the symbol is not mapped to anything, use the symbol prop directly
-    if (!taskConfig.statusSymbols) return `[${status}]`;
+    if (!taskConfig.statusSymbols) return `${status}`;
     const symbol: string | undefined = taskConfig.statusSymbols[status];
-    if (symbol === undefined) return `[${status}]`;
+    if (symbol === undefined) return `${status}`;
     // If it does map to something, then use that
-    return `[${symbol}]`;
+    return `${symbol}`;
+  }
+
+  static getStatusSymbol(props: {
+    note: TaskNoteProps;
+    taskConfig: TaskConfig;
+  }) {
+    const status = this.getStatusSymbolRaw(props);
+    if (status === undefined) return undefined;
+    return `[${this.getStatusSymbolRaw(props)}]`;
   }
 
   static getPrioritySymbol({

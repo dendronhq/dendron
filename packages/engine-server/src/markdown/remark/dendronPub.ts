@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
+  IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
   NoteProps,
@@ -9,6 +10,7 @@ import {
   ProcFlavor,
   StatusCodes,
   TAGS_HIERARCHY,
+  TaskNoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type { Image, Root } from "mdast";
@@ -322,6 +324,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         // for rehype
         //_node.value = newValue;
         //_node.value = alias;
+
+        const { before, after } = linkExtras({ note, config });
+
         _node.data = {
           vaultName: data.vaultName,
           alias,
@@ -334,10 +339,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             href,
           },
           hChildren: [
+            ...before,
             {
               type: "text",
               value: alias,
             },
+            ...after,
           ],
         } as RehypeLinkData;
 
@@ -489,6 +496,67 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     return tree;
   }
   return transformer;
+}
+
+/** Generate elements to be included before and after the text of a wikilink. */
+function linkExtras({
+  note,
+  config,
+}: {
+  note?: NoteProps;
+  config: IntermediateDendronConfig;
+}): {
+  before: any[];
+  after: any[];
+} {
+  const before = [];
+  const after = [];
+
+  // For task notes, add the status, priority, due, and owner info
+  if (note && TaskNoteUtils.isTaskNote(note)) {
+    const taskConfig = ConfigUtils.getTask(config);
+    const status = TaskNoteUtils.getStatusSymbolRaw({
+      note,
+      taskConfig,
+    });
+    if (status) {
+      before.push({
+        type: "element",
+        tagName: "span",
+        properties: {
+          className: "task-before task-status",
+        },
+        children: [span("task-status-text", status)],
+      });
+    }
+    const priority = TaskNoteUtils.getPrioritySymbol({
+      note,
+      taskConfig,
+    });
+    if (priority) {
+      after.push(span("task-after task-priority", `priority:${priority}`));
+    }
+    const { due, owner } = note.custom;
+    if (due) {
+      after.push(span("task-after task-due", `due:${due}`));
+    }
+    if (owner) {
+      after.push(span("task-after task-owner", `@${owner}`));
+    }
+  }
+  return { before, after };
+}
+
+/** Generates a hast (unifiedjs html) element for a span that has the given class names, and contains the given text as contents. */
+function span(className: string, text: string) {
+  return {
+    type: "element",
+    tagName: "span",
+    properties: {
+      className,
+    },
+    children: [{ type: "text", value: text }],
+  };
 }
 
 export { plugin as dendronPub };

@@ -1027,9 +1027,9 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   ENABLE_SELF_CONTAINED_VAULT_WORKSPACE: {
     key: DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
     type: "boolean",
-    default: false,
+    default: true,
     description:
-      "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature.",
+      "When enabled, newly created workspaces will be created as self contained vaults.",
   },
 };
 

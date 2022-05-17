@@ -680,6 +680,8 @@ export async function _activate(
       const wsService = new WorkspaceService({ wsRoot });
       let previousWorkspaceVersionFromWSService = wsService.getMeta().version;
       if (
+        // Fix a temporary issue where CLI was writing an invalid version number to .dendron.ws:
+        !semver.valid(previousWorkspaceVersionFromWSService) ||
         semver.gt(
           previousWorkspaceVersionFromState,
           previousWorkspaceVersionFromWSService

@@ -175,8 +175,9 @@ export class NoteGraphPanelFactory {
           }
 
           case GraphViewMessageEnum.toggleGraphView: {
-            AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
-              type: msg.data.graphType,
+            AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
+              type: "GraphTypeChanged",
+              state: msg.data.graphType,
             });
             break;
           }

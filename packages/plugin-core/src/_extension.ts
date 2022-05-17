@@ -598,7 +598,6 @@ export async function _activate(
       MetadataService.instance().getGlobalVersion();
 
     if (!semver.valid(previousGlobalVersionFromMetadata)) {
-      // TODO: log
       Logger.info({
         ctx,
         msg: "fix invalid metadata",

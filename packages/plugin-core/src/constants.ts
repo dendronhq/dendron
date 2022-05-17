@@ -66,6 +66,14 @@ export const DENDRON_VIEWS = [
     when: DendronContext.PLUGIN_ACTIVE,
     where: "explorer",
   },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TIP_OF_THE_DAY),
+    where: "explorer",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.HELP_AND_FEEDBACK),
+    where: "explorer",
+  },
 ];
 
 type KeyBinding = {

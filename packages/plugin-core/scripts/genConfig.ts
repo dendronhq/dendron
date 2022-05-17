@@ -116,9 +116,26 @@ function main() {
       url: "./dist/dendron-yml.validator.json",
     },
   ];
+  const viewsWelcome = [
+    {
+      view: "dendron.backlinks",
+      contents: "There are no backlinks to this note.",
+    },
+  ];
+  const viewsContainers = {
+    activitybar: [
+      {
+        id: "dendron-view",
+        title: "Dendron",
+        icon: "media/icons/dendron-activity-bar-icon.svg",
+      },
+    ],
+  };
   const categories = ["Other"];
   const contributes = {
     languages,
+    viewsWelcome,
+    viewsContainers,
     views,
     categories,
     commands,

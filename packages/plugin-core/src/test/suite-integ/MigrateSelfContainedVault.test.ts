@@ -1,7 +1,10 @@
 import { SinonStubbedFn } from "@dendronhq/common-test-utils";
 import sinon from "sinon";
 import { window } from "vscode";
-import { MigrateSelfContainedVaultCommand } from "../../commands/MigrateSelfContainedVault";
+import {
+  MigrateSelfContainedVaultCommand,
+  MigrateVaultContinueOption,
+} from "../../commands/MigrateSelfContainedVault";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
@@ -18,6 +21,20 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { DConfig } from "@dendronhq/engine-server";
+
+function stubMigrateQuickPick(
+  vaultSelect: string,
+  continueOption:
+    | MigrateVaultContinueOption
+    | undefined = MigrateVaultContinueOption.continue
+): SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]> {
+  const stub = sinon.stub(VSCodeUtils, "showQuickPick");
+  stub.onFirstCall().resolves({
+    label: vaultSelect,
+  });
+  stub.onSecondCall().resolves({ label: continueOption });
+  return stub;
+}
 
 suite("GIVEN the MigrateSelfContainedVault command", () => {
   describeSingleWS(
@@ -38,6 +55,48 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         showQuickPick = sinon
           .stub(VSCodeUtils, "showQuickPick")
           .resolves(undefined);
+
+        await cmd.run();
+      });
+      after(() => {
+        [showErrorMessage, reloadWindow, showQuickPick].forEach((stub) =>
+          stub.restore()
+        );
+      });
+
+      test("THEN the workspace did not reload since there was no migration", () => {
+        expect(reloadWindow.called).toBeFalsy();
+      });
+
+      test("THEN the vault should not have migrated", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        expect(
+          await verifyVaultNotMigrated({ wsRoot, vault: vaults[0] })
+        ).toBeTruthy();
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN the backup prompt is cancelled",
+    { selfContained: false },
+    () => {
+      let showErrorMessage: SinonStubbedFn<typeof window["showErrorMessage"]>;
+      let reloadWindow: SinonStubbedFn<typeof VSCodeUtils["reloadWindow"]>;
+      let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
+
+      before(async () => {
+        const cmd = new MigrateSelfContainedVaultCommand(
+          ExtensionProvider.getExtension()
+        );
+
+        showErrorMessage = sinon.stub(window, "showErrorMessage");
+        reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        showQuickPick = stubMigrateQuickPick(
+          VaultUtils.getName(vaults[0]),
+          MigrateVaultContinueOption.cancel
+        );
 
         await cmd.run();
       });
@@ -114,9 +173,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         );
 
         reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
-        showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
-          label: VaultUtils.getName(vaults[0]),
-        });
+        showQuickPick = stubMigrateQuickPick(VaultUtils.getName(vaults[0]));
 
         await cmd.run();
       });
@@ -124,8 +181,8 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         [reloadWindow, showQuickPick].forEach((stub) => stub.restore());
       });
 
-      test("THEN it prompts for the vault", () => {
-        expect(showQuickPick.callCount).toEqual(1);
+      test("THEN it prompts for the vault and confirmation", () => {
+        expect(showQuickPick.callCount).toEqual(2);
       });
 
       test("THEN the workspace reloads to apply the migration", () => {
@@ -155,9 +212,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         );
 
         reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
-        showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
-          label: VaultUtils.getName(vaults[0]),
-        });
+        showQuickPick = stubMigrateQuickPick(VaultUtils.getName(vaults[0]));
 
         await cmd.run();
       });
@@ -165,8 +220,8 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         [reloadWindow, showQuickPick].forEach((stub) => stub.restore());
       });
 
-      test("THEN it prompts for the vault", () => {
-        expect(showQuickPick.callCount).toEqual(1);
+      test("THEN it prompts for the vault and confirmation", () => {
+        expect(showQuickPick.callCount).toEqual(2);
       });
 
       test("THEN the workspace reloads to apply the migration", () => {

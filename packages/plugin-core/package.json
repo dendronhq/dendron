@@ -41,6 +41,21 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "viewsWelcome": [
+      {
+        "view": "dendron.backlinks",
+        "contents": "There are no backlinks to this note."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dendron-view",
+          "title": "Dendron",
+          "icon": "media/icons/dendron-activity-bar-icon.svg"
+        }
+      ]
+    },
     "views": {
       "explorer": [
         {
@@ -75,6 +90,17 @@
           "id": "dendron.backlinks",
           "name": "Backlinks",
           "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.tip-of-the-day",
+          "name": "Feature Showcase",
+          "contextualTitle": "Feature Showcase",
+          "type": "webview"
+        },
+        {
+          "id": "dendron.help-and-feedback",
+          "name": "Help and Feedback",
+          "contextualTitle": "Help and Feedback"
         }
       ]
     },

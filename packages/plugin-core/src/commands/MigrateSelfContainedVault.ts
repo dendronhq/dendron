@@ -17,6 +17,11 @@ type CommandOutput = {
   newVault: DVault | null;
 };
 
+export enum MigrateVaultContinueOption {
+  continue = "continue",
+  cancel = "cancel",
+}
+
 export class MigrateSelfContainedVaultCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
@@ -74,6 +79,23 @@ export class MigrateSelfContainedVaultCommand extends BasicCommand<
         vname: vault.label,
       });
     }
+    const cont = await VSCodeUtils.showQuickPick(
+      [
+        {
+          label: MigrateVaultContinueOption.continue,
+          detail: "I have backed up my notes",
+        },
+        {
+          label: MigrateVaultContinueOption.cancel,
+        },
+      ],
+      {
+        canPickMany: false,
+        title: "Please back up your notes before you continue",
+        ignoreFocusOut: true,
+      }
+    );
+    if (cont?.label !== MigrateVaultContinueOption.continue) return undefined;
     return opts;
   }
 

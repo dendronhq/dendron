@@ -773,6 +773,7 @@ export enum GraphViewMessageEnum {
   "onGraphStyleAndThemeLoad" = "onGraphStyleAndThemeLoad",
   "onGraphThemeChange" = "onGraphThemeChange",
   "configureCustomStyling" = "configureCustomStyling",
+  "toggleGraphView" = "toggleGraphView",
 }
 
 export enum CalendarViewMessageType {
@@ -810,6 +811,11 @@ export enum GraphThemeEnum {
   Custom = "Custom",
 }
 
+export enum GraphTypeEnum {
+  fullGraph = "fullGraph",
+  localGraph = "localGraph",
+}
+
 // TODO: split this up into a separate command, i.e. onNoteStateChanged, to capture different use cases
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps | undefined;
@@ -843,7 +849,12 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 
 export type GraphViewMessage = DMessage<
   GraphViewMessageType,
-  { id: string; vault?: string; graphTheme?: GraphThemeEnum }
+  {
+    id: string;
+    vault?: string;
+    graphTheme?: GraphThemeEnum;
+    graphType?: GraphTypeEnum;
+  }
 >;
 
 export type CalendarViewMessage = DMessage<

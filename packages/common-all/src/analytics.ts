@@ -155,6 +155,7 @@ export enum AppNames {
 
 export enum GraphEvents {
   GraphThemeChanged = "GraphThemeChanged",
+  GraphViewUsed = "GraphViewUsed",
 }
 
 export const DendronEvents = {

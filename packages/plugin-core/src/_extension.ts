@@ -426,16 +426,7 @@ async function postReloadWorkspace(opts: { extension: DendronExtension }) {
     return;
   }
 
-  const newVersion = DendronExtension.version();
   const wsMeta = wsService.getMeta();
-  // deal with bad semver version
-  if (!semver.valid(wsMeta.version)) {
-    // this is only used in dendron workspace to upgrade workspace config. we currently
-    // don't rely on this for any settings besides unwanted extensions update
-    // so its save to set to latest version
-    wsMeta.version = newVersion;
-    wsService.writeMeta({ version: DendronExtension.version() });
-  }
   const previousWsVersion = wsMeta.version;
   // stats
   // NOTE: this is legacy to upgrade .code-workspace specific settings
@@ -449,35 +440,38 @@ async function postReloadWorkspace(opts: { extension: DendronExtension }) {
         Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
       });
     wsService.writeMeta({ version: DendronExtension.version() });
-  } else if (semver.lt(previousWsVersion, newVersion)) {
-    let changes: any;
-    Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
-    try {
-      changes = await vscode.commands.executeCommand(
-        DENDRON_COMMANDS.UPGRADE_SETTINGS.key
-      );
-      Logger.info({
-        ctx,
-        msg: "postUpgrade: new wsVersion",
-        changes,
-        previousWsVersion,
-        newVersion,
-      });
-      wsService.writeMeta({ version: DendronExtension.version() });
-    } catch (err) {
-      Logger.error({
-        msg: "error upgrading",
-        error: new DendronError({ message: JSON.stringify(err) }),
-      });
-      return;
-    }
-    HistoryService.instance().add({
-      source: "extension",
-      action: "upgraded",
-      data: { changes },
-    });
   } else {
-    Logger.info({ ctx, msg: "same wsVersion" });
+    const newVersion = DendronExtension.version();
+    if (semver.lt(previousWsVersion, newVersion)) {
+      let changes: any;
+      Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
+      try {
+        changes = await vscode.commands.executeCommand(
+          DENDRON_COMMANDS.UPGRADE_SETTINGS.key
+        );
+        Logger.info({
+          ctx,
+          msg: "postUpgrade: new wsVersion",
+          changes,
+          previousWsVersion,
+          newVersion,
+        });
+        wsService.writeMeta({ version: DendronExtension.version() });
+      } catch (err) {
+        Logger.error({
+          msg: "error upgrading",
+          error: new DendronError({ message: JSON.stringify(err) }),
+        });
+        return;
+      }
+      HistoryService.instance().add({
+        source: "extension",
+        action: "upgraded",
+        data: { changes },
+      });
+    } else {
+      Logger.info({ ctx, msg: "same wsVersion" });
+    }
   }
   Logger.info({ ctx, msg: "exit" });
 }

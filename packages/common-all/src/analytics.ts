@@ -134,6 +134,7 @@ export enum ContextualUIEvents {
 
 export enum WorkspaceEvents {
   AutoFix = "AutoFix",
+  MetadataVersionAutoFix = "MetadataVersionAutoFix",
   DuplicateNoteFound = "DuplicateNoteFound",
 }
 

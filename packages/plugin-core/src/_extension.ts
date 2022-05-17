@@ -26,6 +26,7 @@ import {
   VSCodeEvents,
   WorkspaceType,
   TreeViewItemLabelTypeEnum,
+  WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -601,6 +602,21 @@ export async function _activate(
     const previousGlobalVersionFromState = stateService.getGlobalVersion();
     let previousGlobalVersionFromMetadata =
       MetadataService.instance().getGlobalVersion();
+
+    if (!semver.valid(previousGlobalVersionFromMetadata)) {
+      // TODO: log
+      Logger.info({
+        ctx,
+        msg: "fix invalid metadata",
+        previousGlobalVersionFromMetadata,
+      });
+      // if we had an invalid metadata, assume its the current version
+      MetadataService.instance().setGlobalVersion(currentVersion);
+      previousGlobalVersionFromMetadata = currentVersion;
+      AnalyticsUtils.track(WorkspaceEvents.MetadataVersionAutoFix, {
+        cause: "bad_version",
+      });
+    }
     // state is more recent than global, backfill
     if (
       semver.gt(
@@ -609,6 +625,12 @@ export async function _activate(
       )
     ) {
       previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
+      MetadataService.instance().setGlobalVersion(
+        previousGlobalVersionFromState
+      );
+      AnalyticsUtils.track(WorkspaceEvents.MetadataVersionAutoFix, {
+        cause: "outdated_version",
+      });
     }
     const previousGlobalVersion = previousGlobalVersionFromMetadata;
 

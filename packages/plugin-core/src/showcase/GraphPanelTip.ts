@@ -15,7 +15,7 @@ export class GraphPanelTip implements IFeatureShowcaseMessage {
   }
 
   getDisplayMessage(_displayLocation: DisplayLocation): string {
-    return "Dendron has a new Graph Panel. Check it out!";
+    return "We're experimenting with a note graph panel in the new Dendron sidebar. Check it out!";
   }
 
   onConfirm() {

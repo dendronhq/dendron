@@ -267,10 +267,10 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                   }
                 });
 
-                if (
-                  !alphaCreateCallbackReceived &&
-                  betaCreateCallbackReceived
-                ) {
+                if (alphaCreateCallbackReceived && betaCreateCallbackReceived) {
+                  // correct entry received
+                  return;
+                } else {
                   done({
                     message: `Did not receive updates for both alpha and beta note updates.`,
                   });

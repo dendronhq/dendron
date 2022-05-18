@@ -714,6 +714,11 @@ export async function _activate(
         dendronConfig,
       });
 
+      // check for duplicate config keys and prompt for a fix.
+      StartupUtils.showDuplicateConfigMessageIfNecessary({
+        ext: ws,
+      });
+
       // check for missing default config keys and prompt for a backfill.
       StartupUtils.showMissingDefaultConfigMessageIfNecessary({
         ext: ws,

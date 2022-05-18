@@ -147,11 +147,11 @@ export class StartupUtils {
             "Take the following steps to fix this issue.",
             "1. Look through `dendron.yml` and remove all duplicate mappings.",
             "",
-            `    - We recommend installing the [YAML](${vscode.Uri.parse(
+            `    - We recommend installing the [YAML extension](${vscode.Uri.parse(
               `command:workbench.extensions.search?${JSON.stringify(
                 "@id:redhat.vscode-yaml"
               )}`
-            )}) extension for validating \`dendron.yml\``,
+            )}) for validating \`dendron.yml\``,
             "",
             "1. When you are done, save your changes made to `dendron.yml`",
             "",

@@ -23,8 +23,8 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
-  NoteFNamesDict,
   NoteProps,
+  NotePropsByFnameDict,
   NotePropsDict,
   Optional,
   QueryNotesOpts,
@@ -43,7 +43,7 @@ import { EngineEventEmitter } from "@dendronhq/engine-server";
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
   notes: NotePropsDict;
-  noteFnames: NoteFNamesDict;
+  noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   schemas: SchemaModuleDict;
   links: DLink[];

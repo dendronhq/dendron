@@ -54,7 +54,7 @@ export class SchemaController {
 
   async query({ ws, qs }: SchemaQueryRequest): Promise<SchemaQueryPayload> {
     const engine = await getWSEngine({ ws: ws || "" });
-    return await engine.querySchema(qs);
+    return engine.querySchema(qs);
   }
 
   async update({

@@ -29,8 +29,8 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
-  NoteFNamesDict,
   NoteProps,
+  NotePropsByFnameDict,
   NotePropsDict,
   Optional,
   QueryNotesOpts,
@@ -131,10 +131,10 @@ export class EngineAPIService
     this._internalEngine.notes = arg;
   }
 
-  public get noteFnames(): NoteFNamesDict {
+  public get noteFnames(): NotePropsByFnameDict {
     return this._internalEngine.noteFnames;
   }
-  public set noteFnames(arg: NoteFNamesDict) {
+  public set noteFnames(arg: NotePropsByFnameDict) {
     this._internalEngine.noteFnames = arg;
   }
 

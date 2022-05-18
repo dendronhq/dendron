@@ -34,8 +34,10 @@ import {
   GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
-  NoteFNamesDict,
+  NoteFnameDictUtils,
+  NoteFullDictUtils,
   NoteProps,
+  NotePropsByFnameDict,
   NotePropsDict,
   NoteUtils,
   Optional,
@@ -71,7 +73,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
   public notes: NotePropsDict;
-  public noteFnames: NoteFNamesDict;
+  public noteFnames: NotePropsByFnameDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
   public links: DLink[];
@@ -128,7 +130,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   } & DendronEngineClientOpts) {
     this.api = api;
     this.notes = {};
-    this.noteFnames = new NoteFNamesDict();
+    this.noteFnames = {};
     this.schemas = {};
     this.links = [];
     this.vaults = vaults;
@@ -183,7 +185,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
-    this.noteFnames = new NoteFNamesDict(_.values(notes));
+    this.noteFnames = NoteFnameDictUtils.create(this.notes);
     this.schemas = schemas;
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
@@ -244,7 +246,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
-    this.noteFnames = new NoteFNamesDict(_.values(notes));
+    this.noteFnames = NoteFnameDictUtils.create(this.notes);
     this.schemas = schemas;
     this.fuseEngine.updateNotesIndex(notes);
     this.fuseEngine.updateSchemaIndex(schemas);
@@ -334,26 +336,23 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
+    const notesDict = {
+      notesById: this.notes,
+      notesByFname: this.noteFnames,
+    };
     notes.forEach((ent: NoteChangeEntry) => {
-      const { id } = ent.note;
       const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
       if (ent.status === "delete") {
-        delete this.notes[id];
-        this.noteFnames.delete(ent.note);
+        NoteFullDictUtils.deleteNote(ent.note, notesDict);
         this.history?.add({ source: "engine", action: "delete", uri });
       } else {
         if (ent.status === "create") {
-          this.noteFnames.add(ent.note);
           this.history?.add({ source: "engine", action: "create", uri });
         }
         if (ent.status === "update") {
-          // If the note id or fname has been changed, need to update fname dict
-          if (
-            ent.prevNote?.fname !== ent.note.fname ||
-            ent.prevNote?.id !== ent.note.id
-          ) {
-            if (ent.prevNote) this.noteFnames.delete(ent.prevNote);
-            this.noteFnames.add(ent.note);
+          // If the note id has changed, delete previous entry from dict before adding
+          if (ent.prevNote && ent.prevNote.id !== ent.note.id) {
+            NoteFullDictUtils.deleteNote(ent.prevNote, notesDict);
           }
           ent.note.children = _.sortBy(
             ent.note.children,
@@ -367,7 +366,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
               ).title
           );
         }
-        this.notes[id] = ent.note;
+        NoteFullDictUtils.addNote(ent.note, notesDict);
       }
     });
     this.fuseEngine.updateNotesIndex(this.notes);
@@ -406,7 +405,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
-    this.noteFnames = new NoteFNamesDict(_.values(notes));
+    this.noteFnames = NoteFnameDictUtils.create(this.notes);
     this.schemas = schemas;
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);

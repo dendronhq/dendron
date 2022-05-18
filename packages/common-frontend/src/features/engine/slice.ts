@@ -6,7 +6,8 @@ import {
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
-  NoteFNamesDict,
+  NoteFnameDictUtils,
+  NoteFullDictUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -149,7 +150,7 @@ const initialState: InitialState = {
   currentRequestId: undefined,
   vaults: [],
   notes: {},
-  noteFName: new NoteFNamesDict([]),
+  noteFName: {},
   schemas: {},
   notesRendered: {},
   error: null,
@@ -167,7 +168,7 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = new NoteFNamesDict(_.values(notes));
+      state.noteFName = NoteFnameDictUtils.create(notes);
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
@@ -189,7 +190,7 @@ export const engineSlice = createSlice({
       state.schemas = {};
       state.notesRendered = {};
       state.error = null;
-      state.noteFName = new NoteFNamesDict([]);
+      state.noteFName = {};
     },
     setRenderNote: (
       state,
@@ -204,22 +205,22 @@ export const engineSlice = createSlice({
         state.notes = {};
       }
       // this is a new node
+      const notesDict = {
+        notesById: state.notes,
+        notesByFname: state.noteFName,
+      };
       if (!state.notes[note.id]) {
-        // TODO: Support passing in fname dictionary
-        const stubs = NoteUtils.addOrUpdateParents({
+        const changed = NoteUtils.addOrUpdateParents({
           note,
-          notesDict: state.notes,
+          notesDict,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
-        state.noteFName.add(note);
-        stubs
-          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
-          .forEach((noteChangeEntry) =>
-            state.noteFName.add(noteChangeEntry.note)
-          );
+        changed.forEach((noteChangeEntry) =>
+          NoteFullDictUtils.addNote(noteChangeEntry.note, notesDict)
+        );
       }
-      state.notes[note.id] = note;
+      NoteFullDictUtils.addNote(note, notesDict);
     },
   },
   extraReducers: (builder) => {

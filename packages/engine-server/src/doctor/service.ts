@@ -380,7 +380,8 @@ export class DoctorService implements Disposable {
           note.id = genUUID();
           await engine.writeNote(note, {
             runHooks: false,
-            updateExisting: true,
+            // Old note needs to be removed
+            updateExisting: false,
           });
           numChanges += 1;
         };

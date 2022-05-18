@@ -25,6 +25,7 @@ import {
   NoteOpts,
   NoteProps,
   NotePropsDict,
+  NotePropsFullDict,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -40,11 +41,11 @@ import {
   getSlugger,
   isNotUndefined,
   normalizeUnixPath,
-  NoteFNamesDict,
   randomColor,
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
+import { NoteFullDictUtils } from "./notePropDict";
 
 /**
  * Utilities for dealing with nodes
@@ -157,8 +158,7 @@ export class DNodeUtils {
 
   static findClosestParent(
     fpath: string,
-    nodes: NotePropsDict,
-    notesByFnameDict: NoteFNamesDict,
+    notesDict: NotePropsFullDict,
     opts: {
       noStubs?: boolean;
       vault: DVault;
@@ -168,25 +168,28 @@ export class DNodeUtils {
     const { vault } = opts;
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
-      const _node = notesByFnameDict.get(nodes, "root", vault)[0];
+      const _node = NoteFullDictUtils.findNotesByFname(
+        "root",
+        notesDict,
+        vault
+      )[0];
       if (_.isUndefined(_node)) {
         throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = notesByFnameDict.get(nodes, dirname, vault)[0];
+    const maybeNode = NoteFullDictUtils.findNotesByFname(
+      dirname,
+      notesDict,
+      vault
+    )[0];
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
     ) {
       return maybeNode;
     } else {
-      return DNodeUtils.findClosestParent(
-        dirname,
-        nodes,
-        notesByFnameDict,
-        opts
-      );
+      return DNodeUtils.findClosestParent(dirname, notesDict, opts);
     }
   }
 
@@ -368,19 +371,23 @@ export class NoteUtils {
 
   /**
    * Add node to parents up the note tree, or create stubs if no direct parents exists
+   *
    * @param opts
-   * @returns All notes that were changed including the parents
+   * @returns All parent notes that were changed
    */
-  static addOrUpdateParentsWithDict(opts: {
+  static addOrUpdateParents(opts: {
     note: NoteProps;
-    notesDict: NotePropsDict;
-    notesByFnameDict: NoteFNamesDict;
+    notesDict: NotePropsFullDict;
     createStubs: boolean;
     wsRoot: string;
   }): NoteChangeEntry[] {
-    const { note, notesDict, notesByFnameDict, createStubs, wsRoot } = opts;
+    const { note, notesDict, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    const parent = notesByFnameDict.get(notesDict, parentPath, note.vault)[0];
+    const parent = NoteFullDictUtils.findNotesByFname(
+      parentPath,
+      notesDict,
+      note.vault
+    )[0];
 
     const changed: NoteChangeEntry[] = [];
     if (parent) {
@@ -402,15 +409,10 @@ export class NoteUtils {
       throw DendronError.createFromStatus(err);
     }
     if (!parent) {
-      const ancestor = DNodeUtils.findClosestParent(
-        note.fname,
-        notesDict,
-        notesByFnameDict,
-        {
-          vault: note.vault,
-          wsRoot,
-        }
-      ) as NoteProps;
+      const ancestor = DNodeUtils.findClosestParent(note.fname, notesDict, {
+        vault: note.vault,
+        wsRoot,
+      }) as NoteProps;
 
       const prevAncestorState = { ...ancestor };
 
@@ -429,22 +431,6 @@ export class NoteUtils {
       });
     }
     return changed;
-  }
-
-  static addOrUpdateParents(opts: {
-    note: NoteProps;
-    notesDict: NotePropsDict;
-    createStubs: boolean;
-    wsRoot: string;
-  }): NoteChangeEntry[] {
-    const { note, notesDict, createStubs, wsRoot } = opts;
-    return NoteUtils.addOrUpdateParentsWithDict({
-      note,
-      notesDict,
-      notesByFnameDict: new NoteFNamesDict(_.values(notesDict)),
-      createStubs,
-      wsRoot,
-    });
   }
 
   static addSchema(opts: {
@@ -867,7 +853,11 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return engine.noteFnames.get(engine.notes, fname, vault);
+    return NoteFullDictUtils.findNotesByFname(
+      fname,
+      { notesById: engine.notes, notesByFname: engine.noteFnames },
+      vault
+    );
   }
 
   /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
@@ -962,42 +952,6 @@ export class NoteUtils {
     });
     if (!out) {
       throw new DendronError({ message: `note ${fname} not found` });
-    }
-    return out;
-  }
-
-  /**
-   @deprecated
-   */
-  static getNoteByFname(
-    fname: string,
-    notes: NotePropsDict,
-    opts?: { throwIfEmpty?: boolean; vault?: DVault }
-  ): NoteProps | undefined {
-    const _out = _.filter(_.values(notes), (ent) => {
-      return ent.fname.toLowerCase() === fname.toLowerCase();
-    });
-    let out;
-    if (_out.length > 1) {
-      if (!opts?.vault) {
-        throw new DendronError({
-          message: `multiple nodes found and no vault given for ${fname}`,
-        });
-      }
-      out = _.find(
-        _out,
-        (ent) => ent.vault.fsPath === opts?.vault?.fsPath
-      ) as NoteProps;
-      if (_.isUndefined(out)) {
-        throw new DendronError({
-          message: `no note found for vault: ${opts.vault.fsPath}`,
-        });
-      }
-    } else {
-      out = _out[0];
-    }
-    if (opts?.throwIfEmpty && _.isUndefined(out)) {
-      throw Error(`${fname} not found in getNoteByFname`);
     }
     return out;
   }

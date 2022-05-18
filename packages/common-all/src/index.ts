@@ -26,6 +26,7 @@ export * from "./config";
 export * from "./schema";
 export * from "./abTesting";
 export * from "./abTests";
+export * from "./notePropDict";
 export { axios, AxiosError };
 export { DateTime };
 

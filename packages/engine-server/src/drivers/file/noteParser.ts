@@ -12,9 +12,11 @@ import {
   ERROR_STATUS,
   IDendronError,
   isNotUndefined,
-  NoteFNamesDict,
+  NoteFullDictUtils,
   NoteProps,
+  NotePropsByFnameDict,
   NotePropsDict,
+  NotePropsFullDict,
   NotesCacheEntry,
   NotesCacheEntryMap,
   NoteUtils,
@@ -94,8 +96,12 @@ export class NoteParser extends ParserBase {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
-    const notesByFname: NoteFNamesDict = new NoteFNamesDict();
+    const notesByFname: NotePropsByFnameDict = {};
     const notesById: NotePropsDict = {};
+    const notesDict = {
+      notesById,
+      notesByFname,
+    };
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
     // Keep track of which notes in cache no longer exist
@@ -130,9 +136,6 @@ export class NoteParser extends ParserBase {
         hash: rootProps.noteHash,
       });
     }
-    notesByFname.add(rootNote);
-    notesById[rootNote.id] = rootNote;
-    unseenKeys.delete(rootNote.fname);
 
     // get root of hiearchies
     let lvl = 2;
@@ -181,9 +184,11 @@ export class NoteParser extends ParserBase {
           })
         );
       }
-      notesByFname.add(ent);
-      notesById[ent.id] = ent;
+      NoteFullDictUtils.addNote(ent, notesDict);
     });
+    // Root node children have updated
+    NoteFullDictUtils.addNote(rootNote, notesDict);
+    unseenKeys.delete(rootNote.fname);
     this.logger.info({ ctx, msg: "post:parseDomainNotes" });
 
     // get everything else
@@ -197,8 +202,7 @@ export class NoteParser extends ParserBase {
           try {
             const resp = this.parseNoteProps({
               fileMeta: ent,
-              notesDict: notesById,
-              notesByFname,
+              notesDict: { notesById, notesByFname },
               addParent: true,
               vault,
               errors,
@@ -214,21 +218,22 @@ export class NoteParser extends ParserBase {
                 hash: resp.noteHash,
               });
             }
+
+            // Check for duplicate IDs when adding new note to the map
+            if (notesById[notes[0].id] !== undefined) {
+              const duplicate = notesById[notes[0].id];
+              errors.push(
+                new DuplicateNoteError({
+                  noteA: duplicate,
+                  noteB: notes[0],
+                })
+              );
+            }
+
             // need to be inside this loop
             // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
             notes.forEach((ent) => {
-              // Check for duplicate IDs when adding notes to the map
-              if (notesById[ent.id] !== undefined) {
-                const duplicate = notesById[ent.id];
-                errors.push(
-                  new DuplicateNoteError({
-                    noteA: duplicate,
-                    noteB: ent,
-                  })
-                );
-              }
-              notesByFname.add(ent);
-              notesById[ent.id] = ent;
+              NoteFullDictUtils.addNote(ent, notesDict);
             });
             return notes;
           } catch (err: any) {
@@ -249,7 +254,7 @@ export class NoteParser extends ParserBase {
     this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
     // add schemas
-    const domains = rootNote.children.map(
+    const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
     ) as NoteProps[];
     const schemas = this.opts.store.schemas;
@@ -281,8 +286,7 @@ export class NoteParser extends ParserBase {
    */
   parseNoteProps(opts: {
     fileMeta: FileMeta;
-    notesDict?: NotePropsDict;
-    notesByFname?: NoteFNamesDict;
+    notesDict?: NotePropsFullDict;
     parents?: NoteProps[];
     addParent: boolean;
     createStubs?: boolean;
@@ -296,11 +300,13 @@ export class NoteParser extends ParserBase {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       createStubs: true,
-      notesDict: {},
-      notesByFname: {},
+      notesDict: {
+        notesById: {},
+        notesByFname: {},
+      },
       parents: [] as NoteProps[],
     });
-    const { fileMeta, notesDict, notesByFname, vault, errors } = cleanOpts;
+    const { fileMeta, notesDict, vault, errors } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
@@ -338,18 +344,13 @@ export class NoteParser extends ParserBase {
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addOrUpdateParentsWithDict({
+      const stubs = NoteUtils.addOrUpdateParents({
         note: noteProps,
         notesDict,
-        notesByFnameDict: notesByFname,
         createStubs: cleanOpts.createStubs,
         wsRoot: this.opts.store.wsRoot,
       });
-      out = out.concat(
-        stubs
-          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
-          .map((noteChangeEntry) => noteChangeEntry.note)
-      );
+      out = out.concat(stubs.map((noteChangeEntry) => noteChangeEntry.note));
     }
     return {
       propsList: out,

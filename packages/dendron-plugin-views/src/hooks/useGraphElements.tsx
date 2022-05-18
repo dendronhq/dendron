@@ -1,8 +1,9 @@
 import {
   DVault,
-  NoteFNamesDict,
+  NoteFullDictUtils,
   NoteProps,
   NotePropsDict,
+  NotePropsByFnameDict,
   NoteUtils,
   SchemaModuleDict,
   SchemaProps,
@@ -40,7 +41,7 @@ const getLocalNoteGraphElements = ({
   fNameDict,
 }: {
   notes: NotePropsDict;
-  fNameDict: NoteFNamesDict;
+  fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
@@ -216,10 +217,13 @@ const getLocalNoteGraphElements = ({
       }
 
       const fname = fnameArray[fnameArray.length - 1];
-      let toNotes = fNameDict.get(notes, fname);
-
-      const to = toNotes.filter((note) =>
-        VaultUtils.isEqualV2(note.vault, toVault)
+      let to = NoteFullDictUtils.findNotesByFname(
+        fname,
+        {
+          notesById: notes,
+          notesByFname: fNameDict,
+        },
+        toVault
       )[0];
 
       if (!to) {
@@ -288,7 +292,7 @@ const getFullNoteGraphElements = ({
   noteActive,
 }: {
   notes: NotePropsDict;
-  fNameDict: NoteFNamesDict;
+  fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
@@ -374,10 +378,13 @@ const getFullNoteGraphElements = ({
         }
 
         const fname = fnameArray[fnameArray.length - 1];
-        let toNotes = fNameDict.get(notes, fname);
-
-        const to = toNotes.filter((note) =>
-          VaultUtils.isEqualV2(note.vault, toVault)
+        let to = NoteFullDictUtils.findNotesByFname(
+          fname,
+          {
+            notesById: notes,
+            notesByFname: fNameDict,
+          },
+          toVault
         )[0];
 
         if (!to) {

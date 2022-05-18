@@ -339,6 +339,9 @@ export class SiteUtils {
         delete note.stub;
         // eslint-disable-next-line no-await-in-loop
         await engine.writeNote(note);
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        await engine.updateNote(note);
       }
 
       // if `skipLevels` is enabled, the children of the current note are descendants

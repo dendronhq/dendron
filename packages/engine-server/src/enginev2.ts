@@ -60,6 +60,7 @@ import {
   GetNoteLinksPayload,
   Optional,
   assertUnreachable,
+  NoteFullDictUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -702,8 +703,10 @@ export class DendronEngineV2 implements DEngine {
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
         if (ent.status === "delete") {
-          delete this.notes[id];
-          this.noteFnames.delete(ent.note);
+          NoteFullDictUtils.deleteNote(ent.note, {
+            notesById: this.notes,
+            notesByFname: this.noteFnames,
+          });
         } else {
           const note = await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,

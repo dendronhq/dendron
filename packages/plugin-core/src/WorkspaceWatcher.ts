@@ -334,6 +334,7 @@ export class WorkspaceWatcher {
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
+        await engine.updateNote(note);
         return resolve(changes);
       });
       event.waitUntil(p);

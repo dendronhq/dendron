@@ -62,7 +62,9 @@ export class AssertUtils {
       (match || []).map(([count, match]) => {
         const foundCount = countMatches(match);
         if (foundCount != count) {
-          throw `${match} found ${foundCount} times, expected equal to ${count} in ${body}`;
+          throw Error(
+            `${match} found ${foundCount} times, expected equal to ${count} in ${body}`
+          );
         }
         return true;
       })
@@ -71,7 +73,9 @@ export class AssertUtils {
       (fewerThan || []).map(([count, match]) => {
         const foundCount = countMatches(match);
         if (foundCount >= count) {
-          throw `${match} found ${foundCount} times, expected fewer than ${count} in ${body}`;
+          throw Error(
+            `${match} found ${foundCount} times, expected fewer than ${count} in ${body}`
+          );
         }
         return true;
       })
@@ -80,7 +84,9 @@ export class AssertUtils {
       (moreThan || []).map(([count, match]) => {
         const foundCount = countMatches(match);
         if (foundCount <= count) {
-          throw `${match} found ${foundCount} times, expected more than ${count} in ${body}`;
+          throw Error(
+            `${match} found ${foundCount} times, expected more than ${count} in ${body}`
+          );
         }
         return true;
       })

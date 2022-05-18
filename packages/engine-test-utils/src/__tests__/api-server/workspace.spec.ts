@@ -6,6 +6,8 @@ import path from "path";
 import { createServer, runEngineTestV5 } from "../../engine";
 
 describe("workspace", () => {
+  // long running tests
+  jest.setTimeout(10000);
   test("ok: basic", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults, engine }) => {

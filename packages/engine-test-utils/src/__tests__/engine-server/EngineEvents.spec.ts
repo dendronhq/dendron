@@ -15,8 +15,8 @@ import { createEngineFromServer, ENGINE_HOOKS, runEngineTestV5 } from "../..";
  */
 describe("GIVEN a DendronEngineClient running on client-side", () => {
   describe("WHEN writing a new note", () => {
-    test("THEN create event fired with the correct props AND update note event fired for its parent", async (done) => {
-      await runEngineTestV5(
+    test("THEN create event fired with the correct props AND update note event fired for its parent", (done) => {
+      runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
           // TODO: Get rid of this casting once the proper way to expose EngineEvents of DendronEngineClient is implemented
           const engineClient = engine as DendronEngineClient;
@@ -77,8 +77,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN writing a new note as a grandchild, whose parent doesn't exist yet", () => {
-    test("THEN create event fired for both child and parent (with stub), and update note fired for grandparent", async (done) => {
-      await runEngineTestV5(
+    test("THEN create event fired for both child and parent (with stub), and update note fired for grandparent", (done) => {
+      runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
           const engineClient = engine as DendronEngineClient;
 
@@ -142,8 +142,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN writing over an existing note by changing its ID", () => {
-    test("THEN expect all dependent notes to be updated", async (done) => {
-      await runEngineTestV5(
+    test("THEN expect all dependent notes to be updated", (done) => {
+      runEngineTestV5(
         async ({ engine }) => {
           const engineClient = engine as DendronEngineClient;
 
@@ -196,8 +196,6 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                     return;
                   }
                 });
-
-                done();
               }, done);
             }
           );
@@ -214,8 +212,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN calling bulkAddNotes", () => {
-    test("THEN onNoteCreate event fires for each added note", async (done) => {
-      await runEngineTestV5(
+    test("THEN onNoteCreate event fires for each added note", (done) => {
+      runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
           const engineClient = engine as DendronEngineClient;
 
@@ -270,7 +268,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 });
 
                 if (alphaCreateCallbackReceived && betaCreateCallbackReceived) {
-                  done();
+                  // correct entry received
+                  return;
                 } else {
                   done({
                     message: `Did not receive updates for both alpha and beta note updates.`,
@@ -294,8 +293,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN updating a note (no links)", () => {
-    test("THEN update event fired with the updated title", async (done) => {
-      await runEngineTestV5(
+    test("THEN update event fired with the updated title", (done) => {
+      runEngineTestV5(
         async ({ engine, vaults }) => {
           const engineClient = engine as DendronEngineClient;
           const resp = await engine.getNoteByPath({
@@ -349,8 +348,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN deleting a note that has children", () => {
-    test("THEN *update* (not delete) event fired with stub === true", async (done) => {
-      await runEngineTestV5(
+    test("THEN *update* (not delete) event fired with stub === true", (done) => {
+      runEngineTestV5(
         async ({ engine }) => {
           const engineClient = engine as DendronEngineClient;
 
@@ -400,8 +399,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
   });
 
   describe("WHEN deleting a note that has no children", () => {
-    test("THEN delete event fired with the correct note props AND update event fired for its parent", async (done) => {
-      await runEngineTestV5(
+    test("THEN delete event fired with the correct note props AND update event fired for its parent", (done) => {
+      runEngineTestV5(
         async ({ engine }) => {
           const engineClient = engine as DendronEngineClient;
 
@@ -463,8 +462,8 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
    * though prev/new states are identical. This bug should be fixed.
    */
   describe("WHEN renaming an existing note", () => {
-    test("THEN create AND delete events both get fired with the correct props", async (done) => {
-      await runEngineTestV5(
+    test("THEN create AND delete events both get fired with the correct props", (done) => {
+      runEngineTestV5(
         async ({ engine, vaults }) => {
           const engineClient = engine as DendronEngineClient;
           const bar = engine.notes["bar"];
@@ -489,8 +488,6 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
                 expect(createEntries[0].note.fname).toEqual("cab");
                 expect(deleteEntries[0].note.fname).toEqual("bar");
-
-                done();
               }, done);
             }
           );

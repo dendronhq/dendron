@@ -4,6 +4,7 @@ import {
   DendronError,
   error2PlainObject,
   ERROR_STATUS,
+  TimeUtils,
 } from "@dendronhq/common-all";
 import {
   readYAML,
@@ -42,6 +43,7 @@ export enum DevCommands {
   BUMP_VERSION = "bump_version",
   PUBLISH = "publish",
   SYNC_ASSETS = "sync_assets",
+  SYNC_TUTORIAL = "sync_tutorial",
   PREP_PLUGIN = "prep_plugin",
   PACKAGE_PLUGIN = "package_plugin",
   INSTALL_PLUGIN = "install_plugin",
@@ -225,6 +227,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           await this.syncAssets(opts);
           return { error: null };
         }
+        case DevCommands.SYNC_TUTORIAL: {
+          this.syncTutorial();
+          return { error: null };
+        }
         case DevCommands.PUBLISH: {
           if (!opts.publishEndpoint) {
             return {
@@ -361,10 +367,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       this.print(
         "sleeping 2 mins for remote npm registry to have packages ready"
       );
-      await new Promise((r) => setTimeout(r, 120000));
+      await TimeUtils.sleep(2 * 60 * 1000);
     } else {
       this.print("sleeping 6s for local npm registry to have packages ready");
-      await new Promise((r) => setTimeout(r, 60000));
+      await TimeUtils.sleep(6 * 1000);
     }
 
     this.print("install deps...");
@@ -410,6 +416,65 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     const { staticPath } = await BuildUtils.syncStaticAssets();
     await BuildUtils.syncStaticAssetsToNextjsTemplate();
     return { staticPath };
+  }
+
+  syncTutorial() {
+    const dendronSiteVaultPath = path.join(
+      BuildUtils.getLernaRoot(),
+      "docs",
+      "seeds",
+      "dendron.dendron-site",
+      "vault"
+    );
+
+    const tutorialDirPath = path.join(
+      BuildUtils.getPluginRootPath(),
+      "assets",
+      "dendron-ws",
+      "tutorial"
+    );
+
+    const commonDirPath = path.join(tutorialDirPath, "common");
+
+    // wipe everything in /assets/dendron-ws/tutorial/treatments
+    const treatmentsDirPath = path.join(tutorialDirPath, "treatments");
+
+    fs.removeSync(treatmentsDirPath);
+    fs.ensureDirSync(treatmentsDirPath);
+
+    // grab everything from `tutorial.*` hierarchy
+    const tutorialNotePaths = fs
+      .readdirSync(dendronSiteVaultPath)
+      .filter((basename) => {
+        return (
+          basename.startsWith("tutorial.") &&
+          basename.endsWith(".md") &&
+          basename !== "tutorial.md"
+        );
+      });
+    // determine treatment name
+    const treatmentNames = _.uniq(
+      tutorialNotePaths.map((basename) => basename.split(".")[1])
+    );
+
+    treatmentNames.forEach((treatmentName) => {
+      // create directories for treatment
+      const treatmentNameDirPath = path.join(treatmentsDirPath, treatmentName);
+      fs.ensureDirSync(treatmentNameDirPath);
+      // copy in commons (root, schema, assetdir)
+      fs.copySync(commonDirPath, treatmentNameDirPath);
+      // copy in individual treated tutorial notes
+      tutorialNotePaths
+        .filter((basename) => basename.startsWith(`tutorial.${treatmentName}`))
+        .forEach((basename) => {
+          const src = path.join(dendronSiteVaultPath, basename);
+          const dest = path.join(
+            treatmentNameDirPath,
+            basename.replace(`tutorial.${treatmentName}`, "tutorial")
+          );
+          fs.copyFileSync(src, dest);
+        });
+    });
   }
 
   validateBuildArgs(opts: CommandOpts): opts is BuildCmdOpts {

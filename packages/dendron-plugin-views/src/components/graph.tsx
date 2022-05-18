@@ -10,6 +10,7 @@ import {
   ConfigUtils,
   DMessageSource,
   GraphThemeEnum,
+  GraphTypeEnum,
   GraphViewMessage,
   GraphViewMessageEnum,
   VaultUtils,
@@ -126,7 +127,16 @@ export default function Graph({
     children: (val: boolean | undefined) => React.ReactNode;
     val: boolean | undefined;
     update: (val: boolean) => void;
-  }) => <Button onClick={() => update(!val)}>{children(val)}</Button>;
+  }) => (
+    <Button
+      onClick={() => {
+        update(!val);
+        toggleGraphView(val);
+      }}
+    >
+      {children(val)}
+    </Button>
+  );
 
   const renderGraph = () => {
     if (graphRef.current && nodes && edges) {
@@ -346,6 +356,7 @@ export default function Graph({
           isGraphReady={isReady}
           updateConfigField={updateConfigField}
           customCSS={ide.graphStyles}
+          type={type}
         />
         {type === "note" && (
           <div
@@ -376,6 +387,7 @@ export default function Graph({
             width: "100%",
             height: "100%",
             zIndex: 1,
+            display: showNoteGraphMessage ? "none" : "block",
           }}
         />
       </div>
@@ -425,3 +437,12 @@ const NoteGraphMessage = ({
     </Button>
   </Space>
 );
+
+const toggleGraphView = (val?: boolean) => {
+  const graphType = val ? GraphTypeEnum.fullGraph : GraphTypeEnum.localGraph;
+  postVSCodeMessage({
+    type: GraphViewMessageEnum.toggleGraphView,
+    data: { graphType },
+    source: DMessageSource.webClient,
+  } as GraphViewMessage);
+};

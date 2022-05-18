@@ -173,6 +173,14 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
+
+          case GraphViewMessageEnum.toggleGraphView: {
+            AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
+              type: "GraphTypeChanged",
+              state: msg.data.graphType,
+            });
+            break;
+          }
           default:
             break;
         }
@@ -184,6 +192,9 @@ export class NoteGraphPanelFactory {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
         if (this.defaultGraphTheme) {
+          AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+            defaultTheme: this.defaultGraphTheme,
+          });
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
           this.defaultGraphTheme = undefined;
         }

@@ -316,6 +316,9 @@ describe("GIVEN an ExternalConnectionManager class", () => {
  * GoogleDocsExportPod
  */
 describe("GIVEN a Google Docs Export Pod with a particular config", () => {
+  // pod tests can take a long time to run
+  jest.setTimeout(60000);
+
   describe("WHEN exporting a note", () => {
     test("THEN expect gdoc to be created", async () => {
       await runEngineTestV5(

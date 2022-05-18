@@ -50,4 +50,8 @@ $text-color: #111 !default;
 		border: 1px solid white; padding:10px; // required for tables in preview
 	}
 }
+.ant-message {
+  bottom: 5vh;
+  top: initial !important; // by-default top is 8
+}
 // TODO_END

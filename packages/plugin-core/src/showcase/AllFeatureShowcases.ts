@@ -51,6 +51,14 @@ const INSERT_NOTE_LINK = createTipOfDayMsgWithDocsLink({
     "https://wiki.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47/#insert-note-link",
 });
 
+const PUBLISH_THEME_LINK = createTipOfDayMsgWithDocsLink({
+  showcaseEntry: ShowcaseEntry.PublishTheme,
+  displayMessage:
+    "You can now customize how your published Dendron site looks! We have an example custom theme to get you started.",
+  confirmText: "Show me how",
+  docsUrl: "https://wiki.dendron.so/notes/jknrdi492m8nhq7mw4faydu",
+});
+
 /**
  * All messages in the rotation to be displayed.
  */
@@ -63,5 +71,6 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   TASK_MANAGEMENT,
   BLOCK_REFS,
   INSERT_NOTE_LINK,
+  PUBLISH_THEME_LINK,
   new GraphThemeTip(),
 ];

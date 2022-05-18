@@ -22,11 +22,7 @@ commands:
     copyNoteLink: {}
 workspace:
     dendronVersion: 0.83.0
-    workspaces:
-        dendron-docs:
-            remote:
-                type: git
-                url: git@github.com:dendronhq/dendron-docs.git
+    workspaces: {}
     seeds:
         dendron.dendron-site:
             branch: dev
@@ -36,9 +32,9 @@ workspace:
         dendron.templates: {}
     vaults:
         -
-            fsPath: vault
+            fsPath: dendron-docs
             name: dendron.docs
-            workspace: dendron-docs
+            selfContained: true
         -
             fsPath: vault
             seed: dendron.dendron-site

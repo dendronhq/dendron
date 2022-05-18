@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.93.0",
+  "version": "0.95.0",
   "engines": {
     "vscode": "^1.58.0"
   },
@@ -120,6 +120,21 @@
       },
       {
         "command": "dendron.backlinks.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "dendron.treeView.labelByTitle",
+        "title": "Label and sort notes by title",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.labelByFilename",
+        "title": "Label and sort notes by filename",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.expandAll",
         "title": "Expand All",
         "icon": "$(expand-all)"
       },
@@ -258,6 +273,10 @@
       {
         "command": "dendron.goDownHierarchy",
         "title": "Dendron: Go Down"
+      },
+      {
+        "command": "dendron.gotoBacklink",
+        "title": "Dendron: Go To Backlink"
       },
       {
         "command": "dendron.addAndCommit",
@@ -475,6 +494,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "dendron.treeView.expandAll",
+          "when": "dendron:devMode"
+        },
+        {
           "command": "dendron.browseNote",
           "when": "dendron:pluginActive"
         },
@@ -605,6 +628,10 @@
         {
           "command": "dendron.goDownHierarchy",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.gotoBacklink",
+          "when": "false"
         },
         {
           "command": "dendron.addAndCommit",
@@ -781,6 +808,19 @@
         {
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.treeView.labelByTitle",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == filename"
+        },
+        {
+          "command": "dendron.treeView.labelByFilename",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == title"
+        },
+        {
+          "command": "dendron.treeView.expandAll",
+          "when": "view == dendron.treeView && dendron:devMode",
           "group": "navigation@2"
         }
       ],
@@ -1119,8 +1159,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.93.0",
-    "@dendronhq/engine-test-utils": "^0.93.0",
+    "@dendronhq/common-test-utils": "^0.95.0",
+    "@dendronhq/engine-test-utils": "^0.95.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1156,11 +1196,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.93.0",
-    "@dendronhq/common-all": "^0.93.0",
-    "@dendronhq/common-server": "^0.93.0",
-    "@dendronhq/engine-server": "^0.93.0",
-    "@dendronhq/pods-core": "^0.93.0",
+    "@dendronhq/api-server": "^0.95.0",
+    "@dendronhq/common-all": "^0.95.0",
+    "@dendronhq/common-server": "^0.95.0",
+    "@dendronhq/engine-server": "^0.95.0",
+    "@dendronhq/pods-core": "^0.95.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",
@@ -1174,7 +1214,6 @@
     "open": "^8.2.1",
     "open-graph-scraper": "^4.7.1",
     "query-string": "^7.0.1",
-    "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
     "textextensions": "^5.15.0",

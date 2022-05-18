@@ -3,6 +3,7 @@ import os from "os";
 import fs from "fs-extra";
 import { Uri } from "vscode";
 import { VSCodeUtils } from "./vsCodeUtils";
+import { FOLDERS } from "@dendronhq/common-all";
 
 // TODO: If you'd like to target a specific theme, pre-pend each class with either ".theme-dark" or ".theme-light"
 
@@ -48,7 +49,7 @@ Obsidian.md style
 
 export class GraphStyleService {
   static styleFilePath() {
-    return path.join(os.homedir(), ".dendron", "styles.css");
+    return path.join(os.homedir(), FOLDERS.DENDRON_SYSTEM_ROOT, "styles.css");
   }
 
   static doesStyleFileExist() {

@@ -210,7 +210,7 @@ const getLinks = ({
   });
   const dlinks: DLink[] = [];
 
-  if (isNotUndefined(note.tags)) {
+  if (!_.isNil(note.tags)) {
     let tags: string[];
     if (_.isString(note.tags)) {
       tags = [note.tags];

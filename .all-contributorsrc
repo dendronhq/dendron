@@ -1722,6 +1722,52 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "huland",
+      "name": "huland",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4936652?v=4",
+      "profile": "https://github.com/huland",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "vmasrani",
+      "name": "Vaden Masrani",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3288149?v=4",
+      "profile": "https://vmasrani.github.io/",
+      "contributions": [
+        "bug",
+        "data"
+      ]
+    },
+    {
+      "login": "ShanePerry",
+      "name": "Shane Perry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2213561?v=4",
+      "profile": "https://github.com/ShanePerry",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "aodhagan",
+      "name": "aodhagan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59316063?v=4",
+      "profile": "https://github.com/Aodhagan",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "harrijer",
+      "name": "harrijer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87612241?v=4",
+      "profile": "https://github.com/harrijer",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

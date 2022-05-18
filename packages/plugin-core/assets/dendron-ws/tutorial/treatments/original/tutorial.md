@@ -1,9 +1,9 @@
 ---
-id: 01u0co3RYjOM1bjpc2qIU
+id: y60h6laqi7w462zjp3jyqtt
 title: Tutorial
-desc: 'Tutorial Home Page'
-updated: 1624864763249
-created: 1624333847315
+desc: "Tutorial Home Page"
+updated: 1652287311642
+created: 1652278009766
 ---
 
 ## Welcome to Dendron
@@ -12,7 +12,7 @@ This guide will help you learn the basics of Dendron. You can also follow the Ge
 
 By the end of the tutorial, you will also see how Dendron can help you manage your knowledge with super fast lookup, flexible hierarchies, and powerful linking.
 
-If you close VS Code, you can always get back to this workspace by going to `File > Open Workspace` in VS Code's menu and then selecting your workspace file: `%WORKSPACE_ROOT%`
+If you close VS Code, you can always get back to this workspace by going to `File > Open Workspace` in VS Code's menu and then select `dendron.code-workspace` in your Dendron workspace root.
 
 The tutorial steps take about 10 minutes to complete. Let's get started!
 
@@ -20,12 +20,12 @@ The tutorial steps take about 10 minutes to complete. Let's get started!
 
 - [x] Install Dendron
 - [x] Create your first workspace
-- [ ] Complete the Tutorial (%KEYBINDING%+Click on the links to go to each tutorial note)
-  - [ ] One: [[tutorial.1-navigation-basics]]
-	- [ ] Two: [[tutorial.2-taking-notes]]
-	- [ ] Three: [[tutorial.3-linking-your-notes]]
-	- [ ] Four:  [[tutorial.4-rich-formatting]]
-	- [ ] Five:  [[tutorial.5-conclusion]]
+- [ ] Complete the Tutorial (Cmd / Ctrl + Click on the links to go to each tutorial note)
+  - [ ] One: [[tutorial.user-interface]]
+  - [ ] Two: [[tutorial.taking-notes]]
+  - [ ] Three: [[tutorial.linking-notes]]
+  - [ ] Four: [[tutorial.rich-formatting]]
+  - [ ] Five: [[tutorial.conclusion]]
 
 #### Getting Help
 

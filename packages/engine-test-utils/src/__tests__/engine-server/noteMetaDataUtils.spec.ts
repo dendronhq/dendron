@@ -75,12 +75,14 @@ describe("extract scalar", () => {
       test.concurrent.each(simpleScalars)(
         `THEN %s returns error`,
         async (_type, extract) => {
+          const error = extract({
+            note,
+            key: `a${_type}`,
+            strictNullChecks,
+            required: true,
+          }).error;
           expect(
-            checkString(
-              extract({ note, key: `a${_type}`, strictNullChecks }).error
-                ?.message || "",
-              "is wrong type"
-            )
+            checkString(error?.message || "", "is wrong type")
           ).toBeTruthy();
         }
       );

@@ -1,5 +1,11 @@
-import { DNodeUtils, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  NoteProps,
+  VaultUtils,
+  TreeViewItemLabelTypeEnum,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { GotoNoteCommandOpts } from "../commands/GoToNoteInterface";
@@ -21,23 +27,31 @@ export class TreeNote extends vscode.TreeItem {
   constructor({
     note,
     collapsibleState,
+    labelType,
   }: {
     note: NoteProps;
     collapsibleState: vscode.TreeItemCollapsibleState;
+    labelType: TreeViewItemLabelTypeEnum;
   }) {
     super(DNodeUtils.basename(note.fname, true), collapsibleState);
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({
       vault: this.note.vault,
-      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+      wsRoot,
     });
     this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
 
+    const label =
+      labelType === TreeViewItemLabelTypeEnum.filename
+        ? _.last(this.note.fname.split("."))
+        : this.note.title;
+
     this.label = DNodeUtils.isRoot(note)
       ? `root (${VaultUtils.getName(note.vault)})`
-      : this.note.title;
+      : label;
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
       title: "",

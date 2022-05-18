@@ -44,6 +44,8 @@ export const CONSTANTS = {
   DENDRON_INIT_VERSION: "0.0.0",
   /** Default for the `maxNoteLength` config. */
   DENDRON_DEFAULT_MAX_NOTE_LENGTH: 204800,
+  /** The file containing the custom theme CSS. Located at the workspace root. */
+  CUSTOM_THEME_CSS: "custom.css",
 };
 
 export const FOLDERS = {
@@ -55,6 +57,10 @@ export const FOLDERS = {
   NOTES: "notes",
   /** The folder where the assets are stored, this will be under {@link FOLDERS.NOTES}. */
   ASSETS: "assets",
+  /** The system-wide folder where Dendron stores metadata and other system-wide files. */
+  DENDRON_SYSTEM_ROOT: ".dendron",
+  /** The folder where telemetry payloads that will be sent during next run are temporarily saved. Under {@link FOLDERS.DENDRON_SYSTEM_ROOT}. */
+  SAVED_TELEMETRY: "saved-telemetry",
 };
 
 export enum ERROR_STATUS {

@@ -1,38 +1,50 @@
 import {
+  ConfigUtils,
+  CONSTANTS,
+  IntermediateDendronConfig,
+  Theme,
+} from "@dendronhq/common-all";
+import {
   batch,
   createLogger,
+  ideSlice,
   Provider,
   setLogLevel,
-  ideSlice,
 } from "@dendronhq/common-frontend";
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
+import Head from "next/head";
 import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
-import {
-  combinedStore,
-  useCombinedDispatch,
-  useCombinedSelector,
-} from "../features";
+import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/assets-dendron/css/light.css";
 import "../styles/scss/main.scss";
+import { getLogLevel } from "../utils/etc";
 import { fetchConfig, fetchNotes, fetchTreeMenu } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";
 import { getAssetUrl } from "../utils/links";
 import { NoteData } from "../utils/types";
-import Head from "next/head";
-import { getLogLevel } from "../utils/etc";
 
-const themes = {
+const themes: { [key in Theme]: string } = {
   dark: getAssetUrl(`/assets-dendron/css/dark.css`),
   light: getAssetUrl(`/assets-dendron/css/light.css`),
+  custom: getAssetUrl(`/themes/${CONSTANTS.CUSTOM_THEME_CSS}`),
 };
 
 function AppContainer(appProps: AppProps) {
-  const defaultTheme = "light";
+  const { config } = appProps.pageProps as {
+    config: IntermediateDendronConfig;
+  };
+  const logger = createLogger("AppContainer");
+  useEffect(() => {
+    const logLevel = getLogLevel();
+    setLogLevel(logLevel);
+  }, []);
+  const defaultTheme = ConfigUtils.getPublishing(config).theme || Theme.LIGHT;
+  logger.info({ ctx: "enter", defaultTheme });
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
@@ -48,11 +60,6 @@ function DendronApp({ Component, pageProps }: AppProps) {
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
   useDendronGATracking();
-
-  useEffect(() => {
-    const logLevel = getLogLevel();
-    setLogLevel(logLevel);
-  }, []);
 
   useEffect(() => {
     (async () => {

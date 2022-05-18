@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-frontend",
-  "version": "0.93.0",
+  "version": "0.95.0",
   "description": "common-frontend",
   "license": "GPLv3",
   "repository": {
@@ -31,7 +31,6 @@
     "buildCI": "yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
     "test": "echo 0",
-    "coverage": "jest --coverage",
     "watch": "yarn compile --watch",
     "test:unit": "echo 0",
     "test:unit:debug": "echo 0",
@@ -39,7 +38,7 @@
   },
   "dependencies": {
     "@aws-amplify/core": "^4.0.2",
-    "@dendronhq/common-all": "^0.93.0",
+    "@dendronhq/common-all": "^0.95.0",
     "@reduxjs/toolkit": "^1.5.1",
     "antd": "^4.15.4",
     "lodash": "^4.17.20",
@@ -64,9 +63,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jest": {
-    "preset": "ts-jest"
-  },
-  "gitHead": "b9b209acf808ad7a581bf98b1d0f90ef2bf4b833"
+  }
 }

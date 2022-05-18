@@ -1,11 +1,11 @@
 import {
   FuseEngine,
-  NotePropsDict,
+  getCleanThresholdValue,
   NoteIndexProps,
+  NotePropsDict,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
-import { getCleanThresholdValue } from "@dendronhq/common-all";
 
 type TestData = {
   fname: string;
@@ -19,6 +19,7 @@ async function testDataToNotePropsDict(
   const dict: NotePropsDict = {};
 
   for (const td of testData) {
+    // eslint-disable-next-line no-await-in-loop
     const note = await NoteTestUtilsV4.createNote({
       fname: td.fname,
       vault: { fsPath: "/tmp/vault-path" },
@@ -68,7 +69,7 @@ const queryTestV1 = ({
   expectedFNames.forEach((expectedFname) => {
     const wasFound = notes.some((n) => n.fname === expectedFname);
     if (!wasFound) {
-      fail(`Did not find '${expectedFname}' when querying for '${qs}'`);
+      throw Error(`Did not find '${expectedFname}' when querying for '${qs}'`);
     }
   });
 };
@@ -508,8 +509,8 @@ describe("FuseEngine tests with extracted data.", () => {
         (qs: string, expectedFNames: string[]) => {
           queryTestV1({
             fuseEngine,
-            qs: qs,
-            expectedFNames: expectedFNames,
+            qs,
+            expectedFNames,
           });
         }
       );

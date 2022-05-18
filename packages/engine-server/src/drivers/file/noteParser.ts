@@ -4,12 +4,15 @@ import {
   DEngineClient,
   DNodeUtils,
   DStore,
+  DuplicateNoteError,
   DVault,
   ErrorFactory,
   ErrorUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  IDendronError,
   isNotUndefined,
+  NoteFNamesDict,
   NoteProps,
   NotePropsDict,
   NotesCacheEntry,
@@ -84,20 +87,20 @@ export class NoteParser extends ParserBase {
     allPaths: string[],
     vault: DVault
   ): Promise<{
-    notes: NoteProps[];
+    notesById: NotePropsDict;
     cacheUpdates: NotesCacheEntryMap;
-    errors: DendronError[];
+    errors: IDendronError[];
   }> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
-    const notesByFname: NotePropsDict = {};
+    const notesByFname: NoteFNamesDict = new NoteFNamesDict();
     const notesById: NotePropsDict = {};
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
-    const errors: DendronError[] = [];
+    const errors: IDendronError<any>[] = [];
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
@@ -127,7 +130,7 @@ export class NoteParser extends ParserBase {
         hash: rootProps.noteHash,
       });
     }
-    notesByFname[rootNote.fname] = rootNote;
+    notesByFname.add(rootNote);
     notesById[rootNote.id] = rootNote;
     unseenKeys.delete(rootNote.fname);
 
@@ -167,7 +170,18 @@ export class NoteParser extends ParserBase {
       .filter(isNotUndefined);
     prevNodes.forEach((ent) => {
       DNodeUtils.addChild(rootNote, ent);
-      notesByFname[ent.fname] = ent;
+
+      // Check for duplicate IDs when adding notes to the map
+      if (notesById[ent.id] !== undefined) {
+        const duplicate = notesById[ent.id];
+        errors.push(
+          new DuplicateNoteError({
+            noteA: duplicate,
+            noteB: ent,
+          })
+        );
+      }
+      notesByFname.add(ent);
       notesById[ent.id] = ent;
     });
     this.logger.info({ ctx, msg: "post:parseDomainNotes" });
@@ -183,7 +197,7 @@ export class NoteParser extends ParserBase {
           try {
             const resp = this.parseNoteProps({
               fileMeta: ent,
-              parents: prevNodes,
+              notesDict: notesById,
               notesByFname,
               addParent: true,
               vault,
@@ -203,7 +217,17 @@ export class NoteParser extends ParserBase {
             // need to be inside this loop
             // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
             notes.forEach((ent) => {
-              notesByFname[ent.fname] = ent;
+              // Check for duplicate IDs when adding notes to the map
+              if (notesById[ent.id] !== undefined) {
+                const duplicate = notesById[ent.id];
+                errors.push(
+                  new DuplicateNoteError({
+                    noteA: duplicate,
+                    noteB: ent,
+                  })
+                );
+              }
+              notesByFname.add(ent);
               notesById[ent.id] = ent;
             });
             return notes;
@@ -225,7 +249,6 @@ export class NoteParser extends ParserBase {
     this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
     // add schemas
-    const out = _.values(notesByFname);
     const domains = rootNote.children.map(
       (ent) => notesById[ent]
     ) as NoteProps[];
@@ -242,13 +265,13 @@ export class NoteParser extends ParserBase {
 
     // OPT:make async and don't wait for return
     // Skip this if we found no notes, which means vault did not initialize
-    if (out.length > 0) {
+    if (_.size(notesById) > 0) {
       // TODO only write if there are changes
       this.cache.writeToFileSystem();
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    return { notes: out, cacheUpdates, errors };
+    return { notesById, cacheUpdates, errors };
   }
 
   /**
@@ -258,20 +281,26 @@ export class NoteParser extends ParserBase {
    */
   parseNoteProps(opts: {
     fileMeta: FileMeta;
-    notesByFname?: NotePropsDict;
+    notesDict?: NotePropsDict;
+    notesByFname?: NoteFNamesDict;
     parents?: NoteProps[];
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
-    errors: DendronError[];
-  }): { propsList: NoteProps[]; noteHash: string; matchHash: boolean } {
+    errors: IDendronError[];
+  }): {
+    propsList: NoteProps[];
+    noteHash: string;
+    matchHash: boolean;
+  } {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       createStubs: true,
+      notesDict: {},
       notesByFname: {},
       parents: [] as NoteProps[],
     });
-    const { fileMeta, parents, notesByFname, vault, errors } = cleanOpts;
+    const { fileMeta, notesDict, notesByFname, vault, errors } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
@@ -309,15 +338,24 @@ export class NoteParser extends ParserBase {
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addOrUpdateParents({
+      const stubs = NoteUtils.addOrUpdateParentsWithDict({
         note: noteProps,
-        notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
+        notesDict,
+        notesByFnameDict: notesByFname,
         createStubs: cleanOpts.createStubs,
         wsRoot: this.opts.store.wsRoot,
       });
-      out = out.concat(stubs.map((noteChangeEntry) => noteChangeEntry.note));
+      out = out.concat(
+        stubs
+          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
+          .map((noteChangeEntry) => noteChangeEntry.note)
+      );
     }
-    return { propsList: out, noteHash, matchHash };
+    return {
+      propsList: out,
+      noteHash,
+      matchHash,
+    };
   }
 
   private file2NoteWithCache({
@@ -329,7 +367,7 @@ export class NoteParser extends ParserBase {
     fpath: string;
     vault: DVault;
     toLowercase?: boolean;
-    errors: DendronError[];
+    errors: IDendronError[];
   }): {
     note: NoteProps;
     matchHash: boolean;

@@ -70,6 +70,7 @@ workspace:
       L: low
     todoIntegration: false
     createTaskSelectionType: selection2link
+    taskCompleteStatus: ["x", "done"]
   enableUserTags: true
   enableHashTags: true
   enableEditorDecorations: true

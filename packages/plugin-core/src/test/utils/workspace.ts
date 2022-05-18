@@ -63,6 +63,7 @@ export class WorkspaceTestUtils {
           name: "task",
           dateFormat: "y.MM.dd",
           addBehavior: NoteAddBehaviorEnum.asOwnDomain,
+          taskCompleteStatus: ["done", "x"],
           statusSymbols: {
             "": " ",
             wip: "w",

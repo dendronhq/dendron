@@ -67,16 +67,7 @@ $text-color: #111 !default;
   margin-left: 0.5rem;
   opacity: 0.8;
 }
-.task-status {
-  border: 1px solid;
-  min-width: 1rem;
-  height: 1rem;
-  display: inline-block;
-  text-align: center;
-  vertical-align: text-top;
-  padding: 0 0.15rem;
-}
 .task-status-text {
-  position: relative;
-  top: -0.3rem;
+  opacity: 0.8;
+  margin-right: 0.5rem;
 }

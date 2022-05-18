@@ -520,14 +520,22 @@ function linkExtras({
       taskConfig,
     });
     if (status) {
-      before.push({
+      const checkbox: { [key: string]: any } = {
         type: "element",
-        tagName: "span",
+        tagName: "input",
         properties: {
+          type: "checkbox",
+          disabled: true,
           className: "task-before task-status",
         },
-        children: [span("task-status-text", status)],
-      });
+      };
+      if (TaskNoteUtils.isTaskComplete({ note, taskConfig })) {
+        checkbox.properties.checked = true;
+      } else if (status.trim().length > 0) {
+        checkbox.children = [span("task-status-text", `(${status})`)];
+      }
+
+      before.push(checkbox);
     }
     const priority = TaskNoteUtils.getPrioritySymbol({
       note,

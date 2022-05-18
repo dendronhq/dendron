@@ -12,6 +12,8 @@ export type TaskConfig = Pick<
 > & {
   /** Maps each status to a symbol, word, or sentence. This will be displayed for the task. */
   statusSymbols: { [status: string]: string };
+  /** Sets which statuses mark the task as completed. */
+  taskCompleteStatus: string[];
   /** Maps each priority to a symbol, word, or sentence. This will be displayed for the task. */
   prioritySymbols: { [status: string]: string };
   /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree. */
@@ -40,6 +42,7 @@ export function genDefaultTaskConfig(): TaskConfig {
       dropped: "d",
       pending: "y",
     },
+    taskCompleteStatus: ["done", "x"],
     prioritySymbols: {
       H: "high",
       M: "medium",
@@ -113,6 +116,17 @@ export class TaskNoteUtils {
     const status = this.getStatusSymbolRaw(props);
     if (status === undefined) return undefined;
     return `[${this.getStatusSymbolRaw(props)}]`;
+  }
+
+  static isTaskComplete({
+    note,
+    taskConfig,
+  }: {
+    note: TaskNoteProps;
+    taskConfig: TaskConfig;
+  }) {
+    const { status } = note.custom;
+    return status && taskConfig.taskCompleteStatus?.includes(status);
   }
 
   static getPrioritySymbol({

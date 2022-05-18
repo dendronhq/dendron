@@ -64,9 +64,16 @@ export function readMD(fpath: string): { data: any; content: string } {
   return matter.read(fpath, {});
 }
 
-export function readYAML(fpath: string): any {
+/**
+ *
+ * @param fpath path of yaml file to read
+ * @param overwriteDuplcate if set to true, will not throw duplicate entry exception and use the last entry.
+ * @returns
+ */
+export function readYAML(fpath: string, overwriteDuplcate?: boolean): any {
   return YAML.load(fs.readFileSync(fpath, { encoding: "utf8" }), {
     schema: YAML.JSON_SCHEMA,
+    json: overwriteDuplcate ?? false,
   });
 }
 

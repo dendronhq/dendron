@@ -138,7 +138,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.history = history;
     this.logger = logger || createLogger();
     const cpath = DConfig.configPath(ws);
-    this.config = readYAML(cpath) as IntermediateDendronConfig;
+    this.config = readYAML(cpath, true) as IntermediateDendronConfig;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(this.config).note.fuzzThreshold,
     });

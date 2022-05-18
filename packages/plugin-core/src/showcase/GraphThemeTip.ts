@@ -13,12 +13,6 @@ import {
 } from "./IFeatureShowcaseMessage";
 
 export class GraphThemeTip implements IFeatureShowcaseMessage {
-  private ABUserGroup: GraphThemeFeatureShowcaseTestGroups;
-  constructor() {
-    this.ABUserGroup = GRAPH_THEME_FEATURE_SHOWCASE_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
-  }
   shouldShow(displayLocation: DisplayLocation): boolean {
     switch (displayLocation) {
       case DisplayLocation.InformationMessage:
@@ -33,13 +27,14 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
   }
 
   getDisplayMessage(displayLocation: DisplayLocation): string {
+    const ABUserGroup = GRAPH_THEME_FEATURE_SHOWCASE_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
     const tipofTheDayMessage =
       "Change the appearance of the note graph by clicking the config button on the top left corner of the graph view and selecting one of the built-in styles. You can even customize the appearance to your liking with css";
     switch (displayLocation) {
       case DisplayLocation.InformationMessage:
-        if (
-          this.ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow
-        ) {
+        if (ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
           return `Dendron now has new themes for Graph View. Check it out`;
         }
         return `New themes for Graph View! ${tipofTheDayMessage}`;
@@ -51,7 +46,10 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
   }
 
   onConfirm() {
-    if (this.ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
+    const ABUserGroup = GRAPH_THEME_FEATURE_SHOWCASE_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+    if (ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
       showMeHowView(
         "Graph Theme",
         "https://org-dendron-public-assets.s3.amazonaws.com/images/graph-theme.gif"
@@ -62,7 +60,10 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
   }
 
   get confirmText(): string {
-    if (this.ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
+    const ABUserGroup = GRAPH_THEME_FEATURE_SHOWCASE_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+    if (ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
       return "Show me how";
     }
     return "Open graph view";

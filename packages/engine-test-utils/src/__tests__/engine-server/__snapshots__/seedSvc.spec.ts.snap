@@ -62,6 +62,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -211,6 +214,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -350,6 +356,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -456,6 +465,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -579,6 +591,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -709,6 +724,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -826,6 +844,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium

@@ -88,6 +88,7 @@ export default function Graph({
   setConfig,
   engine,
   ide,
+  isSidePanel,
 }: DendronProps & {
   elements: GraphElements;
   onSelect: EventHandler;
@@ -339,7 +340,7 @@ export default function Graph({
           <NoteGraphMessage
             updateConfigField={updateConfigField}
             setIsReady={setIsReady}
-            isSidePanel={ide.isSidePanel}
+            isSidePanel={isSidePanel}
           />
         )}
       </div>
@@ -352,7 +353,7 @@ export default function Graph({
           opacity: isReady ? 1 : 0,
         }}
       >
-        {!ide.isSidePanel && (
+        {!isSidePanel && (
           <GraphFilterView
             config={config}
             isGraphReady={isReady}
@@ -361,7 +362,7 @@ export default function Graph({
             type={type}
           />
         )}
-        {type === "note" && !ide.isSidePanel && (
+        {type === "note" && !isSidePanel && (
           <div
             style={{
               position: "fixed",

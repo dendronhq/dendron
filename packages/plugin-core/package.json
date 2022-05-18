@@ -1002,8 +1002,8 @@
         },
         "dendron.enableSelfContainedVaultWorkspace": {
           "type": "boolean",
-          "default": false,
-          "description": "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature."
+          "default": true,
+          "description": "When enabled, newly created workspaces will be created as self contained vaults."
         }
       }
     },

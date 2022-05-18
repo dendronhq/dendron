@@ -11,27 +11,6 @@ import { GraphThemeEnum } from "./types/typesv2";
  * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
  */
 
-export enum SelfContainedVaultsTestGroups {
-  /** User will get a regular workspace and vaults set up, like before. */
-  regular = "regularVaults",
-  /** User will get a self contained vault as a workspace. */
-  selfContained = "selfContainedVaults",
-}
-
-export const SELF_CONTAINED_VAULTS_TEST = new ABTest(
-  "SelfContainedVaultsTest",
-  [
-    {
-      name: SelfContainedVaultsTestGroups.regular,
-      weight: 1,
-    },
-    {
-      name: SelfContainedVaultsTestGroups.selfContained,
-      weight: 1,
-    },
-  ]
-);
-
 export enum MeetingNoteTestGroups {
   show = "show",
   noShow = "noShow",
@@ -135,7 +114,6 @@ export const AB_TUTORIAL_TEST = new ABTest("AB_TUTORIAL_TEST", [
  * ^tkqhy45hflfd
  */
 export const CURRENT_AB_TESTS = [
-  SELF_CONTAINED_VAULTS_TEST,
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
   AB_TUTORIAL_TEST,

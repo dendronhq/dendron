@@ -65,15 +65,22 @@ function footnoteDef2html(definition: FootnoteDefinition) {
 
 /** Adds the "Children", "Tags", and "Footnotes" items to the end of the note. Also renders footnotes. */
 // eslint-disable-next-line func-names
-const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
+const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
   const proc = this;
   const { config } = MDUtilsV5.getProcData(this);
-  // MDUtilsV4 explicitly passes these options in, while MDUtilsV5 relies on the config. We need to check both here for now.
-  const hierarchyDisplayTitle =
-    opts?.hierarchyDisplayTitle || config?.hierarchyDisplayTitle || "Children";
-  let hierarchyDisplay: undefined | boolean = opts?.hierarchyDisplay;
-  if (hierarchyDisplay === undefined)
-    hierarchyDisplay = config?.hierarchyDisplay;
+  let hierarchyDisplayTitle = config?.hierarchyDisplayTitle || "Children";
+  let hierarchyDisplay = config?.hierarchyDisplay;
+
+  if (MDUtilsV5.shouldApplyPublishingRules(proc)) {
+    hierarchyDisplay =
+      ConfigUtils.getHierarchyDisplayConfigForPublishing(
+        config
+      ).hierarchyDisplay;
+    hierarchyDisplayTitle =
+      ConfigUtils.getHierarchyDisplayConfigForPublishing(config)
+        .hierarchyDisplayTitle || "Children";
+  }
+
   if (hierarchyDisplay === undefined) hierarchyDisplay = true;
 
   function transformer(tree: Node): void {

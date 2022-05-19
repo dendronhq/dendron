@@ -1,6 +1,7 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
+import { TestConfigUtils } from "../../../../config";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { checkNotInVFile, checkVFile, createProcCompileTests } from "../utils";
 import { getOpts, runTestCases } from "./utils";
@@ -58,6 +59,92 @@ describe("WHEN note enableChildLinks = false", () => {
           }
         );
       },
+    })
+  );
+});
+
+describe("WHEN enableHierarchyDisplay is set to true", () => {
+  const BASIC_TEXT = "[Ch1](foo.ch1.html)";
+  runTestCases(
+    createProcCompileTests({
+      name: "enableHierarchyDisplay",
+      setup: async (opts) => {
+        const { proc } = getOpts(opts);
+
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp, proc };
+      },
+      verify: {
+        [DendronASTDest.HTML]: {
+          [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+            const { resp } = extra;
+            await checkVFile(resp, "Children");
+          },
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    })
+  );
+});
+
+describe("WHEN enableHierarchyDisplay is set to false", () => {
+  const preSetupHook = async (opts: WorkspaceOpts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    TestConfigUtils.withConfig((config) => {
+      config.publishing!.enableHierarchyDisplay = false;
+      return config;
+    }, opts);
+  };
+  const BASIC_TEXT = "[Ch1](foo.ch1.html)";
+  runTestCases(
+    createProcCompileTests({
+      name: "enableHierarchyDisplay",
+      setup: async (opts) => {
+        const { proc } = getOpts(opts);
+
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp, proc };
+      },
+      verify: {
+        [DendronASTDest.HTML]: {
+          [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+            const { resp } = extra;
+            await checkNotInVFile(resp, "Children");
+          },
+        },
+      },
+      preSetupHook,
+    })
+  );
+});
+
+describe("WHEN hierarchyDisplayTitle is set to 'Better Children' ", () => {
+  const preSetupHook = async (opts: WorkspaceOpts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    TestConfigUtils.withConfig((config) => {
+      config.publishing!.hierarchyDisplayTitle = "Better Children";
+      return config;
+    }, opts);
+  };
+  const BASIC_TEXT = "[Ch1](foo.ch1.html)";
+  runTestCases(
+    createProcCompileTests({
+      name: "hierarchyDisplayTitle",
+      setup: async (opts) => {
+        const { proc } = getOpts(opts);
+
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp, proc };
+      },
+      verify: {
+        [DendronASTDest.HTML]: {
+          [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+            const { resp } = extra;
+            await checkVFile(resp, "Better Children");
+          },
+        },
+      },
+      preSetupHook,
     })
   );
 });

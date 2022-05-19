@@ -1019,6 +1019,18 @@ export class ConfigUtils {
     return true;
   }
 
+  static getHierarchyDisplayConfigForPublishing(
+    config: IntermediateDendronConfig
+  ) {
+    const isConfigV4 = configIsV4(config);
+    const hierarchyDisplay = isConfigV4
+      ? config.hierarchyDisplay
+      : ConfigUtils.getPublishing(config).enableHierarchyDisplay;
+    const hierarchyDisplayTitle = isConfigV4
+      ? config.hierarchyDisplayTitle
+      : ConfigUtils.getPublishing(config).hierarchyDisplayTitle;
+    return { hierarchyDisplay, hierarchyDisplayTitle };
+  }
   static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
     return (
       this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"

@@ -64,12 +64,18 @@
           "contextualTitle": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
+        }
+      ],
+      "dendron-view": [
+        {
+          "id": "dendron.tip-of-the-day",
+          "name": "Tip of the Day",
+          "when": "dendron:pluginActive",
+          "type": "webview"
         },
         {
-          "id": "dendron.calendar-view",
-          "name": "Calendar View",
-          "contextualTitle": "Calendar View",
-          "type": "webview",
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
           "when": "dendron:pluginActive"
         },
         {
@@ -87,20 +93,16 @@
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
-          "id": "dendron.backlinks",
-          "name": "Backlinks",
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "contextualTitle": "Calendar View",
+          "type": "webview",
           "when": "dendron:pluginActive"
-        },
-        {
-          "id": "dendron.tip-of-the-day",
-          "name": "Feature Showcase",
-          "contextualTitle": "Feature Showcase",
-          "type": "webview"
         },
         {
           "id": "dendron.help-and-feedback",
           "name": "Help and Feedback"
-        }, 
+        },
         {
           "id": "dendron.graph-panel",
           "name": "Graph Panel",

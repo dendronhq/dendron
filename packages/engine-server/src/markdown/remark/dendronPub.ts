@@ -427,6 +427,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           // Can't install as a child of the list, has to go into a list item
           target = target.children[0];
         }
+        if (RemarkUtils.isTable(target)) {
+          // Can't install as a child of the table directly, has to go into a table cell
+          target = target.children[0].children[0];
+        }
 
         if (RemarkUtils.isParent(target)) {
           // Install the block anchor at the target node

@@ -227,10 +227,52 @@ describe("blockAnchors", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
+    const AFTER_TABLE = createProcTests({
+      name: "after table",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+
+        const p = proc2.parse(
+          [
+            "| t   | a   |",
+            "| --- | --- |",
+            "| c   | d   |",
+            "",
+            `${anchor}`,
+          ].join("\n")
+        );
+        const n = await proc2.run(p);
+        const resp = proc2.stringify(n);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["<a", `href="#${anchor}"`, `id="${anchor}"`, "</a>"],
+                nomatch: ["visibility: hidden"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
     const ALL_TEST_CASES = [
       ...SIMPLE,
       ...END_OF_PARAGRAPH,
       ...AFTER_CODE_BLOCK,
+      ...AFTER_TABLE,
     ];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });

@@ -922,6 +922,7 @@ export class NoteUtils {
     return existingNote;
   }
 
+  /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
   static getNoteOrThrow({
     fname,
     notes,

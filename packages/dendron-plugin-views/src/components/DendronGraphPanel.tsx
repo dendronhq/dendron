@@ -15,7 +15,7 @@ import { postVSCodeMessage } from "../utils/vscode";
 
 const DendronGraphPanel: DendronComponent = (props) => {
   const logger = createLogger("DendronNoteGraphView");
-  const { workspace, ide, engine } = props;
+  const { workspace, ide, engine, isSidePanel } = props;
   const { useEngine } = engineHooks;
   // initialize engine. This is necessary because graph view require full note state.
   useEngine({
@@ -73,6 +73,22 @@ const DendronGraphPanel: DendronComponent = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ide.graphTheme]);
 
+  useEffect(() => {
+    if (isSidePanel) {
+      setConfig((c) => ({
+        ...c,
+        "connections.links": {
+          value: true,
+          mutable: true,
+        },
+        "options.show-local-graph": {
+          value: true,
+          mutable: true,
+        },
+      }));
+    }
+  }, [isSidePanel]);
+
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;
 
@@ -85,7 +101,6 @@ const DendronGraphPanel: DendronComponent = (props) => {
       source: DMessageSource.webClient,
     } as GraphViewMessage);
   };
-
   return (
     <Graph
       elements={elements}
@@ -96,6 +111,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
       ide={ide}
       type="note"
       workspace={workspace}
+      isSidePanel={isSidePanel}
     />
   );
 };

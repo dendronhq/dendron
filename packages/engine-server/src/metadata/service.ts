@@ -20,6 +20,7 @@ export enum ShowcaseEntry {
   InsertNoteLink = "InsertNoteLink",
   GraphTheme = "GraphTheme",
   PublishTheme = "PublishTheme",
+  GraphPanel = "GraphPanel",
 }
 
 type Metadata = Partial<{

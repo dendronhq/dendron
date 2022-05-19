@@ -30,6 +30,7 @@ export enum DendronTreeViewKey {
   LOOKUP_VIEW = "dendron.lookup-view",
   TIP_OF_THE_DAY = "dendron.tip-of-the-day",
   HELP_AND_FEEDBACK = "dendron.help-and-feedback",
+  GRAPH_PANEL = "dendron.graph-panel",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -104,6 +105,12 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     desc: "Help and Feedback",
     label: "Help and Feedback",
     type: "nativeview",
+  },
+  [DendronTreeViewKey.GRAPH_PANEL]: {
+    desc: "Graph Panel (side)",
+    label: "Graph Panel",
+    bundleName: "DendronSideGraphPanel",
+    type: "webview",
   },
 };
 

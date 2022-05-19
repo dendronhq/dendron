@@ -102,6 +102,13 @@
         {
           "id": "dendron.help-and-feedback",
           "name": "Help and Feedback"
+        }, 
+        {
+          "id": "dendron.graph-panel",
+          "name": "Graph Panel",
+          "contextualTitle": "Graph Panel",
+          "type": "webview",
+          "when": "dendron:pluginActive"
         }
       ]
     },

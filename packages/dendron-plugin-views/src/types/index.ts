@@ -12,4 +12,5 @@ export type DendronProps = {
   engine: engineSlice.EngineState;
   ide: ideSlice.IDEState;
   workspace: WorkspaceProps;
+  isSidePanel?: boolean;
 };

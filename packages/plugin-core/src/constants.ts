@@ -97,6 +97,11 @@ export const DENDRON_VIEWS = [
     name: "Help and Feedback",
     where: "dendron-view",
   },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "explorer",
+  },
 ];
 
 type KeyBinding = {

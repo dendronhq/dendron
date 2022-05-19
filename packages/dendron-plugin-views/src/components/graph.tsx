@@ -88,6 +88,7 @@ export default function Graph({
   setConfig,
   engine,
   ide,
+  isSidePanel,
 }: DendronProps & {
   elements: GraphElements;
   onSelect: EventHandler;
@@ -339,6 +340,7 @@ export default function Graph({
           <NoteGraphMessage
             updateConfigField={updateConfigField}
             setIsReady={setIsReady}
+            isSidePanel={isSidePanel}
           />
         )}
       </div>
@@ -351,14 +353,16 @@ export default function Graph({
           opacity: isReady ? 1 : 0,
         }}
       >
-        <GraphFilterView
-          config={config}
-          isGraphReady={isReady}
-          updateConfigField={updateConfigField}
-          customCSS={ide.graphStyles}
-          type={type}
-        />
-        {type === "note" && (
+        {!isSidePanel && (
+          <GraphFilterView
+            config={config}
+            isGraphReady={isReady}
+            updateConfigField={updateConfigField}
+            customCSS={ide.graphStyles}
+            type={type}
+          />
+        )}
+        {type === "note" && !isSidePanel && (
           <div
             style={{
               position: "fixed",
@@ -398,9 +402,11 @@ export default function Graph({
 const NoteGraphMessage = ({
   updateConfigField,
   setIsReady,
+  isSidePanel,
 }: {
   updateConfigField: (key: string, value: string | number | boolean) => void;
   setIsReady: (isReady: boolean) => void;
+  isSidePanel?: boolean;
 }) => (
   <Space
     direction="vertical"
@@ -417,24 +423,27 @@ const NoteGraphMessage = ({
       This is the <b>Local Note Graph.</b> Open a note in the workspace to see
       its connections here.
     </Typography>
-    <Typography>
-      Change to <b>Full Note Graph</b> to see all notes in the workspace.
-    </Typography>
-    <Button
-      onClick={() => {
-        setIsReady(false);
-
-        // Slight timeout to show loading spinner before re-rendering,
-        // as re-rendering is render-blocking
-        setTimeout(() => {
-          updateConfigField("options.show-local-graph", false);
-        }, 50);
-      }}
-      type="primary"
-      size="large"
-    >
-      Show Full Graph
-    </Button>
+    {!isSidePanel && (
+      <>
+        <Typography>
+          Change to <b>Full Note Graph</b> to see all notes in the workspace.
+        </Typography>
+        <Button
+          onClick={() => {
+            setIsReady(false);
+            // Slight timeout to show loading spinner before re-rendering,
+            // as re-rendering is render-blocking
+            setTimeout(() => {
+              updateConfigField("options.show-local-graph", false);
+            }, 50);
+          }}
+          type="primary"
+          size="large"
+        >
+          Show Full Graph
+        </Button>
+      </>
+    )}
   </Space>
 );
 

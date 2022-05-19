@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getEulerConfig, GraphUtils } from "../components/graph";
 import { GraphConfig, GraphElements } from "../utils/graph";
 import _ from "lodash";
+import { createLogger } from "@dendronhq/common-frontend";
 
 const useApplyGraphConfig = ({
   graph,
@@ -13,6 +14,7 @@ const useApplyGraphConfig = ({
   config: GraphConfig;
   elements: GraphElements;
 }) => {
+  const logger = createLogger("useApplyGraphConfig");
   const { nodes, edges } = elements;
   const isLargeGraph = nodes.length + Object.values(edges).flat().length > 1000;
   const [wasLocalGraph, setWasLocalGraph] = useState(false);
@@ -27,34 +29,37 @@ const useApplyGraphConfig = ({
       setWasLocalGraph(isLocalGraph);
       return;
     }
+    try {
+      Object.entries(config)
+        .filter(([k, v]) => k.includes("connections"))
+        .forEach(([k, v]) => {
+          const keyArray = k.split(".");
+          const edgeType = keyArray[keyArray.length - 1];
 
-    Object.entries(config)
-      .filter(([k, v]) => k.includes("connections"))
-      .forEach(([k, v]) => {
-        const keyArray = k.split(".");
-        const edgeType = keyArray[keyArray.length - 1];
+          const includedEdges = graph.$(`.${edgeType}`);
+          const edgeCount = includedEdges.length;
 
-        const includedEdges = graph.$(`.${edgeType}`);
-        const edgeCount = includedEdges.length;
+          if (!v) return;
 
-        if (!v) return;
+          // If edges should be included
+          if (v.value) {
+            // If these edges aren't rendered, add them
+            if (edgeCount === 0) {
+              graph.add(edges[edgeType]);
+              if (allowRelayout) layoutGraph();
+            }
+          }
 
-        // If edges should be included
-        if (v.value) {
-          // If these edges aren't rendered, add them
-          if (edgeCount === 0) {
-            graph.add(edges[edgeType]);
+          // If edges should not be included
+          // If these edges are rendered, remove them
+          else if (edgeCount > 0) {
+            includedEdges.remove();
             if (allowRelayout) layoutGraph();
           }
-        }
-
-        // If edges should not be included
-        // If these edges are rendered, remove them
-        else if (edgeCount > 0) {
-          includedEdges.remove();
-          if (allowRelayout) layoutGraph();
-        }
-      });
+        });
+    } catch (err) {
+      logger.error(`Couldn't find the edge for target note ${err}`);
+    }
   };
   const applyVaultConfig = (allowRelayout: boolean) => {
     if (!graph || graph.$("*").length === 0) return;

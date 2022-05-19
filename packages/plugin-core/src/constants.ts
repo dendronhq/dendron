@@ -98,11 +98,8 @@ export const DENDRON_VIEWS = [
     where: "dendron-view",
   },
   {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TIP_OF_THE_DAY),
-    where: "explorer",
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.HELP_AND_FEEDBACK),
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
+    when: DendronContext.PLUGIN_ACTIVE,
     where: "explorer",
   },
 ];
@@ -1040,9 +1037,9 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   ENABLE_SELF_CONTAINED_VAULT_WORKSPACE: {
     key: DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
     type: "boolean",
-    default: false,
+    default: true,
     description:
-      "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature.",
+      "When enabled, newly created workspaces will be created as self contained vaults.",
   },
 };
 

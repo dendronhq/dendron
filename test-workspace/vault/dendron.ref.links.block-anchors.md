@@ -2,7 +2,7 @@
 id: links.block-anchors
 title: Block Anchors
 desc: ""
-updated: 1630537995313
+updated: 1652829410663
 created: 1608147795766
 ---
 
@@ -21,7 +21,9 @@ Voluptatem ipsum et possimus aut. In modi quaerat temporibus. ^last-paragraph
 | Sapiente | accusamus |
 |----------|-----------|
 | Laborum  | libero    |
-| Ullam    | optio     | ^table
+| Ullam    | optio     |
+
+^table
 
 ```js
 const x = 0;
@@ -56,7 +58,9 @@ Eaque ipsa recusandae exercitationem unde illum est. Sed eos vel eos impedit adi
 | Delectus   | exercitationem |
 |------------|----------------|
 | provident  | Accusamus      |
-| tempore    | blanditiis     | ^table2
+| tempore    | blanditiis     |
+
+^table2
 
 ## Aliquam repudiandae dolorem id
 

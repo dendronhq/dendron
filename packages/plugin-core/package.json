@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.95.0",
+  "version": "0.95.1",
   "engines": {
     "vscode": "^1.58.0"
   },
@@ -99,8 +99,14 @@
         },
         {
           "id": "dendron.help-and-feedback",
-          "name": "Help and Feedback",
-          "contextualTitle": "Help and Feedback"
+          "name": "Help and Feedback"
+        }, 
+        {
+          "id": "dendron.graph-panel",
+          "name": "Graph Panel",
+          "contextualTitle": "Graph Panel",
+          "type": "webview",
+          "when": "dendron:pluginActive"
         }
       ]
     },
@@ -1009,8 +1015,8 @@
         },
         "dendron.enableSelfContainedVaultWorkspace": {
           "type": "boolean",
-          "default": false,
-          "description": "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature."
+          "default": true,
+          "description": "When enabled, newly created workspaces will be created as self contained vaults."
         }
       }
     },
@@ -1159,8 +1165,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.95.0",
-    "@dendronhq/engine-test-utils": "^0.95.0",
+    "@dendronhq/common-test-utils": "^0.95.1",
+    "@dendronhq/engine-test-utils": "^0.95.1",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1196,11 +1202,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.95.0",
-    "@dendronhq/common-all": "^0.95.0",
-    "@dendronhq/common-server": "^0.95.0",
-    "@dendronhq/engine-server": "^0.95.0",
-    "@dendronhq/pods-core": "^0.95.0",
+    "@dendronhq/api-server": "^0.95.1",
+    "@dendronhq/common-all": "^0.95.1",
+    "@dendronhq/common-server": "^0.95.1",
+    "@dendronhq/engine-server": "^0.95.1",
+    "@dendronhq/pods-core": "^0.95.1",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.58",

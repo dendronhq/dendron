@@ -52,7 +52,7 @@ export const baseTheme: Theme = {
       color: "",
       label: {
         fontSize: 8,
-        minZoomedFontSize: 32,
+        minZoomedFontSize: 16,
         fontWeight: 400,
         color: "",
       },

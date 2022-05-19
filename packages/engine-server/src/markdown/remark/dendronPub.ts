@@ -513,7 +513,11 @@ function linkExtras({
   const after = [];
 
   // For task notes, add the status, priority, due, and owner info
-  if (note && TaskNoteUtils.isTaskNote(note)) {
+  if (
+    note &&
+    TaskNoteUtils.isTaskNote(note) &&
+    ConfigUtils.getPublishing(config).enableTaskNotes
+  ) {
     const taskConfig = ConfigUtils.getTask(config);
     const status = TaskNoteUtils.getStatusSymbolRaw({
       note,

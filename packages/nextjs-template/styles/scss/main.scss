@@ -94,6 +94,13 @@ hr {
       opacity: 1;
     }
   }
+
+  // ant overrides the background color for these elements, which blocks the
+  // background color we set for the container element.
+  .ant-layout-sider,
+  .ant-menu {
+    background: unset;
+  }
 }
 
 // override ant design toc
@@ -101,12 +108,4 @@ hr {
   .ant-anchor-link-title {
     white-space: normal;
   }
-}
-
-// ant overrides the background color for these elements, which blocks the
-// background color we set for the container element. Overriding it so the
-// background color of the container shows through.
-.ant-layout-sider,
-.ant-menu {
-  background: unset !important;
 }

@@ -3,6 +3,7 @@ import {
   DendronTreeViewKey,
   NoteProps,
   NoteUtils,
+  TimeUtils,
   TreeViewItemLabelTypeEnum,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -160,7 +161,7 @@ export class NativeTreeView implements Disposable {
           !_.keys(this._provider.getTree()).includes(note.id)
         ) {
           // eslint-disable-next-line no-await-in-loop
-          await new Promise((resolve) => setTimeout(resolve, 10));
+          await TimeUtils.sleep(10);
         }
         this.treeView.reveal(note);
       }

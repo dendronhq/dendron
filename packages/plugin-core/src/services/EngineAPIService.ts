@@ -31,7 +31,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
-  NotePropsDict,
+  NotePropsByIdDict,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -124,10 +124,10 @@ export class EngineAPIService
     this._trustedWorkspace = value;
   }
 
-  public get notes(): NotePropsDict {
+  public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;
   }
-  public set notes(arg: NotePropsDict) {
+  public set notes(arg: NotePropsByIdDict) {
     this._internalEngine.notes = arg;
   }
 

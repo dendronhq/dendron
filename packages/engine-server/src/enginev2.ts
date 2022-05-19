@@ -31,7 +31,7 @@ import {
   milliseconds,
   NoteChangeEntry,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   NullCache,
   QueryNotesOpts,
@@ -60,7 +60,7 @@ import {
   GetNoteLinksPayload,
   Optional,
   assertUnreachable,
-  NoteFullDictUtils,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -233,7 +233,7 @@ export class DendronEngineV2 implements DEngine {
     return DendronEngineV2._instance;
   }
 
-  get notes(): NotePropsDict {
+  get notes(): NotePropsByIdDict {
     return this.store.notes;
   }
   get noteFnames() {
@@ -247,7 +247,7 @@ export class DendronEngineV2 implements DEngine {
     return this._vaults;
   }
 
-  set notes(notes: NotePropsDict) {
+  set notes(notes: NotePropsByIdDict) {
     this.store.notes = notes;
   }
 
@@ -703,7 +703,7 @@ export class DendronEngineV2 implements DEngine {
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
         if (ent.status === "delete") {
-          NoteFullDictUtils.deleteNote(ent.note, {
+          NoteDictsUtils.delete(ent.note, {
             notesById: this.notes,
             notesByFname: this.noteFnames,
           });

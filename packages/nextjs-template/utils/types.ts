@@ -1,9 +1,4 @@
-import {
-  DVault,
-  NoteProps,
-  NotePropsDict,
-  TreeMenu,
-} from "@dendronhq/common-all";
+import { DVault, NoteProps, NotePropsByIdDict } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DendronRouterProps } from "./hooks";
 
@@ -17,7 +12,7 @@ export type NoteData = {
   /**
    * All notes that are published
    */
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   /**
    * All top level domains that are published
    */

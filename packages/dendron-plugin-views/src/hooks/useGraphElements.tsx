@@ -1,8 +1,8 @@
 import {
   DVault,
-  NoteFullDictUtils,
+  NoteDictsUtils,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NotePropsByFnameDict,
   NoteUtils,
   SchemaModuleDict,
@@ -40,7 +40,7 @@ const getLocalNoteGraphElements = ({
   vaults,
   fNameDict,
 }: {
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
@@ -217,7 +217,7 @@ const getLocalNoteGraphElements = ({
       }
 
       const fname = fnameArray[fnameArray.length - 1];
-      let to = NoteFullDictUtils.findNotesByFname(
+      const to = NoteDictsUtils.findByFname(
         fname,
         {
           notesById: notes,
@@ -276,7 +276,7 @@ const getLocalNoteGraphElements = ({
   };
 };
 
-function getNoteColor(opts: { fname: string; notes: NotePropsDict }) {
+function getNoteColor(opts: { fname: string; notes: NotePropsByIdDict }) {
   // Avoiding using color for non-tag notes because it's a little expensive right now,
   // it requires multiple getNotesByFName calls. Once that function is cheaper
   // we can use this for all notes.
@@ -291,7 +291,7 @@ const getFullNoteGraphElements = ({
   vaults,
   noteActive,
 }: {
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
@@ -378,7 +378,7 @@ const getFullNoteGraphElements = ({
         }
 
         const fname = fnameArray[fnameArray.length - 1];
-        let to = NoteFullDictUtils.findNotesByFname(
+        let to = NoteDictsUtils.findByFname(
           fname,
           {
             notesById: notes,

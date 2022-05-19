@@ -173,7 +173,7 @@ export type DNodePropsDict = {
 /**
  * Map of noteId -> noteProp
  */
-export type NotePropsDict = {
+export type NotePropsByIdDict = {
   [key: string]: NoteProps;
 };
 
@@ -184,8 +184,12 @@ export type NotePropsByFnameDict = {
   [key: string]: string[];
 };
 
-export type NotePropsFullDict = {
-  notesById: NotePropsDict;
+/**
+ * Type to keep track of forward index (notesById) and inverted indices (notesByFname)
+ * Use {@link NoteDictsUtils} to perform operations that need to update all indices
+ */
+export type NoteDicts = {
+  notesById: NotePropsByIdDict;
   notesByFname: NotePropsByFnameDict;
 };
 
@@ -340,7 +344,7 @@ export type EngineWriteOptsV2 = {
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayload = {
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
@@ -393,7 +397,7 @@ export type GetDecorationsOpts = {
 
 export type DCommonProps = {
   /** Dictionary where key is the note id. */
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
   noteFnames: NotePropsByFnameDict;
   schemas: SchemaModuleDict;
@@ -633,11 +637,11 @@ export type DStore = DCommonProps &
     /**
      * Get NoteProps by id. If note doesn't exist, return undefined
      */
-    getNote: (id: string) => NoteProps | undefined;
+    getNote: (id: string) => Promise<NoteProps | undefined>;
     /**
      * Find NoteProps by note properties
      */
-    findNotes: (opts: FindNoteOpts) => NoteProps[];
+    findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
@@ -652,7 +656,7 @@ export type DStore = DCommonProps &
 // TODO: not used yet
 export type DEngineV4 = {
   // Properties
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];

@@ -24,8 +24,8 @@ import {
   NoteLocalConfig,
   NoteOpts,
   NoteProps,
-  NotePropsDict,
-  NotePropsFullDict,
+  NotePropsByIdDict,
+  NoteDicts,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -45,7 +45,7 @@ import {
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
-import { NoteFullDictUtils } from "./notePropDict";
+import { NoteDictsUtils } from "./noteDictsUtils";
 
 /**
  * Utilities for dealing with nodes
@@ -158,7 +158,7 @@ export class DNodeUtils {
 
   static findClosestParent(
     fpath: string,
-    notesDict: NotePropsFullDict,
+    noteDicts: NoteDicts,
     opts: {
       noStubs?: boolean;
       vault: DVault;
@@ -168,28 +168,20 @@ export class DNodeUtils {
     const { vault } = opts;
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
-      const _node = NoteFullDictUtils.findNotesByFname(
-        "root",
-        notesDict,
-        vault
-      )[0];
+      const _node = NoteDictsUtils.findByFname("root", noteDicts, vault)[0];
       if (_.isUndefined(_node)) {
         throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = NoteFullDictUtils.findNotesByFname(
-      dirname,
-      notesDict,
-      vault
-    )[0];
+    const maybeNode = NoteDictsUtils.findByFname(dirname, noteDicts, vault)[0];
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
     ) {
       return maybeNode;
     } else {
-      return DNodeUtils.findClosestParent(dirname, notesDict, opts);
+      return DNodeUtils.findClosestParent(dirname, noteDicts, opts);
     }
   }
 
@@ -343,7 +335,7 @@ export class NoteUtils {
 
   static deleteChildFromParent(opts: {
     childToDelete: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteChangeEntry[] {
     const changed: NoteChangeEntry[] = [];
     const { childToDelete, notes } = opts;
@@ -377,15 +369,15 @@ export class NoteUtils {
    */
   static addOrUpdateParents(opts: {
     note: NoteProps;
-    notesDict: NotePropsFullDict;
+    noteDicts: NoteDicts;
     createStubs: boolean;
     wsRoot: string;
   }): NoteChangeEntry[] {
-    const { note, notesDict, createStubs, wsRoot } = opts;
+    const { note, noteDicts, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    const parent = NoteFullDictUtils.findNotesByFname(
+    const parent = NoteDictsUtils.findByFname(
       parentPath,
-      notesDict,
+      noteDicts,
       note.vault
     )[0];
 
@@ -409,7 +401,7 @@ export class NoteUtils {
       throw DendronError.createFromStatus(err);
     }
     if (!parent) {
-      const ancestor = DNodeUtils.findClosestParent(note.fname, notesDict, {
+      const ancestor = DNodeUtils.findClosestParent(note.fname, noteDicts, {
         vault: note.vault,
         wsRoot,
       }) as NoteProps;
@@ -753,7 +745,7 @@ export class NoteUtils {
     notes,
   }: {
     rootNote: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }) {
     // If the note does not have reference links than the last updated time of
     // the preview tree is the last updated time of the note itself. Hence, we
@@ -853,7 +845,7 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return NoteFullDictUtils.findNotesByFname(
+    return NoteDictsUtils.findByFname(
       fname,
       { notesById: engine.notes, notesByFname: engine.noteFnames },
       vault
@@ -868,7 +860,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDict | NoteProps[];
+    notes: NotePropsByIdDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps | undefined {
@@ -937,7 +929,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDict | NoteProps[];
+    notes: NotePropsByIdDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps {
@@ -961,7 +953,7 @@ export class NoteUtils {
     notes,
   }: {
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteProps[] {
     const maybe = _.values(notes).map((ent) => {
       if (
@@ -1012,7 +1004,7 @@ export class NoteUtils {
     sortDesc = true,
   }: {
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     sortDesc?: boolean;
   }): NoteProps[] {
     const out = [];
@@ -1042,7 +1034,7 @@ export class NoteUtils {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
 
-  static getRoots(notes: NotePropsDict): NoteProps[] {
+  static getRoots(notes: NotePropsByIdDict): NoteProps[] {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
@@ -1847,7 +1839,7 @@ export class SchemaUtils {
    */
   static matchDomain(
     domain: NoteProps,
-    notes: NotePropsDict,
+    notes: NotePropsByIdDict,
     schemas: SchemaModuleDict
   ) {
     const match = schemas[domain.fname];
@@ -1866,7 +1858,7 @@ export class SchemaUtils {
 
   static matchDomainWithSchema(opts: {
     noteCandidates: NoteProps[];
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     schemaCandidates: SchemaProps[];
     schemaModule: SchemaModuleProps;
     matchNamespace?: boolean;

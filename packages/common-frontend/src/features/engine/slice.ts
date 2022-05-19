@@ -2,12 +2,12 @@ import {
   DendronApiV2,
   DEngineInitPayload,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
   NoteFnameDictUtils,
-  NoteFullDictUtils,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -168,12 +168,12 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = NoteFnameDictUtils.create(notes);
+      state.noteFName = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
     },
-    setNotes: (state, action: PayloadAction<NotePropsDict>) => {
+    setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {
       state.notes = action.payload;
     },
     setError: (state, action: PayloadAction<any>) => {
@@ -205,22 +205,22 @@ export const engineSlice = createSlice({
         state.notes = {};
       }
       // this is a new node
-      const notesDict = {
+      const noteDicts = {
         notesById: state.notes,
         notesByFname: state.noteFName,
       };
       if (!state.notes[note.id]) {
         const changed = NoteUtils.addOrUpdateParents({
           note,
-          notesDict,
+          noteDicts,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
         changed.forEach((noteChangeEntry) =>
-          NoteFullDictUtils.addNote(noteChangeEntry.note, notesDict)
+          NoteDictsUtils.add(noteChangeEntry.note, noteDicts)
         );
       }
-      NoteFullDictUtils.addNote(note, notesDict);
+      NoteDictsUtils.add(note, noteDicts);
     },
   },
   extraReducers: (builder) => {

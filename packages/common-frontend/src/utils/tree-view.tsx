@@ -2,7 +2,7 @@ import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
 import {
   isNotUndefined,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   TAGS_HIERARCHY,
   TAGS_HIERARCHY_BASE,
   VaultUtils,
@@ -25,7 +25,7 @@ export class TreeViewUtils {
     notes,
     noteId,
   }: {
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     noteId: string;
   }) => {
     let pNote: NoteProps = notes[noteId];
@@ -44,7 +44,7 @@ export class TreeViewUtils {
     applyNavExclude = false,
   }: {
     noteId: string;
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
     showVaultName?: boolean;
     applyNavExclude: boolean;
   }): DataNode | undefined {

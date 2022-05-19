@@ -1,34 +1,34 @@
 import _ from "lodash";
 import {
-  NotePropsDict,
+  NotePropsByIdDict,
   NotePropsByFnameDict,
   DVault,
   NoteProps,
-  NotePropsFullDict,
+  NoteDicts,
 } from "./types";
 import { cleanName, isNotUndefined } from "./utils";
 import { VaultUtils } from "./vault";
 
 /**
- * Utilities for working with NotePropsFullDict. The reason NotePropsFullDict is not a class is due to needing
+ * Utilities for working with NoteDicts. The reason NoteDicts is not a class is due to needing
  * to work with primitive objects with redux
  */
-export class NoteFullDictUtils {
+export class NoteDictsUtils {
   /**
    * Find notes by fname. If vault is provided, filter results so that only notes with matching vault is returned
    * Return empty array if no match is found
    *
    * @param fname
-   * @param notesDict
+   * @param noteDicts
    * @param vault If provided, use to filter results
    * @returns Copy of NoteProps array
    */
-  static findNotesByFname(
+  static findByFname(
     fname: string,
-    notesDict: NotePropsFullDict,
+    noteDicts: NoteDicts,
     vault?: DVault
   ): NoteProps[] {
-    const { notesById, notesByFname } = notesDict;
+    const { notesById, notesByFname } = noteDicts;
     const cleanedFname = cleanName(fname);
     const ids: string[] | undefined = notesByFname[cleanedFname];
     if (!ids) {
@@ -42,15 +42,20 @@ export class NoteFullDictUtils {
   }
 
   /**
-   * Remove note from both notesById and notesByFname
+   * Remove note from both notesById and notesByFname.
+   * Returns true if note was deleted from both. False otherwise
    *
    * @param note note to delete
-   * @param notesDict
+   * @param noteDicts
+   * @return whether note was deleted
    */
-  static deleteNote(note: NoteProps, notesDict: NotePropsFullDict) {
-    const { notesById, notesByFname } = notesDict;
+  static delete(note: NoteProps, noteDicts: NoteDicts): boolean {
+    const { notesById, notesByFname } = noteDicts;
+    if (_.isUndefined(notesById[note.id])) {
+      return false;
+    }
     delete notesById[note.id];
-    NoteFnameDictUtils.deleteNote(note, notesByFname);
+    return NoteFnameDictUtils.delete(note, notesByFname);
   }
 
   /**
@@ -63,8 +68,8 @@ export class NoteFullDictUtils {
    * @param note to add
    * @returns
    */
-  static addNote(note: NoteProps, notesDict: NotePropsFullDict) {
-    const { notesById, notesByFname } = notesDict;
+  static add(note: NoteProps, noteDicts: NoteDicts) {
+    const { notesById, notesByFname } = noteDicts;
     const maybeNote = notesById[note.id];
     if (maybeNote) {
       if (cleanName(maybeNote.fname) === cleanName(note.fname)) {
@@ -72,11 +77,11 @@ export class NoteFullDictUtils {
         return;
       } else {
         // Remove old fname from fname dict
-        NoteFnameDictUtils.deleteNote(maybeNote, notesByFname);
+        NoteFnameDictUtils.delete(maybeNote, notesByFname);
       }
     }
     notesById[note.id] = note;
-    NoteFnameDictUtils.addNote(note, notesByFname);
+    NoteFnameDictUtils.add(note, notesByFname);
   }
 }
 
@@ -85,15 +90,17 @@ export class NoteFullDictUtils {
  */
 export class NoteFnameDictUtils {
   /**
-   * Create a map of {key -> value} where key = noteFname and value is list of ids corresponding to that fname from NotePropsDict
+   * Use NotePropsByIdDict to create a inverted index of {key -> value} where key = noteFname and value is list of ids corresponding to that fname
    *
-   * @param notesById NotePropsDict used to populate map
+   * @param notesById Used to populate map
    * @returns
    */
-  static create(notesById: NotePropsDict): NotePropsByFnameDict {
+  static createNotePropsByFnameDict(
+    notesById: NotePropsByIdDict
+  ): NotePropsByFnameDict {
     const notesByFname = {};
     _.values(notesById).forEach((note) =>
-      NoteFnameDictUtils.addNote(note, notesByFname)
+      NoteFnameDictUtils.add(note, notesByFname)
     );
     return notesByFname;
   }
@@ -104,7 +111,7 @@ export class NoteFnameDictUtils {
    * @param note to add
    * @param notesByFname dictionary to modify
    */
-  static addNote(note: NoteProps, notesByFname: NotePropsByFnameDict) {
+  static add(note: NoteProps, notesByFname: NotePropsByFnameDict) {
     const fname = cleanName(note.fname);
     let ids = notesByFname[fname];
     if (_.isUndefined(ids)) ids = [];
@@ -113,22 +120,24 @@ export class NoteFnameDictUtils {
   }
 
   /**
-   * Delete note id from notesByFname dictionary. If note exists and it corresponds to last entry for that fname, delete fname entry
+   * Delete note from notesByFname dictionary. If note exists and it corresponds to last entry for that fname, delete fname entry
    * from dictionary as well
+   * Returns true if note was deleted
    *
    * @param note to delete
    * @param notesByFname dictionary to modify
-   * @returns
+   * @returns whether note was deleted
    */
-  static deleteNote(note: NoteProps, notesByFname: NotePropsByFnameDict) {
+  static delete(note: NoteProps, notesByFname: NotePropsByFnameDict): boolean {
     const fname = cleanName(note.fname);
     const ids = notesByFname[fname];
-    if (_.isUndefined(ids)) return;
+    if (_.isUndefined(ids)) return false;
     _.pull(ids, note.id);
     if (ids.length === 0) {
       delete notesByFname[fname];
     } else {
       notesByFname[fname] = ids;
     }
+    return true;
   }
 }

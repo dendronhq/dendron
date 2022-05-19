@@ -3,8 +3,7 @@ import {
   DendronError,
   FuseNote,
   FuseNoteIndex,
-  NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import { fetchFuseIndex } from "./fetchers";
 import { useEffect, useState } from "react";
@@ -20,7 +19,7 @@ type FuseIndexProvider = () => Promise<FuseNoteIndex | FuseNote>;
  * good example of what to do.
  */
 function useFuse(
-  notes: NotePropsDict | undefined,
+  notes: NotePropsByIdDict | undefined,
   provider: FuseIndexProvider
 ) {
   const [error, setError] = useState<any>();
@@ -68,13 +67,13 @@ function useFuse(
 }
 
 /** A react hook to fetch the exported fuse index. */
-export function useFetchFuse(notes: NotePropsDict | undefined) {
+export function useFetchFuse(notes: NotePropsByIdDict | undefined) {
   return useFuse(notes, fetchFuseIndex);
 }
 
 /** A react hook to generate the fuse index on the client side. */
 export function useGenerateFuse(
-  notes: NotePropsDict,
+  notes: NotePropsByIdDict,
   overrideOpts?: Parameters<typeof createFuseNote>[1]
 ) {
   return useFuse(notes, async () => {

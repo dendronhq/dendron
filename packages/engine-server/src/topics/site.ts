@@ -10,7 +10,7 @@ import {
   DVault,
   DVaultVisibility,
   HierarchyConfig,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteProps,
   NoteUtils,
   UseVaultBehavior,
@@ -157,7 +157,7 @@ export class SiteUtils {
     engine: DEngineClient;
     config: IntermediateDendronConfig;
     noExpandSingleDomain?: boolean;
-  }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
+  }): Promise<{ notes: NotePropsByIdDict; domains: NoteProps[] }> {
     const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
@@ -176,7 +176,7 @@ export class SiteUtils {
     const { siteHierarchies } = cleanPublishingConfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];
-    const hiearchiesToPublish: NotePropsDict[] = [];
+    const hiearchiesToPublish: NotePropsByIdDict[] = [];
 
     // async pass to process all notes
     const domainsAndhiearchiesToPublish = await Promise.all(
@@ -240,7 +240,7 @@ export class SiteUtils {
     config: IntermediateDendronConfig;
     engine: DEngineClient;
     navOrder: number;
-  }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
+  }): Promise<{ notes: NotePropsByIdDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHierarchy:enter", domain, config });
@@ -318,7 +318,7 @@ export class SiteUtils {
     });
 
     // gather all the children of this hierarchy
-    const out: NotePropsDict = {};
+    const out: NotePropsByIdDict = {};
     const processQ = [domainNote];
 
     while (!_.isEmpty(processQ)) {
@@ -512,7 +512,7 @@ export class SiteUtils {
     fname: string;
     config: IntermediateDendronConfig;
     noteCandidates: NoteProps[];
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
   }) {
     const {
       engine,

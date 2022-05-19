@@ -2,7 +2,7 @@ import {
   FuseEngine,
   getCleanThresholdValue,
   NoteIndexProps,
-  NotePropsDict,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
@@ -13,10 +13,10 @@ type TestData = {
   stub?: boolean;
 };
 
-async function testDataToNotePropsDict(
+async function testDataToNotePropsByIdDict(
   testData: TestData[]
-): Promise<NotePropsDict> {
-  const dict: NotePropsDict = {};
+): Promise<NotePropsByIdDict> {
+  const dict: NotePropsByIdDict = {};
 
   for (const td of testData) {
     // eslint-disable-next-line no-await-in-loop
@@ -50,8 +50,9 @@ function assertDoesNotHaveFName(queryResult: NoteIndexProps[], fname: string) {
 
 async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
   const fuseEngine = new FuseEngine({ fuzzThreshold: 0.2 });
-  const notePropsDict: NotePropsDict = await testDataToNotePropsDict(testData);
-  await fuseEngine.updateNotesIndex(notePropsDict);
+  const notePropsByIdDict: NotePropsByIdDict =
+    await testDataToNotePropsByIdDict(testData);
+  await fuseEngine.updateNotesIndex(notePropsByIdDict);
   return fuseEngine;
 }
 

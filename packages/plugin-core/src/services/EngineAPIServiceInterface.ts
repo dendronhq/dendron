@@ -25,7 +25,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
-  NotePropsDict,
+  NotePropsByIdDict,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -42,7 +42,7 @@ import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
-  notes: NotePropsDict;
+  notes: NotePropsByIdDict;
   noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   schemas: SchemaModuleDict;

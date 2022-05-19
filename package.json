@@ -128,7 +128,7 @@
   },
   "dependencies": {
     "@babel/preset-typescript": "7.16.7",
-    "@babel/types": "7.16.7",
+    "@babel/types": "7.17.10",
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
     "chalk": "^4.1.1",
     "cross-env": "^7.0.3",

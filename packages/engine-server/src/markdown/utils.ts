@@ -26,7 +26,7 @@ import katex from "rehype-katex";
 import raw from "rehype-raw";
 import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
-import remark from "remark";
+import { remark } from "remark";
 import abbrPlugin from "remark-abbr";
 // @ts-ignore
 import containers from "remark-containers";

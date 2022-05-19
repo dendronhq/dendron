@@ -1,12 +1,13 @@
 const commonConfig = {
-  preset: "ts-jest",
+  // preset: "ts-jest",
   clearMocks: true,
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
-      diagnostics: false,
-    },
-  },
+  // globals: {
+  //   "ts-jest": {
+  //     tsconfig: "tsconfig.json",
+  //     diagnostics: false,
+  //     useESM: true,
+  //   },
+  // },
   moduleFileExtensions: ["ts", "tsx", "js", "json"],
   modulePathIgnorePatterns: ["lib", "build", "docs"],
   notify: true,
@@ -14,8 +15,23 @@ const commonConfig = {
   snapshotSerializers: ["jest-serializer-path"],
   testEnvironment: "node",
   testPathIgnorePatterns: ["utils.ts"],
+  //   /Users/kevinlin/code/dendron/node_modules/unist-util-select/index.js
+  // 'transformIgnorePatterns': ["node_modules/(?!(lit-html|lit-element|lit|@lit)/)"],
+  transformIgnorePatterns: [
+    "node_modules/(?!(unified.*|unist-util.*|zwitch|vfile.*|micromark.*|remark.*|mdast.*|rehype.*|hast.*|longest-streak|bail|is-plain-obj|trough|.*)/)",
+  ],
   transform: {
-    "^.+\\.tsx?$": "ts-jest",
+    // "^.+\\.tsx?$": "ts-jest",
+    "^.+\\.(js|jsx|tsx?)$": [
+      "babel-jest",
+      {
+        presets: ["@babel/preset-env"],
+        plugins: [
+          "@babel/transform-runtime",
+          "@babel/plugin-transform-modules-commonjs",
+        ],
+      },
+    ],
   },
 };
 
@@ -33,7 +49,6 @@ module.exports = {
   ...commonConfig,
   projects: [
     {
-      preset: "ts-jest",
       displayName: "non-plugin-tests",
       testMatch: [
         "<rootDir>/packages/engine-test-utils/**/?(*.)+(spec|test).[jt]s?(x)",

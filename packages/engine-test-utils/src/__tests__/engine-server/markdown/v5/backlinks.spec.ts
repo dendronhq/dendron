@@ -8,7 +8,7 @@ import { getOpts, runTestCases } from "./utils";
 
 // NOTE: for setup code details, see, [[../packages/common-test-utils/src/presets/notes.ts#^5xetq2e7t2z4]]
 describe("GIVEN dendron.yml default", () => {
-  describe("WHEN regular run", () => {
+  describe.only("WHEN regular run", () => {
     runTestCases(
       createProcCompileTests({
         name: "THEN backlinks are generated",

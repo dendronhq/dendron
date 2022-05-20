@@ -1,3 +1,5 @@
+[![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
 [![dendronhq on Twitter](https://img.shields.io/twitter/follow/dendronhq?style=social)](https://link.dendron.so/twitter)
 [![Dendron on YouTube](https://img.shields.io/youtube/channel/subscribers/UC8GQLj4KZhN8WcJPiKXtcRQ?style=social)](https://link.dendron.so/youtube)
 [![Discord](https://img.shields.io/discord/717965437182410783?color=blueviolet&label=Discord&style=flat-square)](https://link.dendron.so/discord)
@@ -29,7 +31,7 @@ It not only helps you create notes but also retrieve them - retrieval works as w
 
 ## How
 
-Dendron builds on top of the past five decades of programming languages and developer tooling. We apply the key lessons from software to the management of general knowledge. 
+Dendron builds on top of the past five decades of programming languages and developer tooling. We apply the key lessons from software to the management of general knowledge.
 We make managing general knowledge like managing code and your PKM like an IDE.
 
 ## Design Principles
@@ -184,7 +186,7 @@ Dendron sends out a weekly newsletter highlighting:
 
 There are a variety of ways to connect with Dendron devs, contributors, and other members of the Dendron community:
 
-- Join the [Dendron on Discord](https://link.dendron.so/discord) 
+- Join the [Dendron on Discord](https://link.dendron.so/discord)
 - Follow [Dendron on Twitter (`@dendronhq`)](https://link.dendron.so/twitter)
 - Checkout [Dendron on GitHub](https://link.dendron.so/github)
 - Read the [Dendron Blog](https://blog.dendron.so/)

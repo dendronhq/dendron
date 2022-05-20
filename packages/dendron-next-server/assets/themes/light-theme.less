@@ -31,3 +31,9 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #555; 
 }
+
+/* Tints the background of the selected item in the navigation sidebar with the primary color. */
+.ant-menu-item-selected,
+.dendron-ant-menu-submenu-selected > .ant-menu-submenu-title {
+    background-color: fade(@primary-color, 5%);
+}

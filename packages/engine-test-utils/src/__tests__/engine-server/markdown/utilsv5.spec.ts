@@ -1,5 +1,6 @@
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
+  AnchorUtils,
   DendronASTDest,
   Processor,
   ProcFlavor,
@@ -157,11 +158,54 @@ describe("MDUtils.proc", () => {
     },
   });
 
+  const WIKILINK_WITH_ANCHOR = createProcCompileTests({
+    name: "WIKILINK_WITH_ANCHOR",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = `[[alias|egg#header]]`;
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.MD_REGULAR]: {
+        /**
+         * Test that a wiklink in hover preview will be translated into a vscode
+         * command URI to use GoToNote for navigation
+         * @param opts
+         */
+        [ProcFlavor.HOVER_PREVIEW]: async (opts) => {
+          const {
+            extra: { resp },
+          } = cleanVerifyOpts(opts);
+
+          const goToNoteCommandOpts = {
+            qs: "egg",
+            vault: {
+              fsPath: "vault1",
+            },
+            anchor: AnchorUtils.string2anchor("header"),
+          };
+
+          await checkString(
+            resp.contents,
+            `[alias](command:dendron.gotoNote?${encodeURIComponent(
+              JSON.stringify(goToNoteCommandOpts)
+            )})`
+          );
+        },
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+    },
+  });
+
   const ALL_TEST_CASES = [
     ...WITH_FOOTNOTES,
     ...IMAGE_NO_LEAD_FORWARD_SLASH,
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
     ...WILDCARD_NOTE_REF_MISSING,
+    ...WIKILINK_WITH_ANCHOR,
   ];
 
   test.each(

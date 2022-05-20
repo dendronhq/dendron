@@ -2,6 +2,10 @@
 
 /** The expected output from the processor, if the processor is used to process or stringify a tree. */
 export enum DendronASTDest {
+  /**
+   * @deprecated - no longer needed since we don't use the markdown preview
+   * enhanced anymore
+   */
   MD_ENHANCED_PREVIEW = "MD_ENHANCED_PREVIEW",
   MD_REGULAR = "MD_REGULAR",
   MD_DENDRON = "MD_DENDRON",

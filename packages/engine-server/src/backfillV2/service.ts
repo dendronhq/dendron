@@ -2,7 +2,7 @@ import {
   DEngineClient,
   genUUID,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -18,7 +18,7 @@ export class BackfillService {
     const { engine, note, overwriteFields } = _.defaults(opts, {
       overwriteFields: [],
     });
-    const candidates: NotePropsDict = _.isUndefined(note)
+    const candidates: NotePropsByIdDict = _.isUndefined(note)
       ? engine.notes
       : { [note.id]: note };
     const notes = await Promise.all(

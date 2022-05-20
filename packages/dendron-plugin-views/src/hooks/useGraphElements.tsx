@@ -1,8 +1,9 @@
 import {
   DVault,
-  NoteFNamesDict,
+  NoteDictsUtils,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
+  NotePropsByFnameDict,
   NoteUtils,
   SchemaModuleDict,
   SchemaProps,
@@ -39,8 +40,8 @@ const getLocalNoteGraphElements = ({
   vaults,
   fNameDict,
 }: {
-  notes: NotePropsDict;
-  fNameDict: NoteFNamesDict;
+  notes: NotePropsByIdDict;
+  fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
@@ -216,10 +217,13 @@ const getLocalNoteGraphElements = ({
       }
 
       const fname = fnameArray[fnameArray.length - 1];
-      let toNotes = fNameDict.get(notes, fname);
-
-      const to = toNotes.filter((note) =>
-        VaultUtils.isEqualV2(note.vault, toVault)
+      const to = NoteDictsUtils.findByFname(
+        fname,
+        {
+          notesById: notes,
+          notesByFname: fNameDict,
+        },
+        toVault
       )[0];
 
       if (!to) {
@@ -272,7 +276,7 @@ const getLocalNoteGraphElements = ({
   };
 };
 
-function getNoteColor(opts: { fname: string; notes: NotePropsDict }) {
+function getNoteColor(opts: { fname: string; notes: NotePropsByIdDict }) {
   // Avoiding using color for non-tag notes because it's a little expensive right now,
   // it requires multiple getNotesByFName calls. Once that function is cheaper
   // we can use this for all notes.
@@ -287,8 +291,8 @@ const getFullNoteGraphElements = ({
   vaults,
   noteActive,
 }: {
-  notes: NotePropsDict;
-  fNameDict: NoteFNamesDict;
+  notes: NotePropsByIdDict;
+  fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
@@ -374,10 +378,13 @@ const getFullNoteGraphElements = ({
         }
 
         const fname = fnameArray[fnameArray.length - 1];
-        let toNotes = fNameDict.get(notes, fname);
-
-        const to = toNotes.filter((note) =>
-          VaultUtils.isEqualV2(note.vault, toVault)
+        let to = NoteDictsUtils.findByFname(
+          fname,
+          {
+            notesById: notes,
+            notesByFname: fNameDict,
+          },
+          toVault
         )[0];
 
         if (!to) {

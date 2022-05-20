@@ -1,8 +1,6 @@
 import {
   error2PlainObject,
   ERROR_SEVERITY,
-  NotePropsDict,
-  SchemaModuleDict,
   InitializePayload,
   WorkspaceInitRequest,
   WorkspaceSyncPayload,
@@ -25,8 +23,6 @@ export class WorkspaceController {
   async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
     const start = process.hrtime();
 
-    let notes: NotePropsDict;
-    let schemas: SchemaModuleDict;
     const ctx = "WorkspaceController:init";
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });
@@ -39,8 +35,6 @@ export class WorkspaceController {
       logger.error({ ctx, msg: "fatal error initializing notes", error });
       return { error };
     }
-    notes = engine.notes;
-    schemas = engine.schemas;
     await putWS({ ws: uri, engine });
     const duration = getDurationMilliseconds(start);
     logger.info({ ctx, msg: "finish init", duration, uri, error });
@@ -50,8 +44,8 @@ export class WorkspaceController {
     const payload: InitializePayload = {
       error,
       data: {
-        notes,
-        schemas,
+        notes: engine.notes,
+        schemas: engine.schemas,
         config: engine.config,
         vaults: engine.vaults,
         wsRoot: engine.wsRoot,

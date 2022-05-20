@@ -12,15 +12,18 @@ import {
   ERROR_STATUS,
   IDendronError,
   isNotUndefined,
-  NoteFNamesDict,
+  NoteDictsUtils,
   NoteProps,
-  NotePropsDict,
+  NotePropsByFnameDict,
+  NotePropsByIdDict,
+  NoteDicts,
   NotesCacheEntry,
   NotesCacheEntryMap,
   NoteUtils,
   SchemaUtils,
   stringifyError,
   VaultUtils,
+  NoteChangeEntry,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -87,15 +90,19 @@ export class NoteParser extends ParserBase {
     allPaths: string[],
     vault: DVault
   ): Promise<{
-    notesById: NotePropsDict;
+    notesById: NotePropsByIdDict;
     cacheUpdates: NotesCacheEntryMap;
     errors: IDendronError[];
   }> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
-    const notesByFname: NoteFNamesDict = new NoteFNamesDict();
-    const notesById: NotePropsDict = {};
+    const notesByFname: NotePropsByFnameDict = {};
+    const notesById: NotePropsByIdDict = {};
+    const noteDicts = {
+      notesById,
+      notesByFname,
+    };
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
     // Keep track of which notes in cache no longer exist
@@ -122,7 +129,7 @@ export class NoteParser extends ParserBase {
       vault,
       errors,
     });
-    const rootNote = rootProps.propsList[0];
+    const rootNote = rootProps.changeEntries[0].note;
     this.logger.info({ ctx, msg: "post:parseRootNote" });
     if (!rootProps.matchHash) {
       cacheUpdates[rootNote.fname] = createCacheEntry({
@@ -130,9 +137,6 @@ export class NoteParser extends ParserBase {
         hash: rootProps.noteHash,
       });
     }
-    notesByFname.add(rootNote);
-    notesById[rootNote.id] = rootNote;
-    unseenKeys.delete(rootNote.fname);
 
     // get root of hiearchies
     let lvl = 2;
@@ -147,15 +151,15 @@ export class NoteParser extends ParserBase {
             vault,
             errors,
           });
-          const notes = out.propsList;
-          unseenKeys.delete(notes[0].fname);
+          const parsedNote = out.changeEntries[0].note;
+          unseenKeys.delete(parsedNote.fname);
           if (!out.matchHash) {
-            cacheUpdates[notes[0].fname] = createCacheEntry({
-              noteProps: notes[0],
+            cacheUpdates[parsedNote.fname] = createCacheEntry({
+              noteProps: parsedNote,
               hash: out.noteHash,
             });
           }
-          return notes;
+          return parsedNote;
         } catch (err: any) {
           const dendronError = ErrorFactory.wrapIfNeeded(err);
           // A fatal error would kill the initialization
@@ -181,9 +185,11 @@ export class NoteParser extends ParserBase {
           })
         );
       }
-      notesByFname.add(ent);
-      notesById[ent.id] = ent;
+      NoteDictsUtils.add(ent, noteDicts);
     });
+    // Root node children have updated
+    NoteDictsUtils.add(rootNote, noteDicts);
+    unseenKeys.delete(rootNote.fname);
     this.logger.info({ ctx, msg: "post:parseDomainNotes" });
 
     // get everything else
@@ -197,40 +203,41 @@ export class NoteParser extends ParserBase {
           try {
             const resp = this.parseNoteProps({
               fileMeta: ent,
-              notesDict: notesById,
-              notesByFname,
+              noteDicts: { notesById, notesByFname },
               addParent: true,
               vault,
               errors,
             });
-            const notes = resp.propsList;
-            unseenKeys.delete(notes[0].fname);
+            const parsedNote = resp.changeEntries[0].note;
+            unseenKeys.delete(parsedNote.fname);
 
             // this indicates that the contents of the note was different
             // then what was in the cache. need to update later ^cache-update
             if (!resp.matchHash) {
-              cacheUpdates[notes[0].fname] = createCacheEntry({
-                noteProps: notes[0],
+              cacheUpdates[parsedNote.fname] = createCacheEntry({
+                noteProps: parsedNote,
                 hash: resp.noteHash,
               });
             }
+
             // need to be inside this loop
             // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
-            notes.forEach((ent) => {
-              // Check for duplicate IDs when adding notes to the map
-              if (notesById[ent.id] !== undefined) {
-                const duplicate = notesById[ent.id];
+            resp.changeEntries.forEach((ent) => {
+              const note = ent.note;
+              // Check for duplicate IDs when adding created notes to the map
+              if (ent.status === "create" && notesById[note.id] !== undefined) {
+                const duplicate = notesById[note.id];
                 errors.push(
                   new DuplicateNoteError({
                     noteA: duplicate,
-                    noteB: ent,
+                    noteB: note,
                   })
                 );
               }
-              notesByFname.add(ent);
-              notesById[ent.id] = ent;
+
+              NoteDictsUtils.add(note, noteDicts);
             });
-            return notes;
+            return parsedNote;
           } catch (err: any) {
             const dendronError = ErrorFactory.wrapIfNeeded(err);
             // A fatal error would kill the initialization
@@ -249,7 +256,7 @@ export class NoteParser extends ParserBase {
     this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
     // add schemas
-    const domains = rootNote.children.map(
+    const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
     ) as NoteProps[];
     const schemas = this.opts.store.schemas;
@@ -281,31 +288,32 @@ export class NoteParser extends ParserBase {
    */
   parseNoteProps(opts: {
     fileMeta: FileMeta;
-    notesDict?: NotePropsDict;
-    notesByFname?: NoteFNamesDict;
+    noteDicts?: NoteDicts;
     parents?: NoteProps[];
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
     errors: IDendronError[];
   }): {
-    propsList: NoteProps[];
+    changeEntries: NoteChangeEntry[];
     noteHash: string;
     matchHash: boolean;
   } {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       createStubs: true,
-      notesDict: {},
-      notesByFname: {},
+      noteDicts: {
+        notesById: {},
+        notesByFname: {},
+      },
       parents: [] as NoteProps[],
     });
-    const { fileMeta, notesDict, notesByFname, vault, errors } = cleanOpts;
+    const { fileMeta, noteDicts, vault, errors } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
-    let out: NoteProps[] = [];
+    let changeEntries: NoteChangeEntry[] = [];
     let noteProps: NoteProps;
     let noteHash: string;
     let matchHash: boolean;
@@ -334,25 +342,23 @@ export class NoteParser extends ParserBase {
       }
       throw _err;
     }
-    out.push(noteProps);
+    changeEntries.push({
+      status: "create",
+      note: noteProps,
+    });
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addOrUpdateParentsWithDict({
+      const changed = NoteUtils.addOrUpdateParents({
         note: noteProps,
-        notesDict,
-        notesByFnameDict: notesByFname,
+        noteDicts,
         createStubs: cleanOpts.createStubs,
         wsRoot: this.opts.store.wsRoot,
       });
-      out = out.concat(
-        stubs
-          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
-          .map((noteChangeEntry) => noteChangeEntry.note)
-      );
+      changeEntries = changeEntries.concat(changed);
     }
     return {
-      propsList: out,
+      changeEntries,
       noteHash,
       matchHash,
     };

@@ -22,7 +22,6 @@ import {
   LegacyHierarchyConfig,
   NoteChangeEntry,
   NoteProps,
-  NotePropsDict,
   SEOProps,
 } from "./types";
 import { GithubConfig } from "./types/configs/publishing/github";
@@ -235,39 +234,6 @@ export class DefaultMap<K, V> {
   }
 }
 
-/** Maps a `K` to a list of `V`s. */
-export class ListMap<K, V> {
-  private _internalMap = new Map<K, V[]>();
-
-  public get(key: K) {
-    return this._internalMap.get(key);
-  }
-
-  public add(key: K, ...toAdd: V[]) {
-    let values = this._internalMap.get(key);
-    if (values === undefined) values = [];
-    values.push(...toAdd);
-    this._internalMap.set(key, values);
-  }
-
-  public delete(key: K, ...toDelete: V[]) {
-    const values = this._internalMap.get(key);
-    if (values === undefined) return;
-    _.pull(values, ...toDelete);
-    if (values.length === 0) {
-      this._internalMap.delete(key);
-    } else {
-      this._internalMap.set(key, values);
-    }
-  }
-
-  public has(key: K, value: V) {
-    const values = this._internalMap.get(key);
-    if (values === undefined) return false;
-    return values.includes(value);
-  }
-}
-
 /** Memoizes function results, but allows a custom function to decide if the
  * value needs to be recalculated.
  *
@@ -314,48 +280,6 @@ export function memoize<Inputs extends any[], Key, Output>({
   };
   wrapped.cache = new LruCache<Key, Output>({ maxItems: maxCache });
   return wrapped;
-}
-
-export class NoteFNamesDict {
-  private _internalMap = new ListMap<string, string>();
-
-  public constructor(initialNotes?: NoteProps[]) {
-    if (initialNotes) this.addAll(initialNotes);
-  }
-
-  public get(notes: Readonly<NotePropsDict>, fname: string, vault?: DVault) {
-    const keys = this._internalMap.get(cleanName(fname));
-    if (keys === undefined) return [];
-    let matchedNotes = keys.map((key) => notes[key]).filter(isNotUndefined);
-    if (vault) {
-      matchedNotes = matchedNotes.filter((note) =>
-        VaultUtils.isEqualV2(note.vault, vault)
-      );
-    }
-    return matchedNotes;
-  }
-
-  /** Returns true if dict has `note` exactly with this fname and id. */
-  public has(note: NoteProps): boolean {
-    return !!this._internalMap
-      // there are notes with this fname
-      .get(cleanName(note.fname))
-      // and one of those has matching id
-      ?.some((maybeMatch) => maybeMatch === note.id);
-  }
-
-  public add(note: NoteProps) {
-    if (this.has(note)) return; // avoid duplicates
-    this._internalMap.add(cleanName(note.fname), note.id);
-  }
-
-  public addAll(notes: NoteProps[]) {
-    notes.forEach((note) => this.add(note));
-  }
-
-  public delete(note: NoteProps) {
-    this._internalMap.delete(cleanName(note.fname), note.id);
-  }
 }
 export class FIFOQueue<T> {
   private _internalQueue: T[] = [];

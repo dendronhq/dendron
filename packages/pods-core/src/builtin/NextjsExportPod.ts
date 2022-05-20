@@ -3,7 +3,7 @@ import {
   DendronSiteConfig,
   DEngineClient,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   createSerializedFuseNoteIndex,
   ConfigUtils,
@@ -59,8 +59,8 @@ export const mapObject = (
 export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) =>
   note;
 
-export const removeBodyFromNotesDict = (notes: NotePropsDict) =>
-  mapObject(notes, (_k, note: NotePropsDict) => removeBodyFromNote(note));
+export const removeBodyFromNotesDict = (notes: NotePropsByIdDict) =>
+  mapObject(notes, (_k, note: NotePropsByIdDict) => removeBodyFromNote(note));
 
 function getSiteConfig({
   config,
@@ -259,7 +259,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }: {
     engine: DEngineClient;
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     engineConfig: IntermediateDendronConfig;
   }) {
     const proc = MDUtilsV5.procRehypeFull(

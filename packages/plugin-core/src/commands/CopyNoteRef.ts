@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DNoteRefData,
   DNoteRefLink,
   getSlugger,
@@ -16,7 +17,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
 import { getSelectionAnchors } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getEngine } from "../workspace";
+import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -108,24 +109,26 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    const wsRoot = getDWorkspace().wsRoot;
     const vault = PickerUtilsV2.getVaultForOpenEditor();
     const engine = getEngine();
-    const note: NoteProps = NoteUtils.getNoteOrThrow({
+    const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
-      notes: engine.notes,
-      wsRoot,
+      engine,
       vault,
     });
-    const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
-    const link = await this.buildLink({ note, useVaultPrefix, editor });
-    try {
-      clipboard.writeText(link);
-    } catch (err) {
-      this.L.error({ err, link });
-      throw err;
+    if (note) {
+      const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
+      const link = await this.buildLink({ note, useVaultPrefix, editor });
+      try {
+        clipboard.writeText(link);
+      } catch (err) {
+        this.L.error({ err, link });
+        throw err;
+      }
+      this.showFeedback(link);
+      return link;
+    } else {
+      throw new DendronError({ message: `note ${fname} not found` });
     }
-    this.showFeedback(link);
-    return link;
   }
 }

@@ -421,7 +421,6 @@ suite("duplicate config entry detection", () => {
         );
         fs.writeFileSync(configPath, configContent);
       },
-      timeout: 1e5,
     },
     () => {
       test("THEN duplicate entry is detected", () => {
@@ -436,21 +435,15 @@ suite("duplicate config entry detection", () => {
     }
   );
 
-  describeMultiWS(
-    "GIVEN dendron.yml without duplicate config",
-    {
-      timeout: 1e5,
-    },
-    () => {
-      test("THEN duplicate entry is not detected", () => {
-        const ext = ExtensionProvider.getExtension();
+  describeMultiWS("GIVEN dendron.yml without duplicate config", {}, () => {
+    test("THEN duplicate entry is not detected", () => {
+      const ext = ExtensionProvider.getExtension();
 
-        const out = StartupUtils.getDuplicateKeysMessage({
-          ext,
-        });
-
-        expect(out).toEqual(undefined);
+      const out = StartupUtils.getDuplicateKeysMessage({
+        ext,
       });
-    }
-  );
+
+      expect(out).toEqual(undefined);
+    });
+  });
 });

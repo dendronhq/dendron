@@ -72,13 +72,13 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
   let hierarchyDisplay = config?.hierarchyDisplay;
 
   if (MDUtilsV5.shouldApplyPublishingRules(proc)) {
-    hierarchyDisplay =
-      ConfigUtils.getHierarchyDisplayConfigForPublishing(
-        config
-      ).hierarchyDisplay;
-    hierarchyDisplayTitle =
-      ConfigUtils.getHierarchyDisplayConfigForPublishing(config)
-        .hierarchyDisplayTitle || "Children";
+    const hierarchyConfigForPublishing =
+      ConfigUtils.getHierarchyDisplayConfigForPublishing(config);
+    hierarchyDisplay = hierarchyConfigForPublishing.hierarchyDisplay;
+    if (!_.isUndefined(hierarchyConfigForPublishing.hierarchyDisplayTitle)) {
+      hierarchyDisplayTitle =
+        hierarchyConfigForPublishing.hierarchyDisplayTitle;
+    }
   }
 
   if (hierarchyDisplay === undefined) hierarchyDisplay = true;

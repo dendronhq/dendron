@@ -84,6 +84,8 @@ preview:
   enableHashesForFMTags: false
 publishing:
   theme: custom
+  enableHierarchyDisplay: false
+  hierarchyDisplayTitle: "Sub Notes"
   enableFMTitle: true
   enableNoteTitleForLink: true
   enableMermaid: true

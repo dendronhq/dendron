@@ -6,7 +6,6 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   DNodePropsQuickInputV2,
-  NotePropsByIdDict,
   DEngineClient,
   EngineWriteOptsV2,
 } from "@dendronhq/common-all";

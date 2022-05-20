@@ -91,12 +91,12 @@ export class StartupUtils {
     }
   }
 
-  static showDuplicateConfigMessageIfNecessary(opts: {
+  static showDuplicateConfigEntryMessageIfNecessary(opts: {
     ext: IDendronExtension;
   }) {
     const message = StartupUtils.getDuplicateKeysMessage(opts);
     if (message !== undefined) {
-      StartupUtils.showDuplicateConfigMessage({
+      StartupUtils.showDuplicateConfigEntryMessage({
         ...opts,
         message,
       });
@@ -117,32 +117,35 @@ export class StartupUtils {
     }
   }
 
-  static showDuplicateConfigMessage(opts: {
+  static showDuplicateConfigEntryMessage(opts: {
     ext: IDendronExtension;
     message: string;
   }) {
-    AnalyticsUtils.track(ConfigEvents.DuplicateConfigMessageShow);
+    AnalyticsUtils.track(ConfigEvents.DuplicateConfigEntryMessageShow);
     const FIX_ISSUE = "Fix Issue";
     const MESSAGE =
-      "We have detected a duplicate key mapping in your configuration. Dendron has been activated using the last entry. Please remove all duplicate mappings from dendron.yml";
+      "We have detected duplicate key(s) in dendron.yml. Dendron has activated using the last entry of the duplicate key(s)";
     vscode.window
       .showInformationMessage(MESSAGE, FIX_ISSUE)
       .then(async (resp) => {
         if (resp === FIX_ISSUE) {
-          AnalyticsUtils.track(ConfigEvents.DuplicateConfigMessageConfirm, {
-            status: ConfirmStatus.accepted,
-          });
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.accepted,
+            }
+          );
           const wsRoot = opts.ext.getDWorkspace().wsRoot;
           const configPath = DConfig.configPath(wsRoot);
           const configUri = vscode.Uri.file(configPath);
 
           const message = opts.message;
           const content = [
-            `# Duplicate Mapping in \`dendron.yml\``,
+            `# Duplicate Keys in \`dendron.yml\``,
             "",
-            "The message at the bottom displays the _first_ duplicate mapping that was detected in `dendron.yml`",
+            "The message at the bottom displays the _first_ duplicate key mapping that was detected in `dendron.yml`",
             "",
-            "**There may be more duplicate mappings**.",
+            "**There may be more duplicate key mappings**.",
             "",
             "Take the following steps to fix this issue.",
             "1. Look through `dendron.yml` and remove all duplicate mappings.",
@@ -180,9 +183,12 @@ export class StartupUtils {
             column: vscode.ViewColumn.Beside,
           });
         } else {
-          AnalyticsUtils.track(ConfigEvents.DuplicateConfigMessageConfirm, {
-            status: ConfirmStatus.rejected,
-          });
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.rejected,
+            }
+          );
         }
       });
   }

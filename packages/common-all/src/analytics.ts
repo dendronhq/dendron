@@ -116,8 +116,8 @@ export enum ConfigEvents {
   DeprecatedConfigMessageConfirm = "DeprecatedConfigMessageConfirm",
   DeprecatedConfigMessageShow = "ShowDeprecatedConfigMessage",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
-  DuplicateConfigMessageShow = "DuplicateConfigMessageShow",
-  DuplicateConfigMessageConfirm = "DuplicateConfigMessageConfirm",
+  DuplicateConfigEntryMessageShow = "DuplicateConfigEntryMessageShow",
+  DuplicateConfigEntryMessageConfirm = "DuplicateConfigEntryMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
 }

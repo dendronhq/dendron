@@ -70,10 +70,10 @@ export function readMD(fpath: string): { data: any; content: string } {
  * @param overwriteDuplcate if set to true, will not throw duplicate entry exception and use the last entry.
  * @returns
  */
-export function readYAML(fpath: string, overwriteDuplcate?: boolean): any {
+export function readYAML(fpath: string, overwriteDuplicate?: boolean): any {
   return YAML.load(fs.readFileSync(fpath, { encoding: "utf8" }), {
     schema: YAML.JSON_SCHEMA,
-    json: overwriteDuplcate ?? false,
+    json: overwriteDuplicate ?? false,
   });
 }
 

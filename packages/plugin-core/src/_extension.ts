@@ -715,7 +715,7 @@ export async function _activate(
       });
 
       // check for duplicate config keys and prompt for a fix.
-      StartupUtils.showDuplicateConfigMessageIfNecessary({
+      StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
         ext: ws,
       });
 

@@ -599,4 +599,10 @@ export class MoveHeaderCommand extends BasicCommand<
     );
     return { ...opts, updated };
   }
+
+  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
+    return {
+      updatedCount: out?.updated.length || 0,
+    };
+  }
 }

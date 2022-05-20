@@ -1,5 +1,6 @@
 import {
   DendronError,
+  extractNoteChangeEntryCounts,
   getSlugger,
   RenameNotePayload,
   RespV2,
@@ -148,7 +149,14 @@ export class RenameHeaderCommand extends BasicCommand<
     return out;
   }
 
-  addAnalyticsPayload(opts?: CommandOpts) {
-    return getAnalyticsPayload(opts?.source);
+  addAnalyticsPayload(opts?: CommandOpts, out?: CommandOutput) {
+    const payload =
+      out && out.data !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.data) }
+        : {};
+    return {
+      ...payload,
+      ...getAnalyticsPayload(opts?.source),
+    };
   }
 }

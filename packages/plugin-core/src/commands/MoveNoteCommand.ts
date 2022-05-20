@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  extractNoteChangeEntryCounts,
   NoteChangeEntry,
   RenameNoteOpts,
   VaultUtils,
@@ -316,13 +317,9 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    return {
-      movedNotesCount:
-        // `out.changed` also includes the notes that had to be renamed in the
-        // process, but the created notes are the ones we moved
-        out?.changed?.filter((change) => change?.status === "create").length ||
-        0,
-    };
+    const payload =
+      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+    return payload;
   }
 }
 

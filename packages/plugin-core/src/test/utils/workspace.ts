@@ -132,6 +132,7 @@ export class WorkspaceTestUtils {
         },
         enableSiteLastModified: true,
         enableRandomlyColoredTags: true,
+        enableTaskNotes: true,
         enablePrettyLinks: true,
       },
     };

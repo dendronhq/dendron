@@ -1138,6 +1138,7 @@ suite("Migration", function () {
               cognitoUserPoolId: "qwerty",
               cognitoClientId: "azerty",
               enablePrettyLinks: true,
+              enableTaskNotes: true,
             };
 
             expect(postMigrationDendronConfig.publishing).toEqual(

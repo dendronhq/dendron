@@ -13,6 +13,7 @@ import {
 import { VAULTS } from "@dendronhq/engine-test-utils";
 import * as mocha from "mocha";
 import { describe } from "mocha";
+import fs from "fs-extra";
 import sinon from "sinon";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StartupUtils } from "../../utils/StartupUtils";
@@ -403,4 +404,53 @@ suite("deprecated config detection", () => {
       });
     });
   });
+});
+
+suite("duplicate config entry detection", () => {
+  describeMultiWS(
+    "GIVEN dendron.yml with duplicate config",
+    {
+      preActivateHook: async ({ wsRoot }) => {
+        const configPath = DConfig.configPath(wsRoot);
+        let configContent = fs.readFileSync(configPath, {
+          encoding: "utf-8",
+        });
+        configContent = configContent.replace(
+          "    enablePreviewV2: true",
+          "    enablePreviewV2: true\n    enablePreviewV2: false"
+        );
+        fs.writeFileSync(configPath, configContent);
+      },
+      timeout: 1e5,
+    },
+    () => {
+      test("THEN duplicate entry is detected", () => {
+        const ext = ExtensionProvider.getExtension();
+
+        const out = StartupUtils.getDuplicateKeysMessage({
+          ext,
+        });
+
+        expect(out.includes("duplicated mapping key")).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN dendron.yml without duplicate config",
+    {
+      timeout: 1e5,
+    },
+    () => {
+      test("THEN duplicate entry is not detected", () => {
+        const ext = ExtensionProvider.getExtension();
+
+        const out = StartupUtils.getDuplicateKeysMessage({
+          ext,
+        });
+
+        expect(out).toEqual(undefined);
+      });
+    }
+  );
 });

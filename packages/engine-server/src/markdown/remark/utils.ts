@@ -333,11 +333,26 @@ const getLinkCandidates = ({
       }).filter((note) => note.stub !== true);
       linkCandidates.push(
         ...possibleCandidates.map((candidate): DLink => {
+          const startColumn = value.indexOf(word) + 1;
+          const endColumn = startColumn + word.length;
+
+          const position: Position = {
+            start: {
+              line: textNode.position!.start.line,
+              column: startColumn,
+              offset: textNode.position!.start.offset,
+            },
+            end: {
+              line: textNode.position!.start.line,
+              column: endColumn,
+              offset: textNode.position!.end.offset,
+            },
+          };
           return {
             type: "linkCandidate",
             from: NoteUtils.toNoteLoc(note),
             value: value.trim(),
-            position: textNode.position as Position,
+            position,
             to: {
               fname: word,
               vaultName: VaultUtils.getName(candidate.vault),

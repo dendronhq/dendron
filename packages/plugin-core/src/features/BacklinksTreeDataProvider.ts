@@ -8,21 +8,22 @@ import {
   ProcFlavor,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter } from "@dendronhq/engine-server";
+import {
+  BacklinkSortOrder,
+  EngineEventEmitter,
+  MetadataService,
+} from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _, { Dictionary } from "lodash";
 import path from "path";
 import {
-  CancellationToken,
   Disposable,
   Event,
   EventEmitter,
   MarkdownString,
   ProviderResult,
-  Range,
   ThemeIcon,
   TreeDataProvider,
-  TreeItem,
   TreeItemCollapsibleState,
   Uri,
   window,
@@ -31,15 +32,14 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DendronContext, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-import { BacklinkSortOrder } from "../types";
 import {
-  containsMarkdownExt,
-  findReferences,
+  findReferencesById,
   FoundRefT,
-  getSurroundingContextForNoteRef,
+  getSurroundingContextForNoteRefMds,
   sortPaths,
 } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 import { Backlink, BacklinkFoundRef } from "./Backlink";
 
 export default class BacklinksTreeDataProvider
@@ -70,7 +70,10 @@ export default class BacklinksTreeDataProvider
     isLinkCandidateEnabled: boolean | undefined
   ) {
     this._isLinkCandidateEnabled = isLinkCandidateEnabled;
-    this.updateSortOrder(BacklinkSortOrder.PathNames);
+
+    this.SortOrder =
+      MetadataService.instance().BacklinksPanelSortOrder ??
+      BacklinkSortOrder.PathNames;
 
     this._onDidChangeTreeDataEmitter = new EventEmitter<
       Backlink | undefined | void
@@ -142,37 +145,47 @@ export default class BacklinksTreeDataProvider
     }
   }
 
-  public updateSortOrder(sortOrder: BacklinkSortOrder) {
-    this._sortOrder = sortOrder;
+  public get SortOrder(): BacklinkSortOrder {
+    return this._sortOrder;
+  }
 
-    VSCodeUtils.setContextStringValue(
-      DendronContext.BACKLINKS_SORT_ORDER,
-      sortOrder
-    );
+  public set SortOrder(sortOrder: BacklinkSortOrder) {
+    if (sortOrder !== this._sortOrder) {
+      this._sortOrder = sortOrder;
 
-    this.refreshBacklinks();
+      VSCodeUtils.setContextStringValue(
+        DendronContext.BACKLINKS_SORT_ORDER,
+        sortOrder
+      );
+
+      this.refreshBacklinks();
+
+      // Save the setting update into persistance storage:
+      MetadataService.instance().BacklinksPanelSortOrder = sortOrder;
+    }
   }
 
   // This fn is invoked by vscode as part of the TreeDataProvider interface, so
   // report errors to Sentry in the catch block
-  public async getChildren(element?: Backlink) {
+  public async getChildren(element?: Backlink): Promise<Backlink[]> {
     try {
       // TODO: Make the backlinks panel also work when preview is the active editor.
-      const fsPath = window.activeTextEditor?.document.uri.fsPath;
+      const activeNote = WSUtilsV2.instance().getActiveNote();
+
+      if (!activeNote) {
+        return [];
+      }
 
       if (!element) {
         // Root case, branch will get top level backlinks.
-        // Top level children/1st-level children.
-        if (!fsPath || (fsPath && !containsMarkdownExt(fsPath))) {
-          return [];
-        }
+
         return this.pathsToBacklinkSourceTreeItems(
-          fsPath,
+          activeNote.id,
           this._isLinkCandidateEnabled,
           this._sortOrder
         );
       } else {
-        // 3rd-level children.
+        // 2nd-level children.
         const refs = element?.refs;
         if (!refs) {
           return [];
@@ -181,34 +194,25 @@ export default class BacklinksTreeDataProvider
         if (!this._isLinkCandidateEnabled && element.label === "Candidates") {
           return [];
         }
-        return this.refsToBacklinkTreeItems(refs, fsPath!, element);
+        return this.refsToBacklinkTreeItems(refs, activeNote.fname, element);
       }
-
-      // else {
-      //   // 2nd-level children.
-      //   const refs = element?.refs;
-      //   if (!refs) {
-      //     return [];
-      //   }
-      //   return this.getSecondLevelRefsToBacklinks(refs);
-      // }
     } catch (error) {
       Sentry.captureException(error);
       throw error;
     }
   }
 
-  resolveTreeItem(
-    _item: TreeItem,
-    element: Backlink,
-    _token: CancellationToken
-  ): ProviderResult<TreeItem> {
-    return this.getMarkdownPreviewString(element.label).then((tooltip) => {
-      return {
-        tooltip: new MarkdownString(tooltip),
-      };
-    });
-  }
+  // resolveTreeItem(
+  //   _item: TreeItem,
+  //   element: Backlink,
+  //   _token: CancellationToken
+  // ): ProviderResult<TreeItem> {
+  //   return this.getMarkdownPreviewString(element.label).then((tooltip) => {
+  //     return {
+  //       tooltip: new MarkdownString(tooltip),
+  //     };
+  //   });
+  // }
 
   /**
    * Given all the found references to this note, return tree item(s) showing
@@ -289,9 +293,35 @@ export default class BacklinksTreeDataProvider
       backlink.parentBacklink = parent;
       backlink.description = `on line ${lineNum + 1}`;
 
-      backlink.tooltip = new MarkdownString(
-        getSurroundingContextForNoteRef(ref, 5)
-      );
+      // const lang = await languages.getLanguages();
+
+      const markdownStr = new MarkdownString();
+
+      markdownStr.appendMarkdown(getSurroundingContextForNoteRefMds(ref, 20));
+
+      //       const markdownStr = new MarkdownString(
+      //         ` ### Testing
+
+      // <div style="background-color: #FFFF00">
+      // <li style="background-color: #FFFF00"><em>Helloz</em></li>
+      // <li>World</li>
+      // <div>
+      // <hr/>
+      // <span style="color:#000;background-color:#FFFF00;">Howdy there.</span>
+      // <span style="color:#000;background-color:var(--vscode-button-background);">Howdy there.</span>
+      // <span style="color:#000;background-color: var(--vscode-button-foreground);">Howdy there.</span>
+      // <span style="color:#000;background-color:var(--vscode-button-hoverBackground);">Howdy there.</span>
+
+      // end test`
+      //       );
+
+      // const color = new ThemeColor("badge.background");
+
+      markdownStr.supportHtml = true;
+      markdownStr.isTrusted = true;
+      markdownStr.supportThemeIcons = true;
+
+      backlink.tooltip = markdownStr;
 
       backlink.command = {
         command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
@@ -321,13 +351,14 @@ export default class BacklinksTreeDataProvider
    * @returns list of the source of the backlinks as TreeItems
    */
   private pathsToBacklinkSourceTreeItems = async (
-    fsPath: string,
+    noteId: string,
     isLinkCandidateEnabled: boolean | undefined,
     sortOrder: BacklinkSortOrder
   ) => {
-    const fileName = path.parse(fsPath).name;
+    const references = await findReferencesById(noteId);
     const referencesByPath = _.groupBy(
-      await findReferences(fileName, [fsPath]),
+      // Exclude self-references:
+      _.filter(references, (ref) => ref.note?.id !== noteId),
       ({ location }) => location.uri.fsPath
     );
 
@@ -364,26 +395,24 @@ export default class BacklinksTreeDataProvider
       return [];
     }
 
-    const collapsibleState = TreeItemCollapsibleState.Collapsed;
-
     const out = pathsSorted.map((pathParam) => {
+      const references = referencesByPath[pathParam];
+
       const backlink = new Backlink(
         _.trimEnd(path.basename(pathParam), path.extname(pathParam)),
-        referencesByPath[pathParam],
-        collapsibleState
+        references,
+        TreeItemCollapsibleState.Expanded
       );
 
-      const totalCount = referencesByPath[pathParam].length;
-      const linkCount = referencesByPath[pathParam].filter(
-        (ref) => !ref.isCandidate
-      ).length;
+      const totalCount = references.length;
+      const linkCount = references.filter((ref) => !ref.isCandidate).length;
       const candidateCount = isLinkCandidateEnabled
         ? totalCount - linkCount
         : 0;
 
       const backlinkCount = isLinkCandidateEnabled
-        ? referencesByPath[pathParam].length
-        : referencesByPath[pathParam].filter((ref) => !ref.isCandidate).length;
+        ? references.length
+        : references.filter((ref) => !ref.isCandidate).length;
 
       if (backlinkCount === 0) return undefined;
 
@@ -408,7 +437,7 @@ export default class BacklinksTreeDataProvider
         candidateCountDescription,
       ]).join(", ");
 
-      const updatedTime = referencesByPath[pathParam][0].note?.updated;
+      const updatedTime = references[0].note?.updated;
       const suffix =
         updatedTime !== undefined
           ? `. Note updated: ${DateFormatUtil.formatDate(updatedTime)}`
@@ -420,11 +449,61 @@ export default class BacklinksTreeDataProvider
         command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
         arguments: [
           Uri.file(pathParam),
-          { selection: new Range(0, 0, 0, 0) },
+          { selection: references[0].location.range },
           false,
         ],
         title: "Open File",
       };
+
+      const markdownBlocks = references.map((foundRef) => {
+        return {
+          content: getSurroundingContextForNoteRefMds(foundRef, 10),
+          isCandidate: foundRef.isCandidate,
+        };
+      });
+
+      const newmdstr = new MarkdownString();
+      newmdstr.isTrusted = true;
+      newmdstr.supportHtml = true;
+      newmdstr.supportThemeIcons = true;
+
+      const noteProps = references[0].note;
+
+      if (noteProps) {
+        newmdstr.appendMarkdown(
+          `## ${noteProps.title}
+_created: ${DateFormatUtil.formatDate(noteProps.created)}_<br>
+_updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
+        );
+        newmdstr.appendMarkdown("<hr/>");
+        // newmdstr.appendMarkdown(
+        //   `_created: ${DateFormatUtil.formatDate(noteProps.created)}_ \n`
+        // );
+        // newmdstr.appendMarkdown(
+        //   `_updated: ${DateFormatUtil.formatDate(noteProps.updated)}_ \n`
+        // );
+      }
+
+      let curLinkCount = 1;
+      let curCandidateCount = 1;
+
+      for (const block of markdownBlocks) {
+        let header;
+        if (block.isCandidate) {
+          header = `**CANDIDATE ${curCandidateCount}**<br>`;
+          curCandidateCount += 1;
+        } else {
+          header = `**LINK ${curLinkCount}**<br>`;
+          curLinkCount += 1;
+        }
+
+        newmdstr.appendMarkdown(header);
+        newmdstr.appendMarkdown(block.content);
+        newmdstr.appendMarkdown("<hr/>");
+      }
+
+      backlink.tooltip = newmdstr;
+
       return backlink;
     });
     return _.filter(out, (item) => !_.isUndefined(item)) as Backlink[];
@@ -438,6 +517,11 @@ export default class BacklinksTreeDataProvider
     });
   }
 
+  /**
+   * Duplicated logic - need to consolidate.
+   * @param fname
+   * @returns
+   */
   private async getMarkdownPreviewString(
     fname: string
   ): Promise<string | undefined> {

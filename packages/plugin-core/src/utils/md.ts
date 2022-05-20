@@ -27,6 +27,7 @@ import vscode, {
   commands,
   extensions,
   Location,
+  MarkdownString,
   Position,
   Range,
   Selection,
@@ -482,6 +483,94 @@ export const noteLinks2Locations = (note: NoteProps) => {
   return refs;
 };
 
+export async function findReferencesById(id: string) {
+  const refs: FoundRefT[] = [];
+
+  const engine = ExtensionProvider.getEngine();
+
+  const note = engine.notes[id];
+
+  if (!note) {
+    return;
+  }
+
+  const notesWithRefs = NoteUtils.getNotesWithLinkTo({
+    note,
+    notes: engine.notes,
+  });
+
+  _.forEach(notesWithRefs, (noteWithRef) => {
+    const linksMatch = noteWithRef.links.filter(
+      (l) => l.to?.fname?.toLowerCase() === note.fname.toLowerCase()
+    );
+    const fsPath = NoteUtils.getFullPath({
+      note: noteWithRef,
+      wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+    });
+
+    if (!fs.existsSync(fsPath)) {
+      return;
+    }
+    const fileContent = fs.readFileSync(fsPath).toString();
+    // we are assuming there won't be a `\n---\n` key inside the frontmatter
+    const fmOffset = fileContent.indexOf("\n---") + 4;
+    linksMatch.forEach((link) => {
+      const endOffset = link.position?.end.offset || 0;
+      const lines = fileContent.slice(0, fmOffset + endOffset + 1).split("\n");
+      const lineNum = lines.length;
+      let range: vscode.Range;
+      switch (link.type) {
+        case "wiki":
+          range = new vscode.Range(
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(lineNum - 1, link.position?.end.column || 1)
+          );
+          break;
+        case "frontmatterTag":
+          // -2 in lineNum so that it targets the end of the frontmatter
+          range = new vscode.Range(
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 2,
+              (link.position?.end.column || 1) - 1
+            )
+          );
+          break;
+        default:
+          range = new vscode.Range(
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.end.column || 1) - 1
+            )
+          );
+      }
+      const location = new vscode.Location(vscode.Uri.file(fsPath), range);
+      const foundRef: FoundRefT = {
+        location,
+        matchText: lines.slice(-1)[0],
+        note: noteWithRef,
+      };
+      if (link.type === "linkCandidate") {
+        foundRef.isCandidate = true;
+      }
+
+      refs.push(foundRef);
+    });
+  });
+
+  return refs;
+}
+
 /**
  *  ^find-references
  * @param fname
@@ -533,8 +622,11 @@ export const findReferences = async (
       switch (link.type) {
         case "wiki":
           range = new vscode.Range(
-            new vscode.Position(lineNum - 1, 0),
-            new vscode.Position(lineNum, 0)
+            new vscode.Position(
+              lineNum - 1,
+              (link.position?.start.column || 1) - 1
+            ),
+            new vscode.Position(lineNum - 1, link.position?.end.column || 1)
           );
           break;
         case "frontmatterTag":
@@ -616,7 +708,7 @@ export const fsPathToRef = ({
 export const containsImageExt = (pathParam: string): boolean =>
   !!imageExtsRegex.exec(path.parse(pathParam).ext);
 
-export function getSurroundingContextForNoteRef(
+export function getSurroundingContextForNoteRefMds(
   ref: FoundRefT,
   linesOfContext: number
 ): string {
@@ -628,29 +720,43 @@ export function getSurroundingContextForNoteRef(
   });
   const fileContent = fs.readFileSync(fsPath).toString();
 
-  // ref.location.range.start.
-  // const startOffset = link.position?.start.offset || 0;
   const lines = fileContent.split("\n");
 
-  const finalLines = [];
-
-  const fmEndLineNumber = lines.indexOf("---", 1);
+  const frontmatterOffset = lines.indexOf("---", 1);
 
   const linkLineNumber = ref.location.range.start.line;
 
+  console.log("-- BEGIN --");
+  console.log(`Match Text:${ref.matchText} | Line Number: ${linkLineNumber}`);
+  const unformatted = lines[linkLineNumber];
+  console.log(unformatted);
+  const prefix = unformatted.substring(0, ref.location.range.start.character);
+  console.log(prefix);
+  const suffix = unformatted.substring(
+    ref.location.range.end.character,
+    unformatted.length
+  );
+  const middle = unformatted.substring(
+    ref.location.range.start.character,
+    ref.location.range.end.character
+  );
+  console.log(suffix);
+  console.log("-- END --");
+
+  const golden = `${prefix}<span style="color:#000;background-color:#FFFF00;">${middle}</span>${suffix}`;
+
+  // lower and upper here refer to the line numbers in a text document (so
+  // 'lower' elements appears at the top of your screen)
   const lowerBound = Math.max(
     0,
-    lines.indexOf("---", 1) + 1, // FM Offset
+    frontmatterOffset + 1,
     linkLineNumber - linesOfContext
   );
 
   const lowerBoundText =
-    lowerBound <= fmEndLineNumber + 1
-      ? "---_Start of Note_---"
-      : `---_line ${lowerBound}_---`;
-
-  const markdownBlockStartText = "```markdown";
-  const markdownBlockEndText = "```";
+    lowerBound <= frontmatterOffset + 1
+      ? "--- _Start of Note_ ---<br/>"
+      : `--- _line ${lowerBound}_ ---<br/>`;
 
   const upperBound = Math.min(
     lines.length - 1,
@@ -659,25 +765,94 @@ export function getSurroundingContextForNoteRef(
 
   const upperBoundText =
     upperBound === lines.length - 1
-      ? "---_End of Note_---"
-      : `---_line ${upperBound}_---`;
+      ? "<br/>--- _End of Note_ ---"
+      : `<br/>--- _line ${upperBound}_ ---`;
 
-  // if (lowerBound > fmEndLineNumber + 1) {
-  //   finalLines.push(`_line ${lowerBound}_`);
-  // }
-  finalLines.push(lowerBoundText);
-  finalLines.push(markdownBlockStartText);
-  finalLines.push(...lines.slice(lowerBound, linkLineNumber));
-  finalLines.push(markdownBlockEndText);
-  finalLines.push(`**${_.trim(lines[linkLineNumber], "*")}**`);
-  finalLines.push(markdownBlockStartText);
-  finalLines.push(...lines.slice(linkLineNumber + 1, upperBound));
-  finalLines.push(markdownBlockEndText);
-  finalLines.push(upperBoundText);
-  // if (upperBound < lines.length - 1) {
-  //   finalLines.push(`_line ${upperBound}_`);
-  // }
+  const lowerContentBlock = lines.slice(lowerBound, linkLineNumber);
+  const upperContentBlock = lines.slice(linkLineNumber + 1, upperBound);
 
-  return finalLines.join("\n");
-  // return lines.slice(lowerBound, upperBound).join("\n");
+  if (lowerContentBlock.length === 0) {
+    lowerContentBlock.push("\n");
+  }
+
+  if (upperContentBlock.length === 0) {
+    upperContentBlock.push("\n");
+  }
+
+  adjustForCodeBlocks(lowerContentBlock);
+
+  const codeBlockSections = _.filter(upperContentBlock, (text) =>
+    text.startsWith("```")
+  ).length;
+
+  if (codeBlockSections % 2 === 1) {
+    upperContentBlock.push("```");
+  }
+
+  if (
+    upperContentBlock.slice(-1)[0].startsWith("- ") ||
+    upperContentBlock.slice(-1)[0].startsWith("* ")
+  ) {
+    upperContentBlock.push("\n");
+  }
+
+  //   const rawTextFormattedStyle = new MarkdownString(`${lowerBoundText}
+  // <pre>
+  // ${lines.slice(lowerBound, linkLineNumber).join("\n")}
+  // <span style="color:#000;background-color:#FFFF00;">${
+  //     lines[linkLineNumber]
+  //   }</span>
+  // ${lines.slice(linkLineNumber + 1, upperBound).join("\n")}
+  // </pre>
+  // ${upperBoundText}
+  // `);
+
+  // TODO: Add logic to make it still render ok if we're in the middle of a code block
+  // const markdownStyle = new MarkdownString();
+  // markdownStyle.appendMarkdown(
+  //   lowerBoundText +
+  //     "\n" +
+  //     lines.slice(lowerBound, linkLineNumber).join("\n") +
+  //     `\n<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>` +
+  //     lines.slice(linkLineNumber + 1, upperBound).join("\n") +
+  //     "\n" +
+  //     upperBoundText
+  // );
+
+  // return markdownStyle;
+  // return rawTextFormattedStyle;
+
+  const finalArray = [];
+
+  finalArray.push(lowerBoundText);
+  // finalArray.push(...lines.slice(lowerBound, linkLineNumber));
+  finalArray.push(...lowerContentBlock);
+  finalArray.push(golden);
+  // finalArray.push(
+  //   `<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>`
+  // );
+  finalArray.push(...upperContentBlock);
+  finalArray.push(upperBoundText);
+
+  return finalArray.join("\n");
+
+  // return (
+  //   lowerBoundText +
+  //   "\n" +
+  //   lines.slice(lowerBound, linkLineNumber).join("\n") +
+  //   `\n<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>` +
+  //   lines.slice(linkLineNumber + 1, upperBound).join("\n") +
+  //   "\n" +
+  //   upperBoundText
+  // );
+}
+
+function adjustForCodeBlocks(input: string[]): void {
+  const codeBlockSections = _.filter(input, (text) =>
+    text.startsWith("```")
+  ).length;
+
+  if (codeBlockSections % 2 === 1) {
+    input.unshift("```");
+  }
 }

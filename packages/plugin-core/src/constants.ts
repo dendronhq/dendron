@@ -2,10 +2,11 @@ import {
   DendronTreeViewKey,
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
-  TREE_VIEWS,
   TreeViewItemLabelTypeEnum,
+  TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { BacklinkSortOrder, CodeConfigKeys } from "./types";
+import { BacklinkSortOrder } from "@dendronhq/engine-server";
+import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -275,6 +276,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   BACKLINK_SORT_BY_PATH_NAMES: {
     key: "dendron.backlinks.sortByPathNames",
+    title: "Sort by path names (currently sorted by last updated)",
+    icon: "$(list-ordered)",
+  },
+  BACKLINK_SORT_BY_LAST_UPDATED_CHECKED: {
+    key: "dendron.backlinks.sortByLastUpdatedChecked",
+    title: "Sort by last updated (currently sorted by path names)",
+    icon: "$(list-ordered)",
+  },
+  BACKLINK_SORT_BY_PATH_NAMES_CHECKED: {
+    key: "dendron.backlinks.sortByPathNamesChecked",
     title: "Sort by path names (currently sorted by last updated)",
     icon: "$(list-ordered)",
   },

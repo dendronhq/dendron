@@ -25,8 +25,8 @@ import { Backlink } from "../../features/Backlink";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
-import { BacklinkSortOrder } from "../../types";
 import { MockEngineEvents } from "./MockEngineEvents";
+import { BacklinkSortOrder } from "@dendronhq/engine-server";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
@@ -41,7 +41,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
   );
 
   if (sortOrder) {
-    backlinksTreeDataProvider.updateSortOrder(sortOrder);
+    backlinksTreeDataProvider.SortOrder = sortOrder;
   }
 
   const parents = await backlinksTreeDataProvider.getChildren();
@@ -776,7 +776,7 @@ suite("BacklinksTreeDataProvider", function () {
         );
 
         updateSortOrder = sinon
-          .stub(BacklinksTreeDataProvider.prototype, "updateSortOrder")
+          .stub(BacklinksTreeDataProvider.prototype, "SortOrder")
           .returns(undefined);
       });
       afterEach(() => {

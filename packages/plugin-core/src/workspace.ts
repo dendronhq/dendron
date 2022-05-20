@@ -14,6 +14,7 @@ import {
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
+  BacklinkSortOrder,
   HistoryService,
   WorkspaceService,
   WorkspaceUtils,
@@ -57,7 +58,6 @@ import {
 import { SchemaSyncService } from "./services/SchemaSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
-import { BacklinkSortOrder } from "./types";
 import { DisposableStore } from "./utils";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
@@ -624,9 +624,7 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByLastUpdated",
         });
 
-        backlinksTreeDataProvider.updateSortOrder(
-          BacklinkSortOrder.LastUpdated
-        );
+        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.LastUpdated;
       })
     );
 
@@ -638,7 +636,31 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByPathName",
         });
 
-        backlinksTreeDataProvider.updateSortOrder(BacklinkSortOrder.PathNames);
+        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.PathNames;
+      })
+    );
+
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.BACKLINK_SORT_BY_LAST_UPDATED_CHECKED.key,
+      sentryReportingCallback(() => {
+        AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
+          type: "SortOrderChanged",
+          state: "SortByLastUpdated",
+        });
+
+        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.LastUpdated;
+      })
+    );
+
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.BACKLINK_SORT_BY_PATH_NAMES_CHECKED.key,
+      sentryReportingCallback(() => {
+        AnalyticsUtils.track(VSCodeEvents.BacklinksPanelUsed, {
+          type: "SortOrderChanged",
+          state: "SortByPathName",
+        });
+
+        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.PathNames;
       })
     );
 

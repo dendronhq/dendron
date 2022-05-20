@@ -74,6 +74,10 @@ export class EngineNoteProvider
     }
   }
 
+  getTree(): { [key: string]: TreeNote } {
+    return this._tree;
+  }
+
   getTreeItem(noteProps: NoteProps): TreeItem {
     try {
       return this._tree[noteProps.id];

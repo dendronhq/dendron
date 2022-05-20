@@ -349,7 +349,7 @@ export class DoctorService implements Disposable {
             });
           }
           if (!_.isEmpty(changes)) {
-            await engineDelete(note);
+            await engineDelete(note.id);
             const vname = VaultUtils.getName(note.vault);
             this.L.info(
               `doctor ${DoctorActionsEnum.REMOVE_STUBS} ${note.fname} ${vname}`

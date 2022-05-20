@@ -100,7 +100,7 @@ export const DENDRON_VIEWS = [
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
     when: DendronContext.PLUGIN_ACTIVE,
-    where: "explorer",
+    where: "dendron-view",
   },
 ];
 
@@ -821,6 +821,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RUN_MIGRATION: {
     key: "dendron.dev.runMigration",
     title: `${CMD_PREFIX}Dev: Run Migration`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  MIGRATE_SELF_CONTAINED: {
+    key: "dendron.dev.migrateSelfContained",
+    title: `${CMD_PREFIX} Migrate to Self Contained Vault`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   OPEN_LOGS: {

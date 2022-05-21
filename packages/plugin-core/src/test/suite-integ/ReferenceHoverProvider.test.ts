@@ -9,6 +9,7 @@ import fs from "fs-extra";
 import { before, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
+import { MarkdownString } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -117,7 +118,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             );
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -187,7 +188,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             expect(hover).toBeTruthy();
             // Local images should get full path to image, because hover preview otherwise can't find the image
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 `![](${path.join(
@@ -235,7 +236,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             expect(hover).toBeTruthy();
             // remote images should be unmodified
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "![](https://example.com/image.png)",
@@ -274,7 +275,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -320,7 +321,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -368,7 +369,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             );
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -412,7 +413,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -464,7 +465,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -493,7 +494,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
               expect(hover).toBeTruthy();
               expect(
                 await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
+                  body: (hover!.contents[0] as MarkdownString).value,
                   match: ["vault 1"],
                   nomatch: ["vault 0", "the test note"],
                 })
@@ -520,7 +521,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
               expect(hover).toBeTruthy();
               expect(
                 await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
+                  body: (hover!.contents[0] as MarkdownString).value,
                   match: ["vault 0"],
                   nomatch: ["vault 1", "the test note"],
                 })
@@ -547,7 +548,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
               expect(hover).toBeTruthy();
               expect(
                 await AssertUtils.assertInString({
-                  body: hover!.contents.join(""),
+                  body: (hover!.contents[0] as MarkdownString).value,
                   match: ["vault 1"],
                   nomatch: ["vault 0", "the test note"],
                 })
@@ -654,7 +655,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -700,7 +701,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -744,7 +745,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -788,7 +789,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Sint quo sunt maxime.",
                 "Nisi nam dolorem qui ut minima.",
@@ -835,7 +836,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             const hover = await provideForNote(editor);
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: [
                 "Numquam occaecati",
                 "Sint quo sunt maxime.",
@@ -881,7 +882,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
           );
           expect(hover).toBeTruthy();
           await AssertUtils.assertInString({
-            body: hover!.contents.join(""),
+            body: (hover!.contents[0] as MarkdownString).value,
             match: ["this is tag foo.test"],
           });
           done();
@@ -955,7 +956,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
           );
           expect(hover).toBeTruthy();
           await AssertUtils.assertInString({
-            body: hover!.contents.join(""),
+            body: (hover!.contents[0] as MarkdownString).value,
             match: ["this is user test.mctestface"],
           });
           done();
@@ -1032,7 +1033,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             );
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: ["this is tag foo.test"],
             });
             done();
@@ -1083,7 +1084,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
             );
             expect(hover).toBeTruthy();
             await AssertUtils.assertInString({
-              body: hover!.contents.join(""),
+              body: (hover!.contents[0] as MarkdownString).value,
               match: ["this is tag foo.test"],
             });
             done();

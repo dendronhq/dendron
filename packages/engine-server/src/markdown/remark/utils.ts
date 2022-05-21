@@ -44,9 +44,11 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
+  Code,
   FootnoteDefinition,
   FrontmatterContent,
   Heading,
+  HTML,
   Image,
   InlineCode,
   Link,
@@ -1048,8 +1050,7 @@ export class RemarkUtils {
   }
 
   static isParent(node: Node): node is Parent {
-    // @ts-ignore
-    return _.isArray(node.children);
+    return _.isArray((node as Parent).children);
   }
 
   static isParagraph(node: Node): node is Paragraph {
@@ -1102,6 +1103,18 @@ export class RemarkUtils {
 
   static isFrontmatter(node: Node): node is FrontmatterContent {
     return node.type === DendronASTTypes.FRONTMATTER;
+  }
+
+  static isHTML(node: Node): node is HTML {
+    return node.type === DendronASTTypes.HTML;
+  }
+
+  static isCode(node: Node): node is Code {
+    return node.type === DendronASTTypes.CODE;
+  }
+
+  static isYAML(node: Node): node is YAML {
+    return node.type === DendronASTTypes.YAML;
   }
 
   static isNodeWithPosition<N extends Node>(

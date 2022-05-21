@@ -47,6 +47,10 @@ import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
 import { WorkspaceService } from "../workspace";
 import { DateTimeFormatOptions } from "luxon";
+import {
+  BacklinkHoverProcessor,
+  BacklinkOpts,
+} from "./remark/backlinksHoverTransformer";
 
 export { ProcFlavor };
 
@@ -114,6 +118,7 @@ export type ProcDataFullOptsV5 = {
   fm?: any;
   wikiLinksOpts?: WikiLinksOpts;
   publishOpts?: DendronPubOpts;
+  backlinkHoverOpts?: BacklinkOpts;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -251,7 +256,14 @@ export class MDUtilsV5 {
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)
-      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
+      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
+
+    // This needs to be added before noteRefsV2 & wikiLinks, as it needs to transform some notes to regular text nodes.
+    if (opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
+      proc.use(BacklinkHoverProcessor, data.backlinkHoverOpts);
+    }
+
+    proc
       .use(noteRefsV2)
       .use(wikiLinks, data.wikiLinksOpts)
       .use(blockAnchors)
@@ -318,13 +330,16 @@ export class MDUtilsV5 {
             // but now that's done by the
             // [[PreviewPanel|../packages/plugin-core/src/components/views/PreviewPanel.ts#^preview-rewrites-images]]
           }
-          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
+          if (
+            opts.flavor === ProcFlavor.HOVER_PREVIEW ||
+            opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER
+          ) {
             proc = proc.use(dendronHoverPreview);
           }
           // add additional plugins
           const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
           let insertTitle;
-          if (isNoteRef) {
+          if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
             insertTitle = false;
           } else {
             const config = data.config as IntermediateDendronConfig;

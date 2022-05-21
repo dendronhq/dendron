@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  DendronASTDest,
   DLink,
   DLinkType,
   DNoteAnchorBasic,
@@ -8,6 +9,7 @@ import {
   isLineAnchor,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
 } from "@dendronhq/common-all";
@@ -15,6 +17,7 @@ import {
   HASHTAG_REGEX_BASIC,
   HASHTAG_REGEX_LOOSE,
   LinkUtils,
+  MDUtilsV5,
   RemarkUtils,
   USERTAG_REGEX_LOOSE,
   WorkspaceUtils,
@@ -27,7 +30,6 @@ import vscode, {
   commands,
   extensions,
   Location,
-  MarkdownString,
   Position,
   Range,
   Selection,
@@ -708,6 +710,57 @@ export const fsPathToRef = ({
 export const containsImageExt = (pathParam: string): boolean =>
   !!imageExtsRegex.exec(path.parse(pathParam).ext);
 
+export async function getSurroundingContextForNoteRefMdsViaRemark(
+  ref: FoundRefT,
+  linesOfContext: number
+): Promise<string | undefined> {
+  if (!ref.note) {
+    return;
+  }
+  const proc = MDUtilsV5.procRemarkFull(
+    {
+      engine: ExtensionProvider.getEngine(),
+      fname: ref.note.fname,
+      vault: ref.note.vault,
+      dest: DendronASTDest.MD_REGULAR,
+      backlinkHoverOpts: {
+        linesOfContext,
+        backLinkLineNumber: ref.location.range.start.line + 1, // 1 indexed
+        location: {
+          start: {
+            line: ref.location.range.start.line,
+            column: ref.location.range.start.character + 1,
+          },
+          end: {
+            line: ref.location.range.end.line,
+            column: ref.location.range.end.character + 1,
+          },
+        },
+      },
+    },
+    {
+      flavor: ProcFlavor.BACKLINKS_PANEL_HOVER,
+    }
+  );
+
+  const note = ref.note!;
+
+  const fsPath = NoteUtils.getFullPath({
+    note,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+  });
+
+  const fileContent = fs.readFileSync(fsPath).toString();
+
+  const parsed = proc.parse(fileContent);
+
+  const transformed = await proc.run(parsed);
+
+  const output = proc.stringify(transformed);
+
+  return output;
+}
+
 export function getSurroundingContextForNoteRefMds(
   ref: FoundRefT,
   linesOfContext: number
@@ -726,12 +779,12 @@ export function getSurroundingContextForNoteRefMds(
 
   const linkLineNumber = ref.location.range.start.line;
 
-  console.log("-- BEGIN --");
-  console.log(`Match Text:${ref.matchText} | Line Number: ${linkLineNumber}`);
+  // console.log("-- BEGIN --");
+  // console.log(`Match Text:${ref.matchText} | Line Number: ${linkLineNumber}`);
   const unformatted = lines[linkLineNumber];
-  console.log(unformatted);
+  // console.log(unformatted);
   const prefix = unformatted.substring(0, ref.location.range.start.character);
-  console.log(prefix);
+  // console.log(prefix);
   const suffix = unformatted.substring(
     ref.location.range.end.character,
     unformatted.length
@@ -740,8 +793,8 @@ export function getSurroundingContextForNoteRefMds(
     ref.location.range.start.character,
     ref.location.range.end.character
   );
-  console.log(suffix);
-  console.log("-- END --");
+  // console.log(suffix);
+  // console.log("-- END --");
 
   const golden = `${prefix}<span style="color:#000;background-color:#FFFF00;">${middle}</span>${suffix}`;
 
@@ -796,55 +849,15 @@ export function getSurroundingContextForNoteRefMds(
     upperContentBlock.push("\n");
   }
 
-  //   const rawTextFormattedStyle = new MarkdownString(`${lowerBoundText}
-  // <pre>
-  // ${lines.slice(lowerBound, linkLineNumber).join("\n")}
-  // <span style="color:#000;background-color:#FFFF00;">${
-  //     lines[linkLineNumber]
-  //   }</span>
-  // ${lines.slice(linkLineNumber + 1, upperBound).join("\n")}
-  // </pre>
-  // ${upperBoundText}
-  // `);
-
-  // TODO: Add logic to make it still render ok if we're in the middle of a code block
-  // const markdownStyle = new MarkdownString();
-  // markdownStyle.appendMarkdown(
-  //   lowerBoundText +
-  //     "\n" +
-  //     lines.slice(lowerBound, linkLineNumber).join("\n") +
-  //     `\n<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>` +
-  //     lines.slice(linkLineNumber + 1, upperBound).join("\n") +
-  //     "\n" +
-  //     upperBoundText
-  // );
-
-  // return markdownStyle;
-  // return rawTextFormattedStyle;
-
   const finalArray = [];
 
   finalArray.push(lowerBoundText);
-  // finalArray.push(...lines.slice(lowerBound, linkLineNumber));
   finalArray.push(...lowerContentBlock);
   finalArray.push(golden);
-  // finalArray.push(
-  //   `<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>`
-  // );
   finalArray.push(...upperContentBlock);
   finalArray.push(upperBoundText);
 
   return finalArray.join("\n");
-
-  // return (
-  //   lowerBoundText +
-  //   "\n" +
-  //   lines.slice(lowerBound, linkLineNumber).join("\n") +
-  //   `\n<span style="color:#000;background-color:#FFFF00;">${lines[linkLineNumber]}</span>` +
-  //   lines.slice(linkLineNumber + 1, upperBound).join("\n") +
-  //   "\n" +
-  //   upperBoundText
-  // );
 }
 
 function adjustForCodeBlocks(input: string[]): void {

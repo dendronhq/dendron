@@ -1,13 +1,4 @@
-import {
-  assertUnreachable,
-  DateFormatUtil,
-  DendronASTDest,
-  DendronError,
-  NoteProps,
-  NoteUtils,
-  ProcFlavor,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
 import {
   BacklinkSortOrder,
   EngineEventEmitter,
@@ -28,14 +19,14 @@ import {
   Uri,
   window,
 } from "vscode";
-import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DendronContext, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+// import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import {
   findReferencesById,
   FoundRefT,
   getSurroundingContextForNoteRefMds,
+  getSurroundingContextForNoteRefMdsViaRemark,
   sortPaths,
 } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -65,7 +56,7 @@ export default class BacklinksTreeDataProvider
    * engine
    */
   constructor(
-    private _engine: IEngineAPIService,
+    // private _engine: IEngineAPIService,
     engineEvents: EngineEventEmitter,
     isLinkCandidateEnabled: boolean | undefined
   ) {
@@ -194,6 +185,8 @@ export default class BacklinksTreeDataProvider
         if (!this._isLinkCandidateEnabled && element.label === "Candidates") {
           return [];
         }
+
+        // @ts-ignore tODO REmove
         return this.refsToBacklinkTreeItems(refs, activeNote.fname, element);
       }
     } catch (error) {
@@ -279,7 +272,7 @@ export default class BacklinksTreeDataProvider
     fsPath: string,
     parent: Backlink
   ) => {
-    return refs.map((ref) => {
+    return refs.map(async (ref) => {
       const lineNum = ref.location.range.start.line;
       const backlink = new Backlink(
         ref.matchText,
@@ -293,29 +286,11 @@ export default class BacklinksTreeDataProvider
       backlink.parentBacklink = parent;
       backlink.description = `on line ${lineNum + 1}`;
 
-      // const lang = await languages.getLanguages();
-
       const markdownStr = new MarkdownString();
 
-      markdownStr.appendMarkdown(getSurroundingContextForNoteRefMds(ref, 20));
-
-      //       const markdownStr = new MarkdownString(
-      //         ` ### Testing
-
-      // <div style="background-color: #FFFF00">
-      // <li style="background-color: #FFFF00"><em>Helloz</em></li>
-      // <li>World</li>
-      // <div>
-      // <hr/>
-      // <span style="color:#000;background-color:#FFFF00;">Howdy there.</span>
-      // <span style="color:#000;background-color:var(--vscode-button-background);">Howdy there.</span>
-      // <span style="color:#000;background-color: var(--vscode-button-foreground);">Howdy there.</span>
-      // <span style="color:#000;background-color:var(--vscode-button-hoverBackground);">Howdy there.</span>
-
-      // end test`
-      //       );
-
-      // const color = new ThemeColor("badge.background");
+      markdownStr.appendMarkdown(
+        (await getSurroundingContextForNoteRefMdsViaRemark(ref, 20))!
+      );
 
       markdownStr.supportHtml = true;
       markdownStr.isTrusted = true;
@@ -395,117 +370,119 @@ export default class BacklinksTreeDataProvider
       return [];
     }
 
-    const out = pathsSorted.map((pathParam) => {
-      const references = referencesByPath[pathParam];
+    const out = await Promise.all(
+      pathsSorted.map(async (pathParam) => {
+        const references = referencesByPath[pathParam];
 
-      const backlink = new Backlink(
-        _.trimEnd(path.basename(pathParam), path.extname(pathParam)),
-        references,
-        TreeItemCollapsibleState.Expanded
-      );
-
-      const totalCount = references.length;
-      const linkCount = references.filter((ref) => !ref.isCandidate).length;
-      const candidateCount = isLinkCandidateEnabled
-        ? totalCount - linkCount
-        : 0;
-
-      const backlinkCount = isLinkCandidateEnabled
-        ? references.length
-        : references.filter((ref) => !ref.isCandidate).length;
-
-      if (backlinkCount === 0) return undefined;
-
-      let linkCountDescription;
-
-      if (linkCount === 1) {
-        linkCountDescription = "1 link";
-      } else if (linkCount > 1) {
-        linkCountDescription = `${linkCount} links`;
-      }
-
-      let candidateCountDescription;
-
-      if (candidateCount === 1) {
-        candidateCountDescription = "1 candidate";
-      } else if (candidateCount > 1) {
-        candidateCountDescription = `${candidateCountDescription} candidates`;
-      }
-
-      const description = _.compact([
-        linkCountDescription,
-        candidateCountDescription,
-      ]).join(", ");
-
-      const updatedTime = references[0].note?.updated;
-      const suffix =
-        updatedTime !== undefined
-          ? `. Note updated: ${DateFormatUtil.formatDate(updatedTime)}`
-          : ``;
-
-      backlink.description = `${description}${suffix}`;
-
-      backlink.command = {
-        command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
-        arguments: [
-          Uri.file(pathParam),
-          { selection: references[0].location.range },
-          false,
-        ],
-        title: "Open File",
-      };
-
-      const markdownBlocks = references.map((foundRef) => {
-        return {
-          content: getSurroundingContextForNoteRefMds(foundRef, 10),
-          isCandidate: foundRef.isCandidate,
-        };
-      });
-
-      const newmdstr = new MarkdownString();
-      newmdstr.isTrusted = true;
-      newmdstr.supportHtml = true;
-      newmdstr.supportThemeIcons = true;
-
-      const noteProps = references[0].note;
-
-      if (noteProps) {
-        newmdstr.appendMarkdown(
-          `## ${noteProps.title}
-_created: ${DateFormatUtil.formatDate(noteProps.created)}_<br>
-_updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
+        const backlink = new Backlink(
+          _.trimEnd(path.basename(pathParam), path.extname(pathParam)),
+          references,
+          TreeItemCollapsibleState.Expanded
         );
-        newmdstr.appendMarkdown("<hr/>");
-        // newmdstr.appendMarkdown(
-        //   `_created: ${DateFormatUtil.formatDate(noteProps.created)}_ \n`
-        // );
-        // newmdstr.appendMarkdown(
-        //   `_updated: ${DateFormatUtil.formatDate(noteProps.updated)}_ \n`
-        // );
-      }
 
-      let curLinkCount = 1;
-      let curCandidateCount = 1;
+        const totalCount = references.length;
+        const linkCount = references.filter((ref) => !ref.isCandidate).length;
+        const candidateCount = isLinkCandidateEnabled
+          ? totalCount - linkCount
+          : 0;
 
-      for (const block of markdownBlocks) {
-        let header;
-        if (block.isCandidate) {
-          header = `**CANDIDATE ${curCandidateCount}**<br>`;
-          curCandidateCount += 1;
-        } else {
-          header = `**LINK ${curLinkCount}**<br>`;
-          curLinkCount += 1;
+        const backlinkCount = isLinkCandidateEnabled
+          ? references.length
+          : references.filter((ref) => !ref.isCandidate).length;
+
+        if (backlinkCount === 0) return undefined;
+
+        let linkCountDescription;
+
+        if (linkCount === 1) {
+          linkCountDescription = "1 link";
+        } else if (linkCount > 1) {
+          linkCountDescription = `${linkCount} links`;
         }
 
-        newmdstr.appendMarkdown(header);
-        newmdstr.appendMarkdown(block.content);
-        newmdstr.appendMarkdown("<hr/>");
-      }
+        let candidateCountDescription;
 
-      backlink.tooltip = newmdstr;
+        if (candidateCount === 1) {
+          candidateCountDescription = "1 candidate";
+        } else if (candidateCount > 1) {
+          candidateCountDescription = `${candidateCountDescription} candidates`;
+        }
 
-      return backlink;
-    });
+        const description = _.compact([
+          linkCountDescription,
+          candidateCountDescription,
+        ]).join(", ");
+
+        const updatedTime = references[0].note?.updated;
+        const suffix =
+          updatedTime !== undefined
+            ? `. Note updated: ${DateFormatUtil.formatDate(updatedTime)}`
+            : ``;
+
+        backlink.description = `${description}${suffix}`;
+
+        backlink.command = {
+          command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
+          arguments: [
+            Uri.file(pathParam),
+            { selection: references[0].location.range },
+            false,
+          ],
+          title: "Open File",
+        };
+
+        const markdownBlocksPromise = references.map(async (foundRef) => {
+          return {
+            content: (await getSurroundingContextForNoteRefMdsViaRemark(
+              foundRef,
+              10
+            ))!,
+            // content: getSurroundingContextForNoteRefMds(foundRef, 10),
+            isCandidate: foundRef.isCandidate,
+          };
+        });
+
+        const markdownBlocks = await Promise.all(markdownBlocksPromise);
+
+        const newmdstr = new MarkdownString();
+        newmdstr.isTrusted = true;
+        newmdstr.supportHtml = true;
+        newmdstr.supportThemeIcons = true;
+
+        const noteProps = references[0].note;
+
+        if (noteProps) {
+          newmdstr.appendMarkdown(
+            `## ${noteProps.title}
+_created: ${DateFormatUtil.formatDate(noteProps.created)}_<br>
+_updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
+          );
+          newmdstr.appendMarkdown("<hr/>");
+        }
+
+        let curLinkCount = 1;
+        let curCandidateCount = 1;
+
+        for (const block of markdownBlocks) {
+          let header;
+          if (block.isCandidate) {
+            header = `**CANDIDATE ${curCandidateCount}**<br>`;
+            curCandidateCount += 1;
+          } else {
+            header = `\n\n**LINK ${curLinkCount}**<br>`;
+            curLinkCount += 1;
+          }
+
+          newmdstr.appendMarkdown(header);
+          newmdstr.appendMarkdown(block.content);
+          newmdstr.appendMarkdown("<hr/>");
+        }
+
+        backlink.tooltip = newmdstr;
+
+        return backlink;
+      })
+    );
     return _.filter(out, (item) => !_.isUndefined(item)) as Backlink[];
   };
 
@@ -515,85 +492,5 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
     return sortPaths(Object.keys(referencesByPath), {
       shallowFirst: true,
     });
-  }
-
-  /**
-   * Duplicated logic - need to consolidate.
-   * @param fname
-   * @returns
-   */
-  private async getMarkdownPreviewString(
-    fname: string
-  ): Promise<string | undefined> {
-    const ctx = "";
-    // Check if what's being referenced is a note.
-    let note: NoteProps;
-    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      engine: this._engine,
-    });
-    if (maybeNotes.length === 0) {
-      return;
-    } else if (maybeNotes.length > 1) {
-      // If there are multiple notes with this fname, default to one that's in the same vault first.
-      const currentVault = PickerUtilsV2.getVaultForOpenEditor();
-      const sameVaultNote = _.filter(maybeNotes, (note) =>
-        VaultUtils.isEqual(note.vault, currentVault, this._engine.wsRoot)
-      )[0];
-      if (!_.isUndefined(sameVaultNote)) {
-        // There is a note that's within the same vault, let's go with that.
-        note = sameVaultNote;
-      } else {
-        // Otherwise, just pick one, doesn't matter which.
-        note = maybeNotes[0];
-      }
-    } else {
-      // Just 1 note, use that.
-      note = maybeNotes[0];
-    }
-
-    // For notes, let's use the noteRef functionality to render the referenced portion.
-    const referenceText = ["![["];
-    // if (vaultName) referenceText.push(`dendron://${vaultName}/`);
-    referenceText.push(fname);
-
-    referenceText.push("]]");
-    const reference = referenceText.join("");
-    // now we create a fake note so we can pass this to the engine
-    const id = `note.id-${reference}`;
-    const fakeNote = NoteUtils.createForFake({
-      // Mostly same as the note...
-      fname: note.fname,
-      vault: note.vault,
-      // except the changed ID to avoid caching
-      id,
-      // And using the reference as the text of the note
-      contents: reference,
-    });
-    const rendered = await this._engine.renderNote({
-      id: fakeNote.id,
-      note: fakeNote,
-      dest: DendronASTDest.MD_REGULAR,
-      flavor: ProcFlavor.HOVER_PREVIEW,
-    });
-    if (rendered.error) {
-      const error =
-        rendered.error instanceof DendronError
-          ? rendered.error
-          : new DendronError({
-              message: "Error while rendering backlinks hover",
-              payload: rendered.error,
-            });
-      Sentry.captureException(error);
-      Logger.error({
-        ctx,
-        msg: "Error while rendering the backlinks hover",
-        error,
-      });
-    }
-    if (rendered.data) {
-      return rendered.data;
-    }
-    return;
   }
 }

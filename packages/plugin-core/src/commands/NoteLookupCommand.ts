@@ -18,6 +18,7 @@ import {
   LookupNoteTypeEnum,
   LookupNoteType,
   LookupSelectionType,
+  TemplateUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -548,7 +549,7 @@ export class NoteLookupCommand
         );
       } else if (!_.isUndefined(resp.data)) {
         // Only apply schema if note is found
-        SchemaUtils.applyTemplate({
+        TemplateUtils.applyTemplate({
           templateNote: resp.data,
           note: nodeNew,
           engine,

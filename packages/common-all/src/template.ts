@@ -69,25 +69,6 @@ export class TemplateUtils {
     "tags",
     "image",
   ];
-  // static getTemplate({
-  //   fname,
-  //   vault,
-  //   engine,
-  // }: {
-  //   fname: string;
-  //   vault?: DVault;
-  //   engine: DEngine;
-  // }): NoteProps {
-  // 	// if vault is specified, we have everything we need to get a note
-  //   if (vault) {
-  //     const maybeNotes = NoteUtils.getNoteByFnameFromEngine({
-  //       fname,
-  //       vault,
-  //       engine,
-  //     });
-  // 		return maybeNotes;
-  //   }
-  // }
 
   /**
    * Apply template note to provided {@param note}.

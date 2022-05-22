@@ -10,6 +10,38 @@ describe(`WHEN running applyTemplate tests`, () => {
   const currentDate = new Date(2022, 0, 10);
   let clock: sinon.SinonFakeTimers;
 
+  async function setupTemplateTest(
+    opts: {
+      templateNoteBody: string;
+      fm: any;
+    },
+    cb: ({ targetNote }: { targetNote: NoteProps }) => void
+  ) {
+    const targetNote = await noteFactory.createForFName("new note");
+
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const templateNote: NoteProps = engine.notes["foo"];
+        templateNote.body = opts.templateNoteBody;
+        templateNote.custom = opts.fm;
+        TemplateUtils.applyTemplate({
+          templateNote,
+          targetNote,
+          engine,
+        });
+        cb({ targetNote });
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        modConfigCb: (cfg) => {
+          cfg.workspace.enableHandlebarTemplates = true;
+          return cfg;
+        },
+      }
+    );
+  }
+
   describe("WHEN handlebars enabled", () => {
     beforeEach(async () => {
       targetNote = await noteFactory.createForFName("new note");
@@ -20,27 +52,15 @@ describe(`WHEN running applyTemplate tests`, () => {
       clock.restore();
     });
 
+    const testTemplateNoteBody = "hello {{fm.name}}";
+    const testFM = { name: "james" };
+
     describe("AND WHEN update one variable", () => {
       it("THEN render variable", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            templateNote.body = "hello {{fm.name}}";
-            templateNote.custom.name = "james";
-            TemplateUtils.applyTemplate({
-              templateNote,
-              targetNote,
-              engine,
-            });
+        setupTemplateTest(
+          { templateNoteBody: testTemplateNoteBody, fm: testFM },
+          ({ targetNote }) => {
             expect(targetNote.body).toEqual("hello james");
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupBasic,
-            modConfigCb: (cfg) => {
-              cfg.workspace.enableHandlebarTemplates = true;
-              return cfg;
-            },
           }
         );
       });
@@ -48,24 +68,46 @@ describe(`WHEN running applyTemplate tests`, () => {
 
     describe("AND WHEN update one variable but value is not present", () => {
       it("THEN do not render variable", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            templateNote.body = "hello {{fm.name}}";
-            TemplateUtils.applyTemplate({
-              templateNote,
-              targetNote,
-              engine,
-            });
+        setupTemplateTest(
+          { templateNoteBody: testTemplateNoteBody, fm: {} },
+          ({ targetNote }) => {
             expect(targetNote.body).toEqual("hello ");
-          },
+          }
+        );
+      });
+    });
+
+    const templateBodyWithConditional = [
+      "{{#if fm.name}}",
+      "hello {{fm.name}}",
+      "{{else}}",
+      "No name",
+      "{{/if}}",
+    ].join("\n");
+
+    describe("AND WHEN conditional is present", () => {
+      it("THEN render conditional", async () => {
+        setupTemplateTest(
           {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupBasic,
-            modConfigCb: (cfg) => {
-              cfg.workspace.enableHandlebarTemplates = true;
-              return cfg;
-            },
+            templateNoteBody: templateBodyWithConditional,
+            fm: testFM,
+          },
+          ({ targetNote }) => {
+            expect(targetNote.body).toEqual("hello james\n");
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN conditional is present", () => {
+      it("THEN render conditional", async () => {
+        setupTemplateTest(
+          {
+            templateNoteBody: templateBodyWithConditional,
+            fm: {},
+          },
+          ({ targetNote }) => {
+            expect(targetNote.body).toEqual("No name\n");
           }
         );
       });

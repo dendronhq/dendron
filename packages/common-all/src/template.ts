@@ -45,6 +45,7 @@ function genDefaultContext(targetNote: NoteProps) {
   const CURRENT_HOUR = currentDate.toFormat("HH");
   const CURRENT_MINUTE = currentDate.toFormat("mm");
   const CURRENT_SECOND = currentDate.toFormat("ss");
+  const CURRENT_DAY_OF_WEEK = currentDate.toJSDate().getDay();
   return {
     CURRENT_YEAR,
     CURRENT_MONTH,
@@ -53,6 +54,7 @@ function genDefaultContext(targetNote: NoteProps) {
     CURRENT_HOUR,
     CURRENT_MINUTE,
     CURRENT_SECOND,
+    CURRENT_DAY_OF_WEEK,
     FNAME: targetNote.fname,
     DESC: targetNote.desc,
   };

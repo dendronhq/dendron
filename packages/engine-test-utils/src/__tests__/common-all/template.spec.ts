@@ -17,7 +17,7 @@ describe(`WHEN running applyTemplate tests`, () => {
     },
     cb: ({ targetNote }: { targetNote: NoteProps }) => void
   ) {
-    const targetNote = await noteFactory.createForFName("new note");
+    const targetNote = await noteFactory.createForFName("new-note");
 
     await runEngineTestV5(
       async ({ engine }) => {
@@ -85,7 +85,7 @@ describe(`WHEN running applyTemplate tests`, () => {
       "{{/if}}",
     ].join("\n");
 
-    describe("AND WHEN conditional is present", () => {
+    describe("AND WHEN conditional is present AND is true", () => {
       it("THEN render conditional", async () => {
         setupTemplateTest(
           {
@@ -99,8 +99,8 @@ describe(`WHEN running applyTemplate tests`, () => {
       });
     });
 
-    describe("AND WHEN conditional is present", () => {
-      it("THEN render conditional", async () => {
+    describe("AND WHEN conditional is present AND is false", () => {
+      it("THEN render else clause", async () => {
         setupTemplateTest(
           {
             templateNoteBody: templateBodyWithConditional,
@@ -108,6 +108,34 @@ describe(`WHEN running applyTemplate tests`, () => {
           },
           ({ targetNote }) => {
             expect(targetNote.body).toEqual("No name\n");
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN template uses default context value", () => {
+      it("THEN render default context value", () => {
+        setupTemplateTest(
+          {
+            templateNoteBody: "[[{{FNAME}}.child]]",
+            fm: {},
+          },
+          ({ targetNote }) => {
+            expect(targetNote.body).toEqual("[[new-note.child]]");
+          }
+        );
+      });
+    });
+
+    describe("AND use escaped brackets", () => {
+      it("THEN render raw values", () => {
+        setupTemplateTest(
+          {
+            templateNoteBody: "\\{{ fm.name }}",
+            fm: testFM,
+          },
+          ({ targetNote }) => {
+            expect(targetNote.body).toEqual("{{ fm.name }}");
           }
         );
       });

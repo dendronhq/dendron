@@ -36,6 +36,28 @@ function addOrAppendTemplateBody({
   return targetNote;
 }
 
+function genDefaultContext(targetNote: NoteProps) {
+  const currentDate = Time.now();
+  const CURRENT_YEAR = currentDate.toFormat("yyyy");
+  const CURRENT_MONTH = currentDate.toFormat("LL");
+  const CURRENT_WEEK = currentDate.toFormat("WW");
+  const CURRENT_DAY = currentDate.toFormat("dd");
+  const CURRENT_HOUR = currentDate.toFormat("HH");
+  const CURRENT_MINUTE = currentDate.toFormat("mm");
+  const CURRENT_SECOND = currentDate.toFormat("ss");
+  return {
+    CURRENT_YEAR,
+    CURRENT_MONTH,
+    CURRENT_WEEK,
+    CURRENT_DAY,
+    CURRENT_HOUR,
+    CURRENT_MINUTE,
+    CURRENT_SECOND,
+    FNAME: targetNote.fname,
+    DESC: targetNote.desc,
+  };
+}
+
 export class TemplateUtils {
   /** The props of a template note that will get copied over when the template is applied. */
   static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
@@ -93,7 +115,12 @@ export class TemplateUtils {
     copyTemplateProps({ templateNote, targetNote });
     // TODO: cache tempaltes
     const template = Handlebars.compile(templateNote.body);
-    const templateBody = template({ ...targetNote, fm: targetNote.custom });
+    const context = genDefaultContext(targetNote);
+    const templateBody = template({
+      ...targetNote,
+      fm: targetNote.custom,
+      ...context,
+    });
     addOrAppendTemplateBody({ templateBody, targetNote });
     return targetNote;
   }

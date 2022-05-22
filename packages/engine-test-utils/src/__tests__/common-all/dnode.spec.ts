@@ -1,15 +1,12 @@
 import {
-  NoteUtils,
-  SchemaUtils,
   DVault,
-  SchemaOpts,
-  NoteProps,
   genUUID,
+  NoteUtils,
+  SchemaOpts,
+  SchemaUtils,
 } from "@dendronhq/common-all";
-import sinon from "sinon";
-import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
 import { makeSchemaTests, SchemaTest } from "../../utils/schema";
 
 describe(`NoteUtils tests:`, () => {

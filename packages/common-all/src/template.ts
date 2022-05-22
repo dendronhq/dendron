@@ -1,7 +1,40 @@
+import Handlebars from "handlebars";
 import _ from "lodash";
 import { Time } from "./time";
 import { DEngineClient, NoteProps } from "./types";
 import { ConfigUtils } from "./utils";
+
+type TemplateFunctionProps = {
+  templateNote: NoteProps;
+  targetNote: NoteProps;
+};
+
+function copyTemplateProps({
+  templateNote,
+  targetNote,
+}: TemplateFunctionProps) {
+  const tempNoteProps = _.pick(templateNote, TemplateUtils.TEMPLATE_COPY_PROPS);
+  _.forEach(tempNoteProps, (v, k) => {
+    // @ts-ignore
+    targetNote[k] = v;
+  });
+  return targetNote;
+}
+
+function addOrAppendTemplateBody({
+  targetNote,
+  templateBody,
+}: {
+  templateBody: string;
+  targetNote: NoteProps;
+}) {
+  if (targetNote.body) {
+    targetNote.body += `\n${templateBody}`;
+  } else {
+    targetNote.body = templateBody;
+  }
+  return targetNote;
+}
 
 export class TemplateUtils {
   /** The props of a template note that will get copied over when the template is applied. */
@@ -39,7 +72,7 @@ export class TemplateUtils {
    */
   static applyTemplate(opts: {
     templateNote: NoteProps;
-    note: NoteProps;
+    targetNote: NoteProps;
     engine: DEngineClient;
   }) {
     if (ConfigUtils.getWorkspace(opts.engine.config).enableHandlebarTemplates) {
@@ -49,62 +82,66 @@ export class TemplateUtils {
     }
   }
 
-  static applyHBTemplate(opts: {
+  static applyHBTemplate({
+    templateNote,
+    targetNote,
+  }: {
     templateNote: NoteProps;
-    note: NoteProps;
+    targetNote: NoteProps;
     engine: DEngineClient;
   }) {
-    return;
+    copyTemplateProps({ templateNote, targetNote });
+    // TODO: cache tempaltes
+    const template = Handlebars.compile(templateNote.body);
+    const templateBody = template({ ...targetNote, fm: targetNote.custom });
+    addOrAppendTemplateBody({ templateBody, targetNote });
+    return targetNote;
   }
 
+  // @deprecate
   static applyLodashTemplate(opts: {
     templateNote: NoteProps;
-    note: NoteProps;
+    targetNote: NoteProps;
     engine: DEngineClient;
   }) {
-    const { templateNote, note } = opts;
+    const { templateNote, targetNote } = opts;
     if (templateNote.type === "note") {
-      const tempNoteProps = _.pick(templateNote, this.TEMPLATE_COPY_PROPS);
-      _.forEach(tempNoteProps, (v, k) => {
-        // @ts-ignore
-        note[k] = v;
-      });
+      copyTemplateProps({ templateNote, targetNote });
       // If note body exists, append template's body instead of overriding
-      if (note.body) {
-        note.body += `\n${templateNote.body}`;
-      } else {
-        note.body = templateNote.body;
-      }
+      addOrAppendTemplateBody({
+        templateBody: templateNote.body,
+        targetNote,
+      });
 
       // Apply date variable substitution to the body based on lodash interpolate delimiter if applicable
       // E.g. if template has <%= CURRENT_YEAR %>, new note will contain 2021
       const currentDate = Time.now();
 
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_YEAR\s*%>/g,
         currentDate.toFormat("yyyy")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_MONTH\s*%>/g,
         currentDate.toFormat("LL")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_WEEK\s*%>/g,
         currentDate.toFormat("WW")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_DAY\s*%>/g,
         currentDate.toFormat("dd")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_HOUR\s*%>/g,
         currentDate.toFormat("HH")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_MINUTE\s*%>/g,
         currentDate.toFormat("mm")
       );
-      note.body = note.body.replace(
+      targetNote.body = targetNote.body.replace(
         /<%=\s*CURRENT_SECOND\s*%>/g,
         currentDate.toFormat("ss")
       );

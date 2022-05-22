@@ -481,7 +481,7 @@ export class NoteUtils {
         if (tempNote) {
           TemplateUtils.applyTemplate({
             templateNote: tempNote,
-            note,
+            targetNote: note,
             engine,
           });
         }

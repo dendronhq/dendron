@@ -6,16 +6,76 @@ import { ENGINE_HOOKS } from "../../presets";
 
 describe(`WHEN running applyTemplate tests`, () => {
   const noteFactory: TestNoteFactory = TestNoteFactory.defaultUnitTestFactory();
-  let note: NoteProps;
+  let targetNote: NoteProps;
   const currentDate = new Date(2022, 0, 10);
   let clock: sinon.SinonFakeTimers;
 
-  describe("WHEN handlebars enabled", () => {});
+  describe("WHEN handlebars enabled", () => {
+    beforeEach(async () => {
+      targetNote = await noteFactory.createForFName("new note");
+      clock = sinon.useFakeTimers(currentDate);
+    });
+    afterEach(() => {
+      sinon.restore();
+      clock.restore();
+    });
+
+    describe("AND WHEN update one variable", () => {
+      it("THEN render variable", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const templateNote: NoteProps = engine.notes["foo"];
+            templateNote.body = "hello {{fm.name}}";
+            templateNote.custom.name = "james";
+            TemplateUtils.applyTemplate({
+              templateNote,
+              targetNote,
+              engine,
+            });
+            expect(targetNote.body).toEqual("hello james");
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupBasic,
+            modConfigCb: (cfg) => {
+              cfg.workspace.enableHandlebarTemplates = true;
+              return cfg;
+            },
+          }
+        );
+      });
+    });
+
+    describe("AND WHEN update one variable but value is not present", () => {
+      it("THEN do not render variable", async () => {
+        await runEngineTestV5(
+          async ({ engine }) => {
+            const templateNote: NoteProps = engine.notes["foo"];
+            templateNote.body = "hello {{fm.name}}";
+            TemplateUtils.applyTemplate({
+              templateNote,
+              targetNote,
+              engine,
+            });
+            expect(targetNote.body).toEqual("hello ");
+          },
+          {
+            expect,
+            preSetupHook: ENGINE_HOOKS.setupBasic,
+            modConfigCb: (cfg) => {
+              cfg.workspace.enableHandlebarTemplates = true;
+              return cfg;
+            },
+          }
+        );
+      });
+    });
+  });
 
   describe("WHEN non-handlebars", () => {
     describe(`GIVEN current note's body is empty`, () => {
       beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
+        targetNote = await noteFactory.createForFName("new note");
         clock = sinon.useFakeTimers(currentDate);
       });
       afterEach(() => {
@@ -29,11 +89,11 @@ describe(`WHEN running applyTemplate tests`, () => {
             const templateNote: NoteProps = engine.notes["foo"];
             const resp = TemplateUtils.applyTemplate({
               templateNote,
-              note,
+              targetNote,
               engine,
             });
             expect(resp).toBeTruthy();
-            expect(note.body).toEqual(engine.notes["foo"].body);
+            expect(targetNote.body).toEqual(engine.notes["foo"].body);
           },
           {
             expect,
@@ -48,13 +108,15 @@ describe(`WHEN running applyTemplate tests`, () => {
             const dateTemplate: NoteProps = engine.notes["date-variables"];
             const resp = TemplateUtils.applyTemplate({
               templateNote: dateTemplate,
-              note,
+              targetNote,
               engine,
             });
 
             expect(resp).toBeTruthy();
-            expect(note.body).not.toEqual(engine.notes["date-variables"].body);
-            expect(note.body.trim()).toEqual(
+            expect(targetNote.body).not.toEqual(
+              engine.notes["date-variables"].body
+            );
+            expect(targetNote.body.trim()).toEqual(
               `Today is 2022.01.10` +
                 "\n" +
                 "It is week 02 of the year" +
@@ -77,13 +139,13 @@ describe(`WHEN running applyTemplate tests`, () => {
             const fmTemplate: NoteProps = engine.notes["fm-variables"];
             const resp = TemplateUtils.applyTemplate({
               templateNote: fmTemplate,
-              note,
+              targetNote,
               engine,
             });
 
             expect(resp).toBeTruthy();
-            expect(note.body).toEqual(engine.notes["fm-variables"].body);
-            expect(note.body.trim()).toEqual(`Title is {{ fm.title }}`);
+            expect(targetNote.body).toEqual(engine.notes["fm-variables"].body);
+            expect(targetNote.body.trim()).toEqual(`Title is {{ fm.title }}`);
           },
           {
             expect,
@@ -97,8 +159,8 @@ describe(`WHEN running applyTemplate tests`, () => {
       const noteBody = "test test";
 
       beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
-        note.body = noteBody;
+        targetNote = await noteFactory.createForFName("new note");
+        targetNote.body = noteBody;
       });
 
       it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
@@ -107,11 +169,11 @@ describe(`WHEN running applyTemplate tests`, () => {
             const templateNote: NoteProps = engine.notes["foo"];
             const resp = TemplateUtils.applyTemplate({
               templateNote,
-              note,
+              targetNote,
               engine,
             });
             expect(resp).toBeTruthy();
-            expect(note.body).toEqual(
+            expect(targetNote.body).toEqual(
               noteBody + "\n" + engine.notes["foo"].body
             );
           },
@@ -125,7 +187,7 @@ describe(`WHEN running applyTemplate tests`, () => {
 
     describe("GIVEN template type is not a note", () => {
       beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
+        targetNote = await noteFactory.createForFName("new note");
       });
 
       it("WHEN applying a template, THEN do nothing and return false ", async () => {
@@ -135,7 +197,7 @@ describe(`WHEN running applyTemplate tests`, () => {
             templateNote.type = "schema";
             const resp = TemplateUtils.applyTemplate({
               templateNote,
-              note,
+              targetNote,
               engine,
             });
             expect(resp).toBeFalsy();

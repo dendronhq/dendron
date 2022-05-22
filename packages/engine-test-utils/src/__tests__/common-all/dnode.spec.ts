@@ -273,8 +273,10 @@ schemas:
 /** Run all schema tests.
  *
  * Supports `.skip` pattern (you can write `runAllTests.skip(...` if you are trying to skip a test).
- * Also supports `.only` pattern, but you need to specify which test to do.
- * Should look like `runAllTests.only("rfc.41", ...`
+ *
+ * NOTE: space between o nly because of husky hook that will block test otherwise
+ * Also supports `.o nly` pattern, but you need to specify which test to do.
+ * Should look like `runAllTests.o nly("rfc.41", ...`
  */
 function runAllTests(tests: SchemaTest[], onlyFname?: string) {
   tests.forEach(({ testCase, preSetupHook, name, testedFname }) => {

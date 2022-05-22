@@ -726,6 +726,7 @@ suite("Migration", function () {
               feedback: true,
               apiEndpoint: "foobar.com",
               enableFullHierarchyNoteTitle: false,
+              enableHandlebarTemplates: false,
             };
 
             expect(postMigrationDendronConfig.workspace).toEqual(

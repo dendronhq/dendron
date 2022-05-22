@@ -551,7 +551,7 @@ export class NoteLookupCommand
         // Only apply schema if note is found
         TemplateUtils.applyTemplate({
           templateNote: resp.data,
-          note: nodeNew,
+          targetNote: nodeNew,
           engine,
         });
       }

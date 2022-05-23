@@ -202,4 +202,9 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "The theme to use when publishing.",
       desc: "The theme to use when publishing the site. If you are using a custom theme, make sure to create the CSS file too.",
     },
+    enableTaskNotes: {
+      value: true,
+      label: "Enable special formatting for task notes.",
+      desc: "Task notes will have checkboxes, owner information and more displayed on links leading to them. This applies both in preview and publishing.",
+    },
   };

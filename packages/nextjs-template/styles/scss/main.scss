@@ -109,3 +109,17 @@ hr {
     white-space: normal;
   }
 }
+
+// for task links, the decorations around the links
+.task-before {
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+.task-after {
+  margin-left: 0.5rem;
+  opacity: 0.8;
+}
+.task-status-text {
+  opacity: 0.8;
+  margin-right: 0.5rem;
+}

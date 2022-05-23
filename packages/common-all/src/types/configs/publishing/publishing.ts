@@ -37,6 +37,7 @@ export type DendronPublishingConfig = {
   enableFrontmatterTags: boolean;
   enableHashesForFMTags: boolean;
   enableRandomlyColoredTags?: boolean;
+  enableTaskNotes?: boolean;
   hierarchy?: { [key: string]: HierarchyConfig };
   duplicateNoteBehavior?: DuplicateNoteBehavior;
   writeStubs: boolean;
@@ -104,6 +105,7 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableFrontmatterTags: true,
     enableHashesForFMTags: false,
     enableRandomlyColoredTags: true,
+    enableTaskNotes: true,
     enablePrettyLinks: true,
   };
 }

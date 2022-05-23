@@ -12,6 +12,8 @@ export type TaskConfig = Pick<
 > & {
   /** Maps each status to a symbol, word, or sentence. This will be displayed for the task. */
   statusSymbols: { [status: string]: string };
+  /** Sets which statuses mark the task as completed. */
+  taskCompleteStatus: string[];
   /** Maps each priority to a symbol, word, or sentence. This will be displayed for the task. */
   prioritySymbols: { [status: string]: string };
   /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree. */
@@ -40,6 +42,7 @@ export function genDefaultTaskConfig(): TaskConfig {
       dropped: "d",
       pending: "y",
     },
+    taskCompleteStatus: ["done", "x"],
     prioritySymbols: {
       H: "high",
       M: "medium",
@@ -89,7 +92,7 @@ export class TaskNoteUtils {
     return props;
   }
 
-  static getStatusSymbol({
+  static getStatusSymbolRaw({
     note,
     taskConfig,
   }: {
@@ -99,11 +102,31 @@ export class TaskNoteUtils {
     const { status } = note.custom;
     if (status === undefined) return undefined;
     // If the symbol is not mapped to anything, use the symbol prop directly
-    if (!taskConfig.statusSymbols) return `[${status}]`;
+    if (!taskConfig.statusSymbols) return `${status}`;
     const symbol: string | undefined = taskConfig.statusSymbols[status];
-    if (symbol === undefined) return `[${status}]`;
+    if (symbol === undefined) return `${status}`;
     // If it does map to something, then use that
-    return `[${symbol}]`;
+    return `${symbol}`;
+  }
+
+  static getStatusSymbol(props: {
+    note: TaskNoteProps;
+    taskConfig: TaskConfig;
+  }) {
+    const status = this.getStatusSymbolRaw(props);
+    if (status === undefined) return undefined;
+    return `[${this.getStatusSymbolRaw(props)}]`;
+  }
+
+  static isTaskComplete({
+    note,
+    taskConfig,
+  }: {
+    note: TaskNoteProps;
+    taskConfig: TaskConfig;
+  }) {
+    const { status } = note.custom;
+    return status && taskConfig.taskCompleteStatus?.includes(status);
   }
 
   static getPrioritySymbol({

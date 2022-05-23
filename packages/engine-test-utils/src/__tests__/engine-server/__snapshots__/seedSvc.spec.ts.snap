@@ -62,6 +62,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -115,6 +118,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -211,6 +215,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -267,6 +274,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -350,6 +358,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -401,6 +412,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
 "
 `;
@@ -456,6 +468,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -507,6 +522,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -579,6 +595,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -630,6 +649,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -709,6 +729,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -761,6 +784,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -826,6 +850,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -878,6 +905,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault

@@ -43,3 +43,4 @@ export {
 } from "./extendedImage";
 export type { Image, Link } from "mdast";
 export { makeImageUrlFullPath } from "./dendronPreview";
+export * from "./backlinksHoverTransformer";

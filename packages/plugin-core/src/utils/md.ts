@@ -725,14 +725,14 @@ export async function getSurroundingContextForNoteRefMdsViaRemark(
       dest: DendronASTDest.MD_REGULAR,
       backlinkHoverOpts: {
         linesOfContext,
-        backLinkLineNumber: ref.location.range.start.line + 1, // 1 indexed
+        // backLinkLineNumber: ref.location.range.start.line + 1, // 1 indexed
         location: {
           start: {
-            line: ref.location.range.start.line,
+            line: ref.location.range.start.line + 1,
             column: ref.location.range.start.character + 1,
           },
           end: {
-            line: ref.location.range.end.line,
+            line: ref.location.range.end.line + 1,
             column: ref.location.range.end.character + 1,
           },
         },

@@ -16,7 +16,7 @@ export function BacklinkHoverProcessor(
       return;
     }
 
-    const backlinkLineNumber = _opts.backLinkLineNumber;
+    const backlinkLineNumber = _opts.location.start.line;
 
     const lowerLineLimit = backlinkLineNumber - _opts.linesOfContext;
     const upperLineLimit = backlinkLineNumber + _opts.linesOfContext;
@@ -73,11 +73,11 @@ export function BacklinkHoverProcessor(
             .join("\n");
         }
       }
-
+      // debugger;
       if (RemarkUtils.isWikiLink(node)) {
-        // if (_opts.backLinkLineNumber === node.position?.start.line) {
+        debugger;
         if (
-          _opts.backLinkLineNumber === node.position?.start.line &&
+          backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
         ) {
           (node as Node).type = DendronASTTypes.HTML;
@@ -87,7 +87,7 @@ export function BacklinkHoverProcessor(
         }
       } else if (RemarkUtils.isNoteRefV2(node)) {
         if (
-          _opts.backLinkLineNumber === node.position?.start.line &&
+          backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
         ) {
           (node as Node).type = DendronASTTypes.HTML;
@@ -96,37 +96,47 @@ export function BacklinkHoverProcessor(
           ).value = `<span style="color:#000;background-color:#FFFF00;">![[${node.value}]]</span>`;
         }
       } else if (RemarkUtils.isText(node)) {
-        if (_opts.backLinkLineNumber === node.position?.start.line) {
+        // debugger;
+        if (
+          backlinkLineNumber === node.position?.start.line &&
+          node.position?.end.column > _opts.location.start.column &&
+          node.position?.start.column < _opts.location.end.column
+          // && _opts.location.start.column === node.position.start.column // can't have this or it messes up link candidates.
+        ) {
           const contents = node.value;
           const prefix = contents.substring(0, _opts.location.start.column - 1);
 
           const candidate = contents.substring(
             _opts.location.start.column - 1,
-            _opts.location.end.column
+            _opts.location.end.column - 1
           );
           const suffix = contents.substring(
             _opts.location.end.column - 1,
-            contents.length - 1
+            contents.length
           );
 
           (node as Node).type = DendronASTTypes.HTML;
           (
             node as unknown as HTML
           ).value = `${prefix}<span style="color:#000;background-color:#FFFF00;">${candidate}</span>${suffix}`;
+
+          return index;
         }
       }
       return undefined; // continue
     });
 
+    // debugger;
     visit(tree, [DendronASTTypes.ROOT], (node, _index, _parent) => {
-      if (!RemarkUtils.isRoot(node)) {
+      // debugger;
+      if (!RemarkUtils.isRoot(node) || !node.position) {
         return;
       }
 
       const lowerBoundText =
-        lowerLineLimit < documentBodyStartLine
+        lowerLineLimit <= documentBodyStartLine
           ? "Start of Note"
-          : `Line ${lowerLineLimit}`;
+          : `Line ${lowerLineLimit - 1}`;
 
       const lowerBoundParagraph: Paragraph = {
         type: DendronASTTypes.PARAGRAPH,
@@ -143,7 +153,7 @@ export function BacklinkHoverProcessor(
       const upperBoundText =
         upperLineLimit >= documentEndLine
           ? "End of Note"
-          : `Line ${upperLineLimit}`;
+          : `Line ${upperLineLimit + 1}`;
 
       const upperBoundParagraph: Paragraph = {
         type: DendronASTTypes.PARAGRAPH,
@@ -162,7 +172,6 @@ export function BacklinkHoverProcessor(
 }
 
 export type BacklinkOpts = {
-  backLinkLineNumber: number; // TODO: Remove
   linesOfContext: number;
   location: Position;
 };

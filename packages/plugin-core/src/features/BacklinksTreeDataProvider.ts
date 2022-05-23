@@ -21,7 +21,6 @@ import {
 } from "vscode";
 import { DendronContext, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-// import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import {
   findReferencesById,
   FoundRefT,
@@ -41,7 +40,7 @@ export default class BacklinksTreeDataProvider
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
   private _onDidChangeActiveTextEditorDisposable: Disposable | undefined;
   private _engineEvents;
-  private _sortOrder: BacklinkPanelSortOrder = BacklinkPanelSortOrder.PathNames;
+  private _sortOrder: BacklinkPanelSortOrder | undefined = undefined;
   readonly _isLinkCandidateEnabled: boolean | undefined;
 
   /**
@@ -55,12 +54,12 @@ export default class BacklinksTreeDataProvider
    * engine
    */
   constructor(
-    // private _engine: IEngineAPIService,
     engineEvents: EngineEventEmitter,
     isLinkCandidateEnabled: boolean | undefined
   ) {
     this._isLinkCandidateEnabled = isLinkCandidateEnabled;
 
+    // Set default sort order to use last updated
     this.SortOrder =
       MetadataService.instance().BacklinksPanelSortOrder ??
       BacklinkPanelSortOrder.LastUpdated;
@@ -103,7 +102,7 @@ export default class BacklinksTreeDataProvider
   }
 
   /**
-   * Tells VSCode to refresh the backlinks view. Debounced to fire every 100 ms
+   * Tells VSCode to refresh the backlinks view. Debounced to fire every 250 ms
    */
   private refreshBacklinks = _.debounce(() => {
     this._onDidChangeTreeDataEmitter.fire();
@@ -136,7 +135,7 @@ export default class BacklinksTreeDataProvider
   }
 
   public get SortOrder(): BacklinkPanelSortOrder {
-    return this._sortOrder;
+    return this._sortOrder!;
   }
 
   public set SortOrder(sortOrder: BacklinkPanelSortOrder) {
@@ -172,7 +171,7 @@ export default class BacklinksTreeDataProvider
         return this.pathsToBacklinkSourceTreeItems(
           activeNote.id,
           this._isLinkCandidateEnabled,
-          this._sortOrder
+          this._sortOrder!
         );
       } else {
         // 2nd-level children.

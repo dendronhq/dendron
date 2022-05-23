@@ -118,7 +118,7 @@
     "commands": [
       {
         "command": "dendron.backlinks.sortByLastUpdated",
-        "title": "  Sort by Last Updated"
+        "title": "Sort by Last Updated"
       },
       {
         "command": "dendron.backlinks.sortByLastUpdatedChecked",
@@ -126,7 +126,7 @@
       },
       {
         "command": "dendron.backlinks.sortByPathNames",
-        "title": "  Sort by Path Names"
+        "title": "Sort by Path Names"
       },
       {
         "command": "dendron.backlinks.sortByPathNamesChecked",

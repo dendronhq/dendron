@@ -83,6 +83,8 @@ preview:
   enableFrontmatterTags: true
   enableHashesForFMTags: false
 publishing:
+  enableHierarchyDisplay: false
+  hierarchyDisplayTitle: "Sub Notes"
   theme: light
   enableFMTitle: true
   enableNoteTitleForLink: true

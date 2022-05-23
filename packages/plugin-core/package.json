@@ -394,6 +394,10 @@
         "title": "Dendron: Sign In"
       },
       {
+        "command": "dendron.capitalize",
+        "title": "Dendron: Capitalize"
+      },
+      {
         "command": "dendron.enableTelemetry",
         "title": "Dendron: Enable Telemetry"
       },

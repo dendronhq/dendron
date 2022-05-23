@@ -706,6 +706,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Sign In`,
   },
   // --- Misc
+  CAPITALIZE: {
+    key: "dendron.capitalize",
+    title: `${CMD_PREFIX} Capitalize`,
+  },
   ENABLE_TELEMETRY: {
     key: "dendron.enableTelemetry",
     title: `${CMD_PREFIX} Enable Telemetry`,

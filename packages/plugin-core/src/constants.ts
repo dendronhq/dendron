@@ -5,7 +5,7 @@ import {
   TreeViewItemLabelTypeEnum,
   TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { BacklinkSortOrder } from "@dendronhq/engine-server";
+import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
 import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
@@ -187,12 +187,12 @@ export const DENDRON_MENUS = {
      * */
     {
       command: "dendron.backlinks.sortByLastUpdated",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.PathNames}`,
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.PathNames}`,
       group: "navigation@1",
     },
     {
       command: "dendron.backlinks.sortByPathNames",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.LastUpdated}`,
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.LastUpdated}`,
       group: "navigation@1",
     },
     {

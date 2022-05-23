@@ -26,16 +26,15 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
-import { BacklinkSortOrder } from "@dendronhq/engine-server";
+import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
 /** Asking for root children (asking for children without an input) from backlinks tree
  *  data provider will us the backlinks. */
-const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
+const getRootChildrenBacklinks = async (sortOrder?: BacklinkPanelSortOrder) => {
   const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-    ExtensionProvider.getEngine(),
     mockEvents,
     ExtensionProvider.getDWorkspace().config.dev?.enableLinkCandidates
   );
@@ -64,7 +63,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkSortOrder) => {
 };
 
 async function getRootChildrenBacklinksAsPlainObject(
-  sortOrder?: BacklinkSortOrder
+  sortOrder?: BacklinkPanelSortOrder
 ) {
   const value = await getRootChildrenBacklinks(sortOrder);
 
@@ -367,7 +366,7 @@ suite("BacklinksTreeDataProvider", function () {
         // Test Last Updated sort order
         {
           const { out } = await getRootChildrenBacklinksAsPlainObject(
-            BacklinkSortOrder.LastUpdated
+            BacklinkPanelSortOrder.LastUpdated
           );
           expect(
             out[0].command.arguments[0].path.toLowerCase() as string
@@ -378,7 +377,7 @@ suite("BacklinksTreeDataProvider", function () {
         // Test PathNames sort order
         {
           const { out } = await getRootChildrenBacklinksAsPlainObject(
-            BacklinkSortOrder.PathNames
+            BacklinkPanelSortOrder.PathNames
           );
           expect(
             out[0].command.arguments[0].path.toLowerCase() as string
@@ -770,7 +769,6 @@ suite("BacklinksTreeDataProvider", function () {
       beforeEach(() => {
         mockEvents = new MockEngineEvents();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
-          ExtensionProvider.getEngine(),
           mockEvents,
           ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
         );

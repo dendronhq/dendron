@@ -50,7 +50,7 @@ import { DateTimeFormatOptions } from "luxon";
 import {
   BacklinkHoverProcessor,
   BacklinkOpts,
-} from "./remark/backlinksHoverTransformer";
+} from "./remark/backlinksHoverProcessor";
 
 export { ProcFlavor };
 

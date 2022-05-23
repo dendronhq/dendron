@@ -1,13 +1,9 @@
-import { NoteProps, ProcFlavor, WorkspaceOpts } from "@dendronhq/common-all";
+import { ProcFlavor } from "@dendronhq/common-all";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
-  AssertUtils,
-  NoteTestUtilsV4,
-  TestPresetEntryV4,
-} from "@dendronhq/common-test-utils";
-import {
+  BacklinkOpts,
   DendronASTDest,
   MDUtilsV5,
-  BacklinkOpts,
 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -104,7 +100,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
           },
           end: {
             line: 1,
-            column: 1,
+            column: 8,
           },
         },
       },
@@ -259,7 +255,6 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
       testName: "THEN the backlink text is highlighted with an HTML span",
       noteBody: "![[foo]]",
       backlinkHoverOpts: {
-        // backLinkLineNumber: 1,
         linesOfContext: 2,
         location: {
           start: {
@@ -423,7 +418,6 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
       testName: "THEN the backlink text is highlighted with an HTML span",
       noteBody: "foo",
       backlinkHoverOpts: {
-        // backLinkLineNumber: 1,
         linesOfContext: 2,
         location: {
           start: {

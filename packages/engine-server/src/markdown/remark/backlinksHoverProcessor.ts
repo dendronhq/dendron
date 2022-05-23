@@ -6,6 +6,35 @@ import { VFile } from "vfile";
 import { DendronASTTypes } from "../types";
 import { RemarkUtils } from "./utils";
 
+/**
+ * Options for the backlinks hover transformer. If using
+ * ProcFlavor.BACKLINKS_PANEL_HOVER, then this must be set.
+ */
+export type BacklinkOpts = {
+  /**
+   * How many lines before and after the backlink to show in the hover
+   */
+  linesOfContext: number;
+
+  /**
+   * The location of the backlink text
+   */
+  location: Position;
+};
+
+/**
+ * Unified processor for rendering text in the backlinks hover control. This
+ * processor returns a transformer that does the following:
+ * 1. Highlights the backlink text
+ * 2. Changes the backlink node away from a wikilink/noteref to prevent the
+ *    backlink text from being altered
+ * 3. Adds contextual " --- line # ---" information
+ * 4. Removes all elements that beyond the contextual lines limit of the
+ *    backlink
+ * @param this
+ * @param _opts
+ * @returns
+ */
 export function BacklinkHoverProcessor(
   this: Unified.Processor,
   _opts?: BacklinkOpts
@@ -21,9 +50,13 @@ export function BacklinkHoverProcessor(
     const lowerLineLimit = backlinkLineNumber - _opts.linesOfContext;
     const upperLineLimit = backlinkLineNumber + _opts.linesOfContext;
 
+    /**
+     * The last line of the YAML frontmatter counts as line 0.
+     */
     let documentBodyStartLine = 0;
     let documentEndLine = 0;
 
+    // In the first visit, set the beginning and end markers of the document.
     visit(tree, [DendronASTTypes.ROOT], (node, _index, _parent) => {
       if (RemarkUtils.isRoot(node)) {
         documentEndLine = node.position?.end.line ?? 0;
@@ -35,17 +68,19 @@ export function BacklinkHoverProcessor(
       }
     });
 
+    // In the second visit, modify the wikilink/ref/candidate that is the
+    // backlink to highlight it and to change its node type so that it appears
+    // in its text form to the user (we don't want to convert a noteref backlink
+    // into its reffed contents for example)
     visit(tree, (node, index, parent) => {
       if (!node.position) {
         return;
       }
 
-      // debugger;
       if (
         node.position.end.line < lowerLineLimit ||
         node.position.start.line > upperLineLimit
       ) {
-        // debugger;
         if (parent) {
           parent.children.splice(index, 1);
           return index;
@@ -73,9 +108,7 @@ export function BacklinkHoverProcessor(
             .join("\n");
         }
       }
-      // debugger;
       if (RemarkUtils.isWikiLink(node)) {
-        debugger;
         if (
           backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
@@ -96,12 +129,10 @@ export function BacklinkHoverProcessor(
           ).value = `<span style="color:#000;background-color:#FFFF00;">![[${node.value}]]</span>`;
         }
       } else if (RemarkUtils.isText(node)) {
-        // debugger;
         if (
           backlinkLineNumber === node.position?.start.line &&
-          node.position?.end.column > _opts.location.start.column &&
-          node.position?.start.column < _opts.location.end.column
-          // && _opts.location.start.column === node.position.start.column // can't have this or it messes up link candidates.
+          node.position.end.column > _opts.location.start.column &&
+          node.position.start.column < _opts.location.end.column
         ) {
           const contents = node.value;
           const prefix = contents.substring(0, _opts.location.start.column - 1);
@@ -123,12 +154,11 @@ export function BacklinkHoverProcessor(
           return index;
         }
       }
-      return undefined; // continue
+      return;
     });
 
-    // debugger;
+    // In the third visit, add the contextual line marker information
     visit(tree, [DendronASTTypes.ROOT], (node, _index, _parent) => {
-      // debugger;
       if (!RemarkUtils.isRoot(node) || !node.position) {
         return;
       }
@@ -170,8 +200,3 @@ export function BacklinkHoverProcessor(
   }
   return transformer;
 }
-
-export type BacklinkOpts = {
-  linesOfContext: number;
-  location: Position;
-};

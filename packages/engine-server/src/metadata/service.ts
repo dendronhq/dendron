@@ -24,12 +24,7 @@ export enum ShowcaseEntry {
   GraphPanel = "GraphPanel",
 }
 
-// export enum BacklinksPanelSortOrder {
-//   UpdateTime = "updateTime",
-//   NoteName = "noteName",
-// }
-
-export enum BacklinkSortOrder {
+export enum BacklinkPanelSortOrder {
   /** Using path sorted so order with shallow first = true */
   PathNames = "PathNames",
 
@@ -107,7 +102,7 @@ type Metadata = Partial<{
    */
   treeViewItemLabelType: TreeViewItemLabelTypeEnum;
 
-  backlinksPanelSortOrder: BacklinkSortOrder;
+  backlinksPanelSortOrder: BacklinkPanelSortOrder;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -202,7 +197,7 @@ export class MetadataService {
     );
   }
 
-  get BacklinksPanelSortOrder(): BacklinkSortOrder | undefined {
+  get BacklinksPanelSortOrder(): BacklinkPanelSortOrder | undefined {
     return this.getMeta().backlinksPanelSortOrder;
   }
 
@@ -293,7 +288,7 @@ export class MetadataService {
     this.setMeta("treeViewItemLabelType", labelType);
   }
 
-  set BacklinksPanelSortOrder(sortOrder: BacklinkSortOrder | undefined) {
+  set BacklinksPanelSortOrder(sortOrder: BacklinkPanelSortOrder | undefined) {
     this.setMeta("backlinksPanelSortOrder", sortOrder);
   }
 }

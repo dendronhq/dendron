@@ -14,7 +14,7 @@ import {
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
-  BacklinkSortOrder,
+  BacklinkPanelSortOrder,
   HistoryService,
   WorkspaceService,
   WorkspaceUtils,
@@ -624,7 +624,8 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByLastUpdated",
         });
 
-        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.LastUpdated;
+        backlinksTreeDataProvider.SortOrder =
+          BacklinkPanelSortOrder.LastUpdated;
       })
     );
 
@@ -636,7 +637,7 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByPathName",
         });
 
-        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.PathNames;
+        backlinksTreeDataProvider.SortOrder = BacklinkPanelSortOrder.PathNames;
       })
     );
 
@@ -648,7 +649,8 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByLastUpdated",
         });
 
-        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.LastUpdated;
+        backlinksTreeDataProvider.SortOrder =
+          BacklinkPanelSortOrder.LastUpdated;
       })
     );
 
@@ -660,7 +662,7 @@ export class DendronExtension implements IDendronExtension {
           state: "SortByPathName",
         });
 
-        backlinksTreeDataProvider.SortOrder = BacklinkSortOrder.PathNames;
+        backlinksTreeDataProvider.SortOrder = BacklinkPanelSortOrder.PathNames;
       })
     );
 

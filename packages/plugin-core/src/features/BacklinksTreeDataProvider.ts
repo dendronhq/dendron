@@ -1,6 +1,6 @@
 import { assertUnreachable, DateFormatUtil } from "@dendronhq/common-all";
 import {
-  BacklinkSortOrder,
+  BacklinkPanelSortOrder,
   EngineEventEmitter,
   MetadataService,
 } from "@dendronhq/engine-server";
@@ -25,7 +25,6 @@ import { Logger } from "../logger";
 import {
   findReferencesById,
   FoundRefT,
-  getSurroundingContextForNoteRefMds,
   getSurroundingContextForNoteRefMdsViaRemark,
   sortPaths,
 } from "../utils/md";
@@ -42,7 +41,7 @@ export default class BacklinksTreeDataProvider
   private _onEngineNoteStateChangedDisposable: Disposable | undefined;
   private _onDidChangeActiveTextEditorDisposable: Disposable | undefined;
   private _engineEvents;
-  private _sortOrder: BacklinkSortOrder = BacklinkSortOrder.PathNames;
+  private _sortOrder: BacklinkPanelSortOrder = BacklinkPanelSortOrder.PathNames;
   readonly _isLinkCandidateEnabled: boolean | undefined;
 
   /**
@@ -64,7 +63,7 @@ export default class BacklinksTreeDataProvider
 
     this.SortOrder =
       MetadataService.instance().BacklinksPanelSortOrder ??
-      BacklinkSortOrder.PathNames;
+      BacklinkPanelSortOrder.LastUpdated;
 
     this._onDidChangeTreeDataEmitter = new EventEmitter<
       Backlink | undefined | void
@@ -136,11 +135,11 @@ export default class BacklinksTreeDataProvider
     }
   }
 
-  public get SortOrder(): BacklinkSortOrder {
+  public get SortOrder(): BacklinkPanelSortOrder {
     return this._sortOrder;
   }
 
-  public set SortOrder(sortOrder: BacklinkSortOrder) {
+  public set SortOrder(sortOrder: BacklinkPanelSortOrder) {
     if (sortOrder !== this._sortOrder) {
       this._sortOrder = sortOrder;
 
@@ -328,7 +327,7 @@ export default class BacklinksTreeDataProvider
   private pathsToBacklinkSourceTreeItems = async (
     noteId: string,
     isLinkCandidateEnabled: boolean | undefined,
-    sortOrder: BacklinkSortOrder
+    sortOrder: BacklinkPanelSortOrder
   ) => {
     const references = await findReferencesById(noteId);
     const referencesByPath = _.groupBy(
@@ -338,9 +337,9 @@ export default class BacklinksTreeDataProvider
     );
 
     let pathsSorted: string[];
-    if (sortOrder === BacklinkSortOrder.PathNames) {
+    if (sortOrder === BacklinkPanelSortOrder.PathNames) {
       pathsSorted = this.shallowFirstPathSort(referencesByPath);
-    } else if (sortOrder === BacklinkSortOrder.LastUpdated) {
+    } else if (sortOrder === BacklinkPanelSortOrder.LastUpdated) {
       pathsSorted = Object.keys(referencesByPath).sort((p1, p2) => {
         const ref1 = referencesByPath[p1];
         const ref2 = referencesByPath[p2];

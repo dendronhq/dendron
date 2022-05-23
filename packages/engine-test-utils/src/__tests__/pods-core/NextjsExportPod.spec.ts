@@ -165,6 +165,75 @@ describe("GIVEN NextExport pod", () => {
       });
     });
   });
+  describe("WHEN logoPath is set", () => {
+    describe("AND the logo file exists", () => {
+      test("THEN logo is copied over", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+            await checkDir(
+              { fpath: path.join(dest, "public", "assets") },
+              "logo.png"
+            );
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              const logoPath = path.join(
+                opts.vaults[0].fsPath,
+                "assets",
+                "logo.png"
+              );
+              await fs.ensureFile(path.join(opts.wsRoot, logoPath));
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  logoPath,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+
+    describe("AND the logo file is missing", () => {
+      test("THEN export still works", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            // Site still exported
+            await verifyExport(dest);
+            // Logo was not exported out
+            expect(
+              await fs.pathExists(
+                path.join(dest, "public", "assets", "logo.png")
+              )
+            ).toBeFalsy();
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              const logoPath = path.join(
+                opts.vaults[0].fsPath,
+                "assets",
+                "logo.png"
+              );
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  logoPath,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+  });
   describe("WHEN execute", () => {
     test("THEN create expected data files", async () => {
       await runEngineTestV5(

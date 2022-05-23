@@ -362,7 +362,24 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const logo = ConfigUtils.getLogo(config);
     if (logo && !isWebUri(logo)) {
       const logoPath = path.join(wsRoot, logo);
-      fs.copySync(logoPath, path.join(siteAssetsDir, path.basename(logoPath)));
+      try {
+        const targetPath = path.join(siteAssetsDir, path.basename(logoPath));
+        await fs.copy(logoPath, targetPath);
+      } catch (err: any) {
+        // If the logo file was missing, that shouldn't crash the
+        // initialization. Warn the user and move on.
+        if (err?.code === "ENOENT") {
+          this.L.error({
+            ctx,
+            msg: "Failed to copy the logo",
+            logoPath,
+            siteAssetsDir,
+            err,
+          });
+        } else {
+          throw err;
+        }
+      }
     }
     // get cname
     const githubConfig = ConfigUtils.getGithubConfig(config);

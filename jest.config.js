@@ -1,12 +1,5 @@
 const commonConfig = {
-  preset: "ts-jest",
   clearMocks: true,
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
-      diagnostics: false,
-    },
-  },
   moduleFileExtensions: ["ts", "tsx", "js", "json"],
   modulePathIgnorePatterns: ["lib", "build", "docs"],
   notify: true,
@@ -14,9 +7,6 @@ const commonConfig = {
   snapshotSerializers: ["jest-serializer-path"],
   testEnvironment: "node",
   testPathIgnorePatterns: ["utils.ts"],
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
 };
 
 module.exports = {
@@ -33,7 +23,6 @@ module.exports = {
   ...commonConfig,
   projects: [
     {
-      preset: "ts-jest",
       displayName: "non-plugin-tests",
       testMatch: [
         "<rootDir>/packages/engine-test-utils/**/?(*.)+(spec|test).[jt]s?(x)",

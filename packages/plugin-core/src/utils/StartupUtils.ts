@@ -23,6 +23,7 @@ import {
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import _md from "markdown-it";
 import { Duration } from "luxon";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../commands/Doctor";
@@ -88,6 +89,108 @@ export class StartupUtils {
         currentVersion,
       });
     }
+  }
+
+  static showDuplicateConfigEntryMessageIfNecessary(opts: {
+    ext: IDendronExtension;
+  }) {
+    const message = StartupUtils.getDuplicateKeysMessage(opts);
+    if (message !== undefined) {
+      StartupUtils.showDuplicateConfigEntryMessage({
+        ...opts,
+        message,
+      });
+    }
+  }
+
+  static getDuplicateKeysMessage(opts: { ext: IDendronExtension }) {
+    const wsRoot = opts.ext.getDWorkspace().wsRoot;
+    try {
+      DConfig.getRaw(wsRoot);
+    } catch (error: any) {
+      if (
+        error.name === "YAMLException" &&
+        error.reason === "duplicated mapping key"
+      ) {
+        return error.message;
+      }
+    }
+  }
+
+  static showDuplicateConfigEntryMessage(opts: {
+    ext: IDendronExtension;
+    message: string;
+  }) {
+    AnalyticsUtils.track(ConfigEvents.DuplicateConfigEntryMessageShow);
+    const FIX_ISSUE = "Fix Issue";
+    const MESSAGE =
+      "We have detected duplicate key(s) in dendron.yml. Dendron has activated using the last entry of the duplicate key(s)";
+    vscode.window
+      .showInformationMessage(MESSAGE, FIX_ISSUE)
+      .then(async (resp) => {
+        if (resp === FIX_ISSUE) {
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.accepted,
+            }
+          );
+          const wsRoot = opts.ext.getDWorkspace().wsRoot;
+          const configPath = DConfig.configPath(wsRoot);
+          const configUri = vscode.Uri.file(configPath);
+
+          const message = opts.message;
+          const content = [
+            `# Duplicate Keys in \`dendron.yml\``,
+            "",
+            "The message at the bottom displays the _first_ duplicate key mapping that was detected in `dendron.yml`",
+            "",
+            "**There may be more duplicate key mappings**.",
+            "",
+            "Take the following steps to fix this issue.",
+            "1. Look through `dendron.yml` and remove all duplicate mappings.",
+            "",
+            `    - We recommend installing the [YAML extension](${vscode.Uri.parse(
+              `command:workbench.extensions.search?${JSON.stringify(
+                "@id:redhat.vscode-yaml"
+              )}`
+            )}) for validating \`dendron.yml\``,
+            "",
+            "1. When you are done, save your changes made to `dendron.yml`",
+            "",
+            `1. Reload the window for it to take effect. [Click here to reload window](${vscode.Uri.parse(
+              `command:workbench.action.reloadWindow`
+            )})`,
+            "",
+            "## Error message",
+            "```",
+            message,
+            "```",
+            "",
+            "",
+          ].join("\n");
+          const panel = vscode.window.createWebviewPanel(
+            "showDuplicateConfigMessagePreview",
+            "Duplicated Mapping Keys Preview",
+            vscode.ViewColumn.One,
+            {
+              enableCommandUris: true,
+            }
+          );
+          const md = _md();
+          panel.webview.html = md.render(content);
+          await VSCodeUtils.openFileInEditor(configUri, {
+            column: vscode.ViewColumn.Beside,
+          });
+        } else {
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.rejected,
+            }
+          );
+        }
+      });
   }
 
   static showDeprecatedConfigMessageIfNecessary(opts: {

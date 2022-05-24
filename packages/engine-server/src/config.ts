@@ -43,9 +43,12 @@ export class DConfig {
    * Get without filling in defaults
    * @param wsRoot
    */
-  static getRaw(wsRoot: string) {
+  static getRaw(wsRoot: string, overwriteDuplcate?: boolean) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
+    const config = readYAML(
+      configPath,
+      overwriteDuplcate ?? false
+    ) as Partial<IntermediateDendronConfig>;
     return config;
   }
 
@@ -227,7 +230,7 @@ export class DConfig {
   static readConfigSync(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
     // TODO: validate
-    const config = readYAML(configPath) as IntermediateDendronConfig;
+    const config = readYAML(configPath, true) as IntermediateDendronConfig;
     return config;
   }
 

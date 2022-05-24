@@ -2650,10 +2650,10 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@braintree/sanitize-url@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/@braintree/sanitize-url/-/sanitize-url-3.1.0.tgz#8ff71d51053cd5ee4981e5a501d80a536244f7fd"
-  integrity sha512-GcIY79elgB+azP74j8vqkiXz8xLFfIzbQJdlwOPisgbKT00tviJQuEghOXSMVxJ00HoYJbGswr4kcllUc4xCcg==
+"@braintree/sanitize-url@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.npmjs.org/@braintree/sanitize-url/-/sanitize-url-6.0.0.tgz#fe364f025ba74f6de6c837a84ef44bdb1d61e68f"
+  integrity sha512-mgmE7XBYY/21erpzhexk4Cj1cyTQ9LzvnTxtzM17BJ7ERMNE6W72mQRo0I1Ud8eFJ+RVVIcBNhLFZ3GX4XFz5w==
 
 "@chakra-ui/accordion@1.4.6":
   version "1.4.6"
@@ -3252,10 +3252,10 @@
     compare-func "^2.0.0"
     q "^1.5.1"
 
-"@dendronhq/remark-mermaid@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.npmjs.org/@dendronhq/remark-mermaid/-/remark-mermaid-0.2.0.tgz#e617cd6904c4c435fcd85bd6ed75443cf815b7e8"
-  integrity sha512-8BwEtYghUJEGTGV77afmXbZgt3zKFcykb3mgUEW6lGoEIrmG5Kz1/AdWNccIMy5qCmH7efBhbDYjqUK09Ag7NQ==
+"@dendronhq/remark-mermaid@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.npmjs.org/@dendronhq/remark-mermaid/-/remark-mermaid-0.3.0.tgz#5e943020fbfbce4ae4c9cc7cba25a93e5a880fb6"
+  integrity sha512-CL2DbhBHAXXPN+0GNoW2xi8jl4YkslZLY3ElGUB+F5v12on58jjAbnkvKo3JLgMTuaSXw1KNz2crJuPo43UJOA==
   dependencies:
     fs-extra "^4.0.1"
     unist-util-visit "^1.1.3"
@@ -11555,10 +11555,10 @@ dompurify@2.2.6:
   resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.2.6.tgz#54945dc5c0b45ce5ae228705777e8e59d7b2edc4"
   integrity sha512-7b7ZArhhH0SP6W2R9cqK6RjaU82FZ2UPM7RO8qN1b1wyvC/NY1FNWcX1Pu00fFOAnzEORtwXe4bPaClg6pUybQ==
 
-dompurify@2.3.5:
-  version "2.3.5"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.3.5.tgz#c83ed5a3ae5ce23e52efe654ea052ffb358dd7e3"
-  integrity sha512-kD+f8qEaa42+mjdOpKeztu9Mfx5bv9gVLO6K9jRx4uGvh6Wv06Srn4jr1wPNY2OOUGGSKHNFN+A8MA3v0E0QAQ==
+dompurify@2.3.6:
+  version "2.3.6"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.3.6.tgz#2e019d7d7617aacac07cbbe3d88ae3ad354cf875"
+  integrity sha512-OFP2u/3T1R5CEgWCEONuJ1a5+MFKnOYpkywpUSxv/dj1LeBT1erK+JwM7zK0ROy2BRhqVCf0LRw/kHqKuMkVGg==
 
 domutils@^1.7.0:
   version "1.7.0"
@@ -17042,10 +17042,10 @@ keyv@^4.0.0:
   dependencies:
     json-buffer "3.0.1"
 
-khroma@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/khroma/-/khroma-1.4.1.tgz#ad6a5b6a972befc5112ce5129887a1a83af2c003"
-  integrity sha512-+GmxKvmiRuCcUYDgR7g5Ngo0JEDeOsGdNONdU2zsiBQaK4z19Y2NvXqfEDE0ZiIrg45GTZyAnPLVsLZZACYm3Q==
+khroma@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/khroma/-/khroma-2.0.0.tgz#7577de98aed9f36c7a474c4d453d94c0d6c6588b"
+  integrity sha512-2J8rDNlQWbtiNYThZRvmMv5yt44ZakX+Tz5ZIp/mN1pt4snn+m030Va5Z4v8xA0cQFDXBwO/8i42xL4QPsVk3g==
 
 killable@^1.0.1:
   version "1.0.1"
@@ -18299,18 +18299,18 @@ merge2@^1.2.3, merge2@^1.3.0, merge2@^1.4.1:
   resolved "https://registry.npmjs.org/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-mermaid@^8.14.0:
-  version "8.14.0"
-  resolved "https://registry.npmjs.org/mermaid/-/mermaid-8.14.0.tgz#ef589b0537f56d6340069070edb51719a4faba00"
-  integrity sha512-ITSHjwVaby1Li738sxhF48sLTxcNyUAoWfoqyztL1f7J6JOLpHOuQPNLBb6lxGPUA0u7xP9IRULgvod0dKu35A==
+mermaid@^9.1.1:
+  version "9.1.1"
+  resolved "https://registry.npmjs.org/mermaid/-/mermaid-9.1.1.tgz#5d3d330ca4adf7f3c8ca51095f8bb2f0fb1a93bb"
+  integrity sha512-2RVD+WkzZ4VDyO9gQvQAuQ/ux2gLigJtKDTlbwjYqOR/NwsVzTSfGm/kx648/qWJsg6Sv04tE9BWCO8s6a+pFA==
   dependencies:
-    "@braintree/sanitize-url" "^3.1.0"
+    "@braintree/sanitize-url" "^6.0.0"
     d3 "^7.0.0"
     dagre "^0.8.5"
     dagre-d3 "^0.6.4"
-    dompurify "2.3.5"
+    dompurify "2.3.6"
     graphlib "^2.1.8"
-    khroma "^1.4.1"
+    khroma "^2.0.0"
     moment-mini "^2.24.0"
     stylis "^4.0.10"
 

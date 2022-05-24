@@ -2,7 +2,7 @@
 id: 9eae08fb-5e3f-4a7e-a989-3f206825d490
 title: Markdown
 desc: ""
-updated: 1642749469735
+updated: 1653078860152
 created: 1614629618966
 ---
 
@@ -50,6 +50,21 @@ graph TD;
     A-->C;
     B-->D;
     C-->D;
+```
+
+```mermaid
+classDiagram
+class Shape{
+    <<interface>>
+    noOfVertices
+    draw()
+}
+class Color{
+    <<enumeration>>
+    RED
+    BLUE
+    GREEN
+}
 ```
 
 ### Table

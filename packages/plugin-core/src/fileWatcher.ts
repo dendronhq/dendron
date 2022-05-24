@@ -174,7 +174,7 @@ export class FileWatcher {
     try {
       const engine = ExtensionProvider.getEngine();
       this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-      const nodeToDelete = _.find(engine.notes, { fname });
+      const nodeToDelete = (await engine.findNotes({ fname }))[0];
       if (_.isUndefined(nodeToDelete)) {
         throw new Error(`${fname} not found`);
       }

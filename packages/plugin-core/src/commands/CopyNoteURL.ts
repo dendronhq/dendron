@@ -55,7 +55,7 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     const engine = getDWorkspace().engine;
-    const note = _.find(engine.notes, { fname });
+    const note = (await engine.findNotes({ fname }))[0];
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }

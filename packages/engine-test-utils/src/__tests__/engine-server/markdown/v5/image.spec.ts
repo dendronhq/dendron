@@ -2,7 +2,7 @@ import { ConfigUtils } from "@dendronhq/common-all";
 import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../..";
 import { ENGINE_HOOKS } from "../../../../presets";
-import { checkString } from "../../../../utils";
+import { checkNotInString, checkString } from "../../../../utils";
 import { createProcCompileTests } from "../utils";
 import { getOpts, runTestCases } from "./utils";
 
@@ -51,6 +51,8 @@ describe("GIVEN image link", () => {
                 resp.contents,
                 "/some-prefix/some-image-link.png"
               );
+              // Make sure to avoid extra slash
+              await checkNotInString(resp.contents, "//some-prefix");
             },
           },
         },

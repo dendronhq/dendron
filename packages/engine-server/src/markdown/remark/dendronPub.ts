@@ -123,7 +123,7 @@ class ImageNodeHandler extends DendronNodeHander {
 
     if (!isWebUri(imageNode.url)) {
       const imageUrl = _.trim(imageNode.url, "/");
-      imageNode.url = "/" + (assetsPrefix ? assetsPrefix + "/" : "") + imageUrl;
+      imageNode.url = (assetsPrefix ? assetsPrefix + "/" : "/") + imageUrl;
     }
     return { node: imageNode };
   }

@@ -1,5 +1,6 @@
-import { NoteProps, TemplateUtils } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { TestNoteFactory } from "@dendronhq/common-test-utils";
+import { TemplateUtils } from "@dendronhq/common-server";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";

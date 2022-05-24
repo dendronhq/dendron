@@ -17,11 +17,13 @@ import {
   RespV3,
   SchemaTemplate,
   SchemaUtils,
-  TemplateUtils,
   VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  TemplateUtils,
+} from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri, window } from "vscode";

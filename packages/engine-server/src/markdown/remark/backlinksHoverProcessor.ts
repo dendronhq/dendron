@@ -29,7 +29,7 @@ export type BacklinkOpts = {
  * 2. Changes the backlink node away from a wikilink/noteref to prevent the
  *    backlink text from being altered
  * 3. Adds contextual " --- line # ---" information
- * 4. Removes all elements that beyond the contextual lines limit of the
+ * 4. Removes all elements that lie beyond the contextual lines limit of the
  *    backlink
  * @param this
  * @param _opts
@@ -112,7 +112,7 @@ export function BacklinkHoverProcessor(
       }
 
       // Do the node replacement for wikilinks, node refs, and text blocks when
-      // its a candidate link
+      // it's a candidate link
       if (RemarkUtils.isWikiLink(node)) {
         if (
           backlinkLineNumber === node.position?.start.line &&
@@ -134,19 +134,19 @@ export function BacklinkHoverProcessor(
           backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
         ) {
-          let wiklinkText = `${node.value}`;
+          let noteRefText = `${node.value}`;
 
           if (node.data.link.data.anchorStart) {
-            wiklinkText += `#${node.data.link.data.anchorStart}`;
+            noteRefText += `#${node.data.link.data.anchorStart}`;
           }
 
           if (node.data.link.data.anchorEnd) {
-            wiklinkText += `:#${node.data.link.data.anchorEnd}`;
+            noteRefText += `:#${node.data.link.data.anchorEnd}`;
           }
 
           (node as Node).type = DendronASTTypes.HTML;
           (node as unknown as HTML).value = getHTMLToHighlightText(
-            `![[${wiklinkText}]]`
+            `![[${noteRefText}]]`
           );
         }
       } else if (RemarkUtils.isText(node)) {

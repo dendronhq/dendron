@@ -1,8 +1,11 @@
+import {
+  ConfigUtils,
+  DEngineClient,
+  NoteProps,
+  Time,
+} from "@dendronhq/common-all";
 import Handlebars from "handlebars";
 import _ from "lodash";
-import { Time } from "./time";
-import { DEngineClient, NoteProps } from "./types";
-import { ConfigUtils } from "./utils";
 
 type TemplateFunctionProps = {
   templateNote: NoteProps;

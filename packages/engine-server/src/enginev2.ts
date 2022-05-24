@@ -61,12 +61,14 @@ import {
   Optional,
   assertUnreachable,
   NoteDictsUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   DLogger,
   NodeJSUtils,
   readYAML,
+  TemplateUtils,
   writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -414,6 +416,41 @@ export class DendronEngineV2 implements DEngine {
           noteOpts: { fname: npath, vault },
           engine: this,
         });
+        const maybeSchema = SchemaUtils.getSchemaFromNote({
+          note: noteNew,
+          engine: this,
+        });
+        const maybeTemplate =
+          maybeSchema?.schemas[noteNew.schema?.schemaId as string].data
+            .template;
+        if (maybeTemplate) {
+          // TODO: Support xvault with user prompting for this flow
+          /*
+           * Get first valid template note.
+           * First look for template in same vault as note. Otherwise, look across all vaults.
+           * If there are multiple template matches, apply first one.
+           * This is temp until we get xvault support
+           */
+          const tempInSameVault = NoteUtils.getNoteByFnameFromEngine({
+            fname: maybeTemplate.id,
+            vault: noteNew.vault,
+            engine: this,
+          });
+          const tempNote =
+            tempInSameVault ||
+            NoteUtils.getNotesByFnameFromEngine({
+              fname: maybeTemplate.id,
+              engine: this,
+            })[0];
+
+          if (tempNote) {
+            TemplateUtils.applyTemplate({
+              templateNote: tempNote,
+              targetNote: noteNew,
+              engine: this,
+            });
+          }
+        }
       }
       noteNew = _.merge(noteNew, overrides || {});
       changed = (await this.writeNote(noteNew, { updateExisting })).data;

@@ -46,7 +46,6 @@ import {
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 import { NoteDictsUtils } from "./noteDictsUtils";
-import { TemplateUtils } from "./template";
 
 /**
  * Utilities for dealing with nodes
@@ -457,35 +456,6 @@ export class NoteUtils {
     if (maybeMatch) {
       const { schema, schemaModule } = maybeMatch;
       NoteUtils.addSchema({ note, schemaModule, schema });
-      const maybeTemplate = schema.data.template;
-      if (maybeTemplate) {
-        // TODO: Support xvault with user prompting for this flow
-        /*
-         * Get first valid template note.
-         * First look for template in same vault as note. Otherwise, look across all vaults.
-         * If there are multiple template matches, apply first one.
-         * This is temp until we get xvault support
-         */
-        const tempInSameVault = NoteUtils.getNoteByFnameFromEngine({
-          fname: maybeTemplate.id,
-          vault: note.vault,
-          engine,
-        });
-        const tempNote =
-          tempInSameVault ||
-          NoteUtils.getNotesByFnameFromEngine({
-            fname: maybeTemplate.id,
-            engine,
-          })[0];
-
-        if (tempNote) {
-          TemplateUtils.applyTemplate({
-            templateNote: tempNote,
-            targetNote: note,
-            engine,
-          });
-        }
-      }
     }
     return note;
   }

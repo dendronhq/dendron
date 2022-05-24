@@ -41,6 +41,7 @@
     "@sentry/integrations": "^6.13.3",
     "@sentry/node": "^6.13.3",
     "ajv": "^8.6.0",
+    "handlebars": "^4.7.7",
     "ajv-errors": "^3.0.0",
     "analytics-node": "^5.1.0",
     "anymatch": "^3.1.2",

@@ -4,6 +4,7 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  extractNoteChangeEntryCounts,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -37,7 +38,7 @@ type CommandOpts = {
   noConfirm?: boolean;
 };
 
-type CommandOutput = any;
+type CommandOutput = RenameNoteOutputV2a;
 
 type RenameOperation = {
   vault: DVault;
@@ -418,7 +419,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         return out;
       }
     );
-    return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
+    return out;
   }
 
   async showResponse(res: CommandOutput) {
@@ -429,7 +430,15 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     window.showInformationMessage("Done refactoring.");
     const { changed } = res;
     if (changed.length > 0) {
-      window.showInformationMessage(`Dendron updated ${changed.length} files`);
+      window.showInformationMessage(
+        `Dendron updated ${_.uniqBy(changed, (ent) => ent.note.fname)} files`
+      );
     }
+  }
+
+  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
+    const payload =
+      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+    return payload;
   }
 }

@@ -1335,3 +1335,22 @@ export function extractNoteChangeEntriesByType(
 ): NoteChangeEntry[] {
   return entries.filter((entry) => entry.status === status);
 }
+
+export function extractNoteChangeEntryCountByType(
+  entries: NoteChangeEntry[],
+  status: "create" | "delete" | "update"
+): number {
+  return extractNoteChangeEntriesByType(entries, status).length;
+}
+
+export function extractNoteChangeEntryCounts(entries: NoteChangeEntry[]): {
+  createdCount: number;
+  deletedCount: number;
+  updatedCount: number;
+} {
+  return {
+    createdCount: extractNoteChangeEntryCountByType(entries, "create"),
+    deletedCount: extractNoteChangeEntryCountByType(entries, "delete"),
+    updatedCount: extractNoteChangeEntryCountByType(entries, "update"),
+  };
+}

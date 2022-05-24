@@ -145,6 +145,7 @@ export enum EngagementEvents {
   NoteViewed = "NoteViewed",
   EngineStateChanged = "EngineStateChanged",
   AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
+  TemplateApplied = "TemplateApplied",
 }
 
 export enum AppNames {

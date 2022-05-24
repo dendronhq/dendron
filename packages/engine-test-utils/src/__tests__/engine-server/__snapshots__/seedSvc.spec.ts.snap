@@ -74,6 +74,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -227,6 +228,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -370,6 +372,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -480,6 +483,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -607,6 +611,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -741,6 +746,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -862,6 +868,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true

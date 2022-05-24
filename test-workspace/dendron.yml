@@ -74,6 +74,7 @@ workspace:
   enableUserTags: true
   enableHashTags: true
   enableEditorDecorations: true
+  enableHandlebarTemplates: true
 preview:
   enableFMTitle: true
   enableNoteTitleForLink: true

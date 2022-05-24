@@ -86,6 +86,7 @@ export class WorkspaceTestUtils {
         graph: {
           zoomSpeed: 1,
         },
+        enableHandlebarTemplates: false,
         enableAutoCreateOnDefinition: false,
         enableXVaultWikiLink: false,
         enableRemoteVaultInit: true,

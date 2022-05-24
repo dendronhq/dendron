@@ -25,6 +25,7 @@ export type DendronWorkspaceConfig = {
   disableTelemetry?: boolean;
   enableAutoCreateOnDefinition: boolean;
   enableXVaultWikiLink: boolean;
+  enableHandlebarTemplates: boolean;
   enableRemoteVaultInit: boolean;
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
@@ -65,6 +66,7 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     task: genDefaultTaskConfig(),
     graph: genDefaultGraphConfig(),
     enableAutoCreateOnDefinition: false,
+    enableHandlebarTemplates: false,
     enableXVaultWikiLink: false,
     enableRemoteVaultInit: true,
     enableUserTags: true,

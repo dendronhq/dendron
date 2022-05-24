@@ -46,7 +46,6 @@ import {
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 import { NoteDictsUtils } from "./noteDictsUtils";
-import { TemplateUtils } from "./template";
 
 /**
  * Utilities for dealing with nodes

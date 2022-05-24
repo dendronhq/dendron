@@ -21,7 +21,8 @@ import {
   CreateNoteWithTraitCommand,
 } from "./CreateNoteWithTraitCommand";
 
-export type ExecuteData = {
+// internal to this class
+type ExecuteData = {
   templateCreated: boolean;
   schemaCreated: boolean;
 };

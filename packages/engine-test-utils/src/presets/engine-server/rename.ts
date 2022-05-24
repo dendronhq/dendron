@@ -1599,7 +1599,7 @@ const NOTES = {
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 5,
+          actual: changedEntries && changedEntries.length === 6,
           expected: true,
         },
       ];

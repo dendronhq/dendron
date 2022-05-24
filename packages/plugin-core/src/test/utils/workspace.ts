@@ -63,6 +63,7 @@ export class WorkspaceTestUtils {
           name: "task",
           dateFormat: "y.MM.dd",
           addBehavior: NoteAddBehaviorEnum.asOwnDomain,
+          taskCompleteStatus: ["done", "x"],
           statusSymbols: {
             "": " ",
             wip: "w",
@@ -85,6 +86,7 @@ export class WorkspaceTestUtils {
         graph: {
           zoomSpeed: 1,
         },
+        enableHandlebarTemplates: false,
         enableAutoCreateOnDefinition: false,
         enableXVaultWikiLink: false,
         enableRemoteVaultInit: true,
@@ -131,6 +133,7 @@ export class WorkspaceTestUtils {
         },
         enableSiteLastModified: true,
         enableRandomlyColoredTags: true,
+        enableTaskNotes: true,
         enablePrettyLinks: true,
       },
     };

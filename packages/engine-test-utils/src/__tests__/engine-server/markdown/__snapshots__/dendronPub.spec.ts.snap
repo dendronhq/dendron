@@ -714,3 +714,20 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`GIVEN dendronPub WHEN all notes are public WHEN publishing links to task notes THEN all links are rendered 1`] = `
+VFile {
+  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+<p><a href=\\"/notes/alpha.task\\"><input type=\\"checkbox\\" disabled class=\\"task-before task-status\\" checked>Task<span class=\\"task-after task-priority\\">priority:high</span><span class=\\"task-after task-due\\">due:2022-08-28</span><span class=\\"task-after task-owner\\">@turing</span></a></p>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/notes/alpha\\">Alpha (vault1)</a></li>
+<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">Omega (vault1) (Private)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

@@ -479,6 +479,10 @@
         "title": "Dendron:Dev: Run Migration"
       },
       {
+        "command": "dendron.dev.migrateSelfContained",
+        "title": "Dendron: Migrate to Self Contained Vault"
+      },
+      {
         "command": "dendron.dev.openLogs",
         "title": "Dendron:Dev: Open Logs"
       },
@@ -783,6 +787,10 @@
         },
         {
           "command": "dendron.dev.runMigration",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.dev.migrateSelfContained",
           "when": "dendron:pluginActive"
         },
         {

@@ -295,6 +295,7 @@ class ExtensionUtils {
     const siteUrl = publishigConfig.siteUrl;
     const publishingTheme = dendronConfig?.publishing?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
+    const workspaceConfig = ConfigUtils.getWorkspace(dendronConfig);
     const { workspaceFile, workspaceFolders } = vscode.workspace;
     const trackProps = {
       duration: durationReloadWorkspace,
@@ -326,6 +327,7 @@ class ExtensionUtils {
         : workspaceFolders.length,
       hasLocalConfig: false,
       numLocalConfigVaults: 0,
+      enableHandlebarTemplates: workspaceConfig.enableHandlebarTemplates,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);

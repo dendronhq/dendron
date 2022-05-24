@@ -6,7 +6,7 @@ import {
   NoteProps,
   SchemaModuleDict,
   SchemaUtils,
-  NotePropsDict,
+  NotePropsByIdDict,
   SchemaModuleProps,
   NoteUtils,
   DNodeUtils,
@@ -60,7 +60,7 @@ function createFuse<T>(
 }
 
 export function createFuseNote(
-  publishedNotes: NotePropsDict | NoteProps[],
+  publishedNotes: NotePropsByIdDict | NoteProps[],
   overrideOpts?: Partial<Fuse.IFuseOptions<NoteProps>>,
   index?: Fuse.FuseIndex<NoteProps>
 ) {
@@ -83,7 +83,7 @@ export function createFuseNote(
 }
 
 export function createSerializedFuseNoteIndex(
-  publishedNotes: NotePropsDict | NoteProps[],
+  publishedNotes: NotePropsByIdDict | NoteProps[],
   overrideOpts?: Partial<Parameters<typeof createFuse>[1]>
 ) {
   return createFuseNote(publishedNotes, overrideOpts).getIndex().toJSON();
@@ -251,7 +251,7 @@ export class FuseEngine {
     );
   }
 
-  async updateNotesIndex(notes: NotePropsDict) {
+  async updateNotesIndex(notes: NotePropsByIdDict) {
     this.notesIndex.setCollection(
       _.map(notes, ({ fname, title, id, vault, updated, stub }, _key) => ({
         fname,
@@ -431,7 +431,7 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResults = (notes: NotePropsDict) => {
+  static fetchRootResults = (notes: NotePropsByIdDict) => {
     const roots: NoteProps[] = NoteUtils.getRoots(notes);
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);

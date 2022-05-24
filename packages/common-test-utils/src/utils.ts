@@ -1,7 +1,7 @@
 import {
   DEngineClient,
   DEngineInitResp,
-  NotePropsDict,
+  NotePropsByIdDict,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import assert from "assert";
@@ -113,7 +113,7 @@ export class TestPresetEntry<
   public after: (_opts: TAfterOpts) => Promise<any>;
   public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
   public init: () => Promise<void>;
-  public notes: NotePropsDict = {};
+  public notes: NotePropsByIdDict = {};
 
   constructor({
     label,

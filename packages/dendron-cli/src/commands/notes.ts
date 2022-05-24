@@ -146,43 +146,52 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);
-          const note = NoteUtils.getNoteOrThrow({
+          const note = NoteUtils.getNoteByFnameFromEngine({
             fname: query,
-            notes: engine.notes,
             vault,
-            wsRoot,
+            engine,
           });
-          const resp = await engine.deleteNote(note.id);
-          this.print(`deleted ${note.fname}`);
-          return { data: { payload: note.fname, rawData: resp } };
+          if (note) {
+            const resp = await engine.deleteNote(note.id);
+            this.print(`deleted ${note.fname}`);
+            return { data: { payload: note.fname, rawData: resp } };
+          } else {
+            throw new DendronError({ message: `note ${query} not found` });
+          }
         }
         case NoteCommands.MOVE: {
           const { query, vault } = checkQueryAndVault(opts);
-          const note = NoteUtils.getNoteOrThrow({
+          const note = NoteUtils.getNoteByFnameFromEngine({
             fname: query,
-            notes: engine.notes,
             vault,
-            wsRoot,
+            engine,
           });
-          const oldLoc = NoteUtils.toNoteLoc(note);
-          const newLoc = {
-            fname: destFname || oldLoc.fname,
-            vaultName: destVaultName || oldLoc.vaultName,
-          };
-          const destVault = VaultUtils.getVaultByName({vname: destVaultName ? destVaultName: oldLoc.fname, vaults: engine.vaults})
-          const noteExists = NoteUtils.getNoteByFnameFromEngine({
+          if (note) {
+            const oldLoc = NoteUtils.toNoteLoc(note);
+            const newLoc = {
+              fname: destFname || oldLoc.fname,
+              vaultName: destVaultName || oldLoc.vaultName,
+            };
+            const destVault = VaultUtils.getVaultByName({
+              vname: destVaultName || oldLoc.fname,
+              vaults: engine.vaults,
+            });
+            const noteExists = NoteUtils.getNoteByFnameFromEngine({
               fname: destFname || query,
-              engine: engine,
+              engine,
               vault: destVault || vault,
-          });
-          const isStub = noteExists?.stub;
-          if (noteExists && !isStub) {
+            });
+            const isStub = noteExists?.stub;
+            if (noteExists && !isStub) {
               const vaultName = VaultUtils.getName(noteExists.vault);
               const errMsg = `${vaultName}/${query} exists`;
               throw Error(errMsg);
-          };
-          const resp = await engine.renameNote({ oldLoc, newLoc });
-          return { data: { payload: note.fname, rawData: resp } };
+            }
+            const resp = await engine.renameNote({ oldLoc, newLoc });
+            return { data: { payload: note.fname, rawData: resp } };
+          } else {
+            throw new DendronError({ message: `note ${query} not found` });
+          }
         }
         default: {
           throw Error("bad option");

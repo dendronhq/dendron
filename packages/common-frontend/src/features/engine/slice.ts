@@ -2,11 +2,12 @@ import {
   DendronApiV2,
   DEngineInitPayload,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
-  NoteFNamesDict,
+  NoteFnameDictUtils,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -149,7 +150,7 @@ const initialState: InitialState = {
   currentRequestId: undefined,
   vaults: [],
   notes: {},
-  noteFName: new NoteFNamesDict([]),
+  noteFName: {},
   schemas: {},
   notesRendered: {},
   error: null,
@@ -167,12 +168,12 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = new NoteFNamesDict(_.values(notes));
+      state.noteFName = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
     },
-    setNotes: (state, action: PayloadAction<NotePropsDict>) => {
+    setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {
       state.notes = action.payload;
     },
     setError: (state, action: PayloadAction<any>) => {
@@ -189,7 +190,7 @@ export const engineSlice = createSlice({
       state.schemas = {};
       state.notesRendered = {};
       state.error = null;
-      state.noteFName = new NoteFNamesDict([]);
+      state.noteFName = {};
     },
     setRenderNote: (
       state,
@@ -204,22 +205,22 @@ export const engineSlice = createSlice({
         state.notes = {};
       }
       // this is a new node
+      const noteDicts = {
+        notesById: state.notes,
+        notesByFname: state.noteFName,
+      };
       if (!state.notes[note.id]) {
-        // TODO: Support passing in fname dictionary
-        const stubs = NoteUtils.addOrUpdateParents({
+        const changed = NoteUtils.addOrUpdateParents({
           note,
-          notesDict: state.notes,
+          noteDicts,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
-        state.noteFName.add(note);
-        stubs
-          .filter((noteChangeEntry) => noteChangeEntry.status === "create")
-          .forEach((noteChangeEntry) =>
-            state.noteFName.add(noteChangeEntry.note)
-          );
+        changed.forEach((noteChangeEntry) =>
+          NoteDictsUtils.add(noteChangeEntry.note, noteDicts)
+        );
       }
-      state.notes[note.id] = note;
+      NoteDictsUtils.add(note, noteDicts);
     },
   },
   extraReducers: (builder) => {

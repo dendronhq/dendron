@@ -212,6 +212,8 @@ suite("BacklinksTreeDataProvider", function () {
   describeMultiWS(
     "WHEN there is one note with the candidate word",
     {
+      // NOTE: this test often times out
+      timeout: 10e3,
       preSetupHook: async ({ wsRoot, vaults }) => {
         await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           wsRoot,

@@ -2,22 +2,24 @@ import {
   ConfigUtils,
   DendronError,
   DVault,
-  ERROR_STATUS,
+  EngagementEvents,
   ErrorFactory,
   ErrorMessages,
+  ERROR_STATUS,
+  getJournalTitle,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   RespV3,
+  SchemaTemplate,
   SchemaUtils,
+  TemplateUtils,
   VaultUtils,
   VSCodeEvents,
-  SchemaTemplate,
-  getJournalTitle,
-  LookupSelectionTypeEnum,
-  LookupNoteTypeEnum,
-  LookupNoteType,
-  LookupSelectionType,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
@@ -36,39 +38,39 @@ import {
   TaskBtn,
 } from "../components/lookup/buttons";
 import {
-  DendronQuickPickerV2,
-  DendronQuickPickState,
-  VaultSelectionMode,
-} from "../components/lookup/types";
-import {
+  LookupFilterType,
   LookupSplitType,
   LookupSplitTypeEnum,
-  LookupFilterType,
 } from "../components/lookup/ButtonTypes";
-import {
-  node2Uri,
-  OldNewLocation,
-  PickerUtilsV2,
-} from "../components/lookup/utils";
-import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
-import { DENDRON_COMMANDS, DendronContext } from "../constants";
-import { Logger } from "../logger";
-import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
-import { BaseCommand } from "./base";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { AutoCompletable } from "../utils/AutoCompletable";
-import { ExtensionProvider } from "../ExtensionProvider";
+import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import {
   ILookupProviderV3,
   NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
-import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
+import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
+import {
+  DendronQuickPickerV2,
+  DendronQuickPickState,
+  VaultSelectionMode,
+} from "../components/lookup/types";
+import {
+  node2Uri,
+  OldNewLocation,
+  PickerUtilsV2,
+} from "../components/lookup/utils";
+import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { Logger } from "../logger";
+import { JournalNote } from "../traits/journal";
+import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
+import { AutoCompletable } from "../utils/AutoCompletable";
 import { AutoCompleter } from "../utils/autoCompleter";
 import { parseRef } from "../utils/md";
-import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
-import { JournalNote } from "../traits/journal";
+import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -548,11 +550,12 @@ export class NoteLookupCommand
         );
       } else if (!_.isUndefined(resp.data)) {
         // Only apply schema if note is found
-        SchemaUtils.applyTemplate({
+        TemplateUtils.applyTemplate({
           templateNote: resp.data,
-          note: nodeNew,
+          targetNote: nodeNew,
           engine,
         });
+        AnalyticsUtils.track(EngagementEvents.TemplateApplied);
       }
     }
 

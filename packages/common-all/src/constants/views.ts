@@ -99,7 +99,8 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
   [DendronTreeViewKey.TIP_OF_THE_DAY]: {
     desc: "Feature Showcase",
     label: "Feature Showcase",
-    type: "nativeview",
+    type: "webview",
+    bundleName: "DendronTipOfTheDay",
   },
   [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
     desc: "Help and Feedback",

@@ -9,7 +9,7 @@ import {
   ErrorFactory,
   getSlugger,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NotesCacheEntry,
   NoteUtils,
   RespV3,
@@ -264,7 +264,7 @@ export class HierarchyUtils {
   static getChildren = (opts: {
     skipLevels: number;
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }) => {
     const { skipLevels, note, notes } = opts;
     let children = note.children

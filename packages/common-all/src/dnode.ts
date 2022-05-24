@@ -24,7 +24,8 @@ import {
   NoteLocalConfig,
   NoteOpts,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
+  NoteDicts,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -40,11 +41,12 @@ import {
   getSlugger,
   isNotUndefined,
   normalizeUnixPath,
-  NoteFNamesDict,
   randomColor,
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
+import { NoteDictsUtils } from "./noteDictsUtils";
+import { TemplateUtils } from "./template";
 
 /**
  * Utilities for dealing with nodes
@@ -157,8 +159,7 @@ export class DNodeUtils {
 
   static findClosestParent(
     fpath: string,
-    nodes: NotePropsDict,
-    notesByFnameDict: NoteFNamesDict,
+    noteDicts: NoteDicts,
     opts: {
       noStubs?: boolean;
       vault: DVault;
@@ -168,25 +169,20 @@ export class DNodeUtils {
     const { vault } = opts;
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
-      const _node = notesByFnameDict.get(nodes, "root", vault)[0];
+      const _node = NoteDictsUtils.findByFname("root", noteDicts, vault)[0];
       if (_.isUndefined(_node)) {
         throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = notesByFnameDict.get(nodes, dirname, vault)[0];
+    const maybeNode = NoteDictsUtils.findByFname(dirname, noteDicts, vault)[0];
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
     ) {
       return maybeNode;
     } else {
-      return DNodeUtils.findClosestParent(
-        dirname,
-        nodes,
-        notesByFnameDict,
-        opts
-      );
+      return DNodeUtils.findClosestParent(dirname, noteDicts, opts);
     }
   }
 
@@ -340,7 +336,7 @@ export class NoteUtils {
 
   static deleteChildFromParent(opts: {
     childToDelete: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteChangeEntry[] {
     const changed: NoteChangeEntry[] = [];
     const { childToDelete, notes } = opts;
@@ -368,19 +364,23 @@ export class NoteUtils {
 
   /**
    * Add node to parents up the note tree, or create stubs if no direct parents exists
+   *
    * @param opts
-   * @returns All notes that were changed including the parents
+   * @returns All parent notes that were changed
    */
-  static addOrUpdateParentsWithDict(opts: {
+  static addOrUpdateParents(opts: {
     note: NoteProps;
-    notesDict: NotePropsDict;
-    notesByFnameDict: NoteFNamesDict;
+    noteDicts: NoteDicts;
     createStubs: boolean;
     wsRoot: string;
   }): NoteChangeEntry[] {
-    const { note, notesDict, notesByFnameDict, createStubs, wsRoot } = opts;
+    const { note, noteDicts, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    const parent = notesByFnameDict.get(notesDict, parentPath, note.vault)[0];
+    const parent = NoteDictsUtils.findByFname(
+      parentPath,
+      noteDicts,
+      note.vault
+    )[0];
 
     const changed: NoteChangeEntry[] = [];
     if (parent) {
@@ -402,15 +402,10 @@ export class NoteUtils {
       throw DendronError.createFromStatus(err);
     }
     if (!parent) {
-      const ancestor = DNodeUtils.findClosestParent(
-        note.fname,
-        notesDict,
-        notesByFnameDict,
-        {
-          vault: note.vault,
-          wsRoot,
-        }
-      ) as NoteProps;
+      const ancestor = DNodeUtils.findClosestParent(note.fname, noteDicts, {
+        vault: note.vault,
+        wsRoot,
+      }) as NoteProps;
 
       const prevAncestorState = { ...ancestor };
 
@@ -429,22 +424,6 @@ export class NoteUtils {
       });
     }
     return changed;
-  }
-
-  static addOrUpdateParents(opts: {
-    note: NoteProps;
-    notesDict: NotePropsDict;
-    createStubs: boolean;
-    wsRoot: string;
-  }): NoteChangeEntry[] {
-    const { note, notesDict, createStubs, wsRoot } = opts;
-    return NoteUtils.addOrUpdateParentsWithDict({
-      note,
-      notesDict,
-      notesByFnameDict: new NoteFNamesDict(_.values(notesDict)),
-      createStubs,
-      wsRoot,
-    });
   }
 
   static addSchema(opts: {
@@ -500,9 +479,9 @@ export class NoteUtils {
           })[0];
 
         if (tempNote) {
-          SchemaUtils.applyTemplate({
+          TemplateUtils.applyTemplate({
             templateNote: tempNote,
-            note,
+            targetNote: note,
             engine,
           });
         }
@@ -767,7 +746,7 @@ export class NoteUtils {
     notes,
   }: {
     rootNote: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }) {
     // If the note does not have reference links than the last updated time of
     // the preview tree is the last updated time of the note itself. Hence, we
@@ -867,7 +846,11 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return engine.noteFnames.get(engine.notes, fname, vault);
+    return NoteDictsUtils.findByFname(
+      fname,
+      { notesById: engine.notes, notesByFname: engine.noteFnames },
+      vault
+    );
   }
 
   /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
@@ -878,7 +861,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDict | NoteProps[];
+    notes: NotePropsByIdDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps | undefined {
@@ -940,6 +923,7 @@ export class NoteUtils {
     return existingNote;
   }
 
+  /** @deprecated see {@link NoteUtils.getNoteByFnameFromEngine} */
   static getNoteOrThrow({
     fname,
     notes,
@@ -947,7 +931,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDict | NoteProps[];
+    notes: NotePropsByIdDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps {
@@ -966,48 +950,12 @@ export class NoteUtils {
     return out;
   }
 
-  /**
-   @deprecated
-   */
-  static getNoteByFname(
-    fname: string,
-    notes: NotePropsDict,
-    opts?: { throwIfEmpty?: boolean; vault?: DVault }
-  ): NoteProps | undefined {
-    const _out = _.filter(_.values(notes), (ent) => {
-      return ent.fname.toLowerCase() === fname.toLowerCase();
-    });
-    let out;
-    if (_out.length > 1) {
-      if (!opts?.vault) {
-        throw new DendronError({
-          message: `multiple nodes found and no vault given for ${fname}`,
-        });
-      }
-      out = _.find(
-        _out,
-        (ent) => ent.vault.fsPath === opts?.vault?.fsPath
-      ) as NoteProps;
-      if (_.isUndefined(out)) {
-        throw new DendronError({
-          message: `no note found for vault: ${opts.vault.fsPath}`,
-        });
-      }
-    } else {
-      out = _out[0];
-    }
-    if (opts?.throwIfEmpty && _.isUndefined(out)) {
-      throw Error(`${fname} not found in getNoteByFname`);
-    }
-    return out;
-  }
-
   static getNotesWithLinkTo({
     note,
     notes,
   }: {
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteProps[] {
     const maybe = _.values(notes).map((ent) => {
       if (
@@ -1058,7 +1006,7 @@ export class NoteUtils {
     sortDesc = true,
   }: {
     note: NoteProps;
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     sortDesc?: boolean;
   }): NoteProps[] {
     const out = [];
@@ -1088,7 +1036,7 @@ export class NoteUtils {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
 
-  static getRoots(notes: NotePropsDict): NoteProps[] {
+  static getRoots(notes: NotePropsByIdDict): NoteProps[] {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
@@ -1509,77 +1457,6 @@ type SchemaMatchResult = {
 };
 
 export class SchemaUtils {
-  /** The props of a template note that will get copied over when the template is applied. */
-  static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
-    "desc",
-    "custom",
-    "color",
-    "tags",
-    "image",
-  ];
-
-  /**
-   * Apply template note to provided {@param note}.
-   *
-   * Changes include appending template note's body to end of provided note.
-   */
-  static applyTemplate(opts: {
-    templateNote: NoteProps;
-    note: NoteProps;
-    engine: DEngineClient;
-  }) {
-    const { templateNote, note } = opts;
-    if (templateNote.type === "note") {
-      const tempNoteProps = _.pick(templateNote, this.TEMPLATE_COPY_PROPS);
-      _.forEach(tempNoteProps, (v, k) => {
-        // @ts-ignore
-        note[k] = v;
-      });
-      // If note body exists, append template's body instead of overriding
-      if (note.body) {
-        note.body += `\n${templateNote.body}`;
-      } else {
-        note.body = templateNote.body;
-      }
-
-      // Apply date variable substitution to the body based on lodash interpolate delimiter if applicable
-      // E.g. if template has <%= CURRENT_YEAR %>, new note will contain 2021
-      const currentDate = Time.now();
-
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_YEAR\s*%>/g,
-        currentDate.toFormat("yyyy")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_MONTH\s*%>/g,
-        currentDate.toFormat("LL")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_WEEK\s*%>/g,
-        currentDate.toFormat("WW")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_DAY\s*%>/g,
-        currentDate.toFormat("dd")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_HOUR\s*%>/g,
-        currentDate.toFormat("HH")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_MINUTE\s*%>/g,
-        currentDate.toFormat("mm")
-      );
-      note.body = note.body.replace(
-        /<%=\s*CURRENT_SECOND\s*%>/g,
-        currentDate.toFormat("ss")
-      );
-
-      return true;
-    }
-    return false;
-  }
-
   static createFromSchemaRaw(opts: SchemaRaw & { vault: DVault }): SchemaProps {
     const schemaDataOpts: (keyof SchemaData)[] = [
       "namespace",
@@ -1893,7 +1770,7 @@ export class SchemaUtils {
    */
   static matchDomain(
     domain: NoteProps,
-    notes: NotePropsDict,
+    notes: NotePropsByIdDict,
     schemas: SchemaModuleDict
   ) {
     const match = schemas[domain.fname];
@@ -1912,7 +1789,7 @@ export class SchemaUtils {
 
   static matchDomainWithSchema(opts: {
     noteCandidates: NoteProps[];
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
     schemaCandidates: SchemaProps[];
     schemaModule: SchemaModuleProps;
     matchNamespace?: boolean;

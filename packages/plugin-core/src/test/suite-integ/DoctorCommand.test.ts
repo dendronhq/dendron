@@ -588,7 +588,8 @@ suite("REGENERATE_NOTE_ID", function () {
             vault,
             wsRoot,
           });
-          expect(root?.id).toNotEqual(oldRootId);
+          // Root should not change
+          expect(root?.id).toEqual(oldRootId);
           expect(foo?.id).toNotEqual(oldFooId);
           expect(bar?.id).toNotEqual(oldBarId);
         } finally {

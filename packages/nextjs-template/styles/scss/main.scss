@@ -36,20 +36,9 @@ hr {
 
 // DendronLayout
 
-// from from packages/dendron-next-server/assets/themes/light-theme.less
-$layout-header-background: #f5f7f9; // @layout-header-background
-$text-color: rgba(0, 0, 0, 0.85); // @text-color
-
-.site-layout-sidebar.ant-layout {
-  background-color: $layout-header-background;
-  .ant-menu.ant-menu-inline {
-    background-color: $layout-header-background;
-  }
-}
-
 // DendronTreeMenu
 
-.dendron-tree-menu.ant-menu {
+.dendron-tree-menu.ant-menu:not(.ant-menu-horizontal) {
   .ant-menu-submenu-title {
     [data-expandedicon="true"] {
       position: absolute;
@@ -61,10 +50,6 @@ $text-color: rgba(0, 0, 0, 0.85); // @text-color
       display: flex;
       align-items: center;
     }
-  }
-
-  .ant-menu-item-selected {
-    color: rgba(0, 0, 0, 0.85);
   }
 
   &.ant-menu-inline {
@@ -89,7 +74,7 @@ $text-color: rgba(0, 0, 0, 0.85); // @text-color
       top: 0;
       right: 0;
       bottom: 0;
-      border-right: 3px solid rgb(67, 176, 42); // antd's @border-color-split
+      border-right: 3px solid;
       transform: scaleY(0.0001);
       opacity: 0;
       content: "";
@@ -97,23 +82,24 @@ $text-color: rgba(0, 0, 0, 0.85); // @text-color
     }
   }
 
-  .ant-menu-submenu.dendron-ant-menu-submenu-selected {
-    > .ant-menu-submenu-title {
-      background-color: rgb(
-        230,
-        240,
-        225
-      ); // antd's @menu-item-active-bg with ich @primary-1
-    }
+  // We want the links to have the color of regular text, whatever that color is
+  // for the current theme.
+  .ant-menu-title-content a {
+    color: inherit;
+  }
 
+  .ant-menu-submenu.dendron-ant-menu-submenu-selected {
     > .ant-menu-submenu-title:after {
       transform: scaleY(1);
       opacity: 1;
     }
   }
 
-  .ant-menu-title-content a {
-    color: $text-color;
+  // ant overrides the background color for these elements, which blocks the
+  // background color we set for the container element.
+  .ant-layout-sider,
+  .ant-menu {
+    background: unset;
   }
 }
 
@@ -122,4 +108,18 @@ $text-color: rgba(0, 0, 0, 0.85); // @text-color
   .ant-anchor-link-title {
     white-space: normal;
   }
+}
+
+// for task links, the decorations around the links
+.task-before {
+  margin-right: 0.5rem;
+  opacity: 0.8;
+}
+.task-after {
+  margin-left: 0.5rem;
+  opacity: 0.8;
+}
+.task-status-text {
+  opacity: 0.8;
+  margin-right: 0.5rem;
 }

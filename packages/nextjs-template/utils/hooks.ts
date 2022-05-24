@@ -3,7 +3,7 @@ import {
   FuseEngine,
   IntermediateDendronConfig,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { Grid } from "antd";
@@ -32,7 +32,7 @@ export function useDendronRouter() {
   const getActiveNote = ({
     notes,
   }: {
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteProps | undefined => {
     const maybeIdByQuery = query?.id;
     return !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;

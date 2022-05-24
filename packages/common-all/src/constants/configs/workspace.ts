@@ -132,6 +132,10 @@ const TASK: DendronConfigEntryCollection<TaskConfig> = {
       return [key, value];
     })
   ),
+  taskCompleteStatus: {
+    label: "When is a task complete",
+    desc: "If the note state is set to any of these values, the note is considered to be done.",
+  },
 };
 
 export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
@@ -170,6 +174,10 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   enableXVaultWikiLink: {
     label: "Enable cross-vault wikilink",
     desc: "Enable cross-vault wikilinks",
+  },
+  enableHandlebarTemplates: {
+    label: "Enable handlebar style templates",
+    desc: "",
   },
   enableRemoteVaultInit: {
     label: "Enable Remote Vault Init",

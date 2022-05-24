@@ -2,7 +2,7 @@ import {
   DendronError,
   DNodeUtils,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   TreeUtils,
   TreeViewItemLabelTypeEnum,
@@ -203,7 +203,7 @@ export class EngineNoteProvider
 
   private async parseTree(
     note: NoteProps,
-    ndict: NotePropsDict
+    ndict: NotePropsByIdDict
   ): Promise<TreeNote> {
     const ctx = "parseTree";
     const tn = this.createTreeNote(note);

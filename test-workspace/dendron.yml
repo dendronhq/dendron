@@ -70,9 +70,11 @@ workspace:
       L: low
     todoIntegration: false
     createTaskSelectionType: selection2link
+    taskCompleteStatus: ["x", "done"]
   enableUserTags: true
   enableHashTags: true
   enableEditorDecorations: true
+  enableHandlebarTemplates: true
 preview:
   enableFMTitle: true
   enableNoteTitleForLink: true
@@ -83,7 +85,9 @@ preview:
   enableFrontmatterTags: true
   enableHashesForFMTags: false
 publishing:
-  theme: custom
+  enableHierarchyDisplay: false
+  hierarchyDisplayTitle: "Sub Notes"
+  theme: light
   enableFMTitle: true
   enableNoteTitleForLink: true
   enableMermaid: true
@@ -97,6 +101,7 @@ publishing:
     - dendron
     - bar
     - tags
+    - task
   enableSiteLastModified: true
   siteRootDir: docs
   siteUrl: https://foo.dev.dendron.so

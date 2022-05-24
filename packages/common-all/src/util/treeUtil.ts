@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { NotePropsDict, NoteProps } from "../types";
+import { NotePropsByIdDict, NoteProps } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 
@@ -32,7 +32,7 @@ export enum TreeViewItemLabelTypeEnum {
 
 export class TreeUtils {
   static generateTreeData(
-    allNotes: NotePropsDict,
+    allNotes: NotePropsByIdDict,
     domains: NoteProps[]
   ): TreeMenu {
     // --- Calc
@@ -75,7 +75,7 @@ export class TreeUtils {
     noteDict,
   }: {
     noteId: string;
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
   }): TreeMenuNode | undefined {
     const note = noteDict[noteId];
     if (_.isUndefined(note)) {
@@ -120,7 +120,7 @@ export class TreeUtils {
     labelType,
   }: {
     noteIds: string[];
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
     reverse?: boolean;
     labelType?: TreeViewItemLabelTypeEnum;
   }): string[] => {

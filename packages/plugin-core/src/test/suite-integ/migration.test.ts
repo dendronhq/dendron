@@ -726,6 +726,7 @@ suite("Migration", function () {
               feedback: true,
               apiEndpoint: "foobar.com",
               enableFullHierarchyNoteTitle: false,
+              enableHandlebarTemplates: false,
             };
 
             expect(postMigrationDendronConfig.workspace).toEqual(
@@ -1138,6 +1139,7 @@ suite("Migration", function () {
               cognitoUserPoolId: "qwerty",
               cognitoClientId: "azerty",
               enablePrettyLinks: true,
+              enableTaskNotes: true,
             };
 
             expect(postMigrationDendronConfig.publishing).toEqual(

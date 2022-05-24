@@ -5,7 +5,7 @@ import {
   DVault,
   DVaultVisibility,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -55,8 +55,8 @@ const dupNote = (payload: DVault | string[]) => {
 };
 
 const checkNotes = (opts: {
-  filteredNotes: NotePropsDict;
-  engineNotes: NotePropsDict;
+  filteredNotes: NotePropsByIdDict;
+  engineNotes: NotePropsByIdDict;
   match: ({
     id: string;
   } & Partial<NoteProps>)[];

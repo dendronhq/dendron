@@ -68,6 +68,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -77,6 +80,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -121,6 +125,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -217,6 +222,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -226,6 +234,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -273,6 +282,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -356,6 +366,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -365,6 +378,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -407,6 +421,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
 "
 `;
@@ -462,6 +477,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -471,6 +489,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -513,6 +532,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -585,6 +605,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -594,6 +617,7 @@ workspace:
     graph:
         zoomSpeed: 1
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: false
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -636,6 +660,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault

@@ -57,6 +57,7 @@ function main() {
       ".only": {
         rgx: /(suite|describe|it|test)\.only/,
         fileRgx: /(\.spec\.ts$)|(\.test\.ts$)/,
+        fileIgnoreRgx: /dnode\.spec\.ts/,
       },
       "debugger;": { rgx: /(^|\s)debugger/, fileRgx: /\.ts$/ },
       "rel import of monorepo pkg": {

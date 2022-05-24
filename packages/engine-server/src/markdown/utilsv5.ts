@@ -5,7 +5,7 @@ import {
   DEngineClient,
   DVault,
   ERROR_STATUS,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   NoteProps,
   DateTime,
@@ -103,7 +103,7 @@ export type ProcDataFullOptsV5 = {
   /**
    * Supply alternative dictionary of notes to use when resolving note ids
    */
-  notes?: NotePropsDict;
+  notes?: NotePropsByIdDict;
   /**
    * Check to see if we are in a note reference.
    */
@@ -133,7 +133,7 @@ export type ProcDataFullV5 = {
   // derived: unless passed in, these come from engine or are set by
   // other unified plugins
   config: IntermediateDendronConfig;
-  notes?: NotePropsDict;
+  notes?: NotePropsByIdDict;
   insideNoteRef?: boolean;
 
   fm?: any;

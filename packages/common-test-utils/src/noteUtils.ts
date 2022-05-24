@@ -6,7 +6,6 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   DNodePropsQuickInputV2,
-  NotePropsDict,
   DEngineClient,
   EngineWriteOptsV2,
 } from "@dendronhq/common-all";
@@ -112,16 +111,6 @@ export class TestNoteFactory {
 
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
     return Promise.all(fnames.map((name) => this.createForFName(name)));
-  }
-
-  toNotePropsDict(notes: NoteProps[]): NotePropsDict {
-    const dict: NotePropsDict = {};
-
-    for (const note of notes) {
-      dict[note.id] = note;
-    }
-
-    return dict;
   }
 }
 

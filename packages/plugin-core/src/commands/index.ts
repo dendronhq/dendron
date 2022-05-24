@@ -74,6 +74,7 @@ import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
 import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
 import { GotoCommand } from "./Goto";
+import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -96,6 +97,7 @@ const ALL_COMMANDS = [
   CopyToClipboardCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
+  MigrateSelfContainedVaultCommand,
   CreateSchemaFromHierarchyCommand,
   DeleteHookCommand,
   DeleteNodeCommand,

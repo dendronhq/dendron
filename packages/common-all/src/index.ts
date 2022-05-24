@@ -4,6 +4,7 @@ import minimatch from "minimatch";
 
 export * from "./colors";
 export * from "./dnode";
+export * from "./template";
 export * from "./helpers";
 export * from "./env";
 export * from "./assert";
@@ -26,6 +27,7 @@ export * from "./config";
 export * from "./schema";
 export * from "./abTesting";
 export * from "./abTests";
+export * from "./noteDictsUtils";
 export { axios, AxiosError };
 export { DateTime };
 

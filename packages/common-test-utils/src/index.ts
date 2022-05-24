@@ -3,7 +3,7 @@ import {
   DVault,
   NoteOpts,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteUtils,
   SchemaModuleOpts,
   SchemaModuleProps,
@@ -315,7 +315,7 @@ export class NodeTestUtilsV2 {
     withBody?: boolean;
     vaultPath: string;
     noteProps?: (Omit<NoteOpts, "vault"> & { vault?: DVault })[];
-  }): Promise<NotePropsDict> => {
+  }): Promise<NotePropsByIdDict> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
       noteProps: [] as NoteOpts[],
@@ -329,7 +329,7 @@ export class NodeTestUtilsV2 {
       ...defaultOpts,
       vault,
     });
-    const out: NotePropsDict = {
+    const out: NotePropsByIdDict = {
       root: rootNote,
     };
     await Promise.all(
@@ -449,7 +449,7 @@ export class NodeTestUtilsV2 {
   }
 
   static normalizeNotes(
-    notes: NoteProps[] | NotePropsDict
+    notes: NoteProps[] | NotePropsByIdDict
   ): Partial<NoteProps>[] {
     if (!_.isArray(notes)) {
       notes = _.values(notes);

@@ -104,6 +104,10 @@ type Metadata = Partial<{
   treeViewItemLabelType: TreeViewItemLabelTypeEnum;
 
   backlinksPanelSortOrder: BacklinkPanelSortOrder;
+  /**
+   * When the user first used Daily Journal command
+   */
+  firstDailyJournalTime: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -291,5 +295,8 @@ export class MetadataService {
 
   set BacklinksPanelSortOrder(sortOrder: BacklinkPanelSortOrder | undefined) {
     this.setMeta("backlinksPanelSortOrder", sortOrder);
+  }
+  setFirstDailyJournalTime() {
+    this.setMeta("firstDailyJournalTime", Time.now().toSeconds());
   }
 }

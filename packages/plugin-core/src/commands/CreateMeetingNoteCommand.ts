@@ -1,5 +1,6 @@
 import {
   DendronError,
+  genUUID,
   NoteUtils,
   SchemaCreationUtils,
   SchemaToken,
@@ -20,8 +21,7 @@ import {
   CreateNoteWithTraitCommand,
 } from "./CreateNoteWithTraitCommand";
 
-// internal to this class
-type ExecuteData = {
+export type ExecuteData = {
   templateCreated: boolean;
   schemaCreated: boolean;
 };
@@ -179,7 +179,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     const templateNoteProps = NoteUtils.create({
       fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
       vault,
-      id: "dendronMeetingNoteTemplate",
+      id: genUUID(),
       title: "Meeting Notes Template",
       body,
     });
@@ -187,7 +187,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     await this._ext.getEngine().writeNote(templateNoteProps);
 
     vscode.window.showInformationMessage(
-      `Created a new template for your meeting notes at ${CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME}`
+      `Created template for your meeting notes at ${CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME}`
     );
 
     return true;

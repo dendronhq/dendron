@@ -6,7 +6,7 @@
   "publisher": "dendron",
   "version": "0.96.0",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.62.0"
   },
   "categories": [
     "Other"
@@ -1235,7 +1235,7 @@
     "@dendronhq/pods-core": "^0.96.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
-    "@types/vscode": "^1.67.0",
+    "@types/vscode": "1.62.0",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",

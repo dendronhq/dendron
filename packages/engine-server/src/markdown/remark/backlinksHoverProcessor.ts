@@ -41,7 +41,6 @@ export function BacklinkHoverProcessor(
 ): Transformer {
   function transformer(tree: Node, _file: VFile) {
     if (!_opts) {
-      // addError(proc, DendronError.createPlainError());
       return;
     }
 
@@ -77,6 +76,7 @@ export function BacklinkHoverProcessor(
         return;
       }
 
+      // Remove all elements that fall outside of the context boundary limits
       if (
         node.position.end.line < lowerLineLimit ||
         node.position.start.line > upperLineLimit
@@ -87,6 +87,8 @@ export function BacklinkHoverProcessor(
         }
       }
 
+      // Make special adjustments for preceding and succeeding code blocks that
+      // straddle the context boundaries
       if (node.position && node.position.start.line < lowerLineLimit) {
         if (RemarkUtils.isCode(node)) {
           const lines = node.value.split("\n");
@@ -108,31 +110,55 @@ export function BacklinkHoverProcessor(
             .join("\n");
         }
       }
+
+      // Do the node replacement for wikilinks, node refs, and text blocks when
+      // its a candidate link
       if (RemarkUtils.isWikiLink(node)) {
         if (
           backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
         ) {
+          let wiklinkText = `${node.value}`;
+
+          if (node.data.anchorHeader) {
+            wiklinkText += `#${node.data.anchorHeader}`;
+          }
+
           (node as Node).type = DendronASTTypes.HTML;
-          (
-            node as unknown as HTML
-          ).value = `<span style="color:#000;background-color:#FFFF00;">[[${node.value}]]</span>`;
+          (node as unknown as HTML).value = getHTMLToHighlightText(
+            `[[${wiklinkText}]]`
+          );
         }
       } else if (RemarkUtils.isNoteRefV2(node)) {
         if (
           backlinkLineNumber === node.position?.start.line &&
           node.position.start.column === _opts.location.start.column
         ) {
+          let wiklinkText = `${node.value}`;
+
+          if (node.data.link.data.anchorStart) {
+            wiklinkText += `#${node.data.link.data.anchorStart}`;
+          }
+
+          if (node.data.link.data.anchorEnd) {
+            wiklinkText += `:#${node.data.link.data.anchorEnd}`;
+          }
+
           (node as Node).type = DendronASTTypes.HTML;
-          (
-            node as unknown as HTML
-          ).value = `<span style="color:#000;background-color:#FFFF00;">![[${node.value}]]</span>`;
+          (node as unknown as HTML).value = getHTMLToHighlightText(
+            `![[${wiklinkText}]]`
+          );
         }
       } else if (RemarkUtils.isText(node)) {
+        // If the backlink location falls within the range of this text node,
+        // then proceed with formatting. Note: a text node can span multiple
+        // lines if it ends with a '\n'
         if (
           backlinkLineNumber === node.position?.start.line &&
-          node.position.end.column > _opts.location.start.column &&
-          node.position.start.column < _opts.location.end.column
+          (node.position.end.column > _opts.location.start.column ||
+            node.position.end.line > _opts.location.start.line) &&
+          (node.position.start.column < _opts.location.end.column ||
+            node.position.start.line < _opts.location.end.line)
         ) {
           const contents = node.value;
           const prefix = contents.substring(0, _opts.location.start.column - 1);
@@ -147,9 +173,9 @@ export function BacklinkHoverProcessor(
           );
 
           (node as Node).type = DendronASTTypes.HTML;
-          (
-            node as unknown as HTML
-          ).value = `${prefix}<span style="color:#000;background-color:#FFFF00;">${candidate}</span>${suffix}`;
+          (node as unknown as HTML).value = `${prefix}${getHTMLToHighlightText(
+            candidate
+          )}${suffix}`;
 
           return index;
         }
@@ -199,4 +225,8 @@ export function BacklinkHoverProcessor(
     });
   }
   return transformer;
+}
+
+function getHTMLToHighlightText(input: string): string {
+  return `<span style="color:#000;background-color:#FFFF00;">${input}</span>`;
 }

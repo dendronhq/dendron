@@ -342,12 +342,16 @@ const getLinkCandidates = ({
             start: {
               line: textNode.position!.start.line,
               column: startColumn,
-              offset: textNode.position!.start.offset,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + startColumn - 1
+                : undefined,
             },
             end: {
               line: textNode.position!.start.line,
               column: endColumn,
-              offset: textNode.position!.end.offset,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + endColumn - 1
+                : undefined,
             },
           };
           return {

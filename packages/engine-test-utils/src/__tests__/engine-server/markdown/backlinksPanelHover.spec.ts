@@ -235,6 +235,78 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
       ],
     });
 
+    const WITH_BLOCK_ANCHOR = singleBacklinksPanelTest({
+      testName: "THEN the block anchor is included in the highlighted span",
+      noteBody: "[[foo#^123]]",
+      backlinkHoverOpts: {
+        linesOfContext: 2,
+        location: {
+          start: {
+            line: 1,
+            column: 1,
+          },
+          end: {
+            line: 1,
+            column: 8,
+          },
+        },
+      },
+      match: [
+        '<span style="color:#000;background-color:#FFFF00;">[[foo#^123]]</span>',
+      ],
+    });
+
+    // TODO: Add this failing test once its fixed. Current problem is that the
+    // wikilink doesn't contain the proper data to distinguish when the alias
+    // was explicilty vs implicitly added
+
+    // const WITH_ALIAS = singleBacklinksPanelTest({
+    //   testName: "THEN the alias is included in the highlighted span",
+    //   noteBody: "[[Foo|foo]]",
+    //   backlinkHoverOpts: {
+    //     linesOfContext: 2,
+    //     location: {
+    //       start: {
+    //         line: 1,
+    //         column: 1,
+    //       },
+    //       end: {
+    //         line: 1,
+    //         column: 12,
+    //       },
+    //     },
+    //   },
+    //   match: [
+    //     '<span style="color:#000;background-color:#FFFF00;">[[Foo|foo]]</span>',
+    //   ],
+    // });
+
+    // TODO: Add this failing test once its fixed. Current problem is that the
+    // wikilink doesn't contain the proper data to render the cross vault
+    // prefix.
+
+    // const WITH_CROSS_VAULT_PREFIX = singleBacklinksPanelTest({
+    //   testName:
+    //     "THEN the cross vault prefix is included in the highlighted span",
+    //   noteBody: "[[dendron://vault/foo]]",
+    //   backlinkHoverOpts: {
+    //     linesOfContext: 2,
+    //     location: {
+    //       start: {
+    //         line: 1,
+    //         column: 1,
+    //       },
+    //       end: {
+    //         line: 1,
+    //         column: 28,
+    //       },
+    //     },
+    //   },
+    //   match: [
+    //     '<span style="color:#000;background-color:#FFFF00;">[[dendron://vault/foo]]</span>',
+    //   ],
+    // });
+
     runAllTests({
       name: "THEN statements",
       testCases: [
@@ -243,6 +315,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         ...WITH_FULL_NOTE_CONTEXT,
         ...WITH_TRUNCATED_CONTEXT,
         ...WITH_TRUNCATED_CODE_BLOCKS_AS_CONTEXT,
+        ...WITH_BLOCK_ANCHOR,
       ],
     });
   });
@@ -398,6 +471,48 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
       ],
     });
 
+    const WITH_BLOCK_ANCHOR = singleBacklinksPanelTest({
+      testName: "THEN the block anchor is included in the highlighted span",
+      noteBody: "![[foo#^123]]",
+      backlinkHoverOpts: {
+        linesOfContext: 2,
+        location: {
+          start: {
+            line: 1,
+            column: 1,
+          },
+          end: {
+            line: 1,
+            column: 8,
+          },
+        },
+      },
+      match: [
+        '<span style="color:#000;background-color:#FFFF00;">![[foo#^123]]</span>',
+      ],
+    });
+
+    const WITH_RANGED_ANCHORS = singleBacklinksPanelTest({
+      testName: "THEN the anchor ranges are properly rendered",
+      noteBody: "![[foo#start:#end]]",
+      backlinkHoverOpts: {
+        linesOfContext: 2,
+        location: {
+          start: {
+            line: 1,
+            column: 1,
+          },
+          end: {
+            line: 1,
+            column: 8,
+          },
+        },
+      },
+      match: [
+        '<span style="color:#000;background-color:#FFFF00;">![[foo#start:#end]]</span>',
+      ],
+    });
+
     runAllTests({
       name: "THEN statements",
       testCases: [
@@ -406,6 +521,8 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         ...WITH_FULL_NOTE_CONTEXT,
         ...WITH_TRUNCATED_CONTEXT,
         ...WITH_TRUNCATED_CODE_BLOCKS_AS_CONTEXT,
+        ...WITH_BLOCK_ANCHOR,
+        ...WITH_RANGED_ANCHORS,
       ],
     });
   });

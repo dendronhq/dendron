@@ -256,14 +256,7 @@ export class MDUtilsV5 {
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)
-      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
-
-    // This needs to be added before noteRefsV2 & wikiLinks, as it needs to transform some notes to regular text nodes.
-    if (opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
-      proc.use(BacklinkHoverProcessor, data.backlinkHoverOpts);
-    }
-
-    proc
+      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
       .use(noteRefsV2)
       .use(wikiLinks, data.wikiLinksOpts)
       .use(blockAnchors)
@@ -272,6 +265,7 @@ export class MDUtilsV5 {
       .use(extendedImage)
       .use(footnotes)
       .use(variables)
+      .use(BacklinkHoverProcessor, data.backlinkHoverOpts)
       .data("errors", errors);
 
     // set options and do validation

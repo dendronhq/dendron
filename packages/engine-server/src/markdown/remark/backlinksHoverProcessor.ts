@@ -199,7 +199,7 @@ export function BacklinkHoverProcessor(
         children: [
           {
             type: DendronASTTypes.HTML,
-            value: `--- <i>${lowerBoundText}<i/> ---`,
+            value: `--- <i>${lowerBoundText}</i> ---`,
           },
         ],
       };
@@ -216,7 +216,7 @@ export function BacklinkHoverProcessor(
         children: [
           {
             type: DendronASTTypes.HTML,
-            value: `--- <i>${upperBoundText}<i/> ---`,
+            value: `--- <i>${upperBoundText}</i> ---`,
           },
         ],
       };

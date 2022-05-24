@@ -320,13 +320,6 @@ const getLinkCandidates = ({
   const linkCandidates: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
-    // handling text nodes that start with \n
-    if (textNode.position!.start.line !== textNode.position!.end.line) {
-      textNode.position!.start = {
-        line: textNode.position!.start.line + 1,
-        column: 1,
-      };
-    }
     value.split(/\s+/).forEach((word) => {
       const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,

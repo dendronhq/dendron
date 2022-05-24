@@ -155,9 +155,9 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Start of Note<i/> ---",
+        "--- <i>Start of Note</i> ---",
         "-before",
-        "--- <i>End of Note<i/> ---",
+        "--- <i>End of Note</i> ---",
         "-after",
       ],
     });
@@ -186,9 +186,9 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Line 1<i/> ---",
+        "--- <i>Line 1</i> ---",
         "-before",
-        "--- <i>Line 7<i/> ---",
+        "--- <i>Line 7</i> ---",
         "-after",
       ],
     });
@@ -221,7 +221,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Line 3<i/> ---",
+        "--- <i>Line 3</i> ---",
         "```markdown\n" +
           "-before\n" +
           "```\n" +
@@ -231,7 +231,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
           "```markdown\n" +
           "-after\n" +
           "```\n",
-        "--- <i>Line 9<i/> ---",
+        "--- <i>Line 9</i> ---",
       ],
     });
 
@@ -391,9 +391,9 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Start of Note<i/> ---",
+        "--- <i>Start of Note</i> ---",
         "-before",
-        "--- <i>End of Note<i/> ---",
+        "--- <i>End of Note</i> ---",
         "-after",
       ],
     });
@@ -422,9 +422,9 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Line 1<i/> ---",
+        "--- <i>Line 1</i> ---",
         "-before",
-        "--- <i>Line 7<i/> ---",
+        "--- <i>Line 7</i> ---",
         "-after",
       ],
     });
@@ -457,7 +457,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
         },
       },
       match: [
-        "--- <i>Line 3<i/> ---",
+        "--- <i>Line 3</i> ---",
         "```markdown\n" +
           "-before\n" +
           "```\n" +
@@ -467,7 +467,7 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
           "```markdown\n" +
           "-after\n" +
           "```\n",
-        "--- <i>Line 9<i/> ---",
+        "--- <i>Line 9</i> ---",
       ],
     });
 
@@ -596,9 +596,9 @@ foo
         },
       },
       match: [
-        "--- <i>Start of Note<i/> ---",
+        "--- <i>Start of Note</i> ---",
         "-before",
-        "--- <i>End of Note<i/> ---",
+        "--- <i>End of Note</i> ---",
         "-after",
       ],
     });
@@ -627,9 +627,9 @@ foo
         },
       },
       match: [
-        "--- <i>Line 1<i/> ---",
+        "--- <i>Line 1</i> ---",
         "-before",
-        "--- <i>Line 7<i/> ---",
+        "--- <i>Line 7</i> ---",
         "-after",
       ],
     });
@@ -662,7 +662,7 @@ foo
         },
       },
       match: [
-        "--- <i>Line 3<i/> ---",
+        "--- <i>Line 3</i> ---",
         "```markdown\n" +
           "-before\n" +
           "```\n" +
@@ -672,7 +672,7 @@ foo
           "```markdown\n" +
           "-after\n" +
           "```\n",
-        "--- <i>Line 9<i/> ---",
+        "--- <i>Line 9</i> ---",
       ],
     });
 

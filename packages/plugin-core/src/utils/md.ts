@@ -529,15 +529,6 @@ export async function findReferencesById(id: string) {
       const lineNum = lines.length;
       let range: vscode.Range;
       switch (link.type) {
-        case "wiki":
-          range = new vscode.Range(
-            new vscode.Position(
-              lineNum - 1,
-              (link.position?.start.column || 1) - 1
-            ),
-            new vscode.Position(lineNum - 1, link.position?.end.column || 1)
-          );
-          break;
         case "frontmatterTag":
           // -2 in lineNum so that it targets the end of the frontmatter
           range = new vscode.Range(

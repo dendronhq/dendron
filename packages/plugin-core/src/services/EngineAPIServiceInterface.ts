@@ -11,6 +11,7 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  FindNoteOpts,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -52,6 +53,15 @@ export interface IEngineAPIService {
   config: IntermediateDendronConfig;
   hooks: DHookDict;
   engineEventEmitter: EngineEventEmitter;
+
+  /**
+   * Get NoteProps by id. If note doesn't exist, return undefined
+   */
+  getNote: (id: string) => Promise<NoteProps | undefined>;
+  /**
+   * Find NoteProps by note properties. If no notes match, return empty list
+   */
+  findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
 
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 

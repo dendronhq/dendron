@@ -79,7 +79,7 @@ export const decorateWikilink: Decorator<
 
   // Wikilinks to a part of a task are not tasks themselves, so skip links like [[task.thing#part]]. Also skip broken wikilinks, they have no notes.
   if (!wikiLink.data.anchorHeader && type !== DECORATION_TYPES.brokenWikilink) {
-    const taskDecoration = decorateTaskNote({
+    const taskDecoration = await decorateTaskNote({
       range: wikilinkRange,
       fname,
       vaultName,

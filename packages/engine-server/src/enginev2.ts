@@ -62,6 +62,7 @@ import {
   assertUnreachable,
   NoteDictsUtils,
   SchemaUtils,
+  FindNoteOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -326,6 +327,20 @@ export class DendronEngineV2 implements DEngine {
         }),
       };
     }
+  }
+
+  /**
+   * See {@link DEngine.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    return this.store.getNote(id);
+  }
+
+  /**
+   * See {@link DEngine.findNotes}
+   */
+  findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    return this.store.findNotes(opts);
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

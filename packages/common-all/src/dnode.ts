@@ -807,6 +807,9 @@ export class NoteUtils {
     return latestUpdated;
   }
 
+  /**
+   * @deprecated see {@link DEngineClient.findNotes}
+   */
   static getNotesByFnameFromEngine({
     fname,
     engine,

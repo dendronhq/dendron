@@ -17,6 +17,7 @@ import {
   EngineWriteOptsV2,
   Event,
   extractNoteChangeEntriesByType,
+  FindNoteOpts,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -189,6 +190,20 @@ export class EngineAPIService
 
   public get engineEventEmitter(): EngineEventEmitter {
     return this._engineEventEmitter;
+  }
+
+  /**
+   * See {@link IEngineAPIService.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    return this._internalEngine.getNote(id);
+  }
+
+  /**
+   * See {@link IEngineAPIService.findNotes}
+   */
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    return this._internalEngine.findNotes(opts);
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {

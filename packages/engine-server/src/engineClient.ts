@@ -54,6 +54,7 @@ import {
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
+  FindNoteOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -201,6 +202,30 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         vaults: this.vaults,
       },
     };
+  }
+
+  /**
+   * See {@link DStore.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    const maybeNote = this.notes[id];
+    if (maybeNote) {
+      return _.cloneDeep(maybeNote);
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * See {@link DStore.findNotes}
+   */
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    const { fname, vault } = opts;
+    return NoteDictsUtils.findByFname(
+      fname,
+      { notesById: this.notes, notesByFname: this.noteFnames },
+      vault
+    );
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

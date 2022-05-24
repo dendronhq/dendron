@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
+import { PublishUtils } from "../publish";
 import { NotePropsByIdDict, NoteProps } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
@@ -90,6 +91,7 @@ export class TreeUtils {
     } else if (note.stub) {
       icon = TreeMenuNodeIcon.plusOutlined;
     }
+    const fm = PublishUtils.getPublishFM(note);
 
     return {
       key: note.id,
@@ -97,19 +99,22 @@ export class TreeUtils {
       icon,
       hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
       vaultName: VaultUtils.getName(note.vault),
-      navExclude: note.custom?.nav_exclude,
-      children: this.sortNotesAtLevel({
-        noteIds: note.children,
-        noteDict,
-        reverse: note.custom?.sort_order === "reverse",
-      })
-        .map((noteId) =>
-          TreeUtils.note2Tree({
-            noteId,
-            noteDict,
-          })
-        )
-        .filter(isNotUndefined),
+      navExclude: fm.nav_exclude || false,
+      children:
+        fm.nav_children_exclude || fm.has_collection
+          ? []
+          : this.sortNotesAtLevel({
+              noteIds: note.children,
+              noteDict,
+              reverse: fm.sort_order === "reverse",
+            })
+              .map((noteId) =>
+                TreeUtils.note2Tree({
+                  noteId,
+                  noteDict,
+                })
+              )
+              .filter(isNotUndefined),
     };
   }
 

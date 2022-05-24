@@ -22,7 +22,6 @@ import {
   LegacyHierarchyConfig,
   NoteChangeEntry,
   NoteProps,
-  SEOProps,
 } from "./types";
 import { GithubConfig } from "./types/configs/publishing/github";
 import {
@@ -481,47 +480,6 @@ export class TagUtils {
         _.pull(note.tags, oldTag);
       }
     }
-  }
-}
-
-export class PublishUtils {
-  static getSEOPropsFromConfig(
-    config: IntermediateDendronConfig
-  ): Partial<SEOProps> {
-    if (configIsV4(config)) {
-      const {
-        title,
-        twitter,
-        description: excerpt,
-        image,
-      } = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return { title, twitter, excerpt, image };
-    } else {
-      const {
-        title,
-        twitter,
-        description: excerpt,
-        image,
-      } = ConfigUtils.getPublishing(config).seo;
-      return { title, twitter, excerpt, image };
-    }
-  }
-
-  static getSEOPropsFromNote(note: NoteProps): SEOProps {
-    const { title, created, updated, image } = note;
-    const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
-      note.custom ? note.custom : ({} as any);
-    return {
-      title,
-      excerpt,
-      updated,
-      created,
-      canonicalBaseUrl,
-      canonicalUrl,
-      noindex,
-      image,
-      twitter,
-    };
   }
 }
 

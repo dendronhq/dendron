@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WHEN nav_children_exclude enabled THEN return only root 1`] = `
+Array [
+  Object {
+    "children": Array [],
+    "hasTitleNumberOutlined": false,
+    "icon": "bookOutlined",
+    "key": "foo",
+    "navExclude": false,
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;
+
+exports[`WHEN regular tree THEN return regular tree 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "hasTitleNumberOutlined": false,
+        "icon": "bookOutlined",
+        "key": "foo.ch1",
+        "navExclude": false,
+        "title": "Ch1",
+        "vaultName": "vault1",
+      },
+    ],
+    "hasTitleNumberOutlined": false,
+    "icon": "bookOutlined",
+    "key": "foo",
+    "navExclude": false,
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;

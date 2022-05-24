@@ -66,6 +66,11 @@ export class VaultUtils {
     return vault.fsPath;
   }
 
+  static getRelVaultRootPath(vault: DVault) {
+    if (VaultUtils.isSelfContained(vault)) return vault.fsPath;
+    return VaultUtils.getRelPath(vault);
+  }
+
   static getVaultByName({
     vaults,
     vname,

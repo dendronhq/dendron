@@ -1,13 +1,18 @@
-import { ConfigUtils, NoteQuickInput } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  ExtensionEvents,
+  NoteQuickInput,
+} from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Selection, SnippetString } from "vscode";
+import { Selection, SnippetString, window } from "vscode";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { AnalyticsUtils } from "../utils/analytics";
 
 type CommandInput = any;
 
@@ -79,6 +84,22 @@ export class InsertNoteCommand extends BasicCommand<
     const pos = editor.selection.active;
     const selection = new Selection(pos, pos);
     await editor.insertSnippet(snippet, selection);
+    AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
+      source: DENDRON_COMMANDS.INSERT_NOTE.key,
+    });
+    window
+      .showWarningMessage(
+        "Heads up that InsertNote is being deprecated and will be replaced with the 'Template Apply' command",
+        "See whats changed"
+      )
+      .then((resp) => {
+        if (resp === "See whats changed") {
+          AnalyticsUtils.track(ExtensionEvents.DepreactionNoticeAccept, {
+            source: DENDRON_COMMANDS.INSERT_NOTE.key,
+          });
+          VSCodeUtils.openLink("https://wiki.dendron.so");
+        }
+      });
     return txt;
   }
 }

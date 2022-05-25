@@ -1816,6 +1816,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "mshiltonj",
+      "name": "Steven Hilton",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25542?v=4",
+      "profile": "http://www.mshiltonj.com/",
+      "contributions": [
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -108,8 +108,7 @@ export class FileWatcher {
 
     try {
       this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-      const { vaults, engine } = ExtensionProvider.getDWorkspace();
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,
@@ -172,9 +171,14 @@ export class FileWatcher {
       return;
     }
     try {
-      const engine = ExtensionProvider.getEngine();
+      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const vault = VaultUtils.getVaultByFilePath({
+        vaults,
+        fsPath,
+        wsRoot,
+      });
       this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-      const nodeToDelete = _.find(engine.notes, { fname });
+      const nodeToDelete = (await engine.findNotes({ fname, vault }))[0];
       if (_.isUndefined(nodeToDelete)) {
         throw new Error(`${fname} not found`);
       }

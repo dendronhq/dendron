@@ -577,6 +577,14 @@ export type DEngine = DCommonProps &
     hooks: DHookDict;
 
     init: () => Promise<DEngineInitResp>;
+    /**
+     * Get NoteProps by id. If note doesn't exist, return undefined
+     */
+    getNote: (id: string) => Promise<NoteProps | undefined>;
+    /**
+     * Find NoteProps by note properties. If no notes match, return empty list
+     */
+    findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
@@ -639,7 +647,7 @@ export type DStore = DCommonProps &
      */
     getNote: (id: string) => Promise<NoteProps | undefined>;
     /**
-     * Find NoteProps by note properties
+     * Find NoteProps by note properties. If no notes match, return empty list
      */
     findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
     deleteNote: (

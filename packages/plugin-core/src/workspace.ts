@@ -525,9 +525,6 @@ export class DendronExtension implements IDendronExtension {
         // Tip of the Day
         const tipOfDayView = this.setupTipOfTheDayView();
 
-        // Help and Feedback
-        const helpAndFeedbackView = setupHelpFeedbackTreeView();
-
         // Graph panel (side)
         const graphPanel = new GraphPanel(this);
         this.treeViews[DendronTreeViewKey.GRAPH_PANEL] = graphPanel;
@@ -540,7 +537,6 @@ export class DendronExtension implements IDendronExtension {
 
         context.subscriptions.push(backlinkTreeView);
         context.subscriptions.push(tipOfDayView);
-        context.subscriptions.push(helpAndFeedbackView);
       }
     });
   }

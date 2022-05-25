@@ -33,7 +33,7 @@ export function makeImageUrlFullPath({
 /**
  * Transforms any wiklinks into a vscode command URI for gotoNote.
  */
-function commandUriForWikilink({
+function modifyWikilinkValueToCommandUri({
   proc,
   node,
 }: {
@@ -81,7 +81,7 @@ export function dendronHoverPreview(
         if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
           makeImageUrlFullPath({ proc, node });
         } else if (RemarkUtils.isWikiLink(node)) {
-          commandUriForWikilink({ proc, node });
+          modifyWikilinkValueToCommandUri({ proc, node });
         }
         return undefined; // continue
       }

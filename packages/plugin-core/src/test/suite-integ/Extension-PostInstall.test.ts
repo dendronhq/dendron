@@ -161,7 +161,7 @@ suite("GIVEN Dendron plugin activation", function () {
   });
 });
 
-suite.only("GIVEN keybindings conflict", function () {
+suite("GIVEN keybindings conflict", function () {
   let promptSpy: SinonSpy;
   let installStatusStub: SinonStub;
   describeMultiWS(

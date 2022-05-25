@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DailyJournalTestGroups,
   DVault,
+  Time,
   _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -31,6 +32,9 @@ suite("Create Daily Journal Suite", function () {
 
   beforeEach(() => {
     MetadataService.instance().deleteMeta("firstDailyJournalTime");
+    MetadataService.instance().setInitialInstall(
+      Time.DateTime.fromISO("2022-06-30").toSeconds()
+    );
     sinon
       .stub(_2022_05_DAILY_JOURNAL_TEMPLATE_TEST, "getUserGroup")
       .returns(DailyJournalTestGroups.withTemplate!);
@@ -96,6 +100,48 @@ suite("Create Daily Journal Suite", function () {
         const metadataService = MetadataService.instance();
         metadataService.setFirstDailyJournalTime();
         expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+
+        await cmd.run();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is NOT applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeFalsy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is NOT created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema).toBeFalsy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and first install is before 5/31/22",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then default template and schema is not created", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+        const metadataService = MetadataService.instance();
+        metadataService.setInitialInstall(
+          Time.DateTime.fromISO("2022-04-30").toSeconds()
+        );
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeFalsy();
 
         await cmd.run();
         expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();

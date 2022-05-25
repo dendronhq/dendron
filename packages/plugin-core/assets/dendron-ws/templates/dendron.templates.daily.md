@@ -1,4 +1,4 @@
-_Edit the [[dendron.templates.daily]] to change this template generated for Dendron Daily Journal._
+_Edit the [[dendron.templates.daily]] note to change this template generated for Dendron Daily Journal._
 
 <!--
 Based on the journaling method created by Intelligent Change:

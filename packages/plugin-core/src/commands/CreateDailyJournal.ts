@@ -8,6 +8,7 @@ import {
   SchemaCreationUtils,
   SchemaToken,
   SchemaUtils,
+  Time,
   VaultUtils,
   _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
 } from "@dendronhq/common-all";
@@ -28,7 +29,7 @@ import {
 import { VSCodeUtils } from "../vsCodeUtils";
 import { MetadataService } from "@dendronhq/engine-server";
 
-export type ExecuteData = {
+export type CreateDailyJournalData = {
   isFirstTime: boolean;
   isTemplateCreated: boolean;
   isSchemaCreated: boolean;
@@ -49,7 +50,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
     this.key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   }
 
-  override async execute(opts: CommandOpts): Promise<ExecuteData> {
+  override async execute(opts: CommandOpts): Promise<CreateDailyJournalData> {
     const config = this._extension.getDWorkspace().config;
     const journalConfig = ConfigUtils.getJournal(config);
     const maybeDailyVault = journalConfig.dailyVault;
@@ -64,20 +65,27 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
     let isTemplateCreated = false;
 
     const metaData = MetadataService.instance().getMeta();
-    // Only create default schema/template if running Daily Journal for first time
+    // Only create default schema/template if running Daily Journal for first time after 5/31/22
     if (_.isUndefined(metaData.firstDailyJournalTime)) {
       isFirstTime = true;
       MetadataService.instance().setFirstDailyJournalTime();
-      const ABUserGroup = _2022_05_DAILY_JOURNAL_TEMPLATE_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
-      if (ABUserGroup === DailyJournalTestGroups.withTemplate) {
-        // Check if a schema file exists, and if it doesn't, then create it first.
-        isSchemaCreated = await this.makeSchemaFileIfNotExisting(journalConfig);
-        // same with template file:
-        isTemplateCreated = await this.createTemplateFileIfNotExisting(
-          journalConfig
+      if (
+        !_.isUndefined(metaData.firstInstall) &&
+        metaData.firstInstall > Time.DateTime.fromISO("2022-05-31").toSeconds()
+      ) {
+        const ABUserGroup = _2022_05_DAILY_JOURNAL_TEMPLATE_TEST.getUserGroup(
+          SegmentClient.instance().anonymousId
         );
+        if (ABUserGroup === DailyJournalTestGroups.withTemplate) {
+          // Check if a schema file exists, and if it doesn't, then create it first.
+          isSchemaCreated = await this.makeSchemaFileIfNotExisting(
+            journalConfig
+          );
+          // same with template file:
+          isTemplateCreated = await this.createTemplateFileIfNotExisting(
+            journalConfig
+          );
+        }
       }
     }
 
@@ -89,13 +97,13 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   /**
    * Track whether new schema or template files were created
    */
-  addAnalyticsPayload(_opts: CommandOpts, resp: ExecuteData) {
+  addAnalyticsPayload(_opts: CommandOpts, resp: CreateDailyJournalData) {
     return { resp };
   }
 
   /**
    * Create the pre-canned schema so that we can apply a template to the user's
-   * meeting notes if the schema doesn't exist yet.
+   * daily journal notes if the schema doesn't exist yet.
    *
    * @returns whether a new schema file was made
    */
@@ -173,7 +181,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   }
 
   /**
-   * Create the pre-canned meeting template file in the user's workspace if it
+   * Create the pre-canned daily journal template file in the user's workspace if it
    * doesn't exist yet.
    *
    * @returns whether a new template file was made
@@ -186,7 +194,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
       `.${journalConfig.dailyDomain}`;
     const fileName = fname + `.md`;
 
-    const existingMeetingTemplates = NoteUtils.getNotesByFnameFromEngine({
+    const existingTemplates = NoteUtils.getNotesByFnameFromEngine({
       fname,
       engine: this._extension.getEngine(),
     });
@@ -203,7 +211,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
-    if (existingMeetingTemplates.length > 0) {
+    if (existingTemplates.length > 0) {
       return false;
     }
 
@@ -223,9 +231,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
     const body = (await fs.readFile(src)).toString();
 
     // Ensure that engine state is aware of the template before returning so
-    // that the template can be found when creating the meeting note. TODO: This
-    // is a bit fragile - make sure this ID matches what's in our built in
-    // template
+    // that the template can be found when creating the daily journal note.
     const templateNoteProps = NoteUtils.create({
       fname,
       vault,

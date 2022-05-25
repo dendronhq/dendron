@@ -1,4 +1,4 @@
-import { Time } from "@dendronhq/common-all";
+import { InstallStatus, Time } from "@dendronhq/common-all";
 import { MetadataService } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { after, afterEach, beforeEach, describe } from "mocha";
@@ -7,6 +7,7 @@ import { ExtensionContext } from "vscode";
 import { GLOBAL_STATE } from "../../constants";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
 
@@ -160,13 +161,16 @@ suite("GIVEN Dendron plugin activation", function () {
   });
 });
 
-suite("GIVEN keybindings conflict", function () {
+suite.only("GIVEN keybindings conflict", function () {
   let promptSpy: SinonSpy;
+  let installStatusStub: SinonStub;
   describeMultiWS(
     "GIVEN initial install",
     {
-      beforeHook: async ({ ctx }) => {
-        ctx.globalState.update(GLOBAL_STATE.VERSION, undefined);
+      beforeHook: async () => {
+        installStatusStub = sinon
+          .stub(VSCodeUtils, "getInstallStatusForExtension")
+          .returns(InstallStatus.INITIAL_INSTALL);
         promptSpy = sinon.spy(KeybindingUtils, "maybePromptKeybindingConflict");
       },
       noSetInstallStatus: true,
@@ -183,6 +187,7 @@ suite("GIVEN keybindings conflict", function () {
       });
 
       afterEach(() => {
+        installStatusStub.restore();
         installStatusStub.restore();
       });
 

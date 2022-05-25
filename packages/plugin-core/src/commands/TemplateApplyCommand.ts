@@ -89,6 +89,8 @@ export class TemplateApplyCommand extends BasicCommand<
       targetNote,
     });
     const resp = await engine.writeNote(updatedTargetNote);
+    const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+    await editor.document.save();
     if (resp.error) {
       throw new DendronError({
         message: "error applying template",

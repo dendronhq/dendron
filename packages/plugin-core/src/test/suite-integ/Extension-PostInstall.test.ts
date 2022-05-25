@@ -176,7 +176,6 @@ suite("GIVEN keybindings conflict", function () {
       noSetInstallStatus: true,
     },
     () => {
-      let installStatusStub: SinonStub;
       beforeEach(() => {
         installStatusStub = sinon
           .stub(
@@ -187,7 +186,6 @@ suite("GIVEN keybindings conflict", function () {
       });
 
       afterEach(() => {
-        installStatusStub.restore();
         installStatusStub.restore();
       });
 
@@ -209,7 +207,6 @@ suite("GIVEN keybindings conflict", function () {
       },
     },
     () => {
-      let installStatusStub: SinonStub;
       beforeEach(() => {
         installStatusStub = sinon
           .stub(

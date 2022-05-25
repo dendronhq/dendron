@@ -547,6 +547,10 @@ export async function _activate(
   const maybeUUIDPath = path.join(os.homedir(), CONSTANTS.DENDRON_ID);
   const UUIDPathExists = await fs.pathExists(maybeUUIDPath);
 
+  // this is the first time we are accessing the segment client instance.
+  // unlock Segment client.
+  SegmentClient.unlock();
+
   // If telemetry is not disabled, we enable telemetry and error reporting ^rw8l1w51hnjz
   // - NOTE: we do this outside of the try/catch block in case we run into an error with initialization
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {

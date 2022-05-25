@@ -101,7 +101,7 @@ export class TreeUtils {
       vaultName: VaultUtils.getName(note.vault),
       navExclude: fm.nav_exclude || false,
       children:
-        fm.nav_children_exclude || fm.has_collection
+        fm.nav_exclude_children || fm.has_collection
           ? []
           : this.sortNotesAtLevel({
               noteIds: note.children,

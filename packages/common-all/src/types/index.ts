@@ -73,7 +73,7 @@ export type DendronSiteFM = {
   /**
    * Should exclude children from nav
    */
-  nav_children_exclude?: boolean;
+  nav_exclude_children?: boolean;
   permalink?: string;
   /**
    * If collection, don't show in nav

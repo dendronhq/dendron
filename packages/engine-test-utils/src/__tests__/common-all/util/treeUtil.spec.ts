@@ -19,12 +19,12 @@ describe("WHEN regular tree", () => {
   });
 });
 
-describe("WHEN nav_children_exclude enabled", () => {
+describe("WHEN nav_exclude_children enabled", () => {
   test("THEN return only root", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
         const domain = engine.notes["foo"];
-        domain.custom.nav_children_exclude = true;
+        domain.custom.nav_exclude_children = true;
         const treeData = TreeUtils.generateTreeData(engine.notes, [domain]);
         expect(treeData.roots).toMatchSnapshot();
         expect(treeData.roots[0].children).toEqual([]);
@@ -42,7 +42,7 @@ describe("WHEN has_collection enabled", () => {
     await runEngineTestV5(
       async ({ engine }) => {
         const domain = engine.notes["foo"];
-        domain.custom.nav_children_exclude = true;
+        domain.custom.nav_exclude_children = true;
         const treeData = TreeUtils.generateTreeData(engine.notes, [domain]);
         expect(treeData.roots).toMatchSnapshot();
         expect(treeData.roots[0].children).toEqual([]);

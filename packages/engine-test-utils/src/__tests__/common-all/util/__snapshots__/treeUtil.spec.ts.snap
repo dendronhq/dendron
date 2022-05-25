@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`WHEN nav_children_exclude enabled THEN return only root 1`] = `
+exports[`WHEN nav_exclude_children enabled THEN return only root 1`] = `
 Array [
   Object {
     "children": Array [],

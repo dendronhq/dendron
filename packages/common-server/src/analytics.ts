@@ -169,11 +169,6 @@ export class SegmentClient {
       }
       return this._singleton;
     }
-
-    // if (_.isUndefined(this._singleton) || opts?.forceNew) {
-    //   this._singleton = new SegmentClient(opts);
-    // }
-    // return this._singleton;
   }
 
   /** Legacy: If exists, Dendron telemetry has been disabled. */

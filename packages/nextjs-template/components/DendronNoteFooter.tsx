@@ -84,7 +84,7 @@ class GitUtils {
     }
 
     let gitNotePath = _.join(
-      [path.basename(vault.fsPath), note.fname + ".md"],
+      [VaultUtils.getRelPath(vault), note.fname + ".md"],
       "/"
     );
     if (_.has(note?.custom, RESERVED_KEYS.GIT_NOTE_PATH)) {

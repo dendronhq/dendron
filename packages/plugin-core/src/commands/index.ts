@@ -75,6 +75,7 @@ import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
 import { GotoCommand } from "./Goto";
 import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
+import { TemplateApplyCommand } from "./TemplateApplyCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -144,6 +145,7 @@ const ALL_COMMANDS = [
   PublishDevCommand,
   SnapshotVaultCommand,
   SyncCommand,
+  TemplateApplyCommand,
   ConfigureWithUICommand,
   UpgradeSettingsCommand,
   VaultAddCommand,

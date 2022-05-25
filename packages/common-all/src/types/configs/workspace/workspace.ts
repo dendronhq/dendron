@@ -39,6 +39,7 @@ export type DendronWorkspaceConfig = {
   //
   feedback?: boolean;
   apiEndpoint?: string;
+  templateHierarchy?: string;
 };
 
 export type DendronWorkspace = {
@@ -77,5 +78,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
     enableFullHierarchyNoteTitle: false,
+    templateHierarchy: "template",
   };
 }

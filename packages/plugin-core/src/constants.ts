@@ -515,6 +515,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create Task Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  TEMPLATE_APPLY: {
+    key: "dendron.templateApply",
+    title: `${CMD_PREFIX} Template Apply`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   // --- Hierarchies
   ARCHIVE_HIERARCHY: {
     key: "dendron.archiveHierarchy",

@@ -259,6 +259,10 @@
         "title": "Dendron: Create Task Note"
       },
       {
+        "command": "dendron.templateApply",
+        "title": "Dendron: Template Apply"
+      },
+      {
         "command": "dendron.archiveHierarchy",
         "title": "Dendron: Archive Hierarchy"
       },
@@ -611,6 +615,10 @@
         },
         {
           "command": "dendron.createTask",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.templateApply",
           "when": "dendron:pluginActive"
         },
         {

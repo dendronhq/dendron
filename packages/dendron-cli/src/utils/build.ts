@@ -104,10 +104,6 @@ export class BuildUtils {
     return path.join(this.getLernaRoot(), "packages", "dendron-plugin-views");
   }
 
-  static getNextServerRootPath() {
-    return path.join(this.getLernaRoot(), "packages", "dendron-next-server");
-  }
-
   static getPkgMeta({ pkgPath }: { pkgPath: string }) {
     return fs.readJSONSync(pkgPath) as PkgJson;
   }
@@ -132,13 +128,6 @@ export class BuildUtils {
     upgradeType: SemverVersion;
   }) {
     return semver.inc(opts.currentVersion, opts.upgradeType) as string;
-  }
-
-  static buildNextServer() {
-    const root = this.getNextServerRootPath();
-    $(`yarn`, { cwd: root });
-    $(`yarn setup`, { cwd: root });
-    $(`yarn build:prod`, { cwd: root });
   }
 
   static buildPluginViews() {
@@ -351,7 +340,6 @@ export class BuildUtils {
     // destination for assets
     const pluginAssetPath = path.join(this.getPluginRootPath(), "assets");
     const pluginStaticPath = path.join(pluginAssetPath, "static");
-    const nextServerRoot = this.getNextServerRootPath();
     const pluginViewsRoot = path.join(
       this.getLernaRoot(),
       "packages",
@@ -376,11 +364,8 @@ export class BuildUtils {
       path.join(pluginStaticPath, "css", "themes", "fonts")
     );
 
-    // copy assets from next server
-    // DEPRECATED
-    fs.copySync(path.join(nextServerRoot, "out"), pluginStaticPath);
     fs.copySync(
-      path.join(this.getNextServerRootPath(), "assets", "js"),
+      path.join(commonAssetsRoot, "assets", "js"),
       path.join(pluginStaticPath, "js")
     );
 

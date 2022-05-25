@@ -2,6 +2,8 @@ import {
   ConfigUtils,
   DEngineClient,
   NoteProps,
+  SchemaTemplate,
+  SchemaUtils,
   Time,
 } from "@dendronhq/common-all";
 import Handlebars from "handlebars";
@@ -88,6 +90,25 @@ export class TemplateUtils {
     } else {
       return this.applyLodashTemplate(opts);
     }
+  }
+
+  /**
+   * Try to get a template if note has a matching schema
+   * that also defines a template
+   */
+  static tryGetTemplateFromMatchingSchema({
+    note,
+    engine,
+  }: {
+    note: NoteProps;
+    engine: DEngineClient;
+  }): SchemaTemplate | undefined {
+    const maybeSchema = SchemaUtils.getSchemaFromNote({
+      note,
+      engine,
+    });
+
+    return maybeSchema?.schemas[note.schema?.schemaId as string].data.template;
   }
 
   static applyHBTemplate({

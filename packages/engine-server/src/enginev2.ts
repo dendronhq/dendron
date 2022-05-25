@@ -434,13 +434,11 @@ export class DendronEngineV2 implements DEngine {
           noteOpts: { fname: npath, vault },
           engine: this,
         });
-        const maybeSchema = SchemaUtils.getSchemaFromNote({
+
+        const maybeTemplate = TemplateUtils.tryGetTemplateFromMatchingSchema({
           note: noteNew,
           engine: this,
         });
-        const maybeTemplate =
-          maybeSchema?.schemas[noteNew.schema?.schemaId as string].data
-            .template;
         if (maybeTemplate) {
           // TODO: Support xvault with user prompting for this flow
           /*

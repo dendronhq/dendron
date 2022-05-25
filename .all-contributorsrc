@@ -1778,6 +1778,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "AshSimmonds",
+      "name": "AshSimmonds",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9034041?v=4",
+      "profile": "https://github.com/AshSimmonds",
+      "contributions": [
+        "bug",
+        "content"
+      ]
     }
   ],
   "contributorsPerLine": 7,

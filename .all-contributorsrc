@@ -1798,6 +1798,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "EngineerFaunce",
+      "name": "William Faunce",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16312436?v=4",
+      "profile": "https://williamfaunce.dev/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

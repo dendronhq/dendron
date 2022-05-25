@@ -239,7 +239,7 @@ export default function DendronCalendarPanel({ ide, engine }: DendronProps) {
                     className={`${note.fname}`}
                     dot
                     color={
-                      "#00adb5" /* color copied from packages/dendron-next-server/assets/themes/dark-theme.less TODO make dependent on active theme */
+                      "#00adb5" /* color copied from packages/common-assets/assets/themes/dark-theme.less TODO make dependent on active theme */
                     }
                   />
                 </div>

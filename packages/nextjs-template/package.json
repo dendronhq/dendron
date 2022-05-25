@@ -15,7 +15,7 @@
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",
-    "sync:theme": "cp ../dendron-next-server/public/*theme.css public/",
+    "sync:theme": "cp ../common-assets/public/*theme.css public/",
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json && mv dist/scripts/sitemap.js . ",
     "build:sitemap": "next-sitemap --config sitemap.js",
     "clean": "yarn rimraf public data out",

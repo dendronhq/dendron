@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "sync client assets..."
-pushd ../dendron-next-server
+pushd ../common-assets
 yarn  --ignore-lockfile
 yarn build
 yarn gen:theme

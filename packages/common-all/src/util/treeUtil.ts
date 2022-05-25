@@ -79,6 +79,27 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict;
   }): TreeMenuNode | undefined {
     const note = noteDict[noteId];
+
+    // return children of the curren tnote
+    const getChildren = () => {
+      if (fm.nav_exclude_children || fm.has_collection) {
+        return [];
+      }
+
+      return this.sortNotesAtLevel({
+        noteIds: note.children,
+        noteDict,
+        reverse: fm.sort_order === "reverse",
+      })
+        .map((noteId) =>
+          TreeUtils.note2Tree({
+            noteId,
+            noteDict,
+          })
+        )
+        .filter(isNotUndefined);
+    };
+
     if (_.isUndefined(note)) {
       return undefined;
     }
@@ -100,21 +121,7 @@ export class TreeUtils {
       hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
       vaultName: VaultUtils.getName(note.vault),
       navExclude: fm.nav_exclude || false,
-      children:
-        fm.nav_exclude_children || fm.has_collection
-          ? []
-          : this.sortNotesAtLevel({
-              noteIds: note.children,
-              noteDict,
-              reverse: fm.sort_order === "reverse",
-            })
-              .map((noteId) =>
-                TreeUtils.note2Tree({
-                  noteId,
-                  noteDict,
-                })
-              )
-              .filter(isNotUndefined),
+      children: getChildren(),
     };
   }
 

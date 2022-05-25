@@ -54,3 +54,21 @@ describe("WHEN has_collection enabled", () => {
     );
   });
 });
+
+describe("WHEN has_collection enabled AND nav_children_exclude set to false", () => {
+  test("THEN return only root", async () => {
+    await runEngineTestV5(
+      async ({ engine }) => {
+        const domain = engine.notes["foo"];
+        domain.custom.nav_exclude_children = true;
+        const treeData = TreeUtils.generateTreeData(engine.notes, [domain]);
+        expect(treeData.roots).toMatchSnapshot();
+        expect(treeData.roots[0].children).toEqual([]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      }
+    );
+  });
+});

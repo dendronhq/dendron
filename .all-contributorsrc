@@ -1807,6 +1807,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ebromberg",
+      "name": "ebromberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48656450?v=4",
+      "profile": "https://github.com/ebromberg",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

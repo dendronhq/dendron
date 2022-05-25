@@ -213,7 +213,7 @@ suite("CopyNoteUrl with seed", function () {
         // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
         sinon.stub(WSUtils, "getNoteFromDocument").returns(
           await NoteTestUtilsV4.createNote({
-            fname: "foo",
+            fname: "root",
             vault: vaults[0],
             wsRoot,
           })

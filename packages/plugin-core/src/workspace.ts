@@ -70,7 +70,6 @@ import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { CalendarView } from "./views/CalendarView";
 import TipOfTheDayWebview from "./features/TipOfTheDayWebview";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
-import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 import { GraphPanel } from "./views/GraphPanel";
 
 let _DendronWorkspace: DendronExtension | null;

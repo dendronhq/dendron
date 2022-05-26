@@ -17,6 +17,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { PluginFileUtils } from "../../utils/files";
+import { GotoNoteCommand } from "../../commands/GotoNote";
 
 export enum LinkType {
   WIKI = "WIKI",
@@ -71,7 +72,9 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
 
       if (noteData.note) {
         // Found a note, open that
-        await this._ext.commandFactory.goToNoteCmd().execute({
+        const cmd = new GotoNoteCommand(this._ext);
+
+        await cmd.execute({
           qs: noteData.note.fname,
           vault: noteData.note.vault,
           // Avoid replacing the preview

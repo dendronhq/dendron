@@ -5,7 +5,6 @@ import { Duration } from "luxon";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
-import { ExtensionProvider } from "./ExtensionProvider";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -62,7 +61,6 @@ export class WindowWatcher {
   private onDidChangeActiveTextEditor = sentryReportingCallback(
     async (editor: TextEditor | undefined) => {
       const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
-
       if (
         !editor ||
         editor.document.uri.fsPath !==
@@ -71,9 +69,13 @@ export class WindowWatcher {
         return;
       }
 
-      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
-        editor.document
+      // check and prompt duplicate warning.
+      await this._extension.wsUtils.findDuplicateNoteAndPromptIfNecessary(
+        editor.document,
+        "onDidChangeActiveTextEditor"
       );
+
+      const note = this._extension.wsUtils.getNoteFromDocument(editor.document);
       if (_.isUndefined(note)) {
         return;
       }

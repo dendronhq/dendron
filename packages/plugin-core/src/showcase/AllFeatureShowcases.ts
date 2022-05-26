@@ -60,6 +60,14 @@ const PUBLISH_THEME_LINK = createTipOfDayMsgWithDocsLink({
   docsUrl: "https://wiki.dendron.so/notes/jknrdi492m8nhq7mw4faydu",
 });
 
+const PREVIEW_THEME_LINK = createTipOfDayMsgWithDocsLink({
+  showcaseEntry: ShowcaseEntry.PreviewTheme,
+  displayMessage:
+    "You can now customize how your note preview looks! You can pick between light or dark, or create a custom theme.",
+  confirmText: "Show me how",
+  docsUrl: "https://wiki.dendron.so/notes/lb9wd7z62ch7b4slscp05i4",
+});
+
 /**
  * All messages in the rotation to be displayed.
  */
@@ -75,4 +83,5 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   PUBLISH_THEME_LINK,
   new GraphThemeTip(),
   new GraphPanelTip(),
+  PREVIEW_THEME_LINK,
 ];

@@ -20,6 +20,7 @@ export enum ShowcaseEntry {
   InsertNoteLink = "InsertNoteLink",
   GraphTheme = "GraphTheme",
   PublishTheme = "PublishTheme",
+  PreviewTheme = "PreviewTheme",
   GraphPanel = "GraphPanel",
 }
 

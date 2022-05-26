@@ -6,6 +6,7 @@ import {
   LookupViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
+  SeedBrowserMessageType,
 } from "@dendronhq/common-all";
 import {
   combinedStore,
@@ -111,6 +112,12 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         if (!graphTheme && styles) {
           ideDispatch(ideSlice.actions.setGraphTheme(GraphThemeEnum.Custom));
         }
+        break;
+      }
+      case SeedBrowserMessageType.onSeedStateChange: {
+        const seeds = msg.data.msg;
+        logger.info({ ctx, seeds, msg: "seeds" });
+        ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
         break;
       }
       default:

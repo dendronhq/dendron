@@ -58,9 +58,10 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     type: "webview",
   },
   [DendronEditorViewKey.SEED_BROWSER]: {
-    desc: "TODO",
-    label: "TODO",
-    type: "nativeview",
+    desc: "Seed Registry",
+    label: "Seed Registry",
+    bundleName: "SeedBrowser",
+    type: "webview",
   },
 };
 

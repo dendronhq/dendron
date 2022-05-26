@@ -35,7 +35,7 @@ export type BacklinkOpts = {
  * @param _opts
  * @returns
  */
-export function BacklinkHoverProcessor(
+export function backlinksHover(
   this: Unified.Processor,
   _opts?: BacklinkOpts
 ): Transformer {

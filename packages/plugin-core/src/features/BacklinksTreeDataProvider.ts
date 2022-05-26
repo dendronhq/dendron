@@ -44,6 +44,8 @@ import fs from "fs";
 export default class BacklinksTreeDataProvider
   implements TreeDataProvider<Backlink>, Disposable
 {
+  private readonly MAX_LINES_OF_CONTEX̣T = 10;
+
   private _onDidChangeTreeDataEmitter: EventEmitter<
     Backlink | undefined | void
   >;
@@ -70,7 +72,7 @@ export default class BacklinksTreeDataProvider
     this._isLinkCandidateEnabled = isLinkCandidateEnabled;
 
     // Set default sort order to use last updated
-    this.SortOrder =
+    this.sortOrder =
       MetadataService.instance().BacklinksPanelSortOrder ??
       BacklinkPanelSortOrder.LastUpdated;
 
@@ -86,7 +88,7 @@ export default class BacklinksTreeDataProvider
   /**
    * How items are sorted in the backlink panel
    */
-  public get SortOrder(): BacklinkPanelSortOrder {
+  public get sortOrder(): BacklinkPanelSortOrder {
     return this._sortOrder!;
   }
 
@@ -94,7 +96,7 @@ export default class BacklinksTreeDataProvider
    * Update the sort order of the backlinks panel. This will also save the
    * update into metadata service for persistence.
    */
-  public set SortOrder(sortOrder: BacklinkPanelSortOrder) {
+  public set sortOrder(sortOrder: BacklinkPanelSortOrder) {
     if (sortOrder !== this._sortOrder) {
       this._sortOrder = sortOrder;
 
@@ -201,20 +203,21 @@ export default class BacklinksTreeDataProvider
       });
     } else if (element.treeItemType === BacklinkTreeItemType.referenceLevel) {
       return new Promise<TreeItem>((resolve) => {
-        this.getSurroundingContextForRef(element.singleRef!, 20).then(
-          (value) => {
-            const tooltip = new MarkdownString();
-            tooltip.appendMarkdown(value);
+        this.getSurroundingContextForRef(
+          element.singleRef!,
+          this.MAX_LINES_OF_CONTEX̣T
+        ).then((value) => {
+          const tooltip = new MarkdownString();
+          tooltip.appendMarkdown(value);
 
-            tooltip.supportHtml = true;
-            tooltip.isTrusted = true;
-            tooltip.supportThemeIcons = true;
+          tooltip.supportHtml = true;
+          tooltip.isTrusted = true;
+          tooltip.supportThemeIcons = true;
 
-            resolve({
-              tooltip,
-            });
-          }
-        );
+          resolve({
+            tooltip,
+          });
+        });
       });
     } else {
       return undefined;
@@ -437,7 +440,7 @@ export default class BacklinksTreeDataProvider
   private async getTooltipForNoteLevelTreeItem(
     references: FoundRefT[]
   ): Promise<MarkdownString> {
-    // Shoot for around a max of 60 lines to render in the hover, otherwise,
+    // Shoot for around a max of 40 lines to render in the hover, otherwise,
     // it's a bit too long. Note, this doesn't take into account note reference
     // length, so those can potentially blow up the size of the context.
     // Factoring in note ref length can be a later enhancement
@@ -445,19 +448,19 @@ export default class BacklinksTreeDataProvider
 
     switch (references.length) {
       case 1: {
-        linesOfContext = 20;
+        linesOfContext = this.MAX_LINES_OF_CONTEX̣T;
         break;
       }
       case 2: {
-        linesOfContext = 15;
+        linesOfContext = 7;
         break;
       }
       case 3: {
-        linesOfContext = 10;
+        linesOfContext = 5;
         break;
       }
       default:
-        linesOfContext = 5;
+        linesOfContext = 3;
         break;
     }
 

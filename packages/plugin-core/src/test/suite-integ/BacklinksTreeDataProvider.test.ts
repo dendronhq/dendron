@@ -40,7 +40,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkPanelSortOrder) => {
   );
 
   if (sortOrder) {
-    backlinksTreeDataProvider.SortOrder = sortOrder;
+    backlinksTreeDataProvider.sortOrder = sortOrder;
   }
 
   const parents = await backlinksTreeDataProvider.getChildren();
@@ -682,7 +682,7 @@ suite("BacklinksTreeDataProvider", function () {
         );
 
         updateSortOrder = sinon
-          .stub(BacklinksTreeDataProvider.prototype, "SortOrder")
+          .stub(BacklinksTreeDataProvider.prototype, "sortOrder")
           .returns(undefined);
       });
       afterEach(() => {

@@ -50,10 +50,12 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
       SegmentClient.instance().anonymousId
     );
     if (ABUserGroup === GraphThemeFeatureShowcaseTestGroups.showMeHow) {
-      showMeHowView(
-        "Graph Theme",
-        "https://org-dendron-public-assets.s3.amazonaws.com/images/graph-theme.gif"
-      );
+      showMeHowView({
+        name: "Graph Theme",
+        src: "https://org-dendron-public-assets.s3.amazonaws.com/images/graph-theme.gif",
+        href: "https://www.loom.com/share/f2c53d2a5aeb48209b5587a3dfbb1015",
+        alt: "Click on menu icon in the Graph View to change themes",
+      });
     } else {
       vscode.commands.executeCommand("dendron.showNoteGraph");
     }

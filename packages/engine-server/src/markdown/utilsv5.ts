@@ -47,10 +47,7 @@ import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
 import { WorkspaceService } from "../workspace";
 import { DateTimeFormatOptions } from "luxon";
-import {
-  BacklinkHoverProcessor,
-  BacklinkOpts,
-} from "./remark/backlinksHoverProcessor";
+import { backlinksHover, BacklinkOpts } from "./remark/backlinksHover";
 
 export { ProcFlavor };
 
@@ -265,7 +262,7 @@ export class MDUtilsV5 {
       .use(extendedImage)
       .use(footnotes)
       .use(variables)
-      .use(BacklinkHoverProcessor, data.backlinkHoverOpts)
+      .use(backlinksHover, data.backlinkHoverOpts)
       .data("errors", errors);
 
     // set options and do validation

@@ -1,12 +1,18 @@
 import vscode from "vscode";
 
-const getShowMeHowViewHtml = ({ name, src }: { name: string; src: string }) => {
+export type showMeHowViewOpts = {
+  name: string;
+  src: string;
+  href: string;
+  alt?: string;
+};
+const getShowMeHowViewHtml = (opts: showMeHowViewOpts) => {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${name}</title>
+    <title>${opts.name}</title>
     <style>
       html, body {
         margin: 0px;
@@ -23,22 +29,22 @@ const getShowMeHowViewHtml = ({ name, src }: { name: string; src: string }) => {
   </head>
   <body>
   <div class="img-container">
-    <a href="https://www.loom.com/share/f2c53d2a5aeb48209b5587a3dfbb1015"><img alt="Click on menu icon in the Graph View to change themes" src=${src} /></a>
+    <a href="${opts.href}"><img alt="${opts.alt}" src=${opts.src} /></a>
   </div>
   </body>
   
   </html>`;
 };
 
-export function showMeHowView(name: string, src: string) {
+export function showMeHowView(opts: showMeHowViewOpts) {
   const panel = vscode.window.createWebviewPanel(
-    name,
-    name,
+    opts.name,
+    opts.name,
     vscode.ViewColumn.One,
     {
       enableScripts: true,
     }
   );
 
-  panel.webview.html = getShowMeHowViewHtml({ name, src });
+  panel.webview.html = getShowMeHowViewHtml(opts);
 }

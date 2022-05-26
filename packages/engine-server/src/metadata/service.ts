@@ -22,6 +22,7 @@ export enum ShowcaseEntry {
   PublishTheme = "PublishTheme",
   PreviewTheme = "PreviewTheme",
   GraphPanel = "GraphPanel",
+  BacklinksPanelHover = "BacklinksPanelHover",
 }
 
 export enum BacklinkPanelSortOrder {

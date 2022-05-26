@@ -1,13 +1,10 @@
 import { ProcFlavor } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import {
-  BacklinkOpts,
-  DendronASTDest,
-  MDUtilsV5,
-} from "@dendronhq/engine-server";
-import { runEngineTestV5 } from "../../../engine";
-import { ENGINE_HOOKS } from "../../../presets";
-import { createProcTests, ProcTests } from "./utils";
+import { BacklinkOpts, DendronASTDest } from "@dendronhq/engine-server";
+import { runEngineTestV5 } from "../../../../engine";
+import { ENGINE_HOOKS } from "../../../../presets";
+import { createProcCompileTests, ProcTests } from "../utils";
+import { getOpts, runTestCases } from "./utils";
 
 /**
  * Helper function to run a single test for Backlinks Panel Hover rendering
@@ -25,37 +22,30 @@ function singleBacklinksPanelTest({
   backlinkHoverOpts: BacklinkOpts;
   match: string[];
 }) {
-  return createProcTests({
+  return createProcCompileTests({
     name: testName,
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc = MDUtilsV5.procRemarkFull(
-        {
-          engine,
-          fname: "foo",
-          wikiLinksOpts: { useId: true },
-          dest: extra.dest,
-          vault: vaults[0],
-          backlinkHoverOpts,
-        },
-        {
-          flavor: ProcFlavor.BACKLINKS_PANEL_HOVER,
-        }
-      );
-      const resp = await proc.process(noteBody);
-      return { resp };
+    procOpts: {
+      backlinkHoverOpts,
     },
-    verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
-        return [
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp.toString(),
-              match,
-            }),
-            expected: true,
-          },
-        ];
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const resp = await proc.process(noteBody);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.MD_REGULAR]: {
+        [ProcFlavor.BACKLINKS_PANEL_HOVER]: async ({ extra }) => {
+          const { resp } = extra;
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match,
+              }),
+              expected: true,
+            },
+          ];
+        },
       },
     },
     preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -307,17 +297,14 @@ describe("GIVEN a note to render for the backlinks panel hover control", () => {
     //   ],
     // });
 
-    runAllTests({
-      name: "THEN statements",
-      testCases: [
-        ...BACKLINK_BY_ITSELF,
-        ...WITH_OTHER_TEXT,
-        ...WITH_FULL_NOTE_CONTEXT,
-        ...WITH_TRUNCATED_CONTEXT,
-        ...WITH_TRUNCATED_CODE_BLOCKS_AS_CONTEXT,
-        ...WITH_BLOCK_ANCHOR,
-      ],
-    });
+    runTestCases([
+      ...BACKLINK_BY_ITSELF,
+      ...WITH_OTHER_TEXT,
+      ...WITH_FULL_NOTE_CONTEXT,
+      ...WITH_TRUNCATED_CONTEXT,
+      ...WITH_TRUNCATED_CODE_BLOCKS_AS_CONTEXT,
+      ...WITH_BLOCK_ANCHOR,
+    ]);
   });
 
   /**

@@ -1,4 +1,9 @@
-import { ConfigUtils, DendronError, NoteProps } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DendronError,
+  EngagementEvents,
+  NoteProps,
+} from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -6,6 +11,7 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";
@@ -89,6 +95,9 @@ export class TemplateApplyCommand extends BasicCommand<
       targetNote,
     });
     const resp = await engine.writeNote(updatedTargetNote);
+    AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+      source: this.key,
+    });
     if (resp.error) {
       throw new DendronError({
         message: "error applying template",

@@ -97,7 +97,9 @@ export class InsertNoteCommand extends BasicCommand<
           AnalyticsUtils.track(ExtensionEvents.DepreactionNoticeAccept, {
             source: DENDRON_COMMANDS.INSERT_NOTE.key,
           });
-          VSCodeUtils.openLink("https://wiki.dendron.so");
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6"
+          );
         }
       });
     return txt;

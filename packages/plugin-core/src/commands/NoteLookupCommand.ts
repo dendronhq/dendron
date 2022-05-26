@@ -555,7 +555,9 @@ export class NoteLookupCommand
           targetNote: nodeNew,
           engine,
         });
-        AnalyticsUtils.track(EngagementEvents.TemplateApplied);
+        AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+          source: this.key,
+        });
       }
     }
 

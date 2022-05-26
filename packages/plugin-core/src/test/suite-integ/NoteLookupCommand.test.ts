@@ -1223,7 +1223,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            `Warning: Problem with food schema. No vault found for missingVault`
+            `Warning: Problem with food.ch2 schema. No vault found for missingVault`
           );
 
           cmd.cleanUp();
@@ -1264,7 +1264,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            `Warning: Problem with food schema. No note found for blah`
+            `Warning: Problem with food.ch2 schema. No note found for blah`
           );
 
           cmd.cleanUp();
@@ -1294,7 +1294,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            "Warning: Problem with food schema. No note found for food.missing"
+            "Warning: Problem with food.ch2 schema. No note found for food.missing"
           );
 
           cmd.cleanUp();

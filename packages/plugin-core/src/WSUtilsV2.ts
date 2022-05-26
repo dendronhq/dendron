@@ -4,19 +4,22 @@ import path from "path";
 import {
   DendronError,
   DNoteAnchorBasic,
+  DuplicateNoteError,
   DVault,
   NoteProps,
   NoteUtils,
   RespV3,
   VaultUtils,
+  WorkspaceEvents,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 import { Logger } from "./logger";
-import { VSCodeUtils } from "./vsCodeUtils";
+import { MessageSeverity, VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
-import { isInsidePath, vault2Path } from "@dendronhq/common-server";
+import { file2Note, isInsidePath, vault2Path } from "@dendronhq/common-server";
 import { AnchorUtils, WorkspaceUtils } from "@dendronhq/engine-server";
+import { AnalyticsUtils } from "./utils/analytics";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 
@@ -267,5 +270,70 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     const { vault, fname } = note;
     const fnameWithExtension = `${fname}.md`;
     return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
+  }
+
+  async findDuplicateNoteFromDocument(document: vscode.TextDocument) {
+    const fsPath = document.uri.fsPath;
+    const { vaults, wsRoot, engine } = this.extension.getDWorkspace();
+    let vault;
+    try {
+      vault = VaultUtils.getVaultByFilePath({
+        vaults,
+        wsRoot,
+        fsPath,
+      });
+    } catch (error: any) {
+      // document doesn't exist in workspace.
+      return;
+    }
+    const currentNote = file2Note(fsPath, vault);
+
+    const noteById = await engine.getNote(currentNote.id);
+
+    let hasDuplicate = false;
+
+    if (noteById !== undefined) {
+      if (currentNote.id === noteById.id) {
+        if (VaultUtils.isEqualV2(currentNote.vault, noteById.vault)) {
+          // if they are in the same vault, if their fname is different, they are duplicates.
+          hasDuplicate = currentNote.fname !== noteById.fname;
+        } else {
+          // if they are in different vaults, they are duplicate.
+          hasDuplicate = true;
+        }
+      }
+      Logger.warn({
+        uri: document.uri.fsPath,
+        msg: "duplicate note id found",
+        id: currentNote.id,
+      });
+
+      const resp = hasDuplicate
+        ? { note: currentNote, duplicate: noteById }
+        : { note: currentNote };
+
+      return resp;
+    }
+    return { note: currentNote };
+  }
+
+  async findDuplicateNoteAndPromptIfNecessary(
+    document: vscode.TextDocument,
+    source: string
+  ): Promise<void> {
+    const resp = await this.findDuplicateNoteFromDocument(document);
+    if (resp !== undefined) {
+      const { note, duplicate } = resp;
+      if (duplicate !== undefined) {
+        const error = new DuplicateNoteError({
+          noteA: duplicate,
+          noteB: note,
+        });
+        VSCodeUtils.showMessage(MessageSeverity.WARN, error.message, {});
+        AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound, {
+          source,
+        });
+      }
+    }
   }
 }

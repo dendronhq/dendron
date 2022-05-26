@@ -159,6 +159,7 @@ type flushResponse = {
 describe("GIVEN a SegmentClient", () => {
   const filepath = path.join(tmpDir().name, "test.log");
 
+  SegmentClient.unlock();
   const instance = SegmentClient.instance({
     forceNew: true,
     cachePath: filepath,
@@ -369,6 +370,24 @@ describe("GIVEN a SegmentClient", () => {
     test("AND the file should keep the payload contents of ONLY data that was not sent", (done) => {
       const fileContents = fs.readFileSync(filepath, "utf-8");
       expect(fileContents).toMatchSnapshot();
+      done();
+    });
+  });
+});
+
+describe("Instantiation safeguard", () => {
+  describe("WHEN SegmentClient is locked", () => {
+    test("THEN SegmentClient.instance() throws", (done) => {
+      expect(SegmentClient.instance).toThrow();
+      done();
+    });
+  });
+
+  describe("WHEN SegmentClient is unlocked", () => {
+    test("THEN SegmentClient.instance() is accessible", (done) => {
+      SegmentClient.unlock();
+      const out = SegmentClient.instance();
+      expect(out instanceof SegmentClient).toBeTruthy();
       done();
     });
   });

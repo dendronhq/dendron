@@ -67,6 +67,10 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
+  // this is the first time we are accessing the segment client instance (when this is run as a separate process).
+  // unlock Segment client.
+  SegmentClient.unlock();
+
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
     initializeSentry({ environment: getStage(), release: getSentryRelease() });
   }

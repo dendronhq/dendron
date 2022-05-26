@@ -91,6 +91,7 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
+import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -648,6 +649,11 @@ export async function _activate(
       previousGlobalVersion,
       extensionInstallStatus,
     });
+
+    // Setup the help and feedback view here so that it still works even if
+    // we're not in a Dendron workspace.
+    const helpAndFeedbackView = setupHelpFeedbackTreeView();
+    context.subscriptions.push(helpAndFeedbackView);
 
     if (await DendronExtension.isDendronWorkspace()) {
       const activator = new WorkspaceActivator();

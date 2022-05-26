@@ -14,6 +14,12 @@ export class NodeJSUtils {
   }
 }
 
+export type WebViewThemeMap = {
+  dark: string;
+  light: string;
+  custom?: string;
+};
+
 export class WebViewCommonUtils {
   /**
    *
@@ -38,10 +44,7 @@ export class WebViewCommonUtils {
     wsRoot: string;
     browser: boolean;
     acquireVsCodeApi: string;
-    themeMap: {
-      light: string;
-      dark: string;
-    };
+    themeMap: WebViewThemeMap;
     initialTheme?: string;
   }) => {
     return `<!DOCTYPE html>
@@ -65,18 +68,27 @@ export class WebViewCommonUtils {
       var theme = 'unknown';
 
       function onload() {
-        applyTheme(document.body.className);
+        applyTheme(document.body);
 
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutationRecord) {
-                applyTheme(mutationRecord.target.className);
+                applyTheme(mutationRecord.target);
             });
         });
         var target = document.body;
         observer.observe(target, { attributes : true, attributeFilter : ['class'] });
       }
 
-      function applyTheme(newTheme) {
+      function applyTheme(element) {
+        const defaultTheme = element.className;
+        let newTheme = defaultTheme;
+        const overrideTheme = element.dataset.themeOverride;
+
+        if (overrideTheme !== undefined && overrideTheme.length > 0) {
+          console.log("Applied theme override", overrideTheme);
+          newTheme = overrideTheme;
+        }
+
         var prefix = 'vscode-';
         if (newTheme.startsWith(prefix)) {
             // strip prefix
@@ -93,7 +105,7 @@ export class WebViewCommonUtils {
           newTheme = newTheme.replace(reduceMotionClassName,"").trim()
         }
 
-        // be bale to get current theme using JS;
+        // be able to get current theme using JS;
         window.currentTheme = newTheme;
 
         if (theme === newTheme) return;
@@ -208,7 +220,7 @@ export class WebViewCommonUtils {
         }
     </script>
 
-    <body onload="onload()" class="vscode-${initialTheme || "light"}">
+    <body onload="onload()" data-theme-override="${initialTheme || ""}">
       <div id="main-content-wrap" class="main-content-wrap">
         <div id="main-content" class="main-content">
           <div id="root" data-url="${url}" data-ws="${wsRoot}" data-browser="${browser}" data-name="${name}"></div>

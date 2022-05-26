@@ -1,5 +1,7 @@
 import {
   APIUtils,
+  ConfigUtils,
+  CONSTANTS,
   DendronEditorViewKey,
   DendronTreeViewKey,
   DUtils,
@@ -10,6 +12,7 @@ import {
   findUpTo,
   getDurationMilliseconds,
   WebViewCommonUtils,
+  WebViewThemeMap,
 } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
@@ -17,6 +20,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
+import fs from "fs-extra";
 
 export class WebViewUtils {
   /**
@@ -85,7 +89,15 @@ export class WebViewUtils {
       ExtensionProvider.getExtension().context
     );
     const themes = ["light", "dark"];
-    const themeMap: any = {};
+    const themeMap: { [key: string]: string } = {};
+
+    const customThemePath = path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS);
+    if (await fs.pathExists(customThemePath)) {
+      themeMap["custom"] = panel.webview
+        .asWebviewUri(vscode.Uri.file(customThemePath))
+        .toString();
+    }
+
     themes.map((th) => {
       themeMap[th] = panel.webview
         .asWebviewUri(
@@ -112,7 +124,10 @@ export class WebViewUtils {
       // You must hang onto the instance of the VS Code API returned by this method,
       // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
-      themeMap,
+      themeMap: themeMap as WebViewThemeMap,
+      initialTheme: ConfigUtils.getPreview(
+        ExtensionProvider.getDWorkspace().config
+      ).theme,
       name,
     });
     return out;

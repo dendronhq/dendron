@@ -1,3 +1,5 @@
+import { Theme } from "../publishing";
+
 /**
  * Namespace for all preview related configurations
  */
@@ -10,6 +12,7 @@ export type DendronPreviewConfig = {
   enablePrettyRefs: boolean;
   enableKatex: boolean;
   automaticallyShowPreview: boolean;
+  theme?: Theme;
 };
 
 /**

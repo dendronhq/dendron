@@ -286,27 +286,36 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       // document doesn't exist in workspace.
       return;
     }
+
+    // we do this because the note in document would _not_ be in our store
+    // if it is a duplicate note.
     const currentNote = file2Note(fsPath, vault);
 
+    // find the potentially-duplicate note that's currently in our store.
     const noteById = await engine.getNote(currentNote.id);
 
     let hasDuplicate = false;
 
     if (noteById !== undefined) {
       if (currentNote.id === noteById.id) {
+        // id of note in store and from document is the same. we _might_ have hit a duplicate.
         if (VaultUtils.isEqualV2(currentNote.vault, noteById.vault)) {
           // if they are in the same vault, if their fname is different, they are duplicates.
+          // otherwise, the note in our store and the note from document is the same note. not a duplicate.
           hasDuplicate = currentNote.fname !== noteById.fname;
         } else {
           // if they are in different vaults, they are duplicate.
           hasDuplicate = true;
         }
       }
-      Logger.warn({
-        uri: document.uri.fsPath,
-        msg: "duplicate note id found",
-        id: currentNote.id,
-      });
+
+      if (hasDuplicate) {
+        Logger.warn({
+          uri: document.uri.fsPath,
+          msg: "duplicate note id found",
+          id: currentNote.id,
+        });
+      }
 
       const resp = hasDuplicate
         ? { note: currentNote, duplicate: noteById }

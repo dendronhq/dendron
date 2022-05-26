@@ -194,6 +194,8 @@ function MenuView({
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
+      // results in gray box otherwise when nav bar is too short for display
+      style={{ height: "100%" }}
     >
       {roots.map((menu) => {
         return createMenu(menu);

@@ -25,6 +25,8 @@ type CommandOpts = {
 
 type CommandOutput = {};
 
+const TEMPLATE_APPLY_LOOKUP_ID = "templateApply;";
+
 export class TemplateApplyCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
@@ -38,7 +40,7 @@ export class TemplateApplyCommand extends BasicCommand<
     return;
   }
 
-  createLookup() {
+  private createLookup() {
     const lc = ExtensionProvider.getExtension().lookupControllerFactory.create({
       nodeType: "note",
       buttons: [],
@@ -50,7 +52,7 @@ export class TemplateApplyCommand extends BasicCommand<
     const lc = this.createLookup();
     const extension = ExtensionProvider.getExtension();
     const provider = extension.noteLookupProviderFactory.create(
-      "templateApply",
+      TEMPLATE_APPLY_LOOKUP_ID,
       {
         allowNewNote: false,
       }
@@ -66,7 +68,7 @@ export class TemplateApplyCommand extends BasicCommand<
 
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
-        id: "templateApply",
+        id: TEMPLATE_APPLY_LOOKUP_ID,
         controller: lc,
         logger: this.L,
         onDone: (event: HistoryEvent) => {

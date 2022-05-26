@@ -94,7 +94,7 @@ export class InsertNoteCommand extends BasicCommand<
       )
       .then((resp) => {
         if (resp === "See whats changed") {
-          AnalyticsUtils.track(ExtensionEvents.DepreactionNoticeAccept, {
+          AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeAccept, {
             source: DENDRON_COMMANDS.INSERT_NOTE.key,
           });
           VSCodeUtils.openLink(

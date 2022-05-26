@@ -67,7 +67,7 @@ export enum ExtensionEvents {
   ShowKeybindingConflictAccepted = "Show_Keybinding_Conflict_Accepted",
   ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
   DeprecationNoticeShow = "DeprecationNoticeShow",
-  DepreactionNoticeAccept = "DepreactionNoticeAccept",
+  DeprecationNoticeAccept = "DeprecationNoticeAccept",
 }
 
 export enum LookupEvents {

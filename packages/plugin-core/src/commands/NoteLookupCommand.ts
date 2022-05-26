@@ -54,6 +54,7 @@ import {
   VaultSelectionMode,
 } from "../components/lookup/types";
 import {
+  LookupUtils,
   node2Uri,
   OldNewLocation,
   PickerUtilsV2,
@@ -66,7 +67,6 @@ import { JournalNote } from "../traits/journal";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { AutoCompletable } from "../utils/AutoCompletable";
 import { AutoCompleter } from "../utils/autoCompleter";
-import { LookupUtils } from "../utils/LookupUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BaseCommand } from "./base";
 

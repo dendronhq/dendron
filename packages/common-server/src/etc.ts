@@ -14,6 +14,12 @@ export class NodeJSUtils {
   }
 }
 
+export type WebViewThemeMap = {
+  dark: string;
+  light: string;
+  custom?: string;
+};
+
 export class WebViewCommonUtils {
   /**
    *
@@ -38,10 +44,7 @@ export class WebViewCommonUtils {
     wsRoot: string;
     browser: boolean;
     acquireVsCodeApi: string;
-    themeMap: {
-      light: string;
-      dark: string;
-    };
+    themeMap: WebViewThemeMap;
     initialTheme?: string;
   }) => {
     return `<!DOCTYPE html>
@@ -58,56 +61,77 @@ export class WebViewCommonUtils {
       <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
       <link rel="stylesheet" href="${cssSrc}" />
       <title>Dendron </title>
+      
+      <style>
+      body, h1, h2, h3, h4 {
+        color: var(--vscode-editor-foreground);
+      }
 
+      body {
+        background-color: var(--vscode-editor-background);
+      }
+
+      a,
+      a:hover,
+      a:active {
+        color: var(--vscode-textLink-foreground);
+      }
+      </style>
     </head>
 
     <script type="text/javascript">
       var theme = 'unknown';
 
       function onload() {
-        applyTheme(document.body.className);
+        applyTheme(document.body);
 
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutationRecord) {
-                applyTheme(mutationRecord.target.className);
+                applyTheme(mutationRecord.target);
             });
         });
         var target = document.body;
         observer.observe(target, { attributes : true, attributeFilter : ['class'] });
       }
 
-      function applyTheme(newTheme) {
-        var prefix = 'vscode-';
-        if (newTheme.startsWith(prefix)) {
-            // strip prefix
-            newTheme = newTheme.substr(prefix.length);
+      function applyTheme(element) {
+        let defaultTheme = element.className;
+
+        // If a theme override has been set, apply that override
+        const overrideTheme = element.dataset.themeOverride;
+        if (overrideTheme !== undefined && overrideTheme.length > 0) {
+          console.log("Applied theme override", overrideTheme);
+          const themeMap = ${JSON.stringify(themeMap)};
+
+          // Dynamically add css
+          const link = document.createElement('link');
+          link.setAttribute('rel', 'stylesheet');
+          link.setAttribute('href', themeMap[overrideTheme]);
+          document.head.appendChild(link);
+        } else {
+          console.log('Applying the default theme', defaultTheme);
         }
 
-        if (newTheme === 'high-contrast') {
-            newTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
+        // We need to tell NextJS whether we have a light or dark theme right now
+        // VSCode prefixes the theme color with vscode-
+        const prefix = 'vscode-';
+        if (defaultTheme.startsWith(prefix)) {
+            // strip prefix
+            defaultTheme = defaultTheme.substr(prefix.length);
+        }
+
+        if (defaultTheme === 'high-contrast') {
+            defaultTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
         }
         // this class is introduced with new vscode setting reduce motion  to reduce the amount of motion
         // in the window.
         var reduceMotionClassName = "vscode-reduce-motion"
-        if(newTheme.includes(reduceMotionClassName)) {
-          newTheme = newTheme.replace(reduceMotionClassName,"").trim()
+        if (defaultTheme.includes(reduceMotionClassName)) {
+          defaultTheme = defaultTheme.replace(reduceMotionClassName,"").trim()
         }
 
-        // be bale to get current theme using JS;
-        window.currentTheme = newTheme;
-
-        if (theme === newTheme) return;
-        theme = newTheme;
-
-        console.log('Applying theme: ' + newTheme);
-
-        var themeMap = ${JSON.stringify(themeMap)};
-
-        // Dynamically add css
-        var link = document.createElement('link');
-        link.setAttribute('rel', 'stylesheet');
-        link.setAttribute('href', themeMap[newTheme]);
-        document.head.appendChild(link);
+        // NextJS app needs the current theme type to pass it to mermaid
+        window.currentTheme = defaultTheme;
       }
       ${acquireVsCodeApi}
     </script>
@@ -208,7 +232,7 @@ export class WebViewCommonUtils {
         }
     </script>
 
-    <body onload="onload()" class="vscode-${initialTheme || "light"}">
+    <body onload="onload()" data-theme-override="${initialTheme || ""}">
       <div id="main-content-wrap" class="main-content-wrap">
         <div id="main-content" class="main-content">
           <div id="root" data-url="${url}" data-ws="${wsRoot}" data-browser="${browser}" data-name="${name}"></div>

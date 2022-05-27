@@ -334,6 +334,7 @@ class ExtensionUtils {
     const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
     const siteUrl = publishigConfig.siteUrl;
     const publishingTheme = dendronConfig?.publishing?.theme;
+    const previewTheme = dendronConfig?.preview?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const workspaceConfig = ConfigUtils.getWorkspace(dendronConfig);
     const { workspaceFile, workspaceFolders } = vscode.workspace;
@@ -375,6 +376,9 @@ class ExtensionUtils {
     }
     if (publishingTheme !== undefined) {
       _.set(trackProps, "publishingTheme", publishingTheme);
+    }
+    if (previewTheme !== undefined) {
+      _.set(trackProps, "previewTheme", previewTheme);
     }
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
     if (maybeLocalConfig.data) {

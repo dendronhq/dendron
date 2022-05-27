@@ -937,6 +937,13 @@
           },
           "description": "Maps each status to a symbol, word, or sentence. This will be displayed for the task."
         },
+        "taskCompleteStatus": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sets which statuses mark the task as completed."
+        },
         "prioritySymbols": {
           "type": "object",
           "additionalProperties": {
@@ -969,6 +976,7 @@
         "name",
         "prioritySymbols",
         "statusSymbols",
+        "taskCompleteStatus",
         "todoIntegration"
       ],
       "description": "Namespace for configuring scratch note behavior"
@@ -1029,6 +1037,9 @@
         },
         "automaticallyShowPreview": {
           "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/definitions/Theme"
         }
       },
       "required": [
@@ -1043,6 +1054,14 @@
       ],
       "additionalProperties": false,
       "description": "Namespace for all preview related configurations"
+    },
+    "Theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light",
+        "custom"
+      ]
     },
     "DendronPublishingConfig": {
       "type": "object",
@@ -1117,6 +1136,9 @@
           "type": "boolean"
         },
         "enableRandomlyColoredTags": {
+          "type": "boolean"
+        },
+        "enableTaskNotes": {
           "type": "boolean"
         },
         "hierarchy": {
@@ -1335,14 +1357,6 @@
       "enum": [
         "tree",
         "edit"
-      ]
-    },
-    "Theme": {
-      "type": "string",
-      "enum": [
-        "dark",
-        "light",
-        "custom"
       ]
     }
   }

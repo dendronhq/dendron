@@ -25,13 +25,13 @@ type CommandOpts = {
 
 type CommandOutput = {};
 
-const TEMPLATE_APPLY_LOOKUP_ID = "templateApply;";
+const APPLY_TEMPLATE_LOOKUP_ID = "templateApply;";
 
 export class ApplyTemplateCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.TEMPLATE_APPLY.key;
+  key = DENDRON_COMMANDS.APPLY_TEMPLATE.key;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -52,7 +52,7 @@ export class ApplyTemplateCommand extends BasicCommand<
     const lc = this.createLookup();
     const extension = ExtensionProvider.getExtension();
     const provider = extension.noteLookupProviderFactory.create(
-      TEMPLATE_APPLY_LOOKUP_ID,
+      APPLY_TEMPLATE_LOOKUP_ID,
       {
         allowNewNote: false,
       }
@@ -68,7 +68,7 @@ export class ApplyTemplateCommand extends BasicCommand<
 
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
-        id: TEMPLATE_APPLY_LOOKUP_ID,
+        id: APPLY_TEMPLATE_LOOKUP_ID,
         controller: lc,
         logger: this.L,
         onDone: (event: HistoryEvent) => {
@@ -86,7 +86,7 @@ export class ApplyTemplateCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const ctx = this.key;
+    const ctx = "ApplyTemplateCommand";
     opts = _.defaults(opts, { closeAndOpenFile: true });
     Logger.info({ ctx });
     const { templateNote, targetNote } = opts;

@@ -97,6 +97,7 @@ export class WorkspaceTestUtils {
         enableEditorDecorations: true,
         maxPreviewsCached: 10,
         maxNoteLength: 204800,
+        templateHierarchy: "template",
         enableFullHierarchyNoteTitle: false,
       },
       preview: {

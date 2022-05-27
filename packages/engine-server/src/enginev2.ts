@@ -1,9 +1,11 @@
 import {
+  assertUnreachable,
   BulkAddNoteOpts,
   Cache,
+  ConfigUtils,
   ConfigWriteOpts,
+  DendronASTDest,
   DendronCompositeError,
-  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -21,20 +23,32 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  FindNoteOpts,
   FuseEngine,
+  GetAnchorsRequest,
+  GetDecorationsOpts,
+  GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
+  IntermediateDendronConfig,
   LruCache,
   milliseconds,
+  newRange,
   NoteChangeEntry,
+  NoteDictsUtils,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
   NullCache,
+  Optional,
   QueryNotesOpts,
+  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -48,21 +62,6 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
-  ConfigUtils,
-  RefreshNotesOpts,
-  GetDecorationsOpts,
-  newRange,
-  GetDecorationsPayload,
-  DendronASTDest,
-  GetAnchorsRequest,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
-  GetNoteLinksPayload,
-  Optional,
-  assertUnreachable,
-  NoteDictsUtils,
-  SchemaUtils,
-  FindNoteOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -434,13 +433,11 @@ export class DendronEngineV2 implements DEngine {
           noteOpts: { fname: npath, vault },
           engine: this,
         });
-        const maybeSchema = SchemaUtils.getSchemaFromNote({
+
+        const maybeTemplate = TemplateUtils.tryGetTemplateFromMatchingSchema({
           note: noteNew,
           engine: this,
         });
-        const maybeTemplate =
-          maybeSchema?.schemas[noteNew.schema?.schemaId as string].data
-            .template;
         if (maybeTemplate) {
           // TODO: Support xvault with user prompting for this flow
           /*

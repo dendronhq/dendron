@@ -2,7 +2,7 @@
 id: ytsxhDpYEH1gXG8y
 title: Image
 desc: ''
-updated: 1637575879775
+updated: 1653518461860
 created: 1627067541735
 ---
 
@@ -19,3 +19,4 @@ created: 1627067541735
 
 ## Extended images:
 ![[dendron.ref.extended-images]]
+

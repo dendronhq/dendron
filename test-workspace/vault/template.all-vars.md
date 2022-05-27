@@ -1,7 +1,7 @@
 ---
 id: gfgkb0mkvkcrk6itxylgqdi
 title: All Vars
-desc: 'Custom Description'
+desc: Custom Description
 updated: 1653259484335
 created: 1653259181861
 ---

@@ -1,6 +1,6 @@
 import { NoteProps } from "@dendronhq/common-all";
-import { TestNoteFactory } from "@dendronhq/common-test-utils";
 import { TemplateUtils } from "@dendronhq/common-server";
+import { TestNoteFactory } from "@dendronhq/common-test-utils";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -247,31 +247,6 @@ describe(`WHEN running applyTemplate tests`, () => {
             expect(targetNote.body).toEqual(
               noteBody + "\n" + engine.notes["foo"].body
             );
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-          }
-        );
-      });
-    });
-
-    describe("GIVEN template type is not a note", () => {
-      beforeEach(async () => {
-        targetNote = await noteFactory.createForFName("new note");
-      });
-
-      it("WHEN applying a template, THEN do nothing and return false ", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            templateNote.type = "schema";
-            const resp = TemplateUtils.applyTemplate({
-              templateNote,
-              targetNote,
-              engine,
-            });
-            expect(resp).toBeFalsy();
           },
           {
             expect,

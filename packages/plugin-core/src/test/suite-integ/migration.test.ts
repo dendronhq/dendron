@@ -1,41 +1,43 @@
 import {
-  InstallStatus,
-  LegacyLookupSelectionType,
-  WorkspaceType,
   ConfigUtils,
-  LookupSelectionModeEnum,
+  DendronCommandConfig,
+  DendronPreviewConfig,
+  DendronPublishingConfig,
+  DVaultSync,
+  InsertNoteLinkAliasModeEnum,
+  InstallStatus,
   IntermediateDendronConfig,
   LegacyDuplicateNoteAction,
-  DendronPublishingConfig,
-  DendronPreviewConfig,
-  DendronWorkspaceConfig,
-  LegacyNoteAddBehavior,
-  DVaultSync,
-  NoteAddBehaviorEnum,
-  genDefaultTaskConfig,
-  LegacyRandomNoteConfig,
-  LegacyInsertNoteLinkConfig,
   LegacyInsertNoteIndexConfig,
+  LegacyInsertNoteLinkConfig,
   LegacyLookupConfig,
-  DendronCommandConfig,
+  LegacyLookupSelectionType,
+  LegacyNoteAddBehavior,
+  LegacyRandomNoteConfig,
+  LookupSelectionModeEnum,
   LookupSelectVaultModeOnCreateEnum,
-  InsertNoteLinkAliasModeEnum,
+  WorkspaceType,
 } from "@dendronhq/common-all";
+import { readYAML } from "@dendronhq/common-server";
 import {
   CONFIG_MIGRATIONS,
-  Migrations,
-  MigrateFunction,
-  MigrationService,
-  WorkspaceService,
   DConfig,
+  MigrateFunction,
+  Migrations,
+  MigrationService,
   MigrationUtils,
   MIGRATION_ENTRIES,
+  WorkspaceService,
 } from "@dendronhq/engine-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import fs from "fs-extra";
 import _ from "lodash";
 import { describe, test } from "mocha";
+import path from "path";
 import semver from "semver";
 import sinon from "sinon";
 import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
@@ -46,11 +48,6 @@ import {
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import { readYAML } from "@dendronhq/common-server";
-import path from "path";
-import fs from "fs-extra";
 
 const getMigration = ({
   exact,
@@ -681,57 +678,6 @@ suite("Migration", function () {
             expect(
               oldKeys.every((value) => postMigrationKeys.includes(value))
             ).toBeFalsy();
-
-            // and new workspace namespace should be correctly mapped
-            const expectedWorkspaceConfig: DendronWorkspaceConfig = {
-              dendronVersion: "0.83.0",
-              vaults: [
-                {
-                  fsPath: "vault1",
-                },
-                {
-                  fsPath: "vault2",
-                },
-                {
-                  fsPath: "vault3",
-                  name: "vaultThree",
-                },
-              ],
-              journal: {
-                dailyDomain: "foo",
-                name: "journal",
-                dateFormat: "y.MM.dd",
-                addBehavior: NoteAddBehaviorEnum.asOwnDomain,
-              },
-              scratch: {
-                name: "scratch",
-                dateFormat: "y.MM.dd",
-                addBehavior: NoteAddBehaviorEnum.asOwnDomain,
-              },
-              task: genDefaultTaskConfig(),
-              graph: {
-                zoomSpeed: 10,
-              },
-              disableTelemetry: true,
-              enableAutoCreateOnDefinition: false,
-              enableXVaultWikiLink: false,
-              enableRemoteVaultInit: true,
-              workspaceVaultSyncMode: DVaultSync.SKIP,
-              enableAutoFoldFrontmatter: true,
-              enableUserTags: true,
-              enableHashTags: true,
-              maxPreviewsCached: 100,
-              maxNoteLength: 3000000,
-              enableEditorDecorations: true,
-              feedback: true,
-              apiEndpoint: "foobar.com",
-              enableFullHierarchyNoteTitle: false,
-              enableHandlebarTemplates: false,
-            };
-
-            expect(postMigrationDendronConfig.workspace).toEqual(
-              expectedWorkspaceConfig
-            );
           });
         }
       );

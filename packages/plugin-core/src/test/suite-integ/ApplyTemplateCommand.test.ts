@@ -4,6 +4,7 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import sinon from "sinon";
 import { ApplyTemplateCommand } from "../../commands/ApplyTemplateCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
 
@@ -54,6 +55,8 @@ async function runTemplateTest(templateNote: NoteProps) {
   const ext = ExtensionProvider.getExtension();
   const engine = ext.getEngine();
   const targetNote = engine.notes["foo"];
+  // note needs to be open, otherwise, command will throw an error
+  await WSUtilsV2.instance().openNote(targetNote);
   const { updatedTargetNote } = await executeTemplateApply({
     templateNote,
     targetNote,

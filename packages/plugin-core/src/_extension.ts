@@ -265,7 +265,7 @@ class ExtensionUtils {
 
     // Note IDs that are part of our tutorial(s). We want to exclude these from
     // our 'numNotes' telemetry.
-    const tutorialIDs = [
+    const tutorialIds = new Set<string>([
       "ks3b4u7gnd6yiw68qu6ba4m",
       "mycf53kz1r7swcttcobwbdl",
       "kzry3qcy2y4ey1jcf1llajg",
@@ -283,7 +283,7 @@ class ExtensionUtils {
       "4u6pv56mnt25d8l2wzfygu7",
       "khv6u4514vnvvy4njhctfru",
       "kyjfnf2rnc6vn71iyn9liz7",
-    ];
+    ]);
 
     // Takes about ~10 ms to compute in org-workspace
     Object.values(engine.notes).forEach((val) => {
@@ -309,7 +309,7 @@ class ExtensionUtils {
         }
       });
 
-      if (_.includes(tutorialIDs, val.id)) {
+      if (tutorialIds.has(val.id)) {
         numTutorialNotes += 1;
       }
     });

@@ -23,7 +23,9 @@ type CommandOpts = {
   targetNote: NoteProps;
 };
 
-type CommandOutput = {};
+type CommandOutput = {
+  updatedTargetNote: NoteProps;
+};
 
 const APPLY_TEMPLATE_LOOKUP_ID = "templateApply;";
 
@@ -106,6 +108,6 @@ export class ApplyTemplateCommand extends BasicCommand<
         innerError: resp.error,
       });
     }
-    return updatedTargetNote;
+    return { updatedTargetNote };
   }
 }

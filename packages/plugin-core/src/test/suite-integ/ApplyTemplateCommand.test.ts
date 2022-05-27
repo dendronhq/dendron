@@ -4,7 +4,6 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import sinon from "sinon";
 import { ApplyTemplateCommand } from "../../commands/ApplyTemplateCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
 
@@ -22,10 +21,12 @@ async function executeTemplateApply({
       targetNote,
     })
   );
-  await cmd.run();
+  const resp = await cmd.run();
+  const updatedTargetNote = resp?.updatedTargetNote as NoteProps;
   return {
     stub,
     templateNote,
+    updatedTargetNote,
   };
 }
 
@@ -47,10 +48,11 @@ async function runTemplateTest(templateNote: NoteProps) {
   const ext = ExtensionProvider.getExtension();
   const engine = ext.getEngine();
   const targetNote = engine.notes["foo"];
-  await executeTemplateApply({ templateNote, targetNote });
-  const editor = await new WSUtilsV2(ext).openNote(targetNote);
-  const body = editor.document.getText();
-  return { body };
+  const { updatedTargetNote } = await executeTemplateApply({
+    templateNote,
+    targetNote,
+  });
+  return { updatedTargetNote, body: updatedTargetNote.body };
 }
 
 const basicPreset = ENGINE_HOOKS.setupBasic;
@@ -91,11 +93,12 @@ suite("ApplyTemplate", function () {
           body: "hello {{ fm.name }}",
           custom: { name: "john" },
         });
-        const { body } = await runTemplateTest(templateNote);
+        const { body, updatedTargetNote } = await runTemplateTest(templateNote);
+        expect(updatedTargetNote.custom?.name).toEqual("john");
         expect(
           await AssertUtils.assertInString({
             body,
-            match: ["hello john", "name: john"],
+            match: ["hello john"],
           })
         ).toBeTruthy();
       });

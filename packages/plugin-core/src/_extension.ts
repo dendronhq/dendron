@@ -255,13 +255,36 @@ class ExtensionUtils {
       type: workspaceType,
       config: dendronConfig,
     } = workspace;
-    const numNotes = _.size(engine.notes);
+    let numNotes = _.size(engine.notes);
 
     let numNoteRefs = 0;
     let numWikilinks = 0;
     let numBacklinks = 0;
     let numLinkCandidates = 0;
     let numFrontmatterTags = 0;
+    let numTutorialNotes = 0;
+
+    // Note IDs that are part of our tutorial(s). We want to exclude these from
+    // our 'numNotes' telemetry.
+    const tutorialIds = new Set<string>([
+      "ks3b4u7gnd6yiw68qu6ba4m",
+      "mycf53kz1r7swcttcobwbdl",
+      "kzry3qcy2y4ey1jcf1llajg",
+      "y60h6laqi7w462zjp3jyqtt",
+      "4do06cts1tme9yz7vfp46bu",
+      "5pz82kyfhp2whlzfldxmkzu",
+      "kl6ndok3a1f14be6zv771c9",
+      "iq3ggn67k1u3v6up8ny3kf5",
+      "ie5x2bq5yj7uvenylblnhyr",
+      "rjnqumna1ye82u9u76ni42k",
+      "wmbd5xz40ohjb8rd5b737cq",
+      "epmpyk2kjdxqyvflotan2vt",
+      "yyfpeq3th3h17cgvj8cnjw5",
+      "lxrp006mal1tfsd7nxmsobe",
+      "4u6pv56mnt25d8l2wzfygu7",
+      "khv6u4514vnvvy4njhctfru",
+      "kyjfnf2rnc6vn71iyn9liz7",
+    ]);
 
     // Takes about ~10 ms to compute in org-workspace
     Object.values(engine.notes).forEach((val) => {
@@ -286,7 +309,23 @@ class ExtensionUtils {
             break;
         }
       });
+
+      if (tutorialIds.has(val.id)) {
+        numTutorialNotes += 1;
+      }
     });
+
+    // These are the values for the original tutorial; approximate is ok here.
+    const tutorialWikiLinkCount = 19;
+    const tutorialNoteRefCount = 1;
+    const tutorialBacklinkCount = 18;
+
+    if (numTutorialNotes > 0) {
+      numNotes -= numTutorialNotes;
+      numWikilinks = Math.max(0, numWikilinks - tutorialWikiLinkCount);
+      numNoteRefs = Math.max(0, numNoteRefs - tutorialNoteRefCount);
+      numBacklinks = Math.max(0, numBacklinks - tutorialBacklinkCount);
+    }
 
     const numSchemas = _.size(engine.schemas);
     const codeWorkspacePresent = await fs.pathExists(
@@ -309,6 +348,7 @@ class ExtensionUtils {
       numFrontmatterTags,
       numSchemas,
       numVaults: vaults.length,
+      numTutorialNotes,
       workspaceType,
       codeWorkspacePresent,
       selfContainedVaultsEnabled:

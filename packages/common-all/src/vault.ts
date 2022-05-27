@@ -47,9 +47,16 @@ export class VaultUtils {
   }
 
   /**
-   * Path of vault relative to workspace root
+   * Path for the location of notes in this vault, relative to the workspace
+   * root.
+   *
+   * While for old vaults this is the same as
+   * {@link VaultUtils.getRelVaultRootPath}, for self contained vaults the notes
+   * are located inside the vault in the `notes` subdirectory.
+   *
    * @param vault
-   * @returns
+   * @returns path for location of the notes in the vault, relative to the
+   * workspace root
    */
   static getRelPath(vault: DVault) {
     if (VaultUtils.isSelfContained(vault)) {
@@ -66,6 +73,16 @@ export class VaultUtils {
     return vault.fsPath;
   }
 
+  /**
+   * Path for the location of vault root, relative to the workspace root.
+   *
+   * While for old vaults this is the same as {@link VaultUtils.getRelPath}, for
+   * self contained vaults the notes are located inside the vault in the `notes`
+   * subdirectory.
+   *
+   * @param vault
+   * @returns path for root of the vault, relative to the workspace root. May be "." for the top level self contained vault.
+   */
   static getRelVaultRootPath(vault: DVault) {
     if (VaultUtils.isSelfContained(vault)) return vault.fsPath;
     return VaultUtils.getRelPath(vault);

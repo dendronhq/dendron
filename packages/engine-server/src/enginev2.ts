@@ -1,15 +1,16 @@
 import {
+  assertUnreachable,
   BulkAddNoteOpts,
   Cache,
+  ConfigUtils,
   ConfigWriteOpts,
+  DendronASTDest,
   DendronCompositeError,
-  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
-  DEngineMode,
   DHookDict,
   DLink,
   DNodeType,
@@ -21,20 +22,32 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  FindNoteOpts,
   FuseEngine,
+  GetAnchorsRequest,
+  GetDecorationsOpts,
+  GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
+  GetNoteLinksPayload,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
+  IntermediateDendronConfig,
   LruCache,
   milliseconds,
+  newRange,
   NoteChangeEntry,
+  NoteDictsUtils,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
   NullCache,
+  Optional,
   QueryNotesOpts,
+  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -44,28 +57,12 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaQueryResp,
+  SchemaUtils,
   StatusCodes,
   VaultUtils,
-  WorkspaceOpts,
   WriteNoteResp,
-  ConfigUtils,
-  RefreshNotesOpts,
-  GetDecorationsOpts,
-  newRange,
-  GetDecorationsPayload,
-  DendronASTDest,
-  GetAnchorsRequest,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
-  GetNoteLinksPayload,
-  Optional,
-  assertUnreachable,
-  NoteDictsUtils,
-  SchemaUtils,
-  FindNoteOpts,
 } from "@dendronhq/common-all";
 import {
-  createLogger,
   DLogger,
   NodeJSUtils,
   readYAML,
@@ -73,25 +70,29 @@ import {
   writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
+import { inject, injectable, injectAll } from "tsyringe";
 import { EngineUtils } from ".";
 import { DConfig } from "./config";
-import { FileStorage } from "./drivers/file/storev2";
 import { AnchorUtils, LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
 import { runAllDecorators } from "./markdown/decorations";
 import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
-type CreateStoreFunc = (engine: DEngineClient) => DStore;
-type DendronEngineOptsV2 = {
-  wsRoot: string;
-  vaults: DVault[];
-  forceNew?: boolean;
-  createStore?: CreateStoreFunc;
-  mode?: DEngineMode;
-  logger?: DLogger;
-  config: IntermediateDendronConfig;
-};
-type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
+// We don't need these types anymore since we don't need to explicitly call the
+// DendronEngineV2 constructor anymore
+
+// type CreateStoreFunc = (engine: DEngineClient) => DStore;
+// type DendronEngineOptsV2 = {
+//   wsRoot: string;
+//   vaults: DVault[];
+//   // forceNew?: boolean;
+//   createStore?: CreateStoreFunc;
+//   // mode?: DEngineMode;
+//   logger?: DLogger;
+//   config: IntermediateDendronConfig;
+// };
+
+// export type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
 type CachedPreview = {
   data: string;
@@ -139,10 +140,10 @@ function createRenderedCache(
   }
 }
 
+@injectable()
 export class DendronEngineV2 implements DEngine {
   public wsRoot: string;
   public store: DStore;
-  protected props: DendronEnginePropsV2;
   public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
@@ -152,21 +153,24 @@ export class DendronEngineV2 implements DEngine {
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
 
-  static _instance: DendronEngineV2 | undefined;
-
-  constructor(props: DendronEnginePropsV2) {
-    this.wsRoot = props.wsRoot;
-    this.configRoot = props.wsRoot;
-    this.logger = props.logger;
-    this.props = props;
+  constructor(
+    @inject("wsRoot") wsRoot: string,
+    @injectAll("vaults") vaults: DVault[],
+    @inject("DStore") store: DStore,
+    @inject("DLogger") logger: DLogger,
+    @inject("IntermediateDendronConfig") config: IntermediateDendronConfig
+  ) {
+    this.wsRoot = wsRoot;
+    this.configRoot = wsRoot;
+    this.logger = logger;
     this.fuseEngine = new FuseEngine({
-      fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+      fuzzThreshold: ConfigUtils.getLookup(config).note.fuzzThreshold,
     });
     this.links = [];
-    this.config = props.config;
-    this._vaults = props.vaults;
-    this.store = props.createStore(this);
-    const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
+    this.config = config;
+    this._vaults = vaults;
+    this.store = store;
+    const hooks: DHookDict = ConfigUtils.getWorkspace(config).hooks || {
       onCreate: [],
     };
     this.hooks = hooks;
@@ -210,31 +214,25 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
-    const LOGGER = logger || createLogger();
-    const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+  // static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
+  //   const LOGGER = logger || createLogger();
+  //   const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
 
-    return new DendronEngineV2({
-      wsRoot,
-      vaults: ConfigUtils.getVaults(config),
-      forceNew: true,
-      createStore: (engine) =>
-        new FileStorage({
-          engine,
-          logger: LOGGER,
-        }),
-      mode: "fuzzy",
-      logger: LOGGER,
-      config,
-    });
-  }
-
-  static instance({ wsRoot }: { wsRoot: string }) {
-    if (!DendronEngineV2._instance) {
-      DendronEngineV2._instance = DendronEngineV2.create({ wsRoot });
-    }
-    return DendronEngineV2._instance;
-  }
+  //   // TODO: Remove
+  //   return new DendronEngineV2({
+  //     wsRoot,
+  //     vaults: ConfigUtils.getVaults(config),
+  //     forceNew: true,
+  //     createStore: (engine) =>
+  //       new FileStorage({
+  //         engine,
+  //         logger: LOGGER,
+  //       }),
+  //     mode: "fuzzy",
+  //     logger: LOGGER,
+  //     config,
+  //   });
+  // }
 
   get notes(): NotePropsByIdDict {
     return this.store.notes;
@@ -940,7 +938,20 @@ export class DendronEngineV2 implements DEngine {
   }
 }
 
-export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
-  const engine = DendronEngineV2.create({ wsRoot });
-  return engine as DEngineClient;
-};
+// export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
+//   const LOGGER = createLogger();
+//   const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+
+//   // TODO: Remove
+//   return new DendronEngineV2(
+//     wsRoot,
+//     ConfigUtils.getVaults(config),
+
+//     new FileStorage(this, LOGGER),
+//     LOGGER,
+//     config
+//   );
+
+//   // const engine = DendronEngineV2.create({ wsRoot });
+//   // return engine as DEngineClient;
+// };

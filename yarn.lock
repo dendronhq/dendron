@@ -22584,6 +22584,11 @@ redux@^4.0.0, redux@^4.1.2:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.npmjs.org/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
+
 refractor@^3.0.0:
   version "3.5.0"
   resolved "https://registry.npmjs.org/refractor/-/refractor-3.5.0.tgz#334586f352dda4beaf354099b48c2d18e0819aec"
@@ -25483,6 +25488,13 @@ tsutils@^3.17.1, tsutils@^3.21.0:
   integrity sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==
   dependencies:
     tslib "^1.8.1"
+
+tsyringe@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.npmjs.org/tsyringe/-/tsyringe-4.6.0.tgz#14915d3d7f0db35e1cf7269bdbf7c440713c8d07"
+  integrity sha512-BMQAZamSfEmIQzH8WJeRu1yZGQbPSDuI9g+yEiKZFIcO46GPZuMOC2d0b52cVBdw1d++06JnDSIIZvEnogMdAw==
+  dependencies:
+    tslib "^1.9.3"
 
 tty-browserify@0.0.0:
   version "0.0.0"

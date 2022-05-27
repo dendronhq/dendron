@@ -69,7 +69,9 @@ import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
+import { injectable, inject } from "tsyringe";
 
+@injectable()
 export class FileStorage implements DStore {
   public vaults: DVault[];
   /**
@@ -88,9 +90,9 @@ export class FileStorage implements DStore {
   public config: IntermediateDendronConfig;
   private engine: DEngineClient;
 
-  constructor(props: { engine: DEngineClient; logger: DLogger }) {
-    const { vaults, wsRoot, config } = props.engine;
-    const { logger } = props;
+  // TODO: Remove DEngineClient from this class / all DStore instances.
+  constructor(@inject("DEngineClient") engine: DEngineClient, logger: DLogger) {
+    const { vaults, wsRoot, config } = engine;
     this.wsRoot = wsRoot;
     this.configRoot = wsRoot;
     this.vaults = vaults;
@@ -103,7 +105,7 @@ export class FileStorage implements DStore {
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, wsRoot, vaults, level: this.logger.level });
     this.config = config;
-    this.engine = props.engine;
+    this.engine = engine;
   }
 
   async init(): Promise<DEngineInitResp> {

@@ -7,6 +7,7 @@ const commonConfig = {
   snapshotSerializers: ["jest-serializer-path"],
   testEnvironment: "node",
   testPathIgnorePatterns: ["utils.ts"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
 
 module.exports = {

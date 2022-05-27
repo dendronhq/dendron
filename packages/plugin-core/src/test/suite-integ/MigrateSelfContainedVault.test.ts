@@ -21,6 +21,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { DConfig } from "@dendronhq/engine-server";
+import { pathForVaultRoot } from "@dendronhq/common-server";
 
 function stubMigrateQuickPick(
   vaultSelect: string,
@@ -161,7 +162,28 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
 
   describeSingleWS(
     "WHEN there's only a single vault, and it's not self contained",
-    { selfContained: false },
+    {
+      selfContained: false,
+      modConfigCb: (config) => {
+        const vault = ConfigUtils.getVaults(config)[0];
+        // Using an asset in the vault as the logo. Migration should update the path.
+        ConfigUtils.setPublishProp(
+          config,
+          "logoPath",
+          `${vault.fsPath}/assets/image.png`
+        );
+        return config;
+      },
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vaultPath = pathForVaultRoot({ wsRoot, vault: vaults[0] });
+        // Mock git folder & files to see if migration handles them.
+        await fs.ensureDir(path.join(vaultPath, ".git"));
+        await fs.writeFile(path.join(vaultPath, ".gitignore"), "");
+        // Also mock the logo file
+        await fs.ensureDir(path.join(vaultPath, "assets"));
+        await fs.writeFile(path.join(vaultPath, "assets", "image.png"), "");
+      },
+    },
     () => {
       let reloadWindow: SinonStubbedFn<typeof VSCodeUtils["reloadWindow"]>;
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
@@ -193,6 +215,33 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         expect(
           verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
+        ).toBeTruthy();
+      });
+
+      test("THEN the logoPath is updated to account for the moved asset", async () => {
+        const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+        const logoPath = ConfigUtils.getPublishing(config).logoPath;
+        expect(logoPath).toBeTruthy();
+        // If the logoPath was not updated, then we won't find the asset file there
+        expect(
+          await fs.pathExists(path.join(wsRoot, path.normalize(logoPath!)))
+        ).toBeTruthy();
+      });
+
+      test("THEN the git folders/files are handled correctly", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        expect(
+          await fs.pathExists(
+            path.join(pathForVaultRoot({ vault: vaults[0], wsRoot }), ".git")
+          )
+        ).toBeTruthy();
+        expect(
+          await fs.pathExists(
+            path.join(
+              pathForVaultRoot({ vault: vaults[0], wsRoot }),
+              ".gitignore"
+            )
+          )
         ).toBeTruthy();
       });
     }

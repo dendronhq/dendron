@@ -36,22 +36,23 @@ export class GraphUtils {
 const getCytoscapeStyle = (
   theme: string | undefined,
   customCSS: string | undefined,
-  config: GraphConfig
+  config: GraphConfig,
+  isSidePanel: boolean | undefined
 ) => {
   if (_.isUndefined(theme)) return "";
 
   switch (config.graphTheme.value) {
     case GraphThemeEnum.Classic: {
-      return getStyles(theme, ClassicTheme);
+      return getStyles(theme, ClassicTheme, isSidePanel);
     }
     case GraphThemeEnum.Monokai: {
-      return getStyles(theme, MonokaiTheme);
+      return getStyles(theme, MonokaiTheme, isSidePanel);
     }
     case GraphThemeEnum.Block: {
-      return getStyles(theme, BlockTheme);
+      return getStyles(theme, BlockTheme, isSidePanel);
     }
     case GraphThemeEnum.Custom: {
-      return getStyles(theme, ClassicTheme, customCSS);
+      return getStyles(theme, ClassicTheme, isSidePanel, customCSS);
     }
   }
 };
@@ -108,6 +109,7 @@ export default function Graph({
     ide,
     config,
     workspace,
+    isSidePanel,
   });
 
   // On config update, handle graph changes
@@ -163,7 +165,8 @@ export default function Graph({
       const style = getCytoscapeStyle(
         currentTheme || "light",
         ide.graphStyles,
-        config
+        config,
+        isSidePanel
       ) as any;
       const defaultConfig = ConfigUtils.genDefaultConfig();
 

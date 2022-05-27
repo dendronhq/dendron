@@ -22,13 +22,7 @@ async function executeTemplateApply({
       targetNote,
     })
   );
-  console.log({ bond: cmd.BOND });
-  console.log({
-    templateNote: JSON.stringify(templateNote),
-    targetNote: JSON.stringify(targetNote),
-  });
   const resp = await cmd.run();
-  console.log({ resp: JSON.stringify(resp) });
   const updatedTargetNote = resp?.updatedTargetNote as NoteProps;
   return {
     stub,

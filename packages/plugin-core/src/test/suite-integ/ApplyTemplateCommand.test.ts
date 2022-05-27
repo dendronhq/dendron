@@ -2,7 +2,7 @@ import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import sinon from "sinon";
-import { TemplateApplyCommand } from "../../commands/TemplateApplyCommand";
+import { ApplyTemplateCommand } from "../../commands/ApplyTemplateCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
@@ -15,7 +15,7 @@ async function executeTemplateApply({
   templateNote: NoteProps;
   targetNote: NoteProps;
 }) {
-  const cmd = new TemplateApplyCommand();
+  const cmd = new ApplyTemplateCommand();
   const stub = sinon.stub(cmd, "gatherInputs").returns(
     Promise.resolve({
       templateNote,
@@ -60,9 +60,9 @@ const enableHB = (cfg: IntermediateDendronConfig) => {
   return cfg;
 };
 
-suite("TemplateApply", function () {
+suite("ApplyTemplate", function () {
   describeMultiWS(
-    "WHEN Template Apply run with regular template",
+    "WHEN ApplyTemplate run with regular template",
     {
       preSetupHook: basicPreset,
     },
@@ -80,7 +80,7 @@ suite("TemplateApply", function () {
   );
 
   describeMultiWS(
-    "WHEN Template Apply run with template with frontmatter",
+    "WHEN ApplyTemplate run with template with frontmatter",
     {
       preSetupHook: basicPreset,
       modConfigCb: enableHB,

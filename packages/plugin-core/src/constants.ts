@@ -515,9 +515,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create Task Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  TEMPLATE_APPLY: {
-    key: "dendron.templateApply",
-    title: `${CMD_PREFIX} Template Apply`,
+  APPLY_TEMPLATE: {
+    key: "dendron.applyTemplate",
+    title: `${CMD_PREFIX} Apply Template`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Hierarchies

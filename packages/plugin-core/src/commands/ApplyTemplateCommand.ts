@@ -27,7 +27,7 @@ type CommandOutput = {};
 
 const TEMPLATE_APPLY_LOOKUP_ID = "templateApply;";
 
-export class TemplateApplyCommand extends BasicCommand<
+export class ApplyTemplateCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
@@ -86,7 +86,7 @@ export class TemplateApplyCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const ctx = "TemplateApplyCommand";
+    const ctx = this.key;
     opts = _.defaults(opts, { closeAndOpenFile: true });
     Logger.info({ ctx });
     const { templateNote, targetNote } = opts;

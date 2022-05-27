@@ -89,7 +89,7 @@ export class InsertNoteCommand extends BasicCommand<
     });
     window
       .showWarningMessage(
-        "Heads up that InsertNote is being deprecated and will be replaced with the 'Template Apply' command",
+        "Heads up that InsertNote is being deprecated and will be replaced with the 'Apply Template' command",
         "See whats changed"
       )
       .then((resp) => {

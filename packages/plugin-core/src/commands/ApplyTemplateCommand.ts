@@ -34,6 +34,7 @@ export class ApplyTemplateCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.APPLY_TEMPLATE.key;
+  BOND = true;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {

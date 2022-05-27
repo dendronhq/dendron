@@ -17,7 +17,7 @@ import {
 import {
   createDisposableLogger,
   isSelfContainedVaultFolder,
-  vault2Path,
+  pathForVaultRoot,
 } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
@@ -419,7 +419,7 @@ export class DoctorService implements Disposable {
         const vaultsToFix = (
           await Promise.all(
             vaults.map(async (vault) => {
-              const vaultDir = vault2Path({ wsRoot, vault });
+              const vaultDir = pathForVaultRoot({ wsRoot, vault });
               const gitPath = path.join(vaultDir, ".git");
               // Already a remote vault
               if (vault.remote !== undefined) return;
@@ -452,7 +452,7 @@ export class DoctorService implements Disposable {
           await asyncLoopOneAtATime(
             vaultsToFix,
             async ({ vault, remoteUrl }) => {
-              const vaultDir = vault2Path({ wsRoot, vault });
+              const vaultDir = pathForVaultRoot({ wsRoot, vault });
               this.L.info({
                 ctx,
                 vaultDir,

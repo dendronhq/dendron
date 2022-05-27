@@ -4,6 +4,7 @@ import {
   DendronError,
   DEngineClient,
   DVault,
+  FOLDERS,
   IDendronError,
   IntermediateDendronConfig,
   NoteProps,
@@ -116,12 +117,12 @@ export class MarkdownExportPodV2
         const destPath = path.join(
           destination,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         const srcPath = path.join(
           this._engine.wsRoot,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         if (fs.pathExistsSync(srcPath)) {
           await fs.copy(srcPath, destPath);

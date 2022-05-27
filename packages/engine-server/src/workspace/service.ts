@@ -873,13 +873,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     const vaults = ConfigUtils.getVaults(config);
     const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {
-      const checks = [
-        VaultUtils.getRelPath(ent) === VaultUtils.getRelPath(vault),
-      ];
-      if (vault.workspace) {
-        checks.push(ent.workspace === vault.workspace);
-      }
-      return _.every(checks);
+      return (
+        // Same vault, and
+        VaultUtils.isEqualV2(ent, vault) &&
+        // Either not a workspace vault, or the same workspace
+        (!vault.workspace || ent.workspace === vault.workspace)
+      );
     });
     ConfigUtils.setVaults(config, vaultsAfterReject);
 

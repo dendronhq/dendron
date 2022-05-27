@@ -37,7 +37,7 @@ AFTER: delete the created note.
 ### With matching expanded schema:
 1. Activate look up `cmd+l`
 2. Create new note `book.b1.characters.public_persona`
-3. Make sure that value from [[templates.person]] was added into above note.
+3. Make sure that value from [[template.person]] was added into above note.
 
 AFTER: Delete `book.b1.characters.public_persona`
 

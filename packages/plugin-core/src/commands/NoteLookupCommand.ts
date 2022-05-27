@@ -14,10 +14,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  RespV3,
-  SchemaTemplate,
   SchemaUtils,
-  VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
@@ -57,6 +54,7 @@ import {
   VaultSelectionMode,
 } from "../components/lookup/types";
 import {
+  LookupUtils,
   node2Uri,
   OldNewLocation,
   PickerUtilsV2,
@@ -69,9 +67,7 @@ import { JournalNote } from "../traits/journal";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { AutoCompletable } from "../utils/AutoCompletable";
 import { AutoCompleter } from "../utils/autoCompleter";
-import { parseRef } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { WSUtilsV2 } from "../WSUtilsV2";
 import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
@@ -538,17 +534,19 @@ export class NoteLookupCommand
       }
     }
 
-    const maybeSchema = SchemaUtils.getSchemaFromNote({
+    const maybeTemplate = TemplateUtils.tryGetTemplateFromMatchingSchema({
       note: nodeNew,
       engine,
     });
-    const maybeTemplate =
-      maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
-    if (maybeSchema && maybeTemplate) {
-      const resp = await this.getNoteForSchemaTemplate(maybeTemplate);
+
+    if (maybeTemplate) {
+      const resp = await LookupUtils.getNoteForSchemaTemplate({
+        engine,
+        schemaTemplate: maybeTemplate,
+      });
       if (resp.error) {
         window.showWarningMessage(
-          `Warning: Problem with ${maybeSchema.fname} schema. ${resp.error.message}`
+          `Warning: Problem with ${nodeNew.fname} schema. ${resp.error.message}`
         );
       } else if (!_.isUndefined(resp.data)) {
         // Only apply schema if note is found
@@ -557,7 +555,9 @@ export class NoteLookupCommand
           targetNote: nodeNew,
           engine,
         });
-        AnalyticsUtils.track(EngagementEvents.TemplateApplied);
+        AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+          source: this.key,
+        });
       }
     }
 
@@ -578,49 +578,6 @@ export class NoteLookupCommand
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
-  }
-
-  /**
-   * Find corresponding note for given schema template. Supports cross-vault lookup.
-   *
-   * @param schemaTemplate
-   */
-  private async getNoteForSchemaTemplate(
-    schemaTemplate: SchemaTemplate
-  ): Promise<RespV3<NoteProps | undefined>> {
-    let maybeVault: DVault | undefined;
-    const { ref, vaultName } = parseRef(schemaTemplate.id);
-    const engine = ExtensionProvider.getEngine();
-
-    // If vault is specified, lookup by template id + vault
-    if (!_.isUndefined(vaultName)) {
-      maybeVault = VaultUtils.getVaultByName({
-        vname: vaultName,
-        vaults: engine.vaults,
-      });
-      // If vault is not found, skip lookup through rest of notes and return error
-      if (_.isUndefined(maybeVault)) {
-        return {
-          error: new DendronError({
-            message: `No vault found for ${vaultName}`,
-          }),
-        };
-      }
-    }
-
-    if (!_.isUndefined(ref)) {
-      return WSUtilsV2.instance().findNoteFromMultiVaultAsync({
-        fname: ref,
-        quickpickTitle:
-          "Select which template to apply or press [ESC] to not apply a template",
-        nonStubOnly: true,
-        vault: maybeVault,
-      });
-    } else {
-      return {
-        data: undefined,
-      };
-    }
   }
 
   /**

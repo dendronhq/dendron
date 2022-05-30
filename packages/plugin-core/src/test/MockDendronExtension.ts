@@ -1,5 +1,4 @@
 import {
-  DendronTreeViewKey,
   DEngineClient,
   DVault,
   DWorkspaceV2,
@@ -11,10 +10,8 @@ import {
   Disposable,
   ExtensionContext,
   FileSystemWatcher,
-  WebviewViewProvider,
   WorkspaceConfiguration,
 } from "vscode";
-import { ICommandFactory } from "../commandFactoryInterface";
 import { ILookupControllerV3Factory } from "../components/lookup/LookupControllerV3Interface";
 import {
   INoteLookupProviderFactory,
@@ -69,9 +66,6 @@ export class MockDendronExtension implements IDendronExtension {
   }
   get wsUtils(): IWSUtilsV2 {
     return new WSUtilsV2(this);
-  }
-  get commandFactory(): ICommandFactory {
-    throw new Error("Method not implemented in MockDendronExtension");
   }
   get schemaSyncService(): ISchemaSyncService {
     throw new Error("Method not implemented in MockDendronExtension");
@@ -187,9 +181,5 @@ export class MockDendronExtension implements IDendronExtension {
     // TODO: the old implementation of this was wrong - it did not return WorkspaceConfiguration but a WorkspaceSettings object
     // since this doesn't seem to be used, just adding an exception here for future work
     throw Error("not implemented");
-  }
-
-  getTreeView(_key: DendronTreeViewKey): WebviewViewProvider {
-    throw new Error("Method not implemented in MockDendronExtension.");
   }
 }

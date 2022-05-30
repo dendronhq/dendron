@@ -1,12 +1,10 @@
 import {
-  DendronTreeViewKey,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { IWorkspaceService } from "@dendronhq/engine-server";
 import vscode from "vscode";
-import { ICommandFactory } from "./commandFactoryInterface";
 import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
 import {
   INoteLookupProviderFactory,
@@ -60,7 +58,6 @@ export interface IDendronExtension {
   fileWatcher?: FileWatcher;
   type: WorkspaceType;
   wsUtils: IWSUtilsV2;
-  commandFactory: ICommandFactory;
   schemaSyncService: ISchemaSyncService;
   workspaceService?: IWorkspaceService;
 
@@ -122,10 +119,4 @@ export interface IDendronExtension {
   getWorkspaceConfig(
     section?: string | undefined
   ): vscode.WorkspaceConfiguration;
-
-  /**
-   * @deprecated Temporarily exposed to resolve circular dependencies
-   * Moving forward with the eventing pattern, we shouldn't need to expose any tree views anymore
-   */
-  getTreeView(key: DendronTreeViewKey): vscode.WebviewViewProvider;
 }

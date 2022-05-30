@@ -9,7 +9,7 @@ const path = require("path");
  * circular dependencies detected
  */
 function checkCircularDependencies() {
-  const CIRCULAR_DEP_THRESHOLD = 2; // Lower this each time we fix a circular dependency
+  const CIRCULAR_DEP_THRESHOLD = 1; // Lower this each time we fix a circular dependency
   const rootPath = exec("git rev-parse --show-toplevel").stdout;
   const filePath = path.resolve(rootPath, "packages/plugin-core");
   madge(filePath, {

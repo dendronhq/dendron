@@ -94,7 +94,7 @@
         position: absolute;
         margin-left: -1.4em;
         color: $grey-dk-000;
-        content: "•";
+        content: none;
       }
     }
   }
@@ -114,7 +114,6 @@
   .task-list-item-checkbox {
     margin-right: 0.6em;
   }
-
 
   hr + * {
     margin-top: 0;
@@ -234,11 +233,11 @@ blockquote {
 
 // Footnotes
 a.fnref {
-	vertical-align: super;
-	font-size: 0.7rem;
+  vertical-align: super;
+  font-size: 0.7rem;
 }
 
 a.fn {
-	text-decoration: none;
+  text-decoration: none;
   margin-left: 1rem;
 }

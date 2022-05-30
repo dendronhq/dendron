@@ -31,7 +31,7 @@ $(
   `npx lerna run buildCI --parallel --scope "@dendronhq/{common-frontend,dendron-cli}"`
 );
 
-$(`npx lerna run buildCI --scope "@dendronhq/{engine-test-utils}"`);
+$(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils"`);
 
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);
 

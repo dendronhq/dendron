@@ -22,7 +22,7 @@ $(
 $(
   `npx lerna run build --parallel --scope "@dendronhq/{common-frontend,dendron-cli}"`
 );
-$(`npx lerna run build --scope "@dendronhq/{engine-test-utils}" `);
+$(`npx lerna run build --scope "@dendronhq/engine-test-utils"`);
 $(`npx lerna run build --scope "@dendronhq/dendron-plugin-views"`);
 $(`npx lerna run build --scope "@dendronhq/plugin-core"`);
 $(`npx yarn dendron dev sync_assets --fast`);

@@ -2,10 +2,11 @@ import {
   DendronTreeViewKey,
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
-  TREE_VIEWS,
   TreeViewItemLabelTypeEnum,
+  TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { BacklinkSortOrder, CodeConfigKeys } from "./types";
+import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
+import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -186,13 +187,23 @@ export const DENDRON_MENUS = {
      * */
     {
       command: "dendron.backlinks.sortByLastUpdated",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.PathNames}`,
-      group: "navigation@1",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.PathNames}`,
+      group: "sort@1",
+    },
+    {
+      command: "dendron.backlinks.sortByLastUpdatedChecked",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.LastUpdated}`,
+      group: "sort@1",
     },
     {
       command: "dendron.backlinks.sortByPathNames",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.LastUpdated}`,
-      group: "navigation@1",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.LastUpdated}`,
+      group: "sort@2",
+    },
+    {
+      command: "dendron.backlinks.sortByPathNamesChecked",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.PathNames}`,
+      group: "sort@2",
     },
     {
       command: "dendron.backlinks.expandAll",
@@ -270,13 +281,19 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- backlinks panel buttons
   BACKLINK_SORT_BY_LAST_UPDATED: {
     key: "dendron.backlinks.sortByLastUpdated",
-    title: "Sort by last updated (currently sorted by path names)",
-    icon: "$(list-ordered)",
+    title: "Sort by Last Updated",
+  },
+  BACKLINK_SORT_BY_LAST_UPDATED_CHECKED: {
+    key: "dendron.backlinks.sortByLastUpdatedChecked",
+    title: "✓ Sort by Last Updated",
   },
   BACKLINK_SORT_BY_PATH_NAMES: {
     key: "dendron.backlinks.sortByPathNames",
-    title: "Sort by path names (currently sorted by last updated)",
-    icon: "$(list-ordered)",
+    title: "Sort by Path Names",
+  },
+  BACKLINK_SORT_BY_PATH_NAMES_CHECKED: {
+    key: "dendron.backlinks.sortByPathNamesChecked",
+    title: "✓ Sort by Path Names",
   },
   BACKLINK_EXPAND_ALL: {
     key: "dendron.backlinks.expandAll",

@@ -52,9 +52,14 @@ const checkRefs = ({
   expect(links?.length).toEqual(2);
   const firstLineRange = new vscode.Range(
     new vscode.Position(7, 0),
-    new vscode.Position(8, 0)
+    new vscode.Position(7, 18)
   );
-  expect(links!.map((l) => l.range)).toEqual([firstLineRange, firstLineRange]);
+
+  const secondLineRange = new vscode.Range(
+    new vscode.Position(7, 0),
+    new vscode.Position(7, 14)
+  );
+  expect(links!.map((l) => l.range)).toEqual([firstLineRange, secondLineRange]);
   expect(links!.map((l) => l.uri.fsPath.toLocaleLowerCase())).toEqual(
     refs.map((note) =>
       NoteUtils.getFullPath({ note, wsRoot }).toLocaleLowerCase()

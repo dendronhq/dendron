@@ -53,9 +53,12 @@ export enum DendronASTTypes {
   IMAGE = "image",
   FRONTMATTER = "yaml",
   LINK = "link",
+  CODE = "code",
   INLINE_CODE = "inlineCode",
   FOOTNOTE_DEFINITION = "footnoteDefinition",
   FOOTNOTE_REFERENCE = "footnoteReference",
+  HTML = "html",
+  YAML = "yaml",
 }
 
 export enum VaultMissingBehavior {

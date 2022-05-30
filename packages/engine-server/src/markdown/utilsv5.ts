@@ -47,6 +47,7 @@ import { hierarchies } from "./remark";
 import { extendedImage } from "./remark/extendedImage";
 import { WorkspaceService } from "../workspace";
 import { DateTimeFormatOptions } from "luxon";
+import { backlinksHover, BacklinkOpts } from "./remark/backlinksHover";
 
 export { ProcFlavor };
 
@@ -114,6 +115,7 @@ export type ProcDataFullOptsV5 = {
   fm?: any;
   wikiLinksOpts?: WikiLinksOpts;
   publishOpts?: DendronPubOpts;
+  backlinkHoverOpts?: BacklinkOpts;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -260,6 +262,7 @@ export class MDUtilsV5 {
       .use(extendedImage)
       .use(footnotes)
       .use(variables)
+      .use(backlinksHover, data.backlinkHoverOpts)
       .data("errors", errors);
 
     // set options and do validation
@@ -318,13 +321,16 @@ export class MDUtilsV5 {
             // but now that's done by the
             // [[PreviewPanel|../packages/plugin-core/src/components/views/PreviewPanel.ts#^preview-rewrites-images]]
           }
-          if (opts.flavor === ProcFlavor.HOVER_PREVIEW) {
+          if (
+            opts.flavor === ProcFlavor.HOVER_PREVIEW ||
+            opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER
+          ) {
             proc = proc.use(dendronHoverPreview);
           }
           // add additional plugins
           const isNoteRef = !_.isUndefined((data as ProcDataFullV5).noteRefLvl);
           let insertTitle;
-          if (isNoteRef) {
+          if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
             insertTitle = false;
           } else {
             const config = data.config as IntermediateDendronConfig;

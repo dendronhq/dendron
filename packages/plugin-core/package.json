@@ -6,7 +6,7 @@
   "publisher": "dendron",
   "version": "0.96.0",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.62.0"
   },
   "categories": [
     "Other"
@@ -118,13 +118,19 @@
     "commands": [
       {
         "command": "dendron.backlinks.sortByLastUpdated",
-        "title": "Sort by last updated (currently sorted by path names)",
-        "icon": "$(list-ordered)"
+        "title": "Sort by Last Updated"
+      },
+      {
+        "command": "dendron.backlinks.sortByLastUpdatedChecked",
+        "title": "✓ Sort by Last Updated"
       },
       {
         "command": "dendron.backlinks.sortByPathNames",
-        "title": "Sort by path names (currently sorted by last updated)",
-        "icon": "$(list-ordered)"
+        "title": "Sort by Path Names"
+      },
+      {
+        "command": "dendron.backlinks.sortByPathNamesChecked",
+        "title": "✓ Sort by Path Names"
       },
       {
         "command": "dendron.backlinks.expandAll",
@@ -814,12 +820,22 @@
         {
           "command": "dendron.backlinks.sortByLastUpdated",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
-          "group": "navigation@1"
+          "group": "sort@1"
+        },
+        {
+          "command": "dendron.backlinks.sortByLastUpdatedChecked",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
+          "group": "sort@1"
         },
         {
           "command": "dendron.backlinks.sortByPathNames",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
-          "group": "navigation@1"
+          "group": "sort@2"
+        },
+        {
+          "command": "dendron.backlinks.sortByPathNamesChecked",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
+          "group": "sort@2"
         },
         {
           "command": "dendron.backlinks.expandAll",
@@ -1219,7 +1235,7 @@
     "@dendronhq/pods-core": "^0.96.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
-    "@types/vscode": "1.58",
+    "@types/vscode": "1.62.0",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",

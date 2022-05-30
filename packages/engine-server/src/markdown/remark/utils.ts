@@ -44,9 +44,11 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
+  Code,
   FootnoteDefinition,
   FrontmatterContent,
   Heading,
+  HTML,
   Image,
   InlineCode,
   Link,
@@ -318,13 +320,6 @@ const getLinkCandidates = ({
   const linkCandidates: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
-    // handling text nodes that start with \n
-    if (textNode.position!.start.line !== textNode.position!.end.line) {
-      textNode.position!.start = {
-        line: textNode.position!.start.line + 1,
-        column: 1,
-      };
-    }
     value.split(/\s+/).forEach((word) => {
       const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
@@ -333,11 +328,30 @@ const getLinkCandidates = ({
       }).filter((note) => note.stub !== true);
       linkCandidates.push(
         ...possibleCandidates.map((candidate): DLink => {
+          const startColumn = value.indexOf(word) + 1;
+          const endColumn = startColumn + word.length;
+
+          const position: Position = {
+            start: {
+              line: textNode.position!.start.line,
+              column: startColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + startColumn - 1
+                : undefined,
+            },
+            end: {
+              line: textNode.position!.start.line,
+              column: endColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + endColumn - 1
+                : undefined,
+            },
+          };
           return {
             type: "linkCandidate",
             from: NoteUtils.toNoteLoc(note),
             value: value.trim(),
-            position: textNode.position as Position,
+            position,
             to: {
               fname: word,
               vaultName: VaultUtils.getName(candidate.vault),
@@ -1033,8 +1047,7 @@ export class RemarkUtils {
   }
 
   static isParent(node: Node): node is Parent {
-    // @ts-ignore
-    return _.isArray(node.children);
+    return _.isArray((node as Parent).children);
   }
 
   static isParagraph(node: Node): node is Paragraph {
@@ -1087,6 +1100,18 @@ export class RemarkUtils {
 
   static isFrontmatter(node: Node): node is FrontmatterContent {
     return node.type === DendronASTTypes.FRONTMATTER;
+  }
+
+  static isHTML(node: Node): node is HTML {
+    return node.type === DendronASTTypes.HTML;
+  }
+
+  static isCode(node: Node): node is Code {
+    return node.type === DendronASTTypes.CODE;
+  }
+
+  static isYAML(node: Node): node is YAML {
+    return node.type === DendronASTTypes.YAML;
   }
 
   static isNodeWithPosition<N extends Node>(

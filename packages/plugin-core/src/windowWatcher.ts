@@ -34,7 +34,7 @@ export class WindowWatcher {
     // provide logging whenever window changes
     this._extension.addDisposable(
       window.onDidChangeVisibleTextEditors(
-        sentryReportingCallback((editors: TextEditor[]) => {
+        sentryReportingCallback((editors: readonly TextEditor[]) => {
           const ctx = "WindowWatcher:onDidChangeVisibleTextEditors";
           const editorPaths = editors.map((editor) => {
             return editor.document.uri.fsPath;

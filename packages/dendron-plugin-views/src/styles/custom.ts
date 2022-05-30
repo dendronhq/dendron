@@ -3,6 +3,7 @@ import { Theme } from "./theme-classic";
 export const getStyles = (
   theme: string,
   themeObj: { [theme: string]: Theme },
+  isSidePanel?: boolean,
   customCSS?: string
 ) => {
   // Cytoscape's "diamond" node is smaller than it's "circle" node, so
@@ -16,7 +17,9 @@ export const getStyles = (
     color: ${themeObj[theme].graph.node.label.color};
     label: data(label);
     font-size: ${themeObj[theme].graph.node.label.fontSize};
-    min-zoomed-font-size: ${themeObj[theme].graph.node.label.minZoomedFontSize};
+    min-zoomed-font-size: ${
+      isSidePanel ? 8 : themeObj[theme].graph.node.label.minZoomedFontSize
+    };
     font-weight: ${themeObj[theme].graph.node.label.fontWeight};
     font-family: ${themeObj[theme].graph.node.fontFamily};
   }

@@ -265,8 +265,8 @@
         "title": "Dendron: Create Task Note"
       },
       {
-        "command": "dendron.templateApply",
-        "title": "Dendron: Template Apply"
+        "command": "dendron.applyTemplate",
+        "title": "Dendron: Apply Template"
       },
       {
         "command": "dendron.archiveHierarchy",
@@ -624,7 +624,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.templateApply",
+          "command": "dendron.applyTemplate",
           "when": "dendron:pluginActive"
         },
         {
@@ -1049,12 +1049,12 @@
     "keybindings": [
       {
         "command": "dendron.goto",
-        "when": "editorFocus"
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",
-        "when": "editorFocus"
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.createSchemaFromHierarchy",

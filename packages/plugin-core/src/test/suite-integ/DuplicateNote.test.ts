@@ -94,4 +94,29 @@ suite("Duplicate note detection", function () {
       });
     }
   );
+
+  describeSingleWS(
+    "GIVEN an open file that is in the workspace but doesn't have frontmatter",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("THEN do nothing", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vaultPath = vaults[0].fsPath;
+        const noFMFilePath = path.join(wsRoot, vaultPath, "no-fm.md");
+        const noFMFileUri = vscode.Uri.file(noFMFilePath);
+        const noFMContent = "no frontmatter";
+        fs.writeFileSync(noFMFilePath, noFMContent, { encoding: "utf-8" });
+
+        await VSCodeUtils.openFileInEditor(noFMFileUri);
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const document = editor?.document;
+
+        const wsUtils = ExtensionProvider.getExtension().wsUtils;
+        const resp = await wsUtils.findDuplicateNoteFromDocument(document!);
+        expect(resp?.duplicate).toEqual(undefined);
+      });
+    }
+  );
 });

@@ -2,8 +2,10 @@
 id: rjnqumna1ye82u9u76ni42k
 title: Linking Notes
 desc: Linking Notes
-updated: 1652280770996
+updated: 1653982014592
 created: 1625563999532
+currentStep: 3
+totalSteps: 5
 nav_order: 2
 ---
 

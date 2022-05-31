@@ -2,8 +2,11 @@
 id: y60h6laqi7w462zjp3jyqtt
 title: Tutorial
 desc: "Tutorial Home Page"
-updated: 1652287311642
+updated: 1653980718180
 created: 1652278009766
+currentStep: 0
+totalSteps: 5
+nav_order: 1.1
 ---
 
 ## Welcome to Dendron

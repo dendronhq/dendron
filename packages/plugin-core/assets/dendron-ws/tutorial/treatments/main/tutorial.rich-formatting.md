@@ -2,8 +2,10 @@
 id: lxrp006mal1tfsd7nxmsobe
 title: Rich Formatting
 desc: ""
-updated: 1652291044262
+updated: 1653980630252
 created: 1625573403967
+currentStep: 4
+totalSteps: 5
 nav_order: 3
 ---
 

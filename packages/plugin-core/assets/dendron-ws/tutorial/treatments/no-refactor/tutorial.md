@@ -2,8 +2,10 @@
 id: tbilk9to67d0dwgnjanj5ph
 title: Getting Started
 desc: ""
-updated: 1652280532205
+updated: 1653980839862
 created: 1608051264282
+currentStep: 0
+totalSteps: 5
 nav_order: 1.1
 ---
 

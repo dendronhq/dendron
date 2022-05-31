@@ -2,8 +2,11 @@
 id: ks3b4u7gnd6yiw68qu6ba4m
 title: Navigation Basics
 desc: ""
-updated: 1652279527689
+updated: 1653980753187
 created: 1652278075049
+currentStep: 1
+totalSteps: 5
+nav_order: 0
 ---
 
 Let's do a brief overview on how to navigate the Dendron UI.

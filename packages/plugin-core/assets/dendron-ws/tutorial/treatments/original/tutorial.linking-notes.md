@@ -2,8 +2,11 @@
 id: 4do06cts1tme9yz7vfp46bu
 title: Linking Your Notes
 desc: Note Linking and your Knowledge Graph
-updated: 1652280371265
+updated: 1653980786307
 created: 1652278095382
+currentStep: 3
+totalSteps: 5
+nav_order: 2
 ---
 
 ### Links

@@ -2,8 +2,11 @@
 id: 5pz82kyfhp2whlzfldxmkzu
 title: Conclusion
 desc: ""
-updated: 1652279068668
+updated: 1653980815279
 created: 1652278009760
+currentStep: 5
+totalSteps: 5
+nav_order: 4
 ---
 
 **Congratulations!** You've completed the Dendron Tutorial 🙌.

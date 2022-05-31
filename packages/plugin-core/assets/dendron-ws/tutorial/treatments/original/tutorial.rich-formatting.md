@@ -2,8 +2,11 @@
 id: kzry3qcy2y4ey1jcf1llajg
 title: Rich Formatting
 desc: "Text Formatting, Images, Formulas, and Diagrams"
-updated: 1652280413439
+updated: 1653980802473
 created: 1652278089118
+currentStep: 4
+totalSteps: 5
+nav_order: 3
 ---
 
 Dendron supports an extended Markdown syntax, which provides a lot of options for rich formatting. Take a look at some examples in this note to see what's possible. Have the preview pane opened (`Dendron: Show Preview`) to see how these will get rendered.

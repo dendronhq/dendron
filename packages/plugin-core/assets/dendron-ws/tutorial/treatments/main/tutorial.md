@@ -2,8 +2,10 @@
 id: 4u6pv56mnt25d8l2wzfygu7
 title: Getting Started
 desc: ""
-updated: 1652280815854
+updated: 1653980552303
 created: 1608051264282
+currentStep: 0
+totalSteps: 5
 nav_order: 1.1
 ---
 

@@ -2,8 +2,10 @@
 id: khv6u4514vnvvy4njhctfru
 title: Linking Notes
 desc: Linking Notes
-updated: 1652280901513
+updated: 1653980618942
 created: 1625563999532
+currentStep: 3
+totalSteps: 5
 nav_order: 2
 ---
 

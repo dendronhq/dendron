@@ -47,7 +47,15 @@ export enum TutorialEvents {
   Tutorial_3_Show = "Tutorial_3_Show",
   Tutorial_4_Show = "Tutorial_4_Show",
   Tutorial_5_Show = "Tutorial_5_Show",
+  TutorialNoteViewed = "TutorialNoteViewed",
 }
+
+export type TutorialNoteViewedPayload = {
+  testGroup: string;
+  fname: string;
+  currentStep: number;
+  totalSteps: number;
+};
 
 export enum KeybindingConflictDetectedSource {
   activation = "activation",

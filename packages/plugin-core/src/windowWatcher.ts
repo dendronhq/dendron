@@ -3,6 +3,7 @@ import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
+import { DoctorUtils } from "./components/doctor/utils";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
@@ -70,7 +71,7 @@ export class WindowWatcher {
       }
 
       // check and prompt duplicate warning.
-      await this._extension.wsUtils.findDuplicateNoteAndPromptIfNecessary(
+      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
         editor.document,
         "onDidChangeActiveTextEditor"
       );

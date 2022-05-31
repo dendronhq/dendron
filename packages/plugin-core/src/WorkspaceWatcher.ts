@@ -28,6 +28,7 @@ import {
   window,
   workspace,
 } from "vscode";
+import { DoctorUtils } from "./components/doctor/utils";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
@@ -235,7 +236,7 @@ export class WorkspaceWatcher {
         msg: "Note opened",
         fname: NoteUtils.uri2Fname(document.uri),
       });
-      this._extension.wsUtils.findDuplicateNoteAndPromptIfNecessary(
+      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
         document,
         "onDidOpenTextDocument"
       );
@@ -350,7 +351,7 @@ export class WorkspaceWatcher {
 
   private async onDidSaveNote(document: TextDocument) {
     // check and prompt duplicate warning.
-    await this._extension.wsUtils.findDuplicateNoteAndPromptIfNecessary(
+    await DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
       document,
       "onDidSaveNote"
     );

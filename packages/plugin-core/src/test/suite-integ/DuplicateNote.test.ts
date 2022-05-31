@@ -7,6 +7,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { describeSingleWS } from "../testUtilsV3";
 import { tmpDir } from "@dendronhq/common-server";
 import { expect } from "../testUtilsv2";
+import { DoctorUtils } from "../../components/doctor/utils";
 
 suite("Duplicate note detection", function () {
   describeSingleWS(
@@ -28,8 +29,7 @@ suite("Duplicate note detection", function () {
         const editor = VSCodeUtils.getActiveTextEditor();
         const document = editor?.document;
 
-        const wsUtils = ExtensionProvider.getExtension().wsUtils;
-        const resp = await wsUtils.findDuplicateNoteFromDocument(document!);
+        const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
         expect(resp !== undefined).toBeTruthy();
         if (resp === undefined) {
           throw Error;
@@ -59,8 +59,7 @@ suite("Duplicate note detection", function () {
         const editor = VSCodeUtils.getActiveTextEditor();
         const document = editor?.document;
 
-        const wsUtils = ExtensionProvider.getExtension().wsUtils;
-        const resp = await wsUtils.findDuplicateNoteFromDocument(document!);
+        const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
         expect(resp !== undefined).toBeTruthy();
         if (resp === undefined) {
           throw Error;
@@ -88,8 +87,7 @@ suite("Duplicate note detection", function () {
         const editor = VSCodeUtils.getActiveTextEditor();
         const document = editor?.document;
 
-        const wsUtils = ExtensionProvider.getExtension().wsUtils;
-        const resp = await wsUtils.findDuplicateNoteFromDocument(document!);
+        const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
         expect(resp).toEqual(undefined);
       });
     }
@@ -113,8 +111,7 @@ suite("Duplicate note detection", function () {
         const editor = VSCodeUtils.getActiveTextEditor();
         const document = editor?.document;
 
-        const wsUtils = ExtensionProvider.getExtension().wsUtils;
-        const resp = await wsUtils.findDuplicateNoteFromDocument(document!);
+        const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
         expect(resp?.duplicate).toEqual(undefined);
       });
     }

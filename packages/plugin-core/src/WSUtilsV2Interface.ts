@@ -56,21 +56,4 @@ export interface IWSUtilsV2 {
     nonStubOnly?: boolean;
     vault?: DVault;
   }): Promise<RespV3<NoteProps | undefined>>;
-
-  findDuplicateNoteFromDocument(document: vscode.TextDocument): Promise<
-    | {
-        note: NoteProps;
-        duplicate: NoteProps;
-      }
-    | {
-        note: NoteProps;
-        duplicate?: undefined;
-      }
-    | undefined
-  >;
-
-  findDuplicateNoteAndPromptIfNecessary(
-    document: vscode.TextDocument,
-    source: string
-  ): Promise<void>;
 }

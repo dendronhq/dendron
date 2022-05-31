@@ -242,7 +242,7 @@ export class ReloadIndexCommand extends BasicCommand<
           if (DuplicateNoteError.isDuplicateNoteError(error) && error.code) {
             VSCodeUtils.showMessage(MessageSeverity.WARN, error.message, {});
             AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound, {
-              source: "ReloadIndex",
+              source: this.key,
             });
             this.L.info({ ctx, error, msg: "Duplicate note IDs found" });
           } else {

@@ -1637,10 +1637,10 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.87.0":
-  version "0.87.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.87.0.tgz#6ebb13f81adb0d92fbfbcaa3e4e80fbc9a129a45"
-  integrity sha512-oSOwpdAt5unO7xeR1f4xApHTnD/up3tezElcYWPLMHiaC5MSdHTo7GmYnjRkPpvysM0CcWa13Eu5GKT2TCm8wA==
+"@dendronhq/common-all@^0.97.0":
+  version "0.97.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.97.0.tgz#ecddf5aed2d322880540b3e0de1d697e5723dc71"
+  integrity sha512-MwjWg9HrxpTgvWnWnhfzI2Y8hGJ8FzGfQFmZLRmC3gkvDLydXo784FmWWr7aswddc189im6AYTBanRw5iQ3O8A==
   dependencies:
     axios "^0.21.4"
     dropbox "^4.0.30"
@@ -1656,16 +1656,17 @@
     nanoid "^3.1.23"
     qs "^6.10.1"
     semver "^7.3.2"
+    spark-md5 "^3.0.2"
     title "^3.4.4"
     vscode-uri "^2.1.2"
 
-"@dendronhq/common-frontend@^0.87.0":
-  version "0.87.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.87.0.tgz#b3c643650895a78db4800041c14304313c33d4b7"
-  integrity sha512-NjJPeX2q2wG35f6MSkPe64PGqP0/9sq4r6csigq8TrLjPR/4xUPHfL1nz5UzBlsqTF81qH2BsRjBS5A/Tt4oXg==
+"@dendronhq/common-frontend@^0.97.0":
+  version "0.97.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.97.0.tgz#e971f29924bf84a6dc84c728ca1eeb8fdb83a1ff"
+  integrity sha512-7hd31Zt6NC1NXqS//VfnlUgdSA8gkGxdiDRQN+dPB8vyXZ0UZhG01HK7UbRX5yj7Q4VuHq6Wc39QNOMsyZ9zZg==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.87.0"
+    "@dendronhq/common-all" "^0.97.0"
     "@reduxjs/toolkit" "^1.5.1"
     antd "^4.15.4"
     lodash "^4.17.20"
@@ -1956,6 +1957,11 @@
   version "4.14.178"
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
   integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
+
+"@types/luxon@^2.3.1":
+  version "2.3.2"
+  resolved "https://registry.npmjs.org/@types/luxon/-/luxon-2.3.2.tgz#8a3f2cdd4858ce698b56cd8597d9243b8e9d3c65"
+  integrity sha512-WOehptuhKIXukSUUkRgGbj2c997Uv/iUgYgII8U7XLJqq9W2oF0kQ6frEznRQbdurioz+L/cdaIm4GutTQfgmA==
 
 "@types/node@*":
   version "16.3.3"
@@ -3926,7 +3932,7 @@ minimist@^1.2.0, minimist@^1.2.5:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
   integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
-moment@2.29.2, moment@^2.19.3, moment@^2.24.0, moment@^2.25.3:
+moment@^2.19.3, moment@^2.24.0, moment@^2.25.3:
   version "2.29.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
   integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
@@ -3974,9 +3980,9 @@ next-sitemap@1.8.11:
     "@corex/deepmerge" "^2.6.148"
     minimist "^1.2.5"
 
-next@12:
+next@12.1.0:
   version "12.1.0"
-  resolved "https://registry.yarnpkg.com/next/-/next-12.1.0.tgz#c33d753b644be92fc58e06e5a214f143da61dd5d"
+  resolved "https://registry.npmjs.org/next/-/next-12.1.0.tgz#c33d753b644be92fc58e06e5a214f143da61dd5d"
   integrity sha512-s885kWvnIlxsUFHq9UGyIyLiuD0G3BUC/xrH0CEnH5lHEWkwQcHOORgbDF0hbrW9vr/7am4ETfX4A7M6DjrE7Q==
   dependencies:
     "@next/env" "12.1.0"
@@ -5165,6 +5171,11 @@ source-map@^0.5.0, source-map@^0.5.6:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
   integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
+
+spark-md5@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/spark-md5/-/spark-md5-3.0.2.tgz#7952c4a30784347abcee73268e473b9c0167e3fc"
+  integrity sha512-wcFzz9cDfbuqe0FZzfi2or1sgyIrsDwmPwfZC4hiNidPdPINjeUwNfv5kldczoEAcjl9Y1L3SM7Uz2PUEQzxQw==
 
 spdx-correct@^3.0.0:
   version "3.1.1"

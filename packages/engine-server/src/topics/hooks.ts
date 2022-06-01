@@ -10,6 +10,7 @@ import {
   ConfigUtils,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
+import axios from "axios";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -94,6 +95,7 @@ export class HookUtils {
       wsRoot,
       note: { ...note },
       execa,
+      axios,
       _,
       NoteUtils,
     });

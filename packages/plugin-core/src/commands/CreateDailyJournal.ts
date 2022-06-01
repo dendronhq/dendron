@@ -71,7 +71,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
       MetadataService.instance().setFirstDailyJournalTime();
       if (
         !_.isUndefined(metaData.firstInstall) &&
-        metaData.firstInstall > Time.DateTime.fromISO("2022-05-31").toSeconds()
+        metaData.firstInstall > Time.DateTime.fromISO("2022-06-06").toSeconds()
       ) {
         const ABUserGroup = _2022_05_DAILY_JOURNAL_TEMPLATE_TEST.getUserGroup(
           SegmentClient.instance().anonymousId
@@ -103,7 +103,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
 
   /**
    * Create the pre-canned schema so that we can apply a template to the user's
-   * daily journal notes if the schema doesn't exist yet.
+   * daily journal notes if the schema with the daily journal domain doesn't exist yet.
    *
    * @returns whether a new schema file was made
    */
@@ -111,6 +111,15 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
     journalConfig: JournalConfig
   ): Promise<boolean> {
     const dailyDomain = journalConfig.dailyDomain;
+    if (
+      SchemaUtils.doesSchemaExist({
+        id: dailyDomain,
+        engine: this._extension.getEngine(),
+      })
+    ) {
+      return false;
+    }
+
     const maybeVault = journalConfig.dailyVault
       ? VaultUtils.getVaultByName({
           vaults: this._extension.getEngine().vaults,
@@ -125,10 +134,6 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
     const uri = vscode.Uri.file(
       SchemaUtils.getPath({ root: vaultPath, fname: `dendron.${dailyDomain}` })
     );
-
-    if (await fs.pathExists(uri.fsPath)) {
-      return false;
-    }
 
     const topLevel = {
       id: dailyDomain,

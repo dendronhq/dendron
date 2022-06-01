@@ -1834,6 +1834,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "nklamann",
+      "name": "Norbert Klamann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1001597?v=4",
+      "profile": "http://klamann-it-beratung.de",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

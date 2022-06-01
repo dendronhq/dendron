@@ -1825,6 +1825,15 @@
       "contributions": [
         "tool"
       ]
+    },
+    {
+      "login": "taranlu-houzz",
+      "name": "Taran Lu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52425255?v=4",
+      "profile": "https://github.com/taranlu-houzz",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

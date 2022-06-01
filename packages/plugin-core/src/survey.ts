@@ -10,6 +10,7 @@ import {
   InitialSurveyStatusEnum,
   LapsedUserSurveyStatusEnum,
   MetadataService,
+  PriorTools,
 } from "@dendronhq/engine-server";
 
 export class DendronQuickInputSurvey {
@@ -245,6 +246,12 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
       results: results.map((result) => result.label),
       other: maybeOtherResult,
     });
+
+    // Store the results into metadata so that we can later alter functionality
+    // based on the user's response
+    MetadataService.instance().priorTools = resultsList.map(
+      (result) => PriorTools[result as keyof typeof PriorTools]
+    );
   }
 
   onReject() {
@@ -254,16 +261,16 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
   static create() {
     const title = "Are you coming from an existing tool?";
     const choices = [
-      { label: "No" },
-      { label: "Foam" },
-      { label: "Roam" },
-      { label: "Logseq" },
-      { label: "Notion" },
-      { label: "OneNote" },
-      { label: "Obsidian" },
-      { label: "Evernote" },
-      { label: "Google Keep" },
-      { label: "Other" },
+      { label: PriorTools.No },
+      { label: PriorTools.Foam },
+      { label: PriorTools.Roam },
+      { label: PriorTools.Logseq },
+      { label: PriorTools.Notion },
+      { label: PriorTools.OneNote },
+      { label: PriorTools.Obsidian },
+      { label: PriorTools.Evernote },
+      { label: PriorTools.GoogleKeep },
+      { label: PriorTools.Other },
     ];
     return new PriorToolsSurvey({ title, choices, canPickMany: true });
   }

@@ -22,6 +22,8 @@ import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
+import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
+import { ObsidianImportTip } from "../showcase/ObsidianImportTip";
 import { SurveyUtils } from "../survey";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -65,6 +67,11 @@ export class TutorialInitializer
       ),
       vpath
     );
+
+    // 10 minutes after setup, try to show this toast if we haven't already tried
+    setTimeout(() => {
+      this.tryShowImportNotesFeatureToaster();
+    }, 1000 * 60 * 10);
   }
 
   private getAnalyticsPayloadFromDocument(opts: {
@@ -107,6 +114,11 @@ export class TutorialInitializer
           const { fname } = payload;
           if (fname.includes("tutorial")) {
             AnalyticsUtils.track(TutorialEvents.TutorialNoteViewed, payload);
+
+            // Show import notes tip when they're on the final page of the tutorial.
+            if (payload.currentStep === payload.totalSteps) {
+              this.tryShowImportNotesFeatureToaster();
+            }
           }
         } catch (err) {
           Logger.info({ ctx, msg: "Cannot get payload from document." });
@@ -164,6 +176,18 @@ export class TutorialInitializer
       metaData.initialSurveyStatus === InitialSurveyStatusEnum.submitted;
     if (!initialSurveySubmitted) {
       await SurveyUtils.showInitialSurvey();
+    }
+  }
+
+  private triedToShowImportToast: boolean = false;
+
+  private tryShowImportNotesFeatureToaster() {
+    if (!this.triedToShowImportToast) {
+      const toaster = new FeatureShowcaseToaster();
+
+      // This will only show if the user indicated they've used Obsidian in 'Prior Tools'
+      toaster.showSpecificToast(new ObsidianImportTip());
+      this.triedToShowImportToast = true;
     }
   }
 }

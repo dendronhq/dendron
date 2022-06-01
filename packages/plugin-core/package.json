@@ -355,6 +355,10 @@
         "title": "Dendron: Import Pod"
       },
       {
+        "command": "dendron.importObsidianPod",
+        "title": "Dendron: Import Obsidian Vault"
+      },
+      {
         "command": "dendron.exportPod",
         "title": "Dendron: Export Pod"
       },
@@ -701,6 +705,10 @@
         },
         {
           "command": "dendron.importPod",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.importObsidianPod",
           "when": "dendron:pluginActive"
         },
         {

@@ -661,6 +661,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Import Pod`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  IMPORT_OBSIDIAN_POD: {
+    key: "dendron.importObsidianPod",
+    title: `${CMD_PREFIX} Import Obsidian Vault`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   EXPORT_POD: {
     key: "dendron.exportPod",
     title: `${CMD_PREFIX} Export Pod`,

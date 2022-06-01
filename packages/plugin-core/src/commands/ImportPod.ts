@@ -27,9 +27,9 @@ import { ReloadIndexCommand } from "./ReloadIndex";
 
 type CommandOutput = void;
 
-type CommandInput = { podChoice: PodItemV4 };
+export type CommandInput = { podChoice: PodItemV4 };
 
-type CommandOpts = CommandInput & { config: any };
+export type CommandOpts = CommandInput & { config: any };
 
 export class ImportPodCommand extends BaseCommand<
   CommandOpts,

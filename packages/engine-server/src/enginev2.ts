@@ -1,6 +1,6 @@
 import {
   assertUnreachable,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   Cache,
   ConfigUtils,
   ConfigWriteOpts,
@@ -235,6 +235,9 @@ export class DendronEngineV2 implements DEngine {
     return DendronEngineV2._instance;
   }
 
+  /**
+   * @deprecated see {@link DendronEngineV2.getAllNotes}
+   */
   get notes(): NotePropsByIdDict {
     return this.store.notes;
   }
@@ -339,15 +342,22 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
+   * See {@link DEngine.getAllNotes}
+   */
+  async getAllNotes(): Promise<NotePropsByIdDict> {
+    return this.store.getAllNotes();
+  }
+
+  /**
    * See {@link DEngine.findNotes}
    */
-  findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
     return this.store.findNotes(opts);
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    const changed = await this.store.bulkAddNotes(opts);
-    await this.refreshNotesV2(changed.data);
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    const changed = await this.store.bulkWriteNotes(opts);
+    this.fuseEngine.updateNotesIndex(this.notes);
     return changed;
   }
 
@@ -473,7 +483,7 @@ export class DendronEngineV2 implements DEngine {
     if (!createIfNew && !maybeNote) {
       error = new DendronError({ message: "no_note_found" });
     }
-    await this.refreshNotesV2(changed);
+    this.fuseEngine.updateNotesIndex(this.notes);
     return {
       data: { note: noteNew, changed },
       error,
@@ -583,8 +593,8 @@ export class DendronEngineV2 implements DEngine {
         }
         noteNew = NoteUtils.create({ fname: qs, vault });
       }
-      const changed = await this.writeNote(noteNew, { newNode: true });
-      await this.refreshNotesV2(changed.data);
+      await this.writeNote(noteNew, { newNode: true });
+      this.fuseEngine.updateNotesIndex(this.notes);
     }
     this.logger.info({ ctx, msg: "exit" });
     let notes = items.map((ent) => this.notes[ent.id]);
@@ -612,7 +622,7 @@ export class DendronEngineV2 implements DEngine {
       note = this.notes[id];
     } else {
       // `procRehype` needs the note to be in the engine, so we have to add it in case it's a dummy note
-      this.notes[id] = note;
+      this.store.updateNote(note);
     }
 
     // If note was not provided and we couldn't find it, we can't render.
@@ -677,7 +687,7 @@ export class DendronEngineV2 implements DEngine {
 
     if (NoteUtils.isFileId(note.id)) {
       // Dummy note, we should remove it once we're done rendering
-      delete this.notes[note.id];
+      this.store.deleteNote(note.id);
     }
 
     return ResponseUtil.createHappyResponse({ data });
@@ -753,7 +763,6 @@ export class DendronEngineV2 implements DEngine {
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
-        const { id } = ent.note;
         if (ent.status === "delete") {
           NoteDictsUtils.delete(ent.note, {
             notesById: this.notes,
@@ -764,7 +773,7 @@ export class DendronEngineV2 implements DEngine {
             note: ent.note,
             engine: this,
           });
-          this.notes[id] = note;
+          this.store.updateNote(note);
         }
       })
     );
@@ -794,7 +803,11 @@ export class DendronEngineV2 implements DEngine {
    * @returns
    */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
-    const out = this.store.updateNote(note, opts);
+    const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+      note,
+      engine: this,
+    });
+    const out = this.store.updateNote(noteWithLinks, opts);
     await this.updateIndex("note");
     return out;
   }
@@ -853,8 +866,12 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const out = await this.store.writeNote(note, opts);
-    await this.refreshNotesV2(out.data);
+    const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+      note,
+      engine: this,
+    });
+    const out = await this.store.writeNote(noteWithLinks, opts);
+    this.fuseEngine.updateNotesIndex(this.notes);
     return out;
   }
 

@@ -40,7 +40,7 @@ export class BackfillService {
           return n;
         })
     );
-    await engine.bulkAddNotes({ notes });
+    await engine.bulkWriteNotes({ notes });
     return {};
   }
 }

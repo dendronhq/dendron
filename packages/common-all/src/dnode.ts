@@ -850,6 +850,9 @@ export class NoteUtils {
     return out;
   }
 
+  /**
+   * @deprecated see {@link DEngineClient.findNotes}
+   */
   static getNoteByFnameFromEngine(opts: {
     fname: string;
     vault: DVault;

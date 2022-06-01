@@ -8,7 +8,7 @@ import NOTE_REF from "./note-refs";
 import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
-import { ENGINE_BULK_ADD_NOTES_PRESETS } from "./bulkAddNotes";
+import { ENGINE_BULK_WRITE_NOTES_PRESETS } from "./bulkWriteNotes";
 import { ENGINE_RENDER_PRESETS } from "./render";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
 import _ from "lodash";
@@ -33,7 +33,7 @@ export const ENGINE_SERVER = {
   ENGINE_RENAME_PRESETS,
   ENGINE_GET_NOTE_BLOCKS_PRESETS,
   ENGINE_QUERY_PRESETS,
-  ENGINE_BULK_ADD_NOTES_PRESETS,
+  ENGINE_BULK_ADD_NOTES_PRESETS: ENGINE_BULK_WRITE_NOTES_PRESETS,
   ENGINE_RENDER_PRESETS,
   ENGINE_GET_LINKS_PRESETS,
   ENGINE_GET_ANCHORS_PRESETS,
@@ -89,7 +89,7 @@ export const getPresetGroup = ({
 
 export const ENGINE_PRESETS = [
   {
-    name: "bulkAddNotes",
+    name: "bulkWriteNotes",
     presets: ENGINE_SERVER.ENGINE_BULK_ADD_NOTES_PRESETS,
   },
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },

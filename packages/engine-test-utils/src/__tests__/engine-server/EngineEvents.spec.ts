@@ -211,7 +211,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
     });
   });
 
-  describe("WHEN calling bulkAddNotes", () => {
+  describe("WHEN calling bulkWriteNotes", () => {
     test("THEN onNoteCreate event fires for each added note", (done) => {
       runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
@@ -250,8 +250,9 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
               ) as NoteChangeUpdateEntry[];
 
               testAssertsInsideCallback(() => {
+                // 2 create entries for 2 new notes. 2 update entries for updated root
                 expect(createEntries.length).toEqual(2);
-                expect(updateEntries.length).toEqual(0);
+                expect(updateEntries.length).toEqual(2);
                 expect(deleteEntries.length).toEqual(0);
 
                 createEntries.forEach((entry) => {
@@ -279,7 +280,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          await engineClient.bulkAddNotes({
+          await engineClient.bulkWriteNotes({
             notes: [alpha, beta],
           });
         },

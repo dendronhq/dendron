@@ -366,7 +366,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       created: create.length,
       conflicted: conflicts.length,
     });
-    await engine.bulkAddNotes({ notes: create });
+    await engine.bulkWriteNotes({ notes: create });
     const { handleConflict } = utilityMethods as ConflictHandler;
     const conflictResolveOpts: PodConflictResolveOpts = {
       options: this.getMergeConflictOptions,

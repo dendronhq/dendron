@@ -110,7 +110,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response<WriteNoteResp>) => {
     const { ws, opts } = req.body as EngineBulkAddRequest;
     const engine = await getWSEngine({ ws: ws || "" });
-    const out = await engine.bulkAddNotes(opts);
+    const out = await engine.bulkWriteNotes(opts);
     ExpressUtils.setResponse(res, out);
   })
 );

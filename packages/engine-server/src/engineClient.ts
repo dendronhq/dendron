@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   ConfigGetPayload,
   ConfigUtils,
   ConfigWriteOpts,
@@ -203,7 +203,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       },
     };
   }
-
   /**
    * See {@link DStore.getNote}
    */
@@ -214,6 +213,13 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     } else {
       return undefined;
     }
+  }
+
+  /**
+   * See {@link DStore.getNote}
+   */
+  async getAllNotes(): Promise<NotePropsByIdDict> {
+    return _.cloneDeep(this.notes);
   }
 
   /**
@@ -228,7 +234,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     );
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
     const resp = await this.api.engineBulkAdd({ opts, ws: this.ws });
     const changed = resp.data;
     await this.refreshNotesV2(changed);

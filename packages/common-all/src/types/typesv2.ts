@@ -1,5 +1,5 @@
 import { URI } from "vscode-uri";
-import { DendronError, IDendronError } from "../error";
+import { DendronError, DendronCompositeError, IDendronError } from "../error";
 import {
   DLink,
   DNodeProps,
@@ -254,6 +254,11 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+export interface BulkResp<T> {
+  data?: T;
+  error: DendronCompositeError | null;
+}
+
 /**
  * This lets us use a discriminate union to see if result has error or data
  */
@@ -440,14 +445,15 @@ export type NoteBlock = {
  * Returns list of notes that were changed
  */
 export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
+export type BulkWriteNoteResp = Required<BulkResp<NoteChangeEntry[]>>;
 
 // --- Common
 export type ConfigGetPayload = IntermediateDendronConfig;
 
 export type DCommonMethods = {
-  bulkAddNotes: (
-    opts: BulkAddNoteOpts
-  ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  bulkWriteNotes: (
+    opts: BulkWriteNotesOpts
+  ) => Promise<Required<BulkResp<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   /**
@@ -566,8 +572,9 @@ export type DEngineSyncOpts = {
   metaOnly?: boolean;
 };
 
-export type BulkAddNoteOpts = {
+export type BulkWriteNotesOpts = {
   notes: NoteProps[];
+  opts?: EngineWriteOptsV2;
 };
 
 export type DEngine = DCommonProps &
@@ -581,6 +588,10 @@ export type DEngine = DCommonProps &
      * Get NoteProps by id. If note doesn't exist, return undefined
      */
     getNote: (id: string) => Promise<NoteProps | undefined>;
+    /**
+     * Get all NoteProps stored as a NotePropsByIdDict
+     */
+    getAllNotes: () => Promise<NotePropsByIdDict>;
     /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */
@@ -646,6 +657,10 @@ export type DStore = DCommonProps &
      * Get NoteProps by id. If note doesn't exist, return undefined
      */
     getNote: (id: string) => Promise<NoteProps | undefined>;
+    /**
+     * Get all NoteProps stored as a NotePropsByIdDict
+     */
+    getAllNotes: () => Promise<NotePropsByIdDict>;
     /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */

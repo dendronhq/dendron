@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   ConfigWriteOpts,
   DendronAPI,
   DEngineClient,
@@ -125,6 +125,9 @@ export class EngineAPIService
     this._trustedWorkspace = value;
   }
 
+  /**
+   * @deprecated see {@link EngineAPIService.getAllNotes}
+   */
   public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;
   }
@@ -132,6 +135,9 @@ export class EngineAPIService
     this._internalEngine.notes = arg;
   }
 
+  /**
+   * @deprecated see {@link EngineAPIService.findNotes}
+   */
   public get noteFnames(): NotePropsByFnameDict {
     return this._internalEngine.noteFnames;
   }
@@ -200,6 +206,13 @@ export class EngineAPIService
   }
 
   /**
+   * See {@link IEngineAPIService.getAllNotes}
+   */
+  async getAllNotes(): Promise<NotePropsByIdDict> {
+    return this._internalEngine.getAllNotes();
+  }
+
+  /**
    * See {@link IEngineAPIService.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
@@ -210,8 +223,8 @@ export class EngineAPIService
     return this._internalEngine.refreshNotes(opts);
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return this._internalEngine.bulkAddNotes(opts);
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    return this._internalEngine.bulkWriteNotes(opts);
   }
 
   updateNote(

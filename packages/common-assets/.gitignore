@@ -1,1 +1,7 @@
 build
+
+# vercel
+.vercel
+
+public/*.css
+public/js

@@ -9,10 +9,12 @@ export type SchemaInMaking = {
   pattern?: string;
   template?: SchemaTemplate;
   children?: SchemaInMaking[];
+  desc?: string;
 };
 
 export type SchemaToken = Required<Pick<SchemaData, "pattern">> &
-  Pick<SchemaData, "template">;
+  Pick<SchemaData, "template"> &
+  Pick<SchemaData, "desc">;
 
 /**
  * Utils for generating a Schema **JSON** file.  For working with Schema
@@ -57,6 +59,9 @@ export class SchemaCreationUtils {
             curr = {
               pattern: currPattern.pattern,
             };
+          }
+          if (currPattern.desc) {
+            curr["desc"] = currPattern.desc;
           }
           currParent.children?.push(curr);
           currParent = curr;

@@ -109,6 +109,31 @@ export const AB_TUTORIAL_TEST = new ABTest("AB_TUTORIAL_TEST", [
   },
 ]);
 
+export enum DailyJournalTestGroups {
+  withTemplate = "withTemplate",
+  withoutTemplate = "withoutTemplate",
+}
+
+/**
+ * Experiment to test whether users running `Daily Journal` for the first time should get an auto-generated template/schema or not.
+ *
+ * withTemplate = auto-generate a template and a schema for them that will apply the template to the journal note
+ * withoutTemplate = no template/schema gets generated
+ */
+export const _2022_05_DAILY_JOURNAL_TEMPLATE_TEST = new ABTest(
+  "2022-05-DailyJournalTemplateTest",
+  [
+    {
+      name: DailyJournalTestGroups.withTemplate,
+      weight: 1,
+    },
+    {
+      name: DailyJournalTestGroups.withoutTemplate,
+      weight: 1,
+    },
+  ]
+);
+
 /** All A/B tests that are currently running.
  *
  * ^tkqhy45hflfd
@@ -117,4 +142,5 @@ export const CURRENT_AB_TESTS = [
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
   AB_TUTORIAL_TEST,
+  _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
 ];

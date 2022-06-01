@@ -19,6 +19,7 @@ import {
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
+  isWebUri,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
@@ -32,6 +33,7 @@ import {
   createDisposableLogger,
   DLogger,
   GitUtils,
+  moveIfExists,
   note2File,
   pathForVaultRoot,
   readJSONWithComments,
@@ -500,6 +502,24 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         VaultUtils.isEqualV2(confVault, vault)
       );
       if (configVault) configVault.selfContained = true;
+
+      // Update logoPath if needed
+      let logoPath = config.publishing?.logoPath;
+      if (
+        // If the logo exists, and it was an asset inside the vault we're migrating
+        config.publishing &&
+        logoPath &&
+        !isWebUri(logoPath) &&
+        logoPath.startsWith(VaultUtils.getRelPath(vault))
+      ) {
+        // Then we need to update the logo path for the new path
+        logoPath = logoPath.slice(VaultUtils.getRelPath(vault).length);
+        logoPath = VaultUtils.getRelPath(newVault) + logoPath;
+        config.publishing.logoPath = logoPath;
+      }
+
+      // All updates to the config are done, finish by writing it
+      await DConfig.createBackup(this.wsRoot, "migrate-vault-sc");
       await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
 
       // Add the config file into the vault make it self contained
@@ -518,20 +538,14 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       throw err;
     }
     // Except if there's `.git` inside the vault, that has to stay at the root of the vault
-    try {
-      if (await fs.pathExists(path.join(vaultFolder, FOLDERS.NOTES, ".git"))) {
-        await fs.move(
-          path.join(vaultFolder, FOLDERS.NOTES, ".git"),
-          path.join(vaultFolder, ".git")
-        );
-      }
-    } catch (err) {
-      this.logger.error({
-        ctx,
-        msg: "failed to move the git directory into the new folder",
-        err,
-      });
-    }
+    await moveIfExists(
+      path.join(vaultFolder, FOLDERS.NOTES, ".git"),
+      path.join(vaultFolder, ".git")
+    );
+    await moveIfExists(
+      path.join(vaultFolder, FOLDERS.NOTES, ".gitignore"),
+      path.join(vaultFolder, ".gitignore")
+    );
     // Update the config for the vault
     vault.selfContained = true;
     return vault;

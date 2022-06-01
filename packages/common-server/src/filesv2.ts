@@ -637,6 +637,24 @@ export async function isSelfContainedVaultFolder(dir: string) {
   );
 }
 
+/** Move a file from `from` to `to`, if the file exists.
+ *
+ * @returns True if the file did exist and was moved successfully, false otherwise.
+ */
+export async function moveIfExists(from: string, to: string): Promise<boolean> {
+  try {
+    if (await fs.pathExists(from)) {
+      await fs.move(from, to);
+      return true;
+    }
+  } catch (err) {
+    // Permissions error or similar issue when moving the path
+    // deliberately left empty
+  }
+  return false;
+}
+
+/** Utility functions for dealing with file extensions. */
 export class ExtensionUtils {
   private static textExtensions: ReadonlySet<string>;
   private static ensureTextExtensions() {

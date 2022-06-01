@@ -67,6 +67,10 @@ export class WebViewCommonUtils {
         color: var(--vscode-editor-foreground);
       }
 
+      .main-content ul {
+        list-style: unset;
+      }
+
       body {
         background-color: var(--vscode-editor-background);
       }

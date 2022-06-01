@@ -532,6 +532,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create Task Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  TASK_SET_STATUS: {
+    key: "dendron.setTaskStatus",
+    title: `${CMD_PREFIX} Set Task Status`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  TASK_COMPLETE: {
+    key: "dendron.completeTask",
+    title: `${CMD_PREFIX} Complete Task`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   APPLY_TEMPLATE: {
     key: "dendron.applyTemplate",
     title: `${CMD_PREFIX} Apply Template`,

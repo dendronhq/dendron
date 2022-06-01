@@ -1,0 +1,49 @@
+import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
+import { DENDRON_COMMANDS } from "../constants";
+import { BasicCommand } from "./base";
+import { VSCodeUtils, MessageSeverity } from "../vsCodeUtils";
+import { IDendronExtension } from "../dendronExtensionInterface";
+import { TaskStatusCommand } from "./TaskStatus";
+
+type CommandInput = {
+  setStatus?: string;
+};
+
+type CommandOpts = Required<CommandInput> & {
+  note: NoteProps;
+};
+
+type CommandOutput = {};
+
+export class CreateTaskCommand extends BasicCommand<
+  CommandOpts,
+  CommandOutput
+> {
+  key = DENDRON_COMMANDS.TASK_CREATE.key;
+  private _ext: IDendronExtension;
+
+  constructor(extension: IDendronExtension) {
+    super();
+    this._ext = extension;
+  }
+
+  async execute(opts: CommandOpts) {
+    const complete: string | undefined = ConfigUtils.getTask(
+      this._ext.getDWorkspace().config
+    ).taskCompleteStatus[0];
+
+    if (complete === undefined) {
+      await VSCodeUtils.showMessage(
+        MessageSeverity.ERROR,
+        "You have no task statuses marked as complete. Please add something to 'taskCompleteStatus' in your configuration file.",
+        {}
+      );
+      return;
+    }
+
+    const taskStatusCmd = new TaskStatusCommand(this._ext);
+    return taskStatusCmd.run({
+      setStatus: complete,
+    });
+  }
+}

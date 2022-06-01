@@ -10,6 +10,7 @@ import {
   TAGS_HIERARCHY,
   VaultUtils,
   milliseconds,
+  FIFOQueue,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { message } from "antd";
@@ -34,17 +35,135 @@ const DEFAULT_CLASSES = ""; //graph-view
 const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}`; //color-fill
 const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`;
 
+type QueueData = {
+  note: NoteProps;
+  /**
+   * How far (in the graph) away is this note from the original note?
+   */
+  distance: number;
+};
+
+// Familial is ancestors (parents, grandparents) + children (and great grandhchildren)
+function computeFamilialGraphElements({
+  notes,
+  noteActive,
+  maxDistance,
+}: {
+  notes: NotePropsByIdDict;
+  noteActive: NoteProps;
+  maxDistance: number;
+}): GraphElements {
+  // Initialize edges
+  const edges: GraphEdges = {
+    hierarchy: [],
+    links: [],
+  };
+
+  const nodes: GraphNodes = [];
+
+  // TODO: Add parents and grandparents
+
+  // Add descendents (children, grandchildren, etc) depending on the specified
+  // distance parameter:
+  const nodesQueue = new FIFOQueue<QueueData>();
+  nodesQueue.enqueue({ note: noteActive, distance: 0 });
+
+  // Breadth First Search for Descendants
+  while (nodesQueue.length > 0) {
+    const data = nodesQueue.dequeue();
+
+    if (!data) {
+      break;
+    }
+
+    const { note } = data;
+
+    nodes.push({
+      data: {
+        id: note.id,
+        label: note.title,
+        group: "nodes",
+        fname: note.fname,
+        color: getNoteColor({ fname: note.fname, notes }),
+        stub: _.isUndefined(note.stub) ? false : note.stub,
+      },
+      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
+    });
+
+    if (data.distance < maxDistance) {
+      const children = note.children;
+
+      const noteVaultClass = getVaultClass(note.vault);
+
+      // Setup the edges now:
+      children.forEach((child: string) => {
+        const childNote = notes[child];
+        if (childNote) {
+          edges.hierarchy.push({
+            data: {
+              group: "edges",
+              id: `${note.id}_${childNote.id}`,
+              source: note.id,
+              target: childNote.id,
+              fname: note.fname,
+              stub: false,
+            },
+            classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
+          });
+
+          nodesQueue.enqueue({ note: childNote, distance: data.distance + 1 });
+        }
+      });
+    }
+  }
+
+  return {
+    nodes,
+    edges,
+  };
+}
+
+// All elements that are links/refs contained in the body of the active note
+function computeOutwardLinkGraphElements({
+  notes,
+  noteActive,
+  maxDistance,
+}: {
+  notes: NotePropsByIdDict;
+  noteActive: NoteProps;
+  maxDistance: number;
+}): GraphElements {
+  //TODO: Implement.  Probably need to add additional props to this function
+  throw new Error("Not Implemented Yet");
+}
+
+// All elements that represent backlinks to the current note
+function computeInwardLinkGraphElements({
+  notes,
+  noteActive,
+  maxDistance,
+}: {
+  notes: NotePropsByIdDict;
+  noteActive: NoteProps;
+  maxDistance: number;
+}): GraphElements {
+  //TODO: Implement.  Probably need to add additional props to this function
+  throw new Error("Not Implemented Yet");
+}
+
 const getLocalNoteGraphElements = ({
   notes,
   noteActive,
   vaults,
   fNameDict,
+  maxDistance = 1,
 }: {
   notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
+  maxDistance?: number;
 }): GraphElements => {
   const logger = createLogger("getLocalNoteGraphElements");
 
@@ -62,213 +181,27 @@ const getLocalNoteGraphElements = ({
       edges: {},
     };
   }
-  const parentNote = activeNote.parent ? notes[activeNote.parent] : undefined;
-  const connectedNotes = NoteUtils.getNotesWithLinkTo({
-    note: activeNote,
+
+  const familialElements = computeFamilialGraphElements({
     notes,
+    noteActive,
+    maxDistance,
   });
 
-  // Add active node
-  const nodes: GraphNodes = [
-    {
-      data: {
-        id: activeNote.id,
-        label: activeNote.title,
-        group: "nodes",
-        fname: activeNote.fname,
-        color: getNoteColor({ fname: activeNote.fname, notes }),
-        stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
-        localRoot: true,
-      },
-      classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(activeNote.vault)}`,
-      selected: true,
-    },
-  ];
-
-  // Add parent node
-  if (parentNote) {
-    nodes.push({
-      data: {
-        id: parentNote.id,
-        label: parentNote.title,
-        group: "nodes",
-        fname: parentNote.fname,
-        color: getNoteColor({ fname: parentNote.fname, notes }),
-        stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
-      },
-      classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(
-        parentNote.vault
-      )}`,
-    });
-  }
-
-  // Add connected nodes
-  nodes.push(
-    ...Object.values(connectedNotes).map((note) => {
-      return {
-        data: {
-          id: note.id,
-          label: note.title,
-          group: "nodes",
-          fname: note.fname,
-          color: getNoteColor({ fname: note.fname, notes }),
-          stub: _.isUndefined(note.stub) ? false : note.stub,
-        },
-        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
-      };
-    })
-  );
-
-  // Initialize edges
-  const edges: GraphEdges = {
-    hierarchy: [],
-    links: [],
-  };
-
-  // Get children of active note
-  const noteVaultClass = getVaultClass(activeNote.vault);
-
-  // If note has a parent, add a connection to it
-  if (parentNote) {
-    edges.hierarchy.push({
-      data: {
-        group: "edges",
-        id: `${parentNote.id}_${activeNote.id}`,
-        source: parentNote.id,
-        target: activeNote.id,
-        fname: parentNote.fname,
-        stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
-      },
-      classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
-    });
-  }
-
-  activeNote.children.forEach((child) => {
-    const childNote = notes[child];
-    if (childNote) {
-      nodes.push({
-        data: {
-          id: child,
-          label: childNote.title,
-          group: "nodes",
-          color: getNoteColor({ fname: childNote.fname, notes }),
-          fname: childNote.fname,
-          stub: _.isUndefined(childNote.stub) ? false : childNote.stub,
-        },
-        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(childNote.vault)}`,
-      });
-
-      edges.hierarchy.push({
-        data: {
-          group: "edges",
-          id: `${activeNote.id}_${child}`,
-          source: activeNote.id,
-          target: child,
-          fname: activeNote.fname,
-          stub: _.isUndefined(activeNote.stub) ? false : activeNote.stub,
-        },
-        classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
-      });
-    }
+  const outwardLinkElements = computeOutwardLinkGraphElements({
+    notes,
+    noteActive,
+    maxDistance,
   });
 
-  // Get notes linking to active note
-  const linkConnections = connectedNotes.map((connectedNote) => {
-    return {
-      data: {
-        group: "edges",
-        id: `${activeNote.id}_${connectedNote.id}`,
-        source: activeNote.id,
-        target: connectedNote.id,
-        fname: activeNote.fname,
-        stub:
-          _.isUndefined(activeNote.stub) && _.isUndefined(connectedNote.stub)
-            ? false
-            : !!(activeNote.stub || connectedNote.stub),
-      },
-      classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
-    };
+  const inwardLinkElements = computeInwardLinkGraphElements({
+    notes,
+    noteActive,
+    maxDistance,
   });
 
-  // Find and add linked notes
-  activeNote.links.forEach((link) => {
-    if (link.type === "backlink") return;
-    if (link.to && link.to.fname && activeNote.id && vaults) {
-      const fnameArray = link.to.fname.split("/");
-
-      const toFname = link.to.fname.includes("/")
-        ? fnameArray[fnameArray.length - 1]
-        : link.to.fname;
-      const toVaultName =
-        link.to.vaultName ||
-        fnameArray[fnameArray.length - 2] ||
-        VaultUtils.getName(activeNote.vault);
-
-      const toVault = VaultUtils.getVaultByName({
-        vname: toVaultName,
-        vaults,
-      });
-
-      if (_.isUndefined(toVault)) {
-        logger.error(
-          `Couldn't find vault of note ${toFname}, aborting link creation`
-        );
-        return;
-      }
-
-      const fname = fnameArray[fnameArray.length - 1];
-      const to = NoteDictsUtils.findByFname(
-        fname,
-        {
-          notesById: notes,
-          notesByFname: fNameDict,
-        },
-        toVault
-      )[0];
-
-      if (!to) {
-        logger.warn(
-          `Failed to link note ${VaultUtils.getName(activeNote.vault)}/${
-            activeNote.fname
-          } to ${VaultUtils.getName(toVault)}/${
-            link.to.fname
-          }. Most likely, this note does not exist.`
-        );
-        return;
-      }
-
-      const isStub =
-        _.isUndefined(activeNote.stub) && _.isUndefined(to.stub)
-          ? false
-          : !!(activeNote.stub || to.stub);
-
-      nodes.push({
-        data: {
-          id: to.id,
-          label: to.title,
-          group: "nodes",
-          fname: to.fname,
-          color: getNoteColor({ fname: to.fname, notes }),
-          stub: isStub,
-        },
-        classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(to.vault)}`,
-      });
-
-      linkConnections.push({
-        data: {
-          group: "edges",
-          id: `${activeNote.id}_${to.id}`,
-          source: activeNote.id,
-          target: to.id,
-          fname: activeNote.fname,
-          stub: isStub,
-        },
-        classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
-      });
-    }
-  });
-
-  edges.links.push(...linkConnections);
+  // TODO: Union familialElements, outwardLinkElements, inwardLinkElements. May
+  // need to dedupe nodes if a child is also a link?
 
   return {
     nodes,

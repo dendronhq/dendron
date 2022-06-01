@@ -13,11 +13,11 @@
     "build:js": "gulp js"
   },
   "gitHead": "4ba39ff9fcec3bd1f0ba4fbd663cb3b49449609b",
-  "dependencies": {
-    "gulp": "^4.0.2",
-    "gulp-csso": "^4.0.1",
-    "gulp-debug": "^4.0.0",
-    "gulp-less": "^5.0.0",
-    "gulp-postcss": "^9.0.1"
+  "devDependencies": {
+    "gulp": "4.0.2",
+    "gulp-csso": "4.0.1",
+    "gulp-debug": "4.0.0",
+    "gulp-less": "5.0.0",
+    "gulp-postcss": "9.0.1"
   }
 }

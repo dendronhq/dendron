@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-194-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-195-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -451,6 +451,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/ebromberg"><img src="https://avatars.githubusercontent.com/u/48656450?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ebromberg</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aebromberg" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.mshiltonj.com/"><img src="https://avatars.githubusercontent.com/u/25542?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steven Hilton</b></sub></a><br /><a href="#tool-mshiltonj" title="Tools">🔧</a></td>
     <td align="center"><a href="https://github.com/taranlu-houzz"><img src="https://avatars.githubusercontent.com/u/52425255?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Taran Lu</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ataranlu-houzz" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://klamann-it-beratung.de"><img src="https://avatars.githubusercontent.com/u/1001597?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Norbert Klamann</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=nklamann" title="Documentation">📖</a></td>
   </tr>
 </table>
 

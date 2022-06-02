@@ -48,6 +48,7 @@ export type FoundRefT = {
   location: Location;
   matchText: string;
   isCandidate?: boolean;
+  isFrontmatterTag?: boolean;
   note: NoteProps;
 };
 
@@ -562,6 +563,8 @@ export async function findReferencesById(id: string) {
       };
       if (link.type === "linkCandidate") {
         foundRef.isCandidate = true;
+      } else if (link.type === "frontmatterTag") {
+        foundRef.isFrontmatterTag = true;
       }
 
       refs.push(foundRef);

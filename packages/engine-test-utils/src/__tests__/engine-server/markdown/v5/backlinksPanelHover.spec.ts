@@ -674,4 +674,56 @@ foo
       ],
     });
   });
+
+  /**
+   * Tests for Tags
+   */
+  describe("WHEN the link is a tag", () => {
+    const USERTAG_BY_ITSELF = singleBacklinksPanelTest({
+      testName: "THEN a usertag is highlighted with an HTML span",
+      noteBody: "@johndoe",
+      backlinkHoverOpts: {
+        linesOfContext: 2,
+        location: {
+          start: {
+            line: 1,
+            column: 1,
+          },
+          end: {
+            line: 1,
+            column: 9,
+          },
+        },
+      },
+      match: [
+        '<span style="color:#000;background-color:#FFFF00;">@johndoe</span>',
+      ],
+    });
+
+    const HASHTAG_BY_ITSELF = singleBacklinksPanelTest({
+      testName: "THEN a hashtag is highlighted with an HTML span",
+      noteBody: "#sample",
+      backlinkHoverOpts: {
+        linesOfContext: 2,
+        location: {
+          start: {
+            line: 1,
+            column: 1,
+          },
+          end: {
+            line: 1,
+            column: 8,
+          },
+        },
+      },
+      match: [
+        '<span style="color:#000;background-color:#FFFF00;">#sample</span>',
+      ],
+    });
+
+    runAllTests({
+      name: "THEN statements",
+      testCases: [...USERTAG_BY_ITSELF, ...HASHTAG_BY_ITSELF],
+    });
+  });
 });

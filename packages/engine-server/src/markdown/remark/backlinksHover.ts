@@ -179,6 +179,14 @@ export function backlinksHover(
 
           return index;
         }
+      } else if (RemarkUtils.isHashTag(node) || RemarkUtils.isUserTag(node)) {
+        if (
+          backlinkLineNumber === node.position?.start.line &&
+          node.position.start.column === _opts.location.start.column
+        ) {
+          (node as Node).type = DendronASTTypes.HTML;
+          (node as unknown as HTML).value = getHTMLToHighlightText(node.value);
+        }
       }
       return;
     });

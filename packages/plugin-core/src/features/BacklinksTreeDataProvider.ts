@@ -45,6 +45,8 @@ export default class BacklinksTreeDataProvider
   implements TreeDataProvider<Backlink>, Disposable
 {
   private readonly MAX_LINES_OF_CONTEX̣T = 10;
+  private readonly FRONTMATTER_TAG_CONTEXT_PLACEHOLDER =
+    "_Link is a Frontmatter Tag_";
 
   private _onDidChangeTreeDataEmitter: EventEmitter<
     Backlink | undefined | void
@@ -203,6 +205,13 @@ export default class BacklinksTreeDataProvider
       });
     } else if (element.treeItemType === BacklinkTreeItemType.referenceLevel) {
       return new Promise<TreeItem>((resolve) => {
+        if (element.singleRef?.isFrontmatterTag) {
+          resolve({
+            tooltip: new MarkdownString(
+              this.FRONTMATTER_TAG_CONTEXT_PLACEHOLDER
+            ),
+          });
+        }
         this.getSurroundingContextForRef(
           element.singleRef!,
           this.MAX_LINES_OF_CONTEX̣T
@@ -398,13 +407,7 @@ export default class BacklinksTreeDataProvider
         candidateCountDescription,
       ]).join(", ");
 
-      const updatedTime = references[0].note?.updated;
-      const suffix =
-        updatedTime !== undefined
-          ? `. Note updated: ${DateFormatUtil.formatDate(updatedTime)}`
-          : ``;
-
-      backlink.description = `${description}${suffix}`;
+      backlink.description = description;
 
       backlink.command = {
         command: DENDRON_COMMANDS.GOTO_BACKLINK.key,
@@ -466,6 +469,15 @@ export default class BacklinksTreeDataProvider
 
     const markdownBlocks = await Promise.all(
       references.map(async (foundRef) => {
+        // Just use a simple place holder if it's a frontmatter tag instead of
+        // trying to render context
+        if (foundRef.isFrontmatterTag) {
+          return {
+            content: this.FRONTMATTER_TAG_CONTEXT_PLACEHOLDER,
+            isCandidate: false,
+          };
+        }
+
         return {
           content: (await this.getSurroundingContextForRef(
             foundRef,

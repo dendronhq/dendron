@@ -200,12 +200,96 @@ describe("MDUtils.proc", () => {
     },
   });
 
+  const USER_TAGS = createProcCompileTests({
+    name: "USER_TAGS",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = `@johndoe`;
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.MD_REGULAR]: {
+        /**
+         * Test that a wiklink in hover preview will be translated into a vscode
+         * command URI to use GoToNote for navigation
+         * @param opts
+         */
+        [ProcFlavor.HOVER_PREVIEW]: async (opts) => {
+          const {
+            extra: { resp },
+          } = cleanVerifyOpts(opts);
+
+          const goToNoteCommandOpts = {
+            qs: "user.johndoe",
+            vault: {
+              fsPath: "vault1",
+            },
+          };
+
+          await checkString(
+            resp.contents,
+            `[@johndoe](command:dendron.gotoNote?${encodeURIComponent(
+              JSON.stringify(goToNoteCommandOpts)
+            )})`
+          );
+        },
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+    },
+  });
+
+  const HASH_TAGS = createProcCompileTests({
+    name: "HASH_TAGS",
+    setup: async (opts) => {
+      const { proc } = getOpts(opts);
+      const txt = `#sample`;
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    },
+    verify: {
+      [DendronASTDest.MD_REGULAR]: {
+        /**
+         * Test that a wiklink in hover preview will be translated into a vscode
+         * command URI to use GoToNote for navigation
+         * @param opts
+         */
+        [ProcFlavor.HOVER_PREVIEW]: async (opts) => {
+          const {
+            extra: { resp },
+          } = cleanVerifyOpts(opts);
+
+          const goToNoteCommandOpts = {
+            qs: "tags.sample",
+            vault: {
+              fsPath: "vault1",
+            },
+          };
+
+          await checkString(
+            resp.contents,
+            `[#sample](command:dendron.gotoNote?${encodeURIComponent(
+              JSON.stringify(goToNoteCommandOpts)
+            )})`
+          );
+        },
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+    },
+  });
+
   const ALL_TEST_CASES = [
     ...WITH_FOOTNOTES,
     ...IMAGE_NO_LEAD_FORWARD_SLASH,
     ...IMAGE_WITH_LEAD_FORWARD_SLASH,
     ...WILDCARD_NOTE_REF_MISSING,
     ...WIKILINK_WITH_ANCHOR,
+    ...USER_TAGS,
+    ...HASH_TAGS,
   ];
 
   test.each(

@@ -101,6 +101,7 @@ export class ApplyTemplateCommand extends BasicCommand<
     const resp = await engine.writeNote(updatedTargetNote);
     AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
       source: this.key,
+      ...TemplateUtils.genTrackPayload(templateNote),
     });
     if (resp.error) {
       throw new DendronError({

@@ -238,4 +238,19 @@ export class TemplateUtils {
     );
     return targetNote;
   }
+
+  static genTrackPayload(templateNote: NoteProps) {
+    const fname2Date =
+      templateNote.body.match(/\{\{\s+fname2Date[^}]+\}\}/)?.length || 0;
+    const eq = templateNote.body.match(/\{\{\s+eq[^}]+\}\}/)?.length || 0;
+    const getDayOfWeek =
+      templateNote.body.match(/\{\{\s+getDayOfWeek[^}]+\}\}/)?.length || 0;
+    return {
+      helperStats: {
+        fname2Date,
+        eq,
+        getDayOfWeek,
+      },
+    };
+  }
 }

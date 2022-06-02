@@ -557,6 +557,7 @@ export class NoteLookupCommand
         });
         AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
           source: this.key,
+          ...TemplateUtils.genTrackPayload(resp.data),
         });
       }
     }

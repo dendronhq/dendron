@@ -60,6 +60,43 @@ describe(`WHEN running applyTemplate tests`, () => {
     afterEach(() => {
       sinon.restore();
     });
+    const eqHelper = "{{ eq fm.arg1 fm.arg2 }}";
+    const fname2DateHelper = "{{ fname2Date }}";
+    const getDayOfWeekHelper = "{{ getDayOfWeek (fname2Date) }}";
+
+    describe("AND WHEN track helper usage", () => {
+      describe("AND WHEN comparing equal args", () => {
+        it("THEN show true", async () => {
+          const templateNote = await noteFactory.createForFName("foo");
+          templateNote.body = eqHelper;
+          expect(
+            TemplateUtils.genTrackPayload(templateNote).helperStats
+          ).toEqual({
+            fname2Date: 0,
+            eq: 1,
+            getDayOfWeek: 0,
+          });
+        });
+      });
+
+      describe("AND WHEN comparing all args", () => {
+        it("THEN show true", async () => {
+          const templateNote = await noteFactory.createForFName("foo");
+          templateNote.body = [
+            eqHelper,
+            fname2DateHelper,
+            getDayOfWeekHelper,
+          ].join("\n");
+          expect(
+            TemplateUtils.genTrackPayload(templateNote).helperStats
+          ).toEqual({
+            fname2Date: 1,
+            eq: 1,
+            getDayOfWeek: 1,
+          });
+        });
+      });
+    });
 
     describe("AND WHEN using eq helper", () => {
       const testTemplateNoteBody = "{{ eq fm.arg1 fm.arg2 }}";

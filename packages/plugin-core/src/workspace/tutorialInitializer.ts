@@ -73,7 +73,7 @@ export class TutorialInitializer
     ws: DWorkspaceV2;
   }): TutorialNoteViewedPayload {
     const { document, ws } = opts;
-    const testGroup = AB_TUTORIAL_TEST.getUserGroup(
+    const tutorialType = AB_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
     const fsPath = document.uri.fsPath;
@@ -83,7 +83,7 @@ export class TutorialInitializer
     const { fname, custom } = note;
     const { currentStep, totalSteps } = custom;
     return {
-      testGroup,
+      tutorialType,
       fname,
       currentStep,
       totalSteps,
@@ -100,13 +100,17 @@ export class TutorialInitializer
       const document = e?.document;
 
       if (document !== undefined) {
-        const payload = this.getAnalyticsPayloadFromDocument({
-          document,
-          ws: opts.ws,
-        });
-        const { fname } = payload;
-        if (fname.includes("tutorial")) {
-          AnalyticsUtils.track(TutorialEvents.TutorialNoteViewed, payload);
+        try {
+          const payload = this.getAnalyticsPayloadFromDocument({
+            document,
+            ws: opts.ws,
+          });
+          const { fname } = payload;
+          if (fname.includes("tutorial")) {
+            AnalyticsUtils.track(TutorialEvents.TutorialNoteViewed, payload);
+          }
+        } catch (err) {
+          Logger.info({ ctx, msg: "Cannot get payload from document." });
         }
       }
     });

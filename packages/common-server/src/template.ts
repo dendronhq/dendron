@@ -6,13 +6,21 @@ import {
   SchemaUtils,
   Time,
 } from "@dendronhq/common-all";
-import Handlebars from "handlebars";
+import Handlebars, { HelperOptions } from "handlebars";
 import _ from "lodash";
 
 type TemplateFunctionProps = {
   templateNote: NoteProps;
   targetNote: NoteProps;
 };
+
+interface DendronHandlebarsHelpers extends HelperOptions {
+  data: {
+    root: NoteProps & {
+      FNAME: string;
+    };
+  };
+}
 
 function copyTemplateProps({
   templateNote,
@@ -65,6 +73,57 @@ function genDefaultContext(targetNote: NoteProps) {
   };
 }
 
+let _INIT_HELPERS = false;
+
+class TemplateHelpers {
+  static init() {
+    _.map(this.helpers, (v, k) => {
+      Handlebars.registerHelper(k, v);
+    });
+  }
+
+  /**
+   * WARNING: these helpers are part of the public template api
+   * any changes in these names will result in a breaking change
+   * and needs to be marked as such
+   */
+  static helpers = {
+    eq: (a: any, b: any) => {
+      return a === b;
+    },
+
+    fnameToDate: (
+      patternOrOptions: string | DendronHandlebarsHelpers,
+      options?: DendronHandlebarsHelpers
+    ) => {
+      let pattern = "(?<year>[\\d]{4}).(?<month>[\\d]{2}).(?<day>[\\d]{2})";
+      let fname;
+      if (_.isString(patternOrOptions)) {
+        pattern = patternOrOptions;
+        fname = options!.data.root.FNAME;
+      } else {
+        fname = patternOrOptions.data.root.FNAME;
+      }
+
+      const resp = fname.match(new RegExp(pattern, "i"))?.groups;
+      if (_.isUndefined(resp)) {
+        return "ERROR: no match found for {year}, {month}, or {day}";
+      }
+      const { year, month, day } = resp;
+      return new Date(
+        parseInt(year, 10),
+        parseInt(month, 10) - 1,
+        parseInt(day, 10)
+      );
+    },
+
+    getDayOfWeek: (date: Date) => {
+      const day = date.getDay();
+      return day;
+    },
+  };
+}
+
 export class TemplateUtils {
   /** The props of a template note that will get copied over when the template is applied. */
   static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
@@ -85,6 +144,10 @@ export class TemplateUtils {
     targetNote: NoteProps;
     engine: DEngineClient;
   }): NoteProps {
+    if (!_INIT_HELPERS) {
+      TemplateHelpers.init();
+      _INIT_HELPERS = true;
+    }
     if (ConfigUtils.getWorkspace(opts.engine.config).enableHandlebarTemplates) {
       return this.applyHBTemplate(opts);
     } else {
@@ -179,5 +242,20 @@ export class TemplateUtils {
       currentDate.toFormat("ss")
     );
     return targetNote;
+  }
+
+  static genTrackPayload(templateNote: NoteProps) {
+    const fnameToDate =
+      templateNote.body.match(/\{\{\s+fnameToDate[^}]+\}\}/)?.length || 0;
+    const eq = templateNote.body.match(/\{\{\s+eq[^}]+\}\}/)?.length || 0;
+    const getDayOfWeek =
+      templateNote.body.match(/\{\{\s+getDayOfWeek[^}]+\}\}/)?.length || 0;
+    return {
+      helperStats: {
+        fnameToDate,
+        eq,
+        getDayOfWeek,
+      },
+    };
   }
 }

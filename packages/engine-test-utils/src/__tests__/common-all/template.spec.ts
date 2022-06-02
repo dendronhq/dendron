@@ -1,9 +1,15 @@
 import { NoteProps } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
-import { TestNoteFactory } from "@dendronhq/common-test-utils";
+import { AssertUtils, TestNoteFactory } from "@dendronhq/common-test-utils";
 import sinon from "sinon";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
+
+async function expectStringMatch(note: NoteProps, matchTxt: string) {
+  expect(
+    await AssertUtils.assertInString({ body: note.body, match: [matchTxt] })
+  ).toBeTruthy();
+}
 
 describe(`WHEN running applyTemplate tests`, () => {
   const noteFactory: TestNoteFactory = TestNoteFactory.defaultUnitTestFactory();
@@ -14,11 +20,14 @@ describe(`WHEN running applyTemplate tests`, () => {
   async function setupTemplateTest(
     opts: {
       templateNoteBody: string;
+      templateNoteFname?: string;
       fm: any;
     },
     cb: ({ targetNote }: { targetNote: NoteProps }) => void
   ) {
-    const targetNote = await noteFactory.createForFName("new-note");
+    const targetNote = await noteFactory.createForFName(
+      opts.templateNoteFname || "new-note"
+    );
 
     await runEngineTestV5(
       async ({ engine }) => {
@@ -30,7 +39,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           targetNote,
           engine,
         });
-        cb({ targetNote });
+        await cb({ targetNote });
       },
       {
         expect,
@@ -42,6 +51,114 @@ describe(`WHEN running applyTemplate tests`, () => {
       }
     );
   }
+
+  describe("WHEN using handlebar helpers", () => {
+    beforeEach(async () => {
+      targetNote = await noteFactory.createForFName("new note");
+      clock = sinon.useFakeTimers(currentDate);
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    describe("AND WHEN using eq helper", () => {
+      const testTemplateNoteBody = "{{ eq fm.arg1 fm.arg2 }}";
+      describe("AND WHEN comparing equal args", () => {
+        it("THEN show true", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              fm: { arg1: 1, arg2: 1 },
+            },
+            ({ targetNote }) => {
+              expect(targetNote.body).toEqual("true");
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN comparing not equal args", () => {
+        it("THEN show false", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              fm: { arg1: 1, arg2: 2 },
+            },
+            ({ targetNote }) => {
+              expect(targetNote.body).toEqual("false");
+            }
+          );
+        });
+      });
+    });
+
+    describe("AND WHEN using fname2Date helper", () => {
+      const testTemplateNoteBody = "{{ fname2Date }}";
+
+      describe("AND WHEN no args and date in fname", () => {
+        it("THEN extract date", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "Mon Jan 10 2022 00:00:00");
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN no args and no date in fname", () => {
+        it("THEN throw error", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(
+                targetNote,
+                "ERROR: no match found for {year}, {month}, or {day}"
+              );
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN custom args", () => {
+        it("THEN extract date", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: `{{ fname2Date '(?<year>[\\d]{4})-(?<month>[\\d]{2})-(?<day>[\\d]{2})' }}`,
+              templateNoteFname: "daily.journal.2022-01-10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "Mon Jan 10 2022 00:00:00");
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN using getDayOfWeek helper", () => {
+        const testTemplateNoteBody = "{{ getDayOfWeek (fname2Date) }}";
+        it("THEN get day of week", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "1");
+            }
+          );
+        });
+      });
+    });
+  });
 
   describe("WHEN handlebars enabled", () => {
     beforeEach(async () => {

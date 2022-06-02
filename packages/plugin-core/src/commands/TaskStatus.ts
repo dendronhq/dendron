@@ -25,7 +25,8 @@ export class TaskStatusCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.TASK_CREATE.key;
+  key = DENDRON_COMMANDS.TASK_SET_STATUS.key;
+  public static requireActiveWorkspace: boolean = true;
   private _ext: IDendronExtension;
 
   constructor(extension: IDendronExtension) {
@@ -49,60 +50,60 @@ export class TaskStatusCommand extends BasicCommand<
         );
         return;
       }
-    }
+    } else {
+      const engine = this._ext.getDWorkspace().engine;
+      const vault = selection.vaultName
+        ? VaultUtils.getVaultByName({
+            vaults: this._ext.getDWorkspace().vaults,
+            vname: selection.vaultName,
+          })
+        : undefined;
 
-    const engine = this._ext.getDWorkspace().engine;
-    const vault = selection.vaultName
-      ? VaultUtils.getVaultByName({
-          vaults: this._ext.getDWorkspace().vaults,
-          vname: selection.vaultName,
-        })
-      : undefined;
-
-    if (!selectedNote) {
-      const notes = await engine.findNotes({ fname: selection.value, vault });
-      if (notes.length === 0) {
-        VSCodeUtils.showMessage(
-          MessageSeverity.WARN,
-          `Linked note ${selection.value} is not found, make sure the note exists first.`,
-          {}
-        );
-        return;
-      } else if (notes.length > 1) {
-        const picked = await VSCodeUtils.showQuickPick(
-          notes.map((note): QuickPickItem => {
-            return {
-              label: note.title,
-              description: VaultUtils.getName(note.vault),
-              detail: note.vault.fsPath,
-            };
-          }),
-          {
-            canPickMany: false,
-            ignoreFocusOut: true,
-            matchOnDescription: true,
-            title: "Multiple notes match selected link, please pick one",
-          }
-        );
-        if (!picked) {
-          // Cancelled prompt
+      if (!selectedNote) {
+        const notes = await engine.findNotes({ fname: selection.value, vault });
+        if (notes.length === 0) {
+          VSCodeUtils.showMessage(
+            MessageSeverity.WARN,
+            `Linked note ${selection.value} is not found, make sure the note exists first.`,
+            {}
+          );
           return;
+        } else if (notes.length > 1) {
+          const picked = await VSCodeUtils.showQuickPick(
+            notes.map((note): QuickPickItem => {
+              return {
+                label: note.title,
+                description: VaultUtils.getName(note.vault),
+                detail: note.vault.fsPath,
+              };
+            }),
+            {
+              canPickMany: false,
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              title: "Multiple notes match selected link, please pick one",
+            }
+          );
+          if (!picked) {
+            // Cancelled prompt
+            return;
+          }
+          const pickedNote = notes.find(
+            (note) => note.vault.fsPath === picked.detail
+          );
+          if (!pickedNote) {
+            throw new DendronError({
+              message: "Can't find selected note",
+              payload: {
+                notes,
+                picked,
+              },
+            });
+          }
+          selectedNote = pickedNote;
+        } else {
+          selectedNote = notes[0];
         }
-        const pickedNote = notes.find(
-          (note) => note.vault.fsPath === picked.detail
-        );
-        if (!pickedNote) {
-          throw new DendronError({
-            message: "Can't find selected note",
-            payload: {
-              notes,
-              picked,
-            },
-          });
-        }
-        selectedNote = pickedNote;
-      } else {
-        selectedNote = notes[0];
       }
     }
 

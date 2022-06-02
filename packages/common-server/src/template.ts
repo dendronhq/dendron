@@ -82,12 +82,17 @@ class TemplateHelpers {
     });
   }
 
+  /**
+   * WARNING: these helpers are part of the public template api
+   * any changes in these names will result in a breaking change
+   * and needs to be marked as such
+   */
   static helpers = {
     eq: (a: any, b: any) => {
       return a === b;
     },
 
-    fname2Date: (
+    fnameToDate: (
       patternOrOptions: string | DendronHandlebarsHelpers,
       options?: DendronHandlebarsHelpers
     ) => {
@@ -240,14 +245,14 @@ export class TemplateUtils {
   }
 
   static genTrackPayload(templateNote: NoteProps) {
-    const fname2Date =
-      templateNote.body.match(/\{\{\s+fname2Date[^}]+\}\}/)?.length || 0;
+    const fnameToDate =
+      templateNote.body.match(/\{\{\s+fnameToDate[^}]+\}\}/)?.length || 0;
     const eq = templateNote.body.match(/\{\{\s+eq[^}]+\}\}/)?.length || 0;
     const getDayOfWeek =
       templateNote.body.match(/\{\{\s+getDayOfWeek[^}]+\}\}/)?.length || 0;
     return {
       helperStats: {
-        fname2Date,
+        fnameToDate,
         eq,
         getDayOfWeek,
       },

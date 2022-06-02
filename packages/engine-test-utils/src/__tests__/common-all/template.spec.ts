@@ -61,8 +61,8 @@ describe(`WHEN running applyTemplate tests`, () => {
       sinon.restore();
     });
     const eqHelper = "{{ eq fm.arg1 fm.arg2 }}";
-    const fname2DateHelper = "{{ fname2Date }}";
-    const getDayOfWeekHelper = "{{ getDayOfWeek (fname2Date) }}";
+    const fnameToDateHelper = "{{ fnameToDate }}";
+    const getDayOfWeekHelper = "{{ getDayOfWeek (fnameToDate) }}";
 
     describe("AND WHEN track helper usage", () => {
       describe("AND WHEN comparing equal args", () => {
@@ -72,7 +72,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
           ).toEqual({
-            fname2Date: 0,
+            fnameToDate: 0,
             eq: 1,
             getDayOfWeek: 0,
           });
@@ -84,13 +84,13 @@ describe(`WHEN running applyTemplate tests`, () => {
           const templateNote = await noteFactory.createForFName("foo");
           templateNote.body = [
             eqHelper,
-            fname2DateHelper,
+            fnameToDateHelper,
             getDayOfWeekHelper,
           ].join("\n");
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
           ).toEqual({
-            fname2Date: 1,
+            fnameToDate: 1,
             eq: 1,
             getDayOfWeek: 1,
           });
@@ -129,8 +129,8 @@ describe(`WHEN running applyTemplate tests`, () => {
       });
     });
 
-    describe("AND WHEN using fname2Date helper", () => {
-      const testTemplateNoteBody = "{{ fname2Date }}";
+    describe("AND WHEN using fnameToDate helper", () => {
+      const testTemplateNoteBody = "{{ fnameToDate }}";
 
       describe("AND WHEN no args and date in fname", () => {
         it("THEN extract date", async () => {
@@ -168,7 +168,7 @@ describe(`WHEN running applyTemplate tests`, () => {
         it("THEN extract date", async () => {
           await setupTemplateTest(
             {
-              templateNoteBody: `{{ fname2Date '(?<year>[\\d]{4})-(?<month>[\\d]{2})-(?<day>[\\d]{2})' }}`,
+              templateNoteBody: `{{ fnameToDate '(?<year>[\\d]{4})-(?<month>[\\d]{2})-(?<day>[\\d]{2})' }}`,
               templateNoteFname: "daily.journal.2022-01-10",
               fm: {},
             },
@@ -180,7 +180,7 @@ describe(`WHEN running applyTemplate tests`, () => {
       });
 
       describe("AND WHEN using getDayOfWeek helper", () => {
-        const testTemplateNoteBody = "{{ getDayOfWeek (fname2Date) }}";
+        const testTemplateNoteBody = "{{ getDayOfWeek (fnameToDate) }}";
         it("THEN get day of week", async () => {
           await setupTemplateTest(
             {

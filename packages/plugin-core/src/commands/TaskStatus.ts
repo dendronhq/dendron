@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DendronError,
   NoteProps,
+  TaskNoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
@@ -42,7 +43,7 @@ export class TaskStatusCommand extends BasicCommand<
     if (!selection) {
       // Then they are changing the status for the current note
       selectedNote = this._ext.wsUtils.getActiveNote();
-      if (!selectedNote) {
+      if (!selectedNote || !TaskNoteUtils.isTaskNote(selectedNote)) {
         // No active note either
         VSCodeUtils.showMessage(
           MessageSeverity.WARN,
@@ -149,7 +150,10 @@ export class TaskStatusCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts) {
-    opts.note.custom.status = opts.setStatus;
+    opts.note.custom = {
+      ...opts.note.custom,
+      status: opts.setStatus,
+    };
 
     await this._ext.getEngine().writeNote(opts.note, { updateExisting: true });
 

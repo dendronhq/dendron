@@ -1,12 +1,12 @@
 import {
   APIUtils,
-  ConfigUtils,
   CONSTANTS,
   DendronEditorViewKey,
   DendronTreeViewKey,
   DUtils,
   getStage,
   getWebTreeViewEntry,
+  ThemeType,
 } from "@dendronhq/common-all";
 import {
   findUpTo,
@@ -77,6 +77,7 @@ export class WebViewUtils {
     port,
     wsRoot,
     panel,
+    initialTheme,
   }: {
     name: string;
     jsSrc: vscode.Uri;
@@ -84,6 +85,7 @@ export class WebViewUtils {
     port: number;
     wsRoot: string;
     panel: vscode.WebviewPanel | vscode.WebviewView;
+    initialTheme?: string;
   }) {
     const root = VSCodeUtils.getAssetUri(
       ExtensionProvider.getExtension().context
@@ -105,6 +107,14 @@ export class WebViewUtils {
         )
         .toString();
     });
+
+    const vscodeColorTheme = vscode.window.activeColorTheme.kind;
+    const defaultInitialTheme =
+      vscodeColorTheme === vscode.ColorThemeKind.Dark ||
+      vscodeColorTheme === vscode.ColorThemeKind.HighContrast
+        ? ThemeType.DARK
+        : ThemeType.LIGHT;
+
     const out = WebViewCommonUtils.genVSCodeHTMLIndex({
       jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
       cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
@@ -125,9 +135,7 @@ export class WebViewUtils {
       // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
       themeMap: themeMap as WebViewThemeMap,
-      initialTheme: ConfigUtils.getPreview(
-        ExtensionProvider.getDWorkspace().config
-      ).theme,
+      initialTheme: initialTheme ?? defaultInitialTheme,
       name,
     });
     return out;

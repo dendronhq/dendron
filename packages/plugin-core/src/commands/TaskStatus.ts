@@ -10,6 +10,7 @@ import { VSCodeUtils, MessageSeverity } from "../vsCodeUtils";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { QuickPickItem } from "vscode";
 import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
 
 type CommandInput = {
   setStatus?: string;
@@ -151,6 +152,8 @@ export class TaskStatusCommand extends BasicCommand<
     opts.note.custom.status = opts.setStatus;
 
     await this._ext.getEngine().writeNote(opts.note, { updateExisting: true });
+
+    delayedUpdateDecorations();
 
     return {};
   }

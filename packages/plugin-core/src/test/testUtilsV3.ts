@@ -568,6 +568,20 @@ export function describeMultiWS(
     });
   });
 }
+describeMultiWS.only = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.only("", () => {
+    describeMultiWS(...params);
+  });
+};
+describeMultiWS.skip = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.skip("", () => {
+    describeMultiWS(...params);
+  });
+};
 
 /**
  * Use to run tests with a single-vault workspace. Used in the same way as
@@ -611,6 +625,20 @@ export function describeSingleWS(
     });
   });
 }
+describeSingleWS.only = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.only("", () => {
+    describeMultiWS(...params);
+  });
+};
+describeSingleWS.skip = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.skip("", () => {
+    describeSingleWS(...params);
+  });
+};
 
 /**
  * Helper function for Describe*WS to do a run-time check to make sure an async

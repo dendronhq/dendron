@@ -401,9 +401,15 @@ export type GetDecorationsOpts = {
 // === Engine and Store Main
 
 export type DCommonProps = {
-  /** Dictionary where key is the note id. */
+  /**
+   * Dictionary where key is the note id.
+   * For access, see {@link DEngine.getAllNotes} or {@link DEngine.getNote}
+   */
   notes: NotePropsByIdDict;
-  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
+  /**
+   * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
+   * For access, see {@link DEngine.findNotes}
+   */
   noteFnames: NotePropsByFnameDict;
   schemas: SchemaModuleDict;
   wsRoot: string;

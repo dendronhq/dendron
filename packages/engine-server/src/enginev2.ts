@@ -237,6 +237,7 @@ export class DendronEngineV2 implements DEngine {
 
   /**
    * @deprecated see {@link DendronEngineV2.getAllNotes}
+   * For accessing a specific note by id, see {@link DendronEngineV2.getNote}
    */
   get notes(): NotePropsByIdDict {
     return this.store.notes;

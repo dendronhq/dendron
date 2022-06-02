@@ -46,6 +46,7 @@ export interface IEngineAPIService {
   trustedWorkspace: boolean;
   /**
    * @deprecated see {@link IEngineAPIService.getAllNotes}
+   * For accessing a specific note by id, see {@link IEngineAPIService.getNote}
    */
   notes: NotePropsByIdDict;
   /**

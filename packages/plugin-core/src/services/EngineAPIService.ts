@@ -127,6 +127,7 @@ export class EngineAPIService
 
   /**
    * @deprecated see {@link EngineAPIService.getAllNotes}
+   * For accessing a specific note by id, see {@link EngineAPIService.getNote}
    */
   public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;

@@ -42,6 +42,10 @@ const GRAPH: DendronConfigEntryCollection<DendronGraphConfig> = {
     label: "Zoom Speed",
     desc: "The speed at which the graph zooms in and out. Lower is slower, higher is faster.",
   },
+  createStub: {
+    label: "Create Stub",
+    desc: "When enabled, create a note if it hasn't been created already when clicked on a graph node",
+  },
 };
 
 /**

@@ -6,6 +6,7 @@ import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
 import { DoctorUtils } from "./components/doctor/utils";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
+import { ExtensionProvider } from "./ExtensionProvider";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -76,7 +77,11 @@ export class WindowWatcher {
         "onDidChangeActiveTextEditor"
       );
 
-      const note = this._extension.wsUtils.getNoteFromDocument(editor.document);
+      // TODO: changing this to `this._extension.wsUtils.` will fails some tests that
+      // mock the extension. Change once that is fixed.
+      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+        editor.document
+      );
       if (_.isUndefined(note)) {
         return;
       }

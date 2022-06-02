@@ -116,7 +116,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
         },
       },
       () => {
-        test.only("THEN preview panel is shown", async () => {
+        test("THEN preview panel is shown", async () => {
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot: ExtensionProvider.getDWorkspace().wsRoot,

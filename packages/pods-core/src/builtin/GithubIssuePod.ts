@@ -354,7 +354,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
     const newNotes = this.getNewNotes(notes, engine, vault);
     const updatedNotes = await this.getUpdatedNotes(notes, engine, vault);
 
-    await engine.bulkWriteNotes({ notes: newNotes });
+    await engine.bulkWriteNotes({ notes: newNotes, skipMetadata: true });
 
     return { importedNotes: [...newNotes, ...updatedNotes] };
   }

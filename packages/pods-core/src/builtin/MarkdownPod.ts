@@ -504,7 +504,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           return note;
         })
     );
-    await engine.bulkWriteNotes({ notes: notesClean });
+    await engine.bulkWriteNotes({ notes: notesClean, skipMetadata: true });
     this.L.info({
       ctx,
       wsRoot,

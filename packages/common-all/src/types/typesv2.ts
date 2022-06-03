@@ -580,6 +580,8 @@ export type DEngineSyncOpts = {
 
 export type BulkWriteNotesOpts = {
   notes: NoteProps[];
+  // If true, skips updating metadata
+  skipMetadata?: boolean;
   opts?: EngineWriteOptsV2;
 };
 

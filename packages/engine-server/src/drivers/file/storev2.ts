@@ -639,6 +639,29 @@ export class FileStorage implements DStore {
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {
     this.logger.info({ ctx: "bulkWriteNotes", msg: "enter" });
+    if (opts.skipMetadata) {
+      const noteDicts = {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      };
+      await Promise.all(
+        opts.notes.map((note) => {
+          NoteDictsUtils.add(note, noteDicts);
+          return note2File({
+            note,
+            vault: note.vault,
+            wsRoot: this.wsRoot,
+          });
+        })
+      );
+      const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
+        return { note: n, status: "create" as const };
+      });
+      return {
+        error: null,
+        data: notesChanged,
+      };
+    }
     const writeResponses = await Promise.all(
       opts.notes.flatMap(async (note) => {
         return this.writeNote(note, opts.opts);

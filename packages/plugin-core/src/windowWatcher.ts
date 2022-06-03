@@ -3,6 +3,7 @@ import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
+import { DoctorUtils } from "./components/doctor/utils";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { ExtensionProvider } from "./ExtensionProvider";
@@ -62,7 +63,6 @@ export class WindowWatcher {
   private onDidChangeActiveTextEditor = sentryReportingCallback(
     async (editor: TextEditor | undefined) => {
       const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
-
       if (
         !editor ||
         editor.document.uri.fsPath !==
@@ -71,6 +71,14 @@ export class WindowWatcher {
         return;
       }
 
+      // check and prompt duplicate warning.
+      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+        editor.document,
+        "onDidChangeActiveTextEditor"
+      );
+
+      // TODO: changing this to `this._extension.wsUtils.` will fails some tests that
+      // mock the extension. Change once that is fixed.
       const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
         editor.document
       );

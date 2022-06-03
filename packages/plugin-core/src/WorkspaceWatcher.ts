@@ -28,6 +28,7 @@ import {
   window,
   workspace,
 } from "vscode";
+import { DoctorUtils } from "./components/doctor/utils";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
@@ -183,6 +184,8 @@ export class WorkspaceWatcher {
       await this._schemaSyncService.onDidSave({
         document,
       });
+    } else {
+      await this.onDidSaveNote(document);
     }
   }
 
@@ -233,6 +236,10 @@ export class WorkspaceWatcher {
         msg: "Note opened",
         fname: NoteUtils.uri2Fname(document.uri),
       });
+      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+        document,
+        "onDidOpenTextDocument"
+      );
     } catch (error) {
       Sentry.captureException(error);
       throw error;
@@ -340,6 +347,14 @@ export class WorkspaceWatcher {
       event.waitUntil(p);
     }
     return { changes };
+  }
+
+  private async onDidSaveNote(document: TextDocument) {
+    // check and prompt duplicate warning.
+    await DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+      document,
+      "onDidSaveNote"
+    );
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

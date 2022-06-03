@@ -2,8 +2,11 @@
 id: mycf53kz1r7swcttcobwbdl
 title: Taking Notes
 desc: ""
-updated: 1652388439051
+updated: 1653980773142
 created: 1652278083208
+currentStep: 2
+totalSteps: 5
+nav_order: 1
 ---
 
 ### Create a Note

@@ -6,8 +6,9 @@ import {
   TutorialEvents,
   VaultUtils,
   AB_TUTORIAL_TEST,
+  TutorialNoteViewedPayload,
 } from "@dendronhq/common-all";
-import { SegmentClient, vault2Path } from "@dendronhq/common-server";
+import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
   InitialSurveyStatusEnum,
   MetadataService,
@@ -67,8 +68,54 @@ export class TutorialInitializer
     );
   }
 
+  private getAnalyticsPayloadFromDocument(opts: {
+    document: vscode.TextDocument;
+    ws: DWorkspaceV2;
+  }): TutorialNoteViewedPayload {
+    const { document, ws } = opts;
+    const tutorialType = AB_TUTORIAL_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+    const fsPath = document.uri.fsPath;
+    const { vaults, wsRoot } = ws;
+    const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
+    const note = file2Note(fsPath, vault);
+    const { fname, custom } = note;
+    const { currentStep, totalSteps } = custom;
+    return {
+      tutorialType,
+      fname,
+      currentStep,
+      totalSteps,
+    };
+  }
+
   async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
+
+    // Register a special analytics handler for the tutorial:
+    // This needs to be registered before we open any tutorial note.
+    // Otherwise some events may be lost and not reported properly.
+    const disposable = vscode.window.onDidChangeActiveTextEditor((e) => {
+      const document = e?.document;
+
+      if (document !== undefined) {
+        try {
+          const payload = this.getAnalyticsPayloadFromDocument({
+            document,
+            ws: opts.ws,
+          });
+          const { fname } = payload;
+          if (fname.includes("tutorial")) {
+            AnalyticsUtils.track(TutorialEvents.TutorialNoteViewed, payload);
+          }
+        } catch (err) {
+          Logger.info({ ctx, msg: "Cannot get payload from document." });
+        }
+      }
+    });
+
+    ExtensionProvider.getExtension().context.subscriptions.push(disposable);
 
     const { wsRoot, vaults } = opts.ws;
     const vaultRelPath = VaultUtils.getRelPath(vaults[0]);
@@ -119,32 +166,5 @@ export class TutorialInitializer
     if (!initialSurveySubmitted) {
       await SurveyUtils.showInitialSurvey();
     }
-
-    // Register a special analytics handler for the tutorial:
-    const disposable = vscode.window.onDidChangeActiveTextEditor((e) => {
-      const fileName = e?.document.uri.fsPath;
-
-      let eventName: TutorialEvents | undefined;
-
-      if (fileName?.endsWith("tutorial.md")) {
-        eventName = TutorialEvents.Tutorial_0_Show;
-      } else if (fileName?.endsWith("tutorial.user-interface.md")) {
-        eventName = TutorialEvents.Tutorial_1_Show;
-      } else if (fileName?.endsWith("tutorial.taking-notes.md")) {
-        eventName = TutorialEvents.Tutorial_2_Show;
-      } else if (fileName?.endsWith("tutorial.linking-notes.md")) {
-        eventName = TutorialEvents.Tutorial_3_Show;
-      } else if (fileName?.endsWith("tutorial.rich-formatting.md")) {
-        eventName = TutorialEvents.Tutorial_4_Show;
-      } else if (fileName?.endsWith("tutorial.conclusion.md")) {
-        eventName = TutorialEvents.Tutorial_5_Show;
-      }
-
-      if (eventName) {
-        AnalyticsUtils.track(eventName);
-      }
-    });
-
-    ExtensionProvider.getExtension().context.subscriptions.push(disposable);
   }
 }

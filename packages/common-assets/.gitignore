@@ -3,5 +3,7 @@ build
 # vercel
 .vercel
 
+public/*.ico
+public/*.svg
 public/*.css
 public/js

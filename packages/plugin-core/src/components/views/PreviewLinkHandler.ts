@@ -2,6 +2,7 @@ import {
   DEngineClient,
   DNoteAnchorBasic,
   ErrorFactory,
+  isCommandUri,
   isWebUri,
   NoteProps,
   NoteUtils,
@@ -24,6 +25,7 @@ export enum LinkType {
   ASSET = "ASSET",
   WEBSITE = "WEBSITE",
   TEXT = "TEXT",
+  COMMAND = "COMMAND",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -60,6 +62,12 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       // There's nothing to do then, the default handler opens them automatically.
       // If we try to open it too, it will open twice.
       return LinkType.WEBSITE;
+    }
+
+    if (isCommandUri(data.href)) {
+      // If it's a command uri, do nothing.
+      // Let VSCode handle them.
+      return LinkType.COMMAND;
     }
 
     const uri = vscode.Uri.parse(data.href);

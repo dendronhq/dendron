@@ -26,7 +26,7 @@ export type CreateNoteOptsV4 = {
   wsRoot: string;
   fname: string;
   body?: string;
-  props?: Partial<Omit<NoteProps, "vault|fname|body">>;
+  props?: Partial<Omit<NoteProps, "vault" | "fname" | "body" | "custom">>;
   genRandomId?: boolean;
   noWrite?: boolean;
   custom?: any;

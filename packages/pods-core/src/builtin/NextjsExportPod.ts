@@ -178,7 +178,7 @@ export class NextjsExportPodUtils {
     version: string;
     nextPath: string;
   }) {
-    return this.git(nextPath).checkout(`tags/v${version}`);
+    return this.git(nextPath).checkoutBranch(version, `tags/v${version}`);
   }
 
   static async updateTemplate(opts: { nextPath: string }) {

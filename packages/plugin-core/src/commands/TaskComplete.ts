@@ -4,6 +4,7 @@ import { BasicCommand } from "./base";
 import { VSCodeUtils, MessageSeverity } from "../vsCodeUtils";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { TaskStatusCommand } from "./TaskStatus";
+import { ConfigureCommand } from "./ConfigureCommand";
 
 type CommandOpts = {};
 
@@ -28,11 +29,19 @@ export class TaskCompleteCommand extends BasicCommand<
     ).taskCompleteStatus[0];
 
     if (complete === undefined) {
+      const title = "Open the configuration file";
+
       await VSCodeUtils.showMessage(
         MessageSeverity.ERROR,
-        "You have no task statuses marked as complete. Please add something to 'taskCompleteStatus' in your configuration file.",
-        {}
-      );
+        "You have no task statuses marked as complete. Please add something to 'taskCompleteStatus' in your configuration file. See: https://wiki.dendron.so/notes/SEASewZSteDK7ry1AshNG#taskcompletestatus",
+        {},
+        { title }
+      ).then((pressed) => {
+        if (pressed?.title === title) {
+          const openConfig = new ConfigureCommand(this._ext);
+          openConfig.run();
+        }
+      });
       return {};
     }
 

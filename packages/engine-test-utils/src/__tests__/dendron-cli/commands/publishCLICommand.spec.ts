@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   IntermediateDendronConfig,
+  RespV3,
   URI,
 } from "@dendronhq/common-all";
 import {
@@ -9,6 +10,7 @@ import {
   PublishCLICommandOpts,
   PublishCommands,
 } from "@dendronhq/dendron-cli";
+import { DConfig, VersionProvider } from "@dendronhq/engine-server";
 import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -47,19 +49,124 @@ describe("WHEN run `dendron publish init`", () => {
   afterEach(() => {
     sinon.restore();
   });
-  test("THEN succeed", async () => {
-    await runEngineTestV5(
-      async ({ wsRoot }) => {
-        const cli = new PublishCLICommand();
-        const initStub = stub(cli, "init").resolves({ error: null });
-        await runPublishCmd({ cli, cmd, wsRoot });
-        expect(initStub.calledOnce).toBeTruthy();
-      },
-      {
-        expect,
-      }
-    );
+
+  const getData = (resp: RespV3<any>) => {
+    if (!_.isUndefined(resp.error)) {
+      throw Error("error is not undefined");
+    }
+    return resp.data;
+  };
+
+  describe("AND WHEN no templateVersion set", () => {
+    test("THEN clone with latest version", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cli = new PublishCLICommand();
+          const latestVersion = VersionProvider.engineVersion();
+          const stubClone = stub(cli, "_cloneTemplate").resolves();
+          const stubSwitch = stub(
+            NextjsExportPodUtils,
+            "switchToBranch"
+          ).resolves();
+          const stubInstall = stub(cli, "_installDependencies").resolves();
+          const resp = await runPublishCmd({ cli, cmd, wsRoot });
+
+          // cloned
+          expect(stubClone.calledOn).toBeTruthy();
+          // switch to latest branch
+          expect(
+            stubSwitch.calledWith({
+              version: latestVersion,
+              nextPath: path.join(wsRoot, ".next"),
+            })
+          ).toBeTruthy();
+          // install dependencies
+          expect(stubInstall.calledOn).toBeTruthy();
+          // templateVersion set to latest
+          expect(getData(resp).templateVersion).toEqual(latestVersion);
+          // templateVersion written to config
+          const newConfig = DConfig.getOrCreate(wsRoot);
+          expect(NextjsExportPodUtils.templateVersion(newConfig)).toEqual(
+            latestVersion
+          );
+        },
+        {
+          expect,
+        }
+      );
+    });
   });
+
+  describe("AND WHEN templateVersion set", () => {
+    const templateVersion = "0.95.0";
+    test("THEN clone with templateVersion", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cli = new PublishCLICommand();
+          const latestVersion = templateVersion;
+          const stubClone = stub(cli, "_cloneTemplate").resolves();
+          const stubSwitch = stub(
+            NextjsExportPodUtils,
+            "switchToBranch"
+          ).resolves();
+          const stubInstall = stub(cli, "_installDependencies").resolves();
+          const resp = await runPublishCmd({ cli, cmd, wsRoot });
+
+          expect(stubClone.calledOn).toBeTruthy();
+          expect(
+            stubSwitch.calledWith({
+              version: latestVersion,
+              nextPath: path.join(wsRoot, ".next"),
+            })
+          ).toBeTruthy();
+          expect(stubInstall.calledOn).toBeTruthy();
+          expect(getData(resp).templateVersion).toEqual(latestVersion);
+          // template version unchanged
+          const newConfig = DConfig.getOrCreate(wsRoot);
+          expect(NextjsExportPodUtils.templateVersion(newConfig)).toEqual(
+            templateVersion
+          );
+        },
+        {
+          expect,
+          modConfigCb: (config: IntermediateDendronConfig) => {
+            config.publishing!.templateVersion = templateVersion;
+            return config;
+          },
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN template exists", () => {
+    test("THEN do not clone", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot }) => {
+          const cli = new PublishCLICommand();
+          stub(cli, "_nextPathExists").resolves(true);
+          const resp = await runPublishCmd({ cli, cmd, wsRoot });
+          expect(resp.error.message).toEqual("template exists");
+        },
+        {
+          expect,
+        }
+      );
+    });
+  });
+
+  // test("THEN succeed", async () => {
+  //   await runEngineTestV5(
+  //     async ({ wsRoot }) => {
+  //       const cli = new PublishCLICommand();
+  //       const initStub = stub(cli, "init").resolves({ error: null });
+  //       await runPublishCmd({ cli, cmd, wsRoot });
+  //       expect(initStub.calledOnce).toBeTruthy();
+  //     },
+  //     {
+  //       expect,
+  //     }
+  //   );
+  // });
 });
 
 describe("WHEN run `dendron publish build`", () => {
@@ -202,7 +309,9 @@ describe("WHEN run `dendron publish dev`", () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
         const cli = new PublishCLICommand();
-        const initStub = stub(cli, "init").resolves({ error: null });
+        const initStub = stub(cli, "init").resolves({
+          data: { templateVersion: "" },
+        });
         const buildStub = stub(cli, "build").resolves({ error: null });
         const devStub = stub(cli, "dev").resolves({ error: null });
         await runPublishCmd({ cli, cmd, wsRoot });
@@ -235,7 +344,9 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
-            const initStub = stub(cli, "init").resolves({ error: null });
+            const initStub = stub(cli, "init").resolves({
+              data: { templateVersion: "" },
+            });
             const buildStub = stub(cli, "build").resolves({ error: null });
             const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([true]);
@@ -278,7 +389,9 @@ describe("WHEN run `dendron publish export`", () => {
             fs.ensureFileSync(
               path.join(wsRoot, ".next", "out", "canary-success")
             );
-            const initStub = stub(cli, "init").resolves({ error: null });
+            const initStub = stub(cli, "init").resolves({
+              data: { templateVersion: "" },
+            });
             const buildStub = stub(cli, "build").resolves({ error: null });
             const exportStub = stub(cli, "export").resolves({} as any);
             prompts.inject([false]);

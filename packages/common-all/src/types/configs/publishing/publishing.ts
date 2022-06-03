@@ -48,7 +48,7 @@ export type DendronPublishingConfig = {
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
   enablePrettyLinks: boolean;
-  publishTemplateVersion?: number;
+  templateVersion?: string;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &

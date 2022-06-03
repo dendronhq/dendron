@@ -4,29 +4,30 @@ import {
   DendronError,
   DendronSiteConfig,
   error2PlainObject,
+  ErrorFactory,
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { GitUtils } from "@dendronhq/common-server";
+import { DConfig, SiteUtils, VersionProvider } from "@dendronhq/engine-server";
 import {
+  BuildOverrides,
   NextjsExportConfig,
   NextjsExportPod,
   NextjsExportPodUtils,
-  BuildOverrides,
   PublishTarget,
 } from "@dendronhq/pods-core";
+import fs from "fs-extra";
 import _ from "lodash";
+import ora from "ora";
 import path from "path";
+import prompts from "prompts";
 import yargs from "yargs";
 import { CLIUtils, SpinnerUtils } from "../utils/cli";
 import { CLICommand } from "./base";
 import { ExportPodCLICommand } from "./exportPod";
 import { PodSource } from "./pod";
 import { SetupEngineCLIOpts } from "./utils";
-import prompts from "prompts";
-import fs from "fs-extra";
-import ora from "ora";
-import { GitUtils } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -325,27 +326,20 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
 
     if (nextPathExists) {
-      try {
-        await this._updateNextTemplate({
-          nextPath,
-          spinner,
-        });
-      } catch (err) {
-        SpinnerUtils.renderAndContinue({
-          spinner,
-          text: `failed to update next NextJS template working copy (${err}); cloning fresh`,
-        });
-        await this._removeNextPath({
-          nextPath,
-          spinner,
-        });
-        await this._initialize({ nextPath, spinner });
-      }
-    } else {
-      await this._initialize({ nextPath, spinner });
+      this.print("Nextjs template already exists. Skipping initialization");
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: "template exists",
+        }),
+      };
     }
 
-    return { error: null };
+    const { templateVersion } = await this._initialize({
+      nextPath,
+      spinner,
+      wsRoot,
+    });
+    return { data: { templateVersion } };
   }
 
   async _isInitialized(opts: { wsRoot: string; spinner: ora.Ora }) {
@@ -414,14 +408,39 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async _initialize(opts: { nextPath: string; spinner: ora.Ora }) {
-    const { spinner } = opts;
+  /**
+   * Clone template
+   * If templateVersion is set in dendron.yml, clone at version
+   * Otherwise, get same version as engine
+   * @param opts
+   * @return: string, version of template
+   */
+  async _initialize(opts: {
+    nextPath: string;
+    spinner: ora.Ora;
+    wsRoot: string;
+  }) {
+    const { spinner, wsRoot } = opts;
     SpinnerUtils.renderAndContinue({
       spinner,
       text: "Initializing NextJS template.",
     });
+    const config = DConfig.readConfigAndApplyLocalOverrideSync(opts.wsRoot);
     await this._cloneTemplate(opts);
+    const templateVersion =
+      NextjsExportPodUtils.templateVersion(config) ||
+      VersionProvider.engineVersion();
+    await NextjsExportPodUtils.switchToBranch({
+      version: templateVersion,
+      nextPath: opts.nextPath,
+    });
     await this._installDependencies(opts);
+
+    if (!NextjsExportPodUtils.templateVersion(config)) {
+      ConfigUtils.setPublishProp(config, "templateVersion", templateVersion);
+      await DConfig.writeConfig({ wsRoot, config });
+    }
+    return { templateVersion, error: null };
   }
 
   async _cloneTemplate(opts: { nextPath: string; spinner: ora.Ora }) {

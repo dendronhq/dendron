@@ -115,18 +115,11 @@ export const _2022_05_DAILY_JOURNAL_TEMPLATE_TEST = new ABTest(
   ]
 );
 
-export const MAIN_TUTORIAL_GROUP_NAME = "main";
-
-export const MAIN_TUTORIAL = new ABTest("DefaultTutorialTest", [
-  {
-    name: MAIN_TUTORIAL_GROUP_NAME,
-    weight: 1,
-  },
-]);
+export const MAIN_TUTORIAL_TYPE_NAME = "main";
 
 /**
  * Currently running tutorial AB test group.
- * If we are not running any A/B testing, set this to {@link MAIN_TUTORIAL}
+ * If we are not running any A/B testing, explicitly set this to `undefined`
  */
 export const CURRENT_TUTORIAL_TEST = _2022_06_QUICKSTART_TUTORIAL_TEST;
 

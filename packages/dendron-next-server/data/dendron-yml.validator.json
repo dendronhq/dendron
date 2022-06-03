@@ -768,6 +768,9 @@
         },
         "apiEndpoint": {
           "type": "string"
+        },
+        "templateHierarchy": {
+          "type": "string"
         }
       },
       "required": [
@@ -1173,6 +1176,9 @@
         },
         "enablePrettyLinks": {
           "type": "boolean"
+        },
+        "publishTemplateVersion": {
+          "type": "number"
         }
       },
       "required": [

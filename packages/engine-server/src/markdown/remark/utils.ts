@@ -1114,6 +1114,14 @@ export class RemarkUtils {
     return node.type === DendronASTTypes.YAML;
   }
 
+  static isHashTag(node: Node): node is HashTag {
+    return node.type === DendronASTTypes.HASHTAG;
+  }
+
+  static isUserTag(node: Node): node is UserTag {
+    return node.type === DendronASTTypes.USERTAG;
+  }
+
   static isNodeWithPosition<N extends Node>(
     node: N
   ): node is N & { position: Position } {

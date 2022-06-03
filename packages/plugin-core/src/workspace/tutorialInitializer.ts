@@ -6,6 +6,7 @@ import {
   TutorialEvents,
   VaultUtils,
   CURRENT_TUTORIAL_TEST,
+  MAIN_TUTORIAL_TYPE_NAME,
   TutorialNoteViewedPayload,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
@@ -38,6 +39,12 @@ export class TutorialInitializer
   extends BlankInitializer
   implements WorkspaceInitializer
 {
+  private getTutorialType() {
+    return CURRENT_TUTORIAL_TEST !== undefined
+      ? CURRENT_TUTORIAL_TEST.getUserGroup(SegmentClient.instance().anonymousId)
+      : MAIN_TUTORIAL_TYPE_NAME;
+  }
+
   async onWorkspaceCreation(opts: {
     vaults: DVault[];
     wsRoot: string;
@@ -53,16 +60,14 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    const ABUserGroup = CURRENT_TUTORIAL_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
+    const tutorialDir = this.getTutorialType();
 
     fs.copySync(
       path.join(
         dendronWSTemplate.fsPath,
         "tutorial",
         "treatments",
-        ABUserGroup
+        tutorialDir
       ),
       vpath
     );
@@ -73,9 +78,7 @@ export class TutorialInitializer
     ws: DWorkspaceV2;
   }): TutorialNoteViewedPayload {
     const { document, ws } = opts;
-    const tutorialType = CURRENT_TUTORIAL_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
+    const tutorialType = this.getTutorialType();
     const fsPath = document.uri.fsPath;
     const { vaults, wsRoot } = ws;
     const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });

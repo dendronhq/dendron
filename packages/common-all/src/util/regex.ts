@@ -15,3 +15,9 @@ export function isWebUri(uri: string): boolean {
   if (scheme === "http" || scheme === "https") return true;
   return false;
 }
+
+export function isCommandUri(uri: string): boolean {
+  const scheme = uri.match(uriRegex)?.groups?.scheme;
+  if (scheme === "command") return true;
+  return false;
+}

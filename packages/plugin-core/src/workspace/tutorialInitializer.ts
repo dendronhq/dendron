@@ -5,7 +5,7 @@ import {
   getStage,
   TutorialEvents,
   VaultUtils,
-  AB_TUTORIAL_TEST,
+  CURRENT_TUTORIAL_TEST,
   TutorialNoteViewedPayload,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
@@ -53,7 +53,7 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
 
-    const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
+    const ABUserGroup = CURRENT_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
 
@@ -73,7 +73,7 @@ export class TutorialInitializer
     ws: DWorkspaceV2;
   }): TutorialNoteViewedPayload {
     const { document, ws } = opts;
-    const tutorialType = AB_TUTORIAL_TEST.getUserGroup(
+    const tutorialType = CURRENT_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId
     );
     const fsPath = document.uri.fsPath;

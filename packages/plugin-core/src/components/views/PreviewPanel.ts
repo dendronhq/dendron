@@ -101,6 +101,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         },
         {
           enableScripts: true,
+          enableCommandUris: true,
           retainContextWhenHidden: true,
           enableFindWidget: true,
           localResourceRoots: WebViewUtils.getLocalResourceRoots(

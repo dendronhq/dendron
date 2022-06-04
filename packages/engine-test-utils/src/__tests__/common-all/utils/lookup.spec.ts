@@ -1,14 +1,11 @@
-import { describe, it, suite, beforeEach } from "mocha";
-import { expect } from "../testUtilsv2";
-import { TransformedQueryString } from "../../components/lookup/types";
-import { transformQueryString } from "../../components/lookup/queryStringTransformer";
+import { TransformedQueryString, NoteLookupUtils } from "@dendronhq/common-all";
 
-suite("transformQueryString tests:", () => {
+describe("NoteLookupUtils.transformQueryString tests:", () => {
   describe(`WHEN given simple string with slashes`, () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "some/string/value",
       });
     });
@@ -30,7 +27,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "some.string.value",
       });
     });
@@ -54,7 +51,7 @@ suite("transformQueryString tests:", () => {
       ["^dev.vs.", "^dev.vs."],
     ].forEach((arr) => {
       it(`WHEN input='${arr[0]}' THEN output is '${arr[1]}'`, () => {
-        const transformed = transformQueryString({
+        const transformed = NoteLookupUtils.transformQueryString({
           pickerValue: arr[0],
           onlyDirectChildren: true,
         });
@@ -68,7 +65,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "some.string.value.",
       });
     });
@@ -90,7 +87,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "some.string.value t1 t2 c1.c2",
       });
     });
@@ -112,7 +109,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: " some string.value  ",
       });
     });
@@ -130,7 +127,9 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({ pickerValue: "v1 | v2" });
+      transformed = NoteLookupUtils.transformQueryString({
+        pickerValue: "v1 | v2",
+      });
     });
 
     it(`THEN value stays as is`, () => {
@@ -146,7 +145,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "[[some.string.value]]",
       });
     });
@@ -164,7 +163,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "  [[some.string.value]]   ",
       });
     });
@@ -182,7 +181,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "[[some description|some.string.value]]",
       });
     });
@@ -200,7 +199,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue: "[[some description|dendron://private/some.string.value]]",
       });
     });
@@ -218,7 +217,7 @@ suite("transformQueryString tests:", () => {
     let transformed: TransformedQueryString;
 
     beforeEach(() => {
-      transformed = transformQueryString({
+      transformed = NoteLookupUtils.transformQueryString({
         pickerValue:
           "[[some description|dendron://private.vault/some.string.value#header-val]]",
       });

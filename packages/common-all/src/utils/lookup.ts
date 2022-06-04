@@ -73,29 +73,40 @@ export class NoteLookupUtils {
     return roots.concat(childrenOfRootNotes);
   };
 
+  /**
+   * The core of Dendron lookup logic
+   */
   static async lookup({
-    qs,
-    originalQS,
+    qsRaw,
     engine,
     showDirectChildrenOnly,
   }: {
-    qs: string;
-    originalQS: string;
+    qsRaw: string;
     engine: DEngineClient;
     showDirectChildrenOnly?: boolean;
   }): Promise<NoteProps[]> {
     const { notes } = engine;
-    const qsClean = this.slashToDot(qs);
+    const qsClean = this.slashToDot(qsRaw);
+
+    // special case: if query is empty, fetch top level notes
     if (_.isEmpty(qsClean)) {
       return NoteLookupUtils.fetchRootResults(notes);
     }
-    const resp = await engine.queryNotes({
-      qs,
-      originalQS,
+
+    // otherwise, query engine for results
+    const transformedQuery = NoteLookupUtils.transformQueryString({
+      query: qsRaw,
       onlyDirectChildren: showDirectChildrenOnly,
     });
-    let nodes = resp.data;
+    const resp = await engine.queryNotes({
+      qs: transformedQuery.queryString,
+      originalQS: qsRaw,
+      onlyDirectChildren: showDirectChildrenOnly,
+    });
 
+    // limit number of results. currently, this is hardcoded and we don't paginate
+    // this is okay because we rely on user refining query to get more results
+    let nodes = resp.data;
     if (nodes.length > PAGINATE_LIMIT) {
       nodes = nodes.slice(0, PAGINATE_LIMIT);
     }
@@ -108,6 +119,7 @@ export class NoteLookupUtils {
 
   /**
    * Transform Dendron lookup syntax to fusejs syntax
+   * - if wiki string, strip out wiki links
    */
   static transformQueryString({
     query,
@@ -162,6 +174,8 @@ function wikiTransform(trimmedQuery: string): TransformedQueryString {
  *
  * Special cases:
  *
+ * - Contains '.' without spaces:
+ *   - 'h1.h4' -> to 'h1 h4' (this allows us to find intermediate levels of hierarchy)
  * - Ends with '.':
  *   - We have logic around for lookups that expects special behavior when lookup
  *     ends with '.' for example GoDown command expects logic such that ending

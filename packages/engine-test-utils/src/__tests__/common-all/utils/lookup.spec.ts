@@ -6,7 +6,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "some/string/value",
+        query: "some/string/value",
       });
     });
 
@@ -28,7 +28,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "some.string.value",
+        query: "some.string.value",
       });
     });
 
@@ -52,7 +52,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
     ].forEach((arr) => {
       it(`WHEN input='${arr[0]}' THEN output is '${arr[1]}'`, () => {
         const transformed = NoteLookupUtils.transformQueryString({
-          pickerValue: arr[0],
+          query: arr[0],
           onlyDirectChildren: true,
         });
 
@@ -66,7 +66,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "some.string.value.",
+        query: "some.string.value.",
       });
     });
 
@@ -88,7 +88,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "some.string.value t1 t2 c1.c2",
+        query: "some.string.value t1 t2 c1.c2",
       });
     });
 
@@ -110,7 +110,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: " some string.value  ",
+        query: " some string.value  ",
       });
     });
 
@@ -128,7 +128,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "v1 | v2",
+        query: "v1 | v2",
       });
     });
 
@@ -146,7 +146,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "[[some.string.value]]",
+        query: "[[some.string.value]]",
       });
     });
 
@@ -164,7 +164,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "  [[some.string.value]]   ",
+        query: "  [[some.string.value]]   ",
       });
     });
 
@@ -182,7 +182,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "[[some description|some.string.value]]",
+        query: "[[some description|some.string.value]]",
       });
     });
 
@@ -200,7 +200,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue: "[[some description|dendron://private/some.string.value]]",
+        query: "[[some description|dendron://private/some.string.value]]",
       });
     });
 
@@ -218,7 +218,7 @@ describe("NoteLookupUtils.transformQueryString tests:", () => {
 
     beforeEach(() => {
       transformed = NoteLookupUtils.transformQueryString({
-        pickerValue:
+        query:
           "[[some description|dendron://private.vault/some.string.value#header-val]]",
       });
     });

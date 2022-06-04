@@ -181,7 +181,7 @@ export async function setupLegacyWorkspace(
     workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
-    selfContained: false,
+    selfContained: true,
   });
   const wsRoot = tmpDir().name;
   if (opts.selfContained) {

@@ -265,6 +265,14 @@
         "title": "Dendron: Create Task Note"
       },
       {
+        "command": "dendron.setTaskStatus",
+        "title": "Dendron: Set Task Status"
+      },
+      {
+        "command": "dendron.completeTask",
+        "title": "Dendron: Complete Task"
+      },
+      {
         "command": "dendron.applyTemplate",
         "title": "Dendron: Apply Template"
       },
@@ -621,6 +629,14 @@
         },
         {
           "command": "dendron.createTask",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.setTaskStatus",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.completeTask",
           "when": "dendron:pluginActive"
         },
         {

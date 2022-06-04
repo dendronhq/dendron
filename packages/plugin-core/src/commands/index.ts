@@ -76,6 +76,8 @@ import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
 import { GotoCommand } from "./Goto";
 import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
 import { ApplyTemplateCommand } from "./ApplyTemplateCommand";
+import { TaskStatusCommand } from "./TaskStatus";
+import { TaskCompleteCommand } from "./TaskComplete";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -156,6 +158,8 @@ const ALL_COMMANDS = [
   ConvertCandidateLinkCommand,
   RunMigrationCommand,
   CreateTaskCommand,
+  TaskStatusCommand,
+  TaskCompleteCommand,
   RegisterNoteTraitCommand,
   CreateNoteWithUserDefinedTrait,
   OpenBackupCommand,

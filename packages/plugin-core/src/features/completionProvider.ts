@@ -37,7 +37,6 @@ import {
   Range,
   TextDocument,
   TextEdit,
-  workspace,
 } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -127,7 +126,10 @@ function noteToCompletionItem({
 }
 
 export const provideCompletionItems = sentryReportingCallback(
-  async (document: TextDocument, position: Position) => {
+  async (
+    document: TextDocument,
+    position: Position
+  ): Promise<CompletionItem[] | undefined> => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
 
@@ -195,7 +197,8 @@ export const provideCompletionItems = sentryReportingCallback(
 
     const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
-    let completionItems: CompletionItem[] | CompletionList;
+    let completionItems: CompletionItem[];
+    let completionsIncomplete = false;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -268,7 +271,7 @@ export const provideCompletionItems = sentryReportingCallback(
         engine,
       });
 
-      const items = notes.map((note) =>
+      completionItems = notes.map((note) =>
         noteToCompletionItem({
           note,
           range,
@@ -282,22 +285,23 @@ export const provideCompletionItems = sentryReportingCallback(
               // x will get sorted after numbers, so these will appear after notes without x
               return `x${note.fname}`;
             }
+            return;
           },
         })
       );
 
       // tell vscode to ask for new completions when typing
-      completionItems = new CompletionList(items, /* is incomplete*/ true);
+      completionsIncomplete = true;
     }
 
     const duration = getDurationMilliseconds(startTime);
-    const completionItemsLength =
-      completionItems instanceof CompletionList
-        ? completionItems.items.length
-        : completionItems.length;
+    const completionList = new CompletionList(
+      completionItems,
+      completionsIncomplete
+    );
     Logger.info({
       ctx,
-      completionItemsLength,
+      completionItemsLength: completionList.items.length,
       duration,
     });
     return completionItems;

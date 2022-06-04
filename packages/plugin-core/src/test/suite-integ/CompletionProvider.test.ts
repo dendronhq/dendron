@@ -56,13 +56,13 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "[[]]");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const items = await provideCompletionItems(
           editor.document,
           new Position(8, 2)
         );
         expect(items).toBeTruthy();
-        // Suggested all the notes
-        expect(items!.length).toEqual(7);
+        // Suggested top level notes
+        expect(items!.length).toEqual(6);
         for (const item of items!) {
           // All suggested items exist
           const found = NoteUtils.getNotesByFnameFromEngine({
@@ -140,7 +140,7 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "#");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const items = await provideCompletionItems(
           editor.document,
           new Position(8, 1)
         );
@@ -193,7 +193,7 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "Lorem ipsum #");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const items = await provideCompletionItems(
           editor.document,
           new Position(8, 13)
         );
@@ -246,7 +246,7 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "@");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const items = await provideCompletionItems(
           editor.document,
           new Position(8, 1)
         );
@@ -284,7 +284,10 @@ suite("completionProvider", function () {
         await editor.edit((editBuilder) => {
           editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
         });
-        items = provideCompletionItems(editor.document, new Position(8, 10));
+        items = await provideCompletionItems(
+          editor.document,
+          new Position(8, 10)
+        );
       });
 
       test("THEN it finds completions", () => {

@@ -20,7 +20,7 @@ import {
 suite("CopyNoteRef", function () {
   const ctx = setupBeforeAfter(this, {});
 
-  describe.only("multi", () => {
+  describe("multi", () => {
     describeMultiWS(
       "WHEN xvault link when allowed in config",
       {

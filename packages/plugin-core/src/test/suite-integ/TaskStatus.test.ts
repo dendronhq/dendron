@@ -3,7 +3,7 @@ import sinon from "sinon";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { before, after, describe } from "mocha";
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { NoteTestUtilsV4, SinonStubbedFn } from "@dendronhq/common-test-utils";
@@ -51,11 +51,12 @@ suite("GIVEN TaskStatus", function () {
     });
     test("THEN updates the task status", async () => {
       const { engine } = ExtensionProvider.getDWorkspace();
-      const task = NoteUtils.getNoteByFnameFromEngine({
-        fname: "task.test",
-        engine,
-        vault: taskNote.vault,
-      });
+      const task = (
+        await engine.findNotes({
+          fname: "task.test",
+          vault: taskNote.vault,
+        })
+      )[0];
       expect(task?.custom.status === "y");
     });
   });

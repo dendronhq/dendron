@@ -155,7 +155,7 @@ suite("BacklinksTreeDataProvider", function () {
         await ExtensionProvider.getWSUtils().openNote(engine.notes["alpha"]);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
-          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+          path.join(wsRoot, VaultUtils.getRelPath(vaults[0]), "beta.md")
         ).path;
         expect(
           out[0].command.arguments[0].path.toLowerCase() as string
@@ -192,7 +192,7 @@ suite("BacklinksTreeDataProvider", function () {
 
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
-          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+          path.join(wsRoot, VaultUtils.getRelPath(vaults[0]), "beta.md")
         ).path;
         expect(
           out[0].command.arguments[0].path.toLowerCase() as string

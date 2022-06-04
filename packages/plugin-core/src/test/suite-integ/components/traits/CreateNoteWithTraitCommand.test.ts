@@ -1,3 +1,4 @@
+import { VaultUtils } from "@dendronhq/common-all";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import { CreateNoteWithTraitCommand } from "../../../../commands/CreateNoteWithTraitCommand";
@@ -37,7 +38,11 @@ suite("CreateNoteWithTraitCommand tests", () => {
 
         await cmd.execute({ fname: "test" });
 
-        const expectedFName = path.join(wsRoot, vaults[0].fsPath, "test.md");
+        const expectedFName = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "test.md"
+        );
 
         expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath).toEqual(
           expectedFName

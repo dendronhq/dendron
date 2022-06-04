@@ -10,7 +10,13 @@ import {
 export * from "./config";
 export * from "./engine";
 export * from "./topics";
-export { GitTestUtils, checkVaults, TestSeedUtils } from "./utils";
+export {
+  GitTestUtils,
+  checkVaults,
+  checkString,
+  checkNotInString,
+  TestSeedUtils,
+} from "./utils";
 export * from "./presets";
 export {
   ENGINE_HOOKS,

@@ -184,7 +184,9 @@ describe(`filterPickerResults`, () => {
       results = filterPickerResults({
         itemsToFilter: inputs,
         // Note: using the actual method that generates transform string here.
-        transformedQuery: NoteLookupUtils.transformQueryString({ pickerValue }),
+        transformedQuery: NoteLookupUtils.transformQueryString({
+          query: pickerValue,
+        }),
       });
     });
 
@@ -227,7 +229,9 @@ describe(`filterPickerResults`, () => {
       results = filterPickerResults({
         itemsToFilter: inputs,
         // Note: using the actual method that generates transform string here.
-        transformedQuery: NoteLookupUtils.transformQueryString({ pickerValue }),
+        transformedQuery: NoteLookupUtils.transformQueryString({
+          query: pickerValue,
+        }),
       });
     });
 

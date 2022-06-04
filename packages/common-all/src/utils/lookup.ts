@@ -106,14 +106,17 @@ export class NoteLookupUtils {
     return ent.replace(/\//g, ".");
   }
 
+  /**
+   * Transform Dendron lookup syntax to fusejs syntax
+   */
   static transformQueryString({
-    pickerValue,
+    query,
     onlyDirectChildren,
   }: {
-    pickerValue: string;
+    query: string;
     onlyDirectChildren?: boolean | undefined;
   }): TransformedQueryString {
-    const trimmed = pickerValue.trim();
+    const trimmed = query.trim();
 
     // Detect wiki link decoration and apply wiki link processing
     if (trimmed.startsWith("[[") && trimmed.endsWith("]]")) {
@@ -159,10 +162,10 @@ function wikiTransform(trimmedQuery: string): TransformedQueryString {
  *
  * Special cases:
  *
- * Ends with '.':
- * We have logic around for lookups that expects special behavior when lookup
- * ends with '.' for example GoDown command expects logic such that ending
- * the lookup with '.' expects only children to be shown.
+ * - Ends with '.':
+ *   - We have logic around for lookups that expects special behavior when lookup
+ *     ends with '.' for example GoDown command expects logic such that ending
+ *     the lookup with '.' expects only children to be shown.
  * */
 function regularTransform(
   trimmedQuery: string,

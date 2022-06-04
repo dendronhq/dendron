@@ -15,6 +15,7 @@ import {
   RespV2,
   RespV3,
   SchemaTemplate,
+  TransformedQueryString,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -40,7 +41,6 @@ import { OnAcceptHook } from "./LookupProviderV3Interface";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
-  TransformedQueryString,
   VaultSelectionMode,
 } from "./types";
 
@@ -634,15 +634,6 @@ export class PickerUtilsV2 {
     delete picker.moreResults;
     delete picker.offset;
     delete picker.allResults;
-  }
-
-  /**
-   @deprecated use {@link NoteLookupUtils.slashToDot}
-   * @param ent
-   * @returns
-   */
-  static slashToDot(ent: string) {
-    return ent.replace(/\//g, ".");
   }
 }
 

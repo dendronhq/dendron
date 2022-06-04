@@ -207,11 +207,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     }
 
     const transformedQuery = NoteLookupUtils.transformQueryString({
-      pickerValue,
+      query: pickerValue,
       onlyDirectChildren: picker.showDirectChildrenOnly,
     });
 
-    const queryOrig = PickerUtilsV2.slashToDot(picker.value);
+    const queryOrig = NoteLookupUtils.slashToDot(picker.value);
     const ws = this.extension.getDWorkspace();
     let profile: number;
     const queryUpToLastDot =

@@ -6,6 +6,7 @@ import {
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
+  TransformedQueryString,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/engine-server";
@@ -15,7 +16,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
-import { DendronQuickPickerV2, TransformedQueryString } from "./types";
+import { DendronQuickPickerV2 } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
 
 export const PAGINATE_LIMIT = 50;

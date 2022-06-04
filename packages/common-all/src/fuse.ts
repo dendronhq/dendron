@@ -201,6 +201,7 @@ export class FuseEngine {
         _.filter(results, (ent) => ent.item.fname === "root"),
         (ent) => ent.item
       );
+      /// seearch eveyrthing
     } else if (qs === "*") {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];
@@ -284,6 +285,10 @@ export class FuseEngine {
     });
   }
 
+  /**
+   * Fuse does not support '*' as a wildcard. This replaces the `*` to a fuse equivalent
+   * to make the engine do the right thing
+   */
   static formatQueryForFuse({ qs }: { qs: string }): string {
     // Fuse does not appear to see [*] as anything special.
     // For example:
@@ -295,9 +300,7 @@ export class FuseEngine {
     // Fuse extended search https://fusejs.io/examples.html#extended-search
     // uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
     // We do this replacement since VSCode quick pick actually appears to respect '*'.
-    let result = qs.split("*").join(" ");
-
-    return result;
+    return qs.split("*").join(" ");
   }
 
   /**
@@ -340,7 +343,7 @@ export class FuseEngine {
       },
     ];
 
-    let sorted = _.orderBy(
+    const sorted = _.orderBy(
       results.map((res) => ({
         ...res,
         levenshteinDist: levenshteinDistance(res.item.fname, originalQS),

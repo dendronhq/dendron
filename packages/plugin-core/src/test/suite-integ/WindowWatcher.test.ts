@@ -10,7 +10,7 @@ import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
 import { MockPreviewProxy } from "../MockPreviewProxy";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,
   runLegacyMultiWorkspaceTest,
@@ -35,11 +35,15 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   let watcher: WindowWatcher | undefined;
 
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
-    test("basic", (done) => {
-      runSingleVaultTest({
-        ctx,
+    describeSingleWS(
+      "WHEN check decorator",
+      {
         postSetupHook: setupBasic,
-        onInit: async ({ vault, wsRoot }) => {
+        ctx,
+      },
+      () => {
+        test("decorators are updated", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot,
@@ -52,16 +56,14 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension: mockExtension,
             previewProxy,
           });
-          const vaultPath = vault.fsPath;
+          const vaultPath = vaults[0].fsPath;
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
           await watcher.triggerUpdateDecorations(editor!);
-          // TODO: check for decorations
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     describeSingleWS(
       "AND WHEN automaticallyShowPreview is set to false",

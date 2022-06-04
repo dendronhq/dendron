@@ -1,12 +1,11 @@
 import {
+  AB_TUTORIAL_TEST,
   DendronError,
-  DVault,
   DWorkspaceV2,
   getStage,
   TutorialEvents,
-  VaultUtils,
-  AB_TUTORIAL_TEST,
   TutorialNoteViewedPayload,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -28,7 +27,10 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
-import { WorkspaceInitializer } from "./workspaceInitializer";
+import {
+  OnWorkspaceCreationOpts,
+  WorkspaceInitializer,
+} from "./workspaceInitializer";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -38,10 +40,7 @@ export class TutorialInitializer
   extends BlankInitializer
   implements WorkspaceInitializer
 {
-  async onWorkspaceCreation(opts: {
-    vaults: DVault[];
-    wsRoot: string;
-  }): Promise<void> {
+  async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {
     super.onWorkspaceCreation(opts);
 
     MetadataService.instance().setActivationContext(
@@ -51,7 +50,7 @@ export class TutorialInitializer
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
     const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
-    const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
+    const vpath = vault2Path({ vault: opts.wsVault!, wsRoot: opts.wsRoot });
 
     const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId

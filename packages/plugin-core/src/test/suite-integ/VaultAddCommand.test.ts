@@ -178,7 +178,7 @@ suite("VaultAddCommand", function () {
           const vaultsRemote: DVault[] = [{ fsPath: vaultPath }];
           await WorkspaceService.createWorkspace({
             wsRoot: remoteDir,
-            vaults: vaultsRemote,
+            additionalVaults: vaultsRemote,
           });
           await GitTestUtils.createRepoWithReadme(remoteDir);
 

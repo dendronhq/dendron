@@ -25,6 +25,7 @@ import {
   GitTestUtils,
 } from "../../utils";
 import { TestSeedUtils } from "../../utils/seed";
+import sinon from "sinon";
 
 describe("WorkspaceUtils", () => {
   describe("findWSRoot", () => {
@@ -88,7 +89,10 @@ describe("WorkspaceService", () => {
     test("basic", async () => {
       const wsRoot = tmpDir().name;
       const vaults = [{ fsPath: "vault1" }];
-      await WorkspaceService.createWorkspace({ wsRoot, vaults });
+      await WorkspaceService.createWorkspace({
+        wsRoot,
+        additionalVaults: vaults,
+      });
       const gitignore = path.join(wsRoot, ".gitignore");
       expect(
         fs.readFileSync(gitignore, { encoding: "utf8" })
@@ -98,7 +102,10 @@ describe("WorkspaceService", () => {
     test("workspace Vault", async () => {
       const wsRoot = tmpDir().name;
       const vaults: DVault[] = [{ fsPath: "vault1", workspace: "foo" }];
-      await WorkspaceService.createWorkspace({ wsRoot, vaults });
+      await WorkspaceService.createWorkspace({
+        wsRoot,
+        additionalVaults: vaults,
+      });
       expect(fs.existsSync(path.join(wsRoot, "foo", "vault1"))).toBeTruthy();
     });
   });
@@ -177,12 +184,10 @@ describe("WorkspaceService", () => {
           await WorkspaceService.createWorkspace({
             wsRoot: tmp,
             useSelfContainedVault: true,
-            vaults: [
-              {
-                fsPath: ".",
-                name: vaultName,
-              },
-            ],
+            wsVault: {
+              fsPath: ".",
+              name: vaultName,
+            },
           });
           const vaultFsPath = path.join(
             FOLDERS.DEPENDENCIES,

@@ -2,8 +2,11 @@ import {
   assertUnreachable,
   CLIEvents,
   DendronError,
+  DVault,
   error2PlainObject,
   ERROR_STATUS,
+  NoteProps,
+  NoteUtils,
   TimeUtils,
 } from "@dendronhq/common-all";
 import {
@@ -23,7 +26,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { CLIAnalyticsUtils } from "..";
+import { CLIAnalyticsUtils, setupEngine } from "..";
 import {
   BuildUtils,
   ExtensionTarget,
@@ -40,6 +43,7 @@ type CommandCLIOpts = {
 export enum DevCommands {
   GENERATE_JSON_SCHEMA_FROM_CONFIG = "generate_json_schema_from_config",
   BUILD = "build",
+  CREATE_TEST_VAULT = "create_test_vault",
   BUMP_VERSION = "bump_version",
   PUBLISH = "publish",
   SYNC_ASSETS = "sync_assets",
@@ -57,7 +61,8 @@ export enum DevCommands {
 type CommandOpts = CommandCLIOpts &
   CommandCommonProps &
   Partial<BuildCmdOpts> &
-  Partial<RunMigrationOpts>;
+  Partial<RunMigrationOpts> &
+  Partial<CreateTestVaultOpts>;
 
 type CommandOutput = Partial<{ error: DendronError; data: any }>;
 
@@ -68,6 +73,14 @@ type BuildCmdOpts = {
   skipSentry?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
+
+type CreateTestVaultOpts = {
+  wsRoot: string;
+  /**
+   * Location of json data
+   */
+  jsonData: string;
+} & CommandCLIOpts;
 
 type BumpVersionOpts = {
   upgradeType: SemverVersion;
@@ -81,6 +94,16 @@ type RunMigrationOpts = {
   migrationVersion: string;
   wsRoot: string;
 } & CommandCLIOpts;
+
+type JsonDataForCreateTestVault = {
+  numNotes: number;
+  numVaults: number;
+  ratios: {
+    tag: number;
+    user: number;
+    reg: number;
+  };
+};
 
 export { CommandOpts as DevCLICommandOpts };
 
@@ -138,11 +161,65 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("wsRoot", {
       describe: "root directory of the Dendron workspace",
     });
+    args.option("jsonData", {
+      describe: "json data to pass into command",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd });
     return { data: { ...args } };
+  }
+
+  async createTestVault({
+    wsRoot,
+    payload,
+  }: {
+    wsRoot: string;
+    payload: JsonDataForCreateTestVault;
+  }) {
+    fs.ensureDirSync(wsRoot);
+    fs.emptyDirSync(wsRoot);
+    this.print(`creating test vault with ${JSON.stringify(payload)}`);
+
+    const vaults: DVault[] = _.times(payload.numVaults, (idx) => {
+      return { fsPath: `vault${idx}` };
+    });
+    const svc = await WorkspaceService.createWorkspace({
+      additionalVaults: vaults,
+      wsVault: { fsPath: "notes", selfContained: true },
+      wsRoot,
+      createCodeWorkspace: false,
+      useSelfContainedVault: true,
+    });
+    await svc.initialize();
+
+    const ratioTotal = _.values(payload.ratios).reduce(
+      (acc, cur) => acc + cur,
+      0
+    );
+    const vaultTotal = payload.numVaults;
+    const { engine, server } = await setupEngine({ wsRoot });
+    this.print(`vaults: ${JSON.stringify(svc.vaults)}`);
+
+    await Promise.all(
+      _.keys(payload.ratios).map(async (key) => {
+        const numNotes = Math.round(
+          (payload.ratios[key as keyof JsonDataForCreateTestVault["ratios"]] /
+            ratioTotal) *
+            payload.numNotes
+        );
+        this.print(`creating ${numNotes} ${key} notes...`);
+        const vault = svc.vaults[_.random(0, vaultTotal - 1)];
+        const notes: NoteProps[] = await Promise.all(
+          _.times(numNotes, async (i) => {
+            return NoteUtils.create({ fname: `${key}.${i}`, vault });
+          })
+        );
+        await engine.bulkAddNotes({ notes });
+      })
+    );
+    return { server };
   }
 
   async generateJSONSchemaFromConfig() {
@@ -210,6 +287,26 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             };
           }
           await this.build(opts);
+          return { error: null };
+        }
+        case DevCommands.CREATE_TEST_VAULT: {
+          if (!this.validateCreateTestVaultArgs(opts)) {
+            return {
+              error: new DendronError({
+                message: "missing required options",
+              }),
+            };
+          }
+          const { wsRoot, jsonData } = opts;
+          const payload = fs.readJSONSync(
+            jsonData
+          ) as JsonDataForCreateTestVault;
+          this.print(`reading json data from ${jsonData}`);
+          const { server } = await this.createTestVault({ wsRoot, payload });
+          if (server.close) {
+            this.print("closing server...");
+            server.close();
+          }
           return { error: null };
         }
         case DevCommands.BUMP_VERSION: {
@@ -486,6 +583,13 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   validateBumpVersionArgs(opts: CommandOpts): opts is BumpVersionOpts {
     if (!opts.upgradeType) {
+      return false;
+    }
+    return true;
+  }
+
+  validateCreateTestVaultArgs(opts: CommandOpts): opts is CreateTestVaultOpts {
+    if (!opts.wsRoot || !opts.jsonData) {
       return false;
     }
     return true;

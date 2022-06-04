@@ -97,6 +97,7 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
 export const provideCompletionItems = sentryReportingCallback(
   (document: TextDocument, position: Position) => {
     const ctx = "provideCompletionItems";
+    const startTime = process.hrtime();
 
     // No-op if we're not in a Dendron Workspace
     if (!DendronExtension.isActive()) {
@@ -219,7 +220,12 @@ export const provideCompletionItems = sentryReportingCallback(
       }
       completionItems.push(item);
     });
-    Logger.info({ ctx, completionItemsLength: completionItems.length });
+    const duration = getDurationMilliseconds(startTime);
+    Logger.info({
+      ctx,
+      completionItemsLength: completionItems.length,
+      duration,
+    });
     return completionItems;
   }
 );

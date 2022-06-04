@@ -11,6 +11,7 @@ import {
 } from "@dendronhq/common-all";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import _ from "lodash";
+import { format } from "path";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";

@@ -1,4 +1,4 @@
-import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
+import { DWorkspaceV2 } from "@dendronhq/common-all";
 import {
   MetadataService,
   WorkspaceActivationContext,
@@ -9,29 +9,12 @@ import {
   WebViewPanelFactory,
 } from "../commands/SeedBrowseCommand";
 import { getExtension } from "../workspace";
-import {
-  OnWorkspaceCreationOpts,
-  WorkspaceInitializer,
-} from "./workspaceInitializer";
+import { WorkspaceInitializer } from "./workspaceInitializer";
 
 /**
  * Seed Browser Workspace Initializer - Open the Seed Browser
  */
 export class SeedBrowserInitializer implements WorkspaceInitializer {
-  /**
-   * No-op
-   */
-  createVaults(_vault?: DVault): DVault[] {
-    return [];
-  }
-
-  /**
-   * No-op
-   */
-  async onWorkspaceCreation(_opts: OnWorkspaceCreationOpts): Promise<void> {
-    return;
-  }
-
   /**
    * Launch Seed Browser Webview
    * @param _opts

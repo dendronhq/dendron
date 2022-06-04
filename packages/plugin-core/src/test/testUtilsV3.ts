@@ -200,14 +200,18 @@ export async function setupLegacyWorkspace(
     wsRoot,
   });
 
-  const vaults = await new SetupWorkspaceCommand().execute({
-    rootDirRaw: wsRoot,
-    skipOpenWs: true,
-    ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer(),
-    workspaceType: copts.workspaceType,
-    selfContained: copts.selfContained,
-  });
+  const { wsVault, additionalVaults } =
+    await new SetupWorkspaceCommand().execute({
+      rootDirRaw: wsRoot,
+      skipOpenWs: true,
+      ...copts.setupWsOverride,
+      workspaceInitializer: new BlankInitializer(),
+      workspaceType: copts.workspaceType,
+      selfContained: copts.selfContained,
+    });
+  const vaults = [wsVault, ...(additionalVaults || [])].filter(
+    (v) => !_.isUndefined(v)
+  ) as DVault[];
   stubWorkspaceFolders(wsRoot, vaults);
 
   // update config

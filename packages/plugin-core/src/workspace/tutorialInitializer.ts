@@ -50,7 +50,7 @@ export class TutorialInitializer
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
     const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
-    const vpath = vault2Path({ vault: opts.wsVault, wsRoot: opts.wsRoot });
+    const vpath = vault2Path({ vault: opts.wsVault!, wsRoot: opts.wsRoot });
 
     const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
       SegmentClient.instance().anonymousId

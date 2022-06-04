@@ -35,7 +35,7 @@ type CommandOpts = CommandInput & {
   selfContained?: boolean;
 };
 
-type CommandOutput = DVault[];
+type CommandOutput = { wsVault?: DVault; additionalVaults?: DVault[] };
 
 export { CommandOpts as SetupWorkspaceOpts };
 
@@ -189,7 +189,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
     };
   }
 
-  async execute(opts: CommandOpts): Promise<DVault[]> {
+  async execute(
+    opts: CommandOpts
+  ): Promise<{ wsVault?: DVault; additionalVaults?: DVault[] }> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     // This command can run before the extension is registered, especially during testing
     const defaultSelfContained =
@@ -212,20 +214,17 @@ export class SetupWorkspaceCommand extends BasicCommand<
         skipConfirmation: opts.skipConfirmation,
       }))
     ) {
-      return [];
+      return {};
     }
 
-    const vaults = opts.workspaceInitializer
-      ? opts.workspaceInitializer.createVaults(opts.vault)
-      : [];
+    let wsVault: DVault | undefined;
+    let additionalVaults: DVault[] | undefined;
 
-    // TODO: we currently don't have a workspace initializer that creates more than one vault
-    // if that happens, the following assumption will be broken
-    // we will need to have a way of splitting out a wsVault vs additional vaults at that point
-    if (vaults.length > 1) {
-      throw new Error("workspace initializer should only create one vault");
+    if (opts?.workspaceInitializer?.createVaults) {
+      ({ wsVault, additionalVaults } = opts.workspaceInitializer.createVaults(
+        opts.vault
+      ));
     }
-    const wsVault = vaults[0];
 
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
@@ -233,6 +232,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     const svc = await WorkspaceService.createWorkspace({
       wsVault,
+      additionalVaults,
       wsRoot: rootDir,
       createCodeWorkspace,
       useSelfContainedVault: selfContained,
@@ -240,6 +240,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({
         wsVault,
+        additionalVaults,
         wsRoot: rootDir,
         svc,
       });
@@ -256,7 +257,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
         VSCodeUtils.reloadWindow();
       }
     }
-    return vaults;
+    return { wsVault, additionalVaults };
   }
 
   /**

@@ -2,7 +2,7 @@ import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
 
 export type OnWorkspaceCreationOpts = {
-  wsVault: DVault;
+  wsVault?: DVault;
   additionalVaults?: DVault[];
   wsRoot: string;
   svc?: WorkspaceService;
@@ -15,7 +15,7 @@ export type WorkspaceInitializer = {
   /**
    * Create the vaults to be added to the workspace being initialized.
    */
-  createVaults(vault?: DVault): DVault[];
+  createVaults?(wsVault?: DVault): { wsVault?: DVault; additionalVaults?: [] };
 
   /**
    * Invoked after workspace has been created. Perform operations such as copying over notes.

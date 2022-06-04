@@ -29,6 +29,7 @@ import {
   CancellationToken,
   CompletionItem,
   CompletionItemKind,
+  CompletionList,
   ExtensionContext,
   languages,
   MarkdownString,
@@ -36,6 +37,7 @@ import {
   Range,
   TextDocument,
   TextEdit,
+  workspace,
 } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -130,13 +132,14 @@ export const provideCompletionItems = sentryReportingCallback(
     const startTime = process.hrtime();
 
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!ExtensionProvider.getExtension().isActive()) {
       return;
     }
 
     const line = document.lineAt(position).text;
     Logger.info({ ctx, position, msg: "enter" });
 
+    // get all matches
     let found: RegExpMatchArray | undefined;
     const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);
     for (const match of matches) {
@@ -149,14 +152,18 @@ export const provideCompletionItems = sentryReportingCallback(
         found = match;
       }
     }
+
+    // if no match found, exit early
     if (
       _.isUndefined(found) ||
       _.isUndefined(found.index) ||
       _.isUndefined(found.groups)
     )
       return;
+
     Logger.debug({ ctx, found });
 
+    // if match is hash, delegate to block auto complete
     if (
       (found.groups.hash || found.groups.hashNoSpace) &&
       found.index + (found.groups.beforeAnchor?.length || 0) >
@@ -166,6 +173,7 @@ export const provideCompletionItems = sentryReportingCallback(
       return;
     }
 
+    // do autocomplete
     let start: number;
     let end: number;
     if (found.groups.hashTag || found.groups.userTag) {
@@ -187,7 +195,7 @@ export const provideCompletionItems = sentryReportingCallback(
 
     const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
-    let completionItems: CompletionItem[];
+    let completionItems: CompletionItem[] | CompletionList;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -230,37 +238,37 @@ export const provideCompletionItems = sentryReportingCallback(
       } else if (found?.groups?.noteNoSpace) {
         qsRaw = found?.groups?.noteNoSpace;
       } else {
-        // didn't find anything
-        return;
+        qsRaw = "";
       }
-      const insertTextTransform =
-        found?.groups?.noBracket !== undefined
-          ? (note: NoteProps) => {
-              let resp = note.fname + "]]";
-              if (
-                currentVault &&
-                !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
-              ) {
-                const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
-                  fname: note.fname,
-                  engine,
-                }).length;
-                if (sameNameNotes > 1) {
-                  // There are multiple notes with the same name in multiple vaults,
-                  // and this note is in a different vault than the current note.
-                  // To generate a link to this note, we have to do an xvault link.
-                  resp = `${VaultUtils.toURIPrefix(note.vault)}/${resp}`;
-                }
-              }
-              return resp;
-            }
-          : undefined;
+      const insertTextTransform = (note: NoteProps) => {
+        let resp = note.fname;
+        if (found?.groups?.noBracket !== undefined) {
+          resp += "]]";
+        }
+        if (
+          currentVault &&
+          !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+        ) {
+          const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
+            fname: note.fname,
+            engine,
+          }).length;
+          if (sameNameNotes > 1) {
+            // There are multiple notes with the same name in multiple vaults,
+            // and this note is in a different vault than the current note.
+            // To generate a link to this note, we have to do an xvault link.
+            resp = `${VaultUtils.toURIPrefix(note.vault)}/${resp}`;
+          }
+        }
+        return resp;
+      };
+
       const notes = await NoteLookupUtils.lookup({
         qsRaw,
         engine,
       });
 
-      completionItems = notes.map((note) =>
+      const items = notes.map((note) =>
         noteToCompletionItem({
           note,
           range,
@@ -277,12 +285,19 @@ export const provideCompletionItems = sentryReportingCallback(
           },
         })
       );
+
+      // tell vscode to ask for new completions when typing
+      completionItems = new CompletionList(items, /* is incomplete*/ true);
     }
 
     const duration = getDurationMilliseconds(startTime);
+    const completionItemsLength =
+      completionItems instanceof CompletionList
+        ? completionItems.items.length
+        : completionItems.length;
     Logger.info({
       ctx,
-      completionItemsLength: completionItems.length,
+      completionItemsLength,
       duration,
     });
     return completionItems;
@@ -565,7 +580,8 @@ export const activate = (context: ExtensionContext) => {
       },
       "[", // for wikilinks and references
       "#", // for hashtags
-      "@" // for user tags
+      "@", // for user tags
+      "."
     )
   );
   context.subscriptions.push(

@@ -1,64 +1,61 @@
-import { ConfigUtils } from "@dendronhq/common-all";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS, TestConfigUtils } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { expect, runMultiVaultTest } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import { WSUtils } from "../../WSUtils";
+import { expect } from "../testUtilsv2";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("CopyNoteRef", function () {
   const ctx = setupBeforeAfter(this, {});
 
-  describe("multi", () => {
-    test("xvault link when allowed in config", (done) => {
-      runMultiVaultTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                true
-              );
-              return config;
-            },
-            { wsRoot }
-          );
+  describe.only("multi", () => {
+    describeMultiWS(
+      "WHEN xvault link when allowed in config",
+      {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        modConfigCb: (config: IntermediateDendronConfig) => {
+          ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
+          return config;
+        },
+      },
+      () => {
+        test("THEN create xvault link", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
           );
           await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
           const link = await new CopyNoteRefCommand().run();
-          expect(link).toEqual("![[dendron://main/foo]]");
-          done();
-        },
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      });
-    });
+          expect(link).toEqual("![[dendron://vault1/foo]]");
+        });
+      }
+    );
 
-    test("no xvault link when disabled in config", (done) => {
-      runMultiVaultTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setWorkspaceProp(
-                config,
-                "enableXVaultWikiLink",
-                false
-              );
-              return config;
-            },
-            { wsRoot }
-          );
+    describeMultiWS(
+      "no xvault link when disabled in config",
+      {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+        modConfigCb: (config: IntermediateDendronConfig) => {
+          ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", false);
+          return config;
+        },
+      },
+      () => {
+        test("THEN create xvault link", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -66,13 +63,9 @@ suite("CopyNoteRef", function () {
           await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
           const link = await new CopyNoteRefCommand().run();
           expect(link).toEqual("![[foo]]");
-          done();
-        },
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupBasic(opts);
-        },
-      });
-    });
+        });
+      }
+    );
   });
 
   test("basic", (done) => {

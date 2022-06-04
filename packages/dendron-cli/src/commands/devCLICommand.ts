@@ -2,6 +2,7 @@ import {
   assertUnreachable,
   CLIEvents,
   DendronError,
+  DVault,
   error2PlainObject,
   ERROR_STATUS,
   NoteProps,
@@ -96,6 +97,7 @@ type RunMigrationOpts = {
 
 type JsonDataForCreateTestVault = {
   numNotes: number;
+  numVaults: number;
   ratios: {
     tag: number;
     user: number;
@@ -178,22 +180,27 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }) {
     fs.ensureDirSync(wsRoot);
     fs.emptyDirSync(wsRoot);
+    this.print(`creating test vault with ${JSON.stringify(payload)}`);
 
+    const vaults: DVault[] = _.times(payload.numVaults, (idx) => {
+      return { fsPath: `vault${idx}` };
+    });
     const svc = await WorkspaceService.createWorkspace({
-      vaults: [{ fsPath: "vault" }],
+      additionalVaults: vaults,
+      wsVault: { fsPath: "notes", selfContained: true },
       wsRoot,
       createCodeWorkspace: false,
       useSelfContainedVault: true,
     });
     await svc.initialize();
-    const vault = svc.vaults[0];
 
     const ratioTotal = _.values(payload.ratios).reduce(
       (acc, cur) => acc + cur,
       0
     );
-
+    const vaultTotal = payload.numVaults;
     const { engine, server } = await setupEngine({ wsRoot });
+    this.print(`vaults: ${JSON.stringify(svc.vaults)}`);
 
     await Promise.all(
       _.keys(payload.ratios).map(async (key) => {
@@ -203,6 +210,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             payload.numNotes
         );
         this.print(`creating ${numNotes} ${key} notes...`);
+        const vault = svc.vaults[_.random(0, vaultTotal - 1)];
         const notes: NoteProps[] = await Promise.all(
           _.times(numNotes, async (i) => {
             return NoteUtils.create({ fname: `${key}.${i}`, vault });

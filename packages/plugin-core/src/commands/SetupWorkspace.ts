@@ -7,7 +7,6 @@ import {
 import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import PathLike = fs.PathLike;
 import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
@@ -17,6 +16,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
+import PathLike = fs.PathLike;
 
 type CommandInput = {
   rootDirRaw: string;
@@ -219,19 +219,27 @@ export class SetupWorkspaceCommand extends BasicCommand<
       ? opts.workspaceInitializer.createVaults(opts.vault)
       : [];
 
+    // TODO: we currently don't have a workspace initializer that creates more than one vault
+    // if that happens, the following assumption will be broken
+    // we will need to have a way of splitting out a wsVault vs additional vaults at that point
+    if (vaults.length > 1) {
+      throw new Error("workspace initializer should only create one vault");
+    }
+    const wsVault = vaults[0];
+
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
       workspaceType === WorkspaceType.CODE || workspaceType === undefined;
 
     const svc = await WorkspaceService.createWorkspace({
-      vaults,
+      wsVault,
       wsRoot: rootDir,
       createCodeWorkspace,
       useSelfContainedVault: selfContained,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({
-        vaults,
+        wsVault,
         wsRoot: rootDir,
         svc,
       });

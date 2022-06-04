@@ -175,7 +175,6 @@ export class SeedService {
         writeYAML(cpath, seed);
         const ws = await WorkspaceService.createWorkspace({
           wsRoot,
-          vaults: [],
           createCodeWorkspace: true,
         });
         const config = ws.config;

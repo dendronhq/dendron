@@ -2,7 +2,6 @@ import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import {
   MetadataService,
   WorkspaceActivationContext,
-  WorkspaceService,
 } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import {
@@ -10,7 +9,10 @@ import {
   WebViewPanelFactory,
 } from "../commands/SeedBrowseCommand";
 import { getExtension } from "../workspace";
-import { WorkspaceInitializer } from "./workspaceInitializer";
+import {
+  OnWorkspaceCreationOpts,
+  WorkspaceInitializer,
+} from "./workspaceInitializer";
 
 /**
  * Seed Browser Workspace Initializer - Open the Seed Browser
@@ -26,11 +28,7 @@ export class SeedBrowserInitializer implements WorkspaceInitializer {
   /**
    * No-op
    */
-  async onWorkspaceCreation(_opts: {
-    vaults: DVault[];
-    wsRoot: string;
-    svc?: WorkspaceService;
-  }): Promise<void> {
+  async onWorkspaceCreation(_opts: OnWorkspaceCreationOpts): Promise<void> {
     return;
   }
 

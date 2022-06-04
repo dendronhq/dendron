@@ -6,6 +6,7 @@ import {
   isNotUndefined,
   LINK_NAME,
   LINK_NAME_NO_SPACES,
+  NoteLookupUtils,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
@@ -94,8 +95,37 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
   "g"
 );
 
+function noteToCompletionItem({
+  note,
+  range,
+  lblTransform,
+  insertTextTransform,
+  sortTextTransform,
+}: {
+  note: NoteProps;
+  range: Range;
+  lblTransform?: (note: NoteProps) => string;
+  insertTextTransform?: (note: NoteProps) => string;
+  sortTextTransform?: (note: NoteProps) => string | undefined;
+}): CompletionItem {
+  const label = lblTransform ? lblTransform(note) : note.fname;
+  const insertText = insertTextTransform
+    ? insertTextTransform(note)
+    : note.fname;
+  const sortText = sortTextTransform ? sortTextTransform(note) : undefined;
+  const item: CompletionItem = {
+    label,
+    insertText,
+    sortText,
+    kind: CompletionItemKind.File,
+    detail: VaultUtils.getName(note.vault),
+    range,
+  };
+  return item;
+}
+
 export const provideCompletionItems = sentryReportingCallback(
-  (document: TextDocument, position: Position) => {
+  async (document: TextDocument, position: Position) => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
 
@@ -155,9 +185,9 @@ export const provideCompletionItems = sentryReportingCallback(
     }
     const range = new Range(position.line, start, position.line, end);
 
-    const { engine } = getDWorkspace();
+    const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
-    const completionItems: CompletionItem[] = [];
+    let completionItems: CompletionItem[];
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -167,59 +197,88 @@ export const provideCompletionItems = sentryReportingCallback(
       wsRoot,
     });
 
-    _.values(notes).map((note, index) => {
-      const item: CompletionItem = {
-        label: note.fname,
-        insertText: note.fname,
-        kind: CompletionItemKind.File,
-        sortText: padWithZero(index),
-        detail: VaultUtils.getName(note.vault),
-        range,
-      };
-
-      if (found?.groups?.hashTag) {
-        // We are completing a hashtag, so only do completion for tag notes.
-        if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
-        // Since this is a hashtag, `tags.foo` becomes `#foo`.
-        item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
-        item.insertText = item.label;
-        // hashtags don't support xvault links, so we skip any special xvault handling
-      } else if (found?.groups?.userTag) {
-        // We are completing a user tag, so only do completion for user notes.
-        if (!note.fname.startsWith(USERS_HIERARCHY)) return;
-        // Since this is a hashtag, `tags.foo` becomes `#foo`.
-        item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
-        item.insertText = item.label;
-        // user tags don't support xvault links, so we skip any special xvault handling
+    if (found?.groups?.hashTag) {
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw: `${TAGS_HIERARCHY}.`,
+        engine,
+      });
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          lblTransform: (note) => `${note.fname.slice(TAGS_HIERARCHY.length)}`,
+          insertTextTransform: (note) => note.fname,
+        })
+      );
+    } else if (found?.groups?.userTag) {
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw: `${USERS_HIERARCHY}.`,
+        engine,
+      });
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          lblTransform: (note) => `${note.fname.slice(USERS_HIERARCHY.length)}`,
+          insertTextTransform: (note) => note.fname,
+        })
+      );
+    } else {
+      let qsRaw: string;
+      if (found?.groups?.note) {
+        qsRaw = found?.groups?.note;
+      } else if (found?.groups?.noteNoSpace) {
+        qsRaw = found?.groups?.noteNoSpace;
       } else {
-        if (found?.groups?.noBracket !== undefined) {
-          // If the brackets are missing, then insert them too
-          item.insertText = `${item.insertText}]]`;
-        }
-        if (
-          currentVault &&
-          !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
-        ) {
-          // For notes from other vaults than the current note, sort them after notes from the current vault.
-          // x will get sorted after numbers, so these will appear after notes without x
-          item.sortText = "x" + item.sortText;
-
-          const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
-            fname: note.fname,
-            engine,
-          }).length;
-          if (sameNameNotes > 1) {
-            // There are multiple notes with the same name in multiple vaults,
-            // and this note is in a different vault than the current note.
-            // To generate a link to this note, we have to do an xvault link.
-            item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
-              item.insertText
-            }`;
-          }
-        }
+        // didn't find anything
+        return;
       }
-      completionItems.push(item);
-    });
+      const insertTextTransform =
+        found?.groups?.noBracket !== undefined
+          ? (note: NoteProps) => {
+              let resp = note.fname + "]]";
+              if (
+                currentVault &&
+                !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+              ) {
+                const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
+                  fname: note.fname,
+                  engine,
+                }).length;
+                if (sameNameNotes > 1) {
+                  // There are multiple notes with the same name in multiple vaults,
+                  // and this note is in a different vault than the current note.
+                  // To generate a link to this note, we have to do an xvault link.
+                  resp = `${VaultUtils.toURIPrefix(note.vault)}/${resp}`;
+                }
+              }
+              return resp;
+            }
+          : undefined;
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw,
+        engine,
+      });
+
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          insertTextTransform,
+          sortTextTransform: (note) => {
+            if (
+              currentVault &&
+              !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+            ) {
+              // For notes from other vaults than the current note, sort them after notes from the current vault.
+              // x will get sorted after numbers, so these will appear after notes without x
+              return `x${note.fname}`;
+            }
+          },
+        })
+      );
+    }
+
     const duration = getDurationMilliseconds(startTime);
     Logger.info({
       ctx,

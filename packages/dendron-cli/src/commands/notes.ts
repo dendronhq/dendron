@@ -21,7 +21,7 @@ type CommandCLIOpts = {
   enginePort?: number;
   query?: string;
   cmd: NoteCommands;
-  output: NoteCLIOutput;
+  output?: NoteCLIOutput;
   destFname?: string;
   destVaultName?: string;
 };

@@ -50,6 +50,85 @@ const runLookupCmd = (
   }) as Promise<{ data: NoteCommandData }>;
 };
 
+describe("WHEN run 'dendron note find'", () => {
+  describe("AND WHEN find note that doesn't exist", () => {
+    test("THEN return empty result", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const {
+            data: { notesOutput },
+          } = await runFindCmd({
+            wsRoot,
+            engine,
+            query: "gamma",
+            output: NoteCLIOutput.JSON,
+          });
+          expect(notesOutput).toEqual([]);
+          const note = NoteUtils.getNoteByFnameFromEngine({
+            fname: "gamma",
+            vault,
+            engine,
+          });
+          // note not created
+          expect(note).toBeUndefined();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN find note with single matches", () => {
+    test("THEN return one matches", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runFindCmd({
+            wsRoot,
+            engine,
+            query: "foo.ch1",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN find note with multiple matches", () => {
+    test("THEN return all matches", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runFindCmd({
+            wsRoot,
+            engine,
+            query: "foo",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual([
+            "foo",
+            "foo.ch1",
+          ]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+});
+
 describe("WHEN run 'dendron note lookup'", () => {
   describe("AND WHEN find note that doesn't exist", () => {
     test("THEN return empty result", async () => {

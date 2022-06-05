@@ -3,6 +3,7 @@ import {
   DendronError,
   DEngineClient,
   DVault,
+  ErrorFactory,
   NoteLookupUtils,
   NoteProps,
   NoteUtils,
@@ -20,7 +21,7 @@ type CommandCLIOpts = {
   enginePort?: number;
   query?: string;
   cmd: NoteCommands;
-  output: NoteCLIOutput;
+  output?: NoteCLIOutput;
   destFname?: string;
   destVaultName?: string;
 };
@@ -35,8 +36,20 @@ type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
 type CommandOutput = { data: any; error?: DendronError };
 
+export type NoteCommandData = {
+  /**
+   * String output
+   */
+  stringOutput: string;
+  notesOutput: NoteProps[];
+};
+
 export enum NoteCommands {
-  LOOKUP_V2 = "lookupv2",
+  /**
+   * Like lookup, but only look for notes
+   * Returns a list of notes
+   */
+  FIND = "find",
   LOOKUP = "lookup",
   DELETE = "delete",
   MOVE = "move",
@@ -169,20 +182,26 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, output, destFname, destVaultName } = opts;
+    const { cmd, engine, output, destFname, destVaultName } = _.defaults(opts, {
+      output: NoteCLIOutput.JSON,
+    });
 
     try {
       switch (cmd) {
-        case NoteCommands.LOOKUP_V2: {
+        case NoteCommands.FIND: {
           const { query } = checkQuery(opts);
           const notes = await NoteLookupUtils.lookup({ qsRaw: query, engine });
           const resp = await formatNotes({
-            output: output || NoteCLIOutput.JSON,
+            output: NoteCLIOutput.JSON,
             notes,
             engine,
           });
           this.print(resp);
-          return { data: { payload: resp, rawData: resp } };
+          const data: NoteCommandData = {
+            notesOutput: notes,
+            stringOutput: resp,
+          };
+          return { data };
         }
         case NoteCommands.LOOKUP: {
           const { query, vault } = checkQueryAndVault(opts);
@@ -191,12 +210,27 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             createIfNew: true,
             vault,
           });
-          let payload: string = "";
+          let stringOutput: string = "";
           if (data?.note) {
-            payload = await formatNote({ engine, note: data.note, output });
-            this.print(payload);
+            stringOutput = await formatNotes({
+              engine,
+              notes: [data.note],
+              output,
+            });
+            this.print(stringOutput);
+            return {
+              data: {
+                notesOutput: [data.note],
+                stringOutput,
+              } as NoteCommandData,
+            };
           }
-          return { data: { payload, rawData: data } };
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: "lookup failed",
+            }),
+            data: undefined,
+          };
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);

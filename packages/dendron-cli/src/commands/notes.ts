@@ -10,7 +10,6 @@ import {
 } from "@dendronhq/common-all";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import _ from "lodash";
-import { format } from "path";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
@@ -21,7 +20,7 @@ type CommandCLIOpts = {
   enginePort?: number;
   query?: string;
   cmd: NoteCommands;
-  output?: NoteCLIOutput;
+  output: NoteCLIOutput;
   destFname?: string;
   destVaultName?: string;
 };
@@ -71,7 +70,7 @@ async function formatNotes({
   notes,
   engine,
 }: {
-  output?: NoteCLIOutput;
+  output: NoteCLIOutput;
   notes: NoteProps[];
   engine: DEngineClient;
 }) {
@@ -80,6 +79,9 @@ async function formatNotes({
       return formatNote({ note, output, engine });
     })
   );
+  if (output === NoteCLIOutput.JSON) {
+    return JSON.stringify(resp, null, 4);
+  }
   return resp.join("\n");
 }
 
@@ -88,17 +90,15 @@ async function formatNote({
   note,
   engine,
 }: {
-  output?: NoteCLIOutput;
+  output: NoteCLIOutput;
   note: NoteProps;
   engine: DEngineClient;
-}) {
-  if (!output) {
-    output = NoteCLIOutput.JSON;
-  }
-  let payload: string;
+}): Promise<string | NoteProps> {
+  let payload: string | NoteProps;
   switch (output) {
     case NoteCLIOutput.JSON:
-      payload = JSON.stringify(note, null, 4);
+      // this is a NOP
+      payload = note;
       break;
     case NoteCLIOutput.MARKDOWN_DENDRON:
       payload = NoteUtils.serialize(note);

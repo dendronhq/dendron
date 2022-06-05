@@ -198,7 +198,7 @@ export const provideCompletionItems = sentryReportingCallback(
     const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
     let completionItems: CompletionItem[];
-    let completionsIncomplete = false;
+    let completionsIncomplete = true;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -289,9 +289,6 @@ export const provideCompletionItems = sentryReportingCallback(
           },
         })
       );
-
-      // tell vscode to ask for new completions when typing
-      completionsIncomplete = true;
     }
 
     const duration = getDurationMilliseconds(startTime);
@@ -584,8 +581,7 @@ export const activate = (context: ExtensionContext) => {
       },
       "[", // for wikilinks and references
       "#", // for hashtags
-      "@", // for user tags
-      "."
+      "@" // for user tags
     )
   );
   context.subscriptions.push(

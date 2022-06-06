@@ -1,3 +1,4 @@
+import { VaultUtils } from "@dendronhq/common-all";
 import {
   getAllImportPods,
   MarkdownImportPod,
@@ -62,7 +63,7 @@ export class ImportObsidianCommand extends ImportPodCommand {
 
     const config = {
       src,
-      vaultName: vault.name,
+      vaultName: VaultUtils.getName(vault),
     };
 
     return { podChoice, config };

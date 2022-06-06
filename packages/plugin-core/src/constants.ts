@@ -28,12 +28,10 @@ const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
   const out: {
     id: string;
     name: string;
-    contextualTitle: string;
     type?: "webview";
   } = {
     id,
     name: entry.label,
-    contextualTitle: entry.label,
   };
   if (isWebViewEntry(entry)) {
     out.type = "webview";

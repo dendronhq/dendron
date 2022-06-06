@@ -61,7 +61,6 @@
         {
           "id": "dendron.sample",
           "name": "Sample View",
-          "contextualTitle": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
         }
@@ -81,21 +80,18 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "contextualTitle": "Tree View",
           "when": "dendron:pluginActive",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.lookup-view",
           "name": "Lookup View",
-          "contextualTitle": "Lookup View",
           "type": "webview",
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
           "id": "dendron.calendar-view",
           "name": "Calendar View",
-          "contextualTitle": "Calendar View",
           "type": "webview",
           "when": "dendron:pluginActive"
         },
@@ -106,7 +102,6 @@
         {
           "id": "dendron.graph-panel",
           "name": "Graph Panel",
-          "contextualTitle": "Graph Panel",
           "type": "webview",
           "when": "dendron:pluginActive"
         }

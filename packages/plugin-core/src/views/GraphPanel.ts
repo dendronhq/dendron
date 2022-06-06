@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronTreeViewKey,
   DMessage,
   DMessageEnum,
@@ -61,13 +62,24 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   async onDidReceiveMessageHandler(msg: GraphViewMessage) {
     const ctx = "GraphPanel(side):onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
+    const createStub = ConfigUtils.getWorkspace(
+      this._ext.getDWorkspace().config
+    ).graph.createStub;
     switch (msg.type) {
       case GraphViewMessageEnum.onSelect: {
         const note = this._ext.getEngine().notes[msg.data.id];
-        await new GotoNoteCommand(this._ext).execute({
-          qs: note.fname,
-          vault: note.vault,
-        });
+        if (note.stub && !createStub) {
+          this.refresh(note, createStub);
+        } else {
+          if (this._ext.wsUtils.getActiveNote()?.fname === note.fname) {
+            this.refresh(note);
+            break;
+          }
+          await new GotoNoteCommand(this._ext).execute({
+            qs: note.fname,
+            vault: note.vault,
+          });
+        }
         AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
           type: "NodeClicked",
         });
@@ -158,7 +170,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     }
   }
 
-  public refresh(note?: NoteProps) {
+  public refresh(note?: NoteProps, createStub?: boolean) {
     if (this._view) {
       if (note) {
         this._view.show?.(true);
@@ -168,7 +180,10 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         data: {
           note,
           syncChangedNote: true,
-          activeNote: this._ext.wsUtils.getActiveNote(),
+          activeNote:
+            note?.stub && !createStub
+              ? note
+              : this._ext.wsUtils.getActiveNote(),
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

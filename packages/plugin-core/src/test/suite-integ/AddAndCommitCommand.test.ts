@@ -5,13 +5,13 @@ import {
   SyncActionStatus,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
-import { GitTestUtils, checkString } from "@dendronhq/engine-test-utils";
+import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { AddAndCommit } from "../../commands/AddAndCommit";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("GIVEN Workspace Add And Commit command is run", function () {
   describeSingleWS(
@@ -37,13 +37,15 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
         expect(
-          await checkString(
-            finalMessage,
-            "Finished  Commit",
-            "Skipped",
-            "because it has no new changes",
-            "Committed 0 repo"
-          )
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because it has no new changes",
+              "Committed 0 repo",
+            ],
+          })
         ).toBeTruthy();
       });
     }
@@ -71,12 +73,14 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
         expect(
-          await checkString(
-            finalMessage,
-            "Finished Commit",
-            "Skipped",
-            "because they have merge conflicts that must be resolved manually. Committed 0 repo"
-          )
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because they have merge conflicts that must be resolved manually. Committed 0 repo",
+            ],
+          })
         ).toBeTruthy();
       });
     }
@@ -111,12 +115,14 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
           SyncActionStatus.REBASE_IN_PROGRESS
         );
         expect(
-          await checkString(
-            finalMessage,
-            "Finished Commit",
-            "Skipped",
-            "because there's a rebase in progress that must be resolved. Committed 0 repo"
-          )
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because there's a rebase in progress that must be resolved. Committed 0 repo",
+            ],
+          })
         ).toBeTruthy();
       });
     }

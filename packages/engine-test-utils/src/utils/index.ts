@@ -19,7 +19,7 @@ export * from "./git";
 export * from "./seed";
 export * from "./unified";
 
-export async function checkString(body: string, ...match: string[]) {
+async function checkString(body: string, ...match: string[]) {
   return expect(
     await AssertUtils.assertInString({
       body,

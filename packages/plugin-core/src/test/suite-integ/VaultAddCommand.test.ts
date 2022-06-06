@@ -11,10 +11,10 @@ import {
 } from "@dendronhq/common-all";
 import {
   note2File,
-  readYAML,
   readYAMLAsync,
   schemaModuleOpts2File,
   tmpDir,
+  vault2Path,
 } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
@@ -80,8 +80,9 @@ suite("VaultAddCommand", function () {
             wsRoot,
             vaults: [
               {
-                fsPath: "vault",
+                fsPath: "notes",
                 name: "dendron",
+                selfContained: true,
                 workspace: "vaultRemote",
               },
               vaults[0],
@@ -281,52 +282,32 @@ suite("VaultAddCommand", function () {
       },
       () => {
         test("THEN do right thing", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vault = vaults[0];
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
 
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            ".gitignore",
+          expect(await fs.readdir(vpath)).toEqual([
             "root.md",
             "root.schema.yml",
           ]);
-          expect(
-            fs.readFileSync(path.join(vpath, ".gitignore"), {
-              encoding: "utf8",
-            })
-          ).toEqual("\n.dendron.cache.*");
+          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
           await checkVaults(
             {
               wsRoot,
-              vaults: [
-                {
-                  fsPath: "vault2",
-                },
-                vault,
-              ],
+              vaults: vaultsAfter,
             },
             expect
           );
+          expect(vaultsAfter.length).toEqual(2);
 
           // new file added to newline
           expect(
             await FileTestUtils.assertInFile({
               fpath: path.join(wsRoot, ".gitignore"),
-              match: ["\nvault2"],
+              match: ["vault2"],
             })
           ).toBeTruthy();
-
-          // check config
-          const config = readYAML(
-            path.join(wsRoot, "dendron.yml")
-          ) as IntermediateDendronConfig;
-          const publishingConfig = ConfigUtils.getPublishingConfig(config);
-          expect(publishingConfig.duplicateNoteBehavior).toEqual({
-            action: "useVault",
-            payload: [VaultUtils.getName(vault), "vault2"],
-          });
 
           // check note is still existing note
           expect(
@@ -341,25 +322,27 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("AND WHEN add absolute path inside wsRoot", {}, () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vault = vaults[0];
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const vpath = path.join(wsRoot, "vault2");
         stubVaultInput({ sourceType: "local", sourcePath: vpath });
         await new VaultAddCommand().run();
-        expect(fs.readdirSync(vpath)).toEqual([
-          ".gitignore",
+
+        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+
+        expect(vaultsAfter.length).toEqual(2);
+        expect(
+          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+        ).toEqual([
+          ".dendron.cache.json",
+          ".vscode",
+          "assets",
           "root.md",
           "root.schema.yml",
         ]);
         await checkVaults(
           {
             wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
+            vaults: vaultsAfter,
           },
           expect
         );
@@ -368,26 +351,25 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("AND WHEN add rel path inside wsRoot", {}, () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vault = vaults[0];
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const sourcePath = "vault2";
         stubVaultInput({ sourceType: "local", sourcePath });
         await new VaultAddCommand().run();
-        const vpath = path.join(wsRoot, sourcePath);
-        expect(fs.readdirSync(vpath)).toEqual([
-          ".gitignore",
+
+        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+        expect(
+          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+        ).toEqual([
+          ".dendron.cache.json",
+          ".vscode",
+          "assets",
           "root.md",
           "root.schema.yml",
         ]);
         await checkVaults(
           {
             wsRoot,
-            vaults: [
-              {
-                fsPath: "vault2",
-              },
-              vault,
-            ],
+            vaults: vaultsAfter,
           },
           expect
         );
@@ -396,14 +378,17 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("AND WHEN add absolute path outside of wsRoot", {}, () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vault = vaults[0];
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const vpath = tmpDir().name;
-        const vaultRelPath = path.relative(wsRoot, vpath);
         stubVaultInput({ sourceType: "local", sourcePath: vpath });
         await new VaultAddCommand().run();
-        expect(fs.readdirSync(vpath)).toEqual([
-          ".gitignore",
+        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+        expect(
+          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+        ).toEqual([
+          ".dendron.cache.json",
+          ".vscode",
+          "assets",
           "root.md",
           "root.schema.yml",
         ]);
@@ -411,12 +396,7 @@ suite("VaultAddCommand", function () {
         await checkVaults(
           {
             wsRoot,
-            vaults: [
-              {
-                fsPath: vaultRelPath,
-              },
-              vault,
-            ],
+            vaults: vaultsAfter,
           },
           expect
         );
@@ -612,10 +592,6 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
               path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
             )
           ).toBeTruthy();
-          // A workspace file hasn't been created
-          expect(
-            await fs.pathExists(path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME))
-          ).toBeFalsy();
         });
 
         test("THEN the vault was added to the workspace config correctly", async () => {

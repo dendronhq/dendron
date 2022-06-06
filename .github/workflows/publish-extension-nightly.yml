@@ -41,6 +41,9 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
 
+      - name: Update schema file
+        run: yarn gen:data
+
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873
 

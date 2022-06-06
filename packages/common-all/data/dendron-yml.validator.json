@@ -997,14 +997,10 @@
       "properties": {
         "zoomSpeed": {
           "type": "number"
-        },
-        "createStub": {
-          "type": "boolean"
         }
       },
       "required": [
-        "zoomSpeed",
-        "createStub"
+        "zoomSpeed"
       ],
       "additionalProperties": false,
       "description": "Namespace for all graph related configurations."

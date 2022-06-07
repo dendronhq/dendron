@@ -216,13 +216,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   /**
-   * See {@link DStore.getNote}
-   */
-  async getAllNotes(): Promise<NotePropsByIdDict> {
-    return _.cloneDeep(this.notes);
-  }
-
-  /**
    * See {@link DStore.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {

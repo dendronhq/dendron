@@ -236,8 +236,9 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
-   * @deprecated see {@link DendronEngineV2.getAllNotes}
-   * For accessing a specific note by id, see {@link DendronEngineV2.getNote}
+   * @deprecated
+   * For accessing a specific note by id, see {@link DendronEngineV2.getNote}.
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
    */
   get notes(): NotePropsByIdDict {
     return this.store.notes;
@@ -340,13 +341,6 @@ export class DendronEngineV2 implements DEngine {
    */
   async getNote(id: string): Promise<NoteProps | undefined> {
     return this.store.getNote(id);
-  }
-
-  /**
-   * See {@link DEngine.getAllNotes}
-   */
-  async getAllNotes(): Promise<NotePropsByIdDict> {
-    return this.store.getAllNotes();
   }
 
   /**

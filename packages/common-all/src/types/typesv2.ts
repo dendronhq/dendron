@@ -403,7 +403,7 @@ export type GetDecorationsOpts = {
 export type DCommonProps = {
   /**
    * Dictionary where key is the note id.
-   * For access, see {@link DEngine.getAllNotes} or {@link DEngine.getNote}
+   * For access, see {@link DEngine.getNote}
    */
   notes: NotePropsByIdDict;
   /**
@@ -597,10 +597,6 @@ export type DEngine = DCommonProps &
      */
     getNote: (id: string) => Promise<NoteProps | undefined>;
     /**
-     * Get all NoteProps stored as a NotePropsByIdDict
-     */
-    getAllNotes: () => Promise<NotePropsByIdDict>;
-    /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */
     findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
@@ -665,10 +661,6 @@ export type DStore = DCommonProps &
      * Get NoteProps by id. If note doesn't exist, return undefined
      */
     getNote: (id: string) => Promise<NoteProps | undefined>;
-    /**
-     * Get all NoteProps stored as a NotePropsByIdDict
-     */
-    getAllNotes: () => Promise<NotePropsByIdDict>;
     /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */

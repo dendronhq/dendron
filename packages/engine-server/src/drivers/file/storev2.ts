@@ -201,13 +201,6 @@ export class FileStorage implements DStore {
   }
 
   /**
-   * See {@link DStore.getAllNotes}
-   */
-  async getAllNotes(): Promise<NotePropsByIdDict> {
-    return _.cloneDeep(this.notes);
-  }
-
-  /**
    * See {@link DStore.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {

@@ -126,8 +126,9 @@ export class EngineAPIService
   }
 
   /**
-   * @deprecated see {@link EngineAPIService.getAllNotes}
+   * @deprecated
    * For accessing a specific note by id, see {@link EngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
    */
   public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;
@@ -204,13 +205,6 @@ export class EngineAPIService
    */
   async getNote(id: string): Promise<NoteProps | undefined> {
     return this._internalEngine.getNote(id);
-  }
-
-  /**
-   * See {@link IEngineAPIService.getAllNotes}
-   */
-  async getAllNotes(): Promise<NotePropsByIdDict> {
-    return this._internalEngine.getAllNotes();
   }
 
   /**

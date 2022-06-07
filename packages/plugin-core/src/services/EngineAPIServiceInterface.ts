@@ -45,8 +45,9 @@ import { EngineEventEmitter } from "@dendronhq/engine-server";
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
   /**
-   * @deprecated see {@link IEngineAPIService.getAllNotes}
+   * @deprecated
    * For accessing a specific note by id, see {@link IEngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
    */
   notes: NotePropsByIdDict;
   /**
@@ -66,10 +67,6 @@ export interface IEngineAPIService {
    * Get NoteProps by id. If note doesn't exist, return undefined
    */
   getNote: (id: string) => Promise<NoteProps | undefined>;
-  /**
-   * Get all NoteProps stored as a NotePropsByIdDict
-   */
-  getAllNotes: () => Promise<NotePropsByIdDict>;
   /**
    * Find NoteProps by note properties. If no notes match, return empty list
    */

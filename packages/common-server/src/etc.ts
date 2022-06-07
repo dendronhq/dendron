@@ -47,6 +47,9 @@ export class WebViewCommonUtils {
     themeMap: WebViewThemeMap;
     initialTheme?: string;
   }) => {
+    const builtinStyle = "dendron-editor-follow-style";
+    const defaultStyle = "dendron-editor-default-style";
+    const overrideStyle = "dendron-editor-override-style";
     return `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -62,7 +65,7 @@ export class WebViewCommonUtils {
       <link rel="stylesheet" href="${cssSrc}" />
       <title>Dendron </title>
       
-      <style>
+      <style id="${builtinStyle}">
       body, h1, h2, h3, h4 {
         color: var(--vscode-editor-foreground);
       }
@@ -71,7 +74,7 @@ export class WebViewCommonUtils {
         list-style: unset;
       }
 
-      body {
+      body, .ant-layout {
         background-color: var(--vscode-editor-background);
       }
 
@@ -98,25 +101,43 @@ export class WebViewCommonUtils {
         observer.observe(target, { attributes : true, attributeFilter : ['class'] });
       }
 
-      function applyTheme(element) {
-        let defaultTheme = element.className;
+      function addThemeCSS(theme, styleId, keepBuiltin) {
+        const themeMap = ${JSON.stringify(themeMap)};
 
-        // If a theme override has been set, apply that override
-        const overrideTheme = element.dataset.themeOverride;
-        if (overrideTheme !== undefined && overrideTheme.length > 0) {
-          console.log("Applied theme override", overrideTheme);
-          const themeMap = ${JSON.stringify(themeMap)};
+        console.log('Applying theme', theme);
 
-          // Dynamically add css
-          const link = document.createElement('link');
-          link.setAttribute('rel', 'stylesheet');
-          link.setAttribute('href', themeMap[overrideTheme]);
-          document.head.appendChild(link);
-        } else {
-          console.log('Applying the default theme', defaultTheme);
+        // Dynamically add css
+        const link = document.createElement('link');
+        link.setAttribute('rel', 'stylesheet');
+        link.setAttribute('href', themeMap[theme]);
+        link.setAttribute("id", styleId);
+
+        const oldStyle = document.getElementById(styleId);
+        if (oldStyle) {
+          // If this theme was applied before (e.g. if user is switching between many themes), then delete the old one first
+          document.head.removeChild(oldStyle);
         }
 
-        // We need to tell NextJS whether we have a light or dark theme right now
+        if (keepBuiltin) {
+            document.head.insertBefore(link, document.getElementById("${builtinStyle}"));
+        } else {
+            document.head.appendChild(link);
+        }
+      }
+
+      function applyTheme(element) {
+        // There are 2 themes in play: the default theme which is based on whether
+        // the current user theme is dark or light, and then an optional override
+        // theme which overrides that.
+        // We have to apply both, because the core dark/light theme includes some
+        // styles that are otherwise missing in the default theme, like code highlighting.
+        let defaultTheme = element.className;
+        const overrideTheme = element.dataset.themeOverride;
+
+        // defaultTheme here will be just dark or light, because those are the core themes that
+        // we always need to apply. We also need to pass dark or light to mermaid.
+        // overrideTheme may be those, or it may be custom.
+
         // VSCode prefixes the theme color with vscode-
         const prefix = 'vscode-';
         if (defaultTheme.startsWith(prefix)) {
@@ -124,9 +145,6 @@ export class WebViewCommonUtils {
             defaultTheme = defaultTheme.substr(prefix.length);
         }
 
-        if (defaultTheme === 'high-contrast') {
-            defaultTheme = 'dark'; // the high-contrast theme seems to be an extreme case of the dark theme
-        }
         // this class is introduced with new vscode setting reduce motion  to reduce the amount of motion
         // in the window.
         var reduceMotionClassName = "vscode-reduce-motion"
@@ -134,8 +152,33 @@ export class WebViewCommonUtils {
           defaultTheme = defaultTheme.replace(reduceMotionClassName,"").trim()
         }
 
+        if (defaultTheme === 'high-contrast') {
+            defaultTheme = 'dark'; // the high-contrast theme is a dark theme
+        }
+        if (defaultTheme === "high-contrast-light") {
+            defaultTheme = "light"; // the high-contrast-light is a light theme
+        }
+
+        if (overrideTheme === "light" || overrideTheme === "dark") {
+            // If user picked light or dark as the override, only apply the override
+            console.log("Theme override is overriding the default theme", overrideTheme);
+          
+            defaultTheme = overrideTheme;
+            addThemeCSS(defaultTheme, "${defaultStyle}");
+        } else if (overrideTheme === "custom") {
+            // If the user picked a custom theme, we first need the default theme then the custom theme.
+            // Default first, because it has some critical styles we need. Custom later so the custom can override it.
+            addThemeCSS(defaultTheme, "${defaultStyle}");
+            addThemeCSS(overrideTheme, "${overrideStyle}");
+        } else {
+            // Override theme is not set at all. In that case, we want the theme to follow users editor theme.
+            // In that case, we prepend the theme so the embedded stylesheet at the end of the head has priority.
+            addThemeCSS(defaultTheme, "${defaultStyle}", /* prependBuiltin */ true);
+        }
+
         // NextJS app needs the current theme type to pass it to mermaid
         window.currentTheme = defaultTheme;
+
       }
       ${acquireVsCodeApi}
     </script>

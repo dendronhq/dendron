@@ -116,11 +116,11 @@ export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 
 type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
 
-export class NextjsExportPodUtils {
-  static git(baseDir: string) {
-    return simpleGit({ baseDir });
-  }
+function __git(baseDir: string) {
+  return simpleGit({ baseDir });
+}
 
+export class NextjsExportPodUtils {
   static templateVersion(
     config: IntermediateDendronConfig
   ): string | undefined {
@@ -165,7 +165,7 @@ export class NextjsExportPodUtils {
     const { nextPath } = opts;
 
     await fs.ensureDir(nextPath);
-    const git = simpleGit({ baseDir: nextPath });
+    const git = __git(nextPath);
     await git.clone(TEMPLATE_REMOTE_URL, nextPath);
 
     return { error: null };
@@ -178,7 +178,7 @@ export class NextjsExportPodUtils {
     version: string;
     nextPath: string;
   }) {
-    return this.git(nextPath).checkoutBranch(version, `tags/v${version}`);
+    return __git(nextPath).checkoutBranch(version, `tags/v${version}`);
   }
 
   static async updateTemplate(opts: { nextPath: string }) {

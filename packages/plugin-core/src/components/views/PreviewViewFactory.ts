@@ -20,7 +20,6 @@ export class PreviewPanelFactory {
     // any given time.
 
     // if preview panel doesn't exist yet, create a new one.
-    // if a custom link handler is provided, use that to create a new preview panel.
     if (!PreviewPanelFactory._preview) {
       PreviewPanelFactory._preview = new PreviewPanel({
         extension,

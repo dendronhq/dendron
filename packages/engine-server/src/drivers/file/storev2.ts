@@ -1,6 +1,6 @@
 import {
   assert,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   CONSTANTS,
   DendronCompositeError,
   IntermediateDendronConfig,
@@ -50,6 +50,7 @@ import {
   NoteDictsUtils,
   NoteFnameDictUtils,
   FindNoteOpts,
+  isNotNull,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -629,23 +630,45 @@ export class FileStorage implements DStore {
     return { notesById, cacheUpdates, errors };
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    this.logger.info({ ctx: "bulkAddNotes", msg: "enter" });
-    await Promise.all(
-      opts.notes.map((note) => {
-        return note2File({
-          note,
-          vault: note.vault,
-          wsRoot: this.wsRoot,
-        });
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    this.logger.info({ ctx: "bulkWriteNotes", msg: "enter" });
+    if (opts.skipMetadata) {
+      const noteDicts = {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      };
+      await Promise.all(
+        opts.notes.map((note) => {
+          NoteDictsUtils.add(note, noteDicts);
+          return note2File({
+            note,
+            vault: note.vault,
+            wsRoot: this.wsRoot,
+          });
+        })
+      );
+      const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
+        return { note: n, status: "create" as const };
+      });
+      return {
+        error: null,
+        data: notesChanged,
+      };
+    }
+    const writeResponses = await Promise.all(
+      opts.notes.flatMap(async (note) => {
+        return this.writeNote(note, opts.opts);
       })
     );
-    const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
-      return { note: n, status: "create" as const };
-    });
+    const errors = writeResponses
+      .flatMap((response) => response.error)
+      .filter(isNotNull);
+
     return {
-      error: null,
-      data: notesChanged,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
+      data: writeResponses
+        .flatMap((response) => response.data)
+        .filter(isNotUndefined),
     };
   }
 
@@ -837,6 +860,8 @@ export class FileStorage implements DStore {
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
+
+    // TODO: Move this business logic to engine so we can update metadata
     // read from disk since contents might have changed
     const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtils.hydrate({
@@ -881,7 +906,12 @@ export class FileStorage implements DStore {
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
     if (!_.isUndefined(opts.isEventSourceEngine)) {
-      return this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
+      return (
+        await this.bulkWriteNotes({
+          notes: notesChangedEntries.map((ent) => ent.note),
+          opts: { updateExisting: true },
+        })
+      ).data;
     }
     const newNote: NoteProps = {
       ...oldNote,
@@ -949,7 +979,10 @@ export class FileStorage implements DStore {
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
-    await this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
+    await this.bulkWriteNotes({
+      notes: notesChangedEntries.map((ent) => ent.note),
+      opts: { updateExisting: true },
+    });
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
@@ -958,21 +991,6 @@ export class FileStorage implements DStore {
       .concat(notesChangedEntries);
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
-  }
-
-  /** Utility function to write many notes concurrently. */
-  private async writeManyNotes(notesToWrite: NoteProps[]) {
-    const responses = await Promise.all(
-      notesToWrite.map((n) => {
-        this.logger.info({
-          ctx: "writeManyNotes",
-          msg: "writeNote:pre",
-          note: NoteUtils.toLogObj(n),
-        });
-        return this.writeNote(n, { updateExisting: true });
-      })
-    );
-    return responses.flatMap((response) => response.data);
   }
 
   /**

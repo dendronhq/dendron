@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
 import * as querystring from "qs";
 import {
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   ConfigGetPayload,
   ConfigWriteOpts,
   DEngineDeleteSchemaPayload,
@@ -25,8 +25,9 @@ import {
   WriteNoteResp,
 } from ".";
 import { ThemeTarget, ThemeType } from "./constants";
-import { DendronError, IDendronError } from "./error";
+import { DendronCompositeError, DendronError, IDendronError } from "./error";
 import {
+  BulkWriteNoteResp,
   DEngineInitPayload,
   GetDecorationsPayload,
   GetNoteAnchorsPayload,
@@ -72,7 +73,7 @@ interface IRequestArgs {
 
 interface IAPIPayload {
   data: null | any | any[];
-  error: null | DendronError;
+  error: null | DendronError | DendronCompositeError;
 }
 
 interface IAPIOpts {
@@ -143,7 +144,7 @@ export type EngineDeleteRequest = {
   opts?: EngineDeleteOptsV2;
 } & { ws: string };
 export type EngineBulkAddRequest = {
-  opts: BulkAddNoteOpts;
+  opts: BulkWriteNotesOpts;
 } & { ws: string };
 
 export type EngineInfoRequest = WorkspaceRequest;
@@ -410,7 +411,7 @@ export class DendronAPI extends API {
     });
   }
 
-  engineBulkAdd(req: EngineBulkAddRequest): Promise<WriteNoteResp> {
+  engineBulkAdd(req: EngineBulkAddRequest): Promise<BulkWriteNoteResp> {
     return this._makeRequest({
       path: "note/bulkAdd",
       method: "post",

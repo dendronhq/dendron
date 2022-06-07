@@ -190,6 +190,7 @@ export function string2Note({
   return note;
 }
 
+// TODO: consider throwing error if no frontmatter
 export function file2Note(
   fpath: string,
   vault: DVault,

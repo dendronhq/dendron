@@ -216,7 +216,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             return NoteUtils.create({ fname: `${key}.${i}`, vault });
           })
         );
-        await engine.bulkAddNotes({ notes });
+        await engine.bulkWriteNotes({ notes });
       })
     );
     return { server };

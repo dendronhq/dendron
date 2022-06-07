@@ -1,5 +1,5 @@
 import { URI } from "vscode-uri";
-import { DendronError, IDendronError } from "../error";
+import { DendronError, DendronCompositeError, IDendronError } from "../error";
 import {
   DLink,
   DNodeProps,
@@ -254,6 +254,11 @@ export interface RespV2<T> {
   error: IDendronError | null;
 }
 
+export interface BulkResp<T> {
+  data?: T;
+  error: DendronCompositeError | null;
+}
+
 /**
  * This lets us use a discriminate union to see if result has error or data
  */
@@ -396,9 +401,15 @@ export type GetDecorationsOpts = {
 // === Engine and Store Main
 
 export type DCommonProps = {
-  /** Dictionary where key is the note id. */
+  /**
+   * Dictionary where key is the note id.
+   * For access, see {@link DEngine.getNote}
+   */
   notes: NotePropsByIdDict;
-  /** Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults). */
+  /**
+   * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
+   * For access, see {@link DEngine.findNotes}
+   */
   noteFnames: NotePropsByFnameDict;
   schemas: SchemaModuleDict;
   wsRoot: string;
@@ -440,14 +451,15 @@ export type NoteBlock = {
  * Returns list of notes that were changed
  */
 export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
+export type BulkWriteNoteResp = Required<BulkResp<NoteChangeEntry[]>>;
 
 // --- Common
 export type ConfigGetPayload = IntermediateDendronConfig;
 
 export type DCommonMethods = {
-  bulkAddNotes: (
-    opts: BulkAddNoteOpts
-  ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  bulkWriteNotes: (
+    opts: BulkWriteNotesOpts
+  ) => Promise<Required<BulkResp<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   /**
@@ -566,8 +578,11 @@ export type DEngineSyncOpts = {
   metaOnly?: boolean;
 };
 
-export type BulkAddNoteOpts = {
+export type BulkWriteNotesOpts = {
   notes: NoteProps[];
+  // If true, skips updating metadata
+  skipMetadata?: boolean;
+  opts?: EngineWriteOptsV2;
 };
 
 export type DEngine = DCommonProps &

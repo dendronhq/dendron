@@ -1,5 +1,6 @@
 import {
-  BulkAddNoteOpts,
+  BulkResp,
+  BulkWriteNotesOpts,
   ConfigWriteOpts,
   DEngineInitResp,
   DEngineSyncOpts,
@@ -43,7 +44,15 @@ import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
+  /**
+   * @deprecated
+   * For accessing a specific note by id, see {@link IEngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
+   */
   notes: NotePropsByIdDict;
+  /**
+   * @deprecated see {@link IEngineAPIService.findNotes}
+   */
   noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   schemas: SchemaModuleDict;
@@ -65,9 +74,9 @@ export interface IEngineAPIService {
 
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 
-  bulkAddNotes(
-    opts: BulkAddNoteOpts
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  bulkWriteNotes(
+    opts: BulkWriteNotesOpts
+  ): Promise<Required<BulkResp<NoteChangeEntry[]>>>;
 
   updateNote(
     note: NoteProps,

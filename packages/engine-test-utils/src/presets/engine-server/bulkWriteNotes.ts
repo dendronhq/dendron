@@ -21,7 +21,8 @@ const NOTES = {
       updated: 1,
       vault,
     });
-    await engine.bulkAddNotes({ notes: [note1, note2] });
+    const rootNote = (await engine.findNotes({ fname: "root", vault }))[0];
+    await engine.bulkWriteNotes({ notes: [note1, note2] });
     return [
       {
         actual: _.size(engine.notes),
@@ -29,13 +30,25 @@ const NOTES = {
         msg: "should be 2 more notes",
       },
       {
-        expected: engine.notes["bar1"],
-        actual: note1,
+        expected: engine.notes["bar1"].id,
+        actual: note1.id,
+      },
+      {
+        expected: engine.notes["bar1"].fname,
+        actual: note1.fname,
+      },
+      {
+        expected: engine.notes["bar1"].vault,
+        actual: note1.vault,
+      },
+      {
+        expected: engine.notes["bar1"].parent,
+        actual: rootNote.id,
       },
     ];
   }),
 };
-export const ENGINE_BULK_ADD_NOTES_PRESETS = {
+export const ENGINE_BULK_WRITE_NOTES_PRESETS = {
   NOTES,
   SCHEMAS,
 };

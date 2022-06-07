@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   ConfigWriteOpts,
   DendronAPI,
   DEngineClient,
@@ -125,6 +125,11 @@ export class EngineAPIService
     this._trustedWorkspace = value;
   }
 
+  /**
+   * @deprecated
+   * For accessing a specific note by id, see {@link EngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
+   */
   public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;
   }
@@ -132,6 +137,9 @@ export class EngineAPIService
     this._internalEngine.notes = arg;
   }
 
+  /**
+   * @deprecated see {@link EngineAPIService.findNotes}
+   */
   public get noteFnames(): NotePropsByFnameDict {
     return this._internalEngine.noteFnames;
   }
@@ -210,8 +218,8 @@ export class EngineAPIService
     return this._internalEngine.refreshNotes(opts);
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return this._internalEngine.bulkAddNotes(opts);
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    return this._internalEngine.bulkWriteNotes(opts);
   }
 
   updateNote(

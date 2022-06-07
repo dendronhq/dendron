@@ -768,6 +768,9 @@
         },
         "apiEndpoint": {
           "type": "string"
+        },
+        "templateHierarchy": {
+          "type": "string"
         }
       },
       "required": [

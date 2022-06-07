@@ -354,9 +354,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             hName: "a",
             hProperties: {
               title: "Private",
-              style: "color: brown",
               href: "https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html",
               target: "_blank",
+              class: "private",
             },
             hChildren: [
               {

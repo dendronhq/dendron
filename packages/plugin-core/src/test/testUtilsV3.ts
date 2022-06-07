@@ -200,14 +200,18 @@ export async function setupLegacyWorkspace(
     wsRoot,
   });
 
-  const vaults = await new SetupWorkspaceCommand().execute({
-    rootDirRaw: wsRoot,
-    skipOpenWs: true,
-    ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer(),
-    workspaceType: copts.workspaceType,
-    selfContained: copts.selfContained,
-  });
+  const { wsVault, additionalVaults } =
+    await new SetupWorkspaceCommand().execute({
+      rootDirRaw: wsRoot,
+      skipOpenWs: true,
+      ...copts.setupWsOverride,
+      workspaceInitializer: new BlankInitializer(),
+      workspaceType: copts.workspaceType,
+      selfContained: copts.selfContained,
+    });
+  const vaults = [wsVault, ...(additionalVaults || [])].filter(
+    (v) => !_.isUndefined(v)
+  ) as DVault[];
   stubWorkspaceFolders(wsRoot, vaults);
 
   // update config
@@ -568,6 +572,20 @@ export function describeMultiWS(
     });
   });
 }
+describeMultiWS.only = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.only("", () => {
+    describeMultiWS(...params);
+  });
+};
+describeMultiWS.skip = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.skip("", () => {
+    describeMultiWS(...params);
+  });
+};
 
 /**
  * Use to run tests with a single-vault workspace. Used in the same way as
@@ -611,6 +629,20 @@ export function describeSingleWS(
     });
   });
 }
+describeSingleWS.only = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.only("", () => {
+    describeMultiWS(...params);
+  });
+};
+describeSingleWS.skip = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.skip("", () => {
+    describeSingleWS(...params);
+  });
+};
 
 /**
  * Helper function for Describe*WS to do a run-time check to make sure an async

@@ -78,7 +78,16 @@ export type PathExistBehavior = "delete" | "abort" | "continue";
 
 export type WorkspaceServiceCreateOpts = {
   wsRoot: string;
-  vaults?: DVault[];
+  /**
+   * Does workspace come with a vault?
+   * - for self contained vault, this is the `notes` folder
+   * - for non-self contained vault, this is whatever the user passes in
+   */
+  wsVault?: DVault;
+  /**
+   * Additional vaults to create
+   */
+  additionalVaults?: DVault[];
   /**
    * create dendron.code-workspace file
    */
@@ -431,6 +440,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       selfContained: true,
     };
     if (vault.name) selfContainedVaultConfig.name = vault.name;
+
+    // create dendron.yml
     DConfig.getOrCreate(vaultPath, {
       dev: {
         enableSelfContainedVaults: true,
@@ -439,6 +450,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         vaults: [selfContainedVaultConfig],
       },
     });
+    // create dendron.code-workspace
     WorkspaceConfig.write(vaultPath, [], {
       overrides: {
         folders: [
@@ -1005,7 +1017,13 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   static async createStandardWorkspace(opts: WorkspaceServiceCreateOpts) {
-    const { wsRoot, vaults } = opts;
+    const { wsRoot, wsVault, additionalVaults } = _.defaults(opts, {
+      additionalVaults: [],
+    });
+    // for a standard workspace, there is no difference btw a wsVault and any other vault
+    const vaults: DVault[] = [wsVault, ...additionalVaults].filter(
+      (v): v is DVault => !_.isUndefined(v)
+    );
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
     // this creates `dendron.yml`
@@ -1072,22 +1090,30 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   static async createSelfContainedVaultWorkspace(
     opts: WorkspaceServiceCreateOpts
   ) {
-    const { wsRoot, vaults } = opts;
+    const { wsRoot, additionalVaults, wsVault } = opts;
     const ws = new WorkspaceService({ wsRoot });
-    if (vaults && vaults.length > 0) {
-      // First vault is the self contained vault we are using as the workspace
-      const wsVault = vaults[0];
-      // The vault is the workspace too
+
+    // the `notes` folder in a self contained vault
+    // treat it differently - we don't want to add it to config since this happens automatically
+    if (wsVault) {
       if (wsVault.name === undefined) {
         wsVault.name = path.basename(wsRoot);
       }
       wsVault.fsPath = ".";
       wsVault.selfContained = true;
+      await ws.createSelfContainedVault({
+        vault: wsVault as SelfContainedVault,
+        addToCodeWorkspace: false,
+        addToConfig: false,
+      });
+    }
 
+    // additional vaults
+    if (additionalVaults) {
       // Mutate vault objects to convert them to self contained vaults. The
       // first vault will be skipped because the conversion is a no-op for
       // vaults that are already self contained.
-      const selfContainedVaults = vaults.map(
+      const selfContainedVaults = additionalVaults.map(
         WorkspaceService.standardToSelfContainedVault
       );
       // Needs to be done one at a time, otherwise config updates are racy
@@ -1095,12 +1121,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         return ws.createSelfContainedVault({
           vault,
           addToCodeWorkspace: false,
-          // Don't add to config, {@link SetupWorkspaceCommand} also adds vaults to the config
-          addToConfig: false,
+          addToConfig: true,
         });
       });
     }
-
     // check if this is the first workspace created
     if (_.isUndefined(MetadataService.instance().getMeta().firstWsInitialize)) {
       MetadataService.instance().setFirstWsInitialize();

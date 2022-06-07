@@ -7,7 +7,6 @@ import {
 import { resolveTilde } from "@dendronhq/common-server";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import PathLike = fs.PathLike;
 import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
@@ -17,6 +16,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
+import PathLike = fs.PathLike;
 
 type CommandInput = {
   rootDirRaw: string;
@@ -35,7 +35,7 @@ type CommandOpts = CommandInput & {
   selfContained?: boolean;
 };
 
-type CommandOutput = DVault[];
+type CommandOutput = { wsVault?: DVault; additionalVaults?: DVault[] };
 
 export { CommandOpts as SetupWorkspaceOpts };
 
@@ -189,7 +189,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
     };
   }
 
-  async execute(opts: CommandOpts): Promise<DVault[]> {
+  async execute(
+    opts: CommandOpts
+  ): Promise<{ wsVault?: DVault; additionalVaults?: DVault[] }> {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     // This command can run before the extension is registered, especially during testing
     const defaultSelfContained =
@@ -212,26 +214,33 @@ export class SetupWorkspaceCommand extends BasicCommand<
         skipConfirmation: opts.skipConfirmation,
       }))
     ) {
-      return [];
+      return {};
     }
 
-    const vaults = opts.workspaceInitializer
-      ? opts.workspaceInitializer.createVaults(opts.vault)
-      : [];
+    let wsVault: DVault | undefined;
+    let additionalVaults: DVault[] | undefined;
+
+    if (opts?.workspaceInitializer?.createVaults) {
+      ({ wsVault, additionalVaults } = opts.workspaceInitializer.createVaults(
+        opts.vault
+      ));
+    }
 
     // Default to CODE workspace, otherwise create a NATIVE one
     const createCodeWorkspace =
       workspaceType === WorkspaceType.CODE || workspaceType === undefined;
 
     const svc = await WorkspaceService.createWorkspace({
-      vaults,
+      wsVault,
+      additionalVaults,
       wsRoot: rootDir,
       createCodeWorkspace,
       useSelfContainedVault: selfContained,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({
-        vaults,
+        wsVault,
+        additionalVaults,
         wsRoot: rootDir,
         svc,
       });
@@ -248,7 +257,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
         VSCodeUtils.reloadWindow();
       }
     }
-    return vaults;
+    return { wsVault, additionalVaults };
   }
 
   /**

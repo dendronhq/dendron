@@ -10,6 +10,9 @@ export class TestWorkspaceUtils {
     vaults: DVault[];
     wsRoot?: string;
   }) {
-    return WorkspaceService.createWorkspace({ wsRoot, vaults });
+    return WorkspaceService.createWorkspace({
+      wsRoot,
+      additionalVaults: vaults,
+    });
   }
 }

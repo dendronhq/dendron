@@ -176,7 +176,7 @@ export async function setupWS(opts: {
         await resp;
         await WorkspaceService.createWorkspace({
           wsRoot: path.join(wsRoot, ent.name),
-          vaults: ent.vaults,
+          additionalVaults: ent.vaults,
         });
         return ws.addWorkspace({ workspace: ent });
       },

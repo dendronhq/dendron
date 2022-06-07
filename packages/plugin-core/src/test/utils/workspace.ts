@@ -85,6 +85,7 @@ export class WorkspaceTestUtils {
         },
         graph: {
           zoomSpeed: 1,
+          createStub: false,
         },
         enableHandlebarTemplates: false,
         enableAutoCreateOnDefinition: false,

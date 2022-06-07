@@ -1,3 +1,4 @@
+import { NoteProps } from "@dendronhq/common-all";
 import {
   getAllImportPods,
   ImportPod,
@@ -25,11 +26,11 @@ import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
-type CommandOutput = void;
+type CommandOutput = NoteProps[];
 
-type CommandInput = { podChoice: PodItemV4 };
+export type CommandInput = { podChoice: PodItemV4 };
 
-type CommandOpts = CommandInput & { config: any };
+export type CommandOpts = CommandInput & { config: any };
 
 export class ImportPodCommand extends BaseCommand<
   CommandOpts,
@@ -172,9 +173,14 @@ export class ImportPodCommand extends BaseCommand<
     window.showInformationMessage(
       `${importedNotes.length} notes imported successfully.`
     );
+
+    return importedNotes;
   }
 
-  addAnalyticsPayload(opts?: CommandOpts) {
-    return PodUtils.getAnalyticsPayload(opts);
+  addAnalyticsPayload(opts: CommandOpts, out: NoteProps[]) {
+    return {
+      ...PodUtils.getAnalyticsPayload(opts),
+      importCount: out.length,
+    };
   }
 }

@@ -28,12 +28,10 @@ const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
   const out: {
     id: string;
     name: string;
-    contextualTitle: string;
     type?: "webview";
   } = {
     id,
     name: entry.label,
-    contextualTitle: entry.label,
   };
   if (isWebViewEntry(entry)) {
     out.type = "webview";
@@ -532,6 +530,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create Task Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  TASK_SET_STATUS: {
+    key: "dendron.setTaskStatus",
+    title: `${CMD_PREFIX} Set Task Status`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  TASK_COMPLETE: {
+    key: "dendron.completeTask",
+    title: `${CMD_PREFIX} Complete Task`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   APPLY_TEMPLATE: {
     key: "dendron.applyTemplate",
     title: `${CMD_PREFIX} Apply Template`,
@@ -649,6 +657,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   IMPORT_POD: {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  IMPORT_OBSIDIAN_POD: {
+    key: "dendron.importObsidianPod",
+    title: `${CMD_PREFIX} Import Obsidian Vault`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   EXPORT_POD: {

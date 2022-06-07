@@ -1,6 +1,5 @@
 import {
   DendronError,
-  DVault,
   DWorkspaceV2,
   getStage,
   TutorialEvents,
@@ -24,12 +23,17 @@ import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
+import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
+import { ObsidianImportTip } from "../showcase/ObsidianImportTip";
 import { SurveyUtils } from "../survey";
 import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
-import { WorkspaceInitializer } from "./workspaceInitializer";
+import {
+  OnWorkspaceCreationOpts,
+  WorkspaceInitializer,
+} from "./workspaceInitializer";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -45,10 +49,7 @@ export class TutorialInitializer
       : MAIN_TUTORIAL_TYPE_NAME;
   }
 
-  async onWorkspaceCreation(opts: {
-    vaults: DVault[];
-    wsRoot: string;
-  }): Promise<void> {
+  async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {
     super.onWorkspaceCreation(opts);
 
     MetadataService.instance().setActivationContext(
@@ -58,7 +59,7 @@ export class TutorialInitializer
     const assetUri = VSCodeUtils.getAssetUri(DendronExtension.context());
     const dendronWSTemplate = VSCodeUtils.joinPath(assetUri, "dendron-ws");
 
-    const vpath = vault2Path({ vault: opts.vaults[0], wsRoot: opts.wsRoot });
+    const vpath = vault2Path({ vault: opts.wsVault!, wsRoot: opts.wsRoot });
 
     const tutorialDir = this.getTutorialType();
 
@@ -71,6 +72,31 @@ export class TutorialInitializer
       ),
       vpath
     );
+
+    // 10 minutes after setup, try to show this toast if we haven't already tried
+    setTimeout(() => {
+      this.tryShowImportNotesFeatureToaster();
+    }, 1000 * 60 * 10);
+  }
+
+  private getAnalyticsPayloadFromDocument(opts: {
+    document: vscode.TextDocument;
+    ws: DWorkspaceV2;
+  }): TutorialNoteViewedPayload {
+    const { document, ws } = opts;
+    const tutorialType = this.getTutorialType();
+    const fsPath = document.uri.fsPath;
+    const { vaults, wsRoot } = ws;
+    const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
+    const note = file2Note(fsPath, vault);
+    const { fname, custom } = note;
+    const { currentStep, totalSteps } = custom;
+    return {
+      tutorialType,
+      fname,
+      currentStep,
+      totalSteps,
+    };
   }
 
   private getAnalyticsPayloadFromDocument(opts: {
@@ -111,6 +137,11 @@ export class TutorialInitializer
           const { fname } = payload;
           if (fname.includes("tutorial")) {
             AnalyticsUtils.track(TutorialEvents.TutorialNoteViewed, payload);
+
+            // Show import notes tip when they're on the final page of the tutorial.
+            if (payload.currentStep === payload.totalSteps) {
+              this.tryShowImportNotesFeatureToaster();
+            }
           }
         } catch (err) {
           Logger.info({ ctx, msg: "Cannot get payload from document." });
@@ -169,6 +200,18 @@ export class TutorialInitializer
       metaData.initialSurveyStatus === InitialSurveyStatusEnum.submitted;
     if (!initialSurveySubmitted) {
       await SurveyUtils.showInitialSurvey();
+    }
+  }
+
+  private triedToShowImportToast: boolean = false;
+
+  private tryShowImportNotesFeatureToaster() {
+    if (!this.triedToShowImportToast) {
+      const toaster = new FeatureShowcaseToaster();
+
+      // This will only show if the user indicated they've used Obsidian in 'Prior Tools'
+      toaster.showSpecificToast(new ObsidianImportTip());
+      this.triedToShowImportToast = true;
     }
   }
 }

@@ -23,6 +23,23 @@ export enum ShowcaseEntry {
   PreviewTheme = "PreviewTheme",
   GraphPanel = "GraphPanel",
   BacklinksPanelHover = "BacklinksPanelHover",
+  ObsidianImport = "ObsidianImport",
+}
+
+/**
+ * Survey for users on which prior note-taking tools they've used.
+ */
+export enum PriorTools {
+  No = "No",
+  Foam = "Foam",
+  Roam = "Roam",
+  Logseq = "Logseq",
+  Notion = "Notion",
+  OneNote = "OneNote",
+  Obsidian = "Obsidian",
+  Evernote = "Evernote",
+  GoogleKeep = "Google Keep",
+  Other = "Other",
 }
 
 export enum BacklinkPanelSortOrder {
@@ -108,6 +125,12 @@ type Metadata = Partial<{
    * When the user first used Daily Journal command
    */
   firstDailyJournalTime: number;
+
+  /**
+   * Responses from this user to the initial survey about prior note-taking
+   * tools used.
+   */
+  priorTools: [PriorTools];
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -206,6 +229,10 @@ export class MetadataService {
     return this.getMeta().backlinksPanelSortOrder;
   }
 
+  get priorTools(): PriorTools[] | undefined {
+    return this.getMeta().priorTools;
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -296,7 +323,12 @@ export class MetadataService {
   set BacklinksPanelSortOrder(sortOrder: BacklinkPanelSortOrder | undefined) {
     this.setMeta("backlinksPanelSortOrder", sortOrder);
   }
+
   setFirstDailyJournalTime() {
     this.setMeta("firstDailyJournalTime", Time.now().toSeconds());
+  }
+
+  set priorTools(priorTools: PriorTools[] | undefined) {
+    this.setMeta("priorTools", priorTools);
   }
 }

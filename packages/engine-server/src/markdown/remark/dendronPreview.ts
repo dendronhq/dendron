@@ -26,7 +26,7 @@ export function makeImageUrlFullPath({
   }
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-  const fpath = path.join(vault2Path({ wsRoot, vault }), node.url);
+  const fpath = path.join(vault2Path({ wsRoot, vault }), decodeURI(node.url));
   node.url = fpath;
 }
 

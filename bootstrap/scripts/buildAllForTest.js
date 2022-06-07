@@ -16,6 +16,7 @@ const TEST_NEXT_TEMPLATE = process.env.TEST_NEXT_TEMPLATE;
 console.log("build all...");
 $(`npx lerna run buildCI --scope @dendronhq/common-all`);
 $(`npx lerna run buildCI --scope @dendronhq/common-server `);
+$(`npx lerna run buildCI --scope @dendronhq/dendron-viz `);
 $(`npx lerna run buildCI --scope @dendronhq/engine-server `);
 $(`npx lerna run buildCI --scope @dendronhq/pods-core `);
 if (TEST_NEXT_TEMPLATE) {

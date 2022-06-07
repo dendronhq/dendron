@@ -7,7 +7,7 @@ VFile {
 <strong>Backlinks</strong>
 <ul>
 <li><a href=\\"https://foo.com\\">Alpha (vault1)</a></li>
-<li><a title=\\"Private\\" style=\\"color: brown\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\">Omega (vault1) (Private)</a></li>
+<li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">Omega (vault1) (Private)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

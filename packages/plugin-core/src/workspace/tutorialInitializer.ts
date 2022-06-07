@@ -99,26 +99,6 @@ export class TutorialInitializer
     };
   }
 
-  private getAnalyticsPayloadFromDocument(opts: {
-    document: vscode.TextDocument;
-    ws: DWorkspaceV2;
-  }): TutorialNoteViewedPayload {
-    const { document, ws } = opts;
-    const tutorialType = this.getTutorialType();
-    const fsPath = document.uri.fsPath;
-    const { vaults, wsRoot } = ws;
-    const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
-    const note = file2Note(fsPath, vault);
-    const { fname, custom } = note;
-    const { currentStep, totalSteps } = custom;
-    return {
-      tutorialType,
-      fname,
-      currentStep,
-      totalSteps,
-    };
-  }
-
   async onWorkspaceOpen(opts: { ws: DWorkspaceV2 }): Promise<void> {
     const ctx = "TutorialInitializer.onWorkspaceOpen";
 

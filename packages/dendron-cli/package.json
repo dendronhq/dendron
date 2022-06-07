@@ -44,6 +44,7 @@
     "@dendronhq/api-server": "^0.97.0",
     "@dendronhq/common-all": "^0.97.0",
     "@dendronhq/common-server": "^0.97.0",
+    "@dendronhq/dendron-viz": "^0.97.0",
     "@dendronhq/engine-server": "^0.97.0",
     "@dendronhq/pods-core": "^0.97.0",
     "@jcoreio/async-throttle": "^1.3.2",

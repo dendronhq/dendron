@@ -1861,6 +1861,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "mihaiconstantin",
+      "name": "Mihai Constantin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20051042?v=4",
+      "profile": "http://mihaiconstantin.com",
+      "contributions": [
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,

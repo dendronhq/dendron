@@ -13,6 +13,7 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  PLUGIN_NOT_ACTIVE = "!dendron:pluginActive",
   DEV_MODE = "dendron:devMode",
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
@@ -39,10 +40,28 @@ const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
   return out;
 };
 
+/**
+ * Invocation point for the LaunchTutorialCommand. Used for telemetry purposes
+ */
+export enum LaunchTutorialCommandInvocationPoint {
+  RecentWorkspacesPanel = "RecentWorkspacesPanel",
+  WelcomeWebview = "WelcomeWebview",
+}
+
+const args = {
+  invocationPoint: LaunchTutorialCommandInvocationPoint.RecentWorkspacesPanel,
+};
+const encodedArgs = encodeURIComponent(JSON.stringify(args));
+const commandUri = `command:dendron.launchTutorialWorkspace?${encodedArgs}`;
+
 export const DENDRON_VIEWS_WELCOME = [
   {
-    view: "dendron.backlinks",
+    view: DendronTreeViewKey.BACKLINKS,
     contents: "There are no backlinks to this note.",
+  },
+  {
+    view: DendronTreeViewKey.RECENT_WORKSPACES,
+    contents: `No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](${commandUri}).`,
   },
 ];
 
@@ -63,7 +82,7 @@ export const DENDRON_VIEWS = [
     where: "explorer",
   },
   {
-    id: "dendron.tip-of-the-day",
+    id: DendronTreeViewKey.TIP_OF_THE_DAY,
     name: "Tip of the Day",
     when: DendronContext.PLUGIN_ACTIVE,
     type: "webview",
@@ -92,7 +111,13 @@ export const DENDRON_VIEWS = [
     where: "dendron-view",
   },
   {
-    id: "dendron.help-and-feedback",
+    id: DendronTreeViewKey.RECENT_WORKSPACES,
+    name: "Recent Dendron Workspaces",
+    where: "dendron-view",
+    when: DendronContext.PLUGIN_NOT_ACTIVE,
+  },
+  {
+    id: DendronTreeViewKey.HELP_AND_FEEDBACK,
     name: "Help and Feedback",
     where: "dendron-view",
   },
@@ -872,14 +897,29 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX}Dev: Diagnostics Report`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  /**
+   * This name is a bit of a misnomer - this actually launches the welcome
+   * screen, which has a button that will launch the tutorial when clicked.
+   */
   LAUNCH_TUTORIAL: {
     key: "dendron.launchTutorial",
     title: `${CMD_PREFIX} Launch Tutorial`,
+  },
+  /**
+   * This command actually launches the tutorial workspace
+   */
+  LAUNCH_TUTORIAL_WORKSPACE: {
+    key: "dendron.launchTutorialWorkspace",
+    title: `${CMD_PREFIX} Launch Tutorial Workspace`,
   },
   OPEN_BACKUP: {
     key: "dendron.openBackup",
     title: `${CMD_PREFIX} Open Backup`,
     when: DendronContext.PLUGIN_ACTIVE,
+  },
+  INSTRUMENTED_WRAPPER_COMMAND: {
+    key: "dendron.instrumentedWrapperCommand",
+    title: `${CMD_PREFIX} Instrumented Wrapper Command`,
   },
 };
 

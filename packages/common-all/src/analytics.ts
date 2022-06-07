@@ -28,6 +28,7 @@ export enum VSCodeEvents {
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
   HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
   BacklinksPanelUsed = "BacklinksPanelUsed",
+  RecentWorkspacesPanelUsed = "RecentWorkspacesPanelUsed",
 }
 
 export enum CLIEvents {
@@ -43,6 +44,7 @@ export enum TutorialEvents {
   ClickStart = "Getting_Started_Clicked",
   TutorialNoteViewed = "TutorialNoteViewed",
   TutorialPreviewLinkClicked = "TutorialPreviewLinkClicked",
+  TutorialWorkspaceLaunching = "TutorialWorkspaceLaunching",
 }
 
 export type TutorialPreviewLinkClickedPayload = {

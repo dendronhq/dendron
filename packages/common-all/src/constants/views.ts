@@ -31,6 +31,7 @@ export enum DendronTreeViewKey {
   TIP_OF_THE_DAY = "dendron.tip-of-the-day",
   HELP_AND_FEEDBACK = "dendron.help-and-feedback",
   GRAPH_PANEL = "dendron.graph-panel",
+  RECENT_WORKSPACES = "dendron.recent-workspaces",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {

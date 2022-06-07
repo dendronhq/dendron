@@ -10,6 +10,10 @@ type CommandInput = {};
 
 type CommandOutput = void;
 
+/**
+ * This command is a bit of a misnomer - it actually launches the welcome
+ * webview page
+ */
 export class LaunchTutorialCommand extends BasicCommand<
   CommandOpts,
   CommandOutput

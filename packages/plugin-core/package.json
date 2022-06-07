@@ -48,6 +48,10 @@
       {
         "view": "dendron.backlinks",
         "contents": "There are no backlinks to this note."
+      },
+      {
+        "view": "dendron.recent-workspaces",
+        "contents": "No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](command:dendron.launchTutorialWorkspace?%7B%22invocationPoint%22%3A%22RecentWorkspacesPanel%22%7D)."
       }
     ],
     "viewsContainers": {
@@ -101,6 +105,11 @@
         {
           "id": "dendron.help-and-feedback",
           "name": "Help and Feedback"
+        },
+        {
+          "id": "dendron.recent-workspaces",
+          "name": "Recent Dendron Workspaces",
+          "when": "!dendron:pluginActive"
         },
         {
           "id": "dendron.graph-panel",
@@ -515,8 +524,16 @@
         "title": "Dendron: Launch Tutorial"
       },
       {
+        "command": "dendron.launchTutorialWorkspace",
+        "title": "Dendron: Launch Tutorial Workspace"
+      },
+      {
         "command": "dendron.openBackup",
         "title": "Dendron: Open Backup"
+      },
+      {
+        "command": "dendron.instrumentedWrapperCommand",
+        "title": "Dendron: Instrumented Wrapper Command"
       }
     ],
     "menus": {

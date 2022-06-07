@@ -5,7 +5,6 @@ import {
   TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
-import _ from "lodash";
 import os from "os";
 import path from "path";
 
@@ -131,6 +130,11 @@ type Metadata = Partial<{
    * tools used.
    */
   priorTools: [PriorTools];
+
+  /**
+   * The most recently opened Dendron workspaces
+   */
+  recentWorkspaces: string[];
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -233,6 +237,10 @@ export class MetadataService {
     return this.getMeta().priorTools;
   }
 
+  get RecentWorkspaces(): string[] | undefined {
+    return this.getMeta().recentWorkspaces;
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -330,5 +338,32 @@ export class MetadataService {
 
   set priorTools(priorTools: PriorTools[] | undefined) {
     this.setMeta("priorTools", priorTools);
+  }
+
+  // Add a single path to recent workspaces. Recent workspaces acts like a FIFO
+  // queue
+  addToRecentWorkspaces(path: string) {
+    const RECENT_WORKSPACE_ITEM_LIMIT = 5;
+
+    const current = this.getMeta().recentWorkspaces;
+    const updated: string[] = [];
+    if (!current) {
+      updated.push(path);
+    } else {
+      current.forEach((existingPath) => {
+        if (existingPath !== path) {
+          updated.push(existingPath);
+        }
+      });
+
+      if (updated.length >= RECENT_WORKSPACE_ITEM_LIMIT) {
+        updated.pop();
+      }
+
+      // The first element of the array is the most recent
+      updated.unshift(path);
+    }
+
+    this.setMeta("recentWorkspaces", updated);
   }
 }

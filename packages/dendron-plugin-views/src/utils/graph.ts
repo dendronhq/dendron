@@ -30,6 +30,7 @@ export type CoreGraphConfig = {
 
   "options.allow-relayout": GraphConfigItem<boolean>;
   "options.show-labels": GraphConfigItem<boolean>;
+  "filter.depth": GraphConfigItem<number>;
 
   graphTheme: GraphConfigItem<GraphThemeEnum>;
 };
@@ -88,6 +89,11 @@ const coreGraphConfig: CoreGraphConfig = {
     value: GraphThemeEnum.Classic,
     mutable: true,
     singleSelect: true,
+  },
+  "filter.depth": {
+    value: 1,
+    mutable: true,
+    label: "Depth",
   },
 };
 

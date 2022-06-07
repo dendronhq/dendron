@@ -246,16 +246,30 @@ const FilterViewSection = ({
                   />
                 </>
               )}
-              {_.isNumber(entry?.value) && (
-                <>
-                  <Typography>{label}</Typography>
-                  <InputNumber
-                    value={entry?.value}
-                    onChange={(newValue) => updateConfigField(key, newValue)}
-                    disabled={!entry?.mutable}
-                  />
-                </>
-              )}
+              {_.isNumber(entry.value) &&
+                entry.label === config["filter.depth"].label &&
+                config["options.show-local-graph"]?.value && (
+                  <>
+                    <Typography>{label}</Typography>
+                    <InputNumber
+                      min={1}
+                      max={3}
+                      defaultValue={entry.value || 1}
+                      onChange={(newValue) => updateConfigField(key, newValue)}
+                    />
+                  </>
+                )}
+              {_.isNumber(entry?.value) &&
+                entry.label !== config["filter.depth"].label && (
+                  <>
+                    <Typography>{label}</Typography>
+                    <InputNumber
+                      value={entry?.value}
+                      onChange={(newValue) => updateConfigField(key, newValue)}
+                      disabled={!entry?.mutable}
+                    />
+                  </>
+                )}
               {_.isString(entry?.value) &&
                 !_.isUndefined(entry) &&
                 !_.isUndefined(key) &&

@@ -119,7 +119,7 @@ export class EngineNoteProvider
         });
 
         if (error !== undefined) {
-          Logger.error({ ctx, error });
+          Logger.warn({ ctx, error });
         }
 
         const childrenNoteProps = childrenIds.map((id) => {
@@ -222,7 +222,7 @@ export class EngineNoteProvider
     });
 
     if (error !== undefined) {
-      Logger.error({ ctx, error });
+      Logger.warn({ ctx, error });
     }
 
     tn.children = await Promise.all(

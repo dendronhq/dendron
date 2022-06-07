@@ -104,6 +104,11 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     type: "webview",
     bundleName: "DendronTipOfTheDay",
   },
+  [DendronTreeViewKey.RECENT_WORKSPACES]: {
+    desc: "Recent Dendron Workspaces",
+    label: "Recent Dendron Workspaces",
+    type: "nativeview",
+  },
   [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
     desc: "Help and Feedback",
     label: "Help and Feedback",

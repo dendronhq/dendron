@@ -65,49 +65,30 @@ export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
   ]
 );
 
-/**
- *
- * These enums correspond to the alt treatment hierarchy, and will have to match
- * in order to be synced correctly / loaded by the tutorial initializer.
- *
- * e.g.)
- *  1. in `dendron-site`, prepare tutorials in `tutorial.main.*`, `tutorial.my-treatment-1.*`, and `tutorial.my-treatment-2.*`,
- *  2. in this case, the enum kvps should match the second level hierarchy:
- *     export enum TutorialTestGroups {
- *       "main" = "main",
- *       "my-treatment-1" = "my-treatment-1",
- *       "my-treatment-2" = "my-treatment-2"
- *     }
- */
-export enum TutorialTestGroups {
-  "main" = "main", // shows main tutorial
-  "no-refactor" = "no-refactor", // shows main tutorial, minus mentions to refactoring
-  "original" = "original", // shows old (origianl) tutorial
+export enum QuickstartTutorialTestGroups {
+  "main" = "main",
+  "quickstart-v1" = "quickstart-v1",
 }
 
 /**
- * Long running A/B test for differently treated tutorials.
- * See instructions for how to set up treatments in the comments for {@link TutorialTestGroups}
+ * Experiment to test the impact of a short-form tutorial vs 5-step tutorial on the onboarding funnel.
  *
- * Currently running test:
- *   - old tutorial (including meeting note mention) as baseline
- *   - one group that will get the updated tutorial that is presented in our wiki
- *   - one group that will get the updated tutorial that is presented in our wiki, minus the mentions to refactoring.
+ * main:          full 5-step tutorial
+ * quickstart-v1: one pager tutorial
  */
-export const AB_TUTORIAL_TEST = new ABTest("AB_TUTORIAL_TEST", [
-  {
-    name: TutorialTestGroups["main"],
-    weight: 1,
-  },
-  {
-    name: TutorialTestGroups["no-refactor"],
-    weight: 1,
-  },
-  {
-    name: TutorialTestGroups["original"],
-    weight: 1,
-  },
-]);
+const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
+  "2022-06-QuickstartTutorialTest",
+  [
+    {
+      name: QuickstartTutorialTestGroups["main"],
+      weight: 1,
+    },
+    {
+      name: QuickstartTutorialTestGroups["quickstart-v1"],
+      weight: 1,
+    },
+  ]
+);
 
 export enum DailyJournalTestGroups {
   withTemplate = "withTemplate",
@@ -134,6 +115,14 @@ export const _2022_05_DAILY_JOURNAL_TEMPLATE_TEST = new ABTest(
   ]
 );
 
+export const MAIN_TUTORIAL_TYPE_NAME = "main";
+
+/**
+ * Currently running tutorial AB test group.
+ * If we are not running any A/B testing, explicitly set this to `undefined`
+ */
+export const CURRENT_TUTORIAL_TEST = _2022_06_QUICKSTART_TUTORIAL_TEST;
+
 /** All A/B tests that are currently running.
  *
  * ^tkqhy45hflfd
@@ -141,6 +130,6 @@ export const _2022_05_DAILY_JOURNAL_TEMPLATE_TEST = new ABTest(
 export const CURRENT_AB_TESTS = [
   GRAPH_THEME_TEST,
   GRAPH_THEME_FEATURE_SHOWCASE_TEST,
-  AB_TUTORIAL_TEST,
   _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
+  CURRENT_TUTORIAL_TEST,
 ];

@@ -1,11 +1,12 @@
 import {
-  AB_TUTORIAL_TEST,
   DendronError,
   DWorkspaceV2,
   getStage,
   TutorialEvents,
-  TutorialNoteViewedPayload,
   VaultUtils,
+  CURRENT_TUTORIAL_TEST,
+  MAIN_TUTORIAL_TYPE_NAME,
+  TutorialNoteViewedPayload,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -40,6 +41,12 @@ export class TutorialInitializer
   extends BlankInitializer
   implements WorkspaceInitializer
 {
+  private getTutorialType() {
+    return CURRENT_TUTORIAL_TEST !== undefined
+      ? CURRENT_TUTORIAL_TEST.getUserGroup(SegmentClient.instance().anonymousId)
+      : MAIN_TUTORIAL_TYPE_NAME;
+  }
+
   async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {
     super.onWorkspaceCreation(opts);
 
@@ -52,16 +59,14 @@ export class TutorialInitializer
 
     const vpath = vault2Path({ vault: opts.wsVault!, wsRoot: opts.wsRoot });
 
-    const ABUserGroup = AB_TUTORIAL_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
+    const tutorialDir = this.getTutorialType();
 
     fs.copySync(
       path.join(
         dendronWSTemplate.fsPath,
         "tutorial",
         "treatments",
-        ABUserGroup
+        tutorialDir
       ),
       vpath
     );
@@ -72,9 +77,7 @@ export class TutorialInitializer
     ws: DWorkspaceV2;
   }): TutorialNoteViewedPayload {
     const { document, ws } = opts;
-    const tutorialType = AB_TUTORIAL_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
+    const tutorialType = this.getTutorialType();
     const fsPath = document.uri.fsPath;
     const { vaults, wsRoot } = ws;
     const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
@@ -124,6 +127,7 @@ export class TutorialInitializer
     if (fs.pathExistsSync(rootUri.fsPath)) {
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);
+
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {

@@ -42,7 +42,13 @@ export enum TutorialEvents {
   WelcomeShow = "WelcomeShow",
   ClickStart = "Getting_Started_Clicked",
   TutorialNoteViewed = "TutorialNoteViewed",
+  TutorialPreviewLinkClicked = "TutorialPreviewLinkClicked",
 }
+
+export type TutorialPreviewLinkClickedPayload = {
+  linkType: "WIKI" | "ASSET" | "WEBSITE" | "TEXT" | "COMMAND" | "UNKNOWN";
+  href: string;
+};
 
 export type TutorialNoteViewedPayload = {
   tutorialType: string;

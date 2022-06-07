@@ -2,10 +2,12 @@ import {
   DEngineClient,
   DNoteAnchorBasic,
   ErrorFactory,
+  isVSCodeCommandUri,
   isWebUri,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
+  TutorialEvents,
 } from "@dendronhq/common-all";
 import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
@@ -18,12 +20,14 @@ import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { PluginFileUtils } from "../../utils/files";
 import { GotoNoteCommand } from "../../commands/GotoNote";
+import { AnalyticsUtils } from "../../utils/analytics";
 
 export enum LinkType {
   WIKI = "WIKI",
   ASSET = "ASSET",
   WEBSITE = "WEBSITE",
   TEXT = "TEXT",
+  COMMAND = "COMMAND",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -43,6 +47,14 @@ export interface IPreviewLinkHandler {
  */
 export class PreviewLinkHandler implements IPreviewLinkHandler {
   private _ext: IDendronExtension;
+  /**
+   * set of tutorial note ids that we will allow tracking of link clicked events.
+   * TODO: consolidate tracking of tutorial ids to a central place
+   * TODO: this logic is specific to the tutorial workspace
+   *       add a way to register callbacks to the link handler in the future
+   */
+  private _trackAllowedIds = new Set<string>(["c1bs7wsjfbhb0zipaywqfbg"]);
+
   constructor(ext: IDendronExtension) {
     this._ext = ext;
   }
@@ -56,10 +68,37 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     // If href is missing, something is wrong with our link handler. Just let the VSCode's default handle it.
     if (!data.href) return LinkType.UNKNOWN;
     // First check if it's a web URL.
+
     if (isWebUri(data.href)) {
       // There's nothing to do then, the default handler opens them automatically.
       // If we try to open it too, it will open twice.
+
+      // track the link if it comes from a tutorial
+      // TODO: this logic is specific to the tutorial workspace
+      //       add a way to register callbacks to the link handler in the future
+      if (data.id && this._trackAllowedIds.has(data.id)) {
+        AnalyticsUtils.track(TutorialEvents.TutorialPreviewLinkClicked, {
+          LinkType: LinkType.WEBSITE,
+          href: data.href,
+        });
+      }
       return LinkType.WEBSITE;
+    }
+
+    if (isVSCodeCommandUri(data.href)) {
+      // If it's a command uri, do nothing.
+      // Let VSCode handle them.
+
+      // but track the command uri if it comes from a tutorial
+      // TODO: this logic is specific to the tutorial workspace
+      //       add a way to register callbacks to the link handler in the future
+      if (data.id && this._trackAllowedIds.has(data.id)) {
+        AnalyticsUtils.track(TutorialEvents.TutorialPreviewLinkClicked, {
+          LinkType: LinkType.COMMAND,
+          href: data.href,
+        });
+      }
+      return LinkType.COMMAND;
     }
 
     const uri = vscode.Uri.parse(data.href);

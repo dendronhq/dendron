@@ -14,6 +14,7 @@ const $ = (cmd) => {
 console.log("building all...");
 $(`npx lerna run build --scope @dendronhq/common-all`);
 $(`npx lerna run build --scope @dendronhq/common-server `);
+$(`npx lerna run build --scope @dendronhq/dendron-viz `);
 $(`npx lerna run build --scope @dendronhq/engine-server `);
 $(`npx lerna run build --scope @dendronhq/pods-core `);
 $(

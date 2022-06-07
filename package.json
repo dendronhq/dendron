@@ -10,6 +10,7 @@
       "packages/common-assets",
       "packages/common-server",
       "packages/common-test-utils",
+      "packages/dendron-viz",
       "packages/engine-server",
       "packages/api-server",
       "packages/engine-test-utils",

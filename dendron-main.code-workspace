@@ -13,6 +13,9 @@
       "name": "root"
     },
     {
+      "path": "packages/dendron-viz"
+    },
+    {
       "path": "packages/common-all"
     },
     {

@@ -6,7 +6,7 @@
   "license": "GPLv3",
   "scripts": {
     "watch": "echo nop",
-    "build": "node scripts/buildStyles.js",
+    "build": "node scripts/buildStyles.js && yarn setup",
     "setup": "yarn gen:theme && yarn build:js",
     "buildCI": "yarn build",
     "gen:theme": "gulp less",
@@ -14,10 +14,15 @@
   },
   "gitHead": "4ba39ff9fcec3bd1f0ba4fbd663cb3b49449609b",
   "devDependencies": {
+    "autoprefixer": "10.2.5",
     "gulp": "4.0.2",
     "gulp-csso": "4.0.1",
     "gulp-debug": "4.0.0",
-    "gulp-less": "5.0.0",
-    "gulp-postcss": "9.0.1"
+    "gulp-less": "4.0.1",
+    "gulp-postcss": "9.0.0",
+    "less-plugin-npm-import": "2.1.0"
+  },
+  "dependencies": {
+    "postcss": "8.2.13"
   }
 }

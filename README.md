@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-197-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-198-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -456,6 +456,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/abunavas"><img src="https://avatars.githubusercontent.com/u/11981078?v=4?s=100" width="100px;" alt=""/><br /><sub><b>abunavas</b></sub></a><br /><a href="#ideas-abunavas" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="http://mihaiconstantin.com"><img src="https://avatars.githubusercontent.com/u/20051042?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mihai Constantin</b></sub></a><br /><a href="#tool-mihaiconstantin" title="Tools">🔧</a></td>
   </tr>
 </table>
 

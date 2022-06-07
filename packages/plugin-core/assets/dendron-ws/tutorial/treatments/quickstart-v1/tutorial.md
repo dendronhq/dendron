@@ -2,59 +2,93 @@
 id: c1bs7wsjfbhb0zipaywqfbg
 title: Quickstart
 desc: ""
-updated: 1654226866100
+updated: 1654574624643
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
 ---
 
-Welcome to Dendron! We're a hierarchy-first note taking tool.
+# Quickstart
 
-## Create a note
+Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you manage information using flexible hierarchies!
 
-Use Lookup (<kbd>cmd</kbd> + <kbd>L</kbd>) to create a new note.
+## Create a Note
 
-Use the dot notation to name your note: `animal.vertebrate.mammalia.monkey`
+1. Use `Ctrl+L` / `Cmd+L` to bring up the lookup prompt
+1. Type 'dendron' and press `<ENTER>`
+1. Congrats, you just created your first note!
 
-## Find a note
+- > NOTE: Notes in Dendron are just plain text markdown with some [[Frontmatter|dendron://dendron.dendron-site/dendron.topic.frontmatter]] on the top. You can edit them in Dendron or using ~~vim~~ your favourite text editor.
 
-Use Lookup (<kbd>cmd</kbd> / <kbd>ctrl</kbd> + <kbd>L</kbd>) to find a note using fuzzy search. Yes, it's the same command used above!
+## Find a Note
 
-If the note doesn't exist yet, Lookup will create it for you.
+1. Use `Ctrl+L` / `Cmd+L` to bring up the lookup prompt again
+1. Backspace over the current result and type `tutorial` and press `<ENTER>`
 
-## Keep notes organized
+- > TIP: you don't have to type out the entire query, press `<TAB>` to autocomplete
 
-Keep using dot notations for your notes, and Dendron will organize them for you.
+1. You just `looked up` a note!
 
-Check out the Tree View to see how they are organized and navigate through the hierarchies.
+- > NOTE: in Dendron, you can find or create notes using the lookup prompt
 
-Click [here](command:dendron.treeView.focus) to open the tree view.
+## Organize your Notes
 
-## Link to other notes
+1. Bring up the lookup prompt again
+1. Use the `<RIGHT-ARROW>` key to navigate to the end of the current text cursor and type `.one`. Then press `<ENTER>`
+1. You just created your first hierarchy!
 
-Create links using double square brackets like so: `[[animal.vertebrate.mammalia.monkey]]`. When you type `[[` in the editor, Dendron will show you suggestions for possible notes to link to.
+- > NOTE: hierarchies in Dendron are just `.` delimited files. This makes each note both a file and a folder and makes it easy to keep your notes organized
 
-You can also designate a custom alias for your link like so: `[[Monkey|animal.vertebrate.mammalia.monkey]]`
+- > TIP: You can use the [[Dendron Tree View|dendron://dendron.dendron-site/dendron.topic.sidebar.tree-view]] to view your hierarchy. If it's not currently in focus, you can use `CTRL+P`/`CMD+P` to open the command prompt and type in `dendron: focus on tree view` to make it appear
 
----
+## Create a link
 
-That is all you need to get started, but there are much more to learn about Dendron!
+1. Switch back to your previous note. You can use lookup or click on it in the tree view.
 
-To learn more about other cool features such as Graph View, Backlinks View, Special notes, Tags, checkout the links below:
+- > TIP: You can also use the `<ALT>-<TAB>` shortcut to switch to your previous note
 
-## Other cool stuff
+1. In the current note, type `[[` - this should trigger the autocomplete. You can type `one` to narrow it down to the note you just created and hit enter
+1. You just created your first link!
 
-- Graph View: [Open Note Graph](command:dendron.showNoteGraph), or read the [docs](https://wiki.dendron.so/notes/587e6d62-3c5b-49b0-aedc-02f62f0448e6/)
-- Backlinks: [Open Backlinks View](command:dendron.backlinks.focus), or read the [docs](https://wiki.dendron.so/notes/yxkn87ohgomk0tgs12dppur/)
-- Special notes
-  - Daily Journal: [Create a Daily Journal Note](command:dendron.createDailyJournalNote), or read the [docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd/)
-  - Scratch: [Create a Scratch Note](command:dendron.createScratchNote), or read the [docs](https://wiki.dendron.so/notes/5c213aa6-e4ba-49e8-85c5-1bdcb33ce202/#scratch-note)
-  - Meeting: [Create a Meeting Note](command:dendron.createMeetingNote), or read the [docs](https://wiki.dendron.so/notes/5c213aa6-e4ba-49e8-85c5-1bdcb33ce202/#meeting-note)
-  - Task: [Create a Task Note](command:dendron.createTaskNote), or read the [docs](https://wiki.dendron.so/notes/SEASewZSteDK7ry1AshNG/)
-- Tags: [Read how Dendron handles tags](https://wiki.dendron.so/notes/8bc9b3f1-8508-4d3a-a2de-be9f12ef1821/)
+- > NOTE: the links with the `[[` are called wikilinks (because they were first popularized by Wikipedia)
+- > TIP: If you hover your mouse over the link, you can get a preview of the contents inside the note!
 
-## Next steps
+## Navigate a link
 
-- Browse our in-depth [wiki](https://wiki.dendron.so)
-- Watch a [video demonstration](https://wiki.dendron.so/notes/fzHazEFWTpUVexmv/) of how Kevin manages his personal knowledge base of +20K notes
-- Go through our [5-step tutorial](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
+1. Move your text cursor over the note and use `<CTRL>+<ENTER>`/`<CMD>+<ENTER>`
+
+- > TIP: You can also use `CTRL+CLICK` or `CMD+CLICK` to navigate links via mouse
+
+1. You just navigated the link!
+
+## Refactor a Note
+
+1. In the current note, use `CTRL+P`/`CMD+P` to bring up the command prompt and type `Dendron: Rename Note`
+1. Replace `one` with `two` and then press `<ENTER>`
+1. You just refactored the note!
+
+- > NOTE: when you rename a note, Dendron updates all links and references of the original note being renamed. Try switching back to [[tutorial]] to see the updated link!
+- > TIP: in addition to renaming one note at a time, dendron has [[an entire collection|dendron://dendron.dendron-site/dendron.topic.refactoring]] of refactoring commands that let you change headers, move around sections, and refactor entire hierarchies!
+
+## Conclusion
+
+Congrats, you finished the Dendron tutorial!
+
+Depending on your needs, here are some common next steps:
+
+- I want to just start writing: The easiest way to just start writing is by [creating a daily journal note](command:dendron.createDailyJournalNote) ([[docs|dendron://dendron.dendron-site/dendron.topic.daily-journal-note]])
+- I want to use templates: Use the [[Apply Template|dendron://dendron.dendron-site/dendron.topic.templates.commands.apply-template]] to apply [[Templates|dendron://dendron.dendron-site/dendron.topic.templates]] to existing notes
+- I want to do a longer tutorial: Check out our [5min tutorial to explore more of Dendron's functionality](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
+- I want to implement a particular workflow(eg. zettelkasten): Check out community [[workflow guides|dendron://dendron.dendron-site/dendron.guides.workflows]]
+- I want to use Dendron for managing my tasks and todos: See the [[Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows|dendron://dendron.dendron-site/community.events.greenhouse.2022-02-25-gtd-bullet-journals-task-management-workflow-demos]] for how the founder of Dendron uses it to manage his work
+- I want to dive deeper into Dendron: See [[next steps|dendron://dendron.dendron-site/dendron.tutorial.conclusion]] for longer walkthroughs and advanced functionality!
+
+## Community
+
+Dendron is more that just a tool - we are also a community of individuals that are passionate about knowledge management. If you need help or want to connect with the community, join us in the [Discords](https://link.dendron.so/discord).
+
+You can also:
+
+- Star us on [GitHub](https://github.com/dendronhq/dendron)
+- Follow us on [Twitter](https://twitter.com/dendronhq)
+- Subscribe to the [Dendron Newsletter](https://link.dendron.so/newsletter)

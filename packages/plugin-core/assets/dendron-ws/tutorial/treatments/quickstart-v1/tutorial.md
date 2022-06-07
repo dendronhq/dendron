@@ -2,7 +2,7 @@
 id: c1bs7wsjfbhb0zipaywqfbg
 title: Quickstart
 desc: ""
-updated: 1654574624643
+updated: 1654578425031
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
@@ -18,7 +18,7 @@ Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you
 1. Type 'dendron' and press `<ENTER>`
 1. Congrats, you just created your first note!
 
-- > NOTE: Notes in Dendron are just plain text markdown with some [[Frontmatter|dendron://dendron.dendron-site/dendron.topic.frontmatter]] on the top. You can edit them in Dendron or using ~~vim~~ your favourite text editor.
+- > NOTE: Notes in Dendron are just plain text markdown with some [frontmatter](https://wiki.dendron.so/notes/ffec2853-c0e0-4165-a368-339db12c8e4b) on the top. You can edit them in Dendron or using ~~vim~~ your favourite text editor.
 
 ## Find a Note
 
@@ -39,7 +39,7 @@ Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you
 
 - > NOTE: hierarchies in Dendron are just `.` delimited files. This makes each note both a file and a folder and makes it easy to keep your notes organized
 
-- > TIP: You can use the [[Dendron Tree View|dendron://dendron.dendron-site/dendron.topic.sidebar.tree-view]] to view your hierarchy. If it's not currently in focus, you can use `CTRL+P`/`CMD+P` to open the command prompt and type in `dendron: focus on tree view` to make it appear
+- > TIP: You can use the [Dendron Tree View](https://wiki.dendron.so/notes/hur7r6gr3kqa56s2vme986j) to view your hierarchy. If it's not currently in focus, you can use `CTRL+P`/`CMD+P` to open the command prompt and type in `dendron: focus on tree view` to make it appear
 
 ## Create a link
 
@@ -64,11 +64,11 @@ Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you
 ## Refactor a Note
 
 1. In the current note, use `CTRL+P`/`CMD+P` to bring up the command prompt and type `Dendron: Rename Note`
-1. Replace `one` with `two` and then press `<ENTER>`
+1. Replace `tutorial` with `my-note` and then press `<ENTER>`
 1. You just refactored the note!
 
 - > NOTE: when you rename a note, Dendron updates all links and references of the original note being renamed. Try switching back to [[tutorial]] to see the updated link!
-- > TIP: in addition to renaming one note at a time, dendron has [[an entire collection|dendron://dendron.dendron-site/dendron.topic.refactoring]] of refactoring commands that let you change headers, move around sections, and refactor entire hierarchies!
+- > TIP: in addition to renaming one note at a time, dendron has [an entire collection](https://wiki.dendron.so/notes/srajljj10V2dl19nCSFiC) of refactoring commands that let you change headers, move around sections, and refactor entire hierarchies!
 
 ## Conclusion
 
@@ -76,12 +76,12 @@ Congrats, you finished the Dendron tutorial!
 
 Depending on your needs, here are some common next steps:
 
-- I want to just start writing: The easiest way to just start writing is by [creating a daily journal note](command:dendron.createDailyJournalNote) ([[docs|dendron://dendron.dendron-site/dendron.topic.daily-journal-note]])
-- I want to use templates: Use the [[Apply Template|dendron://dendron.dendron-site/dendron.topic.templates.commands.apply-template]] to apply [[Templates|dendron://dendron.dendron-site/dendron.topic.templates]] to existing notes
+- I want to just start writing: The easiest way to just start writing is by [creating a daily journal note](command:dendron.createDailyJournalNote) ([docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd))
+- I want to use templates: Use the [Appy Template](https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6) command to apply [templates](https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2) to existing notes
 - I want to do a longer tutorial: Check out our [5min tutorial to explore more of Dendron's functionality](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
-- I want to implement a particular workflow(eg. zettelkasten): Check out community [[workflow guides|dendron://dendron.dendron-site/dendron.guides.workflows]]
-- I want to use Dendron for managing my tasks and todos: See the [[Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows|dendron://dendron.dendron-site/community.events.greenhouse.2022-02-25-gtd-bullet-journals-task-management-workflow-demos]] for how the founder of Dendron uses it to manage his work
-- I want to dive deeper into Dendron: See [[next steps|dendron://dendron.dendron-site/dendron.tutorial.conclusion]] for longer walkthroughs and advanced functionality!
+- I want to implement a particular workflow(eg. zettelkasten): Check out community [workflow guides](https://wiki.dendron.so/notes/9313b845-d9bf-42c9-aad1-0da34794ce26)
+- I want to use Dendron for managing my tasks and todos: See the [Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows](https://wiki.dendron.so/notes/ordz7r99w1v099v14hrwgnp) for how the founder of Dendron uses it to manage his work.
+- I want to dive deeper into Dendron: See [next steps](https://wiki.dendron.so/notes/TflY5kn29HOLpp1pWT9tP) for longer walkthroughs and advanced functionality!
 
 ## Community
 

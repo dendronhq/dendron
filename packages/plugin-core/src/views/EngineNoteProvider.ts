@@ -112,11 +112,15 @@ export class EngineNoteProvider
         return Promise.resolve([]);
       }
       if (noteProps) {
-        const childrenIds = TreeUtils.sortNotesAtLevel({
+        const { data: childrenIds, error } = TreeUtils.sortNotesAtLevel({
           noteIds: noteProps.children,
           noteDict: engine.notes,
           labelType: this._labelType,
         });
+
+        if (error !== undefined) {
+          Logger.error({ ctx, error });
+        }
 
         const childrenNoteProps = childrenIds.map((id) => {
           return engine.notes[id];
@@ -211,11 +215,16 @@ export class EngineNoteProvider
 
     const labelType = this._labelType;
 
-    const children = TreeUtils.sortNotesAtLevel({
+    const { data: children, error } = TreeUtils.sortNotesAtLevel({
       noteIds: note.children,
       noteDict: ndict,
       labelType,
     });
+
+    if (error !== undefined) {
+      Logger.error({ ctx, error });
+    }
+
     tn.children = await Promise.all(
       children.map(async (c) => {
         const childNote = ndict[c];

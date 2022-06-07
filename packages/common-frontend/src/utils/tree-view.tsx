@@ -78,15 +78,17 @@ export class TreeViewUtils {
       );
     }
 
+    const { data } = TreeUtils.sortNotesAtLevel({
+      noteIds: note.children,
+      noteDict,
+      reverse: note.custom?.sort_order === "reverse",
+    });
+
     return {
       key: note.id,
       title,
       icon,
-      children: TreeUtils.sortNotesAtLevel({
-        noteIds: note.children,
-        noteDict,
-        reverse: note.custom?.sort_order === "reverse",
-      })
+      children: data
         .map((noteId) =>
           TreeViewUtils.note2TreeDatanote({
             noteId,

@@ -103,13 +103,13 @@
           "when": "dendron:pluginActive"
         },
         {
-          "id": "dendron.help-and-feedback",
-          "name": "Help and Feedback"
-        },
-        {
           "id": "dendron.recent-workspaces",
           "name": "Recent Dendron Workspaces",
           "when": "!dendron:pluginActive"
+        },
+        {
+          "id": "dendron.help-and-feedback",
+          "name": "Help and Feedback"
         },
         {
           "id": "dendron.graph-panel",
@@ -851,8 +851,16 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.launchTutorialWorkspace",
+          "when": "false"
+        },
+        {
           "command": "dendron.openBackup",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.instrumentedWrapperCommand",
+          "when": "false"
         }
       ],
       "view/title": [

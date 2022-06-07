@@ -911,6 +911,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   LAUNCH_TUTORIAL_WORKSPACE: {
     key: "dendron.launchTutorialWorkspace",
     title: `${CMD_PREFIX} Launch Tutorial Workspace`,
+    when: "false",
   },
   OPEN_BACKUP: {
     key: "dendron.openBackup",
@@ -920,6 +921,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   INSTRUMENTED_WRAPPER_COMMAND: {
     key: "dendron.instrumentedWrapperCommand",
     title: `${CMD_PREFIX} Instrumented Wrapper Command`,
+    when: "false",
   },
 };
 

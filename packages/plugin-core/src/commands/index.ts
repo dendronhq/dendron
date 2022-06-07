@@ -78,6 +78,7 @@ import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
 import { ApplyTemplateCommand } from "./ApplyTemplateCommand";
 import { TaskStatusCommand } from "./TaskStatus";
 import { TaskCompleteCommand } from "./TaskComplete";
+import { ImportObsidianCommand } from "./pods/ImportObsidianCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -117,6 +118,7 @@ const ALL_COMMANDS = [
   GotoCommand,
   GotoNoteCommand,
   ImportPodCommand,
+  ImportObsidianCommand,
   InsertNoteCommand,
   InsertNoteLinkCommand,
   InsertNoteIndexCommand,

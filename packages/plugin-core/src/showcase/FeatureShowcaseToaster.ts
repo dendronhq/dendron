@@ -15,7 +15,6 @@ import {
  */
 export class FeatureShowcaseToaster {
   /**
-   *
    * Show a toast containing information about a Dendron Feature. Doesn't show
    * messages more than once, and it also doesn't show to new user's in their
    * first week of Dendron.
@@ -28,6 +27,7 @@ export class FeatureShowcaseToaster {
     }
 
     for (const message of ALL_FEATURE_SHOWCASES) {
+      // Keep cycling through messages until there's one that should be shown
       if (
         !this.hasShownMessage(message.showcaseEntry) &&
         message.shouldShow(DisplayLocation.InformationMessage)
@@ -39,6 +39,26 @@ export class FeatureShowcaseToaster {
 
         return true;
       }
+    }
+
+    return false;
+  }
+
+  /**
+   * Show a specific toast message. This will not show if the message has
+   * already been shown to the user, but unlike {@link showToast}, it will show
+   * even if the user is still in their first week of usage.
+   * @param message
+   * @returns
+   */
+  public showSpecificToast(message: IFeatureShowcaseMessage): boolean {
+    if (
+      !this.hasShownMessage(message.showcaseEntry) &&
+      message.shouldShow(DisplayLocation.InformationMessage)
+    ) {
+      this.showInformationMessage(DisplayLocation.InformationMessage, message);
+
+      return true;
     }
 
     return false;

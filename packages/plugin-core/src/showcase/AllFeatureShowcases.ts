@@ -4,6 +4,7 @@ import { GraphPanelTip } from "./GraphPanelTip";
 import { GraphThemeTip } from "./GraphThemeTip";
 import { IFeatureShowcaseMessage } from "./IFeatureShowcaseMessage";
 import { MeetingNotesTip } from "./MeetingNotesTip";
+import { ObsidianImportTip } from "./ObsidianImportTip";
 import {
   createSimpleTipOfDayMsg,
   createTipOfDayMsgWithDocsLink,
@@ -86,4 +87,5 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   new GraphPanelTip(),
   PREVIEW_THEME_LINK,
   new BacklinksPanelHoverTip(),
+  new ObsidianImportTip(),
 ];

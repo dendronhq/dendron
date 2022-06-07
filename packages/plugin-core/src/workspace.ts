@@ -57,6 +57,7 @@ import {
 import { SchemaSyncService } from "./services/SchemaSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
+import { DisplayLocation } from "./showcase/IFeatureShowcaseMessage";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { DisposableStore } from "./utils";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -559,7 +560,9 @@ export class DendronExtension implements IDendronExtension {
 
   private setupTipOfTheDayView() {
     const featureShowcaseWebview = new TipOfTheDayWebview(
-      ALL_FEATURE_SHOWCASES
+      _.filter(ALL_FEATURE_SHOWCASES, (message) =>
+        message.shouldShow(DisplayLocation.TipOfTheDayView)
+      )
     );
 
     return vscode.window.registerWebviewViewProvider(

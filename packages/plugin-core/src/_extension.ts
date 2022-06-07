@@ -284,6 +284,7 @@ class ExtensionUtils {
       "4u6pv56mnt25d8l2wzfygu7",
       "khv6u4514vnvvy4njhctfru",
       "kyjfnf2rnc6vn71iyn9liz7",
+      "c1bs7wsjfbhb0zipaywqfbg", // quickstart-v1
     ]);
 
     // Takes about ~10 ms to compute in org-workspace

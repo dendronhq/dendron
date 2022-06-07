@@ -18,7 +18,6 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
-import { TutorialPreviewLinkHandler } from "../components/views/TutorialPreviewLinkHandler";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -129,15 +128,12 @@ export class TutorialInitializer
       // Set the view to have the tutorial page showing with the preview opened to the side.
       await vscode.window.showTextDocument(rootUri);
 
-      // create a custom tutorial preview link handler
-      // and use it to create the preview panel.
-      const ext = ExtensionProvider.getExtension();
-      const previewLinkHandler = new TutorialPreviewLinkHandler(ext);
-      const previewProxy = PreviewPanelFactory.create(ext, previewLinkHandler);
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          new ShowPreviewCommand(previewProxy).execute();
+          new ShowPreviewCommand(
+            PreviewPanelFactory.create(ExtensionProvider.getExtension())
+          ).execute();
         }, 1000);
       }
     } else {

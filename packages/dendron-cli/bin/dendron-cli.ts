@@ -15,6 +15,7 @@ import { PublishPodCLICommand } from "../src/commands/publishPod";
 import { SeedCLICommand } from "../src/commands/seedCLICommand";
 import { VaultCLICommand } from "../src/commands/vaultCLICommand";
 import { WorkspaceCLICommand } from "../src/commands/workspaceCLICommand";
+import { VisualizeCLICommand } from "../src/commands/generateVisualizer";
 // import { WorkspaceCLICommand } from "../src/commands/workspace";
 
 if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {
@@ -35,6 +36,7 @@ new SeedCLICommand().buildCmd(buildYargs);
 new DevCLICommand().buildCmd(buildYargs);
 new PublishCLICommand().buildCmd(buildYargs);
 new ExportPodV2CLICommand().buildCmd(buildYargs);
+new VisualizeCLICommand().buildCmd(buildYargs);
 
 // eslint-disable-next-line no-unused-expressions
 buildYargs.strictCommands().demandCommand(1).help().argv;

@@ -1871,6 +1871,15 @@
       "contributions": [
         "tool"
       ]
+    },
+    {
+      "login": "rioka",
+      "name": "riccardo dozzo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/383147?v=4",
+      "profile": "https://github.com/rioka",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

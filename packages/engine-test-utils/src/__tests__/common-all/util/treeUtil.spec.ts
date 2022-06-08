@@ -1,4 +1,5 @@
-import { TreeUtils } from "@dendronhq/common-all";
+import { DendronError, TreeUtils } from "@dendronhq/common-all";
+import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 
@@ -70,5 +71,28 @@ describe("WHEN has_collection enabled AND nav_children_exclude set to false", ()
         preSetupHook: ENGINE_HOOKS.setupBasic,
       }
     );
+  });
+});
+
+describe("sortNotesAtLevel", () => {
+  describe("GIVEN noteIds that do not exist in noteDict", () => {
+    test("THEN gracefully process only available notes and return error payload", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const noteDict = engine.notes;
+          const noteIds = _.toArray(noteDict).map((props) => props.id);
+          noteIds.push("dummy");
+
+          const resp = TreeUtils.sortNotesAtLevel({ noteIds, noteDict });
+          expect(resp.data.includes("dummy")).toBeFalsy();
+          expect(resp.error instanceof DendronError).toBeTruthy();
+          expect(resp.error?.payload).toEqual('{"omitted":["dummy"]}');
+        },
+        {
+          expect,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
   });
 });

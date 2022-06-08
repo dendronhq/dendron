@@ -13,7 +13,7 @@ import _ from "lodash";
 import path from "path";
 import { WSMeta } from "../types";
 
-export * from "./engine";
+export * from "./engineUtils";
 
 function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));

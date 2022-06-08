@@ -105,7 +105,7 @@ export const provideCompletionItems = sentryReportingCallback(
     }
 
     const line = document.lineAt(position).text;
-    Logger.info({ ctx, position, msg: "enter" });
+    Logger.debug({ ctx, position, msg: "enter" });
 
     let found: RegExpMatchArray | undefined;
     const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);

@@ -49,8 +49,8 @@ export enum NoteCommands {
    * Like lookup, but only look for notes
    * Returns a list of notes
    */
-  FIND = "find",
   LOOKUP = "lookup",
+  LOOKUP_LEGACY = "lookup_legacy",
   DELETE = "delete",
   MOVE = "move",
 }
@@ -188,11 +188,11 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     try {
       switch (cmd) {
-        case NoteCommands.FIND: {
+        case NoteCommands.LOOKUP: {
           const { query } = checkQuery(opts);
           const notes = await NoteLookupUtils.lookup({ qsRaw: query, engine });
           const resp = await formatNotes({
-            output: NoteCLIOutput.JSON,
+            output,
             notes,
             engine,
           });
@@ -203,7 +203,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           };
           return { data };
         }
-        case NoteCommands.LOOKUP: {
+        case NoteCommands.LOOKUP_LEGACY: {
           const { query, vault } = checkQueryAndVault(opts);
           const { data } = await engine.getNoteByPath({
             npath: query,

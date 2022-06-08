@@ -23,6 +23,19 @@ const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
   });
 };
 
+const runLookupLegacyCmd = (
+  opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
+) => {
+  const cmd = new NoteCLICommand();
+  cmd.opts.quiet = true;
+  return cmd.execute({
+    ...opts,
+    cmd: NoteCommands.LOOKUP_LEGACY,
+    port: 0,
+    server: {} as any,
+  }) as Promise<{ data: NoteCommandData }>;
+};
+
 const runLookupCmd = (
   opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
 ) => {
@@ -33,24 +46,11 @@ const runLookupCmd = (
     cmd: NoteCommands.LOOKUP,
     port: 0,
     server: {} as any,
-  }) as Promise<{ data: NoteCommandData }>;
-};
-
-const runFindCmd = (
-  opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
-) => {
-  const cmd = new NoteCLICommand();
-  cmd.opts.quiet = true;
-  return cmd.execute({
-    ...opts,
-    cmd: NoteCommands.FIND,
-    port: 0,
-    server: {} as any,
     output: NoteCLIOutput.JSON,
   }) as Promise<{ data: NoteCommandData }>;
 };
 
-describe("WHEN run 'dendron note find'", () => {
+describe("WHEN run 'dendron note lookup'", () => {
   describe("AND WHEN find note that doesn't exist", () => {
     test("THEN return empty result", async () => {
       await runEngineTestV5(
@@ -58,7 +58,7 @@ describe("WHEN run 'dendron note find'", () => {
           const vault = vaults[0];
           const {
             data: { notesOutput },
-          } = await runFindCmd({
+          } = await runLookupCmd({
             wsRoot,
             engine,
             query: "gamma",
@@ -87,10 +87,56 @@ describe("WHEN run 'dendron note find'", () => {
         async ({ engine, wsRoot }) => {
           const {
             data: { notesOutput },
-          } = await runFindCmd({
+          } = await runLookupCmd({
             wsRoot,
             engine,
             query: "foo.ch1",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN single match using wikilink", () => {
+    test("THEN return match", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: "[[foo.ch1]]",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN single match using cross vault wikilink of matching vault", () => {
+    test("THEN return match", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: `[[dendron://${VaultUtils.getName(
+              engine.vaults[0]
+            )}/foo.ch1]]`,
           });
           expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
         },
@@ -109,7 +155,7 @@ describe("WHEN run 'dendron note find'", () => {
         async ({ engine, wsRoot }) => {
           const {
             data: { notesOutput },
-          } = await runFindCmd({
+          } = await runLookupCmd({
             wsRoot,
             engine,
             query: "foo",
@@ -129,8 +175,8 @@ describe("WHEN run 'dendron note find'", () => {
   });
 });
 
-describe("WHEN run 'dendron note lookup'", () => {
-  const cmd = NoteCommands.LOOKUP;
+describe("WHEN run 'dendron note lookup_legacy'", () => {
+  const cmd = NoteCommands.LOOKUP_LEGACY;
 
   describe("AND WHEN lookup note that doesn't exist in specified vault", () => {
     test("THEN lookup creates new note in specified vault", async () => {
@@ -172,7 +218,7 @@ describe("WHEN run 'dendron note lookup'", () => {
           const vault = vaults[0];
           const {
             data: { stringOutput },
-          } = await runLookupCmd({
+          } = await runLookupLegacyCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
             engine,
@@ -198,7 +244,7 @@ describe("WHEN run 'dendron note lookup'", () => {
           const vault = vaults[0];
           const {
             data: { stringOutput },
-          } = await runLookupCmd({
+          } = await runLookupLegacyCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
             engine,

@@ -281,17 +281,26 @@ export class FileStorage implements DStore {
             status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
           });
         }
-        const parentNote = this.notes[noteToDelete.parent] as NoteProps;
-        const parentNotePrev = { ...parentNote };
-        parentNote.children = _.reject(
-          parentNote.children,
-          (ent) => ent === noteToDelete.id
-        );
-        out.push({
-          note: parentNote,
-          status: "update",
-          prevNote: parentNotePrev,
-        });
+        const parentNote: NoteProps | undefined =
+          this.notes[noteToDelete.parent];
+        if (parentNote) {
+          const parentNotePrev = { ...parentNote };
+          parentNote.children = _.reject(
+            parentNote.children,
+            (ent) => ent === noteToDelete.id
+          );
+          out.push({
+            note: parentNote,
+            status: "update",
+            prevNote: parentNotePrev,
+          });
+        } else {
+          this.logger.error({
+            ctx,
+            noteToDelete,
+            message: "Parent note missing from state",
+          });
+        }
 
         NoteDictsUtils.delete(noteToDelete, {
           notesById: this.notes,
@@ -309,42 +318,52 @@ export class FileStorage implements DStore {
           status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
-      // remove from parent
-      let parentNote = this.notes[noteToDelete.parent] as NoteProps;
-      const parentNotePrev = { ...parentNote };
-      parentNote.children = _.reject(
-        parentNote.children,
-        (ent) => ent === noteToDelete.id
-      );
       // delete from note dictionary
       NoteDictsUtils.delete(noteToDelete, {
         notesById: this.notes,
         notesByFname: this.noteFnames,
       });
-      // if parent note is not a stub, update it
-      if (!parentNote.stub) {
-        out.push({
-          note: parentNote,
-          status: "update",
-          prevNote: parentNotePrev,
+
+      // remove from parent
+      const resps: Promise<EngineDeleteNotePayload>[] = [];
+      let parentNote = this.notes[noteToDelete.parent];
+
+      if (parentNote) {
+        const parentNotePrev = { ...parentNote };
+        parentNote.children = _.reject(
+          parentNote.children,
+          (ent) => ent === noteToDelete.id
+        );
+        // if parent note is not a stub, update it
+        if (!parentNote.stub) {
+          out.push({
+            note: parentNote,
+            status: "update",
+            prevNote: parentNotePrev,
+          });
+        }
+        // check all stubs
+        while (parentNote.stub && !opts?.noDeleteParentStub) {
+          const newParent = parentNote.parent;
+          const resp = this.deleteNote(parentNote.id, {
+            metaOnly: true,
+            noDeleteParentStub: true,
+          });
+          resps.push(resp);
+          if (newParent) {
+            parentNote = this.notes[newParent];
+          } else {
+            assert(false, "illegal state in note delete");
+          }
+        }
+      } else {
+        this.logger.error({
+          ctx,
+          noteToDelete,
+          message: "Parent note missing from state",
         });
       }
       out.push({ note: noteToDelete, status: "delete" });
-      // check all stubs
-      const resps: Promise<EngineDeleteNotePayload>[] = [];
-      while (parentNote.stub && !opts?.noDeleteParentStub) {
-        const newParent = parentNote.parent;
-        const resp = this.deleteNote(parentNote.id, {
-          metaOnly: true,
-          noDeleteParentStub: true,
-        });
-        resps.push(resp);
-        if (newParent) {
-          parentNote = this.notes[newParent];
-        } else {
-          assert(false, "illegal state in note delete");
-        }
-      }
       for (const resp of await Promise.all(resps)) {
         out = out.concat(resp);
       }

@@ -258,7 +258,7 @@ export class NoteParser extends ParserBase {
     // add schemas
     const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
-    ) as NoteProps[];
+    );
     const schemas = this.opts.store.schemas;
     await Promise.all(
       domains.map(async (d) => {

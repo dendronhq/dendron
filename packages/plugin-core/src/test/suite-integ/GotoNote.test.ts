@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteProps, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -73,12 +73,7 @@ suite("GotoNote", function () {
         test("THEN get note", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot: getDWorkspace().wsRoot,
-          }) as NoteProps;
+          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
           expect(_.pick(note, ["fname", "stub"])).toEqual({
             fname: "foo",
             stub: true,

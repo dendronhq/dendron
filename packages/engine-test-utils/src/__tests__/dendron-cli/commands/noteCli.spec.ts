@@ -1,4 +1,4 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { VaultUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import {
   NoteCLICommand,
@@ -33,12 +33,12 @@ describe("WHEN run 'dendron note lookup'", () => {
             query: "gamma",
             output: NoteCLIOutput.JSON,
           });
-          const note = NoteUtils.getNoteOrThrow({
-            fname: "gamma",
-            vault,
-            notes: engine.notes,
-            wsRoot,
-          });
+          const note = (
+            await engine.findNotes({
+              fname: "gamma",
+              vault,
+            })
+          )[0];
           expect(note).toBeTruthy();
           expect(_.pick(note, ["title", "vault"])).toEqual({
             title: "Gamma",
@@ -127,12 +127,12 @@ describe("WHEN run 'dendron note lookup'", () => {
             output: NoteCLIOutput.JSON,
           });
           expect(
-            NoteUtils.getNoteOrThrow({
-              fname: "gamma",
-              vault,
-              notes: engine.notes,
-              wsRoot,
-            })
+            (
+              await engine.findNotes({
+                fname: "gamma",
+                vault,
+              })
+            )[0]
           ).toBeTruthy();
         },
         {
@@ -210,12 +210,12 @@ describe("WHEN run 'dendron note move'", () => {
             destFname: "moved-note",
           });
           expect(
-            NoteUtils.getNoteOrThrow({
-              fname: "moved-note",
-              vault,
-              notes: engine.notes,
-              wsRoot,
-            })
+            (
+              await engine.findNotes({
+                fname: "moved-note",
+                vault,
+              })
+            )[0]
           ).toBeTruthy();
         },
         {
@@ -241,12 +241,12 @@ describe("WHEN run 'dendron note move'", () => {
             destFname: "moved-note",
           });
           expect(
-            NoteUtils.getNoteOrThrow({
-              fname: "moved-note",
-              vault,
-              notes: engine.notes,
-              wsRoot,
-            })
+            (
+              await engine.findNotes({
+                fname: "moved-note",
+                vault,
+              })
+            )[0]
           ).toBeTruthy();
         },
         {
@@ -274,12 +274,12 @@ describe("WHEN run 'dendron note move'", () => {
             destVaultName: VaultUtils.getName(otherVault),
           });
           expect(
-            NoteUtils.getNoteOrThrow({
-              fname: "car",
-              vault: otherVault,
-              notes: engine.notes,
-              wsRoot,
-            })
+            (
+              await engine.findNotes({
+                fname: "car",
+                vault: otherVault,
+              })
+            )[0]
           ).toBeTruthy();
         },
         {

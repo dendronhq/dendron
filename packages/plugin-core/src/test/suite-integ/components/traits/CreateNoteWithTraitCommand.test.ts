@@ -1,4 +1,3 @@
-import { NoteUtils } from "@dendronhq/common-all";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import { CreateNoteWithTraitCommand } from "../../../../commands/CreateNoteWithTraitCommand";
@@ -44,12 +43,12 @@ suite("CreateNoteWithTraitCommand tests", () => {
           expectedFName
         );
 
-        const props = NoteUtils.getNoteByFnameV5({
-          fname: "test",
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const props = (
+          await engine.findNotes({
+            fname: "test",
+            vault: vaults[0],
+          })
+        )[0];
 
         expect(props?.title).toEqual(testTrait.TEST_TITLE_MODIFIER);
       });

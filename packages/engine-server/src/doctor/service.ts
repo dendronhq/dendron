@@ -10,6 +10,9 @@ import {
   genUUID,
   isNotUndefined,
   NoteChangeEntry,
+  NoteDicts,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -74,8 +77,12 @@ export class DoctorService implements Disposable {
     this.loggerDispose();
   }
 
-  findBrokenLinks(note: NoteProps, notes: NoteProps[], engine: DEngineClient) {
-    const { wsRoot, vaults } = engine;
+  findBrokenLinks(
+    note: NoteProps,
+    noteDicts: NoteDicts,
+    engine: DEngineClient
+  ) {
+    const { vaults } = engine;
     const links = note.links;
     if (_.isEmpty(links)) {
       return [];
@@ -96,12 +103,11 @@ export class DoctorService implements Disposable {
         if (!vault) return false;
       }
       const isMultiVault = vaults.length > 1;
-      const noteExists = NoteUtils.getNoteByFnameV5({
-        fname: link.to!.fname as string,
-        vault: hasVaultPrefix ? vault! : note.vault,
-        notes,
-        wsRoot,
-      });
+      const noteExists: NoteProps | undefined = NoteDictsUtils.findByFname(
+        link.to!.fname as string,
+        noteDicts,
+        hasVaultPrefix ? vault! : note.vault
+      )[0];
       if (hasVaultPrefix) {
         // true: link w/ vault prefix that points to nothing. (candidate for sure)
         // false: link w/ vault prefix that points to a note. (valid link)
@@ -123,12 +129,19 @@ export class DoctorService implements Disposable {
   getBrokenLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
     const { vaults } = engine;
     let brokenWikiLinks: DLink[] = [];
+    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
         return;
       }
-      const brokenLinks = this.findBrokenLinks(note, notes, engine);
+      const brokenLinks = this.findBrokenLinks(
+        note,
+        { notesById, notesByFname },
+        engine
+      );
       brokenWikiLinks = brokenWikiLinks.concat(brokenLinks);
 
       return true;
@@ -190,6 +203,9 @@ export class DoctorService implements Disposable {
       notes = candidates;
     }
     notes = notes.filter((n) => !n.stub);
+    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
     // this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
     let resp: any;
@@ -390,7 +406,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         resp = [];
         doctorAction = async (note: NoteProps) => {
-          const brokenLinks = this.findBrokenLinks(note, notes, engine);
+          const brokenLinks = this.findBrokenLinks(
+            note,
+            { notesById, notesByFname },
+            engine
+          );
           if (brokenLinks.length > 0) {
             resp.push({
               file: note.fname,

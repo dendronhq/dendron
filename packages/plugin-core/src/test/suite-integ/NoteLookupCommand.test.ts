@@ -725,7 +725,7 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN a note is created and stub property is removed", async () => {
-          const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
           stubVaultPick(vaults);
@@ -734,12 +734,12 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           }))!;
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
-          const fooNote = NoteUtils.getNoteOrThrow({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
+          const fooNote = (
+            await engine.findNotes({
+              fname: "foo",
+              vault,
+            })
+          )[0];
           expect(fooNote.stub).toBeFalsy();
         });
       }
@@ -2361,7 +2361,7 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ wsRoot, vaults, engine }) => {
+          onInit: async ({ vaults, engine }) => {
             const { selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
@@ -2370,12 +2370,12 @@ suite("NoteLookupCommand", function () {
 
             const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
             const today = Time.now().toFormat(dateFormat);
-            const newNote = NoteUtils.getNoteOrThrow({
-              fname: `foo.journal.${today}`,
-              notes: engine.notes,
-              vault: vaults[0],
-              wsRoot,
-            });
+            const newNote = (
+              await engine.findNotes({
+                fname: `foo.journal.${today}`,
+                vault: vaults[0],
+              })
+            )[0];
 
             expect(newNote.body.trim()).toEqual(selectedText);
 
@@ -2391,19 +2391,19 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ wsRoot, vaults, engine }) => {
+          onInit: async ({ vaults, engine }) => {
             const { cmdOut, selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
               noteType: LookupNoteTypeEnum.scratch,
             });
 
-            const newNote = NoteUtils.getNoteOrThrow({
-              fname: cmdOut!.quickpick.value,
-              notes: engine.notes,
-              vault: vaults[0],
-              wsRoot,
-            });
+            const newNote = (
+              await engine.findNotes({
+                fname: cmdOut!.quickpick.value,
+                vault: vaults[0],
+              })
+            )[0];
             expect(newNote.body.trim()).toEqual(selectedText);
 
             cmd.cleanUp();

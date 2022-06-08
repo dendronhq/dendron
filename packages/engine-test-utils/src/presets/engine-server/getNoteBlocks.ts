@@ -3,7 +3,6 @@ import {
   DVault,
   GetNoteBlocksPayload,
   NoteProps,
-  NoteUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -17,7 +16,6 @@ const runGetNoteBlocks = async ({
   engine,
   vaults,
   note,
-  wsRoot,
   filterByAnchorType,
   cb,
 }: {
@@ -29,12 +27,12 @@ const runGetNoteBlocks = async ({
   cb: (opts: GetNoteBlocksPayload) => TestResult[];
 }) => {
   if (_.isUndefined(note))
-    note = NoteUtils.getNoteByFnameV5({
-      fname: "test",
-      notes: engine.notes,
-      vault: vaults[0],
-      wsRoot,
-    });
+    note = (
+      await engine.findNotes({
+        fname: "test",
+        vault: vaults[0],
+      })
+    )[0];
   const out = await engine.getNoteBlocks({
     id: note!.id,
     filterByAnchorType,

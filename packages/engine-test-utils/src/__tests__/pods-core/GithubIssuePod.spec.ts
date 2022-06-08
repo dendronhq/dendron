@@ -68,12 +68,12 @@ describe("GithubIssuePod import pod", () => {
           },
         });
 
-        const note = NoteUtils.getNoteOrThrow({
-          fname,
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname,
+            vault: vaults[0],
+          })
+        )[0];
         expect(note.custom.status).toEqual("OPEN");
         expect(note.custom.author).toEqual("https://github.com/xyzuser");
       },
@@ -107,12 +107,12 @@ describe("GithubIssuePod import pod", () => {
             fnameAsId: true,
           },
         });
-        const note = NoteUtils.getNoteOrThrow({
-          fname,
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname,
+            vault: vaults[0],
+          })
+        )[0];
         expect(note.id).toEqual(fname);
       },
       {
@@ -147,12 +147,12 @@ describe("GithubIssuePod import pod", () => {
             },
           },
         });
-        const note = NoteUtils.getNoteOrThrow({
-          fname,
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname,
+            vault: vaults[0],
+          })
+        )[0];
         expect(note.custom.type).toEqual("issue");
       },
       {

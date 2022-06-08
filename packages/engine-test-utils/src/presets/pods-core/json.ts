@@ -1,4 +1,4 @@
-import { DPod, DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { DPod, DVault, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -117,12 +117,12 @@ const IMPORT = {
         wsRoot,
         engine,
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "baz",
-        vault,
-        notes: engine.notes,
-        wsRoot: engine.wsRoot,
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "baz",
+          vault,
+        })
+      )[0];
 
       return [
         {

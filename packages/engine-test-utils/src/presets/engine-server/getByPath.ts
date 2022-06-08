@@ -1,4 +1,3 @@
-import { NoteUtils } from "@dendronhq/common-all";
 import {
   TestPresetEntryV4,
   NOTE_PRESETS_V4,
@@ -9,21 +8,21 @@ const NOTES = {
   /**
    * Check that we can get both roots from both vaults
    */
-  ROOT: new TestPresetEntryV4(async ({ vaults, engine, wsRoot }) => {
+  ROOT: new TestPresetEntryV4(async ({ vaults, engine }) => {
     const vault = vaults[0];
     const vault2 = vaults[1];
-    const root = NoteUtils.getNoteByFnameV5({
-      fname: "root",
-      notes: engine.notes,
-      vault,
-      wsRoot,
-    });
-    const root2 = NoteUtils.getNoteByFnameV5({
-      fname: "root",
-      notes: engine.notes,
-      vault: vault2,
-      wsRoot,
-    });
+    const root = (
+      await engine.findNotes({
+        fname: "root",
+        vault,
+      })
+    )[0];
+    const root2 = (
+      await engine.findNotes({
+        fname: "root",
+        vault: vault2,
+      })
+    )[0];
     const { data } = await engine.getNoteByPath({ npath: "root", vault });
     const { data: data2 } = await engine.getNoteByPath({
       npath: "root",
@@ -47,12 +46,12 @@ const NOTES = {
   EXISTING_NOTE: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault,
-        wsRoot: engine.wsRoot,
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "foo",
+          vault,
+        })
+      )[0];
       const { data } = await engine.getNoteByPath({ npath: "foo", vault });
       return [
         {
@@ -75,12 +74,12 @@ const NOTES = {
   NOTE_WITH_CAPS_AND_SPACES: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "000 Index",
-        notes: engine.notes,
-        vault,
-        wsRoot: engine.wsRoot,
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "000 Index",
+          vault,
+        })
+      )[0];
       const { data } = await engine.getNoteByPath({
         npath: "000 Index",
         vault,

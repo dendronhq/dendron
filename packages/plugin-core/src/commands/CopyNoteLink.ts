@@ -215,11 +215,9 @@ export class CopyNoteLinkCommand
       // Do nothing as engine may still not be up-to-date
       return;
     } else {
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        vault,
-        engine,
-      }) as NoteProps;
+      const note: NoteProps | undefined = (
+        await engine.findNotes({ fname, vault })
+      )[0];
       return this.executeCopyNoteLink(note, editor);
     }
   }
@@ -231,7 +229,10 @@ export class CopyNoteLinkCommand
     }
   }
 
-  private async executeCopyNoteLink(note: NoteProps, editor: TextEditor) {
+  private async executeCopyNoteLink(
+    note: NoteProps | undefined,
+    editor: TextEditor
+  ) {
     let link: string;
     let type;
     let anchor;

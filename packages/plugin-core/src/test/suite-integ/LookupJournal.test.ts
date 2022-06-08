@@ -1,4 +1,4 @@
-import { LookupNoteTypeEnum, NoteUtils } from "@dendronhq/common-all";
+import { LookupNoteTypeEnum } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
   runJestHarnessV2,
@@ -29,13 +29,8 @@ suite("Journal Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const notes = getDWorkspace().engine.notes;
-          const note = NoteUtils.getNoteByFnameV5({
-            fname,
-            notes,
-            vault,
-            wsRoot: getDWorkspace().wsRoot,
-          });
+          const engine = getDWorkspace().engine;
+          const note = (await engine.findNotes({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,
@@ -72,13 +67,8 @@ suite("Journal Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = "daily";
-          const notes = getDWorkspace().engine.notes;
-          const note = NoteUtils.getNoteByFnameV5({
-            fname,
-            notes,
-            vault,
-            wsRoot: getDWorkspace().wsRoot,
-          });
+          const engine = getDWorkspace().engine;
+          const note = (await engine.findNotes({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,

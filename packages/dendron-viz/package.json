@@ -27,7 +27,8 @@
     "prebuild": "yarn clean",
     "build": "yarn compile",
     "buildCI": "yarn compile",
-    "compile": "tsc -p tsconfig.build.json "
+    "compile": "tsc -p tsconfig.build.json",
+    "watch": "yarn compile --watch"
   },
   "dependencies": {
   },

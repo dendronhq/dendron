@@ -67,8 +67,6 @@ function computeGraphElements({
   const nodes: GraphNodes = [];
   const activeNote = notes[noteActive.id];
 
-  // TODO: Add parents and grandparents
-
   // Add descendents (children, grandchildren, etc) depending on the specified
   // distance parameter:
   const nodesQueue = new FIFOQueue<QueueData>();
@@ -105,6 +103,7 @@ function computeGraphElements({
     if (data.distance < maxDistance) {
       const noteVaultClass = getVaultClass(note.vault);
 
+      //Add parents and grandparents
       const parentNote =
         (data.distance === 0 || data.isParent) && note.parent
           ? notes[note.parent]
@@ -238,7 +237,7 @@ const getLocalNoteGraphElements = ({
     };
   }
 
-  const hierarchicalElements = computeGraphElements({
+  const graphElements = computeGraphElements({
     notes,
     noteActive,
     maxDistance,
@@ -246,10 +245,7 @@ const getLocalNoteGraphElements = ({
     fNameDict,
   });
 
-  // TODO: Union familialElements, outwardLinkElements, inwardLinkElements. May
-  // need to dedupe nodes if a child is also a link?
-
-  return hierarchicalElements;
+  return graphElements;
 };
 
 function getOutwardLinkedConnections({

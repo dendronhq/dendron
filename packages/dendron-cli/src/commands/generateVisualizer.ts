@@ -21,7 +21,7 @@ export class VisualizeCLICommand extends CLICommand<
     return { data: args };
   }
 
-  async execute(opts?: CommandOpts): Promise<CommandOutput> {
+  async execute(_opts?: CommandOpts): Promise<CommandOutput> {
     sayHello();
     return {};
   }

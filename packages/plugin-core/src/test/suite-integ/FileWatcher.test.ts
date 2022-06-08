@@ -1,4 +1,3 @@
-import { NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   ENGINE_HOOKS_MULTI,
@@ -43,12 +42,12 @@ suite("GIVEN FileWatcher", function () {
             const uri = vscode.Uri.file(notePath);
             await watcher.onDidCreate(uri.fsPath);
             const note = engine.notes["newbar"];
-            const root = NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            });
+            const root = (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[0],
+              })
+            )[0];
             expect(note.parent).toEqual(root.id);
             done();
           },
@@ -89,12 +88,12 @@ suite("GIVEN FileWatcher", function () {
             const uri = vscode.Uri.file(notePath);
             await watcher.onDidCreate(uri.fsPath);
             const note = engine.notes["newbar"];
-            const root = NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            });
+            const root = (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[0],
+              })
+            )[0];
             expect(note.parent).toEqual(root.id);
             done();
           },

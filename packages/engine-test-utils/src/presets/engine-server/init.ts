@@ -2,8 +2,6 @@ import {
   ConfigUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  NoteProps,
-  NoteUtils,
   Position,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -323,12 +321,12 @@ const NOTES = {
   ),
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
-      const noteAlpha = NoteUtils.getNoteByFnameV5({
-        fname: "alpha",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const noteAlpha = (
+        await engine.findNotes({
+          fname: "alpha",
+          vault: vaults[0],
+        })
+      )[0];
       return [
         {
           actual: noteAlpha.links,
@@ -397,19 +395,19 @@ const NOTES = {
   ),
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
-      const noteRoot = NoteUtils.getNoteByFnameV5({
-        fname: "root",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const noteRoot = (
+        await engine.findNotes({
+          fname: "root",
+          vault: vaults[0],
+        })
+      )[0];
 
-      const noteChild = NoteUtils.getNoteByFnameV5({
-        wsRoot: engine.wsRoot,
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-      }) as NoteProps;
+      const noteChild = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
         vault: vaults[0],
@@ -438,12 +436,12 @@ const NOTES = {
   ),
   NOTE_WITH_CUSTOM_ATT: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const noteRoot = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const noteRoot = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
 
       return [
         {

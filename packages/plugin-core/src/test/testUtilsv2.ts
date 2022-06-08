@@ -2,7 +2,6 @@ import {
   DNodeUtils,
   DVault,
   NoteProps,
-  NoteUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -25,8 +24,8 @@ import {
 import { SetupWorkspaceOpts } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { DendronExtension, getDWorkspace } from "../workspace";
-import { WSUtils } from "../WSUtils";
 import { createMockConfig } from "./testUtils";
+import { _activate } from "../_extension";
 
 export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -120,15 +119,6 @@ export async function resetCodeWorkspace() {
   }
 }
 
-export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
-  const notes = getDWorkspace().engine.notes;
-  const note = NoteUtils.getNoteByFnameV5({
-    ...opts,
-    notes,
-    wsRoot: getDWorkspace().wsRoot,
-  });
-  return WSUtils.openNote(note!);
-};
 export const getNoteFromTextEditor = (): NoteProps => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };

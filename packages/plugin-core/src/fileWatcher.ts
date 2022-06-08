@@ -92,7 +92,7 @@ export class FileWatcher {
     // check if ignore
     const recentEvents = HistoryService.instance().lookBack();
     this.L.debug({ ctx, recentEvents, fname });
-    let note: NoteProps | undefined;
+    let note: NoteProps;
     if (
       _.find(recentEvents, (event) => {
         return _.every([
@@ -134,7 +134,7 @@ export class FileWatcher {
         fmChangeOnly: false,
         engine,
       });
-      await engine.updateNote(note as NoteProps, {
+      await engine.updateNote(note, {
         newNode: true,
       });
     } catch (err: any) {

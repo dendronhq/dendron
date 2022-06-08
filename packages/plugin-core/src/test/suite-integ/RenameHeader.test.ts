@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { note2String } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { beforeEach, afterEach, describe } from "mocha";
@@ -115,7 +115,7 @@ suite("RenameNote", function () {
             body: "[[has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -125,12 +125,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -138,12 +135,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -177,7 +171,7 @@ suite("RenameNote", function () {
             body: "[[Lorem ipsum dolor amet|has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -187,12 +181,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -200,12 +191,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -242,7 +230,7 @@ suite("RenameNote", function () {
             body: "[[has-header#maxime-distinctio-officia]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -252,12 +240,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -265,12 +250,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -312,12 +294,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             await checkFile({
               note: afterRename!,
               wsRoot,
@@ -356,7 +335,7 @@ suite("RenameNote", function () {
             body: "[[has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -366,12 +345,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -379,12 +355,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -418,7 +391,7 @@ suite("RenameNote", function () {
             body: "[[has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -428,12 +401,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -441,12 +411,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -480,7 +447,7 @@ suite("RenameNote", function () {
             body: "[[has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -490,12 +457,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -503,12 +467,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -542,7 +503,7 @@ suite("RenameNote", function () {
             body: "![[has-header#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -552,12 +513,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -565,12 +523,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -610,7 +565,7 @@ suite("RenameNote", function () {
             body: "![[has-header#lorem-ipsum-dolor-amet:#end]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -620,12 +575,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -633,12 +585,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -681,7 +630,7 @@ suite("RenameNote", function () {
             body: "![[has-header#start:#lorem-ipsum-dolor-amet]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
             line: 11,
@@ -693,12 +642,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -706,12 +652,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,
@@ -757,7 +700,7 @@ suite("RenameNote", function () {
             body: "![[has-header#maxime-distinctio-officia:#end]]",
           });
         },
-        onInit: async ({ engine, vaults, wsRoot }) => {
+        onInit: async ({ engine, vaults }) => {
           const editor = await WSUtils.openNote(note);
           editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
 
@@ -767,12 +710,9 @@ suite("RenameNote", function () {
           try {
             await new RenameHeaderCommand().run({});
 
-            const afterRename = NoteUtils.getNoteByFnameV5({
-              fname: "has-header",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRename = (
+              await engine.findNotes({ fname: "has-header", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRename!.body,
@@ -780,12 +720,9 @@ suite("RenameNote", function () {
                 nomatch: ["Lorem", "ipsum", "dolor", "amet"],
               })
             ).toBeTruthy();
-            const afterRenameLink = NoteUtils.getNoteByFnameV5({
-              fname: "has-link",
-              wsRoot,
-              vault: vaults[0],
-              notes: engine.notes,
-            });
+            const afterRenameLink = (
+              await engine.findNotes({ fname: "has-link", vault: vaults[0] })
+            )[0];
             expect(
               await AssertUtils.assertInString({
                 body: afterRenameLink!.body,

@@ -7,7 +7,6 @@ import {
   DVault,
   DWorkspace,
   IntermediateDendronConfig,
-  NoteUtils,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
@@ -386,14 +385,5 @@ export class TestEngineUtils {
   } & WorkspaceOpts) {
     const vault = vaults[0];
     return NoteTestUtilsV4.createNote({ wsRoot, vault, fname, body, custom });
-  }
-
-  /**
-   * Sugar for retrieving a note in the first vault
-   */
-  static getNoteByFname(engine: DEngineClient, fname: string) {
-    const { wsRoot, vaults, notes } = engine;
-    const vault = vaults[0];
-    return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
 }

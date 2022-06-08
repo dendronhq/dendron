@@ -2,10 +2,10 @@ import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { ConflictHandler, PodUtils } from "../utils";
 import {
+  cleanName,
   Conflict,
   DendronError,
   DEngineClient,
-  DNodeUtils,
   DVault,
   ERROR_SEVERITY,
   MergeConflictOptions,
@@ -159,7 +159,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       } else {
         let noteName =
           name || github || discord || twitter || this.getNameFromEmail(email);
-        noteName = DNodeUtils.cleanFname(noteName);
+        noteName = cleanName(noteName);
         this.L.debug({ ctx: "membersToNotes", msg: "enter", member });
         let fname;
         const note = NoteUtils.getNoteByFnameFromEngine({

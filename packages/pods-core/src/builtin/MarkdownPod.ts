@@ -557,7 +557,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     } else {
       remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
     }
-    const out = remark.processSync(note.body).toString();
+    const out = (await remark.process(note.body)).toString();
     return _.trim(out);
   }
 }

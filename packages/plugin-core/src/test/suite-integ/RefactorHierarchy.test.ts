@@ -12,7 +12,7 @@ import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
 import { getEngine } from "../../workspace";
-import { DNodeProps, DVault, NoteUtils } from "@dendronhq/common-all";
+import { DNodeProps, DVault } from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
 
 suite("RefactorHierarchy", function () {
@@ -115,12 +115,9 @@ suite("RefactorHierarchy", function () {
               })
             ).toBeTruthy();
 
-            const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
-              fname: "prefix",
-              notes: engine.notes,
-              vault,
-              wsRoot,
-            });
+            const noteAfterRefactor = (
+              await engine.findNotes({ fname: "prefix", vault })
+            )[0];
             expect(noteAfterRefactor?.body).toEqual(
               "- [[prefix.one]]\n- [[prefix.two]]\n"
             );
@@ -168,22 +165,16 @@ suite("RefactorHierarchy", function () {
               })
             ).toBeTruthy();
 
-            const noteAfterRefactor = NoteUtils.getNoteByFnameV5({
-              fname: "refactor",
-              notes: engine.notes,
-              vault,
-              wsRoot,
-            });
+            const noteAfterRefactor = (
+              await engine.findNotes({ fname: "refactor", vault })
+            )[0];
             expect(noteAfterRefactor?.body).toEqual(
               "- [[refactor.one]]\n- [[prefix.two]]\n"
             );
 
-            const noteOneAfterRefactor = NoteUtils.getNoteByFnameV5({
-              fname: "refactor.one",
-              notes: engine.notes,
-              vault,
-              wsRoot,
-            });
+            const noteOneAfterRefactor = (
+              await engine.findNotes({ fname: "refactor.one", vault })
+            )[0];
             expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]\n");
             done();
           },

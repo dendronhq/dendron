@@ -781,12 +781,12 @@ const NOTES = {
         match: ["gamma.md"],
         nomatch: [`${fnameOld}.md`],
       });
-      const changedNote = NoteUtils.getNoteByFnameV5({
-        fname: "root",
-        notes: engine.notes,
-        vault,
-        wsRoot: engine.wsRoot,
-      });
+      const changedNote = (
+        await engine.findNotes({
+          fname: "root",
+          vault,
+        })
+      )[0];
       return [
         {
           actual: changed.data?.length,
@@ -1181,12 +1181,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["#bar"],
@@ -1226,12 +1226,12 @@ const NOTES = {
         },
         newLoc: { fname: "user.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["@bar"],
@@ -1270,12 +1270,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["tags: bar"],
@@ -1320,12 +1320,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["bar"],
@@ -1370,12 +1370,12 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: [
@@ -1424,12 +1424,12 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: ["foo", "bar", "undefined"],
@@ -1480,8 +1480,12 @@ const NOTES = {
   //     const vault = vaults[0];
   //     const notes = engine.notes;
   //     const alphaFname = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
-  //     const noteOrig = NoteUtils.getNoteByFnameV5({fname: alphaFname, vault, notes});
-
+  //     const noteOrig = (
+  //      await engine.findNotes({
+  //        fname: "alphaFname",
+  //        vault,
+  //      })
+  //    )[0];
   //   let alphaNoteNew = NoteUtils.create({
   //     fname: "alpha",
   //     id: "alpha",

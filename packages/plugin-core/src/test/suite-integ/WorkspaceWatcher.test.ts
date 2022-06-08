@@ -201,7 +201,6 @@ suite("WorkspaceWatcher", function () {
               vault: vaults[0],
             })
           )[0];
-
           expect(newFile.title).toEqual(`Newfile`);
         }
       });

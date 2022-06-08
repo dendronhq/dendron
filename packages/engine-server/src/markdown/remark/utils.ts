@@ -1,6 +1,7 @@
 import {
   ALIAS_NAME,
   assertUnreachable,
+  asyncLoop,
   ConfigUtils,
   CONSTANTS,
   DendronError,
@@ -1188,14 +1189,14 @@ export class RemarkUtils {
     const prevNote = { ...note };
     // eslint-disable-next-line func-names
     return function (this: Processor) {
-      return (tree: Node, _vfile: VFile) => {
+      return async (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
         const wikiLinks: WikiLinkNoteV4[] = selectAll(
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
         let dirty = false;
-        wikiLinks.forEach((linkNode) => {
+        await asyncLoop(wikiLinks, async (linkNode) => {
           let vault: DVault | undefined;
           if (!_.isUndefined(linkNode.data.vaultName)) {
             vault = VaultUtils.getVaultByName({
@@ -1203,13 +1204,9 @@ export class RemarkUtils {
               vname: linkNode.data.vaultName,
             });
           }
-          const existingNote = NoteUtils.getNoteFromMultiVault({
-            fname: linkNode.value,
-            engine,
-            fromVault: note.vault,
-            toVault: vault,
-            wsRoot: engine.wsRoot,
-          });
+          const existingNote = (
+            await engine.findNotes({ fname: linkNode.value, vault })
+          )[0];
           if (existingNote) {
             const publishingConfig =
               ConfigUtils.getPublishingConfig(dendronConfig);

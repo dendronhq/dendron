@@ -69,6 +69,15 @@ const createEngine = createEngineFactory({
     };
     return rename;
   },
+  findNotes: () => {
+    const findNotes: DendronEngineV2["findNotes"] = async ({
+      fname,
+      vault,
+    }) => {
+      return ExtensionProvider.getEngine().findNotes({ fname, vault });
+    };
+    return findNotes;
+  },
 });
 
 suite("MoveNoteCommand", function () {
@@ -184,7 +193,7 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN update hashtags correctly", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -202,12 +211,9 @@ suite("MoveNoteCommand", function () {
             },
           ],
         });
-        const testNote = NoteUtils.getNoteByFnameV5({
-          fname: "test",
-          notes: engine.notes,
-          wsRoot,
-          vault: vaults[0],
-        })!;
+        const testNote = (
+          await engine.findNotes({ fname: "test", vault: vaults[0] })
+        )[0];
         expect(
           await AssertUtils.assertInString({
             body: testNote?.body,
@@ -237,7 +243,7 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN  turns links to hashtags", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -255,12 +261,9 @@ suite("MoveNoteCommand", function () {
             },
           ],
         });
-        const testNote = NoteUtils.getNoteByFnameV5({
-          fname: "test",
-          notes: engine.notes,
-          wsRoot,
-          vault: vaults[0],
-        })!;
+        const testNote = (
+          await engine.findNotes({ fname: "test", vault: vaults[0] })
+        )[0];
         expect(
           await AssertUtils.assertInString({
             body: testNote?.body,
@@ -290,7 +293,7 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN turns hashtags into regular links", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(tagNote);
 
         const cmd = new MoveNoteCommand();
@@ -308,12 +311,9 @@ suite("MoveNoteCommand", function () {
             },
           ],
         });
-        const testNote = NoteUtils.getNoteByFnameV5({
-          fname: "test",
-          notes: engine.notes,
-          wsRoot,
-          vault: vaults[0],
-        })!;
+        const testNote = (
+          await engine.findNotes({ fname: "test", vault: vaults[0] })
+        )[0];
         expect(
           await AssertUtils.assertInString({
             body: testNote?.body,
@@ -454,15 +454,11 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN do right thing", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vault1,
-          wsRoot,
-        }) as NoteProps;
+        const fooNote = (
+          await engine.findNotes({ fname: "foo", vault: vault1 })
+        )[0];
         await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -513,12 +509,7 @@ suite("MoveNoteCommand", function () {
         expect(!_.isUndefined(vault2Foo)).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo",
-              notes,
-              vault: vault2,
-              wsRoot,
-            })
+            (await engine.findNotes({ fname: "foo", vault: vault2 }))[0]
           )
         ).toBeFalsy();
       });
@@ -535,17 +526,13 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN do right thing", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const vault3 = vaults[2];
 
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vault1,
-          wsRoot,
-        }) as NoteProps;
+        const fooNote = (
+          await engine.findNotes({ fname: "foo", vault: vault1 })
+        )[0];
 
         await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
@@ -598,12 +585,7 @@ suite("MoveNoteCommand", function () {
         expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "bar",
-              notes,
-              vault: vault2,
-              wsRoot,
-            })
+            (await engine.findNotes({ fname: "bar", vault: vault2 }))[0]
           )
         ).toBeTruthy();
 
@@ -617,20 +599,10 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
 
         expect(
-          NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes,
-            vault: vault3,
-            wsRoot,
-          })
+          (await engine.findNotes({ fname: "foo", vault: vault3 }))[0]
         ).toBeTruthy();
         expect(
-          NoteUtils.getNoteByFnameV5({
-            fname: "bar",
-            notes,
-            vault: vault3,
-            wsRoot,
-          })
+          (await engine.findNotes({ fname: "bar", vault: vault3 }))[0]
         ).toBeTruthy();
       });
     }
@@ -646,15 +618,11 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN do right thing", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vault1,
-          wsRoot,
-        }) as NoteProps;
+        const fooNote = (
+          await engine.findNotes({ fname: "foo", vault: vault1 })
+        )[0];
 
         await WSUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
@@ -702,21 +670,11 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
 
         expect(
-          NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes,
-            vault: vault1,
-            wsRoot,
-          })?.stub
+          (await engine.findNotes({ fname: "foo", vault: vault1 }))[0].stub
         ).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameV5({
-              fname: "foo.ch1",
-              notes,
-              vault: vault1,
-              wsRoot,
-            })
+            (await engine.findNotes({ fname: "foo.ch1", vault: vault1 }))[0]
           )
         ).toBeTruthy();
 
@@ -729,20 +687,10 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
 
         expect(
-          NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes,
-            vault: vault2,
-            wsRoot,
-          })
+          (await engine.findNotes({ fname: "foo", vault: vault2 }))[0]
         ).toBeTruthy();
         expect(
-          NoteUtils.getNoteByFnameV5({
-            fname: "foo.ch1",
-            notes,
-            vault: vault2,
-            wsRoot,
-          })
+          (await engine.findNotes({ fname: "foo.ch1", vault: vault2 }))[0]
         ).toBeTruthy();
       });
     }
@@ -766,15 +714,11 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const notes = engine.notes;
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault1 = vaults[0];
-        const fooNote = NoteUtils.getNoteByFnameV5({
-          fname: "foo",
-          notes,
-          vault: vault1,
-          wsRoot,
-        }) as NoteProps;
+        const fooNote = (
+          await engine.findNotes({ fname: "foo", vault: vault1 })
+        )[0];
 
         await WSUtils.openNote(fooNote);
         const lc =

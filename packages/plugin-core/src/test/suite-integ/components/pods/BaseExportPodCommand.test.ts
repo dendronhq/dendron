@@ -1,4 +1,4 @@
-import { assert, DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { assert, DVault, NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   NoteTestUtilsV4,
@@ -199,19 +199,19 @@ suite("BaseExportPodCommand", function () {
             ExtensionProvider.getExtension()
           );
           const engine = ExtensionProvider.getEngine();
-          const { wsRoot, vaults } = engine;
-          const testNote1 = NoteUtils.getNoteByFnameV5({
-            fname: "test-note-for-pod1",
-            notes: engine.notes,
-            wsRoot,
-            vault: vaults[0],
-          }) as NoteProps;
-          const testNote2 = NoteUtils.getNoteByFnameV5({
-            fname: "test-note-for-pod2",
-            notes: engine.notes,
-            wsRoot,
-            vault: vaults[0],
-          }) as NoteProps;
+          const { vaults } = engine;
+          const testNote1 = (
+            await engine.findNotes({
+              fname: "test-note-for-pod1",
+              vault: vaults[0],
+            })
+          )[0];
+          const testNote2 = (
+            await engine.findNotes({
+              fname: "test-note-for-pod2",
+              vault: vaults[0],
+            })
+          )[0];
           const selectedItems = [
             { ...testNote1, label: "" },
             { ...testNote2, label: "" },

@@ -157,20 +157,20 @@ const NOTES = {
   }),
   CUSTOM_ATT_ADD: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const note = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
       note.custom = { bond: 43 };
       await engine.writeNote(note, { updateExisting: true });
-      const newNote = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const newNote = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
       return [
         {
           actual: newNote,
@@ -231,12 +231,12 @@ const NOTES = {
 
       return [
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "foo.ch1",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.schema,
+          actual: (
+            await engine.findNotes({
+              fname: "foo.ch1",
+              vault,
+            })
+          )[0].schema,
           expected: {
             moduleId: "foo",
             schemaId: "ch1",
@@ -270,26 +270,25 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const { notes } = engine;
     const vault = vaults[0];
-    const root = NoteUtils.getNoteByFnameV5({
-      fname: "root",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
-    const bar = NoteUtils.getNoteByFnameV5({
-      fname: "bar",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
-    const child = NoteUtils.getNoteByFnameV5({
-      fname: "bar.ch1",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
+    const root = (
+      await engine.findNotes({
+        fname: "root",
+        vault,
+      })
+    )[0];
+    const bar = (
+      await engine.findNotes({
+        fname: "bar",
+        vault,
+      })
+    )[0];
+    const child = (
+      await engine.findNotes({
+        fname: "bar.ch1",
+        vault,
+      })
+    )[0];
     return [
       {
         actual: _.size(root.children),
@@ -413,30 +412,30 @@ const NOTES = {
       await engine.writeNote(noteC);
       return [
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "Upper Upper",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "Upper Upper",
+              vault,
+            })
+          )[0].title,
           expected: "Upper Upper",
         },
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "lower lower",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "lower lower",
+              vault,
+            })
+          )[0].title,
           expected: "Lower Lower",
         },
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "lower Upper",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "lower Upper",
+              vault,
+            })
+          )[0].title,
           expected: "lower Upper",
         },
       ];
@@ -459,21 +458,21 @@ const NOTES = {
     await engine.writeNote(noteB);
     return [
       {
-        actual: NoteUtils.getNoteByFnameV5({
-          fname: "foo-with-dash",
-          notes: engine.notes,
-          vault,
-          wsRoot: engine.wsRoot,
-        })?.title,
+        actual: (
+          await engine.findNotes({
+            fname: "foo-with-dash",
+            vault,
+          })
+        )[0].title,
         expected: "Foo with Dash",
       },
       {
-        actual: NoteUtils.getNoteByFnameV5({
-          fname: "foo.foo-with-dash",
-          notes: engine.notes,
-          vault,
-          wsRoot: engine.wsRoot,
-        })?.title,
+        actual: (
+          await engine.findNotes({
+            fname: "foo.foo-with-dash",
+            vault,
+          })
+        )[0].title,
         expected: "Foo with Dash",
       },
     ];

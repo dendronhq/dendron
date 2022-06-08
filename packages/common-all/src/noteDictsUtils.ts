@@ -15,6 +15,22 @@ import { VaultUtils } from "./vault";
  */
 export class NoteDictsUtils {
   /**
+   * Construct NotePropsByIdDict from list of NoteProps
+   *
+   * @param notes Used to populate map
+   * @returns NotePropsByIdDict
+   */
+  static createNotePropsByIdDict(notes: NoteProps[]): NotePropsByIdDict {
+    const notesById: NotePropsByIdDict = {};
+
+    for (const note of notes) {
+      notesById[note.id] = note;
+    }
+
+    return notesById;
+  }
+
+  /**
    * Find notes by fname. If vault is provided, filter results so that only notes with matching vault is returned
    * Return empty array if no match is found
    *

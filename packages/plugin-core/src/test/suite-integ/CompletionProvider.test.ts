@@ -41,15 +41,15 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide completions", async () => {
-        const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+        const { engine, vaults } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
         await WSUtils.openNote(
-          NoteUtils.getNoteOrThrow({
-            fname: "root",
-            vault: vaults[1],
-            wsRoot,
-            notes: engine.notes,
-          })
+          (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0]
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
@@ -125,15 +125,15 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide correct completion", async () => {
-        const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+        const { engine, vaults } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
         await WSUtils.openNote(
-          NoteUtils.getNoteOrThrow({
-            fname: "root",
-            vault: vaults[1],
-            wsRoot,
-            notes: engine.notes,
-          })
+          (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0]
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
@@ -178,15 +178,15 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide correct completions", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
         await WSUtils.openNote(
-          NoteUtils.getNoteOrThrow({
-            fname: "root",
-            vault: vaults[1],
-            wsRoot,
-            notes: engine.notes,
-          })
+          (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0]
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
@@ -231,15 +231,15 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide correct completions", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
         await WSUtils.openNote(
-          NoteUtils.getNoteOrThrow({
-            fname: "root",
-            vault: vaults[1],
-            wsRoot,
-            notes: engine.notes,
-          })
+          (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0]
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
@@ -271,14 +271,14 @@ suite("completionProvider", function () {
     () => {
       let items: CompletionItem[] | undefined;
       before(async () => {
-        const { vaults, wsRoot, engine } = getDWorkspace();
+        const { vaults, engine } = getDWorkspace();
         await WSUtils.openNote(
-          NoteUtils.getNoteOrThrow({
-            fname: "root",
-            vault: vaults[1],
-            wsRoot,
-            notes: engine.notes,
-          })
+          (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0]
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
@@ -317,15 +317,15 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN doesn't provide outside wikilink", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "root",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
@@ -362,15 +362,15 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "test",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
@@ -412,15 +412,15 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "test",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
@@ -440,15 +440,15 @@ suite("completionProvider", function () {
     // TODO: flaky
     test.skip("provides headers for other files", (done) => {
       runLegacyMultiWorkspaceTest({
-        onInit: async ({ wsRoot, vaults, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           // Open a note, add [[test2#]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "test",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
@@ -522,15 +522,15 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[test2#^]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "test",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
@@ -591,15 +591,15 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
           await WSUtils.openNote(
-            NoteUtils.getNoteOrThrow({
-              fname: "test",
-              vault: vaults[0],
-              wsRoot,
-              notes: engine.notes,
-            })
+            (
+              await engine.findNotes({
+                fname: "test",
+                vault: vaults[0],
+              })
+            )[0]
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {

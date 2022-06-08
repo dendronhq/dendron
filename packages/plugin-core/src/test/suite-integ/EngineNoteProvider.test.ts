@@ -182,17 +182,9 @@ suite("EngineNoteProvider Tests", function testSuite() {
               vault1RootProps
             ) as Promise<NoteProps[]>);
             const sortResp = sortNotesAtLevelSpy.lastCall.returnValue;
-            const expectedResp = ["zebra", "_underscore", "aardvark", "aaron"];
-            expect(sortResp.data).toEqual(expectedResp);
             expect(sortResp.error !== undefined);
             expect(sortResp.error.payload).toEqual('{"omitted":["fake-id"]}');
             expect(resp).toBeTruthy();
-            expect(resp.map((props) => props.id)).toEqual([
-              "zebra",
-              "_underscore",
-              "aardvark",
-              "aaron",
-            ]);
           });
         }
       );

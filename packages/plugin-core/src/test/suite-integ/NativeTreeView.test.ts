@@ -1845,7 +1845,9 @@ suite("NativeTreeView tests", function () {
           });
 
           expect(sortRespWithError !== undefined);
-          expect(sortRespWithError.payload).toEqual('{omitted:["fake-id"]}');
+          expect(sortRespWithError.error.payload).toEqual(
+            '{"omitted":["fake-id"]}'
+          );
         });
       }
     );

@@ -124,12 +124,21 @@ describe("hashtag", () => {
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
-      const resp1 = proc().parse("彼女に「#よろしく」言って下さい。");
+      const resp1 = proc().parse("彼女に「 #よろしく」言って下さい。");
       expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
       expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual("#よろしく");
+    });
+
+    test("doesn't parse when it's part of a sentence", () => {
+      const resp1 = proc().parse("no#tag");
+      expect(getDescendantNode(expect, resp1, 0, 0).type).not.toEqual(
+        DendronASTTypes.HASHTAG
+      );
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp1, 0, 0).value).toEqual("no#tag");
     });
   });
 

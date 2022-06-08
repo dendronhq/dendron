@@ -31,9 +31,27 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
+    "@actions/artifact": "^0.5.2",
+    "@actions/core": "^1.4.0",
+    "@actions/exec": "^1.1.0",
+    "@dendronhq/common-all": "^0.92.1",
+    "@dendronhq/engine-server": "^0.92.1",
+    "d3": "^7.0.0",
+    "esbuild": "^0.12.15",
+    "lodash": "^4.17.21",
+    "micromatch": "^4.0.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "yargs": "^17.4.1"
   },
   "devDependencies": {
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "@types/jest": "^27.0.1",
+    "@types/micromatch": "^4.0.2",
+    "husky": "^7.0.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.3.5"
   },
   "engines": {
     "node": ">=14.0.0"

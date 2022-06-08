@@ -4057,6 +4057,11 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@popperjs/core@^2.0.0", "@popperjs/core@^2.9.0":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.5.tgz#db5a11bf66bdab39569719555b0f76e138d7bd64"
+  integrity sha512-9X2obfABZuDVLCgPK9aX0a/x4jaOEweTTWE2+9sr0Qqqevj2Uv5XorvusThmc9XGYpS9yI+fhh8RTafBtGposw==
+
 "@popperjs/core@^2.9.3":
   version "2.11.2"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.2.tgz#830beaec4b4091a9e9398ac50f865ddea52186b9"
@@ -9145,10 +9150,17 @@ cytoscape-euler@^1.2.2:
   resolved "https://registry.npmjs.org/cytoscape-euler/-/cytoscape-euler-1.2.2.tgz#d599aa0656c022216f93a5c3ac8fce1ad69ef9b4"
   integrity sha512-A24ZGrFpqCOutTIlGoXA5kmjFj68iy7HvqXuhcZUL1a7Z8bL59Bl2bB7hkSvFcCZBVCNcArxKr+YlB8bJo9Ftw==
 
-cytoscape@3.19.0:
-  version "3.19.0"
-  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.19.0.tgz#b3e3136f823ca00a1c7752741c2a349e52545f57"
-  integrity sha512-DANM8bM4EuSTS3DraPK0nLSmzANrzQ2g/cb3u5Biexu/NVsJA+xAoXVvWHRIHDXz3y0gpMjTPv3Z13ZbkNrEPw==
+cytoscape-popper@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cytoscape-popper/-/cytoscape-popper-2.0.0.tgz#d93917695a9b8af3dbda1d8ee433618ac4d4e359"
+  integrity sha512-b7WSOn8qXHWtdIXFNmrgc8qkaOs16tMY0EwtRXlxzvn8X+al6TAFrUwZoYATkYSlotfd/36ZMoeKMEoUck6feA==
+  dependencies:
+    "@popperjs/core" "^2.0.0"
+
+cytoscape@^3.19.0:
+  version "3.21.0"
+  resolved "https://registry.npmjs.org/cytoscape/-/cytoscape-3.21.0.tgz#8a73f6f0f3a44f948e266ac7df9b2eff65e8bd3c"
+  integrity sha512-xPINMzQNGN4WIog93gYRScT4y/CyZMmqunnhU59/8LynhWwzepJtUydMfvIPuz5TmJ9rSCMdw6rmxhfbb1eofw==
   dependencies:
     heap "^0.2.6"
     lodash.debounce "^4.0.8"
@@ -23431,6 +23443,18 @@ tiny-invariant@^1.0.6:
   version "1.2.0"
   resolved "https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.2.0.tgz#a1141f86b672a9148c72e978a19a73b9b94a15a9"
   integrity sha512-1Uhn/aqw5C6RI4KejVeTg6mIS7IqxnLJ8Mv2tV5rTc0qWobay7pDUz6Wi392Cnc8ak1H0F2cjoRzb2/AW4+Fvg==
+
+tiny-warning@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
+  integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
+
+tippy.js@^6.3.7:
+  version "6.3.7"
+  resolved "https://registry.yarnpkg.com/tippy.js/-/tippy.js-6.3.7.tgz#8ccfb651d642010ed9a32ff29b0e9e19c5b8c61c"
+  integrity sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==
+  dependencies:
+    "@popperjs/core" "^2.9.0"
 
 title@^3.4.4:
   version "3.4.4"

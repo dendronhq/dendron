@@ -25,6 +25,9 @@ import { getStyles } from "../styles/custom";
 import ClassicTheme from "../styles/theme-classic";
 import BlockTheme from "../styles/theme-block";
 import MonokaiTheme from "../styles/theme-monokai";
+import popper from "cytoscape-popper";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
 
 export class GraphUtils {
   static isLocalGraph(config: GraphConfig) {
@@ -111,6 +114,8 @@ export default function Graph({
     workspace,
     isSidePanel,
   });
+  // maps node id with its tooltip
+  const id2tooltip: any = {};
 
   // On config update, handle graph changes
   useApplyGraphConfig({
@@ -161,6 +166,7 @@ export default function Graph({
 
       // Add layout middleware
       cytoscape.use(euler);
+      cytoscape.use(popper);
 
       const style = getCytoscapeStyle(
         currentTheme || "light",
@@ -201,6 +207,22 @@ export default function Graph({
         renderTimeout = setTimeout(() => {
           setIsReady(true);
         }, 1000);
+      });
+
+      network.ready(() => {
+        network.filter("node").forEach((element) => {
+          makePopperWithTippy(element, id2tooltip);
+        });
+      });
+
+      network.nodes().unbind("mouseover");
+      network.nodes().bind("mouseover", (event) => {
+        id2tooltip[event.target.id()].show();
+      });
+
+      network.nodes().unbind("mouseout");
+      network.nodes().bind("mouseout", (event) => {
+        id2tooltip[event.target.id()].hide();
       });
 
       const shouldAnimate =
@@ -457,4 +479,30 @@ const toggleGraphView = (val?: boolean) => {
     data: { graphType },
     source: DMessageSource.webClient,
   } as GraphViewMessage);
+};
+
+const makePopperWithTippy = (node: any, id2tooltip: any) => {
+  const ref = node.popperRef(); // used only for positioning
+
+  //A dummy element must be passed as tippy only accepts dom element(s) as the target
+  const dummyDomEle = document.createElement("div");
+
+  const tooltip = tippy(dummyDomEle, {
+    // tippy props:
+    getReferenceClientRect: ref.getBoundingClientRect,
+    trigger: "manual", // mandatory, we cause the tippy to show programmatically.
+
+    /**
+     * your own custom props
+     * content prop can be used when the target is a single element
+     */
+    content: () => {
+      const content = document.createElement("div");
+      const nodeData = node.data();
+      const fname = nodeData["fname"];
+      content.innerHTML = fname;
+      return content;
+    },
+  });
+  id2tooltip[node.id()] = tooltip;
 };

@@ -1,2 +1,3 @@
-// eslint-disable-next-line no-console
-console.log("hello world");
+export function sayHello() {
+  console.log("hello from dendron-viz");
+}

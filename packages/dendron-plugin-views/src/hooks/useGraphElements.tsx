@@ -42,6 +42,7 @@ type QueueData = {
    */
   distance: number;
   classes: string;
+  isParent?: boolean;
 };
 
 function computeGraphElements({
@@ -102,9 +103,35 @@ function computeGraphElements({
     });
 
     if (data.distance < maxDistance) {
-      const children = note.children;
-
       const noteVaultClass = getVaultClass(note.vault);
+
+      const parentNote =
+        (data.distance === 0 || data.isParent) && note.parent
+          ? notes[note.parent]
+          : undefined;
+      if (parentNote) {
+        nodesQueue.enqueue({
+          note: parentNote,
+          distance: data.distance + 1,
+          isParent: true,
+          classes: `${DEFAULT_NODE_CLASSES} parent ${getVaultClass(
+            parentNote.vault
+          )}`,
+        });
+        edges.hierarchy.push({
+          data: {
+            group: "edges",
+            id: `${parentNote.id}_${note.id}`,
+            source: parentNote.id,
+            target: note.id,
+            fname: parentNote.fname,
+            stub: _.isUndefined(parentNote.stub) ? false : parentNote.stub,
+          },
+          classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
+        });
+      }
+
+      const children = note.children;
 
       // Setup the edges for children now:
       children.forEach((child: string) => {

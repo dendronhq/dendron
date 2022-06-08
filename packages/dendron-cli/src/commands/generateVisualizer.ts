@@ -1,5 +1,5 @@
 import { RespV3 } from "@dendronhq/common-all";
-import yargs from "yargs";
+import { sayHello } from "@dendronhq/dendron-viz";
 import { CLICommand } from "./base";
 
 type CommandOpts = {};
@@ -22,7 +22,7 @@ export class VisualizeCLICommand extends CLICommand<
   }
 
   async execute(opts?: CommandOpts): Promise<CommandOutput> {
-    console.log("Hello World");
+    sayHello();
     return {};
   }
 }

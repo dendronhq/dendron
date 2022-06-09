@@ -1,7 +1,11 @@
 import {
   assertUnreachable,
   DendronError,
+  DEngineClient,
   DVault,
+  ErrorFactory,
+  NoteLookupUtils,
+  NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -32,20 +36,38 @@ type CommandOpts = CommandCLIOpts & SetupEngineResp & CommandCommonProps;
 
 type CommandOutput = { data: any; error?: DendronError };
 
+export type NoteCommandData = {
+  /**
+   * String output
+   */
+  stringOutput: string;
+  notesOutput: NoteProps[];
+};
+
 export enum NoteCommands {
+  /**
+   * Like lookup, but only look for notes
+   * Returns a list of notes
+   */
   LOOKUP = "lookup",
+  LOOKUP_LEGACY = "lookup_legacy",
   DELETE = "delete",
   MOVE = "move",
 }
 
 export { CommandOpts as NoteCLICommandOpts };
 
+function checkQuery(opts: CommandOpts) {
+  if (_.isUndefined(opts.query)) {
+    throw Error("no query found");
+  }
+  return { query: opts.query };
+}
+
 function checkQueryAndVault(opts: CommandOpts) {
   const vaults = opts.engine.vaults;
   let vault: DVault;
-  if (!opts.query) {
-    throw Error("no query found");
-  }
+  const { query } = checkQuery(opts);
   if (_.size(opts.engine.vaults) > 1 && !opts.vault) {
     throw Error("need to specify vault");
   } else {
@@ -53,7 +75,71 @@ function checkQueryAndVault(opts: CommandOpts) {
       ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
       : vaults[0];
   }
-  return { query: opts.query, vault };
+  return { query, vault };
+}
+
+async function formatNotes({
+  output,
+  notes,
+  engine,
+}: {
+  output: NoteCLIOutput;
+  notes: NoteProps[];
+  engine: DEngineClient;
+}) {
+  const resp = await Promise.all(
+    _.map(notes, (note) => {
+      return formatNote({ note, output, engine });
+    })
+  );
+  if (output === NoteCLIOutput.JSON) {
+    return JSON.stringify(resp, null, 4);
+  }
+  return resp.join("\n");
+}
+
+async function formatNote({
+  output,
+  note,
+  engine,
+}: {
+  output: NoteCLIOutput;
+  note: NoteProps;
+  engine: DEngineClient;
+}): Promise<string | NoteProps> {
+  let payload: string | NoteProps;
+  switch (output) {
+    case NoteCLIOutput.JSON:
+      // this is a NOP
+      payload = note;
+      break;
+    case NoteCLIOutput.MARKDOWN_DENDRON:
+      payload = NoteUtils.serialize(note);
+      break;
+    case NoteCLIOutput.MARKDOWN_GFM:
+      payload = await new MarkdownPublishPod().execute({
+        engine,
+        vaults: engine.vaults,
+        wsRoot: engine.wsRoot,
+        config: {
+          fname: note.fname,
+          vaultName: VaultUtils.getName(note.vault),
+          dest: "stdout",
+        },
+      });
+      break;
+    case undefined:
+      throw new DendronError({
+        message: "Unknown output format requested",
+        payload: {
+          ctx: "NoteCLICommand.execute",
+          output,
+        },
+      });
+    default:
+      assertUnreachable(output);
+  }
+  return payload;
 }
 
 export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
@@ -96,53 +182,55 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, wsRoot, output, destFname, destVaultName } = opts;
+    const { cmd, engine, output, destFname, destVaultName } = _.defaults(opts, {
+      output: NoteCLIOutput.JSON,
+    });
 
     try {
       switch (cmd) {
         case NoteCommands.LOOKUP: {
+          const { query } = checkQuery(opts);
+          const notes = await NoteLookupUtils.lookup({ qsRaw: query, engine });
+          const resp = await formatNotes({
+            output,
+            notes,
+            engine,
+          });
+          this.print(resp);
+          const data: NoteCommandData = {
+            notesOutput: notes,
+            stringOutput: resp,
+          };
+          return { data };
+        }
+        case NoteCommands.LOOKUP_LEGACY: {
           const { query, vault } = checkQueryAndVault(opts);
           const { data } = await engine.getNoteByPath({
             npath: query,
             createIfNew: true,
             vault,
           });
-          let payload: string;
-
-          switch (output) {
-            case NoteCLIOutput.JSON:
-              payload = JSON.stringify(data, null, 4);
-              break;
-            case NoteCLIOutput.MARKDOWN_DENDRON:
-              payload = NoteUtils.serialize(data?.note!);
-              break;
-            case NoteCLIOutput.MARKDOWN_GFM:
-              payload = await new MarkdownPublishPod().execute({
-                engine,
-                vaults: engine.vaults,
-                wsRoot,
-                config: {
-                  fname: data?.note?.fname!,
-                  vaultName: VaultUtils.getName(vault),
-                  dest: "stdout",
-                },
-              });
-              break;
-            case undefined:
-              throw new DendronError({
-                message: "Unknown output format requested",
-                payload: {
-                  ctx: "NoteCLICommand.execute",
-                  cmd,
-                  output,
-                },
-              });
-            default:
-              assertUnreachable(output);
+          let stringOutput: string = "";
+          if (data?.note) {
+            stringOutput = await formatNotes({
+              engine,
+              notes: [data.note],
+              output,
+            });
+            this.print(stringOutput);
+            return {
+              data: {
+                notesOutput: [data.note],
+                stringOutput,
+              } as NoteCommandData,
+            };
           }
-
-          this.print(payload);
-          return { data: { payload, rawData: data } };
+          return {
+            error: ErrorFactory.createInvalidStateError({
+              message: "lookup failed",
+            }),
+            data: undefined,
+          };
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);

@@ -1,24 +1,182 @@
-import { VaultUtils } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NoteCLICommand,
   NoteCLICommandOpts,
   NoteCLIOutput,
+  NoteCommandData,
   NoteCommands,
 } from "@dendronhq/dendron-cli";
-import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
-import { checkString } from "../../../utils";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
+import { checkString } from "../../../utils";
 
 const runCmd = (opts: Omit<NoteCLICommandOpts, "port" | "server">) => {
   const cmd = new NoteCLICommand();
   cmd.opts.quiet = true;
-  return cmd.execute({ ...opts, port: 0, server: {} as any });
+  return cmd.execute({
+    ...opts,
+    port: 0,
+    server: {} as any,
+    output: NoteCLIOutput.JSON,
+  });
+};
+
+const runLookupLegacyCmd = (
+  opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
+) => {
+  const cmd = new NoteCLICommand();
+  cmd.opts.quiet = true;
+  return cmd.execute({
+    ...opts,
+    cmd: NoteCommands.LOOKUP_LEGACY,
+    port: 0,
+    server: {} as any,
+  }) as Promise<{ data: NoteCommandData }>;
+};
+
+const runLookupCmd = (
+  opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
+) => {
+  const cmd = new NoteCLICommand();
+  cmd.opts.quiet = true;
+  return cmd.execute({
+    ...opts,
+    cmd: NoteCommands.LOOKUP,
+    port: 0,
+    server: {} as any,
+    output: NoteCLIOutput.JSON,
+  }) as Promise<{ data: NoteCommandData }>;
 };
 
 describe("WHEN run 'dendron note lookup'", () => {
-  const cmd = NoteCommands.LOOKUP;
+  describe("AND WHEN find note that doesn't exist", () => {
+    test("THEN return empty result", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[0];
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: "gamma",
+            output: NoteCLIOutput.JSON,
+          });
+          expect(notesOutput).toEqual([]);
+          const note = NoteUtils.getNoteByFnameFromEngine({
+            fname: "gamma",
+            vault,
+            engine,
+          });
+          // note not created
+          expect(note).toBeUndefined();
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN find note with single matches", () => {
+    test("THEN return one matches", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: "foo.ch1",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN single match using wikilink", () => {
+    test("THEN return match", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: "[[foo.ch1]]",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN single match using cross vault wikilink of matching vault", () => {
+    test("THEN return match", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: `[[dendron://${VaultUtils.getName(
+              engine.vaults[0]
+            )}/foo.ch1]]`,
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN find note with multiple matches", () => {
+    test("THEN return all matches", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const {
+            data: { notesOutput },
+          } = await runLookupCmd({
+            wsRoot,
+            engine,
+            query: "foo",
+          });
+          expect(_.map(notesOutput, (n) => n.fname)).toEqual([
+            "foo",
+            "foo.ch1",
+          ]);
+        },
+        {
+          expect,
+          createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+});
+
+describe("WHEN run 'dendron note lookup_legacy'", () => {
+  const cmd = NoteCommands.LOOKUP_LEGACY;
 
   describe("AND WHEN lookup note that doesn't exist in specified vault", () => {
     test("THEN lookup creates new note in specified vault", async () => {
@@ -58,16 +216,17 @@ describe("WHEN run 'dendron note lookup'", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
-          const { data } = await runCmd({
+          const {
+            data: { stringOutput },
+          } = await runLookupLegacyCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
             engine,
-            cmd,
             query: "foo",
             output: NoteCLIOutput.MARKDOWN_DENDRON,
           });
-          expect(data.payload).toMatchSnapshot();
-          await checkString(data.payload, "---\nfoo body");
+          expect(stringOutput).toMatchSnapshot();
+          await checkString(stringOutput, "---\nfoo body");
         },
         {
           expect,
@@ -83,16 +242,17 @@ describe("WHEN run 'dendron note lookup'", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
-          const { data } = await runCmd({
+          const {
+            data: { stringOutput },
+          } = await runLookupLegacyCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
             engine,
-            cmd,
             query: "foo",
             output: NoteCLIOutput.MARKDOWN_GFM,
           });
-          expect(data.payload).toMatchSnapshot();
-          await checkString(data.payload, "foo.ch1 body");
+          expect(stringOutput).toMatchSnapshot();
+          await checkString(stringOutput, "foo.ch1 body");
         },
         {
           expect,

@@ -1,17 +1,15 @@
 import Fuse from "fuse.js";
 import _, { ListIterator, NotVoid } from "lodash";
 import {
-  DEngineMode,
-  SchemaProps,
-  NoteProps,
-  SchemaModuleDict,
-  SchemaUtils,
-  NotePropsByIdDict,
-  SchemaModuleProps,
-  NoteUtils,
-  DNodeUtils,
-  DEngineClient,
   ConfigUtils,
+  DEngineMode,
+  DNodeUtils,
+  NoteProps,
+  NotePropsByIdDict,
+  SchemaModuleDict,
+  SchemaModuleProps,
+  SchemaProps,
+  SchemaUtils,
 } from ".";
 import { DVault } from "./types";
 import { levenshteinDistance } from "./util/stringUtil";
@@ -418,60 +416,5 @@ export class FuseEngine {
    * */
   static doesContainSpecialQueryChars(str: string) {
     return this.SPECIAL_QUERY_CHARACTERS.some((char) => str.includes(char));
-  }
-}
-
-const PAGINATE_LIMIT = 50;
-
-export class NoteLookupUtils {
-  /**
-   * Get qs for current level of the hierarchy
-   * @param qs
-   * @returns
-   */
-  static getQsForCurrentLevel = (qs: string) => {
-    const lastDotIndex = qs.lastIndexOf(".");
-    return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
-  };
-
-  static fetchRootResults = (notes: NotePropsByIdDict) => {
-    const roots: NoteProps[] = NoteUtils.getRoots(notes);
-
-    const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
-    return roots.concat(childrenOfRootNotes);
-  };
-
-  static async lookup({
-    qs,
-    originalQS,
-    engine,
-    showDirectChildrenOnly,
-  }: {
-    qs: string;
-    originalQS: string;
-    engine: DEngineClient;
-    showDirectChildrenOnly?: boolean;
-  }): Promise<NoteProps[]> {
-    const { notes } = engine;
-    const qsClean = this.slashToDot(qs);
-    if (_.isEmpty(qsClean)) {
-      return NoteLookupUtils.fetchRootResults(notes);
-    }
-    const resp = await engine.queryNotes({
-      qs,
-      originalQS,
-      onlyDirectChildren: showDirectChildrenOnly,
-    });
-    let nodes = resp.data;
-
-    if (nodes.length > PAGINATE_LIMIT) {
-      nodes = nodes.slice(0, PAGINATE_LIMIT);
-    }
-    return nodes;
-  }
-
-  static slashToDot(ent: string) {
-    return ent.replace(/\//g, ".");
   }
 }

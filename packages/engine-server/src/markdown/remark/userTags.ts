@@ -55,8 +55,9 @@ export const matchUserTag = (
   matchLoose: boolean = true
 ): string | undefined => {
   const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
-  if (match && match.groups)
+  if (match && match.groups) {
     return match.groups.tagContents || match.groups.userTagContents;
+  }
   return undefined;
 };
 
@@ -74,7 +75,19 @@ const plugin: Plugin<[PluginOpts?]> = function plugin(
 
 function attachParser(proc: Unified.Processor) {
   function locator(value: string, fromIndex: number) {
-    return value.indexOf("@", fromIndex);
+    // Do not locate a symbol if the previous character is non-whitespace.
+    // Unified cals tokenizer starting at the index we return here,
+    // so tokenizer won't be able to reject it for not starting with a non-space character.
+    const atSymbol = value.indexOf("@", fromIndex);
+    if (atSymbol === 0) {
+      return atSymbol;
+    } else if (atSymbol > 0) {
+      const previousSymbol = value[atSymbol - 1];
+      if (!previousSymbol || /[\s]/.exec(previousSymbol)) {
+        return atSymbol;
+      }
+    }
+    return -1;
   }
 
   function inlineTokenizer(eat: Eat, value: string) {

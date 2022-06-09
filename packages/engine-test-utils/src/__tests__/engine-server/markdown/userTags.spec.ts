@@ -113,7 +113,7 @@ describe("user tags", () => {
     });
 
     test("doesn't parse trailing unicode punctuation", () => {
-      const resp1 = proc().parse("この人は「@松本.行弘」です。");
+      const resp1 = proc().parse("この人は「 @松本.行弘」です。");
       expect(getDescendantNode(expect, resp1, 0, 1).type).toEqual(
         DendronASTTypes.USERTAG
       );
@@ -128,6 +128,8 @@ describe("user tags", () => {
       expect(getDescendantNode(expect, resp1, 0, 0).type).toEqual(
         DendronASTTypes.LINK
       );
+      // @ts-ignore
+      expect(getDescendantNode(expect, resp1, 0, 0).children.length).toEqual(1);
       expect(getDescendantNode(expect, resp1, 0, 0, 0).type).toEqual(
         DendronASTTypes.TEXT
       );

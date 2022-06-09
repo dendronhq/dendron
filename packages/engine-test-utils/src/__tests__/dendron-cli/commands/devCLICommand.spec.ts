@@ -48,10 +48,6 @@ describe("build", () => {
         const publishVersionStub = stub(LernaUtils, "publishVersion").returns(
           Promise.resolve()
         );
-        const buildNextServerStub = stub(
-          BuildUtils,
-          "buildNextServer"
-        ).returns();
         const buildPluginViewsStub = stub(
           BuildUtils,
           "buildPluginViews"
@@ -95,7 +91,6 @@ describe("build", () => {
           typecheckStub,
           bumpVersionStub,
           publishVersionStub,
-          buildNextServerStub,
           buildPluginViewsStub,
           syncStaticAssetsStub,
           syncStaticAssetsToNextjsTemplateStub,

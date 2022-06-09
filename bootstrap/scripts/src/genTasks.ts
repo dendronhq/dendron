@@ -9,7 +9,6 @@ const enum PACKAGE {
   "common-server" = "common-server",
   "common-test-utils" = "common-test-utils",
   "dendron-cli" = "dendron-cli",
-  "dendron-next-server" = "dendron-next-server",
   "engine-server" = "engine-server",
   "engine-test-utils" = "engine-test-utils",
   "generator-dendron" = "generator-dendron",
@@ -151,7 +150,6 @@ async function main() {
   const blacklist = [
     ".DS_Store",
     "plugin-core",
-    "dendron-next-server",
     "lsp-client",
     "lsp-server",
     PACKAGE["generator-dendron"],

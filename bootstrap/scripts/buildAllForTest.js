@@ -31,13 +31,8 @@ if (TEST_NEXT_TEMPLATE) {
 $(
   `npx lerna run buildCI --parallel --scope "@dendronhq/{common-frontend,dendron-cli}"`
 );
-if (TEST_NEXT_TEMPLATE) {
-  $(
-    `npx lerna run buildCI --scope "@dendronhq/{engine-test-utils,dendron-next-server}" `
-  );
-} else {
-  $(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils" `);
-}
+
+$(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils"`);
 
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);
 

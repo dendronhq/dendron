@@ -61,7 +61,7 @@ function main() {
       },
       "debugger;": { rgx: /(^|\s)debugger/, fileRgx: /\.ts$/ },
       "rel import of monorepo pkg": {
-        rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server))/,
+        rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils))/,
         fileRgx: /\.ts[x]?$/,
       },
     },

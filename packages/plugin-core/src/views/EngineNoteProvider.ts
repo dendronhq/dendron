@@ -1,15 +1,18 @@
 import {
+  ConfirmStatus,
   DendronError,
   DNodeUtils,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
   TreeUtils,
+  TreeViewEvents,
   TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter, MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
+import * as vscode from "vscode";
 import {
   Disposable,
   Event,
@@ -24,6 +27,7 @@ import {
 import { DendronContext, ICONS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { TreeNote } from "./TreeNote";
 
@@ -74,6 +78,42 @@ export class EngineNoteProvider
     }
   }
 
+  private showNoteOmittedErrorMessage(opts: { error: DendronError }) {
+    const { error } = opts;
+    const { payload } = error;
+    const fixText = "Reload";
+    if (payload === undefined) return;
+
+    const omittedNotes = JSON.parse(payload).omitted;
+
+    AnalyticsUtils.track(TreeViewEvents.NoteOmittedErrorMessageShow, {
+      count: omittedNotes.length,
+    });
+    vscode.window
+      .showErrorMessage(
+        `Note(s) with note id ${omittedNotes.join(
+          ", "
+        )} have been omitted from the tree view due to an error. Please reload to fix the issue.`,
+        fixText
+      )
+      .then(async (resp) => {
+        if (resp === fixText) {
+          // need to save it because we are
+          AnalyticsUtils.trackForNextRun(
+            TreeViewEvents.NoteOmittedErrorMessageConfirm,
+            {
+              status: ConfirmStatus.accepted,
+            }
+          );
+          await vscode.commands.executeCommand("workbench.action.reloadWindow");
+        } else {
+          AnalyticsUtils.track(TreeViewEvents.NoteOmittedErrorMessageConfirm, {
+            status: ConfirmStatus.rejected,
+          });
+        }
+      });
+  }
+
   getTree(): { [key: string]: TreeNote } {
     return this._tree;
   }
@@ -119,6 +159,7 @@ export class EngineNoteProvider
         });
 
         if (error !== undefined) {
+          this.showNoteOmittedErrorMessage({ error });
           Logger.warn({ ctx, error });
         }
 
@@ -222,6 +263,7 @@ export class EngineNoteProvider
     });
 
     if (error !== undefined) {
+      this.showNoteOmittedErrorMessage({ error });
       Logger.warn({ ctx, error });
     }
 

@@ -172,6 +172,11 @@ export enum GraphEvents {
   GraphPanelUsed = "GraphPanelUsed",
 }
 
+export enum TreeViewEvents {
+  NoteOmittedErrorMessageShow = "NoteOmittedErrorMessageShow",
+  NoteOmittedErrorMessageConfirm = "NoteOmittedErrorMessageConfirm",
+}
+
 export const DendronEvents = {
   VSCodeEvents,
   CLIEvents,
@@ -185,4 +190,5 @@ export const DendronEvents = {
   WorkspaceEvents,
   EngagementEvents,
   GraphEvents,
+  TreeViewEvents,
 };

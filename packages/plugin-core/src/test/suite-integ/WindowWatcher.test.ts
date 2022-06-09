@@ -56,7 +56,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension: mockExtension,
             previewProxy,
           });
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);

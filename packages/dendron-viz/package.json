@@ -25,14 +25,9 @@
     "clean": "rimraf lib && rimraf coverage",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean",
-    "build": "node_modules/.bin/esbuild --target=es2019 ./src/index.jsx --bundle --platform=node --outfile=index.js",
-    "buildDendron": "node_modules/.bin/esbuild --target=es2019 ./src/dendron.ts --bundle --platform=node --outfile=dendron.js",
-    "prepare": "husky install",
-    "typecheck": "yarn run tsc --noEmit --allowJs",
-    "test:jest": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test": "npm run test:jest --",
+    "build": "yarn compile",
+    "buildCI": "yarn compile",
+    "compile": "tsc -p tsconfig.build.json",
     "watch": "yarn compile --watch"
   },
   "dependencies": {

@@ -218,6 +218,8 @@ suite("GIVEN VaultRemoveCommand", function () {
     }
   );
 
+  // This test has been skipped because the checks were not working with self
+  // contained vaults. This should be fixed later.
   describeSingleWS.skip(
     "WHEN there's only one vault left after remove",
     {},
@@ -253,6 +255,8 @@ suite("GIVEN VaultRemoveCommand", function () {
     }
   );
 
+  // This test has been skipped because the checks were not working with self
+  // contained vaults. This should be fixed later.
   describeSingleWS.skip("WHEN a published vault is removed", {}, () => {
     test("THEN the vault is removed from duplicateNoteBehavior payload", async () => {
       const { wsRoot } = ExtensionProvider.getDWorkspace();

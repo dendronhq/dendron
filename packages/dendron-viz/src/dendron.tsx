@@ -7,7 +7,7 @@ import fs from "fs";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./process-dendron-notes";
-import { Tree } from "./Tree";
+import { createTree } from "./Tree";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -48,6 +48,8 @@ async function main(args: InputArgs) {
     colorEncoding,
     customFileColors,
   } = collectInput(args);
+
+  const Tree = await createTree();
 
   const engine = DendronEngineV2.create({ wsRoot: rootPath });
   await engine.init();

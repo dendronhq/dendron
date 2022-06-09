@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "jsx": "react",
     "module": "commonjs",
     "target": "ES2019",
     "lib": ["es2019"],

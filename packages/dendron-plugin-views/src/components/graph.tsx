@@ -84,6 +84,8 @@ export const getEulerConfig = (shouldAnimate: boolean) => ({
   randomize: false,
 });
 
+cytoscape.use(popper);
+
 export default function Graph({
   elements,
   type,
@@ -166,7 +168,6 @@ export default function Graph({
 
       // Add layout middleware
       cytoscape.use(euler);
-      cytoscape.use(popper);
 
       const style = getCytoscapeStyle(
         currentTheme || "light",
@@ -481,7 +482,10 @@ const toggleGraphView = (val?: boolean) => {
   } as GraphViewMessage);
 };
 
-const makePopperWithTippy = (node: any, id2tooltip: any) => {
+const makePopperWithTippy = (
+  node: cytoscape.SingularElementReturnValue,
+  id2tooltip: any
+) => {
   const ref = node.popperRef(); // used only for positioning
 
   //A dummy element must be passed as tippy only accepts dom element(s) as the target

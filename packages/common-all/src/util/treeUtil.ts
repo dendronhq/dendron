@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { PublishUtils } from "../publish";
 import { NotePropsByIdDict, NoteProps } from "../types";
@@ -86,11 +87,13 @@ export class TreeUtils {
         return [];
       }
 
-      return this.sortNotesAtLevel({
+      const { data } = this.sortNotesAtLevel({
         noteIds: note.children,
         noteDict,
         reverse: fm.sort_order === "reverse",
-      })
+      });
+
+      return data
         .map((noteId) =>
           TreeUtils.note2Tree({
             noteId,
@@ -135,12 +138,31 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict;
     reverse?: boolean;
     labelType?: TreeViewItemLabelTypeEnum;
-  }): string[] => {
+  }): { data: string[]; error?: DendronError } => {
+    const unsafeNoteIds: string[] = [];
+    const safeNoteIds = noteIds.filter((noteId) => {
+      const props = _.get(noteDict, noteId);
+      if (props === undefined) {
+        unsafeNoteIds.push(noteId);
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    let error: DendronError | undefined;
+    if (unsafeNoteIds.length > 0) {
+      error = new DendronError({
+        message: "Omitted sorting note ids not found in noteDict",
+        payload: { omitted: unsafeNoteIds },
+      });
+    }
+
     const out = _.sortBy(
-      noteIds,
+      safeNoteIds,
       // Sort by nav order if set
       (noteId) => noteDict[noteId]?.custom?.nav_order,
-      // Sort by titles
+      // Sort by label
       (noteId) => {
         if (labelType) {
           return labelType === TreeViewItemLabelTypeEnum.filename
@@ -166,8 +188,9 @@ export class TreeUtils {
       out.push(maybeTagsHierarchy);
     }
     if (reverse) {
-      return _.reverse(out);
+      return { data: _.reverse(out), error };
     }
-    return out;
+
+    return { data: out, error };
   };
 }

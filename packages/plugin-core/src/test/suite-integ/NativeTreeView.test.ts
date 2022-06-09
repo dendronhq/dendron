@@ -1,14 +1,15 @@
 import { expect } from "../testUtilsv2";
-import { describe, beforeEach } from "mocha";
+import { describe, beforeEach, before, after } from "mocha";
 import { EngineNoteProvider } from "../../views/EngineNoteProvider";
 import { describeMultiWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
-import { NoteProps } from "@dendronhq/common-all";
+import { DendronError, NoteProps, TreeUtils } from "@dendronhq/common-all";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
 import { vault2Path } from "@dendronhq/common-server";
 import { Uri } from "vscode";
 import path from "path";
+import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -1789,6 +1790,67 @@ suite("NativeTreeView tests", function () {
         });
       });
     });
+  });
+  describe("error handling", function () {
+    describeMultiWS(
+      "GIVEN note id that is not in noteDict",
+      {
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "foo",
+          });
+        },
+      },
+      () => {
+        let sortNotesAtLevelSpy: sinon.SinonSpy;
+
+        before(() => {
+          sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
+        });
+
+        after(() => {
+          sortNotesAtLevelSpy.restore();
+        });
+
+        test("THEN gracefully render only the available notes and log omitted note id.", async () => {
+          const mockEvents = new MockEngineEvents();
+          const provider = new EngineNoteProvider(mockEvents);
+
+          const props = await (provider.getChildren() as Promise<NoteProps[]>);
+
+          const vault1RootProps = props[0];
+
+          vault1RootProps.children.push("fake-id");
+
+          const fullTree = await getFullTree({
+            root: vault1RootProps,
+            provider,
+          });
+
+          const sortResps = sortNotesAtLevelSpy.returnValues;
+          const sortRespWithError = sortResps.find((sortResp) => {
+            return sortResp.error instanceof DendronError;
+          });
+          expect(fullTree).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "foo",
+                childNodes: [],
+              },
+            ],
+          });
+
+          expect(sortRespWithError !== undefined);
+          expect(sortRespWithError.error.payload).toEqual(
+            '{"omitted":["fake-id"]}'
+          );
+        });
+      }
+    );
   });
   describe("filesystem change interactions", function () {});
 });

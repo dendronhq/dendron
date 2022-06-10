@@ -20,7 +20,7 @@ export class VisualizeCLICommand extends CLICommand {
   }
 
   async execute(opts: InputArgs) {
-    generateSVG(opts);
+    await generateSVG(opts);
     return {};
   }
 }

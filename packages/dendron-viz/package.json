@@ -25,10 +25,11 @@
     "clean": "rimraf lib && rimraf coverage",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean",
-    "build": "yarn compile",
-    "buildCI": "yarn compile",
+    "build": "yarn copyNonTSFiles && yarn compile",
+    "buildCI": "yarn copyNonTSFiles && yarn compile",
+    "copyNonTSFiles": "mkdir -p lib && cp ./src/loadModule.js lib/",
     "compile": "tsc -p tsconfig.build.json",
-    "watch": "yarn compile --watch"
+    "watch": "yarn copyNonTSFiles && yarn compile --watch"
   },
   "dependencies": {
     "@actions/artifact": "^0.5.2",

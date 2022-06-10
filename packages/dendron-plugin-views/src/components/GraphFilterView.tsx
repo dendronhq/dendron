@@ -255,7 +255,10 @@ const FilterViewSection = ({
                       min={1}
                       max={3}
                       defaultValue={entry.value || 1}
-                      onChange={(newValue) => updateConfigField(key, newValue)}
+                      onChange={(newValue) => {
+                        updateConfigField(key, newValue);
+                        updateGraphDepth(newValue);
+                      }}
                     />
                   </>
                 )}
@@ -342,6 +345,14 @@ const updateGraphTheme = (graphTheme: GraphThemeEnum) => {
 const configureCustomStyling = () => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.configureCustomStyling,
+    source: DMessageSource.webClient,
+  } as GraphViewMessage);
+};
+
+const updateGraphDepth = (graphDepth: number) => {
+  postVSCodeMessage({
+    type: GraphViewMessageEnum.onGraphDepthChange,
+    data: { graphDepth },
     source: DMessageSource.webClient,
   } as GraphViewMessage);
 };

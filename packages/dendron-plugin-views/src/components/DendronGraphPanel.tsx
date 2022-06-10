@@ -74,6 +74,20 @@ const DendronGraphPanel: DendronComponent = (props) => {
   }, [ide.graphTheme]);
 
   useEffect(() => {
+    if (ide.graphDepth) {
+      logger.log("updating graph depth in config ", ide.graphDepth);
+      setConfig((c) => ({
+        ...c,
+        "filter.depth": {
+          ...c["filter.depth"],
+          value: ide.graphDepth!,
+        },
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ide.graphDepth]);
+
+  useEffect(() => {
     if (isSidePanel) {
       setConfig((c) => ({
         ...c,

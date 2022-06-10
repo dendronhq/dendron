@@ -794,11 +794,12 @@ export enum GraphViewMessageEnum {
   "onSelect" = "onSelect",
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
-  "onRequestGraphStyleAndTheme" = "onRequestGraphStyleAndTheme",
-  "onGraphStyleAndThemeLoad" = "onGraphStyleAndThemeLoad",
+  "onRequestGraphOpts" = "onRequestGraphOpts",
+  "onGraphOptsLoad" = "onGraphOptsLoad",
   "onGraphThemeChange" = "onGraphThemeChange",
   "configureCustomStyling" = "configureCustomStyling",
   "toggleGraphView" = "toggleGraphView",
+  "onGraphDepthChange" = "onGraphDepthChange",
 }
 
 export enum CalendarViewMessageType {
@@ -879,6 +880,7 @@ export type GraphViewMessage = DMessage<
     vault?: string;
     graphTheme?: GraphThemeEnum;
     graphType?: GraphTypeEnum;
+    graphDepth?: number;
   }
 >;
 

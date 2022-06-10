@@ -43,7 +43,7 @@ export class NoteGraphPanelFactory {
    * back to MetadataService once the panel is disposed.
    */
   private static defaultGraphTheme: GraphThemeEnum | undefined;
-
+  private static graphDepth: number | undefined;
   static create(
     ext: DendronExtension,
     engineEvents: EngineEventEmitter
@@ -117,19 +117,24 @@ export class NoteGraphPanelFactory {
             this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
+          case GraphViewMessageEnum.onRequestGraphOpts: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
             const graphTheme = MetadataService.instance().getGraphTheme();
+            const graphDepth = MetadataService.instance().getGraphDepth();
             if (graphTheme) {
               this.defaultGraphTheme = graphTheme;
             }
-            if (styles || graphTheme) {
+            if (graphDepth) {
+              this.graphDepth = graphDepth;
+            }
+            if (styles || graphTheme || graphDepth) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
+                type: GraphViewMessageEnum.onGraphOptsLoad,
                 data: {
                   styles,
                   graphTheme,
+                  graphDepth,
                 },
                 source: "vscode",
               });
@@ -193,6 +198,11 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
+
+          case GraphViewMessageEnum.onGraphDepthChange: {
+            this.graphDepth = msg.data.graphDepth;
+            break;
+          }
           default:
             break;
         }
@@ -209,6 +219,10 @@ export class NoteGraphPanelFactory {
           });
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
           this.defaultGraphTheme = undefined;
+        }
+        if (this.graphDepth) {
+          MetadataService.instance().setGraphDepth(this.graphDepth);
+          this.graphDepth = undefined;
         }
       });
     }

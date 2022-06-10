@@ -1,25 +1,14 @@
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  VaultUtils,
-} from "@dendronhq/common-all";
-import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
-import { ENGINE_HOOKS, TestSeedUtils } from "@dendronhq/engine-test-utils";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe, test } from "mocha";
-import sinon from "sinon";
 import * as vscode from "vscode";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-} from "../testUtilsV3";
+import { describeMultiWS } from "../testUtilsV3";
 
 const ROOT_URL = "https://dendron.so";
 const ASSET_PREFIX = "aprefix";
@@ -36,6 +25,7 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "WHEN selection with block anchor",
       {
         modConfigCb,
+        timeout: 4e3,
         postSetupHook: async (opts) => {
           const { vaults, wsRoot } = opts;
           const vault = vaults[0];
@@ -64,6 +54,7 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "WHEN selection with header anchor",
       {
         modConfigCb,
+        timeout: 4e3,
         postSetupHook: async (opts) => {
           const { vaults, wsRoot } = opts;
           const vault = vaults[0];
@@ -94,6 +85,7 @@ suite("GIVEN CopyNoteUrlV2", function () {
       "",
       {
         modConfigCb,
+        timeout: 4e3,
         postSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
         },
@@ -116,6 +108,7 @@ suite("GIVEN CopyNoteUrlV2", function () {
     describeMultiWS(
       "",
       {
+        timeout: 4e3,
         modConfigCb: (config) => {
           config = setupConfig(config);
           config.publishing.assetsPrefix = "/" + ASSET_PREFIX;
@@ -140,95 +133,5 @@ suite("GIVEN CopyNoteUrlV2", function () {
         });
       }
     );
-  });
-});
-
-suite("CopyNoteUrl with seed", function () {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
-
-  test("with seed site url override", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async (opts) => {
-        await ENGINE_HOOKS.setupBasic(opts);
-      },
-      onInit: async ({ wsRoot, engine, vaults }) => {
-        await TestSeedUtils.addSeed2WS({
-          wsRoot,
-          engine,
-          modifySeed: (seed) => {
-            seed.site = {
-              url: "https://foo.com",
-            };
-            return seed;
-          },
-        });
-        const seedId = TestSeedUtils.defaultSeedId();
-        const config = getDWorkspace().config;
-        engine.config = config;
-        engine.vaults = ConfigUtils.getVaults(engine.config);
-        sinon.stub(WSUtils, "getNoteFromDocument").returns(
-          await NoteTestUtilsV4.createNote({
-            fname: "root",
-            vault: vaults[0],
-            wsRoot,
-          })
-        );
-
-        const vault = VaultUtils.getVaultByName({
-          vaults: engine.vaults,
-          vname: seedId,
-        })!;
-        await WSUtils.openNoteByPath({ vault, fname: "root" });
-        VSCodeUtils.getActiveTextEditorOrThrow().selection =
-          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
-        const link = await new CopyNoteURLCommand().run();
-        expect(link).toEqual("https://foo.com");
-        done();
-      },
-    });
-  });
-
-  test("with seed site url and index override", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async (opts) => {
-        await ENGINE_HOOKS.setupBasic(opts);
-      },
-      onInit: async ({ wsRoot, engine, vaults }) => {
-        await TestSeedUtils.addSeed2WS({
-          wsRoot,
-          engine,
-          modifySeed: (seed) => {
-            seed.site = {
-              url: "https://foo.com",
-              index: "root",
-            };
-            return seed;
-          },
-        });
-        const seedId = TestSeedUtils.defaultSeedId();
-        engine.config = getDWorkspace().config;
-        engine.vaults = ConfigUtils.getVaults(engine.config);
-        // TODO: ugly temporary hack. can be removed when [[Unify Runenginetest and Runworkspacetest|scratch.2021.06.17.164102.unify-runenginetest-and-runworkspacetest]] is implemented
-        sinon.stub(WSUtils, "getNoteFromDocument").returns(
-          await NoteTestUtilsV4.createNote({
-            fname: "root",
-            vault: vaults[0],
-            wsRoot,
-          })
-        );
-        const vault = VaultUtils.getVaultByName({
-          vaults: engine.vaults,
-          vname: seedId,
-        })!;
-        await WSUtils.openNoteByPath({ vault, fname: "root" });
-        VSCodeUtils.getActiveTextEditorOrThrow().selection =
-          new vscode.Selection(0, 0, 0, 0); // Otherwise it has the header selected
-        const link = await new CopyNoteURLCommand().run();
-        expect(link).toEqual("https://foo.com");
-        done();
-      },
-    });
   });
 });

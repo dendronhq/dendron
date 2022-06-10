@@ -519,6 +519,7 @@ suite("Migration", function () {
                 enableMarker: true,
               },
               copyNoteLink: {},
+              templateHierarchy: "template",
             };
 
             expect(postMigrationDendronConfig.commands).toEqual(

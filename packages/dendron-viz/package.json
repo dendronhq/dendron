@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "rimraf": "^2.6.2",
-    "@types/micromatch": "^4.0.2",
+    "@types/micromatch": "^4.0.2"
   },
   "engines": {
     "node": ">=14.0.0"

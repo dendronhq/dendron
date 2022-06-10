@@ -1,1 +1,1 @@
-export { generateSVG, InputArgs } from "./dendron";
+export * from "./dendron";

@@ -5,7 +5,6 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import fs from "fs";
 import * as nodePath from "path";
 import { shouldExcludePath } from "./should-exclude-path";
 
@@ -67,7 +66,6 @@ export const processDir = async ({
             continue;
           }
 
-          // const info = fs.statSync(`./${fullPath}`);
           const stats = await addItemToTree(cnote);
           if (stats) children.push(stats);
         }

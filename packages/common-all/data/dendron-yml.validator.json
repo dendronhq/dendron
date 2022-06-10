@@ -501,6 +501,10 @@
         },
         "copyNoteLink": {
           "$ref": "#/definitions/CopyNoteLinkConfig"
+        },
+        "templateHierarchy": {
+          "type": "string",
+          "description": "Default template hiearchy used when running commands like `Apply template`"
         }
       },
       "required": [
@@ -768,9 +772,6 @@
         },
         "apiEndpoint": {
           "type": "string"
-        },
-        "templateHierarchy": {
-          "type": "string"
         }
       },
       "required": [
@@ -997,10 +998,15 @@
       "properties": {
         "zoomSpeed": {
           "type": "number"
+        },
+        "createStub": {
+          "type": "boolean",
+          "description": "If true, create a note if it hasn't been created already when clicked on a graph node"
         }
       },
       "required": [
-        "zoomSpeed"
+        "zoomSpeed",
+        "createStub"
       ],
       "additionalProperties": false,
       "description": "Namespace for all graph related configurations."

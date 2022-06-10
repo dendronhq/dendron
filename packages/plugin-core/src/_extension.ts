@@ -19,10 +19,10 @@ import {
   IntermediateDendronConfig,
   isDisposable,
   Time,
+  TreeViewItemLabelTypeEnum,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
-  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -66,16 +66,17 @@ import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
+import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
+import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -91,7 +92,6 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
-import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main

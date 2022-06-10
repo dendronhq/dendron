@@ -224,8 +224,4 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable FullHierarchyNoteTitle mode",
     desc: "When enabled, the full hierarchy position of a note is used to generate the note title",
   },
-  templateHierarchy: {
-    label: "The hierarchy where template notes will be stored",
-    desc: "Default is 'template'",
-  },
 };

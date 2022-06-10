@@ -1,4 +1,4 @@
-import { ConfigUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
@@ -56,7 +56,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension: mockExtension,
             previewProxy,
           });
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
@@ -98,7 +98,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher.activate();
 
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);
@@ -136,7 +136,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher.activate();
 
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);

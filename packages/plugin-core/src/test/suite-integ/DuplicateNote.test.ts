@@ -8,6 +8,7 @@ import { describeSingleWS } from "../testUtilsV3";
 import { tmpDir } from "@dendronhq/common-server";
 import { expect } from "../testUtilsv2";
 import { DoctorUtils } from "../../components/doctor/utils";
+import { VaultUtils } from "@dendronhq/common-all";
 
 suite("Duplicate note detection", function () {
   describeSingleWS(
@@ -18,7 +19,7 @@ suite("Duplicate note detection", function () {
     () => {
       test("THEN duplicate note is detected", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vaultPath = vaults[0].fsPath;
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const barPath = path.join(wsRoot, vaultPath, "bar.md");
         const dupeNotePath = path.join(wsRoot, vaultPath, "bar-dupe.md");
         const dupeNoteUri = vscode.Uri.file(dupeNotePath);
@@ -51,7 +52,7 @@ suite("Duplicate note detection", function () {
     () => {
       test("THEN duplicate is not detected", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vaultPath = vaults[0].fsPath;
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const barPath = path.join(wsRoot, vaultPath, "bar.md");
         const barUri = vscode.Uri.file(barPath);
 
@@ -101,7 +102,7 @@ suite("Duplicate note detection", function () {
     () => {
       test("THEN do nothing", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        const vaultPath = vaults[0].fsPath;
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const noFMFilePath = path.join(wsRoot, vaultPath, "no-fm.md");
         const noFMFileUri = vscode.Uri.file(noFMFilePath);
         const noFMContent = "no frontmatter";

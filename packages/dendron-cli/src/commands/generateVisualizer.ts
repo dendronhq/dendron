@@ -1,7 +1,8 @@
-import { generateSVG, InputArgs } from "@dendronhq/dendron-viz/lib";
+import { generateSVG, InputArgs } from "@dendronhq/dendron-viz";
 import { Argv } from "yargs";
-import { CLICommand } from "./base";
+import { CLICommand, CommandCommonProps } from "./base";
 
+type CommandOpts = InputArgs & CommandCommonProps;
 export class VisualizeCLICommand extends CLICommand {
   constructor() {
     super({
@@ -19,7 +20,7 @@ export class VisualizeCLICommand extends CLICommand {
     return { data: args };
   }
 
-  async execute(opts: InputArgs) {
+  async execute(opts: CommandOpts) {
     await generateSVG(opts);
     return {};
   }

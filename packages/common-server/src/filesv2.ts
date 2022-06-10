@@ -638,7 +638,7 @@ export async function isSelfContainedVaultFolder(dir: string) {
   );
 }
 
-/** Move a file from `from` to `to`, if the file exists.
+/** Move a file or folder from `from` to `to`, if the file exists.
  *
  * @returns True if the file did exist and was moved successfully, false otherwise.
  */

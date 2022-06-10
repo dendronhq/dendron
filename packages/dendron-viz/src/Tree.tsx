@@ -9,6 +9,7 @@ import flatten from "lodash/flatten";
 import defaultFileColors from "./language-colors.json";
 import { CircleText } from "./CircleText";
 import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
+const loadModule = require("./loadModule");
 
 type Props = {
   data: FileType;
@@ -56,7 +57,7 @@ export async function createTree() {
     scaleLinear,
     scaleSqrt,
     timeFormat,
-  } = await import("d3");
+  } = await loadModule("d3");
 
   const Tree = ({
     data,

@@ -10,6 +10,7 @@ import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
 import { CircleText } from "./CircleText";
 import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
+const loadModule = require("./loadModule");
 
 const loadModule = require("./loadModule");
 

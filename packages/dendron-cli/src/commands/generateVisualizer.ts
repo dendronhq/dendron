@@ -1,18 +1,8 @@
-import { RespV3 } from "@dendronhq/common-all";
-import { sayHello } from "@dendronhq/dendron-viz/lib";
-import { CommandCommonProps } from "./base";
+import { generateSVG, InputArgs } from "@dendronhq/dendron-viz/lib";
+import { Argv } from "yargs";
 import { CLICommand } from "./base";
 
-type CommandOpts = CommandCommonProps & {
-  random: string;
-};
-
-type CommandOutput = {};
-
-export class VisualizeCLICommand extends CLICommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class VisualizeCLICommand extends CLICommand {
   constructor() {
     super({
       name: "visualize",
@@ -20,13 +10,17 @@ export class VisualizeCLICommand extends CLICommand<
     });
   }
 
-  async enrichArgs(args: any): Promise<RespV3<CommandOpts>> {
+  buildArgs(args: Argv) {
+    super.buildArgs(args);
+    args.option("out", { description: "path to the output file " });
+  }
+
+  async enrichArgs(args: any) {
     return { data: args };
   }
 
-  async execute(opts?: CommandOpts): Promise<CommandOutput> {
-    console.log(opts);
-    sayHello();
+  async execute(opts: InputArgs) {
+    generateSVG(opts);
     return {};
   }
 }

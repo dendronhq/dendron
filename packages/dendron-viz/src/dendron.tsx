@@ -66,7 +66,9 @@ async function main(args: InputArgs) {
       );
       const vaultName = VaultUtils.getName(vault);
       const outputFile =
-        core.getInput("output_file") || `./diagram-${vaultName}.svg`;
+        core.getInput("output_file") ||
+        args.out ||
+        `./diagram-${vaultName}.svg`;
 
       core.setOutput("svg", componentCodeString);
 
@@ -77,17 +79,11 @@ async function main(args: InputArgs) {
   console.log(JSON.stringify(resp, null, 2));
 }
 
-type InputArgs = {
+export type InputArgs = {
   wsRoot: string;
+  out?: string;
 };
 
-const args: InputArgs = yargs(hideBin(process.argv))
-  .option("wsRoot", {
-    alias: "r",
-    type: "string",
-    description: "worskpace root",
-    required: true,
-  })
-  .parse();
-
-main(args);
+export function generateSVG(args: InputArgs) {
+  main(args);
+}

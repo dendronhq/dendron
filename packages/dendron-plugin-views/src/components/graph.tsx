@@ -117,7 +117,7 @@ export default function Graph({
     isSidePanel,
   });
   // maps node id with its tooltip
-  const id2tooltip: any = {};
+  const id2tooltip: { [key: string]: any } = {};
 
   // On config update, handle graph changes
   useApplyGraphConfig({
@@ -210,20 +210,16 @@ export default function Graph({
         }, 1000);
       });
 
-      network.ready(() => {
-        network.filter("node").forEach((element) => {
-          makePopperWithTippy(element, id2tooltip);
-        });
-      });
-
       network.nodes().unbind("mouseover");
       network.nodes().bind("mouseover", (event) => {
+        // make tooltip for node
+        makePopperWithTippy(event.target, id2tooltip);
         id2tooltip[event.target.id()].show();
       });
 
       network.nodes().unbind("mouseout");
       network.nodes().bind("mouseout", (event) => {
-        id2tooltip[event.target.id()].hide();
+        id2tooltip[event.target.id()].destroy();
       });
 
       const shouldAnimate =
@@ -484,7 +480,7 @@ const toggleGraphView = (val?: boolean) => {
 
 const makePopperWithTippy = (
   node: cytoscape.SingularElementReturnValue,
-  id2tooltip: any
+  id2tooltip: { [key: string]: any }
 ) => {
   const ref = node.popperRef(); // used only for positioning
 

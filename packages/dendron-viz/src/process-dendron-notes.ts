@@ -3,7 +3,6 @@ import {
   DNodeUtils,
   DVault,
   NoteProps,
-  NotePropsDict,
   NoteUtils,
 } from "@dendronhq/common-all";
 import fs from "fs";

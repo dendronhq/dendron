@@ -23,7 +23,7 @@ function collectInput(args: InputArgs) {
   };
 }
 
-async function main(args: InputArgs) {
+export async function generateSVG(args: InputArgs) {
   console.log("start");
   const { rootPath, maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
@@ -57,7 +57,3 @@ export type InputArgs = {
   wsRoot: string;
   out?: string;
 };
-
-export function generateSVG(args: InputArgs) {
-  main(args);
-}

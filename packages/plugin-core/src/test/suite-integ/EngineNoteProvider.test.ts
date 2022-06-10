@@ -2,6 +2,7 @@ import {
   DendronError,
   NoteChangeEntry,
   NoteProps,
+  TreeUtils,
   TreeViewItemLabelTypeEnum,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -9,7 +10,8 @@ import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe, after } from "mocha";
+import { describe, after, before } from "mocha";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { EngineNoteProvider } from "../../views/EngineNoteProvider";
 import { expect } from "../testUtilsv2";
@@ -146,6 +148,48 @@ suite("EngineNoteProvider Tests", function testSuite() {
         },
       });
     };
+
+    describe("drift in engine state", function () {
+      describeMultiWS(
+        "GIVEN note id that is not in noteDict",
+        {
+          preSetupHook: async (opts) => preSetupHookFunc(opts),
+        },
+        () => {
+          let sortNotesAtLevelSpy: sinon.SinonSpy;
+
+          before(() => {
+            sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
+          });
+
+          after(() => {
+            sortNotesAtLevelSpy.restore();
+          });
+
+          test("THEN omit rendering note id that can't be found and render the rest.", async () => {
+            const mockEvents = new MockEngineEvents();
+            const provider = new EngineNoteProvider(mockEvents);
+
+            const props = await (provider.getChildren() as Promise<
+              NoteProps[]
+            >);
+
+            const vault1RootProps = props[0];
+
+            vault1RootProps.children.push("fake-id");
+
+            const resp = await (provider.getChildren(
+              vault1RootProps
+            ) as Promise<NoteProps[]>);
+            const sortResp = sortNotesAtLevelSpy.lastCall.returnValue;
+            expect(sortResp.error !== undefined);
+            expect(sortResp.error.payload).toEqual('{"omitted":["fake-id"]}');
+            expect(resp).toBeTruthy();
+          });
+        }
+      );
+    });
+
     describe("sort / label config", function () {
       describeMultiWS(
         "WHEN treeViewItemLabelType is omitted",

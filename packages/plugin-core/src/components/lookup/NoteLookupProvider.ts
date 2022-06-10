@@ -26,7 +26,6 @@ import {
   OnAcceptHook,
   OnUpdatePickerItemsOpts,
 } from "./LookupProviderV3Interface";
-import { transformQueryString } from "./queryStringTransformer";
 import { DendronQuickPickerV2, DendronQuickPickState } from "./types";
 import {
   OldNewLocation,
@@ -207,12 +206,12 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
     }
 
-    const transformedQuery = transformQueryString({
-      pickerValue,
+    const transformedQuery = NoteLookupUtils.transformQueryString({
+      query: pickerValue,
       onlyDirectChildren: picker.showDirectChildrenOnly,
     });
 
-    const queryOrig = PickerUtilsV2.slashToDot(picker.value);
+    const queryOrig = NoteLookupUtils.slashToDot(picker.value);
     const ws = this.extension.getDWorkspace();
     let profile: number;
     const queryUpToLastDot =

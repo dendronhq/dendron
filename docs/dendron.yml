@@ -35,6 +35,10 @@ workspace:
             fsPath: dendron-docs
             name: dendron.docs
             selfContained: true
+            siteUrl: https://docs.dendron.so
+            remote:
+                type: git
+                url: https://github.com/dendronhq/dendron-docs.git
         -
             fsPath: vault
             seed: dendron.dendron-site

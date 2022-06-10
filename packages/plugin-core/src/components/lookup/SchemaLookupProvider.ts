@@ -1,5 +1,6 @@
 import {
   DNodeUtils,
+  NoteLookupUtils,
   NoteQuickInput,
   NoteUtils,
   SchemaModuleProps,
@@ -185,8 +186,8 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
     const start = process.hrtime();
 
     // get prior
-    const querystring = PickerUtilsV2.slashToDot(pickerValue);
-    const queryOrig = PickerUtilsV2.slashToDot(picker.value);
+    const querystring = NoteLookupUtils.slashToDot(pickerValue);
+    const queryOrig = NoteLookupUtils.slashToDot(picker.value);
     const ws = this._extension.getDWorkspace();
     let profile: number;
 

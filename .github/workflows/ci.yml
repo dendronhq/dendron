@@ -79,9 +79,9 @@ jobs:
         with:
           path: |
             packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-17
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-8
           restore-keys: |
-            ${{ runner.os }}-yarn-17
+            ${{ runner.os }}-yarn-8
 
       - name: Sets env vars for publish test
         run: |

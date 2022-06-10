@@ -1,10 +1,13 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DNodePropsQuickInputV2, NoteProps } from "@dendronhq/common-all";
+import {
+  DNodePropsQuickInputV2,
+  NoteLookupUtils,
+  NoteProps,
+  TransformedQueryString,
+} from "@dendronhq/common-all";
 import { filterPickerResults } from "../../../../components/lookup/utils";
 import { describe, it, beforeEach } from "mocha";
 import { expect } from "../../../testUtilsv2";
-import { transformQueryString } from "../../../../components/lookup/queryStringTransformer";
-import { TransformedQueryString } from "../../../../components/lookup/types";
 
 let pickerValue: string;
 describe(`filterPickerResults`, () => {
@@ -181,7 +184,9 @@ describe(`filterPickerResults`, () => {
       results = filterPickerResults({
         itemsToFilter: inputs,
         // Note: using the actual method that generates transform string here.
-        transformedQuery: transformQueryString({ pickerValue }),
+        transformedQuery: NoteLookupUtils.transformQueryString({
+          query: pickerValue,
+        }),
       });
     });
 
@@ -224,7 +229,9 @@ describe(`filterPickerResults`, () => {
       results = filterPickerResults({
         itemsToFilter: inputs,
         // Note: using the actual method that generates transform string here.
-        transformedQuery: transformQueryString({ pickerValue }),
+        transformedQuery: NoteLookupUtils.transformQueryString({
+          query: pickerValue,
+        }),
       });
     });
 

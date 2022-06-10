@@ -75,7 +75,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -231,7 +231,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -377,7 +377,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -490,7 +490,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -620,7 +620,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -757,7 +757,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -881,7 +881,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true

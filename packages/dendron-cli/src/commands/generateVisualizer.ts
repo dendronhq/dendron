@@ -1,8 +1,11 @@
 import { RespV3 } from "@dendronhq/common-all";
-import { sayHello } from "@dendronhq/dendron-viz";
+import { sayHello } from "@dendronhq/dendron-viz/lib";
+import { CommandCommonProps } from "./base";
 import { CLICommand } from "./base";
 
-type CommandOpts = {};
+type CommandOpts = CommandCommonProps & {
+  random: string;
+};
 
 type CommandOutput = {};
 
@@ -21,7 +24,8 @@ export class VisualizeCLICommand extends CLICommand<
     return { data: args };
   }
 
-  async execute(_opts?: CommandOpts): Promise<CommandOutput> {
+  async execute(opts?: CommandOpts): Promise<CommandOutput> {
+    console.log(opts);
     sayHello();
     return {};
   }

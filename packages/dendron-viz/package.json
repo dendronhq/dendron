@@ -32,9 +32,7 @@
     "watch": "yarn copyNonTSFiles && yarn compile --watch"
   },
   "dependencies": {
-    "@actions/artifact": "^0.5.2",
     "@actions/core": "^1.4.0",
-    "@actions/exec": "^1.1.0",
     "@dendronhq/common-all": "^0.92.1",
     "@dendronhq/engine-server": "^0.92.1",
     "d3": "^7.0.0",
@@ -49,9 +47,6 @@
     "rimraf": "^2.6.2",
     "@types/jest": "^27.0.1",
     "@types/micromatch": "^4.0.2",
-    "husky": "^7.0.0",
-    "jest": "^27.0.6",
-    "ts-jest": "^27.0.4",
     "typescript": "^4.3.5"
   },
   "engines": {

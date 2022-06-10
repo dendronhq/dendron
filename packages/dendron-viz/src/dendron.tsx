@@ -8,16 +8,12 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./process-dendron-notes";
 import { createTree } from "./Tree";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
 
 function collectInput(args: InputArgs) {
   const rootPath = args.wsRoot;
   const maxDepth = core.getInput("max_depth") || 9;
   const customFileColors = JSON.parse(core.getInput("file_colors") || "{}");
   const colorEncoding = core.getInput("color_encoding") || "type";
-  const commitMessage =
-    core.getInput("commit_message") || "Repo visualizer: update diagram";
   const excludedPathsString =
     core.getInput("excluded_paths") ||
     "node_modules,bower_components,dist,out,build,eject,.next,.netlify,.yarn,.git,.vscode,package-lock.json,yarn.lock";

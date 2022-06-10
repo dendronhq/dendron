@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import * as core from "@actions/core";
 import { VaultUtils } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs";
@@ -11,23 +10,13 @@ import { createTree } from "./Tree";
 
 function collectInput(args: InputArgs) {
   const rootPath = args.wsRoot;
-  const maxDepth = core.getInput("max_depth") || 9;
-  const customFileColors = JSON.parse(core.getInput("file_colors") || "{}");
-  const colorEncoding = core.getInput("color_encoding") || "type";
-  const excludedPathsString =
-    core.getInput("excluded_paths") ||
-    "node_modules,bower_components,dist,out,build,eject,.next,.netlify,.yarn,.git,.vscode,package-lock.json,yarn.lock";
-  const excludedPaths = excludedPathsString.split(",").map((str) => str.trim());
+  const maxDepth = 9;
+  //TODO: Take path to customFileColors as a cli argument
+  const customFileColors = {};
+  const colorEncoding = "type";
 
-  // Split on semicolons instead of commas since ',' are allowed in globs, but ';' are not + are not permitted in file/folder names.
-  const excludedGlobsString = core.getInput("excluded_globs") || "";
-  const excludedGlobs = excludedGlobsString.split(";");
-
-  const branch = core.getInput("branch");
   return {
     rootPath,
-    excludedPaths,
-    excludedGlobs,
     maxDepth,
     colorEncoding,
     customFileColors,
@@ -36,14 +25,8 @@ function collectInput(args: InputArgs) {
 
 async function main(args: InputArgs) {
   console.log("start");
-  const {
-    rootPath,
-    excludedPaths,
-    excludedGlobs,
-    maxDepth,
-    colorEncoding,
-    customFileColors,
-  } = collectInput(args);
+  const { rootPath, maxDepth, colorEncoding, customFileColors } =
+    collectInput(args);
 
   const Tree = await createTree();
 
@@ -61,12 +44,7 @@ async function main(args: InputArgs) {
         />
       );
       const vaultName = VaultUtils.getName(vault);
-      const outputFile =
-        core.getInput("output_file") ||
-        args.out ||
-        `./diagram-${vaultName}.svg`;
-
-      core.setOutput("svg", componentCodeString);
+      const outputFile = args.out || `./diagram-${vaultName}.svg`;
 
       await fs.writeFileSync(outputFile, componentCodeString);
     })

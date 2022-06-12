@@ -21,7 +21,7 @@ export class VisualizeCLICommand extends CLICommand {
   }
 
   async execute(opts: CommandOpts) {
-    generateSVG(opts);
+    await generateSVG(opts);
     return {};
   }
 }

@@ -137,7 +137,7 @@ export const provideCompletionItems = sentryReportingCallback(
   async (
     document: TextDocument,
     position: Position
-  ): Promise<CompletionItem[] | undefined> => {
+  ): Promise<CompletionList | undefined> => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
 
@@ -206,7 +206,6 @@ export const provideCompletionItems = sentryReportingCallback(
     const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
     let completionItems: CompletionItem[];
-    // TODO: this does not work
     const completionsIncomplete = true;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
@@ -312,7 +311,7 @@ export const provideCompletionItems = sentryReportingCallback(
       incomplete: completionList.isIncomplete,
       duration,
     });
-    return completionItems;
+    return completionList;
   }
 );
 

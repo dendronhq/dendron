@@ -130,6 +130,8 @@ export enum ConfigEvents {
   DuplicateConfigEntryMessageConfirm = "DuplicateConfigEntryMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
+  OutdatedSeedVaultMessageShow = "OutdatedSeedVaultMessageShow",
+  OutdatedSeedVaultMessageAccept = "OutdatedSeedVaultMessageAccept",
 }
 
 export enum MigrationEvents {

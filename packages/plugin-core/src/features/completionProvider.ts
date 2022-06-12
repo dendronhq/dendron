@@ -99,12 +99,14 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
 function noteToCompletionItem({
   note,
   range,
+  triggerCompletion,
   lblTransform,
   insertTextTransform,
   sortTextTransform,
 }: {
   note: NoteProps;
   range: Range;
+  triggerCompletion?: boolean;
   lblTransform?: (note: NoteProps) => string;
   insertTextTransform?: (note: NoteProps) => string;
   sortTextTransform?: (note: NoteProps) => string | undefined;
@@ -122,6 +124,12 @@ function noteToCompletionItem({
     detail: VaultUtils.getName(note.vault),
     range,
   };
+  if (triggerCompletion) {
+    item.command = {
+      command: "editor.action.triggerSuggest",
+      title: "Re-trigger completions...",
+    };
+  }
   return item;
 }
 
@@ -163,7 +171,7 @@ export const provideCompletionItems = sentryReportingCallback(
     )
       return;
 
-    Logger.debug({ ctx, found });
+    Logger.debug({ ctx, regexMatch: found });
 
     // if match is hash, delegate to block auto complete
     if (
@@ -198,7 +206,8 @@ export const provideCompletionItems = sentryReportingCallback(
     const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
     let completionItems: CompletionItem[];
-    let completionsIncomplete = true;
+    // TODO: this does not work
+    const completionsIncomplete = true;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -275,6 +284,7 @@ export const provideCompletionItems = sentryReportingCallback(
         noteToCompletionItem({
           note,
           range,
+          triggerCompletion: qsRaw === "",
           insertTextTransform,
           sortTextTransform: (note) => {
             if (
@@ -296,9 +306,10 @@ export const provideCompletionItems = sentryReportingCallback(
       completionItems,
       completionsIncomplete
     );
-    Logger.info({
+    Logger.debug({
       ctx,
       completionItemsLength: completionList.items.length,
+      incomplete: completionList.isIncomplete,
       duration,
     });
     return completionItems;
@@ -579,9 +590,11 @@ export const activate = (context: ExtensionContext) => {
       {
         provideCompletionItems,
       },
+
       "[", // for wikilinks and references
       "#", // for hashtags
-      "@" // for user tags
+      "@", // for user tags
+      "" // for new levels in the hieirarchy
     )
   );
   context.subscriptions.push(

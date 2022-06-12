@@ -10,7 +10,7 @@ import {
   PublishCLICommandOpts,
   PublishCommands,
 } from "@dendronhq/dendron-cli";
-import { DConfig, VersionProvider } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/engine-server";
 import { NextjsExportPodUtils, PublishTarget } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -62,12 +62,20 @@ describe("WHEN run `dendron publish init`", () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
           const cli = new PublishCLICommand();
-          const latestVersion = VersionProvider.engineVersion();
-          const stubClone = stub(cli, "_cloneTemplate").resolves();
+          const latestVersion = "0.97.0";
+          const stubClone = stub(cli, "_cloneTemplate").returns(
+            new Promise<void>((resolve) => {
+              resolve();
+            })
+          );
           const stubSwitch = stub(
             NextjsExportPodUtils,
             "switchToBranch"
           ).resolves();
+          const stubGetNextVersion = stub(
+            NextjsExportPodUtils,
+            "getNextVersion"
+          ).returns({ data: latestVersion });
           const stubInstall = stub(cli, "_installDependencies").resolves();
           const resp = await runPublishCmd({ cli, cmd, wsRoot });
 
@@ -76,12 +84,14 @@ describe("WHEN run `dendron publish init`", () => {
           // switch to latest branch
           expect(
             stubSwitch.calledWith({
-              version: latestVersion,
+              version: "tags/vlatest",
               nextPath: path.join(wsRoot, ".next"),
             })
           ).toBeTruthy();
           // install dependencies
           expect(stubInstall.calledOn).toBeTruthy();
+          // get next version checked
+          expect(stubGetNextVersion.calledOn).toBeTruthy();
           // templateVersion set to latest
           expect(getData(resp).templateVersion).toEqual(latestVersion);
           // templateVersion written to config

@@ -17,6 +17,7 @@ import {
   ERROR_SEVERITY,
   Theme,
   CONSTANTS,
+  ErrorFactory,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -121,6 +122,8 @@ function __git(baseDir: string) {
 }
 
 export class NextjsExportPodUtils {
+  static LATEST_TEMPLATE_VERSION = "tags/vlatest";
+
   static templateVersion(
     config: IntermediateDendronConfig
   ): string | undefined {
@@ -143,6 +146,26 @@ export class NextjsExportPodUtils {
 
   static getNextRoot = (wsRoot: string) => {
     return path.join(wsRoot, ".next");
+  };
+
+  static getNextVersion = (wsRoot: string): RespV3<string> => {
+    const pkgPath = path.join(this.getNextRoot(wsRoot), "package.json");
+    if (!fs.existsSync(pkgPath)) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `package.json not found in ${pkgPath}`,
+        }),
+      };
+    }
+    const resp = fs.readJSONSync(pkgPath);
+    if (_.isString(resp.version)) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `no version found in ${pkgPath}`,
+        }),
+      };
+    }
+    return { data: resp.version };
   };
 
   static async nextPathExists(opts: { nextPath: string }) {

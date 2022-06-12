@@ -6,10 +6,11 @@ import {
   error2PlainObject,
   ErrorFactory,
   getStage,
+  RespV3,
   Stage,
 } from "@dendronhq/common-all";
 import { GitUtils } from "@dendronhq/common-server";
-import { DConfig, SiteUtils, VersionProvider } from "@dendronhq/engine-server";
+import { DConfig, SiteUtils } from "@dendronhq/engine-server";
 import {
   BuildOverrides,
   NextjsExportConfig,
@@ -324,7 +325,6 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       nextPath,
       spinner,
     });
-
     if (nextPathExists) {
       this.print("Nextjs template already exists. Skipping initialization");
       return {
@@ -333,13 +333,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }),
       };
     }
-
-    const { templateVersion } = await this._initialize({
+    return this._initialize({
       nextPath,
       spinner,
       wsRoot,
     });
-    return { data: { templateVersion } };
   }
 
   async _isInitialized(opts: { wsRoot: string; spinner: ora.Ora }) {
@@ -419,7 +417,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     nextPath: string;
     spinner: ora.Ora;
     wsRoot: string;
-  }) {
+  }): Promise<RespV3<{ templateVersion: string }>> {
     const { spinner, wsRoot } = opts;
     SpinnerUtils.renderAndContinue({
       spinner,
@@ -427,20 +425,31 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
     const config = DConfig.readConfigAndApplyLocalOverrideSync(opts.wsRoot);
     await this._cloneTemplate(opts);
-    const templateVersion =
-      NextjsExportPodUtils.templateVersion(config) ||
-      VersionProvider.engineVersion();
+
+    // get template version from config or get latest version
+    let templateVersion = NextjsExportPodUtils.templateVersion(config);
+
     await NextjsExportPodUtils.switchToBranch({
-      version: templateVersion,
+      version: templateVersion || NextjsExportPodUtils.LATEST_TEMPLATE_VERSION,
       nextPath: opts.nextPath,
     });
+
+    // if template version was latest, write current version as the template version
+    if (!templateVersion) {
+      const resp = NextjsExportPodUtils.getNextVersion(wsRoot);
+      if (resp.error) {
+        return resp;
+      }
+      templateVersion = resp.data;
+    }
+
     await this._installDependencies(opts);
 
     if (!NextjsExportPodUtils.templateVersion(config)) {
       ConfigUtils.setPublishProp(config, "templateVersion", templateVersion);
       await DConfig.writeConfig({ wsRoot, config });
     }
-    return { templateVersion, error: null };
+    return { data: { templateVersion }, error: undefined };
   }
 
   async _cloneTemplate(opts: { nextPath: string; spinner: ora.Ora }) {

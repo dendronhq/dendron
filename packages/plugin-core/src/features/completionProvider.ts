@@ -99,14 +99,12 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
 function noteToCompletionItem({
   note,
   range,
-  triggerCompletion,
   lblTransform,
   insertTextTransform,
   sortTextTransform,
 }: {
   note: NoteProps;
   range: Range;
-  triggerCompletion?: boolean;
   lblTransform?: (note: NoteProps) => string;
   insertTextTransform?: (note: NoteProps) => string;
   sortTextTransform?: (note: NoteProps) => string | undefined;
@@ -124,12 +122,6 @@ function noteToCompletionItem({
     detail: VaultUtils.getName(note.vault),
     range,
   };
-  if (triggerCompletion) {
-    item.command = {
-      command: "editor.action.triggerSuggest",
-      title: "Re-trigger completions...",
-    };
-  }
   return item;
 }
 
@@ -283,7 +275,6 @@ export const provideCompletionItems = sentryReportingCallback(
         noteToCompletionItem({
           note,
           range,
-          triggerCompletion: qsRaw === "",
           insertTextTransform,
           sortTextTransform: (note) => {
             if (

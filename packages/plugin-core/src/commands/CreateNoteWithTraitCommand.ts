@@ -4,6 +4,8 @@ import {
   NoteTrait,
   OnCreateContext,
   cleanName,
+  EngagementEvents,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
@@ -17,6 +19,8 @@ import { GotoNoteCommand } from "./GotoNote";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { TemplateUtils } from "@dendronhq/common-server";
+import { AnalyticsUtils } from "../utils/analytics";
 
 export type CommandOpts = {
   fname: string;
@@ -104,19 +108,6 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     let title;
     let body;
 
-    if (this.checkWorkspaceTrustAndWarn()) {
-      if (this.trait.OnCreate?.setTitle) {
-        const context = await this.getCreateContext();
-        context.currentNoteName = fname;
-
-        title = this.trait.OnCreate.setTitle(context);
-      }
-
-      if (this.trait.OnCreate?.setBody) {
-        body = await this.trait.OnCreate.setBody();
-      }
-    }
-
     // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then
     // this vault logic can be deferred there.
     let vault = opts.vaultOverride;
@@ -136,6 +127,50 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
         return;
       } else {
         vault = selectedVault;
+      }
+    }
+
+    // Handle Trait Behavior
+    if (this.checkWorkspaceTrustAndWarn()) {
+      if (this.trait.OnCreate?.setTitle) {
+        const context = await this.getCreateContext();
+        context.currentNoteName = fname;
+
+        title = this.trait.OnCreate.setTitle(context);
+      }
+
+      if (this.trait.OnCreate?.setBody) {
+        body = await this.trait.OnCreate.setBody();
+      } else if (this.trait.OnCreate?.setTemplate) {
+        // Check if we should apply a template from any traits:
+        const templateNotename = this.trait.OnCreate.setTemplate();
+
+        const notes = await ExtensionProvider.getEngine().findNotes({
+          fname: templateNotename,
+          vault,
+        });
+
+        const dummy = NoteUtils.createForFake({
+          contents: "",
+          fname: "trait-tmp",
+          id: "trait-tmp",
+          vault: vault!,
+        });
+
+        if (notes) {
+          // Only apply schema if note is found
+          TemplateUtils.applyTemplate({
+            templateNote: notes[0], // Ok to use [0] here because we specified a vault in findNotes()
+            targetNote: dummy,
+            engine: this._extension.getEngine(),
+          });
+
+          body = dummy.body;
+
+          AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+            source: "Trait",
+          });
+        }
       }
     }
 

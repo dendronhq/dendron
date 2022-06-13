@@ -16,7 +16,7 @@ export type NoteTraitService = {
   /**
    * Contains list of registered Note Traits
    */
-  readonly registeredTraits: NoteTrait[];
+  readonly registeredTraits: Map<string, NoteTrait>;
 
   /**
    * Register a New Note Trait
@@ -40,17 +40,16 @@ export type NoteTraitService = {
 
 export class NoteTraitManager implements NoteTraitService {
   private cmdRegistar: CommandRegistrar;
-  registeredTraits: NoteTrait[] = [];
 
   constructor(registrar: CommandRegistrar) {
     this.cmdRegistar = registrar;
+    this.registeredTraits = new Map<string, NoteTrait>();
   }
 
+  registeredTraits: Map<string, NoteTrait>;
+
   registerTrait(trait: NoteTrait): RespV2<void> {
-    if (
-      this.registeredTraits.find((registered) => registered.id === trait.id) !==
-      undefined
-    ) {
+    if (this.registeredTraits.has(trait.id)) {
       return ResponseUtil.createUnhappyResponse({
         error: new DendronError({
           message: `Type with ID ${trait.id} has already been registered`,
@@ -59,7 +58,8 @@ export class NoteTraitManager implements NoteTraitService {
       });
     }
 
-    this.registeredTraits = this.registeredTraits.concat(trait);
+    this.registeredTraits.set(trait.id, trait);
+
     this.cmdRegistar.registerCommandForTrait(trait);
     return { error: null };
   }

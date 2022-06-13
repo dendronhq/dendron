@@ -12,6 +12,7 @@ import {
 } from "./components/lookup/LookupProviderV3Interface";
 import { FileWatcher } from "./fileWatcher";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
+import { NoteTraitService } from "./services/NoteTraitService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { IWSUtilsV2 } from "./WSUtilsV2Interface";
 
@@ -119,4 +120,10 @@ export interface IDendronExtension {
   getWorkspaceConfig(
     section?: string | undefined
   ): vscode.WorkspaceConfiguration;
+
+  /**
+   * Gets an instance of the trait Registrar service, which contains information
+   * about registered Note Traits
+   */
+  get traitRegistrar(): NoteTraitService;
 }

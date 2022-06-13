@@ -17,7 +17,6 @@ import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { AnalyticsUtils } from "../utils/analytics";
 import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -25,13 +24,18 @@ import { BasicCommand } from "./base";
 export const UPDATE_SEED_CONFIG_PROMPT = "Update configuration";
 
 /** If the configuration for a seed vault has changed, prompt to suggest updating the configuration. */
-async function detectOutOfDateSeeds({ engine }: { engine: IEngineAPIService }) {
-  const seedService = new SeedService({ wsRoot: engine.wsRoot });
-  const seedVaults = seedService.getSeedVaultsInWorkspace();
+export async function detectOutOfDateSeeds({
+  wsRoot,
+  seedSvc,
+}: {
+  wsRoot: string;
+  seedSvc: SeedService;
+}) {
+  const seedVaults = seedSvc.getSeedVaultsInWorkspace();
   await Promise.all(
     seedVaults.map(async (seedVault) => {
       const id = seedVault.seed;
-      const info = await seedService.info({ id });
+      const info = await seedSvc.info({ id });
       if (!info) {
         // Seed is missing from the config, or it's an unknown seed. We could
         // warn the user here to fix their config, but I've never seen issues
@@ -60,13 +64,13 @@ async function detectOutOfDateSeeds({ engine }: { engine: IEngineAPIService }) {
           AnalyticsUtils.trackForNextRun(
             ConfigEvents.OutdatedSeedVaultMessageAccept
           );
-          await DConfig.createBackup(engine.wsRoot, "update-seed");
-          const config = DConfig.getOrCreate(engine.wsRoot);
+          await DConfig.createBackup(wsRoot, "update-seed");
+          const config = DConfig.getOrCreate(wsRoot);
           ConfigUtils.updateVault(config, seedVault, (vault) => {
             vault.fsPath = info.root;
             return vault;
           });
-          DConfig.writeConfig({ wsRoot: engine.wsRoot, config });
+          DConfig.writeConfig({ wsRoot, config });
           VSCodeUtils.reloadWindow();
         }
       }
@@ -267,7 +271,10 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
 
     VSCodeUtils.showMessage(maxMessageSeverity, finalMessage, {});
 
-    detectOutOfDateSeeds({ engine });
+    detectOutOfDateSeeds({
+      wsRoot: engine.wsRoot,
+      seedSvc: new SeedService({ wsRoot: engine.wsRoot }),
+    });
 
     return {
       committed,

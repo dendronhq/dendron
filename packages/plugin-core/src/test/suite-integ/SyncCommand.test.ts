@@ -4,26 +4,18 @@ import {
   ConfigUtils,
   NoteUtils,
   VaultUtils,
-  FOLDERS,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
-  FileTestUtils,
-  NoteTestUtilsV4,
-  SinonStubbedFn,
-} from "@dendronhq/common-test-utils";
-import {
-  DConfig,
   Git,
-  SeedRegistry,
-  SeedService,
   SyncActionStatus,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
-import { GitTestUtils, TestSeedUtils } from "@dendronhq/engine-test-utils";
+import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe, before } from "mocha";
-import { SyncCommand, UPDATE_SEED_CONFIG_PROMPT } from "../../commands/Sync";
+import { describe } from "mocha";
+import { SyncCommand } from "../../commands/Sync";
 import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import {
@@ -34,9 +26,6 @@ import {
 import fs from "fs-extra";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import path from "path";
-import sinon from "sinon";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { SeedAddCommand } from "../../commands/SeedAddCommand";
 
 suite("workspace sync command", function () {
   const ctx = setupBeforeAfter(this, {});
@@ -44,7 +33,7 @@ suite("workspace sync command", function () {
   describe("no repo", () => {
     test("do nothing", (done) => {
       runLegacyMultiWorkspaceTest({
-        onInit: async ({}) => {
+        onInit: async () => {
           const out = await new SyncCommand().execute();
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out;
@@ -1310,63 +1299,6 @@ suite("workspace sync command", function () {
         // Should push
         expect(WorkspaceUtils.getCountForStatusDone(pushed)).toEqual(1);
         expect(pushed[0].status).toEqual(SyncActionStatus.DONE);
-      });
-    }
-  );
-
-  describeSingleWS(
-    "WHEN there's a seed with an out-of-date path",
-    {
-      ctx,
-    },
-    () => {
-      const seedKey = "dendron.foo";
-      let wsRoot: string;
-      let showMessage: SinonStubbedFn<typeof VSCodeUtils["showMessage"]>;
-      before(async () => {
-        const { engine } = ExtensionProvider.getDWorkspace();
-        wsRoot = engine.wsRoot;
-
-        // Create the seed and add it into the workspace
-        const seedRoot = tmpDir().name;
-        const testSeeds = await TestSeedUtils.createSeedRegistry({
-          engine,
-          wsRoot: seedRoot,
-        });
-        const seedService = new SeedService({
-          wsRoot,
-          registryFile: testSeeds.registryFile,
-        });
-        await new SeedAddCommand(seedService).run({
-          seedId: "dendron-foo",
-        });
-
-        // Swap the seed registry stub with one where the seed path is modified
-        const modifiedTestSeeds = await TestSeedUtils.createSeedRegistry({
-          engine,
-          wsRoot: seedRoot,
-          modifySeed: (seed) => {
-            seed.root = FOLDERS.NOTES;
-            return seed;
-          },
-        });
-        const modifiedTestRegistry = new SeedRegistry(
-          modifiedTestSeeds.seedDict
-        );
-        sinon.stub(SeedRegistry, "create").returns(modifiedTestRegistry);
-
-        await new SyncCommand().run();
-      });
-
-      test("THEN Dendron prompts to update the seed config", () => {
-        // Once for sync status, once for the prompt
-        expect(showMessage.calledTwice).toBeTruthy();
-      });
-
-      test("THEN seed config is correctly updated", async () => {
-        const conf = DConfig.getRaw(wsRoot);
-        const seed = conf.vaults?.find((vault) => vault.seed === seedKey);
-        expect(seed?.fsPath).toEqual(FOLDERS.NOTES);
       });
     }
   );

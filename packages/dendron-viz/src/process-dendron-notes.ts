@@ -51,7 +51,7 @@ export const processDir = async ({
 
   const addItemToTree = async (note: NoteProps) => {
     try {
-      console.log("Looking in ", `${note.fname}`);
+      // console.log("Looking in ", `${note.fname}`);
 
       if (isDir(note)) {
         const notes = getChildren(note);
@@ -80,7 +80,8 @@ export const processDir = async ({
       const stats = getFileStats(note);
       return stats;
     } catch (e) {
-      console.log("Issue trying to read file", note.fname, e);
+      // console.log("Issue trying to read file", note.fname, e);
+      console.log("ERROR: Issue trying to read file");
       return null;
     }
   };

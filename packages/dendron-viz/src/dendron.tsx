@@ -32,9 +32,10 @@ export async function generateSVG(args: InputArgs) {
 
   const engine = DendronEngineV2.create({ wsRoot: rootPath });
   await engine.init();
-  const resp = await Promise.all(
+  await Promise.all(
     engine.vaults.map(async (vault) => {
       const data = await processDir({ rootPath: "root", engine, vault });
+      console.log("vault:", data);
       const componentCodeString = ReactDOMServer.renderToStaticMarkup(
         <Tree
           data={data}
@@ -50,7 +51,7 @@ export async function generateSVG(args: InputArgs) {
     })
   );
   console.log("done");
-  console.log(JSON.stringify(resp, null, 2));
+  // console.log(JSON.stringify(resp, null, 2));
 }
 
 export type InputArgs = {

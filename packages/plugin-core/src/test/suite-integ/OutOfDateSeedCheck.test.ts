@@ -57,6 +57,7 @@ suite("GIVEN out of date seed check", function () {
         wsRoot,
         registryFile: modifiedTestSeeds.registryFile,
       });
+      sinon.stub(VSCodeUtils, "reloadWindow");
       await detectOutOfDateSeeds({ wsRoot, seedSvc: modifiedSeedService });
     });
 

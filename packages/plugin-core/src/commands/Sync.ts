@@ -61,7 +61,7 @@ export async function detectOutOfDateSeeds({
           }
         );
         if (select?.title === UPDATE_SEED_CONFIG_PROMPT) {
-          AnalyticsUtils.trackForNextRun(
+          await AnalyticsUtils.trackForNextRun(
             ConfigEvents.OutdatedSeedVaultMessageAccept
           );
           await DConfig.createBackup(wsRoot, "update-seed");
@@ -70,7 +70,7 @@ export async function detectOutOfDateSeeds({
             vault.fsPath = info.root;
             return vault;
           });
-          DConfig.writeConfig({ wsRoot, config });
+          await DConfig.writeConfig({ wsRoot, config });
           VSCodeUtils.reloadWindow();
         }
       }

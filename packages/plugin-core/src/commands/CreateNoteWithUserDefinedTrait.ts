@@ -1,7 +1,7 @@
 import { DendronError, NoteTrait } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getExtension } from "../workspace";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { BaseCommand } from "./base";
 
 type CommandOpts = {
@@ -26,19 +26,18 @@ export class CreateNoteWithUserDefinedTrait extends BaseCommand<
   key = DENDRON_COMMANDS.CREATE_USER_DEFINED_NOTE.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const items = getExtension().traitRegistrar.registeredTraits;
-    const picked = await vscode.window.showQuickPick(
-      items.map((item) => item.id),
-      { canPickMany: false }
-    );
+    const registeredTraits =
+      ExtensionProvider.getExtension().traitRegistrar.registeredTraits;
+    const items = registeredTraits.keys();
+    const picked = await vscode.window.showQuickPick(Array.from(items), {
+      canPickMany: false,
+    });
 
-    if (!picked) {
+    if (!picked || !registeredTraits.get(picked)) {
       return;
     }
 
-    const pickedType = items.find((t) => t.id === picked);
-
-    return { trait: pickedType! };
+    return { trait: registeredTraits.get(picked)! };
   }
 
   async enrichInputs(inputs: CommandInput): Promise<CommandInput> {
@@ -48,9 +47,10 @@ export class CreateNoteWithUserDefinedTrait extends BaseCommand<
   }
 
   async execute(opts: CommandOpts): Promise<CommandOpts> {
-    const cmd = getExtension().traitRegistrar.getRegisteredCommandForTrait(
-      opts.trait
-    );
+    const cmd =
+      ExtensionProvider.getExtension().traitRegistrar.getRegisteredCommandForTrait(
+        opts.trait
+      );
 
     if (!cmd) {
       throw new DendronError({ message: "Unexpected unregistered type" });

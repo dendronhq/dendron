@@ -4,7 +4,7 @@ import sinon from "sinon";
 import vscode from "vscode";
 import { ExtensionProvider } from "../../../../ExtensionProvider";
 import { CommandRegistrar } from "../../../../services/CommandRegistrar";
-import { NoteTraitManager } from "../../../../services/NoteTraitService";
+import { NoteTraitManager } from "../../../../services/NoteTraitManager";
 import { MockDendronExtension } from "../../../MockDendronExtension";
 import { expect } from "../../../testUtilsv2";
 import { describeSingleWS } from "../../../testUtilsV3";

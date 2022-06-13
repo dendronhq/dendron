@@ -50,10 +50,8 @@ import { FileWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CommandRegistrar } from "./services/CommandRegistrar";
 import { EngineAPIService } from "./services/EngineAPIService";
-import {
-  NoteTraitManager,
-  NoteTraitService,
-} from "./services/NoteTraitService";
+import { NoteTraitManager } from "./services/NoteTraitManager";
+import { NoteTraitService } from "./services/NoteTraitService";
 import { SchemaSyncService } from "./services/SchemaSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";

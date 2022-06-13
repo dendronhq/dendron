@@ -28,14 +28,15 @@ export async function generateSVG(args: InputArgs) {
   const { rootPath, maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
 
-  const Tree = await createTree();
-
   const engine = DendronEngineV2.create({ wsRoot: rootPath });
   await engine.init();
+
+  const Tree = await createTree();
   await Promise.all(
     engine.vaults.map(async (vault) => {
+      /* Get stats of each note in the current vault */
       const data = await processDir({ rootPath: "root", engine, vault });
-      console.log("vault:", data);
+
       const componentCodeString = ReactDOMServer.renderToStaticMarkup(
         <Tree
           data={data}

@@ -5,6 +5,9 @@
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
   "version": "0.98.0",
+  "sponsor": {
+    "url": "https://accounts.dendron.so/account/subscribe"
+  },
   "engines": {
     "vscode": "^1.62.0"
   },

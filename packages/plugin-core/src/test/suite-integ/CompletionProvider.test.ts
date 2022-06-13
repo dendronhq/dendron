@@ -56,14 +56,14 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "[[]]");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const compList = await provideCompletionItems(
           editor.document,
           new Position(8, 2)
         );
-        expect(items).toBeTruthy();
-        // Suggested all the notes
-        expect(items!.length).toEqual(7);
-        for (const item of items!) {
+        expect(compList).toBeTruthy();
+        // Suggested top level notes
+        expect(compList!.items.length).toEqual(6);
+        for (const item of compList!.items) {
           // All suggested items exist
           const found = NoteUtils.getNotesByFnameFromEngine({
             fname: item.label as string,
@@ -73,7 +73,7 @@ suite("completionProvider", function () {
         }
         // check that same vault items are sorted before other items
         const sortedItems = _.sortBy(
-          items,
+          compList?.items,
           (item) => item.sortText || item.label
         );
         const testIndex = _.findIndex(
@@ -83,7 +83,10 @@ suite("completionProvider", function () {
         expect(testIndex !== -1 && testIndex < 2).toBeTruthy();
         // Check that xvault links were generated where needed, and only where needed.
         // Using root notes since they are in every vault.
-        const rootItems = _.filter(items, (item) => item.label === "root");
+        const rootItems = _.filter(
+          compList?.items,
+          (item) => item.label === "root"
+        );
         for (const item of rootItems) {
           if (item.detail === VaultUtils.getName(vaults[1])) {
             // don't need an xvault link, should be a regular one
@@ -140,14 +143,14 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "#");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const items = await provideCompletionItems(
           editor.document,
           new Position(8, 1)
         );
         expect(items).toBeTruthy();
         // Suggested all the notes
-        expect(items!.length).toEqual(2);
-        for (const item of items!) {
+        expect(items!.items.length).toEqual(2);
+        for (const item of items!.items) {
           // All suggested items exist
           const found = NoteUtils.getNotesByFnameFromEngine({
             fname: `${TAGS_HIERARCHY}${item.label}`,
@@ -193,10 +196,11 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "Lorem ipsum #");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const compList = await provideCompletionItems(
           editor.document,
           new Position(8, 13)
         );
+        const items = compList?.items;
         expect(items).toBeTruthy();
         // Suggested all the notes
         expect(items!.length).toEqual(2);
@@ -246,10 +250,11 @@ suite("completionProvider", function () {
           editBuilder.insert(new Position(8, 0), "@");
         });
         // have the completion provider complete this wikilink
-        const items = provideCompletionItems(
+        const compList = await provideCompletionItems(
           editor.document,
           new Position(8, 1)
         );
+        const items = compList?.items;
         expect(items).toBeTruthy();
         // Suggested all the notes
         expect(items!.length).toEqual(2);
@@ -284,7 +289,11 @@ suite("completionProvider", function () {
         await editor.edit((editBuilder) => {
           editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
         });
-        items = provideCompletionItems(editor.document, new Position(8, 10));
+        const compList = await provideCompletionItems(
+          editor.document,
+          new Position(8, 10)
+        );
+        items = compList?.items;
       });
 
       test("THEN it finds completions", () => {

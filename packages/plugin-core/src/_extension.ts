@@ -1247,9 +1247,9 @@ async function _setupCommands({
 function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   const mdLangSelector: vscode.DocumentFilter = {
     language: "markdown",
-    scheme: "*",
+    scheme: "file",
   };
-  const anyLangSelector: vscode.DocumentFilter = { scheme: "*" };
+  const anyLangSelector: vscode.DocumentFilter = { scheme: "file" };
   context.subscriptions.push(
     vscode.languages.registerReferenceProvider(
       mdLangSelector,

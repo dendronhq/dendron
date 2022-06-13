@@ -21,6 +21,10 @@ export type DendronCommandConfig = {
   insertNoteLink: InsertNoteLinkConfig;
   insertNoteIndex: InsertNoteIndexConfig;
   copyNoteLink: CopyNoteLinkConfig;
+  /**
+   * Default template hiearchy used when running commands like `Apply template`
+   */
+  templateHierarchy?: string;
 };
 
 /**
@@ -36,5 +40,6 @@ export function genDefaultCommandConfig(): DendronCommandConfig {
     insertNoteLink: genDefaultInsertNoteLinkConfig(),
     insertNoteIndex: genDefaultInsertNoteIndexConfig(),
     copyNoteLink: genDefaultCopyNoteLinkConfig(),
+    templateHierarchy: "template",
   };
 }

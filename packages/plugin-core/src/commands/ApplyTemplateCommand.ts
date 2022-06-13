@@ -65,7 +65,7 @@ export class ApplyTemplateCommand extends BasicCommand<
       throw new DendronError({ message: "No Dendron note open" });
     }
 
-    const tempPrefix = ConfigUtils.getWorkspace(config).templateHierarchy;
+    const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
 
     return new Promise((resolve) => {

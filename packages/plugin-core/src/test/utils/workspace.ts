@@ -45,6 +45,7 @@ export class WorkspaceTestUtils {
         insertNoteIndex: {
           enableMarker: false,
         },
+        templateHierarchy: "template",
       },
       workspace: {
         vaults,
@@ -98,7 +99,6 @@ export class WorkspaceTestUtils {
         enableEditorDecorations: true,
         maxPreviewsCached: 10,
         maxNoteLength: 204800,
-        templateHierarchy: "template",
         enableFullHierarchyNoteTitle: false,
       },
       preview: {

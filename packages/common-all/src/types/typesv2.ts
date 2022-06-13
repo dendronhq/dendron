@@ -601,6 +601,9 @@ export type DEngine = DCommonProps &
     info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
+    /**
+     * @deprecated - See {@link DEngine.findNotes}
+     */
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;

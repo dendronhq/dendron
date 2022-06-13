@@ -9,6 +9,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { TemplateUtils } from "@dendronhq/common-server";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import _ from "lodash";
 import yargs from "yargs";
@@ -205,31 +206,73 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case NoteCommands.LOOKUP_LEGACY: {
           const { query, vault } = checkQueryAndVault(opts);
-          const { data } = await engine.getNoteByPath({
-            npath: query,
-            createIfNew: true,
-            vault,
-          });
-          let stringOutput: string = "";
-          if (data?.note) {
-            stringOutput = await formatNotes({
+          const notes = await engine.findNotes({ fname: query, vault });
+          let note: NoteProps;
+
+          // If note doesn't exist, create note with schema
+          if (notes.length === 0) {
+            note = NoteUtils.createWithSchema({
+              noteOpts: {
+                fname: query,
+                vault,
+              },
               engine,
-              notes: [data.note],
-              output,
             });
-            this.print(stringOutput);
-            return {
-              data: {
-                notesOutput: [data.note],
-                stringOutput,
-              } as NoteCommandData,
-            };
+            // Until we support user prompt, pick template note for them if there are multiple matches in order of
+            // 1. Template note that lies in same vault as note to lookup
+            // 2. First note in list
+            await TemplateUtils.findAndApplyTemplate({
+              note,
+              engine,
+              pickNote: async (choices: NoteProps[]) => {
+                const sameVaultNote = choices.filter((ent) => {
+                  return VaultUtils.isEqual(vault, ent.vault, engine.wsRoot);
+                });
+                if (sameVaultNote.length > 0) {
+                  return { data: sameVaultNote[0] };
+                } else {
+                  return { data: choices[0] };
+                }
+              },
+            });
+            const resp = await engine.writeNote(note);
+            if (resp.error) {
+              return {
+                error: ErrorFactory.createInvalidStateError({
+                  message: "lookup failed",
+                }),
+                data: undefined,
+              };
+            }
+          } else {
+            note = notes[0];
+            // If note exists and its a stub note, delete stub and create new note
+            if (note.stub) {
+              delete note.stub;
+              const resp = await engine.writeNote(note, {
+                updateExisting: true,
+              });
+              if (resp.error) {
+                return {
+                  error: ErrorFactory.createInvalidStateError({
+                    message: "lookup failed",
+                  }),
+                  data: undefined,
+                };
+              }
+            }
           }
+          const stringOutput = await formatNotes({
+            engine,
+            notes: [note],
+            output,
+          });
+          this.print(stringOutput);
           return {
-            error: ErrorFactory.createInvalidStateError({
-              message: "lookup failed",
-            }),
-            data: undefined,
+            data: {
+              notesOutput: [note],
+              stringOutput,
+            } as NoteCommandData,
           };
         }
         case NoteCommands.DELETE: {

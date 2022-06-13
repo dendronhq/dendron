@@ -13,8 +13,6 @@ import {
   OrderedMatcher,
   RenameNoteOpts,
   RespV2,
-  RespV3,
-  SchemaTemplate,
   TransformedQueryString,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -26,9 +24,7 @@ import stringSimilarity from "string-similarity";
 import { QuickPickItem, TextEditor, Uri, ViewColumn, window } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
-import { parseRef } from "../../utils/md";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { WSUtilsV2 } from "../../WSUtilsV2";
 import { DendronBtn, getButtonCategory } from "./ButtonTypes";
 import {
   CREATE_NEW_DETAIL_LIST,
@@ -797,52 +793,4 @@ export function sortBySimilarity(candidates: NoteProps[], query: string) {
       .sort((a, b) => b.similarityScore - a.similarityScore)
       .map((v) => v.cand)
   );
-}
-
-export class LookupUtils {
-  /**
-   * Find corresponding note for given schema template. Supports cross-vault lookup.
-   *
-   * @param schemaTemplate
-   */
-  static async getNoteForSchemaTemplate({
-    engine,
-    schemaTemplate,
-  }: {
-    engine: DEngineClient;
-    schemaTemplate: SchemaTemplate;
-  }): Promise<RespV3<NoteProps | undefined>> {
-    let maybeVault: DVault | undefined;
-    const { ref, vaultName } = parseRef(schemaTemplate.id);
-
-    // If vault is specified, lookup by template id + vault
-    if (!_.isUndefined(vaultName)) {
-      maybeVault = VaultUtils.getVaultByName({
-        vname: vaultName,
-        vaults: engine.vaults,
-      });
-      // If vault is not found, skip lookup through rest of notes and return error
-      if (_.isUndefined(maybeVault)) {
-        return {
-          error: new DendronError({
-            message: `No vault found for ${vaultName}`,
-          }),
-        };
-      }
-    }
-
-    if (!_.isUndefined(ref)) {
-      return WSUtilsV2.instance().findNoteFromMultiVaultAsync({
-        fname: ref,
-        quickpickTitle:
-          "Select which template to apply or press [ESC] to not apply a template",
-        nonStubOnly: true,
-        vault: maybeVault,
-      });
-    } else {
-      return {
-        data: undefined,
-      };
-    }
-  }
 }

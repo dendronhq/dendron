@@ -1,10 +1,14 @@
 import {
   ConfigUtils,
+  DendronError,
   DEngineClient,
+  DVault,
   NoteProps,
-  SchemaTemplate,
+  parseDendronURI,
+  RespV3,
   SchemaUtils,
   Time,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import Handlebars, { HelperOptions } from "handlebars";
 import _ from "lodash";
@@ -156,22 +160,69 @@ export class TemplateUtils {
   }
 
   /**
-   * Try to get a template if note has a matching schema
-   * that also defines a template
+   * Given a note that has a schema:
+   *  - Find template note specified by schema
+   *  - If there are no template notes found, return false
+   *  - If multiple templates notes are found, apply callback `pickNote` to list of notes
+   *  - Apply template note returned by callback to note and return true if applied successfully
+   * If note does not have a schema, return false
+   *
+   * @param note: note to apply template to. This modifies the note body
+   * @returns boolean of whether template has been applied or not
    */
-  static tryGetTemplateFromMatchingSchema({
+  static async findAndApplyTemplate({
     note,
     engine,
+    pickNote,
   }: {
     note: NoteProps;
     engine: DEngineClient;
-  }): SchemaTemplate | undefined {
+    pickNote: (choices: NoteProps[]) => Promise<RespV3<NoteProps | undefined>>;
+  }): Promise<RespV3<boolean>> {
     const maybeSchema = SchemaUtils.getSchemaFromNote({
       note,
       engine,
     });
 
-    return maybeSchema?.schemas[note.schema?.schemaId as string].data.template;
+    const maybeTemplate =
+      maybeSchema?.schemas[note.schema?.schemaId as string].data.template;
+    let maybeVault: DVault | undefined;
+
+    if (maybeTemplate) {
+      // Support xvault template
+      const { link: fname, vaultName } = parseDendronURI(maybeTemplate?.id);
+
+      // If vault is specified, lookup by template id + vault
+      if (!_.isUndefined(vaultName)) {
+        maybeVault = VaultUtils.getVaultByName({
+          vname: vaultName,
+          vaults: engine.vaults,
+        });
+        // If vault is not found, skip lookup through rest of notes and return error
+        if (_.isUndefined(maybeVault)) {
+          return {
+            error: new DendronError({
+              message: `No vault found for ${vaultName}`,
+            }),
+          };
+        }
+      }
+
+      const maybeNotes = await engine.findNotes({ fname, vault: maybeVault });
+      const maybeTemplateNote = await pickNote(maybeNotes);
+      if (maybeTemplateNote.error) {
+        return { error: maybeTemplateNote.error };
+      }
+      if (maybeTemplateNote.data) {
+        TemplateUtils.applyTemplate({
+          templateNote: maybeTemplateNote.data,
+          targetNote: note,
+          engine,
+        });
+        return { data: true };
+      }
+    }
+    return { data: false };
   }
 
   static applyHBTemplate({

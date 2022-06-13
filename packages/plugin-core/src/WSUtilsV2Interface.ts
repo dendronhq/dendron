@@ -37,23 +37,20 @@ export interface IWSUtilsV2 {
   openNote(note: NoteProps): Promise<vscode.TextEditor>;
 
   /**
-   * Find note by fname across all vaults.
+   * Given list of notes, prompt user to pick note by selecting corresponding vault name
    *
-   * If vault is specified, search notes by corresponding vault and fname. If no match, return undefined.
-   * If vault is not specified, search all notes by id.
-   *    - If no match, return error about missing note
-   *    - If one match, assume that is intended note and return.
-   *    - If multiple matches, prompt user via quickpick to select vault from matches. If user escapes out, return undefined
+   * For list of notes,
+   *    - If length == 0, return error about no notes
+   *    - If length == 1, assume that is intended note and return.
+   *    - If length > 1, prompt user via quickpick to select vault from matches. If user escapes out, return undefined
    *
-   * @param fname: name of note to look for
+   * @param notes: list of notes for user to pick from
    * @param quickpickTitle: title of quickpick to display if multiple matches are found
    * @param nonStubOnly?: if provided, boolean to determine whether to return non-stub notes only. Default behavior is to return all
-   * @param vault?: if provided, vault to search note from
    */
-  findNoteFromMultiVaultAsync(opts: {
-    fname: string;
+  promptForNoteAsync(opts: {
+    notes: NoteProps[];
     quickpickTitle: string;
     nonStubOnly?: boolean;
-    vault?: DVault;
   }): Promise<RespV3<NoteProps | undefined>>;
 }

@@ -298,12 +298,9 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
       runEngineTestV5(
         async ({ engine, vaults }) => {
           const engineClient = engine as DendronEngineClient;
-          const resp = await engine.getNoteByPath({
-            npath: "root",
-            createIfNew: false,
-            vault: vaults[0],
-          });
-          const rootFile = resp.data!.note;
+          const rootFile = (
+            await engine.findNotes({ fname: "root", vault: vaults[0] })
+          )[0];
           rootFile!.title = "updated";
 
           engineClient.onEngineNoteStateChanged(

@@ -1,4 +1,4 @@
-import { NoteProps, VaultUtils } from "@dendronhq/common-all";
+import { NoteProps, SchemaTemplate, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -9,7 +9,7 @@ import {
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { before, describe } from "mocha";
+import { afterEach, before, beforeEach, describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -179,10 +179,26 @@ suite("GotoNote", function () {
         },
       },
       () => {
-        test("THEN new note uses the template that's in the same vault", async () => {
+        let showQuickPick: sinon.SinonStub;
+
+        beforeEach(() => {
+          showQuickPick = sinon.stub(vscode.window, "showQuickPick");
+        });
+        afterEach(() => {
+          showQuickPick.restore();
+        });
+
+        test("AND user picks from prompted vault, THEN template body gets applied to new note", async () => {
           // Try to create note in vault 3
           const { vaults } = ExtensionProvider.getDWorkspace();
           const vault = vaults[2];
+          // Pick vault 2
+          showQuickPick.onFirstCall().returns(
+            Promise.resolve({
+              label: "vaultThree",
+              vault: vaults[2],
+            }) as Thenable<vscode.QuickPickItem>
+          );
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
             vault,
@@ -192,6 +208,58 @@ suite("GotoNote", function () {
             VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
           expect(
             content.indexOf("food ch2 template in vaultThree") >= 0
+          ).toBeTruthy();
+        });
+      }
+    );
+
+    describeMultiWS(
+      "GIVEN a new note and multiple templates in different vaults with the same name",
+      {
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          // Schema is in vault1 and specifies template in vault 2
+          const vault = vaults[0];
+          // Template is in vault2 and vaultThree
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            genRandomId: true,
+            body: "food ch2 template in vault 2",
+            fname: "template.ch2",
+            vault: vaults[1],
+          });
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            genRandomId: true,
+            body: "food ch2 template in vaultThree",
+            fname: "template.ch2",
+            vault: vaults[2],
+          });
+          const template: SchemaTemplate = {
+            id: `dendron://${VaultUtils.getName(vaults[1])}/template.ch2`,
+            type: "note",
+          };
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
+        },
+      },
+      () => {
+        test("WHEN schema template uses xvault notation, THEN correct template body gets applied to new note", async () => {
+          // Try to create note in vault 3
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[2];
+          await createGoToNoteCmd().run({
+            qs: "food.ch2",
+            vault,
+          });
+          expect(getActiveEditorBasename()).toEqual("food.ch2.md");
+          const content =
+            VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+          expect(
+            content.indexOf("food ch2 template in vault 2") >= 0
           ).toBeTruthy();
         });
       }

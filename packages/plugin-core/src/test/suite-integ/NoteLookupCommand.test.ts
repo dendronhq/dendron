@@ -10,7 +10,6 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaTemplate,
-  SchemaUtils,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -83,43 +82,6 @@ const stubVaultPick = (vaults: DVault[]) => {
   return sinon
     .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
     .returns(Promise.resolve(vault));
-};
-
-/**
- * Setup schema that references template that may or may not lie in same vault
- */
-const setupSchemaCrossVault = (opts: {
-  wsRoot: string;
-  vault: DVault;
-  template: SchemaTemplate;
-}) => {
-  const { wsRoot, vault, template } = opts;
-  return NoteTestUtilsV4.createSchema({
-    fname: "food",
-    wsRoot,
-    vault,
-    modifier: (schema) => {
-      const schemas = [
-        SchemaUtils.createFromSchemaOpts({
-          id: "food",
-          parent: "root",
-          fname: "food",
-          children: ["ch2"],
-          vault,
-        }),
-        SchemaUtils.createFromSchemaRaw({
-          id: "ch2",
-          template,
-          namespace: true,
-          vault,
-        }),
-      ];
-      schemas.map((s) => {
-        schema.schemas[s.id] = s;
-      });
-      return schema;
-    },
-  });
 };
 
 export function expectQuickPick(quickPick: DendronQuickPickerV2) {
@@ -915,7 +877,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -966,7 +932,11 @@ suite("NoteLookupCommand", function () {
             id: `dendron://${VaultUtils.getName(vaults[2])}/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1018,7 +988,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1078,7 +1052,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1151,7 +1129,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1209,7 +1191,11 @@ suite("NoteLookupCommand", function () {
             id: `dendron://missingVault/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1250,7 +1236,11 @@ suite("NoteLookupCommand", function () {
             id: `blah://${VaultUtils.getName(vaults[1])}/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1264,7 +1254,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            `Warning: Problem with food.ch2 schema. No note found for blah`
+            `Warning: Problem with food.ch2 schema. No note found`
           );
 
           cmd.cleanUp();
@@ -1280,7 +1270,11 @@ suite("NoteLookupCommand", function () {
         postSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
           const template: SchemaTemplate = { id: "food.missing", type: "note" };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1294,7 +1288,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            "Warning: Problem with food.ch2 schema. No note found for food.missing"
+            "Warning: Problem with food.ch2 schema. No note found"
           );
 
           cmd.cleanUp();

@@ -100,26 +100,19 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   }
 
   /**
-   * See {@link IWSUtilsV2.findNoteFromMultiVaultAsync}.
+   * See {@link IWSUtilsV2.promptForNoteAsync}.
    */
-  async findNoteFromMultiVaultAsync(opts: {
-    fname: string;
+  async promptForNoteAsync(opts: {
+    notes: NoteProps[];
     quickpickTitle: string;
     nonStubOnly?: boolean;
-    vault?: DVault;
   }): Promise<RespV3<NoteProps | undefined>> {
-    const { fname, quickpickTitle, nonStubOnly = false, vault } = opts;
+    const { notes, quickpickTitle, nonStubOnly = false } = opts;
     let existingNote: NoteProps | undefined;
-    const engine = ExtensionProvider.getEngine();
-    const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      engine,
-      vault,
-    });
 
     const filteredNotes = nonStubOnly
-      ? maybeNotes.filter((note) => !note.stub)
-      : maybeNotes;
+      ? notes.filter((note) => !note.stub)
+      : notes;
 
     if (filteredNotes.length === 1) {
       // Only one match so use that as note
@@ -129,7 +122,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       const vaults = filteredNotes.map((noteProps) => {
         return {
           vault: noteProps.vault,
-          label: `${fname} from ${VaultUtils.getName(noteProps.vault)}`,
+          label: `${noteProps.fname} from ${VaultUtils.getName(
+            noteProps.vault
+          )}`,
         };
       });
 
@@ -154,7 +149,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     } else {
       return {
         error: new DendronError({
-          message: `No note found for ${fname}`,
+          message: `No note found`,
         }),
       };
     }

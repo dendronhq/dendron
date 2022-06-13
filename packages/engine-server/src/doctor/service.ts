@@ -221,12 +221,6 @@ export class DoctorService implements Disposable {
           // @ts-ignore
           leading: true,
         });
-    const engineGetNoteByPath = dryRun
-      ? () => {}
-      : throttle(_.bind(engine.getNoteByPath, engine), 300, {
-          // @ts-ignore
-          leading: true,
-        });
 
     let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
@@ -381,11 +375,7 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         notes = this.getBrokenLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
-          await engineGetNoteByPath({
-            npath: note.fname,
-            createIfNew: true,
-            vault: note.vault,
-          });
+          await engineWrite(note);
           numChanges += 1;
         };
         break;

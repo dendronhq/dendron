@@ -39,11 +39,12 @@ export class NoteGraphPanelFactory {
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
   /**
-   * This property temporarily stores the graph theme selected by user and is written
+   * These properties temporarily stores the graph theme and depth selected by user and is written
    * back to MetadataService once the panel is disposed.
    */
   private static defaultGraphTheme: GraphThemeEnum | undefined;
   private static graphDepth: number | undefined;
+
   static create(
     ext: DendronExtension,
     engineEvents: EngineEventEmitter
@@ -221,6 +222,9 @@ export class NoteGraphPanelFactory {
           this.defaultGraphTheme = undefined;
         }
         if (this.graphDepth) {
+          AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+            graphDepth: this.graphDepth,
+          });
           MetadataService.instance().setGraphDepth(this.graphDepth);
           this.graphDepth = undefined;
         }

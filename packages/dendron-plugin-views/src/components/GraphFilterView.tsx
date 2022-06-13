@@ -188,6 +188,7 @@ const FilterViewStringInput = ({
   );
 };
 
+//TODO: either make this more generic or split it into multiple components.
 const FilterViewSection = ({
   section,
   config,
@@ -349,6 +350,11 @@ const configureCustomStyling = () => {
   } as GraphViewMessage);
 };
 
+/**
+ * vscode message to update graphDepth selected by User.
+ * When the graph panel is disposed, this value is written back to Metadata Service.
+ * @param graphDepth
+ */
 const updateGraphDepth = (graphDepth: number) => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.onGraphDepthChange,

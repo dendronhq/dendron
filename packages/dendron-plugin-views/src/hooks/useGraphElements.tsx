@@ -42,6 +42,9 @@ type QueueData = {
    */
   distance: number;
   classes: string;
+  /**
+   * is node an ancestor of the active note
+   */
   isParent?: boolean;
 };
 
@@ -70,6 +73,8 @@ function computeGraphElements({
   // Add descendents (children, grandchildren, etc) depending on the specified
   // distance parameter:
   const nodesQueue = new FIFOQueue<QueueData>();
+
+  //enqueue active note
   nodesQueue.enqueue({
     note: activeNote,
     distance: 0,
@@ -103,7 +108,7 @@ function computeGraphElements({
     if (data.distance < maxDistance) {
       const noteVaultClass = getVaultClass(note.vault);
 
-      //Add parents and grandparents
+      //Add parents and grandparents. Distance 0 indicates the immediate parent, isParent indicate the ancestor
       const parentNote =
         (data.distance === 0 || data.isParent) && note.parent
           ? notes[note.parent]

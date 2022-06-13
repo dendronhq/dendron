@@ -222,7 +222,7 @@ export class NoteGraphPanelFactory {
           this.defaultGraphTheme = undefined;
         }
         if (this.graphDepth) {
-          AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+          AnalyticsUtils.track(GraphEvents.GraphDepthChanged, {
             graphDepth: this.graphDepth,
           });
           MetadataService.instance().setGraphDepth(this.graphDepth);

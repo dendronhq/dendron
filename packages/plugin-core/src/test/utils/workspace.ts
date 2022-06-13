@@ -87,7 +87,7 @@ export class WorkspaceTestUtils {
           zoomSpeed: 1,
           createStub: false,
         },
-        enableHandlebarTemplates: false,
+        enableHandlebarTemplates: true,
         enableAutoCreateOnDefinition: false,
         enableXVaultWikiLink: false,
         enableRemoteVaultInit: true,

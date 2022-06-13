@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
 import { AssertUtils, TestNoteFactory } from "@dendronhq/common-test-utils";
 import sinon from "sinon";
@@ -298,6 +298,10 @@ describe(`WHEN running applyTemplate tests`, () => {
   });
 
   describe("WHEN non-handlebars", () => {
+    const modConfigCb = (cfg: IntermediateDendronConfig) => {
+      cfg.workspace.enableHandlebarTemplates = false;
+      return cfg;
+    };
     describe(`GIVEN current note's body is empty`, () => {
       beforeEach(async () => {
         targetNote = await noteFactory.createForFName("new note");
@@ -323,6 +327,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           {
             expect,
             preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+            modConfigCb,
           }
         );
       });
@@ -354,6 +359,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           {
             expect,
             preSetupHook: ENGINE_HOOKS.setupRefs,
+            modConfigCb,
           }
         );
       });
@@ -375,6 +381,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           {
             expect,
             preSetupHook: ENGINE_HOOKS.setupRefs,
+            modConfigCb,
           }
         );
       });
@@ -405,6 +412,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           {
             expect,
             preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+            modConfigCb,
           }
         );
       });

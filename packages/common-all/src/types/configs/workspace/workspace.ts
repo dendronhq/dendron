@@ -67,7 +67,7 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     task: genDefaultTaskConfig(),
     graph: genDefaultGraphConfig(),
     enableAutoCreateOnDefinition: false,
-    enableHandlebarTemplates: false,
+    enableHandlebarTemplates: true,
     enableXVaultWikiLink: false,
     enableRemoteVaultInit: true,
     enableUserTags: true,

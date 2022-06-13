@@ -93,6 +93,14 @@ export class NoteController {
     getLogger().info({ ctx, msg: "enter" });
     try {
       const version = NodeJSUtils.getVersionFromPkg();
+      if (!version) {
+        return {
+          data: undefined,
+          error: DendronError.createPlainError({
+            message: "Unable to read the Dendron version",
+          }),
+        };
+      }
       return {
         data: {
           version,

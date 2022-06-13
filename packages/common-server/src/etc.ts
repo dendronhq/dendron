@@ -1,16 +1,22 @@
 import fs from "fs-extra";
-import path from "path";
-import { goUpTo } from "./filesv2";
+import { findUpTo } from "./filesv2";
 
 export class NodeJSUtils {
-  static getVersionFromPkg(): string {
-    const pkgJSON = fs.readJSONSync(
-      path.join(
-        goUpTo({ base: __dirname, fname: "package.json" }),
-        "package.json"
-      )
-    );
-    return `${pkgJSON.version}`;
+  static getVersionFromPkg(): string | undefined {
+    const packageJsonPath = findUpTo({
+      base: __dirname,
+      fname: "package.json",
+      maxLvl: 5,
+    });
+    if (!packageJsonPath) return undefined;
+    try {
+      const pkgJSON = fs.readJSONSync(packageJsonPath);
+      if (!pkgJSON?.version) return undefined;
+      return `${pkgJSON.version}`;
+    } catch {
+      // There may be errors if we couldn't read the file
+      return undefined;
+    }
   }
 }
 

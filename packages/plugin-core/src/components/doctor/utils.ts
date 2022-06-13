@@ -13,6 +13,8 @@ import { MessageSeverity, VSCodeUtils } from "../../vsCodeUtils";
 export class DoctorUtils {
   static async findDuplicateNoteFromDocument(document: vscode.TextDocument) {
     const fsPath = document.uri.fsPath;
+    // return if file is not a markdown
+    if (!fsPath.endsWith(".md")) return;
     const extension = ExtensionProvider.getExtension();
     const { vaults, wsRoot, engine } = extension.getDWorkspace();
     let vault;

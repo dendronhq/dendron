@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.92.1",
-    "@dendronhq/dendron-cli": "^0.98.0",
     "@dendronhq/engine-server": "^0.92.1",
     "d3": "^7.0.0",
     "lodash": "^4.17.21",

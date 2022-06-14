@@ -1,3 +1,5 @@
+import { DEngineClient } from "@dendronhq/common-all";
+
 export type ImportType = {
   moduleName: string;
   defaultImport: string;
@@ -20,4 +22,11 @@ export type FileType = {
   imports?: ImportType[];
   numberOfLines?: number;
   children?: FileType[];
+};
+export type InputArgs = {
+  wsRoot: string;
+  out?: string;
+};
+export type VisualizationInput = InputArgs & {
+  engine: DEngineClient;
 };

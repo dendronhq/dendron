@@ -200,10 +200,6 @@
         "title": "Dendron: Delete Node"
       },
       {
-        "command": "dendron.insertNote",
-        "title": "Dendron: Insert Note"
-      },
-      {
         "command": "dendron.insertNoteLink",
         "title": "Dendron: Insert Note Link"
       },
@@ -576,10 +572,6 @@
         },
         {
           "command": "dendron.deleteNode",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.insertNote",
           "when": "dendron:pluginActive"
         },
         {

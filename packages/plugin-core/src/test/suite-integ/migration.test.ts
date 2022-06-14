@@ -508,9 +508,6 @@ suite("Migration", function () {
                 include: ["foo", "bar"],
                 exclude: ["lorem"],
               },
-              insertNote: {
-                initialValue: "user.foo",
-              },
               insertNoteLink: {
                 aliasMode: InsertNoteLinkAliasModeEnum.none,
                 enableMultiSelect: true,

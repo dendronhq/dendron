@@ -1,4 +1,5 @@
 import { AddAndCommit } from "./AddAndCommit";
+import { ApplyTemplateCommand } from "./ApplyTemplateCommand";
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
 import { CodeCommandConstructor } from "./base";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
@@ -10,36 +11,42 @@ import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
 import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
 import { ConvertLinkCommand } from "./ConvertLink";
+import { CopyNoteLinkCommand } from "./CopyNoteLink";
 import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
+import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { CreateHookCommand } from "./CreateHookCommand";
+import { CreateJournalNoteCommand } from "./CreateJournalNoteCommand";
+import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
 import { CreateNoteWithUserDefinedTrait } from "./CreateNoteWithUserDefinedTrait";
 import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCommand";
+import { CreateScratchNoteCommand } from "./CreateScratchNoteCommand";
 import { CreateTaskCommand } from "./CreateTask";
 import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
+import { DevTriggerCommand } from "./DevTriggerCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
 import { DoctorCommand } from "./Doctor";
 import { DumpStateCommand } from "./DumpStateCommand";
-import { DevTriggerCommand } from "./DevTriggerCommand";
 import { EnableTelemetryCommand } from "./EnableTelemetry";
 import { ExportPodCommand } from "./ExportPod";
 import { GoDownCommand } from "./GoDownCommand";
+import { GotoCommand } from "./Goto";
 import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
-import { InsertNoteCommand } from "./InsertNoteCommand";
 import { InsertNoteIndexCommand } from "./InsertNoteIndexCommand";
 import { InsertNoteLinkCommand } from "./InsertNoteLink";
-import { ShowWelcomePageCommand } from "./ShowWelcomePageCommand";
+import { InstrumentedWrapperCommand } from "./InstrumentedWrapperCommand";
+import { LaunchTutorialWorkspaceCommand } from "./LaunchTutorialWorkspaceCommand";
+import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
 import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
-import { CreateJournalNoteCommand } from "./CreateJournalNoteCommand";
-import { CreateScratchNoteCommand } from "./CreateScratchNoteCommand";
+import { OpenBackupCommand } from "./OpenBackupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteFileCommand } from "./PasteFile";
@@ -47,6 +54,7 @@ import { PasteLinkCommand } from "./PasteLink";
 import { ConfigureExportPodV2 } from "./pods/ConfigureExportPodV2";
 import { ConfigureServiceConnection } from "./pods/ConfigureServiceConnection";
 import { ExportPodV2Command } from "./pods/ExportPodV2Command";
+import { ImportObsidianCommand } from "./pods/ImportObsidianCommand";
 import { PublishDevCommand } from "./PublishDevCommand";
 import { PublishExportCommand } from "./PublishExportCommand";
 import { PublishPodCommand } from "./PublishPod";
@@ -61,26 +69,17 @@ import { SchemaLookupCommand } from "./SchemaLookupCommand";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowLegacyPreviewCommand } from "./ShowLegacyPreview";
+import { ShowWelcomePageCommand } from "./ShowWelcomePageCommand";
 import { SignInCommand } from "./SignIn";
 import { SignUpCommand } from "./SignUp";
 import { SnapshotVaultCommand } from "./SnapshotVault";
 import { SyncCommand } from "./Sync";
+import { TaskCompleteCommand } from "./TaskComplete";
+import { TaskStatusCommand } from "./TaskStatus";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
-import { OpenBackupCommand } from "./OpenBackupCommand";
-import { CopyToClipboardCommand } from "./CopyToClipboardCommand";
-import { CopyNoteLinkCommand } from "./CopyNoteLink";
-import { CreateMeetingNoteCommand } from "./CreateMeetingNoteCommand";
-import { GotoCommand } from "./Goto";
-import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
-import { ApplyTemplateCommand } from "./ApplyTemplateCommand";
-import { TaskStatusCommand } from "./TaskStatus";
-import { TaskCompleteCommand } from "./TaskComplete";
-import { ImportObsidianCommand } from "./pods/ImportObsidianCommand";
-import { LaunchTutorialWorkspaceCommand } from "./LaunchTutorialWorkspaceCommand";
-import { InstrumentedWrapperCommand } from "./InstrumentedWrapperCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -121,7 +120,6 @@ const ALL_COMMANDS = [
   GotoNoteCommand,
   ImportPodCommand,
   ImportObsidianCommand,
-  InsertNoteCommand,
   InsertNoteLinkCommand,
   InsertNoteIndexCommand,
   NoteLookupCommand,

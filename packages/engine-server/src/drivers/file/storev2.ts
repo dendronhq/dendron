@@ -455,6 +455,7 @@ export class FileStorage implements DStore {
     if (_.isEmpty(schemaFiles)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.NO_SCHEMA_FOUND,
+        message: JSON.stringify(vault),
       });
     }
     const { schemas, errors } = await new SchemaParser({

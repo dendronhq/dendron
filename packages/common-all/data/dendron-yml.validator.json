@@ -501,6 +501,10 @@
         },
         "copyNoteLink": {
           "$ref": "#/definitions/CopyNoteLinkConfig"
+        },
+        "templateHierarchy": {
+          "type": "string",
+          "description": "Default template hiearchy used when running commands like `Apply template`"
         }
       },
       "required": [
@@ -767,9 +771,6 @@
           "type": "boolean"
         },
         "apiEndpoint": {
-          "type": "string"
-        },
-        "templateHierarchy": {
           "type": "string"
         }
       },

@@ -6,6 +6,7 @@ import {
   isNotUndefined,
   LINK_NAME,
   LINK_NAME_NO_SPACES,
+  NoteLookupUtils,
   NoteProps,
   NoteUtils,
   TAGS_HIERARCHY,
@@ -28,6 +29,7 @@ import {
   CancellationToken,
   CompletionItem,
   CompletionItemKind,
+  CompletionList,
   ExtensionContext,
   languages,
   MarkdownString,
@@ -94,19 +96,52 @@ const NOTE_AUTOCOMPLETEABLE_REGEX = new RegExp("" +
   "g"
 );
 
+function noteToCompletionItem({
+  note,
+  range,
+  lblTransform,
+  insertTextTransform,
+  sortTextTransform,
+}: {
+  note: NoteProps;
+  range: Range;
+  lblTransform?: (note: NoteProps) => string;
+  insertTextTransform?: (note: NoteProps) => string;
+  sortTextTransform?: (note: NoteProps) => string | undefined;
+}): CompletionItem {
+  const label = lblTransform ? lblTransform(note) : note.fname;
+  const insertText = insertTextTransform
+    ? insertTextTransform(note)
+    : note.fname;
+  const sortText = sortTextTransform ? sortTextTransform(note) : undefined;
+  const item: CompletionItem = {
+    label,
+    insertText,
+    sortText,
+    kind: CompletionItemKind.File,
+    detail: VaultUtils.getName(note.vault),
+    range,
+  };
+  return item;
+}
+
 export const provideCompletionItems = sentryReportingCallback(
-  (document: TextDocument, position: Position) => {
+  async (
+    document: TextDocument,
+    position: Position
+  ): Promise<CompletionList | undefined> => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
 
     // No-op if we're not in a Dendron Workspace
-    if (!DendronExtension.isActive()) {
+    if (!ExtensionProvider.getExtension().isActive()) {
       return;
     }
 
     const line = document.lineAt(position).text;
-    Logger.debug({ ctx, position, msg: "enter" });
+    Logger.info({ ctx, position, msg: "enter" });
 
+    // get all matches
     let found: RegExpMatchArray | undefined;
     const matches = line.matchAll(NOTE_AUTOCOMPLETEABLE_REGEX);
     for (const match of matches) {
@@ -119,14 +154,18 @@ export const provideCompletionItems = sentryReportingCallback(
         found = match;
       }
     }
+
+    // if no match found, exit early
     if (
       _.isUndefined(found) ||
       _.isUndefined(found.index) ||
       _.isUndefined(found.groups)
     )
       return;
-    Logger.debug({ ctx, found });
 
+    Logger.debug({ ctx, regexMatch: found });
+
+    // if match is hash, delegate to block auto complete
     if (
       (found.groups.hash || found.groups.hashNoSpace) &&
       found.index + (found.groups.beforeAnchor?.length || 0) >
@@ -136,6 +175,7 @@ export const provideCompletionItems = sentryReportingCallback(
       return;
     }
 
+    // do autocomplete
     let start: number;
     let end: number;
     if (found.groups.hashTag || found.groups.userTag) {
@@ -155,9 +195,10 @@ export const provideCompletionItems = sentryReportingCallback(
     }
     const range = new Range(position.line, start, position.line, end);
 
-    const { engine } = getDWorkspace();
+    const engine = ExtensionProvider.getEngine();
     const { notes, wsRoot } = engine;
-    const completionItems: CompletionItem[] = [];
+    let completionItems: CompletionItem[];
+    const completionsIncomplete = true;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
     Logger.debug({
       ctx,
@@ -167,43 +208,50 @@ export const provideCompletionItems = sentryReportingCallback(
       wsRoot,
     });
 
-    _.values(notes).map((note, index) => {
-      const item: CompletionItem = {
-        label: note.fname,
-        insertText: note.fname,
-        kind: CompletionItemKind.File,
-        sortText: padWithZero(index),
-        detail: VaultUtils.getName(note.vault),
-        range,
-      };
-
-      if (found?.groups?.hashTag) {
-        // We are completing a hashtag, so only do completion for tag notes.
-        if (!note.fname.startsWith(TAGS_HIERARCHY)) return;
-        // Since this is a hashtag, `tags.foo` becomes `#foo`.
-        item.label = `${note.fname.slice(TAGS_HIERARCHY.length)}`;
-        item.insertText = item.label;
-        // hashtags don't support xvault links, so we skip any special xvault handling
-      } else if (found?.groups?.userTag) {
-        // We are completing a user tag, so only do completion for user notes.
-        if (!note.fname.startsWith(USERS_HIERARCHY)) return;
-        // Since this is a hashtag, `tags.foo` becomes `#foo`.
-        item.label = `${note.fname.slice(USERS_HIERARCHY.length)}`;
-        item.insertText = item.label;
-        // user tags don't support xvault links, so we skip any special xvault handling
+    if (found?.groups?.hashTag) {
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw: `${TAGS_HIERARCHY}.`,
+        engine,
+      });
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          lblTransform: (note) => `${note.fname.slice(TAGS_HIERARCHY.length)}`,
+          insertTextTransform: (note) => note.fname,
+        })
+      );
+    } else if (found?.groups?.userTag) {
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw: `${USERS_HIERARCHY}.`,
+        engine,
+      });
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          lblTransform: (note) => `${note.fname.slice(USERS_HIERARCHY.length)}`,
+          insertTextTransform: (note) => note.fname,
+        })
+      );
+    } else {
+      let qsRaw: string;
+      if (found?.groups?.note) {
+        qsRaw = found?.groups?.note;
+      } else if (found?.groups?.noteNoSpace) {
+        qsRaw = found?.groups?.noteNoSpace;
       } else {
+        qsRaw = "";
+      }
+      const insertTextTransform = (note: NoteProps) => {
+        let resp = note.fname;
         if (found?.groups?.noBracket !== undefined) {
-          // If the brackets are missing, then insert them too
-          item.insertText = `${item.insertText}]]`;
+          resp += "]]";
         }
         if (
           currentVault &&
           !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
         ) {
-          // For notes from other vaults than the current note, sort them after notes from the current vault.
-          // x will get sorted after numbers, so these will appear after notes without x
-          item.sortText = "x" + item.sortText;
-
           const sameNameNotes = NoteUtils.getNotesByFnameFromEngine({
             fname: note.fname,
             engine,
@@ -212,21 +260,49 @@ export const provideCompletionItems = sentryReportingCallback(
             // There are multiple notes with the same name in multiple vaults,
             // and this note is in a different vault than the current note.
             // To generate a link to this note, we have to do an xvault link.
-            item.insertText = `${VaultUtils.toURIPrefix(note.vault)}/${
-              item.insertText
-            }`;
+            resp = `${VaultUtils.toURIPrefix(note.vault)}/${resp}`;
           }
         }
-      }
-      completionItems.push(item);
-    });
+        return resp;
+      };
+
+      const notes = await NoteLookupUtils.lookup({
+        qsRaw,
+        engine,
+      });
+
+      completionItems = notes.map((note) =>
+        noteToCompletionItem({
+          note,
+          range,
+          insertTextTransform,
+          sortTextTransform: (note) => {
+            if (
+              currentVault &&
+              !VaultUtils.isEqual(currentVault, note.vault, wsRoot)
+            ) {
+              // For notes from other vaults than the current note, sort them after notes from the current vault.
+              // x will get sorted after numbers, so these will appear after notes without x
+              return `x${note.fname}`;
+            }
+            return;
+          },
+        })
+      );
+    }
+
     const duration = getDurationMilliseconds(startTime);
-    Logger.info({
+    const completionList = new CompletionList(
+      completionItems,
+      completionsIncomplete
+    );
+    Logger.debug({
       ctx,
-      completionItemsLength: completionItems.length,
+      completionItemsLength: completionList.items.length,
+      incomplete: completionList.isIncomplete,
       duration,
     });
-    return completionItems;
+    return completionList;
   }
 );
 
@@ -504,9 +580,11 @@ export const activate = (context: ExtensionContext) => {
       {
         provideCompletionItems,
       },
+
       "[", // for wikilinks and references
       "#", // for hashtags
-      "@" // for user tags
+      "@", // for user tags
+      "" // for new levels in the hieirarchy
     )
   );
   context.subscriptions.push(

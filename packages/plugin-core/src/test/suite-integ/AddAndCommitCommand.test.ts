@@ -11,7 +11,7 @@ import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { AddAndCommit } from "../../commands/AddAndCommit";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("GIVEN Workspace Add And Commit command is run", function () {
   describeSingleWS(
@@ -36,9 +36,17 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         const { committed, finalMessage } = out;
         expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.NO_CHANGES);
-        expect(finalMessage).toEqual(
-          "Finished Commit. Skipped vault because it has no new changes. Committed 0 repo"
-        );
+        expect(
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because it has no new changes",
+              "Committed 0 repo",
+            ],
+          })
+        ).toBeTruthy();
       });
     }
   );
@@ -64,9 +72,16 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         const { committed, finalMessage } = out;
         expect(WorkspaceUtils.getCountForStatusDone(committed)).toEqual(0);
         expect(committed[0].status).toEqual(SyncActionStatus.MERGE_CONFLICT);
-        expect(finalMessage).toEqual(
-          "Finished Commit. Skipped vault because they have merge conflicts that must be resolved manually. Committed 0 repo"
-        );
+        expect(
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because they have merge conflicts that must be resolved manually. Committed 0 repo",
+            ],
+          })
+        ).toBeTruthy();
       });
     }
   );
@@ -99,9 +114,16 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
         expect(committed[0].status).toEqual(
           SyncActionStatus.REBASE_IN_PROGRESS
         );
-        expect(finalMessage).toEqual(
-          "Finished Commit. Skipped vault because there's a rebase in progress that must be resolved. Committed 0 repo"
-        );
+        expect(
+          await AssertUtils.assertInString({
+            body: finalMessage,
+            match: [
+              "Finished Commit",
+              "Skipped",
+              "because there's a rebase in progress that must be resolved. Committed 0 repo",
+            ],
+          })
+        ).toBeTruthy();
       });
     }
   );

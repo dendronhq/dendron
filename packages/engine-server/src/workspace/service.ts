@@ -15,7 +15,6 @@ import {
   DWorkspace,
   DWorkspaceEntry,
   FOLDERS,
-  genUUID,
   InstallStatus,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -32,6 +31,7 @@ import {
   assignJSONWithComment,
   createDisposableLogger,
   DLogger,
+  getAllFiles,
   GitUtils,
   moveIfExists,
   note2File,
@@ -483,7 +483,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   async migrateVaultToSelfContained({ vault }: { vault: DVault }) {
-    const ctx = "migrateVaultToSelfContained";
     if (vault.seed || vault.workspace) {
       // Unsupported vaults are filtered in the commands that use this function,
       // but also adding a sanity check here.
@@ -494,73 +493,55 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
     const newVault: SelfContainedVault = { ...vault, selfContained: true };
 
-    const vaultFolder = path.join(this.wsRoot, vault.fsPath);
-    const tmpFolder = path.join(
-      this.wsRoot,
-      `${vault.fsPath}-migrate-${genUUID()}`
-    );
-    // Rename the vault temporarily, create a new folder with the same name,
-    // then move the vault into the `notes` folder inside the new folder. This
-    // is the fastest and most reliable way to move all notes and assets into
-    // the new folder, since we don't have to move each file individually.
-    await fs.move(vaultFolder, tmpFolder);
-    try {
-      await fs.ensureDir(vaultFolder);
-      await fs.move(tmpFolder, path.join(vaultFolder, FOLDERS.NOTES));
-
-      // Update the config to mark this vault as self contained
-      const config = DConfig.getRaw(this.wsRoot) as IntermediateDendronConfig;
-      const configVault = ConfigUtils.getVaults(config).find((confVault) =>
-        VaultUtils.isEqualV2(confVault, vault)
-      );
-      if (configVault) configVault.selfContained = true;
-
-      // Update logoPath if needed
-      let logoPath = config.publishing?.logoPath;
-      if (
-        // If the logo exists, and it was an asset inside the vault we're migrating
-        config.publishing &&
-        logoPath &&
-        !isWebUri(logoPath) &&
-        logoPath.startsWith(VaultUtils.getRelPath(vault))
-      ) {
-        // Then we need to update the logo path for the new path
-        logoPath = logoPath.slice(VaultUtils.getRelPath(vault).length);
-        logoPath = VaultUtils.getRelPath(newVault) + logoPath;
-        config.publishing.logoPath = logoPath;
-      }
-
-      // All updates to the config are done, finish by writing it
-      await DConfig.createBackup(this.wsRoot, "migrate-vault-sc");
-      await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
-
-      // Add the config file into the vault make it self contained
-      await this.createSelfContainedVault({
-        addToCodeWorkspace: false,
-        addToConfig: false,
-        vault: newVault,
-      });
-    } catch (err) {
-      this.logger.error({
-        ctx,
-        msg: "failed to create the new self contained vault",
-        err,
-      });
-      // This is unlikely since we're working in a new folder. It is fatal, so rethrow it.
-      throw err;
+    // This will be something like wsRoot/vault
+    const oldFolder = vault2Path({ wsRoot: this.wsRoot, vault });
+    // And this will be a subfolder like wsRoot/vault/notes
+    const newFolder = vault2Path({ wsRoot: this.wsRoot, vault: newVault });
+    await fs.ensureDir(newFolder);
+    // Move all note files
+    const noteFiles = await getAllFiles({ root: oldFolder, include: ["*.md"] });
+    if (!noteFiles.data) {
+      throw noteFiles.error;
     }
-    // Except if there's `.git` inside the vault, that has to stay at the root of the vault
-    await moveIfExists(
-      path.join(vaultFolder, FOLDERS.NOTES, ".git"),
-      path.join(vaultFolder, ".git")
+    await Promise.all(
+      noteFiles.data.map(async (from) => {
+        await fs.move(path.join(oldFolder, from), path.join(newFolder, from));
+      })
     );
+    // Move assets, if they exist
     await moveIfExists(
-      path.join(vaultFolder, FOLDERS.NOTES, ".gitignore"),
-      path.join(vaultFolder, ".gitignore")
+      path.join(oldFolder, FOLDERS.ASSETS),
+      path.join(newFolder, FOLDERS.ASSETS)
     );
+
+    // Update the config to mark this vault as self contained
+    const config = DConfig.getRaw(this.wsRoot) as IntermediateDendronConfig;
+    const configVault = ConfigUtils.getVaults(config).find((confVault) =>
+      VaultUtils.isEqualV2(confVault, vault)
+    );
+    if (configVault) configVault.selfContained = true;
+
+    // Update logoPath if needed
+    let logoPath = config.publishing?.logoPath;
+    if (
+      // If the logo exists, and it was an asset inside the vault we're migrating
+      config.publishing &&
+      logoPath &&
+      !isWebUri(logoPath) &&
+      logoPath.startsWith(VaultUtils.getRelPath(vault))
+    ) {
+      // Then we need to update the logo path for the new path
+      logoPath = logoPath.slice(VaultUtils.getRelPath(vault).length);
+      logoPath = VaultUtils.getRelPath(newVault) + logoPath;
+      config.publishing.logoPath = logoPath;
+    }
+
+    // All updates to the config are done, finish by writing it
+    await DConfig.createBackup(this.wsRoot, "migrate-vault-sc");
+    await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
+
     // Update the config for the vault
-    vault.selfContained = true;
-    return vault;
+    return newVault;
   }
 
   markVaultAsRemoteInConfig(

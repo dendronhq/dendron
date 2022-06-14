@@ -5,8 +5,8 @@ import {
   RespV3,
   config,
   RuntimeUtils,
-  ConfigUtils,
   DENDRON_EMOJIS,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,

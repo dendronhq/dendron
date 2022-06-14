@@ -3,6 +3,7 @@
 import {
   NoteProps,
   NoteUtils,
+  VaultUtils,
   WorkspaceOpts,
   Wrap,
 } from "@dendronhq/common-all";
@@ -128,9 +129,17 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
+        const oldPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "oldfile.md"
+        );
         const oldUri = vscode.Uri.file(oldPath);
-        const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
+        const newPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "newfile.md"
+        );
         const newUri = vscode.Uri.file(newPath);
         const args: vscode.FileWillRenameEvent = {
           files: [

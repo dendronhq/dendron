@@ -431,7 +431,9 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const { changed } = res;
     if (changed.length > 0) {
       window.showInformationMessage(
-        `Dendron updated ${_.uniqBy(changed, (ent) => ent.note.fname)} files`
+        `Dendron updated ${
+          _.uniqBy(changed, (ent) => ent.note.fname).length
+        } files`
       );
     }
   }

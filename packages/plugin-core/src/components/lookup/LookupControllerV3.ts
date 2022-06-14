@@ -208,20 +208,27 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     // initial call of update
     if (!nonInteractive) {
       // Show the quickpick first before getting item data to ensure we don't
-      // miss user key strokes
+      // miss user key strokes. Furthermore, set a small delay prior to updating
+      // the picker items, which is an expensive call. The VSCode API
+      // QuickPick.show() seems to be a non-awaitable async operation, which
+      // sometimes will get 'stuck' behind provider.onUpdatePickerItems in the
+      // execution queue. Adding a small delay appears to fix the ordering
+      // issue.
       quickpick.show();
 
-      provider.onUpdatePickerItems({
-        picker: quickpick,
-        token: cancelToken.token,
-        fuzzThreshold: this.fuzzThreshold,
-      });
+      setTimeout(() => {
+        provider.onUpdatePickerItems({
+          picker: quickpick,
+          token: cancelToken.token,
+          fuzzThreshold: this.fuzzThreshold,
+        });
 
-      provider.provide({
-        quickpick,
-        token: cancelToken,
-        fuzzThreshold: this.fuzzThreshold,
-      });
+        provider.provide({
+          quickpick,
+          token: cancelToken,
+          fuzzThreshold: this.fuzzThreshold,
+        });
+      }, 10);
     } else {
       await provider.onUpdatePickerItems({
         picker: quickpick,

@@ -459,11 +459,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -525,11 +523,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -594,11 +590,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -690,11 +684,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -793,11 +785,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -900,11 +890,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },
@@ -987,11 +975,9 @@ suite("workspace sync command", function () {
     {
       ctx,
       modConfigCb: (config) => {
-        ConfigUtils.setWorkspaceProp(
-          config,
-          "workspaceVaultSyncMode",
-          "noCommit"
-        );
+        const vaults = ConfigUtils.getVaults(config);
+        vaults[0].sync = DVaultSync.NO_COMMIT;
+        ConfigUtils.setVaults(config, vaults);
         return config;
       },
     },

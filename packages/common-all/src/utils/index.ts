@@ -6,14 +6,14 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache, VaultUtils } from ".";
-import { COLORS_LIST } from "./colors";
+import { DateTime, LruCache, VaultUtils } from "..";
+import { COLORS_LIST } from "../colors";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
   ERROR_SEVERITY,
-} from "./constants";
-import { DendronError, ErrorMessages } from "./error";
+} from "../constants";
+import { DendronError, ErrorMessages } from "../error";
 import {
   DendronSiteConfig,
   DHookDict,
@@ -22,15 +22,15 @@ import {
   LegacyHierarchyConfig,
   NoteChangeEntry,
   NoteProps,
-} from "./types";
-import { GithubConfig } from "./types/configs/publishing/github";
+} from "../types";
+import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
   genDefaultPublishingConfig,
   HierarchyConfig,
-} from "./types/configs/publishing/publishing";
-import { TaskConfig } from "./types/configs/workspace/task";
+} from "../types/configs/publishing/publishing";
+import { TaskConfig } from "../types/configs/workspace/task";
 import {
   configIsV4,
   DendronCommandConfig,
@@ -47,8 +47,10 @@ import {
   ScratchConfig,
   StrictConfigV4,
   StrictConfigV5,
-} from "./types/intermediateConfigs";
-import { isWebUri } from "./util/regex";
+} from "../types/intermediateConfigs";
+import { isWebUri } from "../util/regex";
+
+export * from "./lookup";
 
 /**
  * Dendron utilities

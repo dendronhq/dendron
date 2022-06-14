@@ -32,6 +32,7 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -81,7 +82,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -92,7 +93,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    templateHierarchy: template
     seeds:
         dendron.foo: {}
 preview:
@@ -188,6 +188,7 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -237,7 +238,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -248,7 +249,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    templateHierarchy: template
     seeds:
         dendron.foo:
             site:
@@ -345,6 +345,7 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults: []
     journal:
@@ -383,7 +384,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -394,7 +395,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    templateHierarchy: template
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -456,6 +456,7 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -496,7 +497,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -507,7 +508,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    templateHierarchy: template
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -586,6 +586,7 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -626,7 +627,7 @@ workspace:
         zoomSpeed: 1
         createStub: false
     enableAutoCreateOnDefinition: false
-    enableHandlebarTemplates: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -637,7 +638,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    templateHierarchy: template
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true

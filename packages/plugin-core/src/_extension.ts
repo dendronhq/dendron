@@ -20,10 +20,10 @@ import {
   IntermediateDendronConfig,
   isDisposable,
   Time,
+  TreeViewItemLabelTypeEnum,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
-  TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -67,16 +67,17 @@ import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
+import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
+import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { IBaseCommand } from "./types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "./types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -92,7 +93,7 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
-import setupHelpFeedbackTreeView from "./features/HelpFeedbackTreeview";
+import setupRecentWorkspacesTreeView from "./features/RecentWorkspacesTreeview";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -700,10 +701,10 @@ export async function _activate(
       extensionInstallStatus,
     });
 
-    // Setup the help and feedback view here so that it still works even if
+    // Setup the help and feedback and recent workspaces views here so that it still works even if
     // we're not in a Dendron workspace.
-    const helpAndFeedbackView = setupHelpFeedbackTreeView();
-    context.subscriptions.push(helpAndFeedbackView);
+    context.subscriptions.push(setupHelpFeedbackTreeView());
+    context.subscriptions.push(setupRecentWorkspacesTreeView());
 
     if (await DendronExtension.isDendronWorkspace()) {
       const activator = new WorkspaceActivator();
@@ -935,6 +936,11 @@ export async function _activate(
         const showcase = new FeatureShowcaseToaster();
         showcase.showToast();
       }, ONE_MINUTE_IN_MS);
+
+      // Add the current workspace to the recent workspace list.
+      MetadataService.instance().addToRecentWorkspaces(
+        DendronExtension.workspaceFile().fsPath
+      );
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
@@ -1257,9 +1263,9 @@ async function _setupCommands({
 function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   const mdLangSelector: vscode.DocumentFilter = {
     language: "markdown",
-    scheme: "*",
+    scheme: "file",
   };
-  const anyLangSelector: vscode.DocumentFilter = { scheme: "*" };
+  const anyLangSelector: vscode.DocumentFilter = { scheme: "file" };
   context.subscriptions.push(
     vscode.languages.registerReferenceProvider(
       mdLangSelector,

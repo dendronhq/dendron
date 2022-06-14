@@ -10,11 +10,15 @@ type CommandInput = {};
 
 type CommandOutput = void;
 
-export class LaunchTutorialCommand extends BasicCommand<
+/**
+ * This command is a bit of a misnomer - it actually launches the welcome
+ * webview page
+ */
+export class ShowWelcomePageCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.LAUNCH_TUTORIAL.key;
+  key = DENDRON_COMMANDS.SHOW_WELCOME_PAGE.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};

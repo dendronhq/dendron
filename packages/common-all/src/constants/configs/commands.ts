@@ -192,4 +192,8 @@ export const COMMANDS: DendronConfigEntryCollection<DendronCommandConfig> = {
   insertNoteLink: INSERT_NOTE_LINK,
   insertNoteIndex: INSERT_NOTE_INDEX,
   copyNoteLink: COPY_NOTE_LINK,
+  templateHierarchy: {
+    label: "The hierarchy where template notes will be stored",
+    desc: "Default is 'template'",
+  },
 };

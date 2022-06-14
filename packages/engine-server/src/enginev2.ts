@@ -18,6 +18,7 @@ import {
   DStore,
   DVault,
   EngineDeleteOptsV2,
+  EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
@@ -508,10 +509,19 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async info() {
+  async info(): Promise<RespV2<EngineInfoResp>> {
+    const version = NodeJSUtils.getVersionFromPkg();
+    if (!version) {
+      return {
+        data: undefined,
+        error: DendronError.createPlainError({
+          message: "Unable to read Dendron version",
+        }),
+      };
+    }
     return {
       data: {
-        version: NodeJSUtils.getVersionFromPkg(),
+        version,
       },
       error: null,
     };

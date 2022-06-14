@@ -19,7 +19,6 @@ import {
   NoteProps,
   RenameNoteOpts,
   RenameNotePayload,
-  RespRequired,
   RespV2,
   SchemaModuleProps,
   WriteNoteResp,
@@ -437,7 +436,7 @@ export class DendronAPI extends API {
     });
   }
 
-  engineInfo(): Promise<RespRequired<EngineInfoResp>> {
+  engineInfo(): Promise<RespV2<EngineInfoResp>> {
     return this._makeRequest({
       path: "note/info",
       method: "get",

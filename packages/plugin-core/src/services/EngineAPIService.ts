@@ -40,7 +40,6 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
-  RespRequired,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
@@ -270,7 +269,7 @@ export class EngineAPIService
     return this._internalEngine.deleteSchema(id, opts);
   }
 
-  info(): Promise<RespRequired<EngineInfoResp>> {
+  info(): Promise<RespV2<EngineInfoResp>> {
     return this._internalEngine.info();
   }
 

@@ -1,14 +1,23 @@
 import {
   asyncLoopOneAtATime,
+  ConfigUtils,
+  CONSTANTS,
   DendronError,
   DVault,
   DWorkspace,
   FOLDERS,
+  IntermediateDendronConfig,
+  SelfContainedVault,
   VaultRemoteSource,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { GitUtils, simpleGit } from "@dendronhq/common-server";
 import {
+  GitUtils,
+  pathForVaultRoot,
+  simpleGit,
+} from "@dendronhq/common-server";
+import {
+  DConfig,
   Git,
   WorkspaceService,
   WorkspaceUtils,
@@ -21,7 +30,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -329,16 +338,14 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           // to be done one at a time
           await asyncLoopOneAtATime(vaults, async (vault) => {
             if (VaultUtils.isSelfContained(vault)) {
-              // eslint-disable-next-line no-await-in-loop
+              await this.checkAndWarnTransitiveDeps({ vault, wsRoot });
               await wsService.createSelfContainedVault({
                 vault,
                 addToConfig: true,
               });
             } else {
-              // eslint-disable-next-line no-await-in-loop
               await wsService.createVault({ vault });
             }
-            // eslint-disable-next-line no-await-in-loop
             await this.addVaultToWorkspace(vault);
             progress.report({ increment });
           });
@@ -347,6 +354,44 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         return { vaults, workspace };
       }
     );
+  }
+
+  /** If a self contained vault contains transitive dependencies, warn the user
+   * that they won't be accessible.
+   *
+   * Adding transitive deps is not supported yet, this check can be removed once
+   * support is added.
+   */
+  async checkAndWarnTransitiveDeps(opts: {
+    vault: SelfContainedVault;
+    wsRoot: string;
+  }) {
+    const vaultRootPath = pathForVaultRoot(opts);
+    try {
+      if (
+        await fs.pathExists(
+          path.join(vaultRootPath, CONSTANTS.DENDRON_CONFIG_FILE)
+        )
+      ) {
+        const vaultConfig = DConfig.getRaw(
+          vaultRootPath
+        ) as IntermediateDendronConfig;
+        if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
+          VSCodeUtils.showMessage(
+            MessageSeverity.WARN,
+            "The vault you added depends on other vaults. You may not be able to access these transitive vaults.",
+            {}
+          );
+        }
+      }
+    } catch (err) {
+      // If anything does fail, ignore the error. This check is not crucial to
+      // adding a vault, it's better if we let the user keep adding.
+      Logger.warn({
+        ctx: "VaultAddCommand.handleRemoteRepoSelfContained",
+        err,
+      });
+    }
   }
 
   async addWorkspaceToWorkspace(workspace: DWorkspace) {

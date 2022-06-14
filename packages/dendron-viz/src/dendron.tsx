@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import { VaultUtils } from "@dendronhq/common-all";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./process-dendron-notes";
 import { createTree } from "./Tree";
+import { VisualizeCLICommandOpts } from "@dendronhq/dendron-cli";
 
 function collectInput(args: InputArgs) {
   const rootPath = args.wsRoot;
@@ -23,13 +23,12 @@ function collectInput(args: InputArgs) {
   };
 }
 
-export async function generateSVG(args: InputArgs) {
+export async function generateSVG(args: VisualizeCLICommandOpts) {
   console.log("start");
   const { rootPath, maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
 
-  const engine = DendronEngineV2.create({ wsRoot: rootPath });
-  await engine.init();
+  const engine = args.engine;
 
   const Tree = await createTree();
   await Promise.all(

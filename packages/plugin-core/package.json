@@ -48,6 +48,10 @@
       {
         "view": "dendron.backlinks",
         "contents": "There are no backlinks to this note."
+      },
+      {
+        "view": "dendron.recent-workspaces",
+        "contents": "No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](command:dendron.launchTutorialWorkspace?%7B%22invocationPoint%22%3A%22RecentWorkspacesPanel%22%7D)."
       }
     ],
     "viewsContainers": {
@@ -97,6 +101,11 @@
           "name": "Calendar View",
           "type": "webview",
           "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.recent-workspaces",
+          "name": "Recent Dendron Workspaces",
+          "when": "!dendron:pluginActive"
         },
         {
           "id": "dendron.help-and-feedback",
@@ -511,12 +520,20 @@
         "title": "Dendron:Dev: Diagnostics Report"
       },
       {
-        "command": "dendron.launchTutorial",
+        "command": "dendron.showWelcomePage",
         "title": "Dendron: Launch Tutorial"
+      },
+      {
+        "command": "dendron.launchTutorialWorkspace",
+        "title": "Dendron: Launch Tutorial Workspace"
       },
       {
         "command": "dendron.openBackup",
         "title": "Dendron: Open Backup"
+      },
+      {
+        "command": "dendron.instrumentedWrapperCommand",
+        "title": "Dendron: Instrumented Wrapper Command"
       }
     ],
     "menus": {
@@ -834,8 +851,16 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.launchTutorialWorkspace",
+          "when": "false"
+        },
+        {
           "command": "dendron.openBackup",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.instrumentedWrapperCommand",
+          "when": "false"
         }
       ],
       "view/title": [

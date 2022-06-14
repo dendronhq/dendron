@@ -31,6 +31,7 @@ export enum DendronTreeViewKey {
   TIP_OF_THE_DAY = "dendron.tip-of-the-day",
   HELP_AND_FEEDBACK = "dendron.help-and-feedback",
   GRAPH_PANEL = "dendron.graph-panel",
+  RECENT_WORKSPACES = "dendron.recent-workspaces",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -102,6 +103,11 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
     label: "Feature Showcase",
     type: "webview",
     bundleName: "DendronTipOfTheDay",
+  },
+  [DendronTreeViewKey.RECENT_WORKSPACES]: {
+    desc: "Recent Dendron Workspaces",
+    label: "Recent Dendron Workspaces",
+    type: "nativeview",
   },
   [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
     desc: "Help and Feedback",

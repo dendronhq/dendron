@@ -33,7 +33,7 @@ import { ImportPodCommand } from "./ImportPod";
 import { InsertNoteCommand } from "./InsertNoteCommand";
 import { InsertNoteIndexCommand } from "./InsertNoteIndexCommand";
 import { InsertNoteLinkCommand } from "./InsertNoteLink";
-import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
+import { ShowWelcomePageCommand } from "./ShowWelcomePageCommand";
 import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
@@ -79,6 +79,8 @@ import { ApplyTemplateCommand } from "./ApplyTemplateCommand";
 import { TaskStatusCommand } from "./TaskStatus";
 import { TaskCompleteCommand } from "./TaskComplete";
 import { ImportObsidianCommand } from "./pods/ImportObsidianCommand";
+import { LaunchTutorialWorkspaceCommand } from "./LaunchTutorialWorkspaceCommand";
+import { InstrumentedWrapperCommand } from "./InstrumentedWrapperCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -155,7 +157,8 @@ const ALL_COMMANDS = [
   VaultAddCommand,
   VaultRemoveCommand,
   VaultConvertCommand,
-  LaunchTutorialCommand,
+  ShowWelcomePageCommand,
+  LaunchTutorialWorkspaceCommand,
   ConvertLinkCommand,
   ConvertCandidateLinkCommand,
   RunMigrationCommand,
@@ -165,6 +168,7 @@ const ALL_COMMANDS = [
   RegisterNoteTraitCommand,
   CreateNoteWithUserDefinedTrait,
   OpenBackupCommand,
+  InstrumentedWrapperCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

@@ -1,12 +1,11 @@
-import { TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
-import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
+import { TutorialEvents } from "@dendronhq/common-all";
+import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
+import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspaceCommand";
+import { LaunchTutorialCommandInvocationPoint } from "./constants";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 export function showWelcome(assetUri: vscode.Uri) {
   try {
@@ -41,18 +40,11 @@ export function showWelcome(assetUri: vscode.Uri) {
           case "initializeWorkspace": {
             // ^z5hpzc3fdkxs
             await AnalyticsUtils.trackForNextRun(TutorialEvents.ClickStart);
-            // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
-            const { filePath } =
-              FileUtils.genFilePathWithSuffixThatDoesNotExist({
-                fpath: path.join(resolveTilde("~"), "Dendron"),
-              });
 
-            await new SetupWorkspaceCommand().execute({
-              rootDirRaw: filePath,
-              workspaceInitializer: new TutorialInitializer(),
-              workspaceType: WorkspaceType.CODE,
+            await new LaunchTutorialWorkspaceCommand().run({
+              invocationPoint:
+                LaunchTutorialCommandInvocationPoint.WelcomeWebview,
             });
-
             return;
           }
           default:

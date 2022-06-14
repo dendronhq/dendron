@@ -68,9 +68,6 @@ export const processDir = async ({
 
     const stats = await getFileStats(note);
 
-    // /* If the note doesn't have any children, just return its file stats */
-    // if (!isDir) return stats;
-
     /* Recursively process child notes */
     const notes = getChildren(note);
     const children = [];

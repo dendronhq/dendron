@@ -1,14 +1,18 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/require-default-props */
 import React, { useMemo, useRef, useState } from "react";
 import { FileType } from "./types";
 import countBy from "lodash/countBy";
 import maxBy from "lodash/maxBy";
 import entries from "lodash/entries";
-import uniqBy from "lodash/uniqBy";
+import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
 // file colors are from the github/linguist repo
 import defaultFileColors from "./language-colors.json";
 import { CircleText } from "./CircleText";
 import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
+
 const loadModule = require("./loadModule");
 
 type Props = {
@@ -41,8 +45,8 @@ const looseFilesId = "__structure_loose_file__";
 const width = 1000;
 const height = 1000;
 const maxChildren = 9000;
-const lastCommitAccessor = (d) => new Date(d.commits?.[0]?.date + "0");
-const numberOfCommitsAccessor = (d) => d?.commits?.length || 0;
+const lastCommitAccessor = (d: any) => new Date(d.commits?.[0]?.date + "0");
+const numberOfCommitsAccessor = (d: any) => d?.commits?.length || 0;
 
 export async function createTree() {
   const {
@@ -66,14 +70,17 @@ export async function createTree() {
     colorEncoding = "type",
     customFileColors,
   }: Props) => {
-    const fileColors = { ...defaultFileColors, ...customFileColors };
-    const [selectedNodeId, setSelectedNodeId] = useState(null);
+    const fileColors: { [key: string]: string } = {
+      ...defaultFileColors,
+      ...customFileColors,
+    };
+    const [selectedNodeId] = useState(null);
     const cachedPositions = useRef<{ [key: string]: [number, number] }>({});
     const cachedOrders = useRef<{ [key: string]: string[] }>({});
 
     const { colorScale, colorExtent } = useMemo(() => {
       if (!data) return { colorScale: () => {}, colorExtent: [0, 0] };
-      const flattenTree = (d) => {
+      const flattenTree = (d: any) => {
         return d.children ? flatten(d.children.map(flattenTree)) : d;
       };
       const items = flattenTree(data);
@@ -82,11 +89,11 @@ export async function createTree() {
         colorEncoding === "last-change"
           ? items
               .map(lastCommitAccessor)
-              .sort((a, b) => b - a)
+              .sort((a: any, b: any) => b - a)
               .slice(0, -8)
           : items
               .map(numberOfCommitsAccessor)
-              .sort((a, b) => b - a)
+              .sort((a: any, b: any) => b - a)
               .slice(2, -2);
       const colorExtent = extent(flatTree);
 
@@ -107,7 +114,7 @@ export async function createTree() {
       const colorScale = scaleLinear()
         .domain(
           range(0, colors.length).map(
-            (i) =>
+            (i: any) =>
               +colorExtent[0] +
               ((colorExtent[1] - colorExtent[0]) * i) / (colors.length - 1)
           )
@@ -117,15 +124,15 @@ export async function createTree() {
       return { colorScale, colorExtent };
     }, [data]);
 
-    const getColor = (d) => {
+    const getColor = (d: any) => {
       if (colorEncoding === "type") {
         const isParent = d.children;
         if (isParent) {
           const extensions = countBy(d.children, (c) => c.extension);
-          const mainExtension = maxBy(entries(extensions), ([k, v]) => v)?.[0];
-          return fileColors[mainExtension] || "#CED6E0";
+          const mainExtension = maxBy(entries(extensions), ([v]) => v)?.[0];
+          return fileColors[mainExtension!] || "#CED6E0";
         }
-        return fileColors[d.extension] || "#CED6E0";
+        return fileColors[d.extension as string] || "#CED6E0";
       } else if (colorEncoding === "number-of-changes") {
         return colorScale(numberOfCommitsAccessor(d)) || "#f4f4f4";
       } else if (colorEncoding === "last-change") {
@@ -138,8 +145,8 @@ export async function createTree() {
       const hierarchicalData = hierarchy(
         processChild(data, getColor, cachedOrders.current, 0, fileColors)
       )
-        .sum((d) => d.value)
-        .sort((a, b) => {
+        .sum((d: any) => d.value)
+        .sort((a: any, b: any) => {
           if (b.data.path.startsWith("src/fonts")) {
             //   a.data.sortOrder,
             //   b.data.sortOrder,
@@ -155,12 +162,12 @@ export async function createTree() {
           );
         });
 
-      let packedTree = pack()
+      const packedTree = pack()
         .size([width, height * 1.3]) // we'll reflow the tree to be more horizontal, but we want larger bubbles (.pack() sizes the bubbles to fit the space)
-        .padding((d) => {
+        .padding((d: any) => {
           if (d.depth <= 0) return 0;
           const hasChildWithNoChildren =
-            d.children.filter((d) => !d.children?.length).length > 1;
+            d.children.filter((d: any) => !d.children?.length).length > 1;
           if (hasChildWithNoChildren) return 5;
           return 13;
           // const hasChildren = !!d.children?.find((d) => d?.children?.length);
@@ -176,7 +183,7 @@ export async function createTree() {
 
       cachedOrders.current = {};
       cachedPositions.current = {};
-      const saveCachedPositionForItem = (item) => {
+      const saveCachedPositionForItem = (item: any) => {
         cachedOrders.current[item.data.path] = item.data.sortOrder;
         if (item.children) {
           item.children.forEach(saveCachedPositionForItem);
@@ -193,8 +200,8 @@ export async function createTree() {
     const selectedNode =
       selectedNodeId && packedData.find((d) => d.data.path === selectedNodeId);
 
-    const fileTypes = uniqBy(
-      packedData.map((d) => fileColors[d.data.extension] && d.data.extension)
+    const fileTypes = uniq(
+      packedData.map((d) => fileColors[d.data.extension!] && d.data.extension)
     )
       .sort()
       .filter(Boolean);
@@ -220,12 +227,11 @@ export async function createTree() {
           </filter>
         </defs>
 
-        {packedData.map(({ x, y, r, depth, data, children, ...d }) => {
+        {packedData.map(({ x, y, r, depth, data, children }) => {
           if (depth <= 0) return null;
           if (depth > maxDepth) return null;
-          const isOutOfDepth = depth >= maxDepth;
           const isParent = !!children;
-          let runningR = r;
+          const runningR = r;
           // if (depth <= 1 && !children) runningR *= 3;
           if (data.path === looseFilesId) return null;
           const isHighlighted = filesChanged.includes(data.path);
@@ -280,14 +286,14 @@ export async function createTree() {
           if (!isParent) return null;
           if (data.path === looseFilesId) return null;
           if (r < 16 && selectedNodeId !== data.path) return null;
-          if (data.label.length > r * 0.5) return null;
+          if (data.label!.length > r * 0.5) return null;
 
           const label = truncateString(
             data.label,
             r < 30 ? Math.floor(r / 2.7) + 3 : 100
           );
 
-          let offsetR = r + 12 - depth * 4;
+          const offsetR = r + 12 - depth * 4;
           const fontSize = 16 - depth;
 
           return (
@@ -399,7 +405,7 @@ export async function createTree() {
         })}
 
         {!filesChanged.length && colorEncoding === "type" && (
-          <Legend fileTypes={fileTypes} fileColors={fileColors} />
+          <Legend fileTypes={fileTypes as never[]} fileColors={fileColors} />
         )}
         {!filesChanged.length && colorEncoding !== "type" && (
           <ColorLegend
@@ -412,8 +418,17 @@ export async function createTree() {
     );
   };
 
-  const formatD = (d) => (typeof d === "number" ? d : timeFormat("%b %Y")(d));
-  const ColorLegend = ({ scale, extent, colorEncoding }) => {
+  const formatD = (d: any) =>
+    typeof d === "number" ? d : timeFormat("%b %Y")(d);
+  const ColorLegend = ({
+    scale,
+    extent,
+    colorEncoding,
+  }: {
+    scale: any;
+    extent: any;
+    colorEncoding: any;
+  }) => {
     if (!scale || !scale.ticks) return null;
     const ticks = scale.ticks(10);
     return (
@@ -425,7 +440,7 @@ export async function createTree() {
             : "Last change date"}
         </text>
         <linearGradient id="gradient">
-          {ticks.map((tick, i) => {
+          {ticks.map((tick: any, i: any) => {
             const color = scale(tick);
             return (
               <stop offset={i / (ticks.length - 1)} stopColor={color} key={i} />
@@ -433,7 +448,7 @@ export async function createTree() {
           })}
         </linearGradient>
         <rect x="0" width="100" height="13" fill="url(#gradient)" />
-        {extent.map((d, i) => (
+        {extent.map((d: any, i: any) => (
           <text
             key={i}
             x={i ? 100 : 0}
@@ -448,7 +463,13 @@ export async function createTree() {
     );
   };
 
-  const Legend = ({ fileTypes = [], fileColors }) => {
+  const Legend = ({
+    fileTypes = [],
+    fileColors,
+  }: {
+    fileTypes: any[];
+    fileColors: any;
+  }) => {
     return (
       <g
         transform={`translate(${width - 60}, ${
@@ -483,12 +504,13 @@ export async function createTree() {
 
   const processChild = (
     child: FileType,
-    getColor,
-    cachedOrders,
+    getColor: any,
+    cachedOrders: any,
     i = 0,
-    fileColors
+    fileColors: { [key: string]: string }
   ): ExtendedFileType => {
-    if (!child) return;
+    //TODO: Check if this produces any problem
+    // if (!child) return;
     const isRoot = !child.path;
     let name = child.name;
     let path = child.path;
@@ -517,7 +539,7 @@ export async function createTree() {
       ];
     }
 
-    let extendedChild = {
+    const extendedChild = {
       ...child,
       name,
       path,
@@ -560,7 +582,7 @@ export async function createTree() {
     parentPosition?: [number, number]
   ) => {
     if (!siblings) return;
-    let items = [
+    const items = [
       ...siblings.map((d) => {
         return {
           ...d,
@@ -575,7 +597,7 @@ export async function createTree() {
       .domain([maxDepth, 1])
       .range([3, 8])
       .clamp(true);
-    let simulation = forceSimulation(items)
+    const simulation = forceSimulation(items)
       .force(
         "centerX",
         forceX(width / 2).strength(items[0].depth <= 2 ? 0.01 : 0)
@@ -594,21 +616,23 @@ export async function createTree() {
       )
       .force(
         "x",
-        forceX((d) => cachedPositions[d.data.path]?.[0] || width / 2).strength(
-          (d) =>
-            cachedPositions[d.data.path]?.[1] ? 0.5 : (width / height) * 0.3
+        forceX(
+          (d: any) => cachedPositions[d.data.path]?.[0] || width / 2
+        ).strength((d: any) =>
+          cachedPositions[d.data.path]?.[1] ? 0.5 : (width / height) * 0.3
         )
       )
       .force(
         "y",
-        forceY((d) => cachedPositions[d.data.path]?.[1] || height / 2).strength(
-          (d) =>
-            cachedPositions[d.data.path]?.[0] ? 0.5 : (height / width) * 0.3
+        forceY(
+          (d: any) => cachedPositions[d.data.path]?.[1] || height / 2
+        ).strength((d: any) =>
+          cachedPositions[d.data.path]?.[0] ? 0.5 : (height / width) * 0.3
         )
       )
       .force(
         "collide",
-        forceCollide((d) =>
+        forceCollide((d: any) =>
           d.children ? d.r + paddingScale(d.depth) : d.r + 1.6
         )
           .iterations(8)
@@ -616,7 +640,7 @@ export async function createTree() {
       )
       .stop();
 
-    for (let i = 0; i < 280; i++) {
+    for (let i = 0; i < 280; i += 1) {
       simulation.tick();
       items.forEach((d) => {
         d.x = keepBetween(d.r, d.x, width - d.r);
@@ -637,12 +661,12 @@ export async function createTree() {
       });
     }
     // setTimeout(() => simulation.stop(), 100);
-    const repositionChildren = (d, xDiff, yDiff) => {
-      let newD = { ...d };
+    const repositionChildren = (d: any, xDiff: any, yDiff: any) => {
+      const newD = { ...d };
       newD.x += xDiff;
       newD.y += yDiff;
       if (newD.children) {
-        newD.children = newD.children.map((c) =>
+        newD.children = newD.children.map((c: any) =>
           repositionChildren(c, xDiff, yDiff)
         );
       }
@@ -659,7 +683,7 @@ export async function createTree() {
       ];
 
       if (item.children) {
-        let repositionedCachedPositions = { ...cachedPositions };
+        const repositionedCachedPositions = { ...cachedPositions };
         const itemReflowDiff = [
           item.x - item.originalX,
           item.y - item.originalY,
@@ -690,14 +714,14 @@ export async function createTree() {
             maxDepth,
             item.r,
             [item.x, item.y]
-          );
+          )!;
         }
       }
     }
     return items;
   };
 
-  const getSortOrder = (item: ExtendedFileType, cachedOrders, i = 0) => {
+  const getSortOrder = (item: ExtendedFileType, cachedOrders: any, i = 0) => {
     if (cachedOrders[item.path]) return cachedOrders[item.path];
     if (cachedOrders[item.path?.split("/")?.slice(0, -1)?.join("/")]) {
       return -100000000;
@@ -708,7 +732,7 @@ export async function createTree() {
     //   return item.value  * 100;
     // }
     // if (item.depth <= 1) return -10;
-    return item.value + -i;
+    return item.value! + -i;
     // return b.value - a.value;
   };
 

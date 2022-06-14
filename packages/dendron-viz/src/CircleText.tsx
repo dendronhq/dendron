@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import uniqueId from "lodash/uniqueId";
 import React, { useMemo } from "react";
 
@@ -30,7 +31,7 @@ export const CircleText = ({
         id={id}
         transform={`rotate(${rotate})`}
         style={{ pointerEvents: "none" }}
-      ></path>
+      />
       <text textAnchor="middle" {...props}>
         <textPath href={`#${id}`} startOffset="50%">
           {text}

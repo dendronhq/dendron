@@ -377,10 +377,19 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vaultRootPath
         ) as IntermediateDendronConfig;
         if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
-          VSCodeUtils.showMessage(
+          // Wait for the user to accept the
+          await VSCodeUtils.showMessage(
             MessageSeverity.WARN,
-            "The vault you added depends on other vaults. You may not be able to access these transitive vaults.",
-            {}
+            "The vault you added depends on other vaults, which is not supported.",
+            {
+              modal: true,
+              detail:
+                "You may be unable to access these transitive vaults. The vault itself should continue to work.",
+            },
+            {
+              title: "Continue",
+              isCloseAffordance: true,
+            }
           );
         }
       }

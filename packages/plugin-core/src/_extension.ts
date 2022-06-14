@@ -8,6 +8,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
+  CURRENT_TUTORIAL_TEST,
   DendronError,
   getStage,
   GitEvents,
@@ -1022,10 +1023,19 @@ async function showWelcomeOrWhatsNew({
             : "secondary install on new vscode instance"
         }`,
       });
+
+      // Explicitly set the tutorial split test group in the Install event as
+      // well, since Amplitude may not have the user props splitTest setup in time
+      // before this install event reaches their backend.
+      const group = CURRENT_TUTORIAL_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
         isSecondaryInstall,
+        tutorialGroup: group,
       });
 
       metadataService.setGlobalVersion(version);

@@ -898,11 +898,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: DendronContext.PLUGIN_ACTIVE,
   },
   /**
-   * This name is a bit of a misnomer - this actually launches the welcome
-   * screen, which has a button that will launch the tutorial when clicked.
+   * This launches the welcome screen, which has a button that will launch the
+   * tutorial when clicked.
    */
-  LAUNCH_TUTORIAL: {
-    key: "dendron.launchTutorial",
+  SHOW_WELCOME_PAGE: {
+    key: "dendron.showWelcomePage",
     title: `${CMD_PREFIX} Launch Tutorial`,
   },
   /**

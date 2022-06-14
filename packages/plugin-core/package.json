@@ -520,7 +520,7 @@
         "title": "Dendron:Dev: Diagnostics Report"
       },
       {
-        "command": "dendron.launchTutorial",
+        "command": "dendron.showWelcomePage",
         "title": "Dendron: Launch Tutorial"
       },
       {

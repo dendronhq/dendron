@@ -33,7 +33,7 @@ import { ImportPodCommand } from "./ImportPod";
 import { InsertNoteCommand } from "./InsertNoteCommand";
 import { InsertNoteIndexCommand } from "./InsertNoteIndexCommand";
 import { InsertNoteLinkCommand } from "./InsertNoteLink";
-import { LaunchTutorialCommand } from "./LaunchTutorialCommand";
+import { ShowWelcomePageCommand } from "./ShowWelcomePageCommand";
 import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
@@ -157,7 +157,7 @@ const ALL_COMMANDS = [
   VaultAddCommand,
   VaultRemoveCommand,
   VaultConvertCommand,
-  LaunchTutorialCommand,
+  ShowWelcomePageCommand,
   LaunchTutorialWorkspaceCommand,
   ConvertLinkCommand,
   ConvertCandidateLinkCommand,

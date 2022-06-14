@@ -154,7 +154,7 @@ export class EngineConnector {
       logger: this.logger,
     });
     const resp = await dendronEngine.info();
-    if (!_.isUndefined(resp.error)) {
+    if (resp.error) {
       this.logger.info({ ctx, msg: "can't connect", error: resp.error });
       return false;
     } else {

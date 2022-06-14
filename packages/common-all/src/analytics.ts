@@ -149,6 +149,7 @@ export enum ContextualUIEvents {
 export enum WorkspaceEvents {
   AutoFix = "AutoFix",
   DuplicateNoteFound = "DuplicateNoteFound",
+  TransitiveDepsWarningShow = "TransitiveDepsWarningShow",
 }
 
 export enum NativeWorkspaceEvents {

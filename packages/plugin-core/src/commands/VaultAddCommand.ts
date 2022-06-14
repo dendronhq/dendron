@@ -10,6 +10,7 @@ import {
   SelfContainedVault,
   VaultRemoteSource,
   VaultUtils,
+  WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   GitUtils,
@@ -30,6 +31,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
@@ -377,7 +379,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vaultRootPath
         ) as IntermediateDendronConfig;
         if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
-          // Wait for the user to accept the
+          await AnalyticsUtils.trackForNextRun(
+            WorkspaceEvents.TransitiveDepsWarningShow
+          );
+          // Wait for the user to accept the prompt, otherwise window will
+          // reload before they see the warning
           await VSCodeUtils.showMessage(
             MessageSeverity.WARN,
             "The vault you added depends on other vaults, which is not supported.",

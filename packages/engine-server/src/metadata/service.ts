@@ -145,7 +145,7 @@ type Metadata = Partial<{
   /**
    * level set by user for local graph view and graph panel
    */
-  graphDepth?: number;
+  graphDepth: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -252,7 +252,7 @@ export class MetadataService {
     return this.getMeta().recentWorkspaces;
   }
 
-  getGraphDepth(): number | undefined {
+  get graphDepth(): number | undefined {
     return this.getMeta().graphDepth;
   }
 
@@ -342,7 +342,7 @@ export class MetadataService {
       this.setMeta("graphTheme", graphTheme);
     }
   }
-  setGraphDepth(graphDepth: number) {
+  set graphDepth(graphDepth: number | undefined) {
     const meta = this.getMeta();
     if (meta.graphDepth !== graphDepth) {
       this.setMeta("graphDepth", graphDepth);

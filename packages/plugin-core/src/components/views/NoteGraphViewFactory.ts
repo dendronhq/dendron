@@ -122,7 +122,7 @@ export class NoteGraphPanelFactory {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
             const graphTheme = MetadataService.instance().getGraphTheme();
-            const graphDepth = MetadataService.instance().getGraphDepth();
+            const graphDepth = MetadataService.instance().graphDepth;
             if (graphTheme) {
               this.defaultGraphTheme = graphTheme;
             }
@@ -131,7 +131,7 @@ export class NoteGraphPanelFactory {
             }
             if (styles || graphTheme || graphDepth) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphOptsLoad,
+                type: GraphViewMessageEnum.onGraphLoad,
                 data: {
                   styles,
                   graphTheme,
@@ -222,10 +222,10 @@ export class NoteGraphPanelFactory {
           this.defaultGraphTheme = undefined;
         }
         if (this.graphDepth) {
-          AnalyticsUtils.track(GraphEvents.GraphDepthChanged, {
+          AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
             graphDepth: this.graphDepth,
           });
-          MetadataService.instance().setGraphDepth(this.graphDepth);
+          MetadataService.instance().graphDepth = this.graphDepth;
           this.graphDepth = undefined;
         }
       });

@@ -247,18 +247,18 @@ const FilterViewSection = ({
                   />
                 </>
               )}
-              {_.isNumber(entry.value) &&
-                entry.label === config["filter.depth"].label &&
+              {entry.label === config["filter.depth"].label &&
                 config["options.show-local-graph"]?.value && (
                   <>
                     <Typography>{label}</Typography>
                     <InputNumber
                       min={1}
                       max={3}
-                      defaultValue={entry.value || 1}
+                      disabled={!entry.mutable}
+                      defaultValue={(entry.value as number) || 1}
                       onChange={(newValue) => {
                         updateConfigField(key, newValue);
-                        updateGraphDepth(newValue);
+                        updateGraphDepth(newValue as number);
                       }}
                     />
                   </>

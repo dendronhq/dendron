@@ -795,7 +795,7 @@ export enum GraphViewMessageEnum {
   "onGetActiveEditor" = "onGetActiveEditor",
   "onReady" = "onReady",
   "onRequestGraphOpts" = "onRequestGraphOpts",
-  "onGraphOptsLoad" = "onGraphOptsLoad",
+  "onGraphLoad" = "onGraphLoad",
   "onGraphThemeChange" = "onGraphThemeChange",
   "configureCustomStyling" = "configureCustomStyling",
   "toggleGraphView" = "toggleGraphView",

@@ -98,7 +98,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
-      case GraphViewMessageEnum.onGraphOptsLoad: {
+      case GraphViewMessageEnum.onGraphLoad: {
         const cmsg = msg;
         const { styles, graphTheme, graphDepth } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });

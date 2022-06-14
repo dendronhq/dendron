@@ -89,7 +89,7 @@ export class SchemaGraphViewFactory {
           break;
         }
         // not handled
-        case GraphViewMessageEnum.onGraphOptsLoad: {
+        case GraphViewMessageEnum.onGraphLoad: {
           break;
         }
         // TODO: these should be handled

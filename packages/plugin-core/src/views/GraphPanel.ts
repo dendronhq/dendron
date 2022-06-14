@@ -109,10 +109,10 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         // Set graph styles
         const styles = GraphStyleService.getParsedStyles();
         const graphTheme = MetadataService.instance().getGraphTheme();
-        const graphDepth = MetadataService.instance().getGraphDepth();
+        const graphDepth = MetadataService.instance().graphDepth;
         if (this._view && (styles || graphTheme || graphDepth)) {
           this._view.webview.postMessage({
-            type: GraphViewMessageEnum.onGraphOptsLoad,
+            type: GraphViewMessageEnum.onGraphLoad,
             data: {
               styles,
               graphTheme,

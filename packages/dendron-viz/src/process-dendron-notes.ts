@@ -1,5 +1,5 @@
 import {
-  DEngine,
+  DEngineClient,
   DNodeUtils,
   DVault,
   NoteProps,
@@ -23,7 +23,7 @@ export const processDir = async ({
 }: {
   rootPath: string;
   vault: DVault;
-  engine: DEngine;
+  engine: DEngineClient;
   excludedPaths?: string[];
   excludedGlobs?: string[];
 }): Promise<FileType> => {

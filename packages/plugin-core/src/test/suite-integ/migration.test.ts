@@ -361,7 +361,7 @@ suite("Migration", function () {
       });
     });
 
-    describe("Config Namespace Migration", () => {
+    describe.skip("Config Namespace Migration", () => {
       describeMultiWS(
         "GIVEN v1 config (pre 0.63)",
         {

@@ -1637,10 +1637,10 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.97.0":
-  version "0.97.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.97.0.tgz#ecddf5aed2d322880540b3e0de1d697e5723dc71"
-  integrity sha512-MwjWg9HrxpTgvWnWnhfzI2Y8hGJ8FzGfQFmZLRmC3gkvDLydXo784FmWWr7aswddc189im6AYTBanRw5iQ3O8A==
+"@dendronhq/common-all@^0.99.0":
+  version "0.99.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.99.0.tgz#212f2f13a1f81becb0d3511745cfafc8b39a7f14"
+  integrity sha512-f8DDJpsoWulXgAAQodRU6dqajUKFkfg+9ApxrKMyDl4vjDjrWemteioFIIThS5ZKzaiPBNkTqi7L8v27esbQbw==
   dependencies:
     axios "^0.21.4"
     dropbox "^4.0.30"
@@ -1649,7 +1649,6 @@
     github-slugger "^1.3.0"
     gray-matter "^4.0.2"
     http-status-codes "^2.1.4"
-    isomorphic-fetch "^2.2.1"
     lodash "^4.17.15"
     luxon "^1.25.0"
     minimatch "^3.0.4"
@@ -1660,13 +1659,13 @@
     title "^3.4.4"
     vscode-uri "^2.1.2"
 
-"@dendronhq/common-frontend@^0.97.0":
-  version "0.97.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.97.0.tgz#e971f29924bf84a6dc84c728ca1eeb8fdb83a1ff"
-  integrity sha512-7hd31Zt6NC1NXqS//VfnlUgdSA8gkGxdiDRQN+dPB8vyXZ0UZhG01HK7UbRX5yj7Q4VuHq6Wc39QNOMsyZ9zZg==
+"@dendronhq/common-frontend@^0.99.0":
+  version "0.99.0"
+  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.99.0.tgz#587e41fd96d94a5db61915132e7a66ff82bfcca9"
+  integrity sha512-Zxd9osoP/sRLhYADSz42ox5VJdLPEztkBZkdOOKkfF9kvBPqzFGmvGxd3Ldc0APOUEvbhWIabUFz6rZRVhtPXA==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.97.0"
+    "@dendronhq/common-all" "^0.99.0"
     "@reduxjs/toolkit" "^1.5.1"
     antd "^4.15.4"
     lodash "^4.17.20"
@@ -2736,13 +2735,6 @@ emoji-regex@^9.0.0:
   resolved "https://registry.npmjs.org/emoji-regex/-/emoji-regex-9.2.2.tgz#840c8803b0d8047f4ff0cf963176b32d4ef3ed72"
   integrity sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==
 
-encoding@^0.1.11:
-  version "0.1.13"
-  resolved "https://registry.npmjs.org/encoding/-/encoding-0.1.13.tgz#56574afdd791f54a8e9b2785c0582a2d26210fa9"
-  integrity sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==
-  dependencies:
-    iconv-lite "^0.6.2"
-
 end-of-stream@^1.1.0:
   version "1.4.4"
   resolved "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.4.4.tgz#5ae64a5f45057baf3626ec14da0ca5e4b2431eb0"
@@ -3448,13 +3440,6 @@ https-proxy-agent@5.0.0:
     agent-base "6"
     debug "4"
 
-iconv-lite@^0.6.2:
-  version "0.6.3"
-  resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz#a52f80bf38da1952eb5c681790719871a1a72501"
-  integrity sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==
-  dependencies:
-    safer-buffer ">= 2.1.2 < 3.0.0"
-
 ieee754@^1.1.13:
   version "1.2.1"
   resolved "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
@@ -3623,7 +3608,7 @@ is-regex@^1.1.3:
     call-bind "^1.0.2"
     has-symbols "^1.0.2"
 
-is-stream@^1.0.1, is-stream@^1.1.0:
+is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
   integrity sha1-EtSj3U5o4Lec6428hBc66A2RykQ=
@@ -3651,14 +3636,6 @@ isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
-
-isomorphic-fetch@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.npmjs.org/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
-  integrity sha1-YRrhrPFPXoH3KVB0coGf6XM1WKk=
-  dependencies:
-    node-fetch "^1.0.1"
-    whatwg-fetch ">=0.10.0"
 
 jest-diff@^27.2.5, jest-diff@^27.5.1:
   version "27.5.1"
@@ -4002,14 +3979,6 @@ next@12.1.0:
     "@next/swc-win32-arm64-msvc" "12.1.0"
     "@next/swc-win32-ia32-msvc" "12.1.0"
     "@next/swc-win32-x64-msvc" "12.1.0"
-
-node-fetch@^1.0.1:
-  version "1.7.3"
-  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
-  integrity sha512-NhZ4CsKx7cYm2vSrBAr2PvFOe6sWDf0UYLRqA6svUYg7+/TSfVAu49jYC4BvQ4Sms9SZgdqGBgroqfDhJdTyKQ==
-  dependencies:
-    encoding "^0.1.11"
-    is-stream "^1.0.1"
 
 node-releases@^2.0.1:
   version "2.0.2"
@@ -5013,11 +4982,6 @@ safe-buffer@~5.1.1:
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
   integrity sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==
 
-"safer-buffer@>= 2.1.2 < 3.0.0":
-  version "2.1.2"
-  resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
-  integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
-
 sass@^1.41.1:
   version "1.49.0"
   resolved "https://registry.npmjs.org/sass/-/sass-1.49.0.tgz#65ec1b1d9a6bc1bae8d2c9d4b392c13f5d32c078"
@@ -5530,11 +5494,6 @@ webpack-bundle-analyzer@4.3.0:
     opener "^1.5.2"
     sirv "^1.0.7"
     ws "^7.3.1"
-
-whatwg-fetch@>=0.10.0:
-  version "3.6.2"
-  resolved "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-3.6.2.tgz#dced24f37f2624ed0281725d51d0e2e3fe677f8c"
-  integrity sha512-bJlen0FcuU/0EMLrdbJ7zOnW6ITZLrZMIarMUVmdKtsGvZna8vxKYaexICWPfZ8qwf9fzNq+UEIZrnSaApt6RA==
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

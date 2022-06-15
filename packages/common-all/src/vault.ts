@@ -232,10 +232,13 @@ export class VaultUtils {
 
   static toWorkspaceFolder(vault: DVault): WorkspaceFolderRaw {
     const name = VaultUtils.getName(vault);
-    const _path = VaultUtils.getRelPath(vault);
+    const vaultPath = VaultUtils.getRelPath(vault);
     return {
-      path: _path,
-      name: name === _path || path.basename(_path) === name ? undefined : name,
+      path: normalizeUnixPath(vaultPath),
+      name:
+        name === vaultPath || path.basename(vaultPath) === name
+          ? undefined
+          : name,
     };
   }
 

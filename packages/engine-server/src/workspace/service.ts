@@ -19,6 +19,7 @@ import {
   IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
+  normalizeUnixPath,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
@@ -281,6 +282,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       updateWorkspace: false,
     });
 
+    // Normalize the vault path to unix style (forward slashes) which is better for cross-compatibility
+    vault.fsPath = normalizeUnixPath(vault.fsPath);
     const vaults = ConfigUtils.getVaults(config);
     vaults.unshift(vault);
     ConfigUtils.setVaults(config, vaults);

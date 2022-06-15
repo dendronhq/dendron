@@ -1,15 +1,21 @@
 import { NoteTrait, RespV2 } from "@dendronhq/common-all";
+import * as vscode from "vscode";
 
 /**
  * Interface for a service that manages Note Traits
  * TODO: Figure out how to split functionality here such that some can move to engine-server while plugin-specific func stays in plugin-core
  * TODO: Expand functionality to cover more advanced typed functionality such as note lifecycle events
  */
-export type NoteTraitService = {
+export type NoteTraitService = vscode.Disposable & {
   /**
    * Contains list of registered Note Traits
    */
   readonly registeredTraits: Map<string, NoteTrait>;
+
+  /**
+   * Method for any intialization logic
+   */
+  initialize(): Promise<void>;
 
   /**
    * Register a New Note Trait

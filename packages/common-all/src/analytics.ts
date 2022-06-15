@@ -30,6 +30,7 @@ export enum VSCodeEvents {
   BacklinksPanelUsed = "BacklinksPanelUsed",
   RecentWorkspacesPanelUsed = "RecentWorkspacesPanelUsed",
   V100ReleaseNotesShown = "V100ReleaseNotesShown",
+  NoteTraitsInitialized = "NoteTraitsInitialized",
 }
 
 export enum CLIEvents {

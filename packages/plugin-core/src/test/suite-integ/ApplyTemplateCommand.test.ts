@@ -45,10 +45,16 @@ function createTemplateNote({ body, custom }: { body: string; custom?: any }) {
   });
 }
 
-async function runTemplateTest(templateNote: NoteProps) {
+async function runTemplateTest({
+  templateNote,
+  targetNote: _targetNote,
+}: {
+  templateNote: NoteProps;
+  targetNote?: NoteProps;
+}) {
   const ext = ExtensionProvider.getExtension();
   const engine = ext.getEngine();
-  const targetNote = engine.notes["foo"];
+  const targetNote = _targetNote || engine.notes["foo"];
   // note needs to be open, otherwise, command will throw an error
   await WSUtilsV2.instance().openNote(targetNote);
   const { updatedTargetNote } = await executeTemplateApply({
@@ -76,9 +82,38 @@ suite("ApplyTemplate", function () {
         const templateNote = await createTemplateNote({
           body: "template text",
         });
-        const { body } = await runTemplateTest(templateNote);
+        const { body } = await runTemplateTest({ templateNote });
         expect(
           await AssertUtils.assertInString({ body, match: ["template text"] })
+        ).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS.only(
+    "WHEN ApplyTemplate run with note with no body",
+    {
+      preSetupHook: basicPreset,
+    },
+    () => {
+      test("THEN apply template", async () => {
+        const templateNote = await createTemplateNote({
+          body: "template text",
+        });
+        const { vaults, wsRoot } = ExtensionProvider.getEngine();
+        const targetNote = await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "",
+          vault: vaults[0],
+          wsRoot,
+        });
+        const { body } = await runTemplateTest({ templateNote, targetNote });
+
+        expect(
+          await AssertUtils.assertInString({
+            body,
+            match: ["taemplate text"],
+          })
         ).toBeTruthy();
       });
     }
@@ -96,7 +131,9 @@ suite("ApplyTemplate", function () {
           body: "hello {{ fm.name }}",
           custom: { name: "john" },
         });
-        const { body, updatedTargetNote } = await runTemplateTest(templateNote);
+        const { body, updatedTargetNote } = await runTemplateTest({
+          templateNote,
+        });
         expect(updatedTargetNote.custom?.name).toEqual("john");
         expect(
           await AssertUtils.assertInString({

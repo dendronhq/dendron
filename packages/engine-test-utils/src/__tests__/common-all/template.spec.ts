@@ -129,6 +129,41 @@ describe(`WHEN running applyTemplate tests`, () => {
       });
     });
 
+    describe("AND WHEN using capture helper", () => {
+      const testTemplateNoteBody = `{{ capture FNAME "\\d{4}.\\d{2}.\\d{2}" }}`;
+
+      describe("AND WHEN capture against date based fname", () => {
+        it("THEN extract date", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "2022.01.10");
+            }
+          );
+        });
+      });
+
+      describe.only("AND WHEN capture fail", () => {
+        it("THEN throw error", async () => {
+          const testTemplateNoteBody = `{{ capture FNAME "hello" }}`;
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "ERROR: no match found");
+            }
+          );
+        });
+      });
+    });
+
     describe("AND WHEN using fnameToDate helper", () => {
       const testTemplateNoteBody = "{{ fnameToDate }}";
 

@@ -121,6 +121,14 @@ class TemplateHelpers {
       const day = date.getDay();
       return day;
     },
+
+    capture: (text: string, pattern: string): string => {
+      const out = text.match(new RegExp(pattern, "i"));
+      if (out) {
+        return out[0];
+      }
+      return `ERROR: no match found for ${pattern} in ${text}`;
+    },
   };
 }
 

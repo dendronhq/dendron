@@ -3,7 +3,6 @@ import {
   DNodeUtils,
   DVault,
   NoteProps,
-  NoteUtils,
 } from "@dendronhq/common-all";
 import * as nodePath from "path";
 import { shouldExcludePath } from "./should-exclude-path";
@@ -34,12 +33,14 @@ export const processDir = async ({
   );
 
   /* Given a file name, get corresponding Dendron note */
-  function getNote(fname: string): NoteProps {
-    const note = NoteUtils.getNoteByFnameFromEngine({ fname, engine, vault });
+  async function getNote(fname: string): Promise<NoteProps> {
+    const note = await engine.findNotes({ fname, vault });
+
     if (note === undefined) {
       throw new Error(`Issue trying to find the note ${fname}`);
     }
-    return note;
+
+    return note[0];
   }
 
   /* Given a note, get its child notes */
@@ -81,7 +82,7 @@ export const processDir = async ({
   };
 
   /* Get the root note */
-  const note = getNote("root");
+  const note = await getNote("root");
   /* Recursively traverse all notes and get file stats needed for Tree React component */
   const tree = await addItemToTree(note);
 

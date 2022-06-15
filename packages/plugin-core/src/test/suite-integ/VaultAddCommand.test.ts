@@ -4,6 +4,7 @@ import {
   DVault,
   FOLDERS,
   IntermediateDendronConfig,
+  normalizeUnixPath,
   NoteUtils,
   SchemaUtils,
   VaultUtils,
@@ -211,7 +212,7 @@ suite("VaultAddCommand", function () {
               wsRoot,
               vaults: [
                 {
-                  fsPath: vaultPath,
+                  fsPath: normalizeUnixPath(vaultPath),
                   workspace: wsName,
                   name: "dendron",
                 },
@@ -455,7 +456,12 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
         expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, FOLDERS.LOCAL_DEPENDENCY, vaultName)
+          // vault paths always use UNIX style
+          path.posix.join(
+            FOLDERS.DEPENDENCIES,
+            FOLDERS.LOCAL_DEPENDENCY,
+            vaultName
+          )
         );
       });
 
@@ -525,7 +531,8 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
         expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
+          // vault paths always use UNIX style
+          path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
         );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });
@@ -604,7 +611,8 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           expect(vault?.selfContained).toBeTruthy();
           expect(vault?.name).toEqual(vaultName);
           expect(vault?.fsPath).toEqual(
-            path.join(FOLDERS.DEPENDENCIES, vaultName)
+            // vault paths always use UNIX style
+            path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
           );
         });
 
@@ -749,7 +757,8 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
         expect(vault?.selfContained).toBeFalsy();
         expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
+          // vault paths always use UNIX style
+          path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
         );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });

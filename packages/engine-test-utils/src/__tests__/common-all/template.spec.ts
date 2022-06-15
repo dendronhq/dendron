@@ -147,7 +147,7 @@ describe(`WHEN running applyTemplate tests`, () => {
         });
       });
 
-      describe.only("AND WHEN capture fail", () => {
+      describe("AND WHEN capture fail", () => {
         it("THEN throw error", async () => {
           const testTemplateNoteBody = `{{ capture FNAME "hello" }}`;
           await setupTemplateTest(

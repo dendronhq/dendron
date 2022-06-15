@@ -1898,6 +1898,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "nikhiljha",
+      "name": "Nikhil Jha",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2773700?v=4",
+      "profile": "https://nikhiljha.com/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

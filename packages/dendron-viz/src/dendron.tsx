@@ -6,7 +6,6 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./process-dendron-notes";
 import { createTree } from "./Tree";
-import { VisualizeCLICommandOpts } from "@dendronhq/dendron-cli";
 import { InputArgs, VisualizationInput } from "./types";
 
 function collectInput(args: InputArgs) {
@@ -52,5 +51,4 @@ export async function generateSVG(args: VisualizationInput) {
     })
   );
   console.log("done");
-  // console.log(JSON.stringify(resp, null, 2));
 }

@@ -361,7 +361,7 @@ suite("Migration", function () {
       });
     });
 
-    describe("Config Namespace Migration", () => {
+    describe.skip("Config Namespace Migration", () => {
       describeMultiWS(
         "GIVEN v1 config (pre 0.63)",
         {
@@ -507,9 +507,6 @@ suite("Migration", function () {
               randomNote: {
                 include: ["foo", "bar"],
                 exclude: ["lorem"],
-              },
-              insertNote: {
-                initialValue: "user.foo",
               },
               insertNoteLink: {
                 aliasMode: InsertNoteLinkAliasModeEnum.none,

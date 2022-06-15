@@ -490,9 +490,6 @@
         "randomNote": {
           "$ref": "#/definitions/RandomNoteConfig"
         },
-        "insertNote": {
-          "$ref": "#/definitions/InsertNoteConfig"
-        },
         "insertNoteLink": {
           "$ref": "#/definitions/InsertNoteLinkConfig"
         },
@@ -510,7 +507,6 @@
       "required": [
         "lookup",
         "randomNote",
-        "insertNote",
         "insertNoteLink",
         "insertNoteIndex",
         "copyNoteLink"
@@ -598,16 +594,6 @@
       },
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  RandomNoteCommand }"
-    },
-    "InsertNoteConfig": {
-      "type": "object",
-      "properties": {
-        "initialValue": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "description": "Namespace for configuring  {@link  InsertNoteCommand }"
     },
     "InsertNoteLinkConfig": {
       "type": "object",

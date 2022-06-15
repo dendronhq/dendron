@@ -420,11 +420,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  INSERT_NOTE: {
-    key: "dendron.insertNote",
-    title: `${CMD_PREFIX} Insert Note`,
-    when: DendronContext.PLUGIN_ACTIVE,
-  },
   INSERT_NOTE_LINK: {
     key: "dendron.insertNoteLink",
     title: `${CMD_PREFIX} Insert Note Link`,

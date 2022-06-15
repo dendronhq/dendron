@@ -9,7 +9,6 @@ import {
   LookupSelectionModeEnum,
 } from "../../types/configs/commands/lookup";
 import { RandomNoteConfig } from "../../types/configs/commands/randomNote";
-import { InsertNoteConfig } from "../../types/configs/commands/insertNote";
 import {
   InsertNoteLinkConfig,
   InsertNoteLinkAliasModeEnum,
@@ -98,20 +97,6 @@ const RANDOM_NOTE: DendronConfigEntryCollection<RandomNoteConfig> = {
 };
 
 /**
- * Insert note
- */
-
-/**
- * Insert note entries
- */
-const INSERT_NOTE: DendronConfigEntryCollection<InsertNoteConfig> = {
-  initialValue: {
-    label: "Initial Value",
-    desc: "Initial value that will be filled when prompted.",
-  },
-};
-
-/**
  * Insert note link
  */
 
@@ -188,7 +173,6 @@ const COPY_NOTE_LINK: DendronConfigEntryCollection<CopyNoteLinkConfig> = {
 export const COMMANDS: DendronConfigEntryCollection<DendronCommandConfig> = {
   lookup: LOOKUP,
   randomNote: RANDOM_NOTE,
-  insertNote: INSERT_NOTE,
   insertNoteLink: INSERT_NOTE_LINK,
   insertNoteIndex: INSERT_NOTE_INDEX,
   copyNoteLink: COPY_NOTE_LINK,

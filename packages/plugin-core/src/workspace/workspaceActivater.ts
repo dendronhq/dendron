@@ -60,11 +60,11 @@ export class WorkspaceActivator {
       workspace = await this.activateCodeWorkspace({ ext, context });
     }
 
-    // --- Setup Traits
     ext.workspaceImpl = workspace;
-    // Only set up note traits after workspaceImpl has been set, so that the
-    // wsRoot path is known for locating the note trait definition location.
-    ext.setupTraits();
+
+    // HACK: Only set up note traits after workspaceImpl has been set, so that
+    // the wsRoot path is known for locating the note trait definition location.
+    ext.traitRegistrar.initialize();
     return workspace;
   }
 

@@ -18,7 +18,6 @@ import {
   ISchemaLookupProviderFactory,
 } from "../components/lookup/LookupProviderV3Interface";
 import { IDendronExtension } from "../dendronExtensionInterface";
-import { FileWatcher } from "../fileWatcher";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { NoteTraitService } from "../services/NoteTraitService";
 import { ISchemaSyncService } from "../services/SchemaSyncServiceInterface";

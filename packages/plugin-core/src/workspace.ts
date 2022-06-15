@@ -7,7 +7,6 @@ import {
   DWorkspaceV2,
   ERROR_STATUS,
   getStage,
-  ResponseUtil,
   VSCodeEvents,
   WorkspaceSettings,
   WorkspaceType,
@@ -56,7 +55,6 @@ import { SchemaSyncService } from "./services/SchemaSyncService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { ALL_FEATURE_SHOWCASES } from "./showcase/AllFeatureShowcases";
 import { DisplayLocation } from "./showcase/IFeatureShowcaseMessage";
-import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
 import { DisposableStore } from "./utils";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VersionProvider } from "./versionProvider";
@@ -130,7 +128,7 @@ export class DendronExtension implements IDendronExtension {
 
   private _engine?: EngineAPIService;
   private _disposableStore: DisposableStore;
-  private _traitRegistrar: NoteTraitService;
+  private _traitRegistrar: NoteTraitService | undefined;
   private L: typeof Logger;
 
   public backlinksDataProvider: BacklinksTreeDataProvider | undefined;
@@ -181,6 +179,18 @@ export class DendronExtension implements IDendronExtension {
   }
 
   get traitRegistrar(): NoteTraitService {
+    // Lazy initialize the traits service - only set up note traits after
+    // workspaceImpl has been set, so that the wsRoot path is known for locating
+    // the note trait definition location.
+    if (!this._traitRegistrar) {
+      const { wsRoot } = this.getDWorkspace();
+      this._traitRegistrar = new NoteTraitManager(
+        wsRoot,
+        new CommandRegistrar(this)
+      );
+      this.context.subscriptions.push(this._traitRegistrar);
+    }
+
     return this._traitRegistrar;
   }
 
@@ -354,7 +364,7 @@ export class DendronExtension implements IDendronExtension {
     this.L = Logger;
     this._disposableStore = new DisposableStore();
     this.setupViews(context);
-    this._traitRegistrar = new NoteTraitManager(new CommandRegistrar(this));
+
     this.wsUtils = new WSUtilsV2(this);
     this.schemaSyncService = new SchemaSyncService(this);
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
@@ -523,37 +533,6 @@ export class DendronExtension implements IDendronExtension {
         context.subscriptions.push(tipOfDayView);
       }
     });
-  }
-
-  // ^6fjseznl6au4
-  async setupTraits() {
-    // Register any User Defined Note Traits
-    const userTraitsPath = getDWorkspace().wsRoot
-      ? path.join(
-          getDWorkspace().wsRoot,
-          CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE
-        )
-      : undefined;
-
-    if (userTraitsPath && fs.pathExistsSync(userTraitsPath)) {
-      const files = fs.readdirSync(userTraitsPath);
-      files.forEach((file) => {
-        if (file.endsWith(".js")) {
-          const traitId = path.basename(file, ".js");
-          this.L.info("Registering User Defined Note Trait with ID " + traitId);
-          const newNoteTrait = new UserDefinedTraitV1(
-            traitId,
-            path.join(userTraitsPath, file)
-          );
-          const resp = this._traitRegistrar.registerTrait(newNoteTrait);
-          if (ResponseUtil.hasError(resp)) {
-            this.L.error({
-              msg: `Error registering trait for trait definition at ${file}`,
-            });
-          }
-        }
-      });
-    }
   }
 
   private setupTipOfTheDayView() {

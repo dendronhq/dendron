@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { BaseCommand } from "./base";
+import { RegisterNoteTraitCommand } from "./RegisterNoteTraitCommand";
 
 type CommandOpts = {
   trait: NoteTrait;
@@ -28,9 +29,23 @@ export class CreateNoteWithUserDefinedTrait extends BaseCommand<
   async gatherInputs(): Promise<CommandInput | undefined> {
     const registeredTraits =
       ExtensionProvider.getExtension().traitRegistrar.registeredTraits;
+
+    if (registeredTraits.size === 0) {
+      const createOption = "Create Trait";
+      const response = await vscode.window.showErrorMessage(
+        "No registered traits. Create a trait first before running this command.",
+        createOption
+      );
+
+      if (response === createOption) {
+        const cmd = new RegisterNoteTraitCommand();
+        cmd.run();
+      }
+    }
     const items = registeredTraits.keys();
     const picked = await vscode.window.showQuickPick(Array.from(items), {
       canPickMany: false,
+      title: "Select a Note Trait",
     });
 
     if (!picked || !registeredTraits.get(picked)) {

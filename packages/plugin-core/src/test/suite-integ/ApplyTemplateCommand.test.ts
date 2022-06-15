@@ -90,7 +90,7 @@ suite("ApplyTemplate", function () {
     }
   );
 
-  describeMultiWS.only(
+  describeMultiWS(
     "WHEN ApplyTemplate run with note with no body",
     {
       preSetupHook: basicPreset,
@@ -112,7 +112,7 @@ suite("ApplyTemplate", function () {
         expect(
           await AssertUtils.assertInString({
             body,
-            match: ["taemplate text"],
+            match: ["template text"],
           })
         ).toBeTruthy();
       });

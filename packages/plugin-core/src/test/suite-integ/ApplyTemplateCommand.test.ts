@@ -8,6 +8,9 @@ import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
 
+// these tests can run longer than the default 2s timeout;
+const timeout = 5e3;
+
 async function executeTemplateApply({
   templateNote,
   targetNote,
@@ -76,6 +79,7 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with regular template",
     {
       preSetupHook: basicPreset,
+      timeout,
     },
     () => {
       test("THEN apply template", async () => {
@@ -94,6 +98,7 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with note with no body",
     {
       preSetupHook: basicPreset,
+      timeout,
     },
     () => {
       test("THEN apply template", async () => {
@@ -124,6 +129,7 @@ suite("ApplyTemplate", function () {
     {
       preSetupHook: basicPreset,
       modConfigCb: enableHB,
+      timeout,
     },
     () => {
       test("THEN apply frontmatter ", async () => {

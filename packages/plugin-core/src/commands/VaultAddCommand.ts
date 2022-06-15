@@ -333,6 +333,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
               await wsService.createSelfContainedVault({
                 vault,
                 addToConfig: true,
+                newVault: false,
               });
             } else {
               // eslint-disable-next-line no-await-in-loop
@@ -417,6 +418,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vault,
           addToConfig: true,
           addToCodeWorkspace: false,
+          newVault: true,
         });
       } else {
         await wsService.createVault({ vault });

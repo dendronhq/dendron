@@ -48,18 +48,14 @@ type QueueData = {
   isParent?: boolean;
 };
 
-function computeGraphElements({
+function computeHierarchicalGraphElements({
   notes,
   noteActive,
   maxDistance,
-  vaults,
-  fNameDict,
 }: {
   notes: NotePropsByIdDict;
   noteActive: NoteProps;
   maxDistance: number;
-  vaults: DVault[] | undefined;
-  fNameDict: NotePropsByFnameDict;
 }): GraphElements {
   // Initialize edges
   const edges: GraphEdges = {
@@ -134,8 +130,8 @@ function computeGraphElements({
           classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
         });
       }
-
-      const children = note.children;
+      // do not include children of parent/grandparent
+      const children = data.isParent ? [] : note.children;
 
       // Setup the edges for children now:
       children.forEach((child: string) => {
@@ -162,36 +158,111 @@ function computeGraphElements({
           });
         }
       });
+    }
+  }
+  return {
+    nodes,
+    edges,
+  };
+}
+/**
+ * compute the nodes that are connected to active note via links(outward and backlinks).
+ * @returns Graph Elements
+ */
+function computeLinkedElements({
+  notes,
+  noteActive,
+  maxDistance,
+  vaults,
+  fNameDict,
+}: {
+  notes: NotePropsByIdDict;
+  noteActive: NoteProps;
+  maxDistance: number;
+  vaults: DVault[] | undefined;
+  fNameDict: NotePropsByFnameDict;
+}): GraphElements {
+  // Initialize edges
+  const edges: GraphEdges = {
+    hierarchy: [],
+    links: [],
+  };
+  // map to keep track of links added
+  const linkedEdgesMap: Map<string, string> = new Map();
+  const nodes: GraphNodes = [];
+  const activeNote = notes[noteActive.id];
+
+  const nodesQueue = new FIFOQueue<QueueData>();
+
+  //enqueue active note
+  nodesQueue.enqueue({
+    note: activeNote,
+    distance: 0,
+    classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(activeNote.vault)}`,
+  });
+
+  // Breadth First Search for Descendants
+  while (nodesQueue.length > 0) {
+    const data = nodesQueue.dequeue();
+
+    if (!data) {
+      break;
+    }
+
+    const { note, distance, classes } = data;
+    const isActive = activeNote && note.id === activeNote.id;
+    nodes.push({
+      data: {
+        id: note.id,
+        label: note.title,
+        group: "nodes",
+        fname: note.fname,
+        color: getNoteColor({ fname: note.fname, notes }),
+        stub: _.isUndefined(note.stub) ? false : note.stub,
+        localRoot: distance === 0,
+      },
+      classes,
+      selected: isActive,
+    });
+
+    if (data.distance < maxDistance) {
+      const noteVaultClass = getVaultClass(note.vault);
 
       // setup inward links for note
       const connectedNotes = NoteUtils.getNotesWithLinkTo({
         note,
         notes,
       });
-      const inwardLinkConnections: EdgeDefinition[] = connectedNotes.map(
-        (connectedNote) => {
-          nodesQueue.enqueue({
-            note: connectedNote,
-            distance: data.distance + 1,
-            classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
-          });
-          return {
-            data: {
-              group: "edges",
-              id: `${note.id}_${connectedNote.id}`,
-              source: note.id,
-              target: connectedNote.id,
-              fname: note.fname,
-              stub:
-                _.isUndefined(note.stub) && _.isUndefined(connectedNote.stub)
-                  ? false
-                  : !!(note.stub || connectedNote.stub),
-            },
-            classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
-          };
-        }
-      );
-      edges.links.push(...inwardLinkConnections);
+      connectedNotes.forEach((connectedNote) => {
+        // return if it is a self-referential link or there's already an outward link for this set of nodes
+        if (
+          note.id === connectedNote.id ||
+          linkedEdgesMap.has(`${connectedNote.id}_${note.id}`)
+        )
+          return;
+
+        // add link to the map
+        linkedEdgesMap.set(`${note.id}_${connectedNote.id}`, "");
+        nodesQueue.enqueue({
+          note: connectedNote,
+          distance: data.distance + 1,
+          classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
+        });
+        edges.links.push({
+          data: {
+            group: "edges",
+            id: `${note.id}_${connectedNote.id}`,
+            source: note.id,
+            target: connectedNote.id,
+            fname: note.fname,
+            stub:
+              _.isUndefined(note.stub) && _.isUndefined(connectedNote.stub)
+                ? false
+                : !!(note.stub || connectedNote.stub),
+          },
+          classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
+        });
+      });
 
       // setup outward links for note
 
@@ -203,6 +274,7 @@ function computeGraphElements({
         nodesQueue,
         data,
         noteVaultClass,
+        linkedEdgesMap,
       });
       edges.links.push(...outwardLinkedConnections);
     }
@@ -242,7 +314,13 @@ const getLocalNoteGraphElements = ({
     };
   }
 
-  const graphElements = computeGraphElements({
+  const hierarchicalElements = computeHierarchicalGraphElements({
+    notes,
+    noteActive,
+    maxDistance,
+  });
+
+  const linkedElements = computeLinkedElements({
     notes,
     noteActive,
     maxDistance,
@@ -250,6 +328,13 @@ const getLocalNoteGraphElements = ({
     fNameDict,
   });
 
+  const graphElements = {
+    nodes: [...hierarchicalElements.nodes, ...linkedElements.nodes],
+    edges: {
+      links: [...linkedElements.edges.links],
+      hierarchy: [...hierarchicalElements.edges.hierarchy],
+    },
+  };
   return graphElements;
 };
 
@@ -261,6 +346,7 @@ function getOutwardLinkedConnections({
   nodesQueue,
   data,
   noteVaultClass,
+  linkedEdgesMap,
 }: {
   note: NoteProps;
   vaults: DVault[] | undefined;
@@ -269,6 +355,7 @@ function getOutwardLinkedConnections({
   nodesQueue: FIFOQueue<QueueData>;
   data: QueueData;
   noteVaultClass: string;
+  linkedEdgesMap: Map<string, string>;
 }) {
   const logger = createLogger("getOutwardLinkedConnections");
   const outwardLinkedConnections: EdgeDefinition[] = [];
@@ -317,6 +404,10 @@ function getOutwardLinkedConnections({
         );
         return;
       }
+      // return if there's already a link for this set of nodes or is a self referential link
+      if (note.id === to.id || linkedEdgesMap.has(`${to.id}_${note.id}`))
+        return;
+      linkedEdgesMap.set(`${note.id}_${to.id}`, "");
 
       const isStub =
         _.isUndefined(note.stub) && _.isUndefined(to.stub)

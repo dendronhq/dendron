@@ -33,7 +33,7 @@ type CommandInput = any;
 
 const md = _md();
 
-type CommandOpts = {
+export type CommandOpts = {
   moves: RenameNoteOpts[];
   /**
    * Show notification message
@@ -57,9 +57,11 @@ type CommandOpts = {
   useSameVault?: boolean;
   /** Defaults to true. */
   allowMultiselect?: boolean;
+  /** set a custom title for the quick input. Used for rename note */
+  title?: string;
 };
 
-type CommandOutput = {
+export type CommandOutput = {
   changed: NoteChangeEntry[];
 };
 
@@ -142,7 +144,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         },
       });
       lc.show({
-        title: "Move note",
+        title: opts?.title || "Move note",
         placeholder: "foo",
         provider,
         initialValue: opts?.initialValue || initialValue,

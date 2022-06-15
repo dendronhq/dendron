@@ -34,18 +34,26 @@ type CommandOutput = {
 
 export { CommandOutput as RenameNoteOutputV2a };
 
+/**
+ * This is not `Dendron: Rename Note`. For that, See [[../packages/plugin-core/src/commands/RenameNoteCommand.ts]]
+ * This is an plugin internal command that is used as part of refactor hierarchy and the rename provider implementation.
+ *
+ * TODO: refactor this class to avoid confusion.
+ * Possibly consolidate renaming logic in one place.
+ */
 export class RenameNoteV2aCommand extends BaseCommand<
   CommandOpts,
   CommandOutput,
   CommandInput
 > {
-  key = DENDRON_COMMANDS.RENAME_NOTE.key;
+  key = DENDRON_COMMANDS.RENAME_NOTE_V2A.key;
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput> {
     const extension = ExtensionProvider.getExtension();
     const lc = extension.lookupControllerFactory.create({
       nodeType: "note",
+      title: "Rename note",
     });
     const provider = extension.noteLookupProviderFactory.create("rename", {
       allowNewNote: true,

@@ -48,7 +48,6 @@ import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SeedAddCommand } from "./commands/SeedAddCommand";
 import {
@@ -1169,22 +1168,6 @@ async function _setupCommands({
           DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
           sentryReportingCallback(async () => {
             await new GoToSiblingCommand().execute({ direction: "prev" });
-          })
-        )
-      );
-    }
-
-    // RENAME is alias to MOVE
-    if (!existingCommands.includes(DENDRON_COMMANDS.RENAME_NOTE.key)) {
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.RENAME_NOTE.key,
-          sentryReportingCallback(async (args: any) => {
-            await new MoveNoteCommand().run({
-              allowMultiselect: false,
-              useSameVault: true,
-              ...args,
-            });
           })
         )
       );

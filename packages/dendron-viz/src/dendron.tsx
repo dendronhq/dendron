@@ -25,7 +25,7 @@ function collectInput(args: InputArgs) {
 
 export async function generateSVG(args: VisualizationInput) {
   console.log("start");
-  const { rootPath, maxDepth, colorEncoding, customFileColors } =
+  const { /*rootPath*/ maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
 
   const engine = args.engine;

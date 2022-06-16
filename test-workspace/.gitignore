@@ -7,3 +7,4 @@ vault-generated/
 pods/*
 .history
 .backup
+*.svg

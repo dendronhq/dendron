@@ -225,11 +225,11 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               note,
               engine,
               pickNote: async (choices: NoteProps[]) => {
-                const sameVaultNote = choices.filter((ent) => {
+                const sameVaultNote = choices.find((ent) => {
                   return VaultUtils.isEqual(vault, ent.vault, engine.wsRoot);
                 });
-                if (sameVaultNote.length > 0) {
-                  return { data: sameVaultNote[0] };
+                if (sameVaultNote) {
+                  return { data: sameVaultNote };
                 } else {
                   return { data: choices[0] };
                 }

@@ -21,8 +21,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
@@ -106,8 +104,6 @@ export interface IEngineAPIService {
   info(): Promise<RespV2<EngineInfoResp>>;
 
   sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp>;
-
-  getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>>;
 
   getSchema(qs: string): Promise<RespV2<SchemaModuleProps>>;
 

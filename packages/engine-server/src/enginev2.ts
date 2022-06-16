@@ -34,8 +34,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
   IDendronError,
   IntermediateDendronConfig,
   LruCache,
@@ -407,33 +405,6 @@ export class DendronEngineV2 implements DEngine {
         error: err,
       };
     }
-  }
-
-  /**
-   * @deprecated - See {@link DendronEngineV2.findNotes}
-   */
-  async getNoteByPath({
-    npath,
-    createIfNew,
-    vault,
-  }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
-    const ctx = "getNoteByPath";
-    this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-      fname: npath,
-      engine: this,
-      vault,
-    });
-    this.logger.debug({ ctx, maybeNote, msg: "post-query" });
-    let error = null;
-
-    if (!createIfNew && !maybeNote) {
-      error = new DendronError({ message: "no_note_found" });
-    }
-    return {
-      data: { note: maybeNote, changed: [] },
-      error,
-    };
   }
 
   async getConfig() {

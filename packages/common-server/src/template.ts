@@ -161,13 +161,14 @@ export class TemplateUtils {
 
   /**
    * Given a note that has a schema:
-   *  - Find template note specified by schema
-   *  - If there are no template notes found, return false
-   *  - If multiple templates notes are found, apply callback `pickNote` to list of notes
+   *  - Find template specified by schema
+   *  - If there is no template found, return false
+   *  - Find note by template name and apply callback `pickNote` to list of notes
    *  - Apply template note returned by callback to note and return true if applied successfully
    * If note does not have a schema, return false
    *
    * @param note: note to apply template to. This modifies the note body
+   * @param pickNote: cb to pick note from list of possible template notes (can also be empty)
    * @returns boolean of whether template has been applied or not
    */
   static async findAndApplyTemplate({

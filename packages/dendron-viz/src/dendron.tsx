@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
 import { VaultUtils } from "@dendronhq/common-all";
-import fs from "fs";
+import fs from "fs-extra";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./process-dendron-notes";
 import { createTree } from "./Tree";
 import { InputArgs, VisualizationInput } from "./types";
+import path from "path";
 
 function collectInput(args: InputArgs) {
   const rootPath = args.wsRoot;
   const maxDepth = 9;
-  //TODO: Take path to customFileColors as a cli argument
+  //TODO: Take path to customFileColors as a cli argument (as an added functionality)
   const customFileColors = {};
   const colorEncoding = "type";
 
@@ -45,9 +46,15 @@ export async function generateSVG(args: VisualizationInput) {
         />
       );
       const vaultName = VaultUtils.getName(vault);
-      const outputFile = args.out || `./diagram-${vaultName}.svg`;
+      if (args.out) {
+        await fs.ensureDir(args.out);
+      }
+      const outputFile = path.join(
+        args.out || args.wsRoot,
+        `diagram-${vaultName}.svg`
+      );
 
-      await fs.writeFileSync(outputFile, componentCodeString);
+      await fs.writeFile(outputFile, componentCodeString);
     })
   );
   console.log("done");

@@ -13,7 +13,6 @@ import {
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
-  RespRequired,
   RespV2,
 } from "@dendronhq/common-all";
 import { NodeJSUtils } from "@dendronhq/common-server";
@@ -88,16 +87,24 @@ export class NoteController {
     }
   }
 
-  async info(): Promise<RespRequired<EngineInfoResp>> {
+  async info(): Promise<RespV2<EngineInfoResp>> {
     const ctx = "NoteController:info";
     getLogger().info({ ctx, msg: "enter" });
     try {
       const version = NodeJSUtils.getVersionFromPkg();
+      if (!version) {
+        return {
+          data: undefined,
+          error: DendronError.createPlainError({
+            message: "Unable to read the Dendron version",
+          }),
+        };
+      }
       return {
         data: {
           version,
         },
-        error: undefined,
+        error: null,
       };
     } catch (err) {
       getLogger().error({ ctx, err });

@@ -280,16 +280,6 @@ export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
 }
 
-/**
- * @deprecated - use RespV2<T> instead.
- */
-export type RespRequired<T> =
-  | {
-      error: null | undefined;
-      data: T;
-    }
-  | { error: IDendronError; data: undefined };
-
 export interface QueryOptsV2 {
   /**
    * Should add to full nodes
@@ -608,7 +598,7 @@ export type DEngine = DCommonProps &
       id: string,
       opts?: EngineDeleteOptsV2
     ) => Promise<DEngineDeleteSchemaResp>;
-    info: () => Promise<RespRequired<EngineInfoResp>>;
+    info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;

@@ -46,7 +46,6 @@ import {
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
-  RespRequired,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
@@ -298,7 +297,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     return resp;
   }
 
-  async info(): Promise<RespRequired<EngineInfoResp>> {
+  async info(): Promise<RespV2<EngineInfoResp>> {
     const resp = await this.api.engineInfo();
     return resp;
   }

@@ -1,8 +1,7 @@
 import { IDendronExtension } from "../../dendronExtensionInterface";
-import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
-import { ReleaseNotesPanel } from "./ReleaseNotesPanel";
 import { PreviewLinkHandler } from "./PreviewLinkHandler";
 import { PreviewProxy } from "./PreviewProxy";
+import { ReleaseNotesPanel } from "./ReleaseNotesPanel";
 
 /**
  * Creates a singleton PreviewProxy intended for use for displaying release
@@ -23,7 +22,6 @@ export class ReleaseNotesViewFactory {
       ReleaseNotesViewFactory._view = new ReleaseNotesPanel({
         extension,
         linkHandler: new PreviewLinkHandler(extension),
-        textDocumentService: TextDocumentServiceFactory.create(extension),
       });
     }
 

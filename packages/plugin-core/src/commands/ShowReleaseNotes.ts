@@ -12,9 +12,7 @@ import {
 } from "./ShowPreviewInterface";
 
 /**
- * Command to show the preview. If the desire is to programmatically show the
- * preview webview, then prefer to get an instance of {@link PreviewProxy}
- * instead of creating an instance of this command.
+ * Command to show the Release Notes webview
  */
 export class ShowReleaseNotesCommand extends InputArgCommand<
   ShowPreviewCommandOpts,
@@ -28,22 +26,11 @@ export class ShowReleaseNotesCommand extends InputArgCommand<
     this._panel = changelogPanel;
   }
 
-  // async sanityCheck(opts?: ShowPreviewCommandOpts) {
-  //   if (_.isEmpty(opts)) {
-  //     return "No release note selected to open.";
-  //   }
-  //   return;
-  // }
-
-  // addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
-  //   return { providedFile: !_.isEmpty(opts) };
-  // }
-
   /**
    *
    * @param opts if a Uri is defined through this parameter, then that Uri will
-   * be shown in preview. If unspecified, then preview will follow default
-   * behavior of showing the contents of the currently in-focus Dendron note.
+   * be shown in preview. Otherwise, show the hard-coded release notes markdown
+   * file. (This can be cleaned up later)
    */
   async execute(opts?: ShowPreviewCommandOpts) {
     let fsPath;
@@ -64,12 +51,6 @@ export class ShowReleaseNotesCommand extends InputArgCommand<
     return { fsPath };
   }
 
-  /**
-   * Show a file in the preview. Only use this for files that are not notes,
-   * like a markdown file outside any vault.
-   * @param filePath
-   * @returns
-   */
   private async openFileInPreview(filePath: string) {
     const { wsRoot } = ExtensionProvider.getDWorkspace();
     const contents = await fs.readFile(filePath, { encoding: "utf-8" });
@@ -78,6 +59,9 @@ export class ShowReleaseNotesCommand extends InputArgCommand<
       wsRoot,
       contents,
     });
+
+    // Tmp Override
+    dummyFileNote.title = "Release Notes 0.100.0";
 
     await this._panel.show(dummyFileNote);
   }

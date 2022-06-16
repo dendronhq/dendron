@@ -19,7 +19,7 @@ export enum DendronEditorViewKey {
   NOTE_GRAPH = "dendron.graph-note",
   SCHEMA_GRAPH = "dendron.graph-schema",
   NOTE_PREVIEW = "dendron.note-preview",
-  CHANGELOG = "dendron.changelog",
+  RELEASE_NOTES = "dendron.release-notes",
   SEED_BROWSER = "dendron.seed-browser",
 }
 
@@ -42,9 +42,9 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     bundleName: "DendronNotePreview",
     type: "webview",
   },
-  [DendronEditorViewKey.CHANGELOG]: {
-    desc: "Changelog",
-    label: "Changelog",
+  [DendronEditorViewKey.RELEASE_NOTES]: {
+    desc: "Dendron Release Notes",
+    label: "Dendron Release Notes",
     bundleName: "DendronNotePreview",
     type: "webview",
   },

@@ -17,7 +17,7 @@ import { InstrumentedWrapperCommand } from "../commands/InstrumentedWrapperComma
 enum MenuItem {
   getStarted = "Get Started",
   readDocs = "Read Documentation",
-  seeFaqs = "See FAQ's",
+  seeFaq = "See FAQ",
   reviewIssues = "Review Issues",
   reportIssue = "Report Issue",
   joinCommunity = "Join our Community!",
@@ -45,7 +45,7 @@ class HelpFeedbackTreeDataProvider implements TreeDataProvider<MenuItem> {
         url = "https://wiki.dendron.so/notes/FWtrGfE4YJc3j0yMNjBn5/";
         break;
 
-      case MenuItem.seeFaqs:
+      case MenuItem.seeFaq:
         iconPath = new ThemeIcon("question");
         url =
           "https://wiki.dendron.so/notes/683740e3-70ce-4a47-a1f4-1f140e80b558/";

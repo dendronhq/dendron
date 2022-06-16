@@ -19,8 +19,8 @@ const runCmd = (opts: Omit<VisualizeCLICommandOpts, "port" | "server">) => {
 };
 
 describe("WHEN run 'visualize'", () => {
-  describe("AND WHEN dendron ws root is set correctly", () => {
-    test("THEN produce svg files", async () => {
+  describe("AND WHEN one director argument is not provided", () => {
+    test("THEN visualization should be generated inside workspace root", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           await runCmd({
@@ -30,7 +30,9 @@ describe("WHEN run 'visualize'", () => {
 
           vaults.forEach((vault) => {
             expect(
-              fs.existsSync(getDiagramName(vault.name || vault.fsPath))
+              fs.existsSync(
+                path.join(wsRoot, getDiagramName(vault.name || vault.fsPath))
+              )
             ).toEqual(true);
           });
         },

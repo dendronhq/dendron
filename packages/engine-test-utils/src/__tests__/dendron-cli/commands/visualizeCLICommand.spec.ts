@@ -2,7 +2,6 @@ import {
   VisualizeCLICommand,
   VisualizeCLICommandOpts,
 } from "@dendronhq/dendron-cli";
-import { fstat } from "fs";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import * as fs from "fs";
@@ -24,7 +23,6 @@ describe("WHEN run 'visualize'", () => {
   describe("AND WHEN one director argument is not provided", () => {
     test("THEN visualization should be generated inside workspace root", async () => {
       await runEngineTestV5(
-        //TODO: Where and how vaults are created?
         async ({ engine, wsRoot, vaults }) => {
           await runCmd({
             wsRoot,

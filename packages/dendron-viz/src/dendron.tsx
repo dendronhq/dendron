@@ -25,7 +25,6 @@ function collectInput(args: InputArgs) {
 }
 
 export async function generateSVG(args: VisualizationInput) {
-  console.log("start");
   const { /*rootPath*/ maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
 
@@ -57,5 +56,4 @@ export async function generateSVG(args: VisualizationInput) {
       await fs.writeFile(outputFile, componentCodeString);
     })
   );
-  console.log("done");
 }

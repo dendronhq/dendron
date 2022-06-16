@@ -15,7 +15,7 @@ import { PublishPodCLICommand } from "../src/commands/publishPod";
 import { SeedCLICommand } from "../src/commands/seedCLICommand";
 import { VaultCLICommand } from "../src/commands/vaultCLICommand";
 import { WorkspaceCLICommand } from "../src/commands/workspaceCLICommand";
-import { VisualizeCLICommand } from "../src/commands/generateVisualizer";
+import { VisualizeCLICommand } from "../src/commands/visualizeCLICommand";
 // import { WorkspaceCLICommand } from "../src/commands/workspace";
 
 if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {

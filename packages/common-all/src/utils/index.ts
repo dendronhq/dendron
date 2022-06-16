@@ -1238,7 +1238,7 @@ export function cleanName(name: string): string {
 
 /** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
 export function normalizeUnixPath(fsPath: string): string {
-  return path.posix.format(path.parse(fsPath));
+  return path.posix.normalize(fsPath.replace(/\\/g, "/"));
 }
 
 /** Wrapper(s) for easier testing, to wrap functions where we don't want to mock the global function. */

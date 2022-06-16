@@ -251,7 +251,7 @@ export class FileStorage implements DStore {
     // remove from fs
     if (!opts?.metaOnly) {
       this.logger.info({ ctx, noteAsLog, msg: "removing from disk", fpath });
-      fs.unlinkSync(fpath);
+      await fs.unlink(fpath);
     }
 
     // if have children, keep this node around as a stub

@@ -129,10 +129,10 @@ describe(`WHEN running applyTemplate tests`, () => {
       });
     });
 
-    describe("AND WHEN using capture helper", () => {
-      const testTemplateNoteBody = `{{ capture FNAME "\\d{4}.\\d{2}.\\d{2}" }}`;
+    describe("WHEN using match helper", () => {
+      const testTemplateNoteBody = `{{ match FNAME "\\d{4}.\\d{2}.\\d{2}" }}`;
 
-      describe("AND WHEN capture against date based fname", () => {
+      describe("AND WHEN match against date based fname", () => {
         it("THEN extract date", async () => {
           await setupTemplateTest(
             {
@@ -147,9 +147,9 @@ describe(`WHEN running applyTemplate tests`, () => {
         });
       });
 
-      describe("AND WHEN capture fail", () => {
-        it("THEN throw error", async () => {
-          const testTemplateNoteBody = `{{ capture FNAME "hello" }}`;
+      describe("AND WHEN match fail", () => {
+        it("THEN return false", async () => {
+          const testTemplateNoteBody = `{{ match FNAME "hello" }}`;
           await setupTemplateTest(
             {
               templateNoteBody: testTemplateNoteBody,
@@ -157,7 +157,7 @@ describe(`WHEN running applyTemplate tests`, () => {
               fm: {},
             },
             async ({ targetNote }) => {
-              await expectStringMatch(targetNote, "ERROR: no match found");
+              await expectStringMatch(targetNote, "false");
             }
           );
         });

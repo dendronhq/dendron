@@ -122,12 +122,12 @@ class TemplateHelpers {
       return day;
     },
 
-    capture: (text: string, pattern: string): string => {
+    match: (text: string, pattern: string): string | false => {
       const out = text.match(new RegExp(pattern, "i"));
       if (out) {
         return out[0];
       }
-      return `ERROR: no match found for ${pattern} in ${text}`;
+      return false;
     },
   };
 }
@@ -258,11 +258,13 @@ export class TemplateUtils {
     const eq = templateNote.body.match(/\{\{\s+eq[^}]+\}\}/)?.length || 0;
     const getDayOfWeek =
       templateNote.body.match(/\{\{\s+getDayOfWeek[^}]+\}\}/)?.length || 0;
+    const match = templateNote.body.match(/\{\{\s+match[^}]+\}\}/)?.length || 0;
     return {
       helperStats: {
         fnameToDate,
         eq,
         getDayOfWeek,
+        match,
       },
     };
   }

@@ -1,5 +1,13 @@
-import { DendronError, ERROR_SEVERITY } from "@dendronhq/common-all";
 import {
+  ConfigEvents,
+  ConfigUtils,
+  DendronError,
+  ERROR_SEVERITY,
+  VaultUtils,
+} from "@dendronhq/common-all";
+import {
+  DConfig,
+  SeedService,
   SyncActionResult,
   SyncActionStatus,
   WorkspaceUtils,
@@ -9,8 +17,66 @@ import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { AnalyticsUtils } from "../utils/analytics";
 import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
+
+export const UPDATE_SEED_CONFIG_PROMPT = "Update configuration";
+
+/** If the configuration for a seed vault has changed, prompt to suggest updating the configuration. */
+export async function detectOutOfDateSeeds({
+  wsRoot,
+  seedSvc,
+}: {
+  wsRoot: string;
+  seedSvc: SeedService;
+}) {
+  const seedVaults = seedSvc.getSeedVaultsInWorkspace();
+  await Promise.all(
+    seedVaults.map(async (seedVault) => {
+      const id = seedVault.seed;
+      const info = await seedSvc.info({ id });
+      if (!info) {
+        // Seed is missing from the config, or it's an unknown seed. We could
+        // warn the user here to fix their config, but I've never seen issues
+        // around this so skipping it for now.
+        return;
+      }
+      if (seedVault.fsPath !== info.root) {
+        // The path specified in the seed has changed compared to what's in the
+        // users config. User won't be able to read the notes in that vault, we
+        // should prompt to fix it.
+        AnalyticsUtils.track(ConfigEvents.OutdatedSeedVaultMessageShow);
+        const select = await VSCodeUtils.showMessage(
+          MessageSeverity.WARN,
+          `The configuration for the seed vault ${VaultUtils.getName(
+            seedVault
+          )} has changed. You may be unable to access the vault until you update your configuration.`,
+          {},
+          {
+            title: UPDATE_SEED_CONFIG_PROMPT,
+          },
+          {
+            title: "Skip for now",
+          }
+        );
+        if (select?.title === UPDATE_SEED_CONFIG_PROMPT) {
+          await AnalyticsUtils.trackForNextRun(
+            ConfigEvents.OutdatedSeedVaultMessageAccept
+          );
+          await DConfig.createBackup(wsRoot, "update-seed");
+          const config = DConfig.getOrCreate(wsRoot);
+          ConfigUtils.updateVault(config, seedVault, (vault) => {
+            vault.fsPath = info.root;
+            return vault;
+          });
+          await DConfig.writeConfig({ wsRoot, config });
+          VSCodeUtils.reloadWindow();
+        }
+      }
+    })
+  );
+}
 
 const L = Logger;
 
@@ -204,6 +270,11 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const finalMessage = message.join(" ");
 
     VSCodeUtils.showMessage(maxMessageSeverity, finalMessage, {});
+
+    detectOutOfDateSeeds({
+      wsRoot: engine.wsRoot,
+      seedSvc: new SeedService({ wsRoot: engine.wsRoot }),
+    });
 
     return {
       committed,

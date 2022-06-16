@@ -33,7 +33,7 @@ suite("workspace sync command", function () {
   describe("no repo", () => {
     test("do nothing", (done) => {
       runLegacyMultiWorkspaceTest({
-        onInit: async ({}) => {
+        onInit: async () => {
           const out = await new SyncCommand().execute();
           expect(out).toBeTruthy();
           const { committed, pulled, pushed } = out;

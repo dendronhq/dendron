@@ -456,6 +456,10 @@
         "icon": "$(open-preview)"
       },
       {
+        "command": "dendron.showReleaseNotes",
+        "title": "Dendron: Show Release Notes"
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File"
       },
@@ -784,6 +788,10 @@
         },
         {
           "command": "dendron.showPreview",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.showReleaseNotes",
           "when": "dendron:pluginActive"
         },
         {

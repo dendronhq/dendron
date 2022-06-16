@@ -36,6 +36,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { showWelcome } from "../WelcomeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import semver from "semver";
 
 export class StartupUtils {
   static async runMigrationsIfNecessary({
@@ -517,5 +518,21 @@ export class StartupUtils {
           }
         });
     }
+  }
+
+  static shouldShowFullPageUpgradeWebview(
+    previousExtensionVersion: string,
+    currentVersion: string
+  ): boolean {
+    const threshold = "0.100.0";
+
+    if (!currentVersion) {
+      return false;
+    }
+
+    return (
+      semver.lt(previousExtensionVersion, threshold) &&
+      semver.gte(currentVersion, threshold)
+    );
   }
 }

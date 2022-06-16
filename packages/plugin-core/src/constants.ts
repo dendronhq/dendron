@@ -814,6 +814,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: "dendron:pluginActive",
   },
+  SHOW_RELEASE_NOTES: {
+    key: "dendron.showReleaseNotes",
+    title: `${CMD_PREFIX} Show Release Notes`,
+    when: "dendron:pluginActive",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,

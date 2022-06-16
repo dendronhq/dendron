@@ -94,6 +94,8 @@ import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 import setupRecentWorkspacesTreeView from "./features/RecentWorkspacesTreeview";
+import { ShowReleaseNotesCommand } from "./commands/ShowReleaseNotes";
+import { ReleaseNotesViewFactory } from "./components/views/ReleaseNotesViewFactory";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -960,6 +962,7 @@ export async function _activate(
       previousExtensionVersion: previousWorkspaceVersionFromState,
       start: startActivate,
       assetUri,
+      ws,
     });
 
     if (DendronExtension.isActive(context)) {
@@ -1008,6 +1011,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion,
   start,
   assetUri,
+  ws,
 }: {
   extensionInstallStatus: InstallStatus;
   isSecondaryInstall: boolean;
@@ -1015,6 +1019,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion: string;
   start: [number, number];
   assetUri: vscode.Uri;
+  ws: DendronExtension;
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
@@ -1069,27 +1074,38 @@ async function showWelcomeOrWhatsNew({
         duration: getDurationMilliseconds(start),
       });
 
-      const buttonAction = "See what's new";
-
-      vscode.window
-        .showInformationMessage(
-          `Dendron has been upgraded to ${version}`,
-          buttonAction
+      // Show the release notes in a webview during bigger releases, otherwise,
+      // just show a small toast.
+      if (
+        StartupUtils.shouldShowFullPageUpgradeWebview(
+          previousExtensionVersion,
+          version
         )
-        .then((resp) => {
-          if (resp === buttonAction) {
-            AnalyticsUtils.track(VSCodeEvents.UpgradeSeeWhatsChangedClicked, {
-              previousVersion: previousExtensionVersion,
-              duration: getDurationMilliseconds(start),
-            });
-            vscode.commands.executeCommand(
-              "vscode.open",
-              vscode.Uri.parse(
-                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
-              )
-            );
-          }
-        });
+      ) {
+        new ShowReleaseNotesCommand(ReleaseNotesViewFactory.create(ws)).run();
+      } else {
+        const buttonAction = "See what's new";
+
+        vscode.window
+          .showInformationMessage(
+            `Dendron has been upgraded to ${version}`,
+            buttonAction
+          )
+          .then((resp) => {
+            if (resp === buttonAction) {
+              AnalyticsUtils.track(VSCodeEvents.UpgradeSeeWhatsChangedClicked, {
+                previousVersion: previousExtensionVersion,
+                duration: getDurationMilliseconds(start),
+              });
+              vscode.commands.executeCommand(
+                "vscode.open",
+                vscode.Uri.parse(
+                  "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
+                )
+              );
+            }
+          });
+      }
       break;
     }
     default:
@@ -1196,6 +1212,22 @@ async function _setupCommands({
             await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
               args
             );
+          })
+        )
+      );
+    }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_RELEASE_NOTES.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_RELEASE_NOTES.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await new ShowReleaseNotesCommand(
+              ReleaseNotesViewFactory.create(ws)
+            ).run(args);
           })
         )
       );

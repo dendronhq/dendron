@@ -1176,6 +1176,9 @@
         },
         "enablePrettyLinks": {
           "type": "boolean"
+        },
+        "publishTemplateVersion": {
+          "type": "number"
         }
       },
       "required": [

@@ -17,6 +17,7 @@ import {
   ERROR_SEVERITY,
   Theme,
   CONSTANTS,
+  ErrorFactory,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -116,7 +117,19 @@ export type NextjsExportConfig = ExportPodConfig & NextjsExportPodCustomOpts;
 
 type NextjsExportPlantOpts = ExportPodPlantOpts<NextjsExportConfig>;
 
+function __git(baseDir: string) {
+  return simpleGit({ baseDir });
+}
+
 export class NextjsExportPodUtils {
+  static LATEST_TEMPLATE_VERSION = "tags/vlatest";
+
+  static templateVersion(
+    config: IntermediateDendronConfig
+  ): string | undefined {
+    return ConfigUtils.getPublishing(config).templateVersion;
+  }
+
   static async buildSiteMap(opts: { nextPath: string }) {
     const { nextPath } = opts;
     const cmdDev = "npm run build:sitemap";
@@ -133,6 +146,26 @@ export class NextjsExportPodUtils {
 
   static getNextRoot = (wsRoot: string) => {
     return path.join(wsRoot, ".next");
+  };
+
+  static getNextVersion = (wsRoot: string): RespV3<string> => {
+    const pkgPath = path.join(this.getNextRoot(wsRoot), "package.json");
+    if (!fs.existsSync(pkgPath)) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `package.json not found in ${pkgPath}`,
+        }),
+      };
+    }
+    const resp = fs.readJSONSync(pkgPath);
+    if (_.isString(resp.version)) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `no version found in ${pkgPath}`,
+        }),
+      };
+    }
+    return { data: resp.version };
   };
 
   static async nextPathExists(opts: { nextPath: string }) {
@@ -155,10 +188,20 @@ export class NextjsExportPodUtils {
     const { nextPath } = opts;
 
     await fs.ensureDir(nextPath);
-    const git = simpleGit({ baseDir: nextPath });
+    const git = __git(nextPath);
     await git.clone(TEMPLATE_REMOTE_URL, nextPath);
 
     return { error: null };
+  }
+
+  static async switchToBranch({
+    version,
+    nextPath,
+  }: {
+    version: string;
+    nextPath: string;
+  }) {
+    return __git(nextPath).checkoutBranch(version, `tags/v${version}`);
   }
 
   static async updateTemplate(opts: { nextPath: string }) {

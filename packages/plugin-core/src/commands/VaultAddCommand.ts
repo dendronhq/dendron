@@ -32,6 +32,7 @@ import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
+import { PluginFileUtils } from "../utils/files";
 import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
@@ -384,19 +385,28 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           );
           // Wait for the user to accept the prompt, otherwise window will
           // reload before they see the warning
-          await VSCodeUtils.showMessage(
+          const openDocsOption = "Open documentation & continue";
+          const select = await VSCodeUtils.showMessage(
             MessageSeverity.WARN,
             "The vault you added depends on other vaults, which is not supported.",
             {
               modal: true,
               detail:
-                "You may be unable to access these transitive vaults. The vault itself should continue to work.",
+                "You may be unable to access these transitive vaults. The vault itself should continue to work. Please see for [details]()",
             },
             {
               title: "Continue",
               isCloseAffordance: true,
-            }
+            },
+            { title: openDocsOption }
           );
+          if (select?.title === openDocsOption) {
+            // Open a page in the default browser that describes what transitive
+            // dependencies are, and how to add them.
+            await PluginFileUtils.openWithDefaultApp(
+              "https://wiki.dendron.so/notes/q9yo0y7czv8mxlkbnw1ugj1"
+            );
+          }
         }
       }
     } catch (err) {

@@ -103,7 +103,7 @@
     {
       "label": "visualize",
       "type": "shell",
-      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli visualize --wsRoot ${workspaceFolder}/../../docs",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli visualize --wsRoot ${workspaceFolder}/../../test-workspace",
       "problemMatcher": []
     }
   ]

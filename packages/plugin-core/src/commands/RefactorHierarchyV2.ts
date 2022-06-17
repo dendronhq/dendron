@@ -472,19 +472,19 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     let traitsAcc: string[] = [];
     await asyncLoop(operations, async (operation) => {
       const newPath = operation.newUri.fsPath;
-      const npath = path.basename(newPath, ".md");
+      const fname = path.basename(newPath, ".md");
       if (newPath !== undefined) {
         const vault = VaultUtils.getVaultByFilePath({
           vaults,
           wsRoot,
           fsPath: newPath,
         });
-        const resp = await engine.getNoteByPath({
-          vault,
-          npath,
-          createIfNew: false,
-        });
-        const newNote = resp.data?.note;
+        const newNote = (
+          await engine.findNotes({
+            vault,
+            fname,
+          })
+        )[0];
         if (newNote !== undefined) {
           numProcessedAcc += 1;
 

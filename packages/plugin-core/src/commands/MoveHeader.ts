@@ -486,7 +486,7 @@ export class MoveHeaderCommand extends BasicCommand<
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteChangeEntry[]> {
-    const noteChangeEntries: NoteChangeEntry[] = [];
+    let noteChangeEntries: NoteChangeEntry[] = [];
     const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
@@ -518,9 +518,8 @@ export class MoveHeaderCommand extends BasicCommand<
       const writeResp = await engine.writeNote(note!, {
         updateExisting: true,
       });
-      noteChangeEntries.concat(writeResp.data);
+      noteChangeEntries = noteChangeEntries.concat(writeResp.data);
     });
-
     return noteChangeEntries;
   }
 

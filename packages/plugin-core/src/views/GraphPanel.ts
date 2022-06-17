@@ -3,6 +3,7 @@ import {
   DendronTreeViewKey,
   DMessage,
   DMessageEnum,
+  DMessageSource,
   GraphEvents,
   GraphViewMessage,
   GraphViewMessageEnum,
@@ -25,6 +26,8 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.GRAPH_PANEL;
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
+  private graphDepth: number | undefined;
+
   constructor(extension: IDendronExtension) {
     this._ext = extension;
     this._ext.context.subscriptions.push(
@@ -32,8 +35,34 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
   }
 
-  public postMessage(msg: DMessage) {
-    this._view?.webview.postMessage(msg);
+  private postMessage(msg: DMessage) {
+    if (this._view) this._view.webview.postMessage(msg);
+  }
+
+  public increaseGraphDepth() {
+    if (this._view && this.graphDepth && this.graphDepth < 3) {
+      this.graphDepth += 1;
+      this.postMessage({
+        type: GraphViewMessageEnum.onGraphDepthChange,
+        data: {
+          graphDepth: this.graphDepth,
+        },
+        source: DMessageSource.vscode,
+      });
+    }
+  }
+
+  public decreaseGraphDepth() {
+    if (this.graphDepth && this.graphDepth > 1) {
+      this.graphDepth -= 1;
+      this.postMessage({
+        type: GraphViewMessageEnum.onGraphDepthChange,
+        data: {
+          graphDepth: this.graphDepth,
+        },
+        source: DMessageSource.vscode,
+      });
+    }
   }
 
   public async resolveWebviewView(
@@ -53,6 +82,9 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
 
     webviewView.onDidChangeVisibility(() => {
+      if (this.graphDepth && !webviewView.visible) {
+        MetadataService.instance().graphDepth = this.graphDepth;
+      }
       AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
         type: "VisibilityChanged",
         state: webviewView.visible ? "Visible" : "Collapsed",
@@ -109,14 +141,14 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         // Set graph styles
         const styles = GraphStyleService.getParsedStyles();
         const graphTheme = MetadataService.instance().getGraphTheme();
-        const graphDepth = MetadataService.instance().graphDepth;
-        if (this._view && (styles || graphTheme || graphDepth)) {
+        this.graphDepth = MetadataService.instance().graphDepth;
+        if (this._view && (styles || graphTheme || this.graphDepth)) {
           this._view.webview.postMessage({
             type: GraphViewMessageEnum.onGraphLoad,
             data: {
               styles,
               graphTheme,
-              graphDepth,
+              graphDepth: this.graphDepth,
             },
             source: "vscode",
           });

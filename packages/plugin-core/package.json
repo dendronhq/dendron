@@ -160,6 +160,16 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "dendron.graph-panel.increaseDepth",
+        "title": "Increase Depth",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "dendron.graph-panel.decreaseDepth",
+        "title": "Decrease Depth",
+        "icon": "$(arrow-down)"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note"
       },
@@ -892,6 +902,16 @@
         {
           "command": "dendron.treeView.expandAll",
           "when": "view == dendron.treeView && dendron:devMode",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.increaseDepth",
+          "when": "view == dendron.graph-panel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.decreaseDepth",
+          "when": "view == dendron.graph-panel",
           "group": "navigation@2"
         }
       ],

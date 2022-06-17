@@ -124,6 +124,14 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
         break;
       }
+
+      case GraphViewMessageEnum.onGraphDepthChange: {
+        const cmsg = msg;
+        const { graphDepth } = cmsg.data;
+        logger.info({ ctx, graphDepth, msg: "onGraphDepthChange" });
+        ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

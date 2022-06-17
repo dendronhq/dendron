@@ -513,16 +513,11 @@ export class DendronExtension implements IDendronExtension {
         const tipOfDayView = this.setupTipOfTheDayView();
 
         // Graph panel (side)
-        const graphPanel = new GraphPanel(this);
-        context.subscriptions.push(
-          vscode.window.registerWebviewViewProvider(
-            GraphPanel.viewType,
-            graphPanel
-          )
-        );
+        const graphPanel = this.setupGraphPanel();
 
         context.subscriptions.push(backlinkTreeView);
         context.subscriptions.push(tipOfDayView);
+        context.subscriptions.push(graphPanel);
       }
     });
   }
@@ -685,6 +680,29 @@ export class DendronExtension implements IDendronExtension {
     );
 
     return backlinkTreeView;
+  }
+
+  private setupGraphPanel() {
+    const graphPanel = new GraphPanel(this);
+
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_INCREASE_DEPTH.key,
+      sentryReportingCallback(() => {
+        // post message to DendronGraphPanel
+        graphPanel.increaseGraphDepth();
+      })
+    );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_DECREASE_DEPTH.key,
+      sentryReportingCallback(() => {
+        // post message to DendronGraphPanel
+        graphPanel.decreaseGraphDepth();
+      })
+    );
+    return vscode.window.registerWebviewViewProvider(
+      GraphPanel.viewType,
+      graphPanel
+    );
   }
 
   addDisposable(disposable: vscode.Disposable) {

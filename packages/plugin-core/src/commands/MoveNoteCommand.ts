@@ -1,6 +1,9 @@
 import {
+  asyncLoop,
   DendronError,
   DEngineClient,
+  DNodeUtils,
+  EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
   RenameNoteOpts,
@@ -28,6 +31,7 @@ import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { AnalyticsUtils } from "../utils/analytics";
 
 type CommandInput = any;
 
@@ -318,10 +322,97 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     panel.webview.html = md.render(contentLines.join("\n"));
   }
 
-  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    const payload =
+  async trackProxyMetrics({
+    opts,
+    noteChangeEntryCounts,
+  }: {
+    opts: CommandOpts;
+    noteChangeEntryCounts: {
+      createdCount?: number;
+      deletedCount?: number;
+      updatedCount?: number;
+    };
+  }) {
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults } = engine;
+
+    // since we allow multiples, aggregate them.
+    const { moves } = opts;
+
+    let numProcessedAcc = 0;
+    const numChildrenAcc: number[] = [];
+    const numLinksAcc: number[] = [];
+    const numCharsAcc: number[] = [];
+    const noteDepthAcc: number[] = [];
+    let traitsAcc: string[] = [];
+    await asyncLoop(moves, async (move) => {
+      const { fname, vaultName: vname } = move.newLoc;
+      if (fname !== undefined && vname !== undefined) {
+        const newLocVault = VaultUtils.getVaultByName({ vaults, vname });
+        const newLocNote = (
+          await engine.findNotes({
+            fname,
+            vault: newLocVault,
+          })
+        )[0];
+        if (newLocNote !== undefined) {
+          numProcessedAcc += 1;
+
+          // children
+          const numChildren = newLocNote.children.length;
+          numChildrenAcc.push(numChildren);
+
+          // links
+          const numLinks = newLocNote.links.length;
+          numLinksAcc.push(numLinks);
+
+          // body
+          const numChars = newLocNote.body.length;
+          numCharsAcc.push(numChars);
+
+          // note depth
+          const noteDepth = DNodeUtils.getDepth(newLocNote);
+          noteDepthAcc.push(noteDepth);
+
+          // traits
+          const traits = newLocNote.traits;
+          if (traits) traitsAcc = traitsAcc.concat(traits);
+        }
+      }
+    });
+
+    // track proxy metrics separately
+    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
+      command: this.key,
+      ...noteChangeEntryCounts,
+      numVaults: vaults.length,
+      traits: new Set(traitsAcc),
+      isMultiMove: isMultiMove(moves),
+      // all numX props are mean value but named as plain numX
+      // since we want to use the same name across different commands for an aggregate analysis.
+      numProcessed: numProcessedAcc,
+      numChildren: _.mean(numChildrenAcc),
+      maxNumChildren: _.max(numChildrenAcc),
+      numLinks: _.mean(numLinksAcc),
+      maxNumLinks: _.max(numLinksAcc),
+      numChars: _.mean(numCharsAcc),
+      maxNumChars: _.max(numCharsAcc),
+      noteDepth: _.mean(noteDepthAcc),
+      maxNoteDepth: _.max(noteDepthAcc),
+    });
+  }
+
+  addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
       out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
-    return payload;
+    try {
+      this.trackProxyMetrics({ opts, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+
+    return noteChangeEntryCounts;
   }
 }
 

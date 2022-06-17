@@ -26,6 +26,10 @@ export class ShowReleaseNotesCommand extends InputArgCommand<
     this._panel = changelogPanel;
   }
 
+  addAnalyticsPayload(_opts?: ShowPreviewCommandOpts) {
+    return { page: "v0.100.0" };
+  }
+
   /**
    *
    * @param opts if a Uri is defined through this parameter, then that Uri will

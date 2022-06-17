@@ -20,6 +20,7 @@ export enum DendronEditorViewKey {
   SCHEMA_GRAPH = "dendron.graph-schema",
   NOTE_PREVIEW = "dendron.note-preview",
   SEED_BROWSER = "dendron.seed-browser",
+  VISUALIZATION = "dendron.visualization",
 }
 
 export enum DendronTreeViewKey {
@@ -62,6 +63,12 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     desc: "Seed Registry",
     label: "Seed Registry",
     bundleName: "SeedBrowser",
+    type: "webview",
+  },
+  [DendronEditorViewKey.VISUALIZATION]: {
+    desc: "Visualization",
+    label: "Visualization",
+    bundleName: "Visualization",
     type: "webview",
   },
 };

@@ -24,6 +24,7 @@ import {
   SchemaUtils,
   SeedEntry,
   SelfContainedVault,
+  stringifyError,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -198,7 +199,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   get config(): IntermediateDendronConfig {
     // TODO: don't read all the time but cache
-    return DConfig.readConfigAndApplyLocalOverrideSync(this.wsRoot);
+    const { error, data } = DConfig.readConfigAndApplyLocalOverrideSync(
+      this.wsRoot
+    );
+    if (error) this.logger.error(stringifyError(error));
+    return data;
   }
 
   get seedService(): SeedService {

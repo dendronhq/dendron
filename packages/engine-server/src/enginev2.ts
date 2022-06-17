@@ -58,6 +58,7 @@ import {
   SchemaModuleProps,
   SchemaQueryResp,
   StatusCodes,
+  stringifyError,
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
@@ -209,7 +210,11 @@ export class DendronEngineV2 implements DEngine {
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
-    const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+    const { error, data: config } =
+      DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+    if (error) {
+      LOGGER.error(stringifyError(error));
+    }
 
     return new DendronEngineV2({
       wsRoot,

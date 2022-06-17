@@ -276,6 +276,11 @@ export type BooleanResp =
   | { data: true; error: null }
   | { data: false; error: IDendronError };
 
+export type DataWithOptError<T> = {
+  data: T;
+  error?: IDendronError;
+};
+
 export function isDendronResp<T = any>(args: any): args is RespV2<T> {
   return args?.error instanceof DendronError;
 }

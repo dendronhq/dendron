@@ -1,5 +1,6 @@
 import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
+import _ from "lodash";
 import Sinon from "sinon";
 import { TestEngineUtils } from "../../engine";
 import { VAULTS } from "../../presets";
@@ -40,7 +41,8 @@ function testScope(configScope: LocalConfigScope) {
     describe(`AND GIVEN ${configScope} config is empty`, () => {
       test("THEN engine config should be unaltered", async () => {
         const { wsRoot } = await createWs();
-        const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        const { data: config } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
         expect(config).toEqual(defaultConfig);
       });
     });
@@ -54,7 +56,8 @@ function testScope(configScope: LocalConfigScope) {
           config: { workspace: { vaults: localVaults } },
           configScope,
         });
-        const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        const { data: config } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
         const _defaultConfig = getDefaultConfig();
         _defaultConfig.workspace.vaults = localVaults.concat(
           defaultConfig.workspace.vaults
@@ -71,7 +74,8 @@ function testScope(configScope: LocalConfigScope) {
           config: { workspace: { enableEditorDecorations: false } },
           configScope,
         });
-        const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        const { data: config } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
         const _defaultConfig = getDefaultConfig();
         _defaultConfig.workspace.enableEditorDecorations = false;
         expect(config).toEqual(_defaultConfig);
@@ -83,6 +87,61 @@ function testScope(configScope: LocalConfigScope) {
 describe("DConfig", () => {
   testScope(LocalConfigScope.WORKSPACE);
   testScope(LocalConfigScope.GLOBAL);
+
+  describe("GIVEN bad local config", () => {
+    const vaults = VAULTS.MULTI_VAULT_WITH_THREE_VAULTS();
+    const vaultsReverse = _.reverse(VAULTS.MULTI_VAULT_WITH_THREE_VAULTS());
+    const configScope = LocalConfigScope.WORKSPACE;
+    const createWs = async () => {
+      return TestWorkspaceUtils.create({ vaults });
+    };
+
+    describe("WHEN workspace empty", () => {
+      test("THEN engine config should be unaltered", async () => {
+        const { wsRoot } = await createWs();
+        await DConfig.writeLocalConfig({
+          wsRoot,
+          config: { workspace: {} },
+          configScope,
+        });
+        const { data, error } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        expect(error).toBeDefined();
+        expect(data.workspace.vaults).toEqual(vaultsReverse);
+      });
+    });
+
+    describe("WHEN workspace does not have vaults property", () => {
+      test("THEN engine config should have new property updated ", async () => {
+        const { wsRoot } = await createWs();
+        await DConfig.writeLocalConfig({
+          wsRoot,
+          config: { workspace: { apiEndpoint: "foo" } },
+          configScope,
+        });
+        const { data, error } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        expect(error).toBeUndefined();
+        expect(data.workspace.vaults).toEqual(vaultsReverse);
+        expect(data.workspace.apiEndpoint).toEqual("foo");
+      });
+    });
+
+    describe("WHEN workspace has empty vaults", () => {
+      test("THEN engine config should be unaltered but no error should be thrown", async () => {
+        const { wsRoot } = await createWs();
+        await DConfig.writeLocalConfig({
+          wsRoot,
+          config: { workspace: { vaults: [] } },
+          configScope,
+        });
+        const { data, error } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        expect(error).toBeUndefined();
+        expect(data.workspace.vaults).toEqual(vaultsReverse);
+      });
+    });
+  });
 
   describe("GIVEN ws config present", () => {
     const vaults = VAULTS.MULTI_VAULT_WITH_THREE_VAULTS();
@@ -116,7 +175,8 @@ describe("DConfig", () => {
             configScope: LocalConfigScope.GLOBAL,
           }),
         ]);
-        const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+        const { data: config } =
+          DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
         const _defaultConfig = getDefaultConfig();
         _defaultConfig.workspace.enableEditorDecorations = false;
         expect(config).toEqual(_defaultConfig);

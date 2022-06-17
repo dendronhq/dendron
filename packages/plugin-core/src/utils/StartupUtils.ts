@@ -36,6 +36,8 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { showWelcome } from "../WelcomeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { readMD } from "@dendronhq/common-server";
 
 export class StartupUtils {
   static async runMigrationsIfNecessary({
@@ -517,5 +519,29 @@ export class StartupUtils {
           }
         });
     }
+  }
+
+  static showProductHuntMessage() {
+    const uri = VSCodeUtils.joinPath(
+      VSCodeUtils.getAssetUri(ExtensionProvider.getExtension().context),
+      "dendron-ws",
+      "vault",
+      "v100.html"
+    );
+
+    const { content } = readMD(uri.fsPath);
+    const title = "Release Log";
+
+    const panel = vscode.window.createWebviewPanel(
+      _.kebabCase(title),
+      title,
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+      }
+    );
+
+    panel.webview.html = content;
+    panel.reveal();
   }
 }

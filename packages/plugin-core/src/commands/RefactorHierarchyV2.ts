@@ -1,11 +1,14 @@
 import {
+  asyncLoop,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -28,6 +31,7 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { AnalyticsUtils } from "../utils/analytics";
 
 const md = _md();
 
@@ -38,7 +42,9 @@ type CommandOpts = {
   noConfirm?: boolean;
 };
 
-type CommandOutput = RenameNoteOutputV2a;
+export type CommandOutput = RenameNoteOutputV2a & {
+  operations: RenameOperation[];
+};
 
 type RenameOperation = {
   vault: DVault;
@@ -419,7 +425,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         return out;
       }
     );
-    return out;
+    return { ...out, operations };
   }
 
   async showResponse(res: CommandOutput) {
@@ -438,9 +444,101 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     }
   }
 
-  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    const payload =
+  async trackProxyMetrics({
+    out,
+    noteChangeEntryCounts,
+    key,
+  }: {
+    out: CommandOutput;
+    noteChangeEntryCounts: {
+      createdCount?: number;
+      deletedCount?: number;
+      updatedCount?: number;
+    };
+    key?: string;
+  }) {
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults, wsRoot } = engine;
+
+    // since we allow multiples, aggregate them.
+    const { operations } = out;
+
+    let numProcessedAcc = 0;
+    const numChildrenAcc: number[] = [];
+    const numLinksAcc: number[] = [];
+    const numCharsAcc: number[] = [];
+    const noteDepthAcc: number[] = [];
+    let traitsAcc: string[] = [];
+    await asyncLoop(operations, async (operation) => {
+      const newPath = operation.newUri.fsPath;
+      const npath = path.basename(newPath, ".md");
+      if (newPath !== undefined) {
+        const vault = VaultUtils.getVaultByFilePath({
+          vaults,
+          wsRoot,
+          fsPath: newPath,
+        });
+        const resp = await engine.getNoteByPath({
+          vault,
+          npath,
+          createIfNew: false,
+        });
+        const newNote = resp.data?.note;
+        if (newNote !== undefined) {
+          numProcessedAcc += 1;
+
+          // children
+          const numChildren = newNote.children.length;
+          numChildrenAcc.push(numChildren);
+
+          // links
+          const numLinks = newNote.links.length;
+          numLinksAcc.push(numLinks);
+
+          // body
+          const numChars = newNote.body.length;
+          numCharsAcc.push(numChars);
+
+          // note depth
+          const noteDepth = DNodeUtils.getDepth(newNote);
+          noteDepthAcc.push(noteDepth);
+
+          // traits
+          const traits = newNote.traits;
+          if (traits) traitsAcc = traitsAcc.concat(traits);
+        }
+      }
+    });
+
+    // track proxy metrics separately
+    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
+      command: key || this.key,
+      ...noteChangeEntryCounts,
+      numVaults: vaults.length,
+      traits: new Set(traitsAcc),
+      // all numX props are mean value but named as plain numX
+      // since we want to use the same name across different commands for an aggregate analysis.
+      numProcessed: numProcessedAcc,
+      numChildren: _.mean(numChildrenAcc),
+      maxNumChildren: _.max(numChildrenAcc),
+      numLinks: _.mean(numLinksAcc),
+      maxNumLinks: _.max(numLinksAcc),
+      numChars: _.mean(numCharsAcc),
+      maxNumChars: _.max(numCharsAcc),
+      noteDepth: _.mean(noteDepthAcc),
+      maxNoteDepth: _.max(noteDepthAcc),
+    });
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
       out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
-    return payload;
+    try {
+      this.trackProxyMetrics({ out, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+    return noteChangeEntryCounts;
   }
 }

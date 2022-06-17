@@ -36,6 +36,8 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { showWelcome } from "../WelcomeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { readMD } from "@dendronhq/common-server";
 
 export class StartupUtils {
   static async runMigrationsIfNecessary({
@@ -517,5 +519,42 @@ export class StartupUtils {
           }
         });
     }
+  }
+
+  /**
+   * A one-off logic to show a special webview message for the v0.100.0 launch.
+   * @returns
+   */
+  static maybeShowProductHuntMessage() {
+    // only show once
+    if (MetadataService.instance().v100ReleaseMessageShown) {
+      return;
+    }
+
+    const uri = VSCodeUtils.joinPath(
+      VSCodeUtils.getAssetUri(ExtensionProvider.getExtension().context),
+      "dendron-ws",
+      "vault",
+      "v100.html"
+    );
+
+    const { content } = readMD(uri.fsPath);
+    const title = "Dendron Release Notes";
+
+    const panel = vscode.window.createWebviewPanel(
+      _.kebabCase(title),
+      title,
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+      }
+    );
+
+    panel.webview.html = content;
+    panel.reveal();
+
+    AnalyticsUtils.track(VSCodeEvents.V100ReleaseNotesShown);
+
+    MetadataService.instance().v100ReleaseMessageShown = true;
   }
 }

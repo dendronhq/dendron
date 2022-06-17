@@ -707,7 +707,9 @@ export async function _activate(
     context.subscriptions.push(setupRecentWorkspacesTreeView());
 
     // Tmp Show of v100 Product hunt Message:
-    StartupUtils.maybeShowProductHuntMessage();
+    if (getStage() === "prod") {
+      StartupUtils.maybeShowProductHuntMessage();
+    }
 
     if (await DendronExtension.isDendronWorkspace()) {
       const activator = new WorkspaceActivator();

@@ -218,7 +218,8 @@ export const provideCompletionItems = sentryReportingCallback(
           note,
           range,
           lblTransform: (note) => `${note.fname.slice(TAGS_HIERARCHY.length)}`,
-          insertTextTransform: (note) => note.fname,
+          insertTextTransform: (note) =>
+            `${note.fname.slice(TAGS_HIERARCHY.length)}`,
         })
       );
     } else if (found?.groups?.userTag) {
@@ -231,7 +232,8 @@ export const provideCompletionItems = sentryReportingCallback(
           note,
           range,
           lblTransform: (note) => `${note.fname.slice(USERS_HIERARCHY.length)}`,
-          insertTextTransform: (note) => note.fname,
+          insertTextTransform: (note) =>
+            `${note.fname.slice(USERS_HIERARCHY.length)}`,
         })
       );
     } else {

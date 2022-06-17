@@ -157,6 +157,7 @@ suite("completionProvider", function () {
             engine,
           });
           expect(found.length > 0).toBeTruthy();
+          expect(items?.items![0].insertText).toEqual("bar");
         }
       });
     }
@@ -265,6 +266,7 @@ suite("completionProvider", function () {
             engine,
           });
           expect(found.length > 0).toBeTruthy();
+          expect(items![0].insertText).toEqual("bar");
         }
       });
     }

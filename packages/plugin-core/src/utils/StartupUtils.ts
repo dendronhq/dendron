@@ -521,7 +521,16 @@ export class StartupUtils {
     }
   }
 
-  static showProductHuntMessage() {
+  /**
+   * A one-off logic to show a special webview message for the v0.100.0 launch.
+   * @returns
+   */
+  static maybeShowProductHuntMessage() {
+    // only show once
+    if (MetadataService.instance().v100ReleaseMessageShown) {
+      return;
+    }
+
     const uri = VSCodeUtils.joinPath(
       VSCodeUtils.getAssetUri(ExtensionProvider.getExtension().context),
       "dendron-ws",
@@ -530,7 +539,7 @@ export class StartupUtils {
     );
 
     const { content } = readMD(uri.fsPath);
-    const title = "Release Log";
+    const title = "Dendron Release Notes";
 
     const panel = vscode.window.createWebviewPanel(
       _.kebabCase(title),
@@ -543,5 +552,9 @@ export class StartupUtils {
 
     panel.webview.html = content;
     panel.reveal();
+
+    AnalyticsUtils.track(VSCodeEvents.V100ReleaseNotesShown);
+
+    MetadataService.instance().v100ReleaseMessageShown = true;
   }
 }

@@ -29,6 +29,7 @@ export enum VSCodeEvents {
   HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
   BacklinksPanelUsed = "BacklinksPanelUsed",
   RecentWorkspacesPanelUsed = "RecentWorkspacesPanelUsed",
+  V100ReleaseNotesShown = "V100ReleaseNotesShown",
 }
 
 export enum CLIEvents {

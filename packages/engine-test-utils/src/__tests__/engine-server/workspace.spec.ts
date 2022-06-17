@@ -156,7 +156,7 @@ describe("WorkspaceService", () => {
               snapshot: false,
             },
             // Necessary for windows test-compat:
-            path.join(`seeds`, `${id}`, `vault`).replace(/\\/g, "\\\\")
+            path.posix.join(`seeds`, `${id}`, `vault`)
           );
           await checkVaults(
             {

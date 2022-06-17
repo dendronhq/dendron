@@ -19,6 +19,7 @@ import {
   IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
+  normalizeUnixPath,
   NoteUtils,
   SchemaUtils,
   SeedEntry,
@@ -281,6 +282,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       updateWorkspace: false,
     });
 
+    // Normalize the vault path to unix style (forward slashes) which is better for cross-compatibility
+    vault.fsPath = normalizeUnixPath(vault.fsPath);
     const vaults = ConfigUtils.getVaults(config);
     vaults.unshift(vault);
     ConfigUtils.setVaults(config, vaults);
@@ -396,12 +399,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * for the current workspace.
    * @param addToCodeWorkspace If true, the created vault will be added to the
    * `code-workspace` file for the current workspace.
+   * @param newVault If true, the root note and schema files, and workspace
+   * files will be created inside the vault.
    */
   async createSelfContainedVault(opts: {
     addToConfig?: boolean;
     addToCodeWorkspace?: boolean;
     // Must be created with a self-contained vault
     vault: SelfContainedVault;
+    newVault: boolean;
   }) {
     const { vault, addToConfig, addToCodeWorkspace } = opts;
     /** The `vault` folder */
@@ -412,65 +418,67 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     await fs.mkdirp(notesPath);
     await fs.mkdirp(path.join(notesPath, "assets"));
 
-    // Create root note and schema
-    const note = NoteUtils.createRoot({
-      vault,
-      body: ROOT_NOTE_TEMPLATE,
-    });
-    const schema = SchemaUtils.createRootModule({ vault });
-    if (
-      !(await fs.pathExists(
-        NoteUtils.getFullPath({ note, wsRoot: this.wsRoot })
-      ))
-    ) {
-      await note2File({ note, vault, wsRoot: this.wsRoot });
-    }
-    if (
-      !(await fs.pathExists(
-        SchemaUtils.getPath({ root: notesPath, fname: "root" })
-      ))
-    ) {
-      await schemaModuleOpts2File(schema, notesPath, "root");
-    }
+    if (opts.newVault) {
+      // Create root note and schema
+      const note = NoteUtils.createRoot({
+        vault,
+        body: ROOT_NOTE_TEMPLATE,
+      });
+      const schema = SchemaUtils.createRootModule({ vault });
+      if (
+        !(await fs.pathExists(
+          NoteUtils.getFullPath({ note, wsRoot: this.wsRoot })
+        ))
+      ) {
+        await note2File({ note, vault, wsRoot: this.wsRoot });
+      }
+      if (
+        !(await fs.pathExists(
+          SchemaUtils.getPath({ root: notesPath, fname: "root" })
+        ))
+      ) {
+        await schemaModuleOpts2File(schema, notesPath, "root");
+      }
 
-    // Create the config and code-workspace for the vault, which make it self contained.
-    // This is the config that goes inside the vault itself
-    const selfContainedVaultConfig: DVault = {
-      fsPath: ".",
-      selfContained: true,
-    };
-    if (vault.name) selfContainedVaultConfig.name = vault.name;
+      // Create the config and code-workspace for the vault, which make it self contained.
+      // This is the config that goes inside the vault itself
+      const selfContainedVaultConfig: DVault = {
+        fsPath: ".",
+        selfContained: true,
+      };
+      if (vault.name) selfContainedVaultConfig.name = vault.name;
 
-    // create dendron.yml
-    DConfig.getOrCreate(vaultPath, {
-      dev: {
-        enableSelfContainedVaults: true,
-      },
-      workspace: {
-        vaults: [selfContainedVaultConfig],
-      },
-    });
-    // create dendron.code-workspace
-    WorkspaceConfig.write(vaultPath, [], {
-      overrides: {
-        folders: [
-          {
-            // Following how we set up workspace config for workspaces, where
-            // the root is the `vault` directory
-            path: "notes",
-            name: VaultUtils.getName(vault),
-          },
-        ],
-        settings: {
-          // Also enable the self contained vault workspaces when inside the self contained vault
-          [DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE]:
-            true,
+      // create dendron.yml
+      DConfig.getOrCreate(vaultPath, {
+        dev: {
+          enableSelfContainedVaults: true,
         },
-      },
-    });
-    // Also add a gitignore, so files like `.dendron.port` are ignored if the
-    // self contained vault is opened on its own
-    await WorkspaceService.createGitIgnore(vaultPath);
+        workspace: {
+          vaults: [selfContainedVaultConfig],
+        },
+      });
+      // create dendron.code-workspace
+      WorkspaceConfig.write(vaultPath, [], {
+        overrides: {
+          folders: [
+            {
+              // Following how we set up workspace config for workspaces, where
+              // the root is the `vault` directory
+              path: "notes",
+              name: VaultUtils.getName(vault),
+            },
+          ],
+          settings: {
+            // Also enable the self contained vault workspaces when inside the self contained vault
+            [DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE]:
+              true,
+          },
+        },
+      });
+      // Also add a gitignore, so files like `.dendron.port` are ignored if the
+      // self contained vault is opened on its own
+      await WorkspaceService.createGitIgnore(vaultPath);
+    }
 
     // Update the config and code-workspace for the current workspace
     if (addToConfig) {
@@ -1086,6 +1094,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         vault: wsVault as SelfContainedVault,
         addToCodeWorkspace: false,
         addToConfig: false,
+        newVault: true,
       });
     }
 
@@ -1103,6 +1112,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
           vault,
           addToCodeWorkspace: false,
           addToConfig: true,
+          newVault: true,
         });
       });
     }

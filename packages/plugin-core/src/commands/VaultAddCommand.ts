@@ -345,6 +345,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
               await wsService.createSelfContainedVault({
                 vault,
                 addToConfig: true,
+                newVault: false,
               });
             } else {
               await wsService.createVault({ vault });
@@ -487,6 +488,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vault,
           addToConfig: true,
           addToCodeWorkspace: false,
+          newVault: true,
         });
       } else {
         await wsService.createVault({ vault });

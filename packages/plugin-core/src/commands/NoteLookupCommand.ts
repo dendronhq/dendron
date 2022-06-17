@@ -14,7 +14,6 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  SchemaUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
@@ -54,7 +53,6 @@ import {
   VaultSelectionMode,
 } from "../components/lookup/types";
 import {
-  LookupUtils,
   node2Uri,
   OldNewLocation,
   PickerUtilsV2,
@@ -68,6 +66,7 @@ import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { AutoCompletable } from "../utils/AutoCompletable";
 import { AutoCompleter } from "../utils/autoCompleter";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
@@ -511,55 +510,42 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-      nodeNew = NoteUtils.create({
-        fname,
-        vault,
-        title: item.title,
-        traits: item.traits,
+      nodeNew = NoteUtils.createWithSchema({
+        noteOpts: {
+          fname,
+          vault,
+          title: item.title,
+          traits: item.traits,
+        },
+        engine,
       });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
-
-      const schemaMatchResult = SchemaUtils.matchPath({
-        notePath: fname,
-        schemaModDict: engine.schemas,
-      });
-      if (schemaMatchResult) {
-        NoteUtils.addSchema({
-          note: nodeNew,
-          schemaModule: schemaMatchResult.schemaModule,
-          schema: schemaMatchResult.schema,
-        });
-      }
     }
 
-    const maybeTemplate = TemplateUtils.tryGetTemplateFromMatchingSchema({
+    const templateAppliedResp = await TemplateUtils.findAndApplyTemplate({
       note: nodeNew,
       engine,
+      pickNote: async (choices: NoteProps[]) => {
+        return WSUtilsV2.instance().promptForNoteAsync({
+          notes: choices,
+          quickpickTitle:
+            "Select which template to apply or press [ESC] to not apply a template",
+          nonStubOnly: true,
+        });
+      },
     });
 
-    if (maybeTemplate) {
-      const resp = await LookupUtils.getNoteForSchemaTemplate({
-        engine,
-        schemaTemplate: maybeTemplate,
+    if (templateAppliedResp.error) {
+      window.showWarningMessage(
+        `Warning: Problem with ${nodeNew.fname} schema. ${templateAppliedResp.error.message}`
+      );
+    } else if (templateAppliedResp.data) {
+      AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+        source: this.key,
+        ...TemplateUtils.genTrackPayload(nodeNew),
       });
-      if (resp.error) {
-        window.showWarningMessage(
-          `Warning: Problem with ${nodeNew.fname} schema. ${resp.error.message}`
-        );
-      } else if (!_.isUndefined(resp.data)) {
-        // Only apply schema if note is found
-        TemplateUtils.applyTemplate({
-          templateNote: resp.data,
-          targetNote: nodeNew,
-          engine,
-        });
-        AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
-          source: this.key,
-          ...TemplateUtils.genTrackPayload(resp.data),
-        });
-      }
     }
 
     if (picker.onCreate) {

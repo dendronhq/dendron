@@ -34,8 +34,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
   IDendronError,
   IntermediateDendronConfig,
   LruCache,
@@ -69,7 +67,6 @@ import {
   DLogger,
   NodeJSUtils,
   readYAML,
-  TemplateUtils,
   writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -408,82 +405,6 @@ export class DendronEngineV2 implements DEngine {
         error: err,
       };
     }
-  }
-
-  async getNoteByPath({
-    npath,
-    createIfNew,
-    vault,
-    overrides,
-  }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
-    const ctx = "getNoteByPath";
-    this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-      fname: npath,
-      engine: this,
-      vault,
-    });
-    this.logger.debug({ ctx, maybeNote, msg: "post-query" });
-    let noteNew: NoteProps | undefined = maybeNote;
-    let changed: NoteChangeEntry[] = [];
-    let error = null;
-    let updateExisting = false;
-    if ((!maybeNote || maybeNote.stub) && createIfNew) {
-      this.logger.debug({ ctx, maybeNote, msg: "create-new" });
-      if (maybeNote?.stub) {
-        noteNew = maybeNote;
-        delete noteNew.stub;
-        updateExisting = true;
-      } else {
-        noteNew = NoteUtils.createWithSchema({
-          noteOpts: { fname: npath, vault },
-          engine: this,
-        });
-
-        const maybeTemplate = TemplateUtils.tryGetTemplateFromMatchingSchema({
-          note: noteNew,
-          engine: this,
-        });
-        if (maybeTemplate) {
-          // TODO: Support xvault with user prompting for this flow
-          /*
-           * Get first valid template note.
-           * First look for template in same vault as note. Otherwise, look across all vaults.
-           * If there are multiple template matches, apply first one.
-           * This is temp until we get xvault support
-           */
-          const tempInSameVault = NoteUtils.getNoteByFnameFromEngine({
-            fname: maybeTemplate.id,
-            vault: noteNew.vault,
-            engine: this,
-          });
-          const tempNote =
-            tempInSameVault ||
-            NoteUtils.getNotesByFnameFromEngine({
-              fname: maybeTemplate.id,
-              engine: this,
-            })[0];
-
-          if (tempNote) {
-            TemplateUtils.applyTemplate({
-              templateNote: tempNote,
-              targetNote: noteNew,
-              engine: this,
-            });
-          }
-        }
-      }
-      noteNew = _.merge(noteNew, overrides || {});
-      changed = (await this.writeNote(noteNew, { updateExisting })).data;
-    }
-    if (!createIfNew && !maybeNote) {
-      error = new DendronError({ message: "no_note_found" });
-    }
-    this.fuseEngine.updateNotesIndex(this.notes);
-    return {
-      data: { note: noteNew, changed },
-      error,
-    };
   }
 
   async getConfig() {

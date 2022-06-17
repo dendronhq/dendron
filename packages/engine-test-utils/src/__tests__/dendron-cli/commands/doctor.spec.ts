@@ -173,12 +173,12 @@ describe("h1 to h2", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -290,12 +290,12 @@ describe("H1_TO_TITLE", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -377,12 +377,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -429,12 +429,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -484,12 +484,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -585,12 +585,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
             "[[qaaaz note|dendron://vault2/qaaaz2]]",
           ].join("\n"),
         });
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault: vault1,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault: vault1,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,

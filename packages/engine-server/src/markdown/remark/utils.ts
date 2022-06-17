@@ -30,6 +30,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
+  parseDendronURI,
   Point,
   Position,
   TAGS_HIERARCHY,
@@ -451,21 +452,6 @@ export class LinkUtils {
     return { alias, value: NoteUtils.normalizeFname(value) };
   }
 
-  static parseDendronURI(linkString: string) {
-    if (linkString.startsWith(CONSTANTS.DENDRON_DELIMETER)) {
-      const [vaultName, link] = linkString
-        .split(CONSTANTS.DENDRON_DELIMETER)[1]
-        .split("/");
-      return {
-        vaultName,
-        link,
-      };
-    }
-    return {
-      link: linkString,
-    };
-  }
-
   /** Either value or anchorHeader will always be present if the function did not
    *  return null. A missing value means that the file containing this link is
    *  the value.
@@ -488,7 +474,7 @@ export class LinkUtils {
       if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
       if (value) {
-        ({ vaultName, link: value } = this.parseDendronURI(value));
+        ({ vaultName, link: value } = parseDendronURI(value));
         if (!alias && !explicitAlias) {
           alias = value;
         }
@@ -597,7 +583,7 @@ export class LinkUtils {
 
     // pre-parse vault name if it exists
     let vaultName: string | undefined;
-    ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
+    ({ vaultName, link: ref } = parseDendronURI(ref));
 
     const groups = reLink.exec(ref)?.groups;
     const clean: DNoteRefData = {

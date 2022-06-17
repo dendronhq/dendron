@@ -8,6 +8,7 @@ import {
   DNodePropsQuickInputV2,
   DEngineClient,
   EngineWriteOptsV2,
+  SchemaTemplate,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -220,4 +221,41 @@ export class NoteTestUtilsV4 {
     const newSchema = cb(schema);
     return schemaModuleProps2File(newSchema, vpath, fname);
   }
+
+  /**
+   * Setup schema that references template that may or may not lie in same vault
+   */
+  static setupSchemaCrossVault = (opts: {
+    wsRoot: string;
+    vault: DVault;
+    template: SchemaTemplate;
+  }) => {
+    const { wsRoot, vault, template } = opts;
+    return NoteTestUtilsV4.createSchema({
+      fname: "food",
+      wsRoot,
+      vault,
+      modifier: (schema) => {
+        const schemas = [
+          SchemaUtils.createFromSchemaOpts({
+            id: "food",
+            parent: "root",
+            fname: "food",
+            children: ["ch2"],
+            vault,
+          }),
+          SchemaUtils.createFromSchemaRaw({
+            id: "ch2",
+            template,
+            namespace: true,
+            vault,
+          }),
+        ];
+        schemas.map((s) => {
+          schema.schemas[s.id] = s;
+        });
+        return schema;
+      },
+    });
+  };
 }

@@ -301,21 +301,6 @@ export type EngineUpdateNodesOptsV2 = {
    */
   newNode: boolean;
 };
-export type GetNoteOptsV2 = {
-  vault: DVault;
-  /**
-   * Note file name minus the extension
-   */
-  npath: string;
-  /**
-   * If node does not exist, create it?
-   */
-  createIfNew?: boolean;
-  /**
-   * Override any props
-   */
-  overrides?: Partial<NoteProps>;
-};
 export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
   /**
@@ -545,10 +530,6 @@ export type GetNoteLinksPayload = RespV2<DLink[]>;
 export type GetAnchorsResp = { [index: string]: DNoteAnchorPositioned };
 export type GetNoteAnchorsPayload = RespV2<GetAnchorsResp>;
 
-export type GetNotePayload = {
-  note: NoteProps | undefined;
-  changed: NoteChangeEntry[];
-};
 export type QueryNotesOpts = {
   qs: string;
 
@@ -601,7 +582,6 @@ export type DEngine = DCommonProps &
     info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-    getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
@@ -688,7 +668,6 @@ export type DEngineV4Methods = {
   ) => Promise<DEngineDeleteSchemaResp>;
   sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-  getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;
   getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
   querySchema: (qs: string) => Promise<SchemaQueryResp>;
   queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;

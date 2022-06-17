@@ -2,8 +2,6 @@ import {
   DendronError,
   EngineDeletePayload,
   EngineDeleteRequest,
-  EngineGetNoteByPathPayload,
-  EngineGetNoteByPathRequest,
   EngineInfoResp,
   EngineRenameNotePayload,
   EngineRenameNoteRequest,
@@ -38,22 +36,6 @@ export class NoteController {
     const engine = await getWSEngine({ ws });
     try {
       const data = await engine.deleteNote(id, opts);
-      return data;
-    } catch (err) {
-      return {
-        error: new DendronError({ message: JSON.stringify(err) }),
-        data: undefined,
-      };
-    }
-  }
-
-  async getByPath({
-    ws,
-    ...opts
-  }: EngineGetNoteByPathRequest): Promise<EngineGetNoteByPathPayload> {
-    const engine = await getWSEngine({ ws });
-    try {
-      const data = await engine.getNoteByPath(opts);
       return data;
     } catch (err) {
       return {

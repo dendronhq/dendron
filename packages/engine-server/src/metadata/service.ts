@@ -135,6 +135,12 @@ type Metadata = Partial<{
    * The most recently opened Dendron workspaces
    */
   recentWorkspaces: string[];
+
+  /**
+   * One-off setting for tracking whether we've shown the v100 release notes
+   * message
+   */
+  v100ReleaseMessageShown: boolean;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -249,6 +255,10 @@ export class MetadataService {
     });
   }
 
+  get v100ReleaseMessageShown(): boolean | undefined {
+    return this.getMeta().v100ReleaseMessageShown;
+  }
+
   /**
    * Set first install logic
    *  ^o4y7ijuvi5nv
@@ -338,6 +348,10 @@ export class MetadataService {
 
   set priorTools(priorTools: PriorTools[] | undefined) {
     this.setMeta("priorTools", priorTools);
+  }
+
+  set v100ReleaseMessageShown(hasShown) {
+    this.setMeta("v100ReleaseMessageShown", hasShown);
   }
 
   // Add a single path to recent workspaces. Recent workspaces acts like a FIFO

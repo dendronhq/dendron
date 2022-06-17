@@ -241,7 +241,10 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const ws = this.ws;
     const resp = await this.api.engineDelete({ id, opts, ws });
     if (!resp.data) {
-      throw new DendronError({ message: "no data" });
+      throw new DendronError({
+        message: `Failed to delete note with id ${id}`,
+        payload: resp.error,
+      });
     }
     await this.refreshNotesV2(resp.data);
 

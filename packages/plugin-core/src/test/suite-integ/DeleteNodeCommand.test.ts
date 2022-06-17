@@ -1,71 +1,64 @@
-import {
-  EngineDeletePayload,
-  NoteChangeEntry,
-  NoteProps,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { NoteProps, VaultUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
-import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
+import {
+  DeleteNodeCommand,
+  DeleteNodeCommandOutput,
+} from "../../commands/DeleteNodeCommand";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  describeMultiWS,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 import { window } from "vscode";
-import { WSUtils } from "../../WSUtils";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, SinonStubbedFn } from "@dendronhq/common-test-utils";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { before, after } from "mocha";
 
 suite("DeleteNodeCommand", function () {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
-
-  test("basic", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine, vaults, wsRoot }) => {
+  describeMultiWS(
+    "WHEN deleting a single note",
+    { preSetupHook: ENGINE_HOOKS.setupBasic },
+    () => {
+      let windowSpy: SinonStubbedFn<typeof window["showInformationMessage"]>;
+      before(async () => {
+        windowSpy = sinon.stub(window, "showInformationMessage");
+        const { engine } = ExtensionProvider.getDWorkspace();
         const note = engine.notes["foo"];
-        await WSUtils.openNote(note);
+        await ExtensionProvider.getWSUtils().openNote(note);
         await new DeleteNodeCommand().execute({ noConfirm: true });
+      });
+      after(() => {
+        windowSpy.restore();
+      });
 
+      test("THEN the note file is deleted", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultFiles = fs.readdirSync(
           path.join(wsRoot, VaultUtils.getRelPath(vaults[0]))
         );
         const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
         expect(noteFiles.sort()).toEqual(["bar.md", "foo.ch1.md", "root.md"]);
-        done();
-      },
-    });
-  });
+      });
 
-  test("WHEN note is deleted THEN correct message is shown.", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: ENGINE_HOOKS.setupBasic,
-      onInit: async ({ engine }) => {
-        const sinonSandbox = sinon.createSandbox();
-        const windowSpy = sinonSandbox.spy(window, "showInformationMessage");
+      test("THEN the correct prompt is shown", () => {
+        expect(windowSpy.calledOnce).toBeTruthy();
+        expect(windowSpy.getCall(0).args[0]).toEqual("foo.md (vault1) deleted");
+      });
+    }
+  );
 
-        const note = engine.notes["foo"];
-        await WSUtils.openNote(note);
-        await new DeleteNodeCommand().execute({ noConfirm: true });
-
-        const infoMsg = windowSpy.getCall(0).args[0];
-        expect(infoMsg).toEqual("foo.md (vault1) deleted");
-
-        sinonSandbox.restore();
-        done();
-      },
-    });
-  });
-
-  test("WHEN note to be deleted has outstanding links to it THEN show preview of broken links", (done) => {
-    let activeNote: NoteProps;
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  let activeNote: NoteProps;
+  describeMultiWS(
+    "WHEN a note with backlinks is deleted",
+    {
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         activeNote = await NoteTestUtilsV4.createNote({
@@ -106,8 +99,10 @@ suite("DeleteNodeCommand", function () {
           wsRoot,
         });
       },
-      onInit: async () => {
-        await WSUtils.openNote(activeNote);
+    },
+    () => {
+      test("THEN a preview of broken links is shown", async () => {
+        await ExtensionProvider.getWSUtils().openNote(activeNote);
         const cmd = new DeleteNodeCommand();
 
         const sandbox = sinon.createSandbox();
@@ -123,43 +118,65 @@ suite("DeleteNodeCommand", function () {
         expect(previewArgs[1].length).toEqual(4);
         expect(previewContent.includes("dummy")).toBeFalsy();
         sandbox.restore();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("domain w/no children", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      preSetupHook: async (opts) => {
-        await ENGINE_HOOKS.setupBasic(opts);
-        const { wsRoot, vaults } = opts;
-        const vaultRoot = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-        fs.removeSync(path.join(vaultRoot, "foo.ch1.md"));
-      },
-      onInit: async ({ engine, vaults, wsRoot }) => {
-        const note = engine.notes["foo"];
-        await WSUtils.openNote(note);
-        const resp = await new DeleteNodeCommand().execute({ noConfirm: true });
-        const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
+  describeMultiWS(
+    "WHEN deleting a domain without children",
+    { preSetupHook: ENGINE_HOOKS.setupBasic },
+    () => {
+      let output: DeleteNodeCommandOutput;
+      let windowSpy: SinonStubbedFn<typeof window["showInformationMessage"]>;
+      before(async () => {
+        windowSpy = sinon.stub(window, "showInformationMessage");
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const note = engine.notes["foo.ch1"];
+        await ExtensionProvider.getWSUtils().openNote(note);
+        output = await new DeleteNodeCommand().execute({ noConfirm: true });
+      });
+      after(() => {
+        windowSpy.restore();
+      });
+
+      test("THEN the note file is deleted", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vaultFiles = await fs.readdir(
+          path.join(wsRoot, VaultUtils.getRelPath(vaults[0]))
+        );
+        const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".md"));
+        expect(noteFiles.sort()).toEqual(["bar.md", "foo.md", "root.md"]);
+      });
+
+      test("THEN the correct prompt is shown", () => {
+        expect(windowSpy.calledOnce).toBeTruthy();
+        expect(windowSpy.getCall(0).args[0]).toEqual(
+          "foo.ch1.md (vault1) deleted"
+        );
+      });
+
+      test("THEN the engine produces the correct changes", async () => {
+        const notes = ExtensionProvider.getDWorkspace().engine.notes;
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const vaultDir = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
-        const notes = engine.notes;
+        expect(output?.data).toBeTruthy();
+        const changed = output!.data!;
         expect(
           _.every(
             [
               {
                 actual: changed[0].note.fname,
-                expected: "root",
-                msg: "root updated",
+                expected: "foo",
+                msg: "foo updated",
               },
               {
                 actual: changed[0].note.children,
-                expected: ["bar"],
-                msg: "root has one child",
+                expected: [],
+                msg: "foo has no children",
               },
-              { actual: notes["foo"], expected: undefined },
+              { actual: notes["foo.ch1"], expected: undefined },
               {
-                actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
+                actual: _.includes(await fs.readdir(vaultDir), "foo.ch1.md"),
                 expected: false,
               },
             ],
@@ -171,11 +188,9 @@ suite("DeleteNodeCommand", function () {
             }
           )
         ).toBeTruthy();
-
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 });
 
 suite("schemas", function () {

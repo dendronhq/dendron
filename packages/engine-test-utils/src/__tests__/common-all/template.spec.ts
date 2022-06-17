@@ -71,7 +71,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           templateNote.body = eqHelper;
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
-          ).toEqual({
+          ).toMatchObject({
             fnameToDate: 0,
             eq: 1,
             getDayOfWeek: 0,
@@ -89,7 +89,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           ].join("\n");
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
-          ).toEqual({
+          ).toMatchObject({
             fnameToDate: 1,
             eq: 1,
             getDayOfWeek: 1,

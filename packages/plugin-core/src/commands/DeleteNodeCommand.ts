@@ -28,6 +28,7 @@ type CommandOpts = {
 };
 
 type CommandOutput = EngineDeletePayload | void;
+export type { CommandOutput as DeleteNodeCommandOutput };
 
 function formatDeletedMsg({
   fsPath,

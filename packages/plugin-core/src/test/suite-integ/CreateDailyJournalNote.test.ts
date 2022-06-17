@@ -27,6 +27,12 @@ const stubVaultPick = (vaults: DVault[]) => {
   return vault;
 };
 
+/**
+ * These tests can timeout otherwise
+ * eg. https://github.com/dendronhq/dendron/runs/6942599059?check_suite_focus=true
+ */
+const timeout = 5e3;
+
 suite("Create Daily Journal Suite", function () {
   const TEMPLATE_BODY = "test daily template";
 
@@ -44,6 +50,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -84,6 +91,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and DAILY JOURNAL has already been run before",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -124,6 +132,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and first install is before 5/31/22",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -166,6 +175,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and dailyVault set",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -214,6 +224,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and dailyVault set with lookup Confirm",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -262,6 +273,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and dailyVault not set with lookup Confirm",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
@@ -310,6 +322,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and dailyDomain set",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".bar",
@@ -351,6 +364,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note and deprecated config",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daisy",
@@ -405,6 +419,7 @@ suite("Create Daily Journal Suite", function () {
     "GIVEN a basic workspace with a daily journal template note",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
       preActivateHook: async ({ wsRoot, vaults }) => {
         await NoteTestUtilsV4.createNote({
           fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",

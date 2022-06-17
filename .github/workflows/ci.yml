@@ -79,7 +79,7 @@ jobs:
         with:
           path: |
             packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-9
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-10
           restore-keys: |
             ${{ runner.os }}-yarn-8
 

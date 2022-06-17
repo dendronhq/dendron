@@ -164,6 +164,7 @@ export enum EngagementEvents {
   EngineStateChanged = "EngineStateChanged",
   AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
   TemplateApplied = "TemplateApplied",
+  RefactoringCommandUsed = "RefactoringCommandUsed",
 }
 
 export enum AppNames {

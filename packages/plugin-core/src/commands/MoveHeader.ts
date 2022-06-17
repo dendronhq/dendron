@@ -2,10 +2,15 @@ import {
   asyncLoopOneAtATime,
   DendronError,
   DLink,
+  DNodeUtils,
+  DNoteHeaderAnchor,
   DNoteLink,
   DVault,
+  EngagementEvents,
   ERROR_SEVERITY,
+  extractNoteChangeEntryCounts,
   getSlugger,
+  NoteChangeEntry,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -44,6 +49,7 @@ import {
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { AnalyticsUtils } from "../utils/analytics";
 
 type CommandInput =
   | {
@@ -59,7 +65,7 @@ type CommandOpts = {
   engine: IEngineAPIService;
 } & CommandInput;
 type CommandOutput = {
-  updated: NoteProps[];
+  changed: NoteChangeEntry[];
 } & CommandOpts;
 
 export class MoveHeaderCommand extends BasicCommand<
@@ -479,8 +485,8 @@ export class MoveHeaderCommand extends BasicCommand<
     engine: IEngineAPIService,
     origin: NoteProps,
     dest: NoteProps
-  ): Promise<NoteProps[]> {
-    const updated: NoteProps[] = [];
+  ): Promise<NoteChangeEntry[]> {
+    const noteChangeEntries: NoteChangeEntry[] = [];
     const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
@@ -512,10 +518,10 @@ export class MoveHeaderCommand extends BasicCommand<
       const writeResp = await engine.writeNote(note!, {
         updateExisting: true,
       });
-      updated.push(writeResp.data[0].note);
+      noteChangeEntries.concat(writeResp.data);
     });
 
-    return updated;
+    return noteChangeEntries;
   }
 
   /**
@@ -597,12 +603,72 @@ export class MoveHeaderCommand extends BasicCommand<
       origin,
       dest
     );
-    return { ...opts, updated };
+
+    return { ...opts, changed: updated };
   }
 
-  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    return {
-      updatedCount: out?.updated.length || 0,
+  trackProxyMetrics({
+    out,
+    noteChangeEntryCounts,
+  }: {
+    out: CommandOutput;
+    noteChangeEntryCounts: {
+      createdCount?: number;
+      deletedCount?: number;
+      updatedCount?: number;
     };
+  }) {
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults } = engine;
+
+    // only look at origin note
+    const { origin } = out;
+
+    const headers = _.toArray(origin.anchors).filter((anchor) => {
+      return anchor !== undefined && anchor.type === "header";
+    }) as DNoteHeaderAnchor[];
+
+    const numOriginHeaders = headers.length;
+    const originHeaderDepths = headers.map((header) => header.depth);
+    const maxOriginHeaderDepth = _.max(originHeaderDepths);
+    const meanOriginHeaderDepth = _.mean(originHeaderDepths);
+    const movedHeaders = out.nodesToMove.filter((node) => {
+      return node.type === "heading";
+    }) as Heading[];
+    const numMovedHeaders = movedHeaders.length;
+    const movedHeaderDepths = movedHeaders.map((header) => header.depth);
+    const maxMovedHeaderDepth = _.max(movedHeaderDepths);
+    const meanMovedHeaderDepth = _.mean(movedHeaderDepths);
+
+    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
+      command: this.key,
+      ...noteChangeEntryCounts,
+      traits: origin.traits || [],
+      numVaults: vaults.length,
+      numChildren: origin.children.length,
+      numlinks: origin.links.length,
+      numChars: origin.body.length,
+      noteDepth: DNodeUtils.getDepth(origin),
+      numOriginHeaders,
+      maxOriginHeaderDepth,
+      meanOriginHeaderDepth,
+      numMovedHeaders,
+      maxMovedHeaderDepth,
+      meanMovedHeaderDepth,
+    });
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+
+    try {
+      this.trackProxyMetrics({ out, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+
+    return noteChangeEntryCounts;
   }
 }

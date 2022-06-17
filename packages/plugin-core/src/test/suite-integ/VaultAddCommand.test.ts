@@ -16,8 +16,8 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
-import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import { FileTestUtils, SinonStubbedFn } from "@dendronhq/common-test-utils";
+import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
 import {
   checkVaults,
   GitTestUtils,
@@ -546,6 +546,114 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         });
         expect(note).toBeTruthy();
         expect(note?.vault.name).toEqual(vaultName);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN adding a remote self contained vault with transitive deps",
+    { modConfigCb: enableSelfCOntainedVaults },
+    () => {
+      let vaultName: string;
+      let remoteDir: string;
+      let transitiveDir: string;
+      let showMessageStub: SinonStubbedFn<typeof VSCodeUtils["showMessage"]>;
+      before(async () => {
+        // Create two self contained vaults with git. Add the first one into the second one.
+        // The first vault becomes a transitive dependency.
+        transitiveDir = tmpDir().name;
+        await createSelfContainedVaultWithGit(transitiveDir);
+        remoteDir = tmpDir().name;
+        await createSelfContainedVaultWithGit(remoteDir);
+        const wsService = new WorkspaceService({ wsRoot: remoteDir });
+        await wsService.createSelfContainedVault({
+          addToConfig: true,
+          addToCodeWorkspace: true,
+          vault: {
+            fsPath: "transitive",
+            selfContained: true,
+            remote: {
+              type: "git",
+              url: transitiveDir,
+            },
+          },
+        });
+        wsService.dispose();
+        const git = new Git({
+          localUrl: remoteDir,
+        });
+        await git.addAll();
+        await git.commit({ msg: "add transitive dep" });
+
+        vaultName = path.basename(remoteDir);
+
+        // Now, run the command to add the second vault into the current
+        // workspace. It should add the second vault, but prompt that the first
+        // vault won't be added because we don't support transitive
+        // dependencies.
+        showMessageStub = sinon
+          .stub(VSCodeUtils, "showMessage")
+          .resolves({ title: "" });
+        sinon.stub(VSCodeUtils, "showQuickPick").resolves({ label: "remote" });
+        sinon.stub(VSCodeUtils, "showInputBox").resolves(remoteDir);
+        sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
+
+        await new VaultAddCommand().run();
+      });
+
+      test("THEN the vault is under `dependencies/remote`, and is self contained", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        // It's kinda hard to mock git cloning from a remote here, so the remote
+        // we're using is a directory. Because of that, the name of the vault
+        // will fall back to the directory name.
+        const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
+        expect(await fs.pathExists(vaultPath)).toBeTruthy();
+        expect(
+          await fs.pathExists(path.join(vaultPath, FOLDERS.NOTES))
+        ).toBeTruthy();
+        expect(
+          await readYAMLAsync(
+            path.join(vaultPath, CONSTANTS.DENDRON_CONFIG_FILE)
+          )
+        ).toBeTruthy();
+      });
+
+      test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const config = DConfig.getOrCreate(wsRoot);
+        const vault = VaultUtils.getVaultByName({
+          vaults: ConfigUtils.getVaults(config),
+          vname: vaultName,
+        });
+        expect(vault?.selfContained).toBeTruthy();
+        expect(vault?.name).toEqual(vaultName);
+        expect(vault?.fsPath).toEqual(
+          path.join(FOLDERS.DEPENDENCIES, vaultName)
+        );
+        expect(vault?.remote?.url).toEqual(remoteDir);
+      });
+
+      test("THEN the notes in this vault are accessible", async () => {
+        // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
+        await new ReloadIndexCommand().run();
+        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const vault = VaultUtils.getVaultByName({
+          vaults,
+          vname: vaultName,
+        });
+        expect(vault).toBeTruthy();
+        const note = NoteUtils.getNoteByFnameFromEngine({
+          fname: "root",
+          vault: vault!,
+          engine,
+        });
+        expect(note).toBeTruthy();
+        expect(note?.vault.name).toEqual(vaultName);
+      });
+
+      test("THEN we prompted the user that the transitive dependency is not supported", async () => {
+        // Called once to prompt the user that the transitive dependency is not supported
+        expect(showMessageStub.calledOnce).toBeTruthy();
       });
     }
   );

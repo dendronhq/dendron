@@ -5,10 +5,9 @@ import {
   NoteProps,
 } from "@dendronhq/common-all";
 import * as nodePath from "path";
-import { shouldExcludePath } from "./should-exclude-path";
+import { shouldExcludePath } from "./shouldExcludePath";
 import { FileType } from "./types";
 
-//TODO: What does dir stand for (directory)? Can a directory be passed as an argument or only markdown files?
 function isDir(note: NoteProps) {
   return note.children.length !== 0;
 }

@@ -4,7 +4,7 @@ import { VaultUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { processDir } from "./process-dendron-notes";
+import { processDir } from "./processDendronNotes";
 import { createTree } from "./Tree";
 import { InputArgs, VisualizationInput } from "./types";
 import path from "path";

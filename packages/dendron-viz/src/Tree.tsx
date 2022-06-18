@@ -8,12 +8,14 @@ import maxBy from "lodash/maxBy";
 import entries from "lodash/entries";
 import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
-// file colors are from the github/linguist repo
-import defaultFileColors from "./language-colors.json";
 import { CircleText } from "./CircleText";
 import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
 
 const loadModule = require("./loadModule");
+
+//TODO: Set default colors for different file types. Adjust this so that different types of notes (ex. schemas or journals)
+// can be color coded differently
+const defaultColors = {};
 
 type Props = {
   data: FileType;
@@ -71,7 +73,7 @@ export async function createTree() {
     customFileColors,
   }: Props) => {
     const fileColors: { [key: string]: string } = {
-      ...defaultFileColors,
+      ...defaultColors,
       ...customFileColors,
     };
     const [selectedNodeId] = useState(null);

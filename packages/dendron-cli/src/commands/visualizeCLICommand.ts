@@ -11,7 +11,7 @@ export class VisualizeCLICommand extends CLICommand {
   constructor() {
     super({
       name: "visualize",
-      desc: "generates a fingerprint visualization of Dendron workspace",
+      desc: "generates a packed circles visualization of Dendron workspace",
     });
   }
 

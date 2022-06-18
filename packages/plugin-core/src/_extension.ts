@@ -921,6 +921,19 @@ async function _setupCommands({
         )
       );
     }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_VISUALIZATION.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_VISUALIZATION.key,
+          async () => {
+            await new ShowVisualizationCommand(
+              VisualizationFactory.create(ws, ws.getEngine())
+            ).run();
+          }
+        )
+      );
+    }
   }
 
   // NOTE: seed commands currently DO NOT take extension as a first argument

@@ -3,12 +3,13 @@
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 import * as vscode from "vscode";
-import {
-  DendronEditorViewKey,
-  getWebEditorViewEntry,
-} from "@dendronhq/common-all";
-import { ExtensionProvider } from "../ExtensionProvider";
-import { WebViewUtils } from "../views/utils";
+import { VisualizationFactory } from "../components/views/VisualizationFactory";
+// import {
+//   DendronEditorViewKey,
+//   getWebEditorViewEntry,
+// } from "@dendronhq/common-all";
+// import { ExtensionProvider } from "../ExtensionProvider";
+// import { WebViewUtils } from "../views/utils";
 
 type CommandOpts = {};
 
@@ -18,40 +19,35 @@ export class ShowVisualizationCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_VISUALIZATION.key;
   static requireActiveWorkspace: boolean = true;
 
-  private _view;
+  key = DENDRON_COMMANDS.SHOW_VISUALIZATION.key;
 
-  constructor(view: vscode.WebviewView) {
+  private _panel;
+
+  /* Get the panel on which to display visualization */
+  constructor(panel: vscode.WebviewPanel) {
     super();
-    this._view = view;
-    console.log("view:", this._view);
+    this._panel = panel;
   }
 
   async execute() {
-    console.log("Hello from Show Visualization Command");
-
-    const { bundleName: name } = getWebEditorViewEntry(
-      DendronEditorViewKey.VISUALIZATION
-    );
-
-    const ext = ExtensionProvider.getExtension();
-    const port = ext.port!;
-    const engine = ext.getEngine();
-    const { wsRoot } = engine;
-
-    const webViewAssets = WebViewUtils.getJsAndCss();
-    const html = await WebViewUtils.getWebviewContent({
-      ...webViewAssets,
-      name,
-      port,
-      wsRoot,
-      panel: this._view,
-    });
-
-    console.log("webview", this._view.webview);
-
-    this._view.webview.html = html;
+    console.log(this._panel);
+    // const panel = await VisualizationFactory.create();
+    // panel.webview.html = getWebviewContent();
   }
 }
+
+// function getWebviewContent() {
+//   return `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8">
+//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//     <title>Cat Coding</title>
+// </head>
+// <body>
+//     <h1>Hello World</h1>
+// </body>
+// </html>`;
+// }

@@ -202,7 +202,7 @@ export class GitUtils {
     // If none of these worked, try to make a fallback path. This may be because
     // the remote points to a local directory, or because it's something we
     // didn't expect.
-    const fallback = _.findLast(url.split(/[/\\]/), (part) => part.length > 0);
+    const fallback = _.findLast(url.split(/[/\\]/), (part: string) => part.length > 0);
     if (fallback) return fallback;
     // Fallback for the fallback: if all else fails, just use the vault name
     return vaultName;
@@ -222,7 +222,7 @@ export class GitUtils {
     const vaultName =
       vault.name ??
       // if the vault has no name, compute one based on the path
-      _.findLast(vault.fsPath.split(/[/\\]/), (part) => part.length > 0) ??
+      _.findLast(vault.fsPath.split(/[/\\]/), (part: string) => part.length > 0) ??
       // Fall back to fsPath directly if the calculation fails
       vault.fsPath;
 

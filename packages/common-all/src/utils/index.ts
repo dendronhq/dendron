@@ -872,7 +872,7 @@ export class ConfigUtils {
       opts.note.config.global &&
       !_.isUndefined(opts.note.config.global.enableChildLinks)
     ) {
-      return opts.note.config.global.enableChildLinks;
+      return opts.note.config.global.enableChildLinks!;
     }
     return true;
   }
@@ -888,7 +888,7 @@ export class ConfigUtils {
       opts.note.config.global &&
       _.isBoolean(opts.note.config.global.enableBackLinks)
     ) {
-      return opts.note.config.global.enableBackLinks;
+      return opts.note.config.global.enableBackLinks!;
     }
     // check config value, if enableBacklinks set, then use value set
     const publishConfig = ConfigUtils.getPublishingConfig(_config);
@@ -897,7 +897,7 @@ export class ConfigUtils {
       opts?.shouldApplyPublishingRules
     ) {
       if (_.isBoolean(publishConfig.enableBackLinks)) {
-        return publishConfig.enableBackLinks;
+        return publishConfig.enableBackLinks!;
       }
     }
     return true;
@@ -1133,7 +1133,7 @@ export class ConfigUtils {
     }
 
     const minCompatClientVersion =
-      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion].clientVersion;
+      CONFIG_TO_MINIMUM_COMPAT_MAPPING[configVersion!].clientVersion;
 
     if (_.isUndefined(minCompatClientVersion)) {
       throw new DendronError({
@@ -1170,7 +1170,7 @@ export class ConfigUtils {
     });
 
     const configVersionCompatible =
-      Number(minCompatConfigVersion) <= configVersion;
+      Number(minCompatConfigVersion) <= configVersion!;
 
     const isValid = clientVersionCompatible && configVersionCompatible;
     if (!isValid) {

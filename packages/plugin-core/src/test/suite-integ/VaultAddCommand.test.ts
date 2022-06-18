@@ -576,6 +576,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         await wsService.createSelfContainedVault({
           addToConfig: true,
           addToCodeWorkspace: true,
+          newVault: true,
           vault: {
             fsPath: "transitive",
             selfContained: true,

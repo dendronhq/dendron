@@ -629,6 +629,27 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
+  // For an empty selection, check if the cursor is within a wiki link,
+  //  if so, let the link be the default path in the lookup dialog box;
+  // For a non empty selection, just pass it to the `handler`;
+  //
+  // the definition guarantees that quickPick is passed by reference;
+  private onSelectionBtnToggled(
+    quickPick: DendronQuickPickerV2,
+    handler?: (text: string, quickPick: DendronQuickPickerV2) => void
+  ) {
+    let { text } = VSCodeUtils.getSelection();
+    text = text!.trim();
+    if (text === "") {
+      const { link } = VSCodeUtils.getWikiLinkFromCursor();
+      if (link !== "") {
+        quickPick.value = link;
+      }
+    } else if (handler !== undefined) {
+      handler(text, quickPick);
+    }
+  }
+
   private onSelectionExtractBtnToggled(enabled: boolean) {
     const quickPick = this._quickPick!;
     if (enabled) {
@@ -638,6 +659,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           note,
         });
       };
+      this.onSelectionBtnToggled(quickPick);
     } else {
       quickPick.selectionProcessFunc = undefined;
     }
@@ -652,19 +674,22 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           note,
         });
       };
-
-      quickPick.prevValue = quickPick.value;
-      const { text } = VSCodeUtils.getSelection();
-      const slugger = getSlugger();
-      quickPick.selectionModifierValue = slugger.slug(text!);
-      if (quickPick.noteModifierValue || quickPick.prefix) {
-        quickPick.value = NotePickerUtils.getPickerValue(quickPick);
-      } else {
-        quickPick.value = [
-          quickPick.rawValue,
-          NotePickerUtils.getPickerValue(quickPick),
-        ].join(".");
-      }
+      this.onSelectionBtnToggled(
+        quickPick,
+        (selectedText: string, quickPick) => {
+          quickPick.prevValue = quickPick.value;
+          const slugger = getSlugger();
+          quickPick.selectionModifierValue = slugger.slug(selectedText);
+          if (quickPick.noteModifierValue || quickPick.prefix) {
+            quickPick.value = NotePickerUtils.getPickerValue(quickPick);
+          } else {
+            quickPick.value = [
+              quickPick.rawValue,
+              NotePickerUtils.getPickerValue(quickPick),
+            ].join(".");
+          }
+        }
+      );
       return;
     } else {
       quickPick.selectionProcessFunc = undefined;

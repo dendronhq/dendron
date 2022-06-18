@@ -93,6 +93,45 @@ export class VSCodeUtils {
     return { document, range };
   };
 
+  static getWikiLinkFromCursor = (
+    documentParam?: vscode.TextDocument
+  ): { label: string; link: string } => {
+    const document = documentParam || vscode.window.activeTextEditor?.document;
+
+    if (!document || (document && document.languageId !== "markdown")) {
+      return { label: "", link: "" };
+    }
+
+    const active = vscode.window.activeTextEditor!.selection.active;
+    const range = document.getWordRangeAtPosition(active, /\[\[.*\]\]/);
+
+    if (!range || (range && range.isEmpty)) {
+      return { label: "", link: "" };
+    }
+
+    return this.parseWikiLink(document.getText(range));
+  };
+
+  // split [[  label | link]]
+  static parseWikiLink = (
+    input: string
+  ): {
+    label: string;
+    link: string;
+  } => {
+    const regex = /^\[\[(?:(?=.+\|)(.+)\|(.+)|(.+))\]\]$/;
+    const m = regex.exec(input);
+    if (m === null) {
+      return { label: "", link: "" };
+    }
+
+    if (m[1] === undefined) {
+      return { label: "", link: m[3].trim() };
+    } else {
+      return { label: m[1].trim(), link: m[2].trim() };
+    }
+  };
+
   static deleteRange = async (
     document: vscode.TextDocument,
     range: vscode.Range

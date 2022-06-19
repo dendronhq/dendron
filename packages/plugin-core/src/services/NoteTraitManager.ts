@@ -1,4 +1,5 @@
 import {
+  asyncLoopOneAtATime,
   CONSTANTS,
   DendronError,
   ERROR_SEVERITY,
@@ -145,11 +146,11 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
       let traitHasSetNameModifierImplCount = 0;
       let traitHasSetTemplateImplCount = 0;
 
-      files.forEach((file) => {
+      asyncLoopOneAtATime(files, async (file) => {
         if (file.endsWith(".js")) {
           traitJSFileCount += 1;
 
-          const resp = this.setupTraitFromJSFile(
+          const resp = await this.setupTraitFromJSFile(
             path.join(userTraitsPath, file)
           );
 
@@ -188,11 +189,24 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
     }
   }
 
-  private setupTraitFromJSFile(fsPath: string): RespV2<NoteTrait> {
+  private async setupTraitFromJSFile(
+    fsPath: string
+  ): Promise<RespV2<NoteTrait>> {
     const traitId = path.basename(fsPath, ".js");
 
     this.L.info("Registering User Defined Note Trait with ID " + traitId);
     const newNoteTrait = new UserDefinedTraitV1(traitId, fsPath);
+
+    try {
+      await newNoteTrait.initialize();
+    } catch (error: any) {
+      return {
+        error: new DendronError({
+          message: `Error in ${path.basename(fsPath)} file.`,
+          innerError: error,
+        }),
+      };
+    }
 
     const resp = this.registerTrait(newNoteTrait);
 
@@ -226,7 +240,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
 
     this._watcher.onDidChange(
       // Need to debounce this, for some reason it fires 4 times each save
-      _.debounce((uri) => {
+      _.debounce(async (uri) => {
         const traitId = path.basename(uri.fsPath, ".js");
 
         // First unregister if it exists already (and then re-register)
@@ -234,11 +248,15 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
           this.unregisterTrait(this.registeredTraits.get(traitId)!);
         }
 
-        const resp = this.setupTraitFromJSFile(uri.fsPath);
+        const resp = await this.setupTraitFromJSFile(uri.fsPath);
 
         if (ResponseUtil.hasError(resp)) {
           const errMessage = `${resp.error?.message}\n${resp.error?.innerError?.stack}`;
           vscode.window.showErrorMessage(errMessage);
+        } else {
+          vscode.window.showInformationMessage(
+            `Note trait ${traitId} successfully registered.`
+          );
         }
       }),
       250 // 250 ms debounce interval

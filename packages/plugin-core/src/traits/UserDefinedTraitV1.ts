@@ -9,7 +9,7 @@ import fs from "fs-extra";
 import path from "path";
 
 /**
- * A NoteTrait that will execute end-user defined javascript code.
+ * A Note Trait that will execute end-user defined javascript code.
  */
 export class UserDefinedTraitV1 implements NoteTrait {
   id: string;

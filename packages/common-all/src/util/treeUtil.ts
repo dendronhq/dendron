@@ -1,9 +1,8 @@
 import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { PublishUtils } from "../publish";
 import { NotePropsByIdDict, NoteProps } from "../types";
-import { isNotUndefined } from "../utils";
+import { isNotUndefined, PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 
 export enum TreeMenuNodeIcon {

@@ -58,9 +58,9 @@ suite("NoteTraitManager tests", () => {
 
   describe(`GIVEN a user defined trait in a JS file`, () => {
     describeSingleWS("WHEN registering the trait", {}, () => {
-      let trait: NoteTrait;
+      let trait: UserDefinedTraitV1;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         trait = new UserDefinedTraitV1(
           "foo",
           path.resolve(
@@ -68,6 +68,8 @@ suite("NoteTraitManager tests", () => {
             "../../../../../../src/test/suite-integ/components/traits/testJSTraits/UserTestTrait.js"
           )
         );
+
+        await trait.initialize();
       });
 
       test(`THEN setNameModifier can be properly invoked AND context props can be accessed`, () => {
@@ -89,10 +91,10 @@ suite("NoteTraitManager tests", () => {
     });
   });
 
-  describe(`GIVEN a user defined trait with module requires`, () => {
+  describe(`GIVEN a user defined trait with invalid JS`, () => {
     describeSingleWS("WHEN registering the trait", {}, (ctx) => {
       let registrar: CommandRegistrar;
-      let trait: NoteTrait;
+      let trait: UserDefinedTraitV1;
 
       afterEach(() => {
         if (registrar && trait) {
@@ -100,7 +102,50 @@ suite("NoteTraitManager tests", () => {
         }
       });
 
-      test(`THEN registration succeeds and lodash and luxon modules can be invoked`, () => {
+      test(`THEN registration fails and a helpful error message is provided`, async () => {
+        const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const mockExtension = new MockDendronExtension({
+          engine,
+          wsRoot,
+          context: ctx,
+        });
+        registrar = new CommandRegistrar(mockExtension);
+
+        trait = new UserDefinedTraitV1(
+          "foo",
+          path.resolve(
+            __dirname,
+            "../../../../../../src/test/suite-integ/components/traits/testJSTraits/InvalidTestTrait.js"
+          )
+        );
+
+        await trait.initialize();
+
+        const traitManager = new NoteTraitManager(wsRoot, registrar);
+        const resp = traitManager.registerTrait(trait);
+
+        expect(resp.error).toBeTruthy();
+
+        // The Invalid JS is inside the setNameModifier function, so expect it
+        // to be in the error message.
+        expect(resp.error?.message.includes("OnWillCreate.setNameModifier"));
+        expect(resp.error?.innerError).toBeTruthy();
+      });
+    });
+  });
+
+  describe(`GIVEN a user defined trait with module requires`, () => {
+    describeSingleWS("WHEN registering the trait", {}, (ctx) => {
+      let registrar: CommandRegistrar;
+      let trait: UserDefinedTraitV1;
+
+      afterEach(() => {
+        if (registrar && trait) {
+          registrar.unregisterTrait(trait);
+        }
+      });
+
+      test(`THEN registration succeeds and lodash and luxon modules can be invoked`, async () => {
         const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const mockExtension = new MockDendronExtension({
           engine,
@@ -116,6 +161,8 @@ suite("NoteTraitManager tests", () => {
             "../../../../../../src/test/suite-integ/components/traits/testJSTraits/TestTraitUsingModules.js"
           )
         );
+
+        await trait.initialize();
 
         const traitManager = new NoteTraitManager(wsRoot, registrar);
         const resp = traitManager.registerTrait(trait);

@@ -140,7 +140,29 @@ export class RegisterNoteTraitCommand extends BasicCommand<
     fs.writeFileSync(scriptPath, noteTraitTemplate);
 
     const newNoteTrait = new UserDefinedTraitV1(opts.traitId, scriptPath);
-    ExtensionProvider.getExtension().traitRegistrar.registerTrait(newNoteTrait);
+
+    try {
+      await newNoteTrait.initialize();
+    } catch (error: any) {
+      const msg = `Error registering note trait ${opts.traitId}\n${error.stack}`;
+
+      this.L.error({
+        msg,
+      });
+    }
+
+    const resp =
+      ExtensionProvider.getExtension().traitRegistrar.registerTrait(
+        newNoteTrait
+      );
+
+    if (resp.error) {
+      const msg = `Error registering note trait ${opts.traitId}\n${resp.error.innerError?.stack}`;
+
+      this.L.error({
+        msg,
+      });
+    }
 
     await VSCodeUtils.openFileInEditor(vscode.Uri.file(scriptPath));
     return;

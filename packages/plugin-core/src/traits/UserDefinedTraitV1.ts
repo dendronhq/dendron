@@ -5,11 +5,11 @@ import {
   onCreateProps,
   onWillCreateProps,
 } from "@dendronhq/common-all";
+import fs from "fs-extra";
+import path from "path";
 
 /**
- * A NoteTrait that will execute end-user defined javascript code. TODO: Support
- * hot reload (user doesn't need to reload window in order for their changes to
- * take effect)
+ * A NoteTrait that will execute end-user defined javascript code.
  */
 export class UserDefinedTraitV1 implements NoteTrait {
   id: string;
@@ -27,20 +27,27 @@ export class UserDefinedTraitV1 implements NoteTrait {
   constructor(traitId: string, scriptPath: string) {
     this.id = traitId;
     this.scriptPath = scriptPath;
-
-    this.OnCreate = UserDefinedTraitV1.getOnCreateProps(scriptPath);
-    this.OnWillCreate = UserDefinedTraitV1.getOnWillCreateProps(scriptPath);
   }
 
-  private static getOnWillCreateProps(noteTypeScriptPath: string) {
-    const hack = require(`./webpack-require-hack.js`);
-    const req: NoteTrait = hack(noteTypeScriptPath);
-    return req.OnWillCreate;
-  }
+  /**
+   * This method needs to be called before a user defined trait's defined
+   * methods will be invoked.
+   */
+  async initialize() {
+    // Copy the user's JS file to somewhere in the current node execution path.
+    // This allows any module.requires (such as lodash, luxon) in the user's JS
+    // file to properly resolve and gives the user full access to any node
+    // modules Dendron is using.
+    const userTraitsPath = path.join(__dirname, "user-traits");
+    const destPath = path.join(userTraitsPath, path.basename(this.scriptPath));
 
-  private static getOnCreateProps(noteTypeScriptPath: string) {
+    fs.ensureDirSync(userTraitsPath);
+    fs.copyFileSync(this.scriptPath, destPath);
+
     const hack = require(`./webpack-require-hack.js`);
-    const req: NoteTrait = hack(noteTypeScriptPath);
-    return req.OnCreate;
+    const trait = hack(destPath);
+
+    this.OnCreate = trait.OnCreate;
+    this.OnWillCreate = trait.OnWillCreate;
   }
 }

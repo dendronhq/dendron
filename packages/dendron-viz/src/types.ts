@@ -30,3 +30,4 @@ export type InputArgs = {
 export type VisualizationInput = InputArgs & {
   engine: DEngineClient;
 };
+export type Visualizations = { [key: string]: string };

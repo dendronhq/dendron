@@ -144,7 +144,6 @@ const ALL_COMMANDS = [
   SetupWorkspaceCommand,
   ShowHelpCommand,
   ShowLegacyPreviewCommand,
-  ShowVisualizationCommand,
   SignInCommand,
   SignUpCommand,
   PublishExportCommand,

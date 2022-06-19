@@ -1,4 +1,8 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  IntermediateDendronConfig,
+  NoteProps,
+} from "@dendronhq/common-all";
 import {
   createLogger,
   DendronNote,
@@ -6,6 +10,7 @@ import {
 } from "@dendronhq/common-frontend";
 import { Col, Row } from "antd";
 import _ from "lodash";
+import dynamic from "next/dynamic";
 import React from "react";
 import { DendronCollectionItem } from "../components/DendronCollection";
 import DendronCustomHead from "../components/DendronCustomHead";
@@ -28,6 +33,7 @@ export type DendronNotePageProps = {
   collectionChildren: NoteProps[] | null;
   config: IntermediateDendronConfig;
 };
+let BannerAlert: any | undefined;
 
 export default function Note({
   note,
@@ -46,6 +52,20 @@ export default function Note({
   if (id === "root") {
     id = noteIndex.id;
   }
+
+  const shouldLoadBanner = true;
+  React.useEffect(() => {
+    if (ConfigUtils.getPublishing(config).siteBanner === "custom") {
+      logger.info({ ctx: "loading banner" });
+      try {
+        // eslint-disable-next-line global-require
+        BannerAlert = dynamic(() => import("../custom/BannerAlert"), {
+          loading: () => null,
+        });
+        // eslint-disable-next-line no-empty
+      } catch (err) {}
+    }
+  }, []);
 
   // --- Hooks
   const dispatch = useCombinedDispatch();
@@ -99,6 +119,7 @@ export default function Note({
         <Col span={24}>
           <Row gutter={20}>
             <Col xs={24} md={18}>
+              {BannerAlert && <BannerAlert />}
               <DendronNote noteContent={noteBody} config={config} />
               {maybeCollection}
             </Col>

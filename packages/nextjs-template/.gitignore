@@ -46,3 +46,4 @@ sitemap.xml
 public/*.html
 dist
 .env.production
+custom/*

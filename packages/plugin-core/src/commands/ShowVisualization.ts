@@ -1,15 +1,8 @@
-// import { WebViewPanelFactory } from "./SeedBrowseCommand";
-// import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 import * as vscode from "vscode";
-import { VisualizationFactory } from "../components/views/VisualizationFactory";
-// import {
-//   DendronEditorViewKey,
-//   getWebEditorViewEntry,
-// } from "@dendronhq/common-all";
-// import { ExtensionProvider } from "../ExtensionProvider";
-// import { WebViewUtils } from "../views/utils";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { getVisualizationContent } from "@dendronhq/dendron-viz";
 
 type CommandOpts = {};
 
@@ -32,11 +25,17 @@ export class ShowVisualizationCommand extends BasicCommand<
   }
 
   async execute() {
-    this._panel.webview.html = getWebviewContent();
+    const ext = ExtensionProvider.getExtension();
+    const engine = ext.getEngine();
+    const { wsRoot } = engine;
+
+    const visualizations = await getVisualizationContent({ engine, wsRoot });
+    const thirdVault = Object.values(visualizations)[3];
+    this._panel.webview.html = createHTML(thirdVault);
   }
 }
 
-function getWebviewContent() {
+function createHTML(content: string) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,7 +44,7 @@ function getWebviewContent() {
     <title>Cat Coding</title>
 </head>
 <body>
-    <h1>Hello World</h1>
+    ${content}
 </body>
 </html>`;
 }

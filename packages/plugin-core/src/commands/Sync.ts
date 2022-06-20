@@ -265,8 +265,8 @@ export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
     const pushedDone = WorkspaceUtils.getCountForStatusDone(pushed);
     const repos = (count: number) => (count === 1 ? "repo" : "repos");
     message.push(`Committed ${committedDone} ${repos(committedDone)},`);
-    message.push(`tried pulling ${pulledDone}`);
-    message.push(`and pushing ${pushedDone} ${repos(pushedDone)}.`);
+    message.push(`pulled ${pulledDone}`);
+    message.push(`and pushed ${pushedDone} ${repos(pushedDone)}.`);
     const finalMessage = message.join(" ");
 
     VSCodeUtils.showMessage(maxMessageSeverity, finalMessage, {});

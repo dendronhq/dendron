@@ -1,15 +1,14 @@
 import {
   assertUnreachable,
-  IntermediateDendronConfig,
+  ConfigUtils,
   DendronError,
   DEngineClient,
   DVault,
   ERROR_STATUS,
+  IntermediateDendronConfig,
+  NoteProps,
   NotePropsByIdDict,
   NoteUtils,
-  NoteProps,
-  DateTime,
-  ConfigUtils,
   ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -17,8 +16,8 @@ import rehypePrism from "@mapbox/rehype-prism";
 // @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
-import math from "remark-math";
 import link from "rehype-autolink-headings";
+import math from "remark-math";
 // @ts-ignore
 import variables from "remark-variables";
 // @ts-ignore
@@ -33,21 +32,19 @@ import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
+import { hierarchies } from "./remark";
+import { backlinks } from "./remark/backlinks";
+import { BacklinkOpts, backlinksHover } from "./remark/backlinksHover";
 import { blockAnchors } from "./remark/blockAnchors";
 import { dendronHoverPreview } from "./remark/dendronPreview";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
+import { extendedImage } from "./remark/extendedImage";
+import { hashtags } from "./remark/hashtag";
 import { noteRefsV2 } from "./remark/noteRefsV2";
+import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV4 } from "./utils";
-import { hashtags } from "./remark/hashtag";
-import { userTags } from "./remark/userTags";
-import { backlinks } from "./remark/backlinks";
-import { hierarchies } from "./remark";
-import { extendedImage } from "./remark/extendedImage";
-import { WorkspaceService } from "../workspace";
-import { DateTimeFormatOptions } from "luxon";
-import { backlinksHover, BacklinkOpts } from "./remark/backlinksHover";
 
 export { ProcFlavor };
 
@@ -217,29 +214,16 @@ export class MDUtilsV5 {
     );
   }
 
-  static getFM(opts: { note: NoteProps; wsRoot: string }) {
-    const { note, wsRoot } = opts;
-
+  static getFM(opts: { note: NoteProps }) {
+    const { note } = opts;
     const custom = note.custom ? note.custom : undefined;
-
-    const ws = new WorkspaceService({ wsRoot });
-    const wsConfig = ws.getCodeWorkspaceSettingsSync();
-    ws.dispose();
-    const timestampConfig: keyof typeof DateTime =
-      wsConfig?.settings["dendron.defaultTimestampDecorationFormat"];
-    const formatOption = DateTime[timestampConfig] as
-      | DateTimeFormatOptions
-      | undefined;
-    const created = DateTime.fromMillis(_.toInteger(note.created));
-    const updated = DateTime.fromMillis(_.toInteger(note.updated));
-
     return {
       ...custom,
       id: note.id,
       title: note.title,
       desc: note.desc,
-      created: created.toLocaleString(formatOption),
-      updated: updated.toLocaleString(formatOption),
+      created: note.created,
+      updated: note.updated,
     };
   }
 
@@ -301,7 +285,7 @@ export class MDUtilsV5 {
           });
 
           if (!_.isUndefined(note)) {
-            proc = proc.data("fm", this.getFM({ note, wsRoot: data.wsRoot }));
+            proc = proc.data("fm", this.getFM({ note }));
           }
 
           // backwards compatibility, default to v4 values

@@ -9,13 +9,15 @@ const VALID_NAMES = [
   "DendronSchemaGraphPanel",
   "DendronSideGraphPanel",
   "SeedBrowser",
+  "Visualization",
 ];
 
 const elem = window.document.getElementById("root")!;
 const VIEW_NAME = elem.getAttribute("data-name")!;
 
+console.log("NAME VALID: ", VIEW_NAME);
+
 if (VALID_NAMES.includes(VIEW_NAME)) {
-  console.log("NAME VALID: ", VIEW_NAME);
   const View = require(`./components/${VIEW_NAME}`).default;
   let props = {
     padding: "inherit",

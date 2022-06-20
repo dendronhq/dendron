@@ -88,6 +88,14 @@ export type WriteConfigOpts = {
 };
 
 export class WorkspaceConfig {
+  static genDefaults(): WorkspaceSettings {
+    return {
+      folders: [],
+      settings: Settings.defaults(),
+      extensions: Extensions.defaults(),
+    };
+  }
+
   static workspaceFile(wsRoot: string) {
     return path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
   }
@@ -104,7 +112,9 @@ export class WorkspaceConfig {
       vaults,
       overrides: {},
     });
+    const defaultSettings = this.genDefaults();
     const jsonBody: WorkspaceSettings = _.merge(
+      defaultSettings,
       {
         folders: cleanOpts.vaults
           ? cleanOpts.vaults.map((ent) => ({
@@ -112,8 +122,6 @@ export class WorkspaceConfig {
               name: ent.name,
             }))
           : [],
-        settings: Settings.defaults(),
-        extensions: Extensions.defaults(),
       },
       cleanOpts.overrides
     );

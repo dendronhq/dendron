@@ -843,8 +843,7 @@ function convertNoteRefHelperAST(
     MDUtilsV5.getProcOpts(proc)
   );
 
-  const wsRoot = engine.wsRoot;
-  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
+  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note }));
   MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
 
   const bodyAST: DendronASTNode = noteRefProc.parse(

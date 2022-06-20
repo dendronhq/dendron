@@ -1,5 +1,7 @@
 import {
   ALIAS_NAME,
+  assertUnreachable,
+  DEngineClient,
   DNoteAnchor,
   ERROR_SEVERITY,
   genUUIDInsecure,
@@ -18,10 +20,12 @@ import {
   AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
+  HashTagUtils,
   HASHTAG_REGEX_LOOSE,
   LinkUtils,
   MDUtilsV5,
   ProcFlavor,
+  UserTagUtils,
   USERTAG_REGEX_LOOSE,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -125,6 +129,49 @@ function noteToCompletionItem({
   return item;
 }
 
+async function provideCompletionsForTag({
+  type,
+  engine,
+  found,
+  range,
+}: {
+  found: RegExpMatchArray | null;
+  type: "hashtag" | "usertag";
+  engine: DEngineClient;
+  range: Range;
+}) {
+  let prefix = "";
+  let tagValue = "";
+  switch (type) {
+    case "hashtag": {
+      prefix = TAGS_HIERARCHY;
+      tagValue = HashTagUtils.extractTagFromMatch(found) || "";
+      break;
+    }
+    case "usertag": {
+      prefix = USERS_HIERARCHY;
+      tagValue = UserTagUtils.extractTagFromMatch(found) || "";
+      break;
+    }
+    default: {
+      assertUnreachable(type);
+    }
+  }
+  const qsRaw = `${prefix}.${tagValue}`;
+  const notes = await NoteLookupUtils.lookup({
+    qsRaw,
+    engine,
+  });
+  return notes.map((note) =>
+    noteToCompletionItem({
+      note,
+      range,
+      lblTransform: (note) => `${note.fname.slice(prefix.length)}`,
+      insertTextTransform: (note) => `${note.fname.slice(prefix.length)}`,
+    })
+  );
+}
+
 export const provideCompletionItems = sentryReportingCallback(
   async (
     document: TextDocument,
@@ -209,31 +256,19 @@ export const provideCompletionItems = sentryReportingCallback(
     });
 
     if (found?.groups?.hashTag) {
-      const notes = await NoteLookupUtils.lookup({
-        qsRaw: `${TAGS_HIERARCHY}.`,
+      completionItems = await provideCompletionsForTag({
+        type: "hashtag",
         engine,
+        found,
+        range,
       });
-      completionItems = notes.map((note) =>
-        noteToCompletionItem({
-          note,
-          range,
-          lblTransform: (note) => `${note.fname.slice(TAGS_HIERARCHY.length)}`,
-          insertTextTransform: (note) => note.fname,
-        })
-      );
     } else if (found?.groups?.userTag) {
-      const notes = await NoteLookupUtils.lookup({
-        qsRaw: `${USERS_HIERARCHY}.`,
+      completionItems = await provideCompletionsForTag({
+        type: "usertag",
         engine,
+        found,
+        range,
       });
-      completionItems = notes.map((note) =>
-        noteToCompletionItem({
-          note,
-          range,
-          lblTransform: (note) => `${note.fname.slice(USERS_HIERARCHY.length)}`,
-          insertTextTransform: (note) => note.fname,
-        })
-      );
     } else {
       let qsRaw: string;
       if (found?.groups?.note) {

@@ -27,13 +27,13 @@ export {
   HASHTAG_REGEX_LOOSE,
   HASHTAG_REGEX_BASIC,
   hashtags,
-  matchHashtag,
+  HashTagUtils,
 } from "./hashtag";
 export {
   USERTAG_REGEX,
   USERTAG_REGEX_LOOSE,
   userTags,
-  matchUserTag,
+  UserTagUtils,
 } from "./userTags";
 export {
   extendedImage,

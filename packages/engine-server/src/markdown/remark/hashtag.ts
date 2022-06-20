@@ -67,20 +67,26 @@ export const HASHTAG_REGEX_LOOSE = new RegExp(
 /** Used for `getWordAtRange` queries. Too permissive, but the full regex breaks the function. */
 export const HASHTAG_REGEX_BASIC = new RegExp(`#${GOOD_MIDDLE_CHARACTER}+`);
 
-/**
- *
- * @param text The text to check if it matches an hashtag.
- * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
- * @returns The identifier for the matched hashtag, or undefined if it did not match.
- */
-export const matchHashtag = (
-  text: string,
-  matchLoose: boolean = true
-): string | undefined => {
-  const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(text);
-  if (match && match.groups) return match.groups.tagContents;
-  return undefined;
-};
+export class HashTagUtils {
+  static extractTagFromMatch(match: RegExpMatchArray | null) {
+    if (match && match.groups) return match.groups.tagContents;
+    return undefined;
+  }
+
+  /**
+   *
+   * @param text The text to check if it matches an hashtag.
+   * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
+   * @returns The identifier for the matched hashtag, or undefined if it did not match.
+   */
+  static matchHashtag = (
+    text: string,
+    matchLoose: boolean = true
+  ): string | undefined => {
+    const match = (matchLoose ? HASHTAG_REGEX : HASHTAG_REGEX_LOOSE).exec(text);
+    return this.extractTagFromMatch(match);
+  };
+}
 
 type PluginOpts = {};
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /* eslint-disable no-await-in-loop */
 
 import { VaultUtils } from "@dendronhq/common-all";

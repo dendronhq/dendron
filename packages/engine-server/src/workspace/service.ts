@@ -496,15 +496,19 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   async migrateVaultToSelfContained({ vault }: { vault: DVault }) {
-    if (vault.seed || vault.workspace) {
+    const backupInfix = "migrate-vault-sc";
+    if (vault.seed) {
       // Unsupported vaults are filtered in the commands that use this function,
       // but also adding a sanity check here.
       throw new DendronError({
         message:
-          "Seed vaults and workspace vaults are not yet supported for automated migration.",
+          "Seed vaults vaults are not yet supported for automated migration.",
       });
     }
-    const newVault: SelfContainedVault = { ...vault, selfContained: true };
+    const newVault: SelfContainedVault = {
+      ..._.omit(vault, "workspace"),
+      selfContained: true,
+    };
 
     // This will be something like wsRoot/vault
     const oldFolder = vault2Path({ wsRoot: this.wsRoot, vault });
@@ -550,8 +554,64 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
 
     // All updates to the config are done, finish by writing it
-    await DConfig.createBackup(this.wsRoot, "migrate-vault-sc");
+    await DConfig.createBackup(this.wsRoot, backupInfix);
     await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
+
+    const workspaceService = new WorkspaceService({ wsRoot: newFolder });
+
+    const vaultConfig: SelfContainedVault = {
+      // The config to be placed inside the vault, to function as a self contained vault
+      ..._.omit(newVault, "remote"),
+      fsPath: ".",
+    };
+    // Create or update the config file (dendron.yml) inside the vault
+    if (
+      !(await fs.pathExists(
+        path.join(newFolder, CONSTANTS.DENDRON_CONFIG_FILE)
+      ))
+    ) {
+      // No existing config, so create new one
+      await workspaceService.createSelfContainedVault({
+        addToCodeWorkspace: false,
+        addToConfig: true,
+        vault: vaultConfig,
+        newVault: true,
+      });
+    } else {
+      // There's already a config file in the vault, update the existing one
+      await DConfig.createBackup(newFolder, backupInfix);
+      const config = DConfig.getOrCreate(newFolder);
+      ConfigUtils.setVaults(config, [vaultConfig]);
+      await DConfig.writeConfig({ wsRoot: newFolder, config });
+    }
+
+    // Create or update the workspace file (dendron.code-workspace) inside the vault
+    if (
+      !(await fs.pathExists(path.join(newFolder, CONSTANTS.DENDRON_WS_NAME)))
+    ) {
+      // No existing config, create a new one
+      await workspaceService.createSelfContainedVault({
+        addToCodeWorkspace: true,
+        addToConfig: false,
+        vault: vaultConfig,
+        newVault: true,
+      });
+    } else {
+      // There's already a config file in the vault, update the existing one
+      await WorkspaceUtils.updateCodeWorkspaceSettings({
+        wsRoot: newFolder,
+        updateCb: (settings) => {
+          settings.folders = [
+            {
+              path: FOLDERS.NOTES,
+              name: VaultUtils.getName(newVault),
+            },
+          ];
+          return settings;
+        },
+      });
+    }
+    workspaceService.dispose();
 
     // Update the config for the vault
     return newVault;

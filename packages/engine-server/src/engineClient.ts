@@ -440,7 +440,12 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
     const noteClean = resp.data;
     if (_.isUndefined(noteClean)) {
-      throw new DendronError({ message: "error updating note", payload: resp });
+      throw new DendronError({
+        message: `error updating note: ${JSON.stringify(
+          NoteUtils.toNoteLoc(note)
+        )}`,
+        payload: resp,
+      });
     }
 
     // If no note existed, treat this as a create.

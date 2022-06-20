@@ -728,19 +728,31 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
+   * TODO: this should return a ERROR
    * See {@link FileStorageV2.updateNote}
    * @param note
    * @param opts
    * @returns
    */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
-    const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
-      note,
-      engine: this,
-    });
-    const out = this.store.updateNote(noteWithLinks, opts);
-    await this.updateIndex("note");
-    return out;
+    const ctx = "updateNote";
+    this.logger.debug({ ctx, msg: "enter", note: NoteUtils.toNoteLoc(note) });
+    const engine = this as DEngineClient;
+    try {
+      const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+        note,
+        engine,
+      });
+      this.logger.debug({ ctx, msg: "post:refreshed note links and anchors" });
+      const out = this.store.updateNote(noteWithLinks, opts);
+      this.logger.debug({ ctx, msg: "post:updateNote" });
+      await this.updateIndex("note");
+      this.logger.debug({ ctx, msg: "post:updateIndex" });
+      return out;
+    } catch (err) {
+      this.logger.error({ ctx, msg: error2PlainObject(err as Error) });
+      throw err;
+    }
   }
 
   async updateIndex(mode: DNodeType) {

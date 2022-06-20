@@ -71,7 +71,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           templateNote.body = eqHelper;
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
-          ).toEqual({
+          ).toMatchObject({
             fnameToDate: 0,
             eq: 1,
             getDayOfWeek: 0,
@@ -89,7 +89,7 @@ describe(`WHEN running applyTemplate tests`, () => {
           ].join("\n");
           expect(
             TemplateUtils.genTrackPayload(templateNote).helperStats
-          ).toEqual({
+          ).toMatchObject({
             fnameToDate: 1,
             eq: 1,
             getDayOfWeek: 1,
@@ -123,6 +123,41 @@ describe(`WHEN running applyTemplate tests`, () => {
             },
             ({ targetNote }) => {
               expect(targetNote.body).toEqual("false");
+            }
+          );
+        });
+      });
+    });
+
+    describe("WHEN using match helper", () => {
+      const testTemplateNoteBody = `{{ match FNAME "\\d{4}.\\d{2}.\\d{2}" }}`;
+
+      describe("AND WHEN match against date based fname", () => {
+        it("THEN extract date", async () => {
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "2022.01.10");
+            }
+          );
+        });
+      });
+
+      describe("AND WHEN match fail", () => {
+        it("THEN return false", async () => {
+          const testTemplateNoteBody = `{{ match FNAME "hello" }}`;
+          await setupTemplateTest(
+            {
+              templateNoteBody: testTemplateNoteBody,
+              templateNoteFname: "daily.journal.2022.01.10",
+              fm: {},
+            },
+            async ({ targetNote }) => {
+              await expectStringMatch(targetNote, "false");
             }
           );
         });

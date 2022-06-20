@@ -207,4 +207,8 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Enable special formatting for task notes.",
       desc: "Task notes will have checkboxes, owner information and more displayed on links leading to them. This applies both in preview and publishing.",
     },
+    siteBanner: {
+      label: "Add a custom banner to the site",
+      desc: "EXPERIMENTAL: do not use",
+    },
   };

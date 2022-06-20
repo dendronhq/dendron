@@ -1,9 +1,15 @@
-import { DendronSiteConfig, DendronSiteFM, NoteProps, SEOProps } from "./types";
+import path from "path";
+import {
+  DendronSiteConfig,
+  DendronSiteFM,
+  NoteProps,
+  SEOProps,
+} from "../types";
 import {
   configIsV4,
   IntermediateDendronConfig,
-} from "./types/intermediateConfigs";
-import { ConfigUtils } from "./utils";
+} from "../types/intermediateConfigs";
+import { ConfigUtils } from "./index";
 
 export class PublishUtils {
   static getPublishFM(note: NoteProps): DendronSiteFM {
@@ -49,5 +55,23 @@ export class PublishUtils {
       image,
       twitter,
     };
+  }
+
+  /**
+   * Path to the banner alert compoenent
+   */
+  static getCustomSiteBannerPathFromWorkspace(wsRoot: string) {
+    return path.join(wsRoot, "publish", "components", "BannerAlert.tsx");
+  }
+
+  static getCustomSiteBannerPathToPublish(publishRoot: string) {
+    return path.join(publishRoot, "custom", "BannerAlert.tsx");
+  }
+
+  /**
+   * Site banner uses a custom react component
+   */
+  static hasCustomSiteBanner(config: IntermediateDendronConfig): boolean {
+    return ConfigUtils.getPublishing(config).siteBanner === "custom";
   }
 }

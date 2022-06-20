@@ -51,6 +51,7 @@ import {
 import { isWebUri } from "../util/regex";
 
 export * from "./lookup";
+export * from "./publishUtils";
 
 /**
  * Dendron utilities

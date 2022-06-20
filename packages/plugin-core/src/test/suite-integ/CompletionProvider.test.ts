@@ -8,7 +8,7 @@ import {
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { before } from "mocha";
+import { before, describe } from "mocha";
 import { CompletionItem, Position, Range } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import {
@@ -17,7 +17,7 @@ import {
 } from "../../features/completionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { getDWorkspace } from "../../workspace";
-import { WSUtils } from "../../WSUtils";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -43,7 +43,7 @@ suite("completionProvider", function () {
       test("THEN provide completions", async () => {
         const { engine, vaults } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
-        await WSUtils.openNote(
+        await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotes({
               fname: "root",
@@ -130,7 +130,7 @@ suite("completionProvider", function () {
       test("THEN provide correct completion", async () => {
         const { engine, vaults } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
-        await WSUtils.openNote(
+        await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotes({
               fname: "root",
@@ -157,6 +157,7 @@ suite("completionProvider", function () {
             engine,
           });
           expect(found.length > 0).toBeTruthy();
+          expect(items?.items![0].insertText).toEqual("bar");
         }
       });
     }
@@ -183,7 +184,7 @@ suite("completionProvider", function () {
       test("THEN provide correct completions", async () => {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
         // Open a note, add [[]]
-        await WSUtils.openNote(
+        await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotes({
               fname: "root",
@@ -219,6 +220,7 @@ suite("completionProvider", function () {
   describeMultiWS(
     "user tag",
     {
+      timeout: 10e6,
       preSetupHook: async (opts) => {
         const { wsRoot, vaults } = opts;
         await NoteTestUtilsV4.createNote({
@@ -234,38 +236,67 @@ suite("completionProvider", function () {
       },
     },
     () => {
-      test("THEN provide correct completions", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
-        // Open a note, add [[]]
-        await WSUtils.openNote(
-          (
-            await engine.findNotes({
-              fname: "root",
-              vault: vaults[1],
-            })
-          )[0]
-        );
-        const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-        await editor.edit((editBuilder) => {
-          editBuilder.insert(new Position(8, 0), "@");
-        });
-        // have the completion provider complete this wikilink
-        const compList = await provideCompletionItems(
-          editor.document,
-          new Position(8, 1)
-        );
-        const items = compList?.items;
-        expect(items).toBeTruthy();
-        // Suggested all the notes
-        expect(items!.length).toEqual(2);
-        for (const item of items!) {
-          // All suggested items exist
-          const found = NoteUtils.getNotesByFnameFromEngine({
-            fname: `${USERS_HIERARCHY}${item.label}`,
-            engine,
+      describe("WHEN only @ symbol", () => {
+        test("THEN provide all completions", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
+            (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[1],
+              })
+            )[0]
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(8, 0), "@");
           });
-          expect(found.length > 0).toBeTruthy();
-        }
+          // have the completion provider complete this wikilink
+          const compList = await provideCompletionItems(
+            editor.document,
+            new Position(8, 1)
+          );
+          const items = compList?.items;
+          expect(items).toBeTruthy();
+          // Suggested all the notes
+          expect(items!.length).toEqual(2);
+          for (const item of items!) {
+            // All suggested items exist
+            const found = NoteUtils.getNotesByFnameFromEngine({
+              fname: `${USERS_HIERARCHY}${item.label}`,
+              engine,
+            });
+            expect(found.length > 0).toBeTruthy();
+            expect(items![0].insertText).toEqual("bar");
+          }
+        });
+      });
+
+      describe("WHEN a few characters typed", () => {
+        test("THEN provide specific completion", async () => {
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
+            (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[1],
+              })
+            )[0]
+          );
+          const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new Position(8, 0), "@ba");
+          });
+          // have the completion provider complete this wikilink
+          const compList = await provideCompletionItems(
+            editor.document,
+            new Position(8, 1)
+          );
+          const items = compList?.items;
+          // Suggested all the notes
+          expect(items!.length).toEqual(1);
+          expect(items![0].insertText).toEqual("bar");
+        });
       });
     }
   );
@@ -277,7 +308,7 @@ suite("completionProvider", function () {
       let items: CompletionItem[] | undefined;
       before(async () => {
         const { vaults, engine } = getDWorkspace();
-        await WSUtils.openNote(
+        await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotes({
               fname: "root",
@@ -328,7 +359,7 @@ suite("completionProvider", function () {
         test("THEN doesn't provide outside wikilink", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "root",
@@ -373,7 +404,7 @@ suite("completionProvider", function () {
         test("THEN provide correct completions", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "test",
@@ -423,7 +454,7 @@ suite("completionProvider", function () {
         test("THEN provide correct completions", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "test",
@@ -451,7 +482,7 @@ suite("completionProvider", function () {
       runLegacyMultiWorkspaceTest({
         onInit: async ({ vaults, engine }) => {
           // Open a note, add [[test2#]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "test",
@@ -533,7 +564,7 @@ suite("completionProvider", function () {
         test("THEN provide correct completions", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[test2#^]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "test",
@@ -602,7 +633,7 @@ suite("completionProvider", function () {
         test("THEN provide correct completions", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           // Open a note, add [[^]]
-          await WSUtils.openNote(
+          await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotes({
                 fname: "test",

@@ -44,22 +44,28 @@ export const USERTAG_REGEX_LOOSE = new RegExp(
     `)`
 );
 
-/**
- *
- * @param text The text to check if it matches an hashtag.
- * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
- * @returns The identifier for the matched hashtag, or undefined if it did not match.
- */
-export const matchUserTag = (
-  text: string,
-  matchLoose: boolean = true
-): string | undefined => {
-  const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
-  if (match && match.groups) {
-    return match.groups.tagContents || match.groups.userTagContents;
+export class UserTagUtils {
+  static extractTagFromMatch(match: RegExpMatchArray | null) {
+    if (match && match.groups) {
+      return match.groups.tagContents || match.groups.userTagContents;
+    }
+    return;
   }
-  return undefined;
-};
+
+  /**
+   *
+   * @param text The text to check if it matches an hashtag.
+   * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
+   * @returns The identifier for the matched hashtag, or undefined if it did not match.
+   */
+  static matchUserTag = (
+    text: string,
+    matchLoose: boolean = true
+  ): string | undefined => {
+    const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
+    return this.extractTagFromMatch(match);
+  };
+}
 
 type PluginOpts = {};
 

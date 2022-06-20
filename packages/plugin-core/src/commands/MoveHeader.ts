@@ -612,9 +612,9 @@ export class MoveHeaderCommand extends BasicCommand<
   }: {
     out: CommandOutput;
     noteChangeEntryCounts: {
-      createdCount?: number;
-      deletedCount?: number;
-      updatedCount?: number;
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
     };
   }) {
     const extension = ExtensionProvider.getExtension();
@@ -660,7 +660,13 @@ export class MoveHeaderCommand extends BasicCommand<
 
   addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
     const noteChangeEntryCounts =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
 
     try {
       this.trackProxyMetrics({ out, noteChangeEntryCounts });

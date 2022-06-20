@@ -174,9 +174,9 @@ export class RenameHeaderCommand extends BasicCommand<
   }: {
     opts: CommandOpts;
     noteChangeEntryCounts: {
-      createdCount?: number;
-      deletedCount?: number;
-      updatedCount?: number;
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
     };
   }) {
     if (_.isUndefined(opts)) {
@@ -196,7 +196,7 @@ export class RenameHeaderCommand extends BasicCommand<
       command: this.key,
       ...noteChangeEntryCounts,
       numVaults: vaults.length,
-      traits: note.traits,
+      traits: note.traits || [],
       numChildren: note.children.length,
       numLinks: note.links.length,
       numChars: note.body.length,
@@ -206,9 +206,13 @@ export class RenameHeaderCommand extends BasicCommand<
 
   addAnalyticsPayload(opts?: CommandOpts, out?: CommandOutput) {
     const noteChangeEntryCounts =
-      out && out.data !== undefined
+      out?.data !== undefined
         ? { ...extractNoteChangeEntryCounts(out.data) }
-        : {};
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
     try {
       this.trackProxyMetrics({ opts, noteChangeEntryCounts });
     } catch (error) {

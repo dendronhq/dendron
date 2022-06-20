@@ -1,11 +1,11 @@
 import {
-  asyncLoop,
   DendronError,
   DEngineClient,
   DNodeUtils,
   EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
+  NoteProps,
   RenameNoteOpts,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -82,6 +82,7 @@ function isMoveNecessary(move: RenameNoteOpts) {
 
 export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MOVE_NOTE.key;
+  _proxyMetricPayload = {};
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -129,13 +130,14 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         id: "move",
         controller: lc,
         logger: this.L,
-        onDone: (event: HistoryEvent) => {
+        onDone: async (event: HistoryEvent) => {
           const data =
             event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
           if (data.cancel) {
             resolve(undefined);
             return;
           }
+          await this.prepareProxyMetricPayload(data);
           const opts: CommandOpts = {
             moves: this.getDesiredMoves(data),
           };
@@ -155,6 +157,54 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         nonInteractive: opts?.nonInteractive,
       });
     });
+  }
+
+  private async prepareProxyMetricPayload(
+    data: NoteLookupProviderSuccessResp<OldNewLocation>
+  ) {
+    const engine = ExtensionProvider.getEngine();
+    const items = (
+      await Promise.all(
+        data.onAcceptHookResp.map(async (resp) => {
+          const { oldLoc } = resp;
+          if (oldLoc.fname === undefined || oldLoc.vaultName === undefined) {
+            return;
+          } else {
+            const vault = VaultUtils.getVaultByName({
+              vaults: engine.vaults,
+              vname: oldLoc.vaultName,
+            });
+            const note = (
+              await engine.findNotes({ fname: oldLoc.fname, vault })
+            )[0];
+            return note;
+          }
+        })
+      )
+    ).filter((item): item is NoteProps => item !== undefined);
+
+    const numChildrenAcc = items.map((item) => item.children.length);
+    const numLinksAcc = items.map((item) => item.links.length);
+    const numCharsAcc = items.map((item) => item.body.length);
+    const noteDepthAcc = items.map((item) => DNodeUtils.getDepth(item));
+    const traitsAcc = items.flatMap((item) =>
+      item.traits && item.traits.length > 0 ? item.traits : []
+    );
+    const traitsSet = new Set(traitsAcc);
+    this._proxyMetricPayload = {
+      traits: [...traitsSet],
+      numProcessed: items.length,
+      // all numX props are mean value but named as plain numX
+      // since we want to use the same name across different commands for an aggregate analysis.
+      numChildren: _.mean(numChildrenAcc),
+      maxNumChildren: _.max(numChildrenAcc),
+      numLinks: _.mean(numLinksAcc),
+      maxNumLinks: _.max(numLinksAcc),
+      numChars: _.mean(numCharsAcc),
+      maxNumChars: _.max(numCharsAcc),
+      noteDepth: _.mean(noteDepthAcc),
+      maxNoteDepth: _.max(noteDepthAcc),
+    };
   }
 
   private getDesiredMoves(
@@ -322,90 +372,40 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     panel.webview.html = md.render(contentLines.join("\n"));
   }
 
-  async trackProxyMetrics({
+  trackProxyMetrics({
     opts,
     noteChangeEntryCounts,
   }: {
     opts: CommandOpts;
     noteChangeEntryCounts: {
-      createdCount?: number;
-      deletedCount?: number;
-      updatedCount?: number;
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
     };
   }) {
     const extension = ExtensionProvider.getExtension();
     const engine = extension.getEngine();
     const { vaults } = engine;
 
-    // since we allow multiples, aggregate them.
-    const { moves } = opts;
-
-    let numProcessedAcc = 0;
-    const numChildrenAcc: number[] = [];
-    const numLinksAcc: number[] = [];
-    const numCharsAcc: number[] = [];
-    const noteDepthAcc: number[] = [];
-    let traitsAcc: string[] = [];
-    await asyncLoop(moves, async (move) => {
-      const { fname, vaultName: vname } = move.newLoc;
-      if (fname !== undefined && vname !== undefined) {
-        const newLocVault = VaultUtils.getVaultByName({ vaults, vname });
-        const newLocNote = (
-          await engine.findNotes({
-            fname,
-            vault: newLocVault,
-          })
-        )[0];
-        if (newLocNote !== undefined) {
-          numProcessedAcc += 1;
-
-          // children
-          const numChildren = newLocNote.children.length;
-          numChildrenAcc.push(numChildren);
-
-          // links
-          const numLinks = newLocNote.links.length;
-          numLinksAcc.push(numLinks);
-
-          // body
-          const numChars = newLocNote.body.length;
-          numCharsAcc.push(numChars);
-
-          // note depth
-          const noteDepth = DNodeUtils.getDepth(newLocNote);
-          noteDepthAcc.push(noteDepth);
-
-          // traits
-          const traits = newLocNote.traits;
-          if (traits) traitsAcc = traitsAcc.concat(traits);
-        }
-      }
-    });
-
     // track proxy metrics separately
     AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
       command: this.key,
-      ...noteChangeEntryCounts,
       numVaults: vaults.length,
-      traits: new Set(traitsAcc),
-      isMultiMove: isMultiMove(moves),
-      // all numX props are mean value but named as plain numX
-      // since we want to use the same name across different commands for an aggregate analysis.
-      numProcessed: numProcessedAcc,
-      numChildren: _.mean(numChildrenAcc),
-      maxNumChildren: _.max(numChildrenAcc),
-      numLinks: _.mean(numLinksAcc),
-      maxNumLinks: _.max(numLinksAcc),
-      numChars: _.mean(numCharsAcc),
-      maxNumChars: _.max(numCharsAcc),
-      noteDepth: _.mean(noteDepthAcc),
-      maxNoteDepth: _.max(noteDepthAcc),
+      isMultiMove: isMultiMove(opts.moves),
+      ...noteChangeEntryCounts,
+      ...this._proxyMetricPayload,
     });
   }
 
   addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
     const noteChangeEntryCounts =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
     try {
       this.trackProxyMetrics({ opts, noteChangeEntryCounts });
     } catch (error) {

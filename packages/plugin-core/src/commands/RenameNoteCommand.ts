@@ -1,8 +1,6 @@
 import {
-  DNodeUtils,
   EngagementEvents,
   extractNoteChangeEntryCounts,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
@@ -51,53 +49,43 @@ export class RenameNoteCommand extends BasicCommand<
     return this._moveNoteCommand.gatherInputs(this.populateCommandOpts(opts));
   }
 
-  async trackProxyMetrics({
-    opts,
+  trackProxyMetrics({
     noteChangeEntryCounts,
   }: {
-    opts: CommandOpts;
     noteChangeEntryCounts: {
-      createdCount?: number;
-      deletedCount?: number;
-      updatedCount?: number;
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
     };
   }) {
     const extension = ExtensionProvider.getExtension();
     const engine = extension.getEngine();
     const { vaults } = engine;
 
-    // we only have one move for this particular command
-    const { moves } = opts;
-
-    const move = moves[0];
-
-    const { fname, vaultName: vname } = move.newLoc;
-    if (fname === undefined || vname === undefined) {
-      return;
-    }
-    const vault = VaultUtils.getVaultByName({ vaults, vname });
-    const note = (await engine.findNotes({ fname, vault }))[0];
-    if (note === undefined) {
-      return;
-    }
-
     AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
       command: this.key,
+      numVaults: vaults.length,
       ...noteChangeEntryCounts,
-      numVaults: engine.vaults.length,
-      traits: note.traits,
-      numChildren: note.children.length,
-      numLinks: note.links.length,
-      numChars: note.body.length,
-      noteDepth: DNodeUtils.getDepth(note),
+      ..._.omit(this._moveNoteCommand._proxyMetricPayload, [
+        "maxNumChildren",
+        "maxNumLinks",
+        "maxNumChars",
+        "maxNoteDepth",
+      ]),
     });
   }
 
-  addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
     const noteChangeEntryCounts =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
     try {
-      this.trackProxyMetrics({ opts, noteChangeEntryCounts });
+      this.trackProxyMetrics({ noteChangeEntryCounts });
     } catch (error) {
       this.L.error({ error });
     }

@@ -1,5 +1,4 @@
 import {
-  asyncLoop,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
@@ -8,7 +7,6 @@ import {
   EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -22,7 +20,6 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 import {
@@ -57,6 +54,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+  _proxyMetricPayload = {};
 
   entireWorkspaceQuickPickItem = {
     label: "Entire Workspace",
@@ -378,18 +376,46 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     return resp === "Proceed";
   }
 
+  prepareProxyMetricPayload(capturedNotes: DNodeProps[]) {
+    const numChildrenAcc = capturedNotes.map((note) => note.children.length);
+    const numLinksAcc = capturedNotes.map((note) => note.links.length);
+    const numCharsAcc = capturedNotes.map((note) => note.body.length);
+    const noteDepthAcc = capturedNotes.map((note) => DNodeUtils.getDepth(note));
+    const traitsAcc = capturedNotes.flatMap((note) =>
+      note.traits && note.traits.length > 0 ? note.traits : []
+    );
+    const traitsSet = new Set(traitsAcc);
+    this._proxyMetricPayload = {
+      traits: [...traitsSet],
+      // all numX props are mean value but named as plain numX
+      // since we want to use the same name across different commands for an aggregate analysis.
+      numProcessed: capturedNotes.length,
+      numChildren: _.mean(numChildrenAcc),
+      maxNumChildren: _.max(numChildrenAcc),
+      numLinks: _.mean(numLinksAcc),
+      maxNumLinks: _.max(numLinksAcc),
+      numChars: _.mean(numCharsAcc),
+      maxNumChars: _.max(numCharsAcc),
+      noteDepth: _.mean(noteDepthAcc),
+      maxNoteDepth: _.max(noteDepthAcc),
+    };
+    console.log({ ctx: "prep", bond: this._proxyMetricPayload, bond2: this });
+  }
+
   async execute(opts: CommandOpts): Promise<any> {
     const ctx = "RefactorHierarchy:execute";
     const { scope, match, replace, noConfirm } = opts;
     this.L.info({ ctx, opts, msg: "enter" });
-    const ext = getExtension();
-    const { engine } = getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const matchRE = new RegExp(match);
     const capturedNotes = this.getCapturedNotes({
       scope,
       matchRE,
       engine,
     });
+
+    this.prepareProxyMetricPayload(capturedNotes);
 
     const operations = this.getRenameOperations({
       capturedNotes,
@@ -444,98 +470,45 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     }
   }
 
-  async trackProxyMetrics({
-    out,
+  trackProxyMetrics({
     noteChangeEntryCounts,
-    key,
   }: {
-    out: CommandOutput;
     noteChangeEntryCounts: {
       createdCount?: number;
       deletedCount?: number;
       updatedCount?: number;
     };
-    key?: string;
   }) {
     const extension = ExtensionProvider.getExtension();
     const engine = extension.getEngine();
-    const { vaults, wsRoot } = engine;
+    const { vaults } = engine;
 
-    // since we allow multiples, aggregate them.
-    const { operations } = out;
-
-    let numProcessedAcc = 0;
-    const numChildrenAcc: number[] = [];
-    const numLinksAcc: number[] = [];
-    const numCharsAcc: number[] = [];
-    const noteDepthAcc: number[] = [];
-    let traitsAcc: string[] = [];
-    await asyncLoop(operations, async (operation) => {
-      const newPath = operation.newUri.fsPath;
-      const fname = path.basename(newPath, ".md");
-      if (newPath !== undefined) {
-        const vault = VaultUtils.getVaultByFilePath({
-          vaults,
-          wsRoot,
-          fsPath: newPath,
-        });
-        const newNote = (
-          await engine.findNotes({
-            vault,
-            fname,
-          })
-        )[0];
-        if (newNote !== undefined) {
-          numProcessedAcc += 1;
-
-          // children
-          const numChildren = newNote.children.length;
-          numChildrenAcc.push(numChildren);
-
-          // links
-          const numLinks = newNote.links.length;
-          numLinksAcc.push(numLinks);
-
-          // body
-          const numChars = newNote.body.length;
-          numCharsAcc.push(numChars);
-
-          // note depth
-          const noteDepth = DNodeUtils.getDepth(newNote);
-          noteDepthAcc.push(noteDepth);
-
-          // traits
-          const traits = newNote.traits;
-          if (traits) traitsAcc = traitsAcc.concat(traits);
-        }
-      }
-    });
-
-    // track proxy metrics separately
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: key || this.key,
+    console.log({
+      command: this.key,
       ...noteChangeEntryCounts,
       numVaults: vaults.length,
-      traits: new Set(traitsAcc),
-      // all numX props are mean value but named as plain numX
-      // since we want to use the same name across different commands for an aggregate analysis.
-      numProcessed: numProcessedAcc,
-      numChildren: _.mean(numChildrenAcc),
-      maxNumChildren: _.max(numChildrenAcc),
-      numLinks: _.mean(numLinksAcc),
-      maxNumLinks: _.max(numLinksAcc),
-      numChars: _.mean(numCharsAcc),
-      maxNumChars: _.max(numCharsAcc),
-      noteDepth: _.mean(noteDepthAcc),
-      maxNoteDepth: _.max(noteDepthAcc),
+      ...this._proxyMetricPayload,
+    });
+
+    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
+      command: this.key,
+      ...noteChangeEntryCounts,
+      numVaults: vaults.length,
+      ...this._proxyMetricPayload,
     });
   }
 
   addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
     const noteChangeEntryCounts =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
     try {
-      this.trackProxyMetrics({ out, noteChangeEntryCounts });
+      this.trackProxyMetrics({ noteChangeEntryCounts });
     } catch (error) {
       this.L.error({ error });
     }

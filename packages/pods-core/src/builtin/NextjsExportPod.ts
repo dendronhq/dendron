@@ -353,7 +353,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }
 
     // custom components
-    debugger;
     if (PublishUtils.hasCustomSiteBanner(config)) {
       const bannerPath =
         PublishUtils.getCustomSiteBannerPathFromWorkspace(wsRoot);

@@ -1,6 +1,7 @@
 import { extractNoteChangeEntryCounts, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import {
@@ -25,11 +26,15 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   key = DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key;
   private refactorCmd: RefactorHierarchyCommandV2;
   private trackProxyMetrics;
+  private prepareProxyMetricPayload;
+  _proxyMetricPayload = {};
 
   constructor(name?: string) {
     super(name);
     this.refactorCmd = new RefactorHierarchyCommandV2();
-    this.trackProxyMetrics = this.refactorCmd.trackProxyMetrics;
+    this.trackProxyMetrics = this.refactorCmd.trackProxyMetrics.bind(this);
+    this.prepareProxyMetricPayload =
+      this.refactorCmd.prepareProxyMetricPayload.bind(this);
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
@@ -50,6 +55,13 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const { match } = _.defaults(opts, {});
     const replace = `archive.${match}`;
+    const engine = ExtensionProvider.getEngine();
+    const capturedNotes = this.refactorCmd.getCapturedNotes({
+      scope: undefined,
+      matchRE: new RegExp(match),
+      engine,
+    });
+    this.prepareProxyMetricPayload(capturedNotes);
     return this.refactorCmd.execute({ match, replace });
   }
 
@@ -59,9 +71,17 @@ export class ArchiveHierarchyCommand extends BasicCommand<
 
   addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
     const noteChangeEntryCounts =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
     try {
-      this.trackProxyMetrics({ out, noteChangeEntryCounts, key: this.key });
+      this.trackProxyMetrics({
+        noteChangeEntryCounts,
+      });
     } catch (error) {
       this.L.error({ error });
     }

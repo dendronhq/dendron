@@ -87,6 +87,10 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     webviewView.onDidChangeVisibility(() => {
       if (this.graphDepth && !webviewView.visible) {
         MetadataService.instance().graphDepth = this.graphDepth;
+        AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
+          type: "DepthChanged",
+          state: this.graphDepth,
+        });
       }
       AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
         type: "VisibilityChanged",

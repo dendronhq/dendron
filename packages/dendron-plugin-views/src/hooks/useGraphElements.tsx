@@ -62,7 +62,6 @@ function computeHierarchicalGraphElements({
     hierarchy: [],
     links: [],
   };
-
   const nodes: GraphNodes = [];
   const activeNote = notes[noteActive.id];
 
@@ -109,7 +108,7 @@ function computeHierarchicalGraphElements({
         (data.distance === 0 || data.isParent) && note.parent
           ? notes[note.parent]
           : undefined;
-      if (parentNote) {
+      if (parentNote && parentNote.id !== activeNote.id) {
         nodesQueue.enqueue({
           note: parentNote,
           distance: data.distance + 1,

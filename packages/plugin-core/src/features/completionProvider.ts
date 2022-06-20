@@ -341,6 +341,12 @@ export const provideCompletionItems = sentryReportingCallback(
   }
 );
 
+export const debouncedProvideCompletionItems = _.debounce(
+  provideCompletionItems,
+  100,
+  { trailing: false, leading: true }
+);
+
 export const resolveCompletionItem = sentryReportingCallback(
   async (
     item: CompletionItem,
@@ -613,7 +619,8 @@ export const activate = (context: ExtensionContext) => {
     languages.registerCompletionItemProvider(
       "markdown",
       {
-        provideCompletionItems,
+        // we debounce this provider since we don't want lookup to be triggered on every keystroke.
+        provideCompletionItems: debouncedProvideCompletionItems,
       },
 
       "[", // for wikilinks and references
@@ -626,6 +633,10 @@ export const activate = (context: ExtensionContext) => {
     languages.registerCompletionItemProvider(
       "markdown",
       {
+        /**
+         * we don't have to debounce this since it is not triggered on every keystroke
+         * and is ligher than {@link provideCompletionItems} in general.
+         */
         provideCompletionItems: provideBlockCompletionItems,
       },
       "#",

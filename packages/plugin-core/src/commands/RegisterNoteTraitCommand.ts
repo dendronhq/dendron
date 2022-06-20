@@ -45,13 +45,13 @@ const noteTraitTemplate = `
 /**
  * lodash module is available. See https://lodash.com/docs for documentation.
  */
-const _ = module.require("lodash");
+//const _ = module.require("lodash");
 
 /**
  * luxon is available for Date functions. See
  * https://moment.github.io/luxon/api-docs/index.html for documentation
  */
-const luxon = module.require("luxon");
+//const luxon = module.require("luxon");
 
 module.exports = {
   OnWillCreate: {

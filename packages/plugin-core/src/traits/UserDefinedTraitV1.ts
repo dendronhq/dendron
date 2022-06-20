@@ -5,8 +5,8 @@ import {
   onCreateProps,
   onWillCreateProps,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
-import path from "path";
+// import fs from "fs-extra";
+// import path from "path";
 
 /**
  * A Note Trait that will execute end-user defined javascript code.
@@ -38,14 +38,24 @@ export class UserDefinedTraitV1 implements NoteTrait {
     // This allows any module.requires (such as lodash, luxon) in the user's JS
     // file to properly resolve and gives the user full access to any node
     // modules Dendron is using.
-    const userTraitsPath = path.join(__dirname, "user-traits");
-    const destPath = path.join(userTraitsPath, path.basename(this.scriptPath));
+    // const userTraitsPath = path.join(__dirname, "user-traits");
+    // const destPath = path.join(userTraitsPath, path.basename(this.scriptPath));
 
-    fs.ensureDirSync(userTraitsPath);
-    fs.copyFileSync(this.scriptPath, destPath);
+    // fs.ensureDirSync(userTraitsPath);
+    // fs.copyFileSync(this.scriptPath, destPath);
 
+    const _ = require("lodash");
+    const luxon = require("luxon");
     const hack = require(`./webpack-require-hack.js`);
-    const trait = hack(destPath);
+    const trait = hack(this.scriptPath);
+    // const pro = trait.OnCreate.prototype;
+
+    const proto = Object.getPrototypeOf(trait);
+
+    proto._ = _;
+    proto.luxon = luxon;
+
+    // const trait = hack(destPath);
 
     this.OnCreate = trait.OnCreate;
     this.OnWillCreate = trait.OnWillCreate;

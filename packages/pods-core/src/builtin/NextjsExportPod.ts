@@ -17,6 +17,7 @@ import {
   ERROR_SEVERITY,
   Theme,
   CONSTANTS,
+  PublishUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import {
@@ -350,6 +351,20 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         fs.copySync(headerPath, path.join(destPublicPath, "header.html"));
       }
     }
+
+    // custom components
+    if (PublishUtils.hasCustomSiteBanner(config)) {
+      const bannerPath =
+        PublishUtils.getCustomSiteBannerPathFromWorkspace(wsRoot);
+      if (!fs.existsSync(bannerPath)) {
+        throw Error(`no banner found at ${bannerPath}`);
+      }
+      fs.copySync(
+        bannerPath,
+        PublishUtils.getCustomSiteBannerPathToPublish(dest)
+      );
+    }
+
     // get favicon
     const siteFaviconPath = publishingConfig.siteFaviconPath;
     if (siteFaviconPath) {

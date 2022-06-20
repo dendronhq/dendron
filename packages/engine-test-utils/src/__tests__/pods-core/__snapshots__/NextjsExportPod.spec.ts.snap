@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN NextExport pod WHEN copy siteBanner AND WHEN siteBanner exist THEN banner is copied 1`] = `"export default function Banner { return <div> Banner </div> };"`;

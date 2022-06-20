@@ -26,13 +26,30 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.GRAPH_PANEL;
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
-  private graphDepth: number | undefined;
+  private _graphDepth: number | undefined;
 
   constructor(extension: IDendronExtension) {
     this._ext = extension;
     this._ext.context.subscriptions.push(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
+  }
+
+  get graphDepth(): number | undefined {
+    return this._graphDepth;
+  }
+
+  set graphDepth(depth: number | undefined) {
+    if (depth) {
+      this._graphDepth = depth;
+      this.postMessage({
+        type: GraphViewMessageEnum.onGraphDepthChange,
+        data: {
+          graphDepth: this._graphDepth,
+        },
+        source: DMessageSource.vscode,
+      });
+    }
   }
 
   private postMessage(msg: DMessage) {
@@ -42,26 +59,12 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   public increaseGraphDepth() {
     if (this._view && this.graphDepth && this.graphDepth < 3) {
       this.graphDepth += 1;
-      this.postMessage({
-        type: GraphViewMessageEnum.onGraphDepthChange,
-        data: {
-          graphDepth: this.graphDepth,
-        },
-        source: DMessageSource.vscode,
-      });
     }
   }
 
   public decreaseGraphDepth() {
     if (this.graphDepth && this.graphDepth > 1) {
       this.graphDepth -= 1;
-      this.postMessage({
-        type: GraphViewMessageEnum.onGraphDepthChange,
-        data: {
-          graphDepth: this.graphDepth,
-        },
-        source: DMessageSource.vscode,
-      });
     }
   }
 

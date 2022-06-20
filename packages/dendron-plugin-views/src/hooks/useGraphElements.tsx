@@ -77,7 +77,7 @@ function computeHierarchicalGraphElements({
     classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(activeNote.vault)}`,
   });
 
-  // Breadth First Search for Descendants
+  // Breadth First Search
   while (nodesQueue.length > 0) {
     const data = nodesQueue.dequeue();
 
@@ -130,34 +130,35 @@ function computeHierarchicalGraphElements({
           classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
         });
       }
+      const children = note.children;
       // do not include children of parent/grandparent
-      const children = data.isParent ? [] : note.children;
+      if (!data.isParent) {
+        // Setup the edges for children now:
+        children.forEach((child: string) => {
+          const childNote = notes[child];
+          if (childNote) {
+            edges.hierarchy.push({
+              data: {
+                group: "edges",
+                id: `${note.id}_${childNote.id}`,
+                source: note.id,
+                target: childNote.id,
+                fname: note.fname,
+                stub: false,
+              },
+              classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
+            });
 
-      // Setup the edges for children now:
-      children.forEach((child: string) => {
-        const childNote = notes[child];
-        if (childNote) {
-          edges.hierarchy.push({
-            data: {
-              group: "edges",
-              id: `${note.id}_${childNote.id}`,
-              source: note.id,
-              target: childNote.id,
-              fname: note.fname,
-              stub: false,
-            },
-            classes: `${DEFAULT_EDGE_CLASSES} hierarchy ${noteVaultClass}`,
-          });
-
-          nodesQueue.enqueue({
-            note: childNote,
-            distance: data.distance + 1,
-            classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(
-              childNote.vault
-            )}`,
-          });
-        }
-      });
+            nodesQueue.enqueue({
+              note: childNote,
+              distance: data.distance + 1,
+              classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(
+                childNote.vault
+              )}`,
+            });
+          }
+        });
+      }
     }
   }
   return {

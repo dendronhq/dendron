@@ -5,8 +5,8 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
-import React, { useCallback, useEffect, useRef } from "react";
-import { useCombinedDispatch } from "../features";
+import React, { useCallback, useEffect } from "react";
+import { useCombinedDispatch, useCombinedSelector } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
 import type Fuse from "fuse.js";
@@ -85,8 +85,9 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   );
   const [results, setResults] = React.useState<SearchMode>();
   const dispatch = useCombinedDispatch();
+  //const notes = useCombinedSelector((state) => state.engine.notes);
   const { noteBodies, requestNotes } = useNoteBodies();
-  const lookup = useDendronLookup();
+  const lookup = useDendronLookup(props.notes);
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
   const initValue = noteActive?.fname || "";
   const [searchQueryValue, setSearchQueryValue] = React.useState(initValue);

@@ -1,7 +1,6 @@
 /* eslint-disable */
 import {
   ConfigUtils,
-  DVault,
   IntermediateDendronConfig,
   NoteProps,
   RESERVED_KEYS,

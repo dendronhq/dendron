@@ -57,7 +57,7 @@ export default function DendronTreeMenu(
     });
 
     setActiveNoteIds(activeNoteIds);
-  }, [props.notes, props.noteIndex, dendronRouter.query.id, noteActiveId]);
+  }, [props.noteIndex, dendronRouter.query.id, noteActiveId]);
 
   const { notes, collapsed, setCollapsed } = props;
 

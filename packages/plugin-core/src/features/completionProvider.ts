@@ -179,13 +179,13 @@ export const provideCompletionItems = sentryReportingCallback(
   ): Promise<CompletionList | undefined> => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
-
     // No-op if we're not in a Dendron Workspace
     if (!ExtensionProvider.getExtension().isActive()) {
       return;
     }
 
     const line = document.lineAt(position).text;
+    console.log({ ctx, line });
     Logger.info({ ctx, position, msg: "enter" });
 
     // get all matches
@@ -344,7 +344,7 @@ export const provideCompletionItems = sentryReportingCallback(
 export const debouncedProvideCompletionItems = _.debounce(
   provideCompletionItems,
   100,
-  { trailing: false, leading: true }
+  { leading: true, trailing: true }
 );
 
 export const resolveCompletionItem = sentryReportingCallback(

@@ -40,8 +40,14 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 
-    const workspaceFile = DendronExtension.workspaceFile().fsPath;
-    const wsFile = fs.readFileSync(workspaceFile, { encoding: "utf8" });
+    let wsFile: string;
+    try {
+      const workspaceFile = DendronExtension.workspaceFile().fsPath;
+      wsFile = await fs.readFile(workspaceFile, { encoding: "utf8" });
+    } catch {
+      // Workspace file is missing, may be a native workspace
+      wsFile = "<!-- workspace file doesn't exist -->";
+    }
 
     const content = [
       "# Plugin Logs",

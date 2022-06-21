@@ -220,12 +220,21 @@ export class DendronExtension implements IDendronExtension {
   }
 
   /**
-   * Workspace settings file
+   * Workspace settings file. Warning, this doesn't exist in all workspaces!
+   *
+   * Warning! This function will throw when used in a Native Workspace. Make
+   * sure to use it in a try...catch block unless you're sure you are running in
+   * a Code Workspace.
    */
   static workspaceFile(): vscode.Uri {
     if (!vscode.workspace.workspaceFile) {
       throw Error("no workspace file");
     }
+    return vscode.workspace.workspaceFile;
+  }
+
+  /** Get the workspace settings file, unless it's a native workspace where we may not have one. */
+  static tryWorkspaceFile(): vscode.Uri | undefined {
     return vscode.workspace.workspaceFile;
   }
 
@@ -396,11 +405,14 @@ export class DendronExtension implements IDendronExtension {
 
   /** For Native workspaces (without .code-workspace file) this will return undefined. */
   async getWorkspaceSettings(): Promise<WorkspaceSettings | undefined> {
-    const workspaceFile = DendronExtension.workspaceFile();
+    const ctx = "DendronExtension.getWorkspaceSettings";
+    const workspaceFile = DendronExtension.tryWorkspaceFile();
+    if (!workspaceFile) return undefined;
     const resp = await WorkspaceUtils.getCodeWorkspaceSettings(
       path.dirname(workspaceFile.fsPath)
     );
     if (resp.error) {
+      Logger.warn({ ctx, err: resp.error });
       return undefined;
     } else {
       return resp.data;
@@ -408,11 +420,14 @@ export class DendronExtension implements IDendronExtension {
   }
 
   getWorkspaceSettingsSync(): WorkspaceSettings | undefined {
-    const workspaceFile = DendronExtension.workspaceFile();
+    const ctx = "DendronExtension.getWorkspaceSettingsSync";
+    const workspaceFile = DendronExtension.tryWorkspaceFile();
+    if (!workspaceFile) return undefined;
     const resp = WorkspaceUtils.getCodeWorkspaceSettingsSync(
       path.dirname(workspaceFile.fsPath)
     );
     if (resp.error) {
+      Logger.warn({ ctx, err: resp.error });
       return undefined;
     } else {
       return resp.data;

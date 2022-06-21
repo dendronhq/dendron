@@ -7,6 +7,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   RenameNoteOpts,
+  StatisticsUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -198,12 +199,20 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       // since we want to use the same name across different commands for an aggregate analysis.
       numChildren: _.mean(numChildrenAcc),
       maxNumChildren: _.max(numChildrenAcc),
+      medianNumChildren: StatisticsUtils.median(numChildrenAcc),
+      stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
       numLinks: _.mean(numLinksAcc),
       maxNumLinks: _.max(numLinksAcc),
+      medianNumLinks: StatisticsUtils.median(numLinksAcc),
+      stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
       numChars: _.mean(numCharsAcc),
       maxNumChars: _.max(numCharsAcc),
+      medianNumChars: StatisticsUtils.median(numCharsAcc),
+      stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
       noteDepth: _.mean(noteDepthAcc),
       maxNoteDepth: _.max(noteDepthAcc),
+      medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
+      stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
     };
   }
 

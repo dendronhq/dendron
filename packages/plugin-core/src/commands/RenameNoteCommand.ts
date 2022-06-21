@@ -68,9 +68,17 @@ export class RenameNoteCommand extends BasicCommand<
       ...noteChangeEntryCounts,
       ..._.omit(this._moveNoteCommand._proxyMetricPayload, [
         "maxNumChildren",
+        "medianNumChildren",
+        "stddevNumChildren",
         "maxNumLinks",
+        "medianNumLinks",
+        "stddevNumLinks",
         "maxNumChars",
+        "medianNumChars",
+        "stddevNumChars",
         "maxNoteDepth",
+        "medianNoteDepth",
+        "stddevNoteDepth",
       ]),
     });
   }

@@ -7,6 +7,7 @@ import {
   EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteUtils,
+  StatisticsUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -392,14 +393,21 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       numProcessed: capturedNotes.length,
       numChildren: _.mean(numChildrenAcc),
       maxNumChildren: _.max(numChildrenAcc),
+      medianNumChildren: StatisticsUtils.median(numChildrenAcc),
+      stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
       numLinks: _.mean(numLinksAcc),
       maxNumLinks: _.max(numLinksAcc),
+      medianNumLinks: StatisticsUtils.median(numLinksAcc),
+      stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
       numChars: _.mean(numCharsAcc),
       maxNumChars: _.max(numCharsAcc),
+      medianNumChars: StatisticsUtils.median(numCharsAcc),
+      stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
       noteDepth: _.mean(noteDepthAcc),
       maxNoteDepth: _.max(noteDepthAcc),
+      medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
+      stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
     };
-    console.log({ ctx: "prep", bond: this._proxyMetricPayload, bond2: this });
   }
 
   async execute(opts: CommandOpts): Promise<any> {
@@ -482,13 +490,6 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const extension = ExtensionProvider.getExtension();
     const engine = extension.getEngine();
     const { vaults } = engine;
-
-    console.log({
-      command: this.key,
-      ...noteChangeEntryCounts,
-      numVaults: vaults.length,
-      ...this._proxyMetricPayload,
-    });
 
     AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
       command: this.key,

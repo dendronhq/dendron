@@ -164,25 +164,27 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     data: NoteLookupProviderSuccessResp<OldNewLocation>
   ) {
     const engine = ExtensionProvider.getEngine();
-    const items = (
-      await Promise.all(
-        data.onAcceptHookResp.map(async (resp) => {
-          const { oldLoc } = resp;
-          if (oldLoc.fname === undefined || oldLoc.vaultName === undefined) {
-            return;
-          } else {
-            const vault = VaultUtils.getVaultByName({
-              vaults: engine.vaults,
-              vname: oldLoc.vaultName,
-            });
-            const note = (
-              await engine.findNotes({ fname: oldLoc.fname, vault })
-            )[0];
-            return note;
-          }
-        })
-      )
-    ).filter((item): item is NoteProps => item !== undefined);
+    let items: NoteProps[];
+    if (data.selectedItems.length === 1) {
+      // single move. find note from resp
+      const { oldLoc } = data.onAcceptHookResp[0];
+      const { fname, vaultName: vname } = oldLoc;
+      if (fname !== undefined && vname !== undefined) {
+        const vault = VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname,
+        });
+        const note = (await engine.findNotes({ fname, vault }))[0];
+        items = [note];
+      } else {
+        items = [];
+      }
+    } else {
+      const notes = data.selectedItems.map(
+        (item): NoteProps => _.omit(item, ["label", "detail", "alwaysShow"])
+      );
+      items = notes;
+    }
 
     const numChildrenAcc = items.map((item) => item.children.length);
     const numLinksAcc = items.map((item) => item.links.length);

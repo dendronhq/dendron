@@ -1168,6 +1168,9 @@
         },
         "enablePrettyLinks": {
           "type": "boolean"
+        },
+        "siteBanner": {
+          "type": "string"
         }
       },
       "required": [

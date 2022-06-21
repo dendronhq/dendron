@@ -16,8 +16,8 @@ export class VisualizationFactory {
   // private static initWithNote: NoteProps | undefined;
 
   static create(
-    ext: DendronExtension,
-    engineEvents: EngineEventEmitter
+    _ext: DendronExtension,
+    _engineEvents: EngineEventEmitter
   ): vscode.WebviewPanel {
     if (this._panel) return this._panel;
 

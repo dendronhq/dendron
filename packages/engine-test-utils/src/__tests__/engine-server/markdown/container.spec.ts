@@ -56,7 +56,7 @@ describe("containers", () => {
         const { resp } = extra;
         await checkVFile(
           resp,
-          '<aside class="class-one class-two"><h1 id="header-one"><a aria-hidden="true" class="anchor-heading" href="#header-one"><svg aria-hidden="true" viewBox="0 0 16 16"><use xlink:href="#svg-link"></use></svg></a>Header One</h1><p>With container contents. </p></aside>'
+          '<aside class="class-one class-two"><h1 id="header-one"><a aria-hidden="true" class="anchor-heading icon-link" href="#header-one"></a>Header One</h1><p>With container contents. </p></aside>'
         );
       },
     },
@@ -114,7 +114,7 @@ describe("containers", () => {
         const { resp } = extra;
         await checkNotInVFile(
           resp,
-          '<aside class="class-one class-two"><h1 id="header-one"><a aria-hidden="true" class="anchor-heading" href="#header-one"><svg aria-hidden="true" viewBox="0 0 16 16"><use xlink:href="#svg-link"></use></svg></a>Header One</h1><p>With container contents. </p></aside>'
+          '<aside class="class-one class-two"><h1 id="header-one"><a aria-hidden="true" class="anchor-heading icon-link" href="#header-one"></a>Header One</h1><p>With container contents. </p></aside>'
         );
       },
     },

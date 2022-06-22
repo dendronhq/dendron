@@ -2,7 +2,7 @@
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
 VFile {
-  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
+  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#with-override\\"><span class=\\"icon icon-link\\"></span></a>With Override</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -23,7 +23,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
 VFile {
-  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#with-override\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>With Override</h1>
+  "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#with-override\\"><span class=\\"icon icon-link\\"></span></a>With Override</h1>
 <p></p><p></p><p>bar body</p><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -76,7 +76,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#foo\\"><span class=\\"icon icon-link\\"></span></a>Foo</h1>
 <p></p><p></p><p>bar body</p><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -92,7 +92,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: true 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#foo\\"><span class=\\"icon icon-link\\"></span></a>Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -144,7 +144,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs enablePrettyRef defaults to true in both cases 2`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#foo\\"><span class=\\"icon icon-link\\"></span></a>Foo</h1>
 <p></p><p></p><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -181,7 +181,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: false THEN not rendered: PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -203,7 +203,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN not rendered when missing: PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has no fm tags</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -248,10 +248,10 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>
 <hr>
-<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#tags\\"><span class=\\"icon icon-link\\"></span></a>Tags</h2>
 <ol>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">first (Private)</a></li>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">second (Private)</a></li>
@@ -265,10 +265,10 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: multiple tags, PUBLISHING 2`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>
 <hr>
-<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#tags\\"><span class=\\"icon icon-link\\"></span></a>Tags</h2>
 <ol>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">first (Private)</a></li>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">second (Private)</a></li>
@@ -314,10 +314,10 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>
 <hr>
-<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#tags\\"><span class=\\"icon icon-link\\"></span></a>Tags</h2>
 <ol>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">first (Private)</a></li>
 </ol>",
@@ -330,10 +330,10 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true THEN rendered when available: single tag, PUBLISHING 2`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>
 <hr>
-<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#tags\\"><span class=\\"icon icon-link\\"></span></a>Tags</h2>
 <ol>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">first (Private)</a></li>
 </ol>",
@@ -363,10 +363,10 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) frontmatter tags GIVEN enableFrontmatterTags: true WHEN enableHashesForFMTags: true THEN rendered with a hashtag(#): PUBLISHING 1`] = `
 VFile {
-  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fmtags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Fmtags</h1>
+  "contents": "<h1 id=\\"fmtags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#fmtags\\"><span class=\\"icon icon-link\\"></span></a>Fmtags</h1>
 <p>has fm tags</p>
 <hr>
-<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#tags\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Tags</h2>
+<h2 id=\\"tags\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#tags\\"><span class=\\"icon icon-link\\"></span></a>Tags</h2>
 <ol>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">#first (Private)</a></li>
 <li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">#second (Private)</a></li>
@@ -717,7 +717,7 @@ VFile {
 
 exports[`GIVEN dendronPub WHEN all notes are public WHEN publishing links to task notes THEN all links are rendered 1`] = `
 VFile {
-  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#beta\\"><span class=\\"icon icon-link\\"></span></a>Beta</h1>
 <p><a href=\\"/notes/alpha.task\\"><input type=\\"checkbox\\" disabled class=\\"task-before task-status\\" checked>Task<span class=\\"task-after task-priority\\">priority:high</span><span class=\\"task-after task-due\\">due:2022-08-28</span><span class=\\"task-after task-owner\\">@turing</span></a></p>
 <hr>
 <strong>Backlinks</strong>

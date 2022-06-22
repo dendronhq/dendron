@@ -235,10 +235,10 @@ export default function Graph({
   };
 
   useEffect(() => {
-    logger.log("Requesting graph style and theme...");
+    logger.log("Requesting graph opts");
     // Get graph style
     postVSCodeMessage({
-      type: GraphViewMessageEnum.onRequestGraphStyleAndTheme,
+      type: GraphViewMessageEnum.onRequestGraphOpts,
       data: {},
       source: DMessageSource.webClient,
     } as GraphViewMessage);

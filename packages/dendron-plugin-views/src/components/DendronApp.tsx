@@ -98,9 +98,9 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
-      case GraphViewMessageEnum.onGraphStyleAndThemeLoad: {
+      case GraphViewMessageEnum.onGraphLoad: {
         const cmsg = msg;
-        const { styles, graphTheme } = cmsg.data;
+        const { styles, graphTheme, graphDepth } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
           ideDispatch(ideSlice.actions.setGraphStyles(styles));
@@ -112,12 +112,24 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         if (!graphTheme && styles) {
           ideDispatch(ideSlice.actions.setGraphTheme(GraphThemeEnum.Custom));
         }
+        if (graphDepth) {
+          logger.info({ ctx, graphDepth, msg: "default graph depth" });
+          ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
+        }
         break;
       }
       case SeedBrowserMessageType.onSeedStateChange: {
         const seeds = msg.data.msg;
         logger.info({ ctx, seeds, msg: "seeds" });
         ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
+        break;
+      }
+
+      case GraphViewMessageEnum.onGraphDepthChange: {
+        const cmsg = msg;
+        const { graphDepth } = cmsg.data;
+        logger.info({ ctx, graphDepth, msg: "onGraphDepthChange" });
+        ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         break;
       }
       default:

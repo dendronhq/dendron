@@ -3,6 +3,7 @@ import {
   DendronTreeViewKey,
   DMessage,
   DMessageEnum,
+  DMessageSource,
   GraphEvents,
   GraphViewMessage,
   GraphViewMessageEnum,
@@ -25,6 +26,8 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = DendronTreeViewKey.GRAPH_PANEL;
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
+  private _graphDepth: number | undefined;
+
   constructor(extension: IDendronExtension) {
     this._ext = extension;
     this._ext.context.subscriptions.push(
@@ -32,8 +35,37 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
   }
 
-  public postMessage(msg: DMessage) {
-    this._view?.webview.postMessage(msg);
+  private get graphDepth(): number | undefined {
+    return this._graphDepth;
+  }
+
+  private set graphDepth(depth: number | undefined) {
+    if (depth) {
+      this._graphDepth = depth;
+      this.postMessage({
+        type: GraphViewMessageEnum.onGraphDepthChange,
+        data: {
+          graphDepth: this._graphDepth,
+        },
+        source: DMessageSource.vscode,
+      });
+    }
+  }
+
+  private postMessage(msg: DMessage) {
+    if (this._view) this._view.webview.postMessage(msg);
+  }
+
+  public increaseGraphDepth() {
+    if (this._view && this.graphDepth && this.graphDepth < 3) {
+      this.graphDepth += 1;
+    }
+  }
+
+  public decreaseGraphDepth() {
+    if (this.graphDepth && this.graphDepth > 1) {
+      this.graphDepth -= 1;
+    }
   }
 
   public async resolveWebviewView(
@@ -53,6 +85,13 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
 
     webviewView.onDidChangeVisibility(() => {
+      if (this.graphDepth && !webviewView.visible) {
+        MetadataService.instance().graphDepth = this.graphDepth;
+        AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
+          type: "DepthChanged",
+          state: this.graphDepth,
+        });
+      }
       AnalyticsUtils.track(GraphEvents.GraphPanelUsed, {
         type: "VisibilityChanged",
         state: webviewView.visible ? "Visible" : "Collapsed",
@@ -105,16 +144,18 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         }
         break;
       }
-      case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
+      case GraphViewMessageEnum.onRequestGraphOpts: {
         // Set graph styles
         const styles = GraphStyleService.getParsedStyles();
         const graphTheme = MetadataService.instance().getGraphTheme();
-        if (this._view && (styles || graphTheme)) {
+        this.graphDepth = MetadataService.instance().graphDepth;
+        if (this._view && (styles || graphTheme || this.graphDepth)) {
           this._view.webview.postMessage({
-            type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
+            type: GraphViewMessageEnum.onGraphLoad,
             data: {
               styles,
               graphTheme,
+              graphDepth: this.graphDepth,
             },
             source: "vscode",
           });

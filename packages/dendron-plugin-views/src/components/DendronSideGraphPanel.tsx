@@ -7,7 +7,10 @@ import DendronGraphPanel from "./DendronGraphPanel";
  * @returns DendronGraphPanel component with ide.isSidePanel set to true
  */
 const DendronSideGraphPanel: DendronComponent = (props) => {
-  props.isSidePanel = true;
+  props = {
+    ...props,
+    isSidePanel: true,
+  };
   return <DendronGraphPanel {...props} />;
 };
 export default DendronSideGraphPanel;

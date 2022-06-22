@@ -39,10 +39,11 @@ export class NoteGraphPanelFactory {
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
   /**
-   * This property temporarily stores the graph theme selected by user and is written
+   * These properties temporarily stores the graph theme and depth selected by user and is written
    * back to MetadataService once the panel is disposed.
    */
   private static defaultGraphTheme: GraphThemeEnum | undefined;
+  private static graphDepth: number | undefined;
 
   static create(
     ext: DendronExtension,
@@ -117,19 +118,24 @@ export class NoteGraphPanelFactory {
             this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
+          case GraphViewMessageEnum.onRequestGraphOpts: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
             const graphTheme = MetadataService.instance().getGraphTheme();
+            const graphDepth = MetadataService.instance().graphDepth;
             if (graphTheme) {
               this.defaultGraphTheme = graphTheme;
             }
-            if (styles || graphTheme) {
+            if (graphDepth) {
+              this.graphDepth = graphDepth;
+            }
+            if (styles || graphTheme || graphDepth) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
+                type: GraphViewMessageEnum.onGraphLoad,
                 data: {
                   styles,
                   graphTheme,
+                  graphDepth,
                 },
                 source: "vscode",
               });
@@ -193,6 +199,11 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
+
+          case GraphViewMessageEnum.onGraphDepthChange: {
+            this.graphDepth = msg.data.graphDepth;
+            break;
+          }
           default:
             break;
         }
@@ -209,6 +220,13 @@ export class NoteGraphPanelFactory {
           });
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
           this.defaultGraphTheme = undefined;
+        }
+        if (this.graphDepth) {
+          AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
+            graphDepth: this.graphDepth,
+          });
+          MetadataService.instance().graphDepth = this.graphDepth;
+          this.graphDepth = undefined;
         }
       });
     }

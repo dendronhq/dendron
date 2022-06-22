@@ -141,6 +141,11 @@ type Metadata = Partial<{
    * message
    */
   v100ReleaseMessageShown: boolean;
+
+  /**
+   * level set by user for local graph view and graph panel
+   */
+  graphDepth: number;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -247,6 +252,10 @@ export class MetadataService {
     return this.getMeta().recentWorkspaces;
   }
 
+  get graphDepth(): number | undefined {
+    return this.getMeta().graphDepth;
+  }
+
   setMeta(key: keyof Metadata, value: any) {
     const stateFromFile = this.getMeta();
     stateFromFile[key] = value;
@@ -331,6 +340,12 @@ export class MetadataService {
     const meta = this.getMeta();
     if (meta.graphTheme !== graphTheme) {
       this.setMeta("graphTheme", graphTheme);
+    }
+  }
+  set graphDepth(graphDepth: number | undefined) {
+    const meta = this.getMeta();
+    if (meta.graphDepth !== graphDepth) {
+      this.setMeta("graphDepth", graphDepth);
     }
   }
 

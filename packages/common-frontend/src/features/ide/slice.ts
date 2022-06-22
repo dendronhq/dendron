@@ -27,6 +27,7 @@ type InitialState = {
   lookupModifiers: LookupModifierStatePayload | undefined;
   tree?: TreeMenu;
   graphTheme?: GraphThemeEnum;
+  graphDepth?: number;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -39,6 +40,7 @@ const INITIAL_STATE: InitialState = {
   lookupModifiers: undefined,
   tree: undefined,
   graphTheme: GraphThemeEnum.Classic,
+  graphDepth: 1,
 };
 
 export { InitialState as IDEState };
@@ -78,6 +80,9 @@ export const ideSlice = createSlice({
     },
     setGraphTheme: (state, action: PayloadAction<GraphThemeEnum>) => {
       state.graphTheme = action.payload;
+    },
+    setGraphDepth: (state, action: PayloadAction<number>) => {
+      state.graphDepth = action.payload;
     },
   },
 });

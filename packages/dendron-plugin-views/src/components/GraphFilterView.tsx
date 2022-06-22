@@ -188,6 +188,7 @@ const FilterViewStringInput = ({
   );
 };
 
+//TODO: either make this more generic or split it into multiple components.
 const FilterViewSection = ({
   section,
   config,
@@ -246,16 +247,33 @@ const FilterViewSection = ({
                   />
                 </>
               )}
-              {_.isNumber(entry?.value) && (
-                <>
-                  <Typography>{label}</Typography>
-                  <InputNumber
-                    value={entry?.value}
-                    onChange={(newValue) => updateConfigField(key, newValue)}
-                    disabled={!entry?.mutable}
-                  />
-                </>
-              )}
+              {entry.label === config["filter.depth"].label &&
+                config["options.show-local-graph"]?.value && (
+                  <>
+                    <Typography>{label}</Typography>
+                    <InputNumber
+                      min={1}
+                      max={3}
+                      disabled={!entry.mutable}
+                      defaultValue={(entry.value as number) || 1}
+                      onChange={(newValue) => {
+                        updateConfigField(key, newValue);
+                        updateGraphDepth(newValue as number);
+                      }}
+                    />
+                  </>
+                )}
+              {_.isNumber(entry?.value) &&
+                entry.label !== config["filter.depth"].label && (
+                  <>
+                    <Typography>{label}</Typography>
+                    <InputNumber
+                      value={entry?.value}
+                      onChange={(newValue) => updateConfigField(key, newValue)}
+                      disabled={!entry?.mutable}
+                    />
+                  </>
+                )}
               {_.isString(entry?.value) &&
                 !_.isUndefined(entry) &&
                 !_.isUndefined(key) &&
@@ -328,6 +346,19 @@ const updateGraphTheme = (graphTheme: GraphThemeEnum) => {
 const configureCustomStyling = () => {
   postVSCodeMessage({
     type: GraphViewMessageEnum.configureCustomStyling,
+    source: DMessageSource.webClient,
+  } as GraphViewMessage);
+};
+
+/**
+ * vscode message to update graphDepth selected by User.
+ * When the graph panel is disposed, this value is written back to Metadata Service.
+ * @param graphDepth
+ */
+const updateGraphDepth = (graphDepth: number) => {
+  postVSCodeMessage({
+    type: GraphViewMessageEnum.onGraphDepthChange,
+    data: { graphDepth },
     source: DMessageSource.webClient,
   } as GraphViewMessage);
 };

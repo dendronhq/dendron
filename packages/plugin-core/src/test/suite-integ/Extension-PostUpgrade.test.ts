@@ -49,6 +49,7 @@ suite("WHEN migrate config", function () {
         await beforeSetup({ version: "0.83.0" });
       },
       afterHook,
+      skipMigrations: false,
     },
     () => {
       test("THEN: config migration is prompted on init", () => {
@@ -74,6 +75,7 @@ suite("WHEN migrate config", function () {
         await beforeSetup({ version: "0.83.0" });
       },
       afterHook,
+      skipMigrations: false,
     },
     () => {
       test("THEN: config migration is not prompted on init", () => {
@@ -99,6 +101,7 @@ suite("WHEN migrate config", function () {
         await beforeSetup({ version: "0.84.0" });
       },
       afterHook,
+      skipMigrations: false,
     },
     () => {
       test("THEN: config migration is prompted on init", () => {
@@ -124,6 +127,7 @@ suite("WHEN migrate config", function () {
         await beforeSetup({ version: "0.84.0" });
       },
       afterHook,
+      skipMigrations: false,
     },
     () => {
       test("THEN: config migration is not prompted on init", () => {

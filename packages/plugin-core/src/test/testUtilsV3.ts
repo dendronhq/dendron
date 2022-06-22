@@ -552,6 +552,7 @@ export function describeMultiWS(
      */
     timeout?: number;
     noSetInstallStatus?: boolean;
+    skipMigrations?: boolean;
   },
   fn: (ctx: ExtensionContext) => void
 ) {
@@ -575,7 +576,9 @@ export function describeMultiWS(
       await _activate(ctx, {
         skipLanguageFeatures: true,
         skipInteractiveElements: true,
-        skipMigrations: true,
+        skipMigrations: _.isBoolean(opts.skipMigrations)
+          ? opts.skipMigrations
+          : true,
         skipTreeView: true,
       });
     });

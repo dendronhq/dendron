@@ -688,14 +688,12 @@ export class DendronExtension implements IDendronExtension {
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.GRAPH_PANEL_INCREASE_DEPTH.key,
       sentryReportingCallback(() => {
-        // post message to DendronGraphPanel
         graphPanel.increaseGraphDepth();
       })
     );
     vscode.commands.registerCommand(
       DENDRON_COMMANDS.GRAPH_PANEL_DECREASE_DEPTH.key,
       sentryReportingCallback(() => {
-        // post message to DendronGraphPanel
         graphPanel.decreaseGraphDepth();
       })
     );

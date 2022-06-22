@@ -35,11 +35,11 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     );
   }
 
-  get graphDepth(): number | undefined {
+  private get graphDepth(): number | undefined {
     return this._graphDepth;
   }
 
-  set graphDepth(depth: number | undefined) {
+  private set graphDepth(depth: number | undefined) {
     if (depth) {
       this._graphDepth = depth;
       this.postMessage({

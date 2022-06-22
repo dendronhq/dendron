@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 import {
   ConfigUtils,
   IntermediateDendronConfig,
@@ -53,18 +55,13 @@ export default function Note({
     id = noteIndex.id;
   }
 
-  const shouldLoadBanner = true;
   React.useEffect(() => {
-    if (ConfigUtils.getPublishing(config).siteBanner === "custom") {
-      logger.info({ ctx: "loading banner" });
-      try {
-        // eslint-disable-next-line global-require
-        BannerAlert = dynamic(() => import("../custom/BannerAlert"), {
-          loading: () => null,
-        });
-        // eslint-disable-next-line no-empty
-      } catch (err) {}
-    }
+    const BannerFile =
+      ConfigUtils.getPublishing(config).siteBanner === "custom"
+        ? "BannerAlert.tsx"
+        : "NoOp";
+    logger.info({ ctx: "loading banner", BannerFile });
+    BannerAlert = require(`../custom/${BannerFile}`).default;
   }, []);
 
   // --- Hooks

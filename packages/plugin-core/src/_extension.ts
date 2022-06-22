@@ -418,7 +418,9 @@ class ExtensionUtils {
 }
 
 // this method is called when your extension is activated
-export function activate(context: vscode.ExtensionContext) {
+export function activate(
+  context: vscode.ExtensionContext
+): vscode.ExtensionContext {
   const stage = getStage();
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
@@ -434,7 +436,7 @@ export function activate(context: vscode.ExtensionContext) {
       });
     });
   }
-  return;
+  return context;
 }
 
 async function reloadWorkspace(opts: { extension: DendronExtension }) {

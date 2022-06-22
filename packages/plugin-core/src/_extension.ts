@@ -420,7 +420,10 @@ export function activate(context: vscode.ExtensionContext) {
   });
   if (stage !== "test") {
     _activate(context).catch((err) => {
-      Logger.error(err);
+      Logger.error({
+        ctx: "activate",
+        error: err,
+      });
       HistoryService.instance().add({
         action: "not_initialized",
         source: "extension",

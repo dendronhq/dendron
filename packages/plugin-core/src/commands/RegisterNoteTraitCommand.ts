@@ -42,17 +42,6 @@ const noteTraitTemplate = `
  * before confirming.
  */
 
-/**
- * lodash module is available. See https://lodash.com/docs for documentation.
- */
-const _ = module.require("lodash");
-
-/**
- * luxon is available for Date functions. See
- * https://moment.github.io/luxon/api-docs/index.html for documentation
- */
-const luxon = module.require("luxon");
-
 module.exports = {
   OnWillCreate: {
     /**
@@ -69,6 +58,8 @@ module.exports = {
       // true so that the user has the option to alter the title name before
       // creating the note.
       return {
+        // luxon is available for Date functions. See
+        // https://moment.github.io/luxon/api-docs/index.html for documentation
         name: "my-hierarchy." + luxon.DateTime.local().toFormat("yyyy.MM.dd"),
         promptUserForModification: true,
       };
@@ -99,7 +90,9 @@ module.exports = {
 `;
 
 /**
- * Command for a user to register a new note type with custom functionality
+ * Command for a user to register a new note type with custom functionality.
+ * This command is not directly exposed via the command palette, for the user
+ * facing command see ConfigureNoteTraitsCommand
  */
 export class RegisterNoteTraitCommand extends BasicCommand<
   CommandOpts,
@@ -108,12 +101,23 @@ export class RegisterNoteTraitCommand extends BasicCommand<
   key = DENDRON_COMMANDS.REGISTER_NOTE_TRAIT.key;
 
   async gatherInputs() {
-    const traitId = await VSCodeUtils.showInputBox({
+    let traitId = await VSCodeUtils.showInputBox({
+      title: "Create New Note Trait",
       placeHolder: "name of trait",
+      validateInput: (value) => {
+        return ExtensionProvider.getExtension().traitRegistrar.registeredTraits.has(
+          value
+        )
+          ? "Trait ID already exists."
+          : null;
+      },
     });
     if (!traitId) {
       return undefined;
     }
+
+    // Clean up and replace any spaces
+    traitId = traitId.trim().replace(" ", "-");
 
     return { traitId };
   }

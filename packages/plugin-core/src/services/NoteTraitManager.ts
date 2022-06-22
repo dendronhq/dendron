@@ -258,8 +258,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
             `Note trait ${traitId} successfully registered.`
           );
         }
-      }),
-      250 // 250 ms debounce interval
+      }, 500) // 500 ms debounce interval
     );
 
     this._watcher.onDidDelete((uri) => {

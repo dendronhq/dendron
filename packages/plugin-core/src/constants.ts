@@ -733,6 +733,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   REGISTER_NOTE_TRAIT: {
     key: "dendron.registerNoteTrait",
     title: `${CMD_PREFIX} Register Note Trait`,
+    when: "false",
+  },
+  CONFIGURE_NOTE_TRAITS: {
+    key: "dendron.configureNoteTraits",
+    title: `${CMD_PREFIX} Configure Note Traits`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   CREATE_USER_DEFINED_NOTE: {

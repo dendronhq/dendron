@@ -19,6 +19,7 @@ import {
   InstallStatus,
   IntermediateDendronConfig,
   isDisposable,
+  TaskNoteUtils,
   Time,
   TreeViewItemLabelTypeEnum,
   VaultUtils,
@@ -265,6 +266,7 @@ class ExtensionUtils {
     let numLinkCandidates = 0;
     let numFrontmatterTags = 0;
     let numTutorialNotes = 0;
+    let numTaskNotes = 0;
 
     // Note IDs that are part of our tutorial(s). We want to exclude these from
     // our 'numNotes' telemetry.
@@ -316,6 +318,9 @@ class ExtensionUtils {
       if (tutorialIds.has(val.id)) {
         numTutorialNotes += 1;
       }
+      if (TaskNoteUtils.isTaskNote(val)) {
+        numTaskNotes += 1;
+      }
     });
 
     // These are the values for the original tutorial; approximate is ok here.
@@ -353,6 +358,7 @@ class ExtensionUtils {
       numSchemas,
       numVaults: vaults.length,
       numTutorialNotes,
+      numTaskNotes,
       workspaceType,
       codeWorkspacePresent,
       selfContainedVaultsEnabled:

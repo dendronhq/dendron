@@ -1,7 +1,6 @@
 import {
   DendronError,
   DNodeUtils,
-  EngagementEvents,
   extractNoteChangeEntryCounts,
   getSlugger,
   NoteProps,
@@ -22,11 +21,12 @@ import { Range, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
+import { getAnalyticsPayload } from "../utils/analytics";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { WSUtils } from "../WSUtils";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandOpts =
   | {
@@ -192,15 +192,19 @@ export class RenameHeaderCommand extends BasicCommand<
     const engine = extension.getEngine();
     const { vaults } = engine;
 
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: this.key,
-      ...noteChangeEntryCounts,
-      numVaults: vaults.length,
-      traits: note.traits || [],
-      numChildren: note.children.length,
-      numLinks: note.links.length,
-      numChars: note.body.length,
-      noteDepth: DNodeUtils.getDepth(note),
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props: {
+        command: this.key,
+        numVaults: vaults.length,
+        traits: note.traits || [],
+        numChildren: note.children.length,
+        numLinks: note.links.length,
+        numChars: note.body.length,
+        noteDepth: DNodeUtils.getDepth(note),
+      },
+      extra: {
+        ...noteChangeEntryCounts,
+      },
     });
   }
 

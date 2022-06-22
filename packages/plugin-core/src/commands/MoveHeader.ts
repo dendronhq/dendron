@@ -6,7 +6,6 @@ import {
   DNoteHeaderAnchor,
   DNoteLink,
   DVault,
-  EngagementEvents,
   ERROR_SEVERITY,
   extractNoteChangeEntryCounts,
   getSlugger,
@@ -49,7 +48,7 @@ import {
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-import { AnalyticsUtils } from "../utils/analytics";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandInput =
   | {
@@ -640,21 +639,25 @@ export class MoveHeaderCommand extends BasicCommand<
     const maxMovedHeaderDepth = _.max(movedHeaderDepths);
     const meanMovedHeaderDepth = _.mean(movedHeaderDepths);
 
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: this.key,
-      ...noteChangeEntryCounts,
-      traits: origin.traits || [],
-      numVaults: vaults.length,
-      numChildren: origin.children.length,
-      numlinks: origin.links.length,
-      numChars: origin.body.length,
-      noteDepth: DNodeUtils.getDepth(origin),
-      numOriginHeaders,
-      maxOriginHeaderDepth,
-      meanOriginHeaderDepth,
-      numMovedHeaders,
-      maxMovedHeaderDepth,
-      meanMovedHeaderDepth,
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props: {
+        command: this.key,
+        numVaults: vaults.length,
+        traits: origin.traits || [],
+        numChildren: origin.children.length,
+        numLinks: origin.links.length,
+        numChars: origin.body.length,
+        noteDepth: DNodeUtils.getDepth(origin),
+      },
+      extra: {
+        ...noteChangeEntryCounts,
+        numOriginHeaders,
+        maxOriginHeaderDepth,
+        meanOriginHeaderDepth,
+        numMovedHeaders,
+        maxMovedHeaderDepth,
+        meanMovedHeaderDepth,
+      },
     });
   }
 

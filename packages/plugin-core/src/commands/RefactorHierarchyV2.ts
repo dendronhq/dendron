@@ -4,9 +4,9 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteUtils,
+  RefactoringCommandUsedPayload,
   StatisticsUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -29,7 +29,7 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
-import { AnalyticsUtils } from "../utils/analytics";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 const md = _md();
 
@@ -55,7 +55,13 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
-  _proxyMetricPayload = {};
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   entireWorkspaceQuickPickItem = {
     label: "Entire Workspace",
@@ -378,6 +384,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   prepareProxyMetricPayload(capturedNotes: DNodeProps[]) {
+    const engine = ExtensionProvider.getEngine();
     const numChildrenAcc = capturedNotes.map((note) => note.children.length);
     const numLinksAcc = capturedNotes.map((note) => note.links.length);
     const numCharsAcc = capturedNotes.map((note) => note.body.length);
@@ -387,26 +394,28 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     );
     const traitsSet = new Set(traitsAcc);
     this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
       traits: [...traitsSet],
-      // all numX props are mean value but named as plain numX
-      // since we want to use the same name across different commands for an aggregate analysis.
-      numProcessed: capturedNotes.length,
       numChildren: _.mean(numChildrenAcc),
-      maxNumChildren: _.max(numChildrenAcc),
-      medianNumChildren: StatisticsUtils.median(numChildrenAcc),
-      stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
       numLinks: _.mean(numLinksAcc),
-      maxNumLinks: _.max(numLinksAcc),
-      medianNumLinks: StatisticsUtils.median(numLinksAcc),
-      stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
       numChars: _.mean(numCharsAcc),
-      maxNumChars: _.max(numCharsAcc),
-      medianNumChars: StatisticsUtils.median(numCharsAcc),
-      stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
       noteDepth: _.mean(noteDepthAcc),
-      maxNoteDepth: _.max(noteDepthAcc),
-      medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
-      stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+      extra: {
+        numProcessed: capturedNotes.length,
+        maxNumChildren: _.max(numChildrenAcc),
+        medianNumChildren: StatisticsUtils.median(numChildrenAcc),
+        stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
+        maxNumLinks: _.max(numLinksAcc),
+        medianNumLinks: StatisticsUtils.median(numLinksAcc),
+        stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
+        maxNumChars: _.max(numCharsAcc),
+        medianNumChars: StatisticsUtils.median(numCharsAcc),
+        stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
+        maxNoteDepth: _.max(noteDepthAcc),
+        medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
+        stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+      },
     };
   }
 
@@ -482,20 +491,23 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     noteChangeEntryCounts,
   }: {
     noteChangeEntryCounts: {
-      createdCount?: number;
-      deletedCount?: number;
-      updatedCount?: number;
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
     };
   }) {
-    const extension = ExtensionProvider.getExtension();
-    const engine = extension.getEngine();
-    const { vaults } = engine;
+    if (this._proxyMetricPayload === undefined) {
+      return;
+    }
 
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: this.key,
-      ...noteChangeEntryCounts,
-      numVaults: vaults.length,
-      ...this._proxyMetricPayload,
+    const { extra, ...props } = this._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+      },
     });
   }
 

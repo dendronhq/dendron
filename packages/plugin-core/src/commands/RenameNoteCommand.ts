@@ -1,11 +1,7 @@
-import {
-  EngagementEvents,
-  extractNoteChangeEntryCounts,
-} from "@dendronhq/common-all";
+import { extractNoteChangeEntryCounts } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
-import { ExtensionProvider } from "../ExtensionProvider";
-import { AnalyticsUtils } from "../utils/analytics";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { BasicCommand } from "./base";
 import {
   MoveNoteCommand,
@@ -58,28 +54,20 @@ export class RenameNoteCommand extends BasicCommand<
       updatedCount: number;
     };
   }) {
-    const extension = ExtensionProvider.getExtension();
-    const engine = extension.getEngine();
-    const { vaults } = engine;
+    if (this._moveNoteCommand._proxyMetricPayload === undefined) {
+      return;
+    }
 
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: this.key,
-      numVaults: vaults.length,
-      ...noteChangeEntryCounts,
-      ..._.omit(this._moveNoteCommand._proxyMetricPayload, [
-        "maxNumChildren",
-        "medianNumChildren",
-        "stddevNumChildren",
-        "maxNumLinks",
-        "medianNumLinks",
-        "stddevNumLinks",
-        "maxNumChars",
-        "medianNumChars",
-        "stddevNumChars",
-        "maxNoteDepth",
-        "medianNoteDepth",
-        "stddevNoteDepth",
-      ]),
+    const { extra, ...props } = this._moveNoteCommand._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props: {
+        command: this.key,
+        ..._.omit(props, "command"),
+      },
+      extra: {
+        ...noteChangeEntryCounts,
+      },
     });
   }
 

@@ -2,10 +2,10 @@ import {
   DendronError,
   DEngineClient,
   DNodeUtils,
-  EngagementEvents,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
+  RefactoringCommandUsedPayload,
   RenameNoteOpts,
   StatisticsUtils,
   VaultUtils,
@@ -32,7 +32,7 @@ import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
-import { AnalyticsUtils } from "../utils/analytics";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandInput = any;
 
@@ -83,7 +83,13 @@ function isMoveNecessary(move: RenameNoteOpts) {
 
 export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MOVE_NOTE.key;
-  _proxyMetricPayload = {};
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -195,26 +201,28 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     );
     const traitsSet = new Set(traitsAcc);
     this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
       traits: [...traitsSet],
-      numProcessed: items.length,
-      // all numX props are mean value but named as plain numX
-      // since we want to use the same name across different commands for an aggregate analysis.
       numChildren: _.mean(numChildrenAcc),
-      maxNumChildren: _.max(numChildrenAcc),
-      medianNumChildren: StatisticsUtils.median(numChildrenAcc),
-      stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
       numLinks: _.mean(numLinksAcc),
-      maxNumLinks: _.max(numLinksAcc),
-      medianNumLinks: StatisticsUtils.median(numLinksAcc),
-      stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
       numChars: _.mean(numCharsAcc),
-      maxNumChars: _.max(numCharsAcc),
-      medianNumChars: StatisticsUtils.median(numCharsAcc),
-      stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
       noteDepth: _.mean(noteDepthAcc),
-      maxNoteDepth: _.max(noteDepthAcc),
-      medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
-      stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+      extra: {
+        numProcessed: items.length,
+        maxNumChildren: _.max(numChildrenAcc),
+        medianNumChildren: StatisticsUtils.median(numChildrenAcc),
+        stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
+        maxNumLinks: _.max(numLinksAcc),
+        medianNumLinks: StatisticsUtils.median(numLinksAcc),
+        stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
+        maxNumChars: _.max(numCharsAcc),
+        medianNumChars: StatisticsUtils.median(numCharsAcc),
+        stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
+        maxNoteDepth: _.max(noteDepthAcc),
+        medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
+        stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+      },
     };
   }
 
@@ -394,17 +402,19 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       updatedCount: number;
     };
   }) {
-    const extension = ExtensionProvider.getExtension();
-    const engine = extension.getEngine();
-    const { vaults } = engine;
+    if (this._proxyMetricPayload === undefined) {
+      // something went wrong during prep. don't track.
+      return;
+    }
+    const { extra, ...props } = this._proxyMetricPayload;
 
-    // track proxy metrics separately
-    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
-      command: this.key,
-      numVaults: vaults.length,
-      isMultiMove: isMultiMove(opts.moves),
-      ...noteChangeEntryCounts,
-      ...this._proxyMetricPayload,
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+        isMultiMove: isMultiMove(opts.moves),
+      },
     });
   }
 

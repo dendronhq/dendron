@@ -1,4 +1,8 @@
-import { extractNoteChangeEntryCounts, NoteUtils } from "@dendronhq/common-all";
+import {
+  extractNoteChangeEntryCounts,
+  NoteUtils,
+  RefactoringCommandUsedPayload,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -27,7 +31,13 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   private refactorCmd: RefactorHierarchyCommandV2;
   private trackProxyMetrics;
   private prepareProxyMetricPayload;
-  _proxyMetricPayload = {};
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   constructor(name?: string) {
     super(name);

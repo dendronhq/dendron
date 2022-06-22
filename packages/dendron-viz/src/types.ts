@@ -32,10 +32,11 @@ export type InputArgs = {
   out?: string;
 };
 export type VisualizationInput = InputArgs & {
-  //TODO: remove engine
-  engine?: DEngineClient;
   notes: NotePropsByIdDict;
   vault: DVault;
+};
+export type GenerateSVGInput = InputArgs & {
+  engine: DEngineClient;
 };
 //TODO: work from here
 // export type VisualizationComponentInput

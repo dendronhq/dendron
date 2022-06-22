@@ -1,5 +1,4 @@
 import {
-  DEngineClient,
   DNodeUtils,
   DVault,
   NoteProps,
@@ -36,7 +35,11 @@ export const processDir = async ({
   /* Given a file name, get corresponding Dendron note */
   async function getNote(fname: string): Promise<NoteProps> {
     //TODO: Figure out how to replace findNotes
-    const note = await engine.findNotes({ fname, vault });
+    // const note = await engine.findNotes({ fname, vault });
+
+    //TODO: Given a file name, get NoteProp (how?)
+
+    const note: NoteProps = notes[vault.name!];
 
     if (note === undefined) {
       throw new Error(`Issue trying to find the note ${fname}`);

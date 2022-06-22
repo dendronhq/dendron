@@ -6,7 +6,7 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./processDendronNotes";
 import { createTree } from "./Tree";
-import { InputArgs, VisualizationInput } from "./types";
+import { GenerateSVGInput, InputArgs, VisualizationInput } from "./types";
 import path from "path";
 
 function collectInput(args: InputArgs) {
@@ -24,40 +24,32 @@ function collectInput(args: InputArgs) {
   };
 }
 
-export async function generateSVG(args: VisualizationInput) {
+export async function generateSVG(args: GenerateSVGInput) {
+  const { out, engine, wsRoot } = args;
+
   /* Ensure that the provided directory exists. If not present, this creates the directory */
-  if (args.out) await fs.ensureDir(args.out);
+  if (out) await fs.ensureDir(out);
 
-  /* Create visualization for each vault */
-  const visualizations = await getVisualizationContent(args);
+  if (!engine) throw new Error("Engine is not initialized");
 
-  if (!args.engine) throw new Error("Engine is not initialized");
-
-  args.engine.vaults.forEach(async (vault) => {
+  engine.vaults.forEach(async (vault) => {
+    /* Get vault name */
     const vaultName = VaultUtils.getName(vault);
-
-    const outputFile = path.join(
-      args.out || args.wsRoot,
-      `diagram-${vaultName}.svg`
-    );
-
-    const Visualization = await getVisualizationContent({ ...args, vault });
+    /* Get the path to the output file */
+    const outputFile = path.join(out || wsRoot, `diagram-${vaultName}.svg`);
+    /* Create React component for visualization */
+    const Visualization = await getVisualizationContent({
+      ...args,
+      vault,
+      notes: engine.notes,
+    });
+    /* From React component, get svg as a string */
     const html = ReactDOMServer.renderToStaticMarkup(Visualization);
-    await fs.writeFile(outputFile, html);
-  });
-
-  /* For visualization of each vault, create a svg file */
-  Object.entries(visualizations).forEach(async ([vault, html]) => {
-    const outputFile = path.join(
-      args.out || args.wsRoot,
-      `diagram-${vault}.svg`
-    );
-
+    /* Write svg to the output file */
     await fs.writeFile(outputFile, html);
   });
 }
 
-//TODO: Take vault name as an argument
 export async function getVisualizationContent(args: VisualizationInput) {
   const { vault, notes } = args;
   const { /*rootPath*/ maxDepth, colorEncoding, customFileColors } =

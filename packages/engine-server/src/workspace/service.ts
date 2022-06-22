@@ -502,7 +502,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       // but also adding a sanity check here.
       throw new DendronError({
         message:
-          "Seed vaults vaults are not yet supported for automated migration.",
+          "Seed vaults are not yet supported for automated migration.",
       });
     }
     const newVault: SelfContainedVault = {

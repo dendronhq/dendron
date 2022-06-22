@@ -83,6 +83,8 @@ Depending on your needs, here are some common next steps:
 - I want to use Dendron for managing my tasks and todos: See the [Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows](https://wiki.dendron.so/notes/ordz7r99w1v099v14hrwgnp) for how the founder of Dendron uses it to manage his work.
 - I want to dive deeper into Dendron: See [next steps](https://wiki.dendron.so/notes/TflY5kn29HOLpp1pWT9tP) for longer walkthroughs and advanced functionality!
 
+> Coming from Obsidian? Click [here](command:dendron.importObsidianPod) to import your Obsidian notes (or any markdown notes) into Dendron to see how they look.
+
 ## Community
 
 Dendron is more that just a tool - we are also a community of individuals that are passionate about knowledge management. If you need help or want to connect with the community, join us in the [Discords](https://link.dendron.so/discord).

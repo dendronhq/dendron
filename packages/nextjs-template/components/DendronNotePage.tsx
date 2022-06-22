@@ -59,6 +59,7 @@ export default function Note({
       logger.info({ ctx: "loading banner" });
       try {
         // eslint-disable-next-line global-require
+        // @ts-ignore
         BannerAlert = dynamic(() => import("../custom/BannerAlert"), {
           loading: () => null,
         });

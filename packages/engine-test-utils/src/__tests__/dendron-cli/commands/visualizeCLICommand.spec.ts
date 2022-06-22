@@ -18,7 +18,7 @@ const runCmd = (opts: Omit<VisualizeCLICommandOpts, "port" | "server">) => {
   });
 };
 
-jest.setTimeout(50000);
+jest.setTimeout(30000);
 describe("WHEN run 'visualize'", () => {
   describe("AND WHEN one director argument is not provided", () => {
     test("THEN visualization should be generated inside workspace root", async () => {

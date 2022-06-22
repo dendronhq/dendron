@@ -47,10 +47,7 @@ export class MigrateSelfContainedVaultCommand extends BasicCommand<
       const nonSCVaults = this.extension
         .getDWorkspace()
         .vaults.filter(
-          (vault) =>
-            !VaultUtils.isSelfContained(vault) &&
-            !vault.seed &&
-            !vault.workspace
+          (vault) => !VaultUtils.isSelfContained(vault) && !vault.seed
         );
       if (nonSCVaults.length === 0) {
         throw new DendronError({

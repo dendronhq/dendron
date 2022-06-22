@@ -20,7 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
 import { pathForVaultRoot } from "@dendronhq/common-server";
 
 function stubMigrateQuickPick(
@@ -242,6 +242,67 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
               ".gitignore"
             )
           )
+        ).toBeTruthy();
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN there's a workspace vault",
+    {
+      selfContained: false,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vaultPath = pathForVaultRoot({ wsRoot, vault: vaults[0] });
+        // Turn the regular vault inside the workspace into a workspace vault
+        await WorkspaceService.createWorkspace({
+          useSelfContainedVault: false,
+          wsRoot: vaultPath,
+          wsVault: {
+            fsPath: "inner",
+          },
+        });
+        const wsService = new WorkspaceService({
+          wsRoot: vaultPath,
+        });
+        await wsService.createVault({
+          addToCodeWorkspace: true,
+          vault: {
+            fsPath: "vault",
+          },
+        });
+      },
+    },
+    () => {
+      let reloadWindow: SinonStubbedFn<typeof VSCodeUtils["reloadWindow"]>;
+      let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
+
+      before(async () => {
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        const cmd = new MigrateSelfContainedVaultCommand(
+          ExtensionProvider.getExtension()
+        );
+
+        reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
+        showQuickPick = stubMigrateQuickPick(VaultUtils.getName(vaults[0]));
+
+        await cmd.run();
+      });
+      after(() => {
+        [reloadWindow, showQuickPick].forEach((stub) => stub.restore());
+      });
+
+      test("THEN it prompts for the vault and confirmation", () => {
+        expect(showQuickPick.callCount).toEqual(2);
+      });
+
+      test("THEN the workspace reloads to apply the migration", () => {
+        expect(reloadWindow.called).toBeTruthy();
+      });
+
+      test("THEN the vault is migrated", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        expect(
+          verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
     }

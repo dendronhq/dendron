@@ -46,25 +46,6 @@ export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
   },
 ]);
 
-export enum GraphThemeFeatureShowcaseTestGroups {
-  showMeHow = "showMeHow",
-  openGraph = "openGraphView",
-}
-
-export const GRAPH_THEME_FEATURE_SHOWCASE_TEST = new ABTest(
-  "GraphThemeFeatureShowcaseTest",
-  [
-    {
-      name: GraphThemeFeatureShowcaseTestGroups.openGraph,
-      weight: 1,
-    },
-    {
-      name: GraphThemeFeatureShowcaseTestGroups.showMeHow,
-      weight: 1,
-    },
-  ]
-);
-
 export enum QuickstartTutorialTestGroups {
   "main" = "main",
   "quickstart-v1" = "quickstart-v1",
@@ -129,7 +110,6 @@ export const CURRENT_TUTORIAL_TEST = _2022_06_QUICKSTART_TUTORIAL_TEST;
  */
 export const CURRENT_AB_TESTS = [
   GRAPH_THEME_TEST,
-  GRAPH_THEME_FEATURE_SHOWCASE_TEST,
   _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
   CURRENT_TUTORIAL_TEST,
 ];

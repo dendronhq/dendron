@@ -384,11 +384,17 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   prepareProxyMetricPayload(capturedNotes: DNodeProps[]) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
     const engine = ExtensionProvider.getEngine();
-    const numChildrenAcc = capturedNotes.map((note) => note.children.length);
-    const numLinksAcc = capturedNotes.map((note) => note.links.length);
-    const numCharsAcc = capturedNotes.map((note) => note.body.length);
-    const noteDepthAcc = capturedNotes.map((note) => DNodeUtils.getDepth(note));
+
+    const basicStats = StatisticsUtils.getBasicStatsFromNotes(capturedNotes);
+    if (basicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth, ...rest } = basicStats;
+
     const traitsAcc = capturedNotes.flatMap((note) =>
       note.traits && note.traits.length > 0 ? note.traits : []
     );
@@ -397,24 +403,13 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       command: this.key,
       numVaults: engine.vaults.length,
       traits: [...traitsSet],
-      numChildren: _.mean(numChildrenAcc),
-      numLinks: _.mean(numLinksAcc),
-      numChars: _.mean(numCharsAcc),
-      noteDepth: _.mean(noteDepthAcc),
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
       extra: {
         numProcessed: capturedNotes.length,
-        maxNumChildren: _.max(numChildrenAcc),
-        medianNumChildren: StatisticsUtils.median(numChildrenAcc),
-        stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
-        maxNumLinks: _.max(numLinksAcc),
-        medianNumLinks: StatisticsUtils.median(numLinksAcc),
-        stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
-        maxNumChars: _.max(numCharsAcc),
-        medianNumChars: StatisticsUtils.median(numCharsAcc),
-        stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
-        maxNoteDepth: _.max(noteDepthAcc),
-        medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
-        stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+        ...rest,
       },
     };
   }

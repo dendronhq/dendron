@@ -1,7 +1,6 @@
 import {
   DendronError,
   DEngineClient,
-  DNodeUtils,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
@@ -169,6 +168,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   private async prepareProxyMetricPayload(
     data: NoteLookupProviderSuccessResp<OldNewLocation>
   ) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
     const engine = ExtensionProvider.getEngine();
     let items: NoteProps[];
     if (data.selectedItems.length === 1) {
@@ -192,36 +192,30 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       items = notes;
     }
 
-    const numChildrenAcc = items.map((item) => item.children.length);
-    const numLinksAcc = items.map((item) => item.links.length);
-    const numCharsAcc = items.map((item) => item.body.length);
-    const noteDepthAcc = items.map((item) => DNodeUtils.getDepth(item));
+    const basicStats = StatisticsUtils.getBasicStatsFromNotes(items);
+    if (basicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth, ...rest } = basicStats;
+
     const traitsAcc = items.flatMap((item) =>
       item.traits && item.traits.length > 0 ? item.traits : []
     );
     const traitsSet = new Set(traitsAcc);
+
     this._proxyMetricPayload = {
       command: this.key,
       numVaults: engine.vaults.length,
       traits: [...traitsSet],
-      numChildren: _.mean(numChildrenAcc),
-      numLinks: _.mean(numLinksAcc),
-      numChars: _.mean(numCharsAcc),
-      noteDepth: _.mean(noteDepthAcc),
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
       extra: {
         numProcessed: items.length,
-        maxNumChildren: _.max(numChildrenAcc),
-        medianNumChildren: StatisticsUtils.median(numChildrenAcc),
-        stddevNumChildren: StatisticsUtils.stddev(numChildrenAcc),
-        maxNumLinks: _.max(numLinksAcc),
-        medianNumLinks: StatisticsUtils.median(numLinksAcc),
-        stddevNumLinks: StatisticsUtils.stddev(numLinksAcc),
-        maxNumChars: _.max(numCharsAcc),
-        medianNumChars: StatisticsUtils.median(numCharsAcc),
-        stddevNumChars: StatisticsUtils.stddev(numCharsAcc),
-        maxNoteDepth: _.max(noteDepthAcc),
-        medianNoteDepth: StatisticsUtils.median(noteDepthAcc),
-        stddevNoteDepth: StatisticsUtils.stddev(noteDepthAcc),
+        ...rest,
       },
     };
   }

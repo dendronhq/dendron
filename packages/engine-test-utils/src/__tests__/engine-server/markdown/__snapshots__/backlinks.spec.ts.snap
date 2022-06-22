@@ -2,7 +2,7 @@
 
 exports[`backlinks backlink to home page 1`] = `
 VFile {
-  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#beta\\"><span class=\\"icon icon-link\\"></span></a>Beta</h1>
+  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#beta\\"></a>Beta</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>

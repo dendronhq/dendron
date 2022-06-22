@@ -426,7 +426,11 @@ export class MDUtilsV5 {
         properties: {
           "aria-hidden": "true",
           class: "anchor-heading icon-link",
-          contents: "",
+        },
+        content: {
+          type: "text",
+          // @ts-ignore
+          value: "",
         },
       });
     }

@@ -2,9 +2,9 @@
 
 exports[`containers "HTML: NOT_ENABLED" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#foo\\"><span class=\\"icon icon-link\\"></span></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
 <p>::: aside class-one class-two</p>
-<h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#header-one\\"><span class=\\"icon icon-link\\"></span></a>Header One</h1>
+<h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#header-one\\"></a>Header One</h1>
 <p>With container contents.
 :::</p>
 <hr>
@@ -21,8 +21,8 @@ VFile {
 
 exports[`containers "HTML: REGULAR_CASE" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#foo\\"><span class=\\"icon icon-link\\"></span></a>Foo</h1>
-<aside class=\\"class-one class-two\\"><h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" contents=\\"\\" href=\\"#header-one\\"><span class=\\"icon icon-link\\"></span></a>Header One</h1><p>With container contents. </p></aside>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+<aside class=\\"class-one class-two\\"><h1 id=\\"header-one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#header-one\\"></a>Header One</h1><p>With container contents. </p></aside>
 <hr>
 <strong>Children</strong>
 <ol>

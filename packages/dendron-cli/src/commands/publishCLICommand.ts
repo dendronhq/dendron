@@ -130,6 +130,18 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "override existing siteConfig properties",
       type: "string",
     });
+    args.option("target", {
+      describe: "export to specific destination",
+      choices: _.values(PublishTarget),
+    });
+    args.option("yes", {
+      describe: "automatically say yes to all prompts",
+      type: "boolean",
+    });
+    args.option("sitemap", {
+      describe: "generates a sitemap: https://en.wikipedia.org/wiki/Site_map",
+      type: "boolean",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {

@@ -8,7 +8,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
-  CURRENT_TUTORIAL_TEST,
   DendronError,
   getStage,
   GitEvents,
@@ -94,6 +93,7 @@ import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 import setupRecentWorkspacesTreeView from "./features/RecentWorkspacesTreeview";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -1038,9 +1038,7 @@ async function showWelcomeOrWhatsNew({
       // Explicitly set the tutorial split test group in the Install event as
       // well, since Amplitude may not have the user props splitTest setup in time
       // before this install event reaches their backend.
-      const group = CURRENT_TUTORIAL_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
+      const group = TutorialInitializer.getTutorialType();
 
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {

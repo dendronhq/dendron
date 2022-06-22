@@ -6,7 +6,7 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./processDendronNotes";
 import { createTree } from "./Tree";
-import { InputArgs, Visualizations, VisualizationInput } from "./types";
+import { InputArgs, VisualizationInput } from "./types";
 import path from "path";
 
 function collectInput(args: InputArgs) {
@@ -31,6 +31,21 @@ export async function generateSVG(args: VisualizationInput) {
   /* Create visualization for each vault */
   const visualizations = await getVisualizationContent(args);
 
+  if (!args.engine) throw new Error("Engine is not initialized");
+
+  args.engine.vaults.forEach(async (vault) => {
+    const vaultName = VaultUtils.getName(vault);
+
+    const outputFile = path.join(
+      args.out || args.wsRoot,
+      `diagram-${vaultName}.svg`
+    );
+
+    const Visualization = await getVisualizationContent({ ...args, vault });
+    const html = ReactDOMServer.renderToStaticMarkup(Visualization);
+    await fs.writeFile(outputFile, html);
+  });
+
   /* For visualization of each vault, create a svg file */
   Object.entries(visualizations).forEach(async ([vault, html]) => {
     const outputFile = path.join(
@@ -42,35 +57,26 @@ export async function generateSVG(args: VisualizationInput) {
   });
 }
 
-export async function getVisualizationContent(
-  args: VisualizationInput
-): Promise<Visualizations> {
+//TODO: Take vault name as an argument
+export async function getVisualizationContent(args: VisualizationInput) {
+  const { vault, notes } = args;
   const { /*rootPath*/ maxDepth, colorEncoding, customFileColors } =
     collectInput(args);
 
-  const engine = args.engine;
-
   const Tree = await createTree();
 
-  const visualizations: Visualizations = {};
+  const data = await processDir({
+    rootPath: "root",
+    notes,
+    vault,
+  });
 
-  for (const vault of engine.vaults) {
-    /* Get stats of each note in the current vault */
-    const data = await processDir({ rootPath: "root", engine, vault });
-
-    const vaultName = VaultUtils.getName(vault);
-
-    const html = ReactDOMServer.renderToStaticMarkup(
-      <Tree
-        data={data}
-        maxDepth={+maxDepth}
-        colorEncoding={colorEncoding as any}
-        customFileColors={customFileColors}
-      />
-    );
-
-    visualizations[vaultName] = html;
-  }
-
-  return visualizations;
+  return (
+    <Tree
+      data={data}
+      maxDepth={+maxDepth}
+      colorEncoding={colorEncoding as any}
+      customFileColors={customFileColors}
+    />
+  );
 }

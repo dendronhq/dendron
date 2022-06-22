@@ -1,4 +1,8 @@
-import { DEngineClient } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  DVault,
+  NotePropsByIdDict,
+} from "@dendronhq/common-all";
 
 export type ImportType = {
   moduleName: string;
@@ -28,6 +32,11 @@ export type InputArgs = {
   out?: string;
 };
 export type VisualizationInput = InputArgs & {
-  engine: DEngineClient;
+  //TODO: remove engine
+  engine?: DEngineClient;
+  notes: NotePropsByIdDict;
+  vault: DVault;
 };
+//TODO: work from here
+// export type VisualizationComponentInput
 export type Visualizations = { [key: string]: string };

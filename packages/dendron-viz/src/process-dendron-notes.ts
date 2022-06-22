@@ -3,6 +3,7 @@ import {
   DNodeUtils,
   DVault,
   NoteProps,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import * as nodePath from "path";
 import { shouldExcludePath } from "./should-exclude-path";
@@ -15,14 +16,14 @@ function isDir(note: NoteProps) {
 
 export const processDir = async ({
   rootPath = "",
-  engine,
+  notes,
   vault,
   excludedPaths = [],
   excludedGlobs = [],
 }: {
   rootPath: string;
   vault: DVault;
-  engine: DEngineClient;
+  notes: NotePropsByIdDict;
   excludedPaths?: string[];
   excludedGlobs?: string[];
 }): Promise<FileType> => {
@@ -34,6 +35,7 @@ export const processDir = async ({
 
   /* Given a file name, get corresponding Dendron note */
   async function getNote(fname: string): Promise<NoteProps> {
+    //TODO: Figure out how to replace findNotes
     const note = await engine.findNotes({ fname, vault });
 
     if (note === undefined) {
@@ -45,7 +47,7 @@ export const processDir = async ({
 
   /* Given a note, get its child notes */
   function getChildren(note: NoteProps): NoteProps[] {
-    return note.children.map((id) => engine.notes[id]);
+    return note.children.map((id) => notes[id]);
   }
 
   /* Given a note, get file stats needed for Tree React component */

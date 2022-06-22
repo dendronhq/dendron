@@ -5,6 +5,7 @@ import {
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
+import { WebViewUtils } from "../../views/utils";
 // import { Disposable } from "vscode";
 import { DendronExtension } from "../../workspace";
 
@@ -16,7 +17,7 @@ export class VisualizationFactory {
   // private static initWithNote: NoteProps | undefined;
 
   static create(
-    _ext: DendronExtension,
+    ext: DendronExtension,
     _engineEvents: EngineEventEmitter
   ): vscode.WebviewPanel {
     if (this._panel) return this._panel;
@@ -33,7 +34,12 @@ export class VisualizationFactory {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true,
       },
-      {}
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        enableFindWidget: false,
+        localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
+      }
     );
 
     // this._ext = ext;

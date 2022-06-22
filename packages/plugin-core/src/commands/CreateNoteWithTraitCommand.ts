@@ -182,7 +182,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
           vault: vault!,
         });
 
-        if (notes) {
+        if (notes && notes.length > 0) {
           // Only apply schema if note is found
           TemplateUtils.applyTemplate({
             templateNote: notes[0], // Ok to use [0] here because we specified a vault in findNotes()

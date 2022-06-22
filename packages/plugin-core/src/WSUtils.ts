@@ -39,7 +39,9 @@ export class WSUtils {
     context.subscriptions.push(
       new vscode.Disposable(() => {
         Logger.info({ ctx, msg: "kill server start" });
-        process.kill(subprocess.pid);
+        if (subprocess.pid) {
+          process.kill(subprocess.pid);
+        }
         Logger.info({ ctx, msg: "kill server end" });
       })
     );

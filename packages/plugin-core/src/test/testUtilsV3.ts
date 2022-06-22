@@ -311,7 +311,12 @@ export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
-  await _activate(opts.ctx!);
+  await _activate(opts.ctx!, {
+    skipLanguageFeatures: true,
+    skipInteractiveElements: true,
+    skipMigrations: true,
+    skipTreeView: true,
+  });
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
@@ -322,10 +327,20 @@ export async function runLegacySingleWorkspaceTest(
  * @deprecated please use {@link describeMultiWS} instead
  */
 export async function runLegacyMultiWorkspaceTest(
-  opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
+  opts: SetupLegacyWorkspaceMultiOpts & {
+    onInit: OnInitHook;
+    skipMigrations?: boolean;
+  }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
-  await _activate(opts.ctx!);
+  await _activate(opts.ctx!, {
+    skipLanguageFeatures: true,
+    skipInteractiveElements: true,
+    skipMigrations: _.isBoolean(opts.skipMigrations)
+      ? opts.skipMigrations
+      : true,
+    skipTreeView: true,
+  });
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
@@ -557,7 +572,12 @@ export function describeMultiWS(
       if (opts.preActivateHook) {
         await opts.preActivateHook({ ctx, ...out });
       }
-      await _activate(ctx);
+      await _activate(ctx, {
+        skipLanguageFeatures: true,
+        skipInteractiveElements: true,
+        skipMigrations: true,
+        skipTreeView: true,
+      });
     });
 
     const result = fn(ctx);
@@ -617,7 +637,12 @@ export function describeSingleWS(
     before(async () => {
       setupWorkspaceStubs({ ...opts, ctx });
       await setupLegacyWorkspace(opts);
-      await _activate(ctx);
+      await _activate(ctx, {
+        skipLanguageFeatures: true,
+        skipInteractiveElements: true,
+        skipMigrations: true,
+        skipTreeView: true,
+      });
     });
 
     const result = fn(ctx);

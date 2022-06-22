@@ -948,10 +948,11 @@ export async function _activate(
         showcase.showToast();
       }, ONE_MINUTE_IN_MS);
 
-      // Add the current workspace to the recent workspace list.
-      MetadataService.instance().addToRecentWorkspaces(
-        DendronExtension.workspaceFile().fsPath
-      );
+      // Add the current workspace to the recent workspace list. The current
+      // workspace is either the workspace file (Code Workspace) or the current
+      // folder (Native Workspace)
+      const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
+      MetadataService.instance().addToRecentWorkspaces(workspace);
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {

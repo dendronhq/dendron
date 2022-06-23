@@ -1,6 +1,8 @@
 import {
   DNodeUtils,
   DVault,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NotePropsByIdDict,
 } from "@dendronhq/common-all";
@@ -15,7 +17,7 @@ function isDir(note: NoteProps) {
 
 export const processDir = async ({
   rootPath = "",
-  notes,
+  notes: notesById,
   vault,
   excludedPaths = [],
   excludedGlobs = [],
@@ -34,23 +36,26 @@ export const processDir = async ({
 
   /* Given a file name, get corresponding Dendron note */
   async function getNote(fname: string): Promise<NoteProps> {
-    //TODO: Figure out how to replace findNotes
-    // const note = await engine.findNotes({ fname, vault });
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+    const notes = NoteDictsUtils.findByFname(
+      fname,
+      { notesById, notesByFname },
+      vault
+    );
 
-    //TODO: Given a file name, get NoteProp (how?)
-
-    const note: NoteProps = notes[vault.name!];
+    const note = notes[0];
 
     if (note === undefined) {
       throw new Error(`Issue trying to find the note ${fname}`);
     }
 
-    return note[0];
+    return note;
   }
 
   /* Given a note, get its child notes */
   function getChildren(note: NoteProps): NoteProps[] {
-    return note.children.map((id) => notes[id]);
+    return note.children.map((id) => notesById[id]);
   }
 
   /* Given a note, get file stats needed for Tree React component */

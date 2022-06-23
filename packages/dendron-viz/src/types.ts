@@ -38,6 +38,3 @@ export type VisualizationInput = InputArgs & {
 export type GenerateSVGInput = InputArgs & {
   engine: DEngineClient;
 };
-//TODO: work from here
-// export type VisualizationComponentInput
-export type Visualizations = { [key: string]: string };

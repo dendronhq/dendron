@@ -47,3 +47,4 @@ public/*.html
 dist
 .env.production
 custom/*
+!custom/NoOp.tsx

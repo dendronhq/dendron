@@ -11,9 +11,11 @@ import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
+import { WorkspaceActivator } from "../workspace/workspaceActivater";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
 import PathLike = fs.PathLike;
@@ -253,8 +255,13 @@ export class SetupWorkspaceCommand extends BasicCommand<
           vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
         );
       } else if (workspaceType === WorkspaceType.NATIVE) {
-        // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
-        VSCodeUtils.reloadWindow();
+        const ext = ExtensionProvider.getExtension();
+        const { context } = ext;
+        new WorkspaceActivator().activateNativeWorkspace({
+          context,
+          ext,
+          wsRoot: rootDir,
+        });
       }
     }
     return { wsVault, additionalVaults };

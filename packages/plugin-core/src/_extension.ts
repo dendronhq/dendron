@@ -283,7 +283,7 @@ export async function _activate(
     });
 
     // Setup the commands
-    await _setupCommands({ ws, context, requireActiveWorkspace: false });
+    await _setupCommands({ ext: ws, context, requireActiveWorkspace: false });
 
     if (!opts?.skipLanguageFeatures) {
       _setupLanguageFeatures(context);
@@ -374,7 +374,18 @@ export async function _activate(
 
     if (await DendronExtension.isDendronWorkspace()) {
       const activator = new WorkspaceActivator();
-      const maybeWs = await activator.activate({ ext: ws, context });
+      const maybeWsRoot = await activator.getOrPromptWsRoot({
+        ext: ws,
+        context,
+      });
+      if (!maybeWsRoot) {
+        return false;
+      }
+      const maybeWs = await activator.activate({
+        ext: ws,
+        context,
+        wsRoot: maybeWsRoot,
+      });
       if (!maybeWs) {
         return false;
       }
@@ -587,7 +598,7 @@ export async function _activate(
       ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
 
       MetadataService.instance().setDendronWorkspaceActivated();
-      await _setupCommands({ ws, context, requireActiveWorkspace: true });
+      await _setupCommands({ ext: ws, context, requireActiveWorkspace: true });
 
       // Track contributors to repositories, but do so in the background so
       // initialization isn't delayed.
@@ -791,12 +802,12 @@ async function showWelcomeOrWhatsNew({
 }
 
 async function _setupCommands({
-  ws,
+  ext,
   context,
   // If your command needs access to the engine at setup, requireActiveWorkspace should be set to true
   requireActiveWorkspace,
 }: {
-  ws: DendronExtension;
+  ext: DendronExtension;
   context: vscode.ExtensionContext;
   requireActiveWorkspace: boolean;
 }) {
@@ -808,7 +819,7 @@ async function _setupCommands({
     if (Cmd.requireActiveWorkspace !== requireActiveWorkspace) {
       return;
     }
-    const cmd = new Cmd(ws);
+    const cmd = new Cmd(ext);
     if (isDisposable(cmd)) {
       context.subscriptions.push(cmd);
     }
@@ -877,7 +888,7 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
-            await new ShowPreviewCommand(PreviewPanelFactory.create(ws)).run(
+            await new ShowPreviewCommand(PreviewPanelFactory.create(ext)).run(
               args
             );
           })
@@ -891,7 +902,7 @@ async function _setupCommands({
           DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key,
           sentryReportingCallback(async () => {
             await new ShowSchemaGraphCommand(
-              SchemaGraphViewFactory.create(ws)
+              SchemaGraphViewFactory.create(ext)
             ).run();
           })
         )
@@ -904,7 +915,7 @@ async function _setupCommands({
           DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key,
           sentryReportingCallback(async () => {
             await new ShowNoteGraphCommand(
-              NoteGraphPanelFactory.create(ws, ws.getEngine())
+              NoteGraphPanelFactory.create(ext, ext.getEngine())
             ).run();
           })
         )
@@ -933,7 +944,7 @@ async function _setupCommands({
         DENDRON_COMMANDS.SEED_BROWSE.key,
         sentryReportingCallback(async () => {
           const panel = WebViewPanelFactory.create(
-            ws.workspaceService!.seedService
+            ext.workspaceService!.seedService
           );
           const cmd = new SeedBrowseCommand(panel);
 

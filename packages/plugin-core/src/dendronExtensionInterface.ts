@@ -65,6 +65,7 @@ export interface IDendronExtension {
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
+  workspaceImpl?: DWorkspaceV2;
 
   activateWatchers(): Promise<void>;
   /**
@@ -126,4 +127,5 @@ export interface IDendronExtension {
    * about registered Note Traits
    */
   get traitRegistrar(): NoteTraitService;
+  setupTraits(): Promise<void>;
 }

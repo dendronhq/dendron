@@ -13,7 +13,6 @@ import {
   TreeViewItemLabelTypeEnum,
   VaultUtils,
   VSCodeEvents,
-  WorkspaceType,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -391,48 +390,13 @@ export async function _activate(
       }
       const wsImpl = maybeWs;
       const start = process.hrtime();
-      const dendronConfig = wsImpl.config;
 
       // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
       const wsService = new WorkspaceService({ wsRoot });
-      let previousWorkspaceVersionFromWSService = wsService.getMeta().version;
-
-      // Fix a temporary issue where CLI was writing an invalid version number
-      // to .dendron.ws:
-      if (previousWorkspaceVersionFromWSService === "dendron-cli") {
-        previousWorkspaceVersionFromWSService = "0.91.0";
-      }
-
-      if (
-        !semver.valid(previousWorkspaceVersionFromWSService) ||
-        semver.gt(
-          previousWorkspaceVersionFromState,
-          previousWorkspaceVersionFromWSService
-        )
-      ) {
-        previousWorkspaceVersionFromWSService =
-          previousWorkspaceVersionFromState;
-        wsService.writeMeta({ version: previousGlobalVersionFromState });
-      }
-      const previousWorkspaceVersion = previousWorkspaceVersionFromWSService;
 
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
-
-      const maybeWsSettings =
-        ws.type === WorkspaceType.CODE
-          ? wsService.getCodeWorkspaceSettingsSync()
-          : undefined;
-      if (!opts?.skipMigrations) {
-        await StartupUtils.runMigrationsIfNecessary({
-          wsService,
-          currentVersion,
-          previousWorkspaceVersion,
-          maybeWsSettings,
-          dendronConfig,
-        });
-      }
 
       if (opts?.skipInteractiveElements) {
         // check for duplicate config keys and prompt for a fix.

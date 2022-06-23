@@ -127,4 +127,5 @@ export interface IDendronExtension {
    * about registered Note Traits
    */
   get traitRegistrar(): NoteTraitService;
+  setupTraits(): Promise<void>;
 }

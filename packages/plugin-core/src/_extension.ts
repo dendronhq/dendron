@@ -8,7 +8,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
-  CURRENT_TUTORIAL_TEST,
   DendronError,
   getStage,
   GitEvents,
@@ -95,6 +94,7 @@ import { WorkspaceActivator } from "./workspace/workspaceActivater";
 import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 import setupRecentWorkspacesTreeView from "./features/RecentWorkspacesTreeview";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -978,10 +978,11 @@ export async function _activate(
         }, ONE_MINUTE_IN_MS);
       }
 
-      // Add the current workspace to the recent workspace list.
-      MetadataService.instance().addToRecentWorkspaces(
-        DendronExtension.workspaceFile().fsPath
-      );
+      // Add the current workspace to the recent workspace list. The current
+      // workspace is either the workspace file (Code Workspace) or the current
+      // folder (Native Workspace)
+      const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
+      MetadataService.instance().addToRecentWorkspaces(workspace);
 
       Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
@@ -1074,9 +1075,7 @@ async function showWelcomeOrWhatsNew({
       // Explicitly set the tutorial split test group in the Install event as
       // well, since Amplitude may not have the user props splitTest setup in time
       // before this install event reaches their backend.
-      const group = CURRENT_TUTORIAL_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
+      const group = TutorialInitializer.getTutorialType();
 
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {

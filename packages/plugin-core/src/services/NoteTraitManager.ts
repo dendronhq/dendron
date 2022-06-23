@@ -240,25 +240,32 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
 
     this._watcher.onDidChange(
       // Need to debounce this, for some reason it fires 4 times each save
-      _.debounce(async (uri) => {
-        const traitId = path.basename(uri.fsPath, ".js");
+      _.debounce(
+        async (uri) => {
+          const traitId = path.basename(uri.fsPath, ".js");
 
-        // First unregister if it exists already (and then re-register)
-        if (this.registeredTraits.has(traitId)) {
-          this.unregisterTrait(this.registeredTraits.get(traitId)!);
+          // First unregister if it exists already (and then re-register)
+          if (this.registeredTraits.has(traitId)) {
+            this.unregisterTrait(this.registeredTraits.get(traitId)!);
+          }
+
+          const resp = await this.setupTraitFromJSFile(uri.fsPath);
+
+          if (ResponseUtil.hasError(resp)) {
+            const errMessage = `${resp.error?.message}\n${resp.error?.innerError?.stack}`;
+            vscode.window.showErrorMessage(errMessage);
+          } else {
+            vscode.window.showInformationMessage(
+              `Note trait ${traitId} successfully registered.`
+            );
+          }
+        },
+        500, // 500 ms debounce interval
+        {
+          trailing: true,
+          leading: false,
         }
-
-        const resp = await this.setupTraitFromJSFile(uri.fsPath);
-
-        if (ResponseUtil.hasError(resp)) {
-          const errMessage = `${resp.error?.message}\n${resp.error?.innerError?.stack}`;
-          vscode.window.showErrorMessage(errMessage);
-        } else {
-          vscode.window.showInformationMessage(
-            `Note trait ${traitId} successfully registered.`
-          );
-        }
-      }, 500) // 500 ms debounce interval
+      )
     );
 
     this._watcher.onDidDelete((uri) => {

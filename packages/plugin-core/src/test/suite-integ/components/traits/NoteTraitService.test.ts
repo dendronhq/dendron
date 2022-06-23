@@ -173,9 +173,9 @@ suite("NoteTraitManager tests", () => {
         expect(trait.OnCreate!.setTitle!(createContext)).toEqual(2);
 
         // setTemplate uses luxon
-        expect(trait.OnCreate!.setTemplate!()).toEqual(
-          "2022-01-01T00:00:00.000+08:00"
-        );
+        expect(
+          trait.OnCreate!.setTemplate!().startsWith("2022-01-01")
+        ).toBeTruthy();
       });
     });
   });

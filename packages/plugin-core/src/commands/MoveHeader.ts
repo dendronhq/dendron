@@ -525,7 +525,9 @@ export class MoveHeaderCommand extends BasicCommand<
         const writeResp = await engine.writeNote(note!, {
           updateExisting: true,
         });
-        noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+        if (writeResp.data) {
+          noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+        }
       } catch (error) {
         // TODO: should notify which one we failed during update.
         this.L.error({ ctx, error });

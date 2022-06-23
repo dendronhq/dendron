@@ -227,9 +227,11 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {
     const resp = await this.api.engineBulkAdd({ opts, ws: this.ws });
     const changed = resp.data;
-    await this.refreshNotesV2(changed);
 
-    this._onNoteChangedEmitter.fire(resp.data);
+    if (changed) {
+      await this.refreshNotesV2(changed);
+      this._onNoteChangedEmitter.fire(changed);
+    }
 
     return resp;
   }
@@ -349,6 +351,10 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
+    if (_.isUndefined(notes)) {
+      return;
+    }
+
     const noteDicts = {
       notesById: this.notes,
       notesByFname: this.noteFnames,
@@ -486,9 +492,11 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     if (opts?.updateExisting) {
       changed = _.reject(changed, (ent) => ent.status === "delete");
     }
-    await this.refreshNotesV2(changed);
 
-    this._onNoteChangedEmitter.fire(resp.data);
+    if (changed) {
+      await this.refreshNotesV2(changed);
+      this._onNoteChangedEmitter.fire(changed);
+    }
 
     return resp;
   }

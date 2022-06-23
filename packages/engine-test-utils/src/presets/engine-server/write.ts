@@ -204,12 +204,12 @@ const NOTES = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data[0];
+    const note = resp.data![0];
 
     return [
       {
         actual: note,
-        expected: engine.notes[note.id],
+        expected: engine.notes["note.id"],
         msg: "bar should be written in engine",
       },
       {
@@ -495,7 +495,7 @@ const NOTES_MULTI = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data[0];
+    const note = resp.data![0];
 
     return [
       {
@@ -527,7 +527,7 @@ const NOTES_MULTI = {
         originalQS: "bar",
         vault,
       });
-      const note = resp.data[0];
+      const note = resp.data![0];
 
       return [
         {
@@ -549,17 +549,17 @@ const NOTES_MULTI = {
       fooUpdated.id = "updatedID";
       const changes = await engine.writeNote(fooUpdated);
       const createEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "create"
       );
 
       const deleteEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "delete"
       );
 
       const updateEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "update"
       ) as NoteChangeUpdateEntry[];
 

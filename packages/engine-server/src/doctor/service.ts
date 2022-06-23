@@ -197,13 +197,16 @@ export class DoctorService implements Disposable {
 
     let notes: NoteProps[];
     if (_.isUndefined(candidates)) {
-      notes = query
-        ? engine.queryNotesSync({ qs: query, originalQS: query }).data
-        : _.values(engine.notes);
+      notes =
+        (query
+          ? engine.queryNotesSync({ qs: query, originalQS: query }).data
+          : _.values(engine.notes)) ?? [];
     } else {
       notes = candidates;
     }
-    notes = notes.filter((n) => !n.stub);
+    if (notes) {
+      notes = notes.filter((n) => !n.stub);
+    }
     const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
     const notesByFname =
       NoteFnameDictUtils.createNotePropsByFnameDict(notesById);

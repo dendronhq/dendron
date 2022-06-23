@@ -69,7 +69,7 @@ interface IRequestArgs {
 }
 
 interface IAPIPayload {
-  data: null | any | any[];
+  data?: null | any | any[];
   error: null | DendronError | DendronCompositeError;
 }
 

@@ -233,7 +233,7 @@ export class EngineAPIService
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>> {
+  ): Promise<RespV2<NoteChangeEntry[]>> {
     if (!this._trustedWorkspace) {
       if (!opts) {
         opts = { runHooks: false };
@@ -283,7 +283,7 @@ export class EngineAPIService
     return this._internalEngine.querySchema(qs);
   }
 
-  queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>> {
+  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
     return this._internalEngine.queryNotes(opts);
   }
 
@@ -295,7 +295,7 @@ export class EngineAPIService
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): Required<RespV2<NoteProps[]>> {
+  }): RespV2<NoteProps[]> {
     return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 

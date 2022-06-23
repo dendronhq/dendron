@@ -107,6 +107,11 @@ export class NoteLookupUtils {
     // limit number of results. currently, this is hardcoded and we don't paginate
     // this is okay because we rely on user refining query to get more results
     let nodes = resp.data;
+
+    if (!nodes) {
+      return [];
+    }
+
     if (nodes.length > PAGINATE_LIMIT) {
       nodes = nodes.slice(0, PAGINATE_LIMIT);
     }

@@ -418,33 +418,7 @@ export async function _activate(
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
       // --- checkpoint
-
       ws.workspaceService = wsService;
-      // set vaults now that ws is initialized
-      const vaults = wsService.vaults;
-
-      // check for vaults with same name
-      const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
-      if (_.size(uniqVaults) < _.size(vaults)) {
-        const txt = "Fix it";
-        await vscode.window
-          .showErrorMessage(
-            "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",
-            txt
-          )
-          .then((resp) => {
-            if (resp === txt) {
-              vscode.commands.executeCommand(
-                "vscode.open",
-                vscode.Uri.parse(
-                  "https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name"
-                )
-              );
-            }
-          });
-        return false;
-      }
-      wsService.writeMeta({ version: DendronExtension.version() });
 
       // stats
       const platform = getOS();

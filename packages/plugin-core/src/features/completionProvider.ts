@@ -179,7 +179,6 @@ export const provideCompletionItems = sentryReportingCallback(
   ): Promise<CompletionList | undefined> => {
     const ctx = "provideCompletionItems";
     const startTime = process.hrtime();
-
     // No-op if we're not in a Dendron Workspace
     if (!ExtensionProvider.getExtension().isActive()) {
       return;
@@ -339,6 +338,21 @@ export const provideCompletionItems = sentryReportingCallback(
     });
     return completionList;
   }
+);
+
+/**
+ * Debounced version of {@link provideCompletionItems}.
+ *
+ * We trigger on both leading and trailing edge of the debounce window because:
+ * 1. without the leading edge we lose focus to the Intellisense
+ * 2. without the trailing edge we may miss some keystrokes from the users at the end.
+ *
+ * related discussion: https://github.com/dendronhq/dendron/pull/3116#discussion_r902075154
+ */
+export const debouncedProvideCompletionItems = _.debounce(
+  provideCompletionItems,
+  100,
+  { leading: true, trailing: true }
 );
 
 export const resolveCompletionItem = sentryReportingCallback(
@@ -613,7 +627,8 @@ export const activate = (context: ExtensionContext) => {
     languages.registerCompletionItemProvider(
       "markdown",
       {
-        provideCompletionItems,
+        // we debounce this provider since we don't want lookup to be triggered on every keystroke.
+        provideCompletionItems: debouncedProvideCompletionItems,
       },
 
       "[", // for wikilinks and references
@@ -626,6 +641,10 @@ export const activate = (context: ExtensionContext) => {
     languages.registerCompletionItemProvider(
       "markdown",
       {
+        /**
+         * we don't have to debounce this since it is not triggered on every keystroke
+         * and is ligher than {@link provideCompletionItems} in general.
+         */
         provideCompletionItems: provideBlockCompletionItems,
       },
       "#",

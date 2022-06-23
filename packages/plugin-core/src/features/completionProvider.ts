@@ -185,7 +185,6 @@ export const provideCompletionItems = sentryReportingCallback(
     }
 
     const line = document.lineAt(position).text;
-    console.log({ ctx, line });
     Logger.info({ ctx, position, msg: "enter" });
 
     // get all matches
@@ -341,6 +340,15 @@ export const provideCompletionItems = sentryReportingCallback(
   }
 );
 
+/**
+ * Debounced version of {@link provideCompletionItems}.
+ *
+ * We trigger on both leading and trailing edge of the debounce window because:
+ * 1. without the leading edge we lose focus to the Intellisense
+ * 2. without the trailing edge we may miss some keystrokes from the users at the end.
+ *
+ * related discussion: https://github.com/dendronhq/dendron/pull/3116#discussion_r902075154
+ */
 export const debouncedProvideCompletionItems = _.debounce(
   provideCompletionItems,
   100,

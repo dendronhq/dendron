@@ -22,6 +22,14 @@
 			"outFiles": [
 				"${workspaceFolder:engine-test-utils}/lib/**/*.js"
 			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/test-workspace",
+			"name": "debug visualize cli command",
+			"program": "${workspaceFolder:root}/packages/dendron-cli/lib/bin/dendron-cli.js",
+			"args": ["visualize"]
 		}
 	]
 }

@@ -18,6 +18,7 @@ import {
   ISchemaLookupProviderFactory,
 } from "../components/lookup/LookupProviderV3Interface";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { FileWatcher } from "../fileWatcher";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { NoteTraitService } from "../services/NoteTraitService";
 import { ISchemaSyncService } from "../services/SchemaSyncServiceInterface";
@@ -52,6 +53,11 @@ export class MockDendronExtension implements IDendronExtension {
     this._vaults = vaults;
   }
   get traitRegistrar(): NoteTraitService {
+    throw new Error("Method not implemented.");
+  }
+  fileWatcher?: FileWatcher | undefined;
+  workspaceImpl?: DWorkspaceV2 | undefined;
+  setupTraits(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 

@@ -64,7 +64,7 @@ export function getOrThrow<T = any>(
   opts = _.defaults(opts, { shouldThrow: true });
   const maybeValue = obj[k];
   if (_.isUndefined(maybeValue) && opts.shouldThrow) {
-    throw Error(`no ${k} in ${JSON.stringify(obj)}`);
+    throw Error(`no ${String(k)} in ${JSON.stringify(obj)}`);
   }
   return maybeValue;
 }

@@ -501,8 +501,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       // Unsupported vaults are filtered in the commands that use this function,
       // but also adding a sanity check here.
       throw new DendronError({
-        message:
-          "Seed vaults are not yet supported for automated migration.",
+        message: "Seed vaults are not yet supported for automated migration.",
       });
     }
     const newVault: SelfContainedVault = {
@@ -1292,7 +1291,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   async getVaultRepo(vault: DVault) {
-    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    const vpath = pathForVaultRoot({ vault, wsRoot: this.wsRoot });
     return GitUtils.getGitRoot(vpath);
   }
 

@@ -1,4 +1,9 @@
-import { DWorkspaceV2, WorkspaceType } from "@dendronhq/common-all";
+import {
+  DWorkspaceV2,
+  ErrorFactory,
+  RespV3,
+  WorkspaceType,
+} from "@dendronhq/common-all";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -108,14 +113,38 @@ export class WorkspaceActivator {
     ext,
     context,
     wsRoot,
-    skipMigrations,
-  }: WorkspaceActivatorOpts & { skipMigrations?: boolean }) {
+    opts,
+  }: WorkspaceActivatorOpts & {
+    opts?: Partial<{
+      /**
+       * Skip setting up language features (eg. code action providesr)
+       */
+      skipLanguageFeatures: boolean;
+      /**
+       * Skip automatic migrations on start
+       */
+      skipMigrations: boolean;
+      /**
+       * Skip surfacing dialogues on startup
+       */
+      skipInteractiveElements: boolean;
+
+      /**
+       * Skip showing tree view
+       */
+      skipTreeView: boolean;
+    }>;
+  }): Promise<RespV3<DWorkspaceV2>> {
     // --- Setup workspace
-    let workspace: DWorkspaceV2 | boolean;
+    let workspace: DWorkspaceV2;
     if (ext.type === WorkspaceType.NATIVE) {
       workspace = await this.activateNativeWorkspace({ ext, context, wsRoot });
       if (!workspace) {
-        return;
+        return {
+          error: ErrorFactory.createInvalidStateError({
+            message: "could not find native workspace",
+          }),
+        };
       }
     } else {
       workspace = await this.activateCodeWorkspace({ ext, context, wsRoot });
@@ -140,17 +169,20 @@ export class WorkspaceActivator {
       globalState: context.globalState,
       workspaceState: context.workspaceState,
     });
+
+    // get previous workspace version and fixup
     const previousWorkspaceVersion = await getAndCleanPreviousWSVersion({
       wsService,
       stateService,
       ext,
     });
 
+    // run migrations
     const maybeWsSettings =
       ext.type === WorkspaceType.CODE
         ? wsService.getCodeWorkspaceSettingsSync()
         : undefined;
-    if (!skipMigrations) {
+    if (!opts?.skipMigrations) {
       await StartupUtils.runMigrationsIfNecessary({
         wsService,
         currentVersion,
@@ -160,7 +192,37 @@ export class WorkspaceActivator {
       });
     }
 
-    return workspace;
+    // show interactive elements,
+    if (opts?.skipInteractiveElements) {
+      // check for duplicate config keys and prompt for a fix.
+      StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
+        ext,
+      });
+    }
+
+    const didClone = await wsService.initialize({
+      onSyncVaultsProgress: () => {
+        vscode.window.showInformationMessage(
+          "found empty remote vaults that need initializing"
+        );
+      },
+      onSyncVaultsEnd: () => {
+        vscode.window.showInformationMessage(
+          "finish initializing remote vaults. reloading workspace"
+        );
+        // TODO: remove
+        setTimeout(VSCodeUtils.reloadWindow, 200);
+      },
+    });
+    if (didClone) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: "could not initialize workspace",
+        }),
+      };
+    }
+
+    return { data: workspace };
   }
 
   async activateCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {

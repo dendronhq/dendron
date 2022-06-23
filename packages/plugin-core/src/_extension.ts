@@ -2,6 +2,7 @@ import { SubProcessExitType } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
+  DWorkspaceV2,
   getStage,
   GitEvents,
   GraphEvents,
@@ -380,15 +381,15 @@ export async function _activate(
       if (!maybeWsRoot) {
         return false;
       }
-      const maybeWs = await activator.activate({
+      const resp = await activator.activate({
         ext: ws,
         context,
         wsRoot: maybeWsRoot,
       });
-      if (!maybeWs) {
+      if (resp.error) {
         return false;
       }
-      const wsImpl = maybeWs;
+      const wsImpl: DWorkspaceV2 = resp.data;
       const start = process.hrtime();
 
       // --- Get Version State
@@ -398,12 +399,8 @@ export async function _activate(
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
+      // show interactive elements when **extension starts**
       if (opts?.skipInteractiveElements) {
-        // check for duplicate config keys and prompt for a fix.
-        StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
-          ext: ws,
-        });
-
         // check for missing default config keys and prompt for a backfill.
         StartupUtils.showMissingDefaultConfigMessageIfNecessary({
           ext: ws,
@@ -420,22 +417,7 @@ export async function _activate(
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
-      const didClone = await wsService.initialize({
-        onSyncVaultsProgress: () => {
-          vscode.window.showInformationMessage(
-            "found empty remote vaults that need initializing"
-          );
-        },
-        onSyncVaultsEnd: () => {
-          vscode.window.showInformationMessage(
-            "finish initializing remote vaults. reloading workspace"
-          );
-          setTimeout(VSCodeUtils.reloadWindow, 200);
-        },
-      });
-      if (didClone) {
-        return false;
-      }
+      // --- checkpoint
 
       ws.workspaceService = wsService;
       // set vaults now that ws is initialized

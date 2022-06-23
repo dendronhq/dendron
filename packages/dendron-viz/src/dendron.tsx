@@ -32,22 +32,24 @@ export async function generateSVG(args: GenerateSVGInput) {
 
   if (!engine) throw new Error("Engine is not initialized");
 
-  engine.vaults.forEach(async (vault) => {
-    /* Get vault name */
-    const vaultName = VaultUtils.getName(vault);
-    /* Get the path to the output file */
-    const outputFile = path.join(out || wsRoot, `diagram-${vaultName}.svg`);
-    /* Create React component for visualization */
-    const Visualization = await getVisualizationContent({
-      ...args,
-      vault,
-      notes: engine.notes,
-    });
-    /* From React component, get svg as a string */
-    const html = ReactDOMServer.renderToStaticMarkup(Visualization);
-    /* Write svg to the output file */
-    await fs.writeFile(outputFile, html);
-  });
+  await Promise.all(
+    engine.vaults.map(async (vault) => {
+      /* Get vault name */
+      const vaultName = VaultUtils.getName(vault);
+      /* Get the path to the output file */
+      const outputFile = path.join(out || wsRoot, `diagram-${vaultName}.svg`);
+      /* Create React component for visualization */
+      const Visualization = await getVisualizationContent({
+        ...args,
+        vault,
+        notes: engine.notes,
+      });
+      /* From React component, get svg as a string */
+      const html = ReactDOMServer.renderToStaticMarkup(Visualization);
+      /* Write svg to the output file */
+      await fs.writeFile(outputFile, html);
+    })
+  );
 }
 
 export async function getVisualizationContent(args: VisualizationInput) {

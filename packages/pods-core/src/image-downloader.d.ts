@@ -1,7 +1,7 @@
 declare module "image-downloader" {
-  type Options = {
+  type DImageDownloaderOptions = {
     url: string;
     dest: string;
   };
-  export function image(options: Options): any;
+  export function image(options: DImageDownloaderOptions): any;
 }

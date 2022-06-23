@@ -1,8 +1,4 @@
-import {
-  launchv2,
-  ServerUtils,
-  SubProcessExitType,
-} from "@dendronhq/api-server";
+import { launchv2, ServerUtils } from "@dendronhq/api-server";
 import {
   ConfigEvents,
   ConfigUtils,
@@ -39,7 +35,6 @@ import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
-import { _activate } from "../_extension";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -147,10 +142,12 @@ export class ExtensionUtils {
     context,
     start,
     wsService,
+    onExit,
   }: {
     context: vscode.ExtensionContext;
     wsService: WorkspaceService;
     start: [number, number];
+    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
   }) {
     const ctx = "startServerProcess";
     const { port, subprocess } = await startServerProcess();
@@ -158,19 +155,7 @@ export class ExtensionUtils {
       WSUtils.handleServerProcess({
         subprocess,
         context,
-        onExit: (type: SubProcessExitType) => {
-          const txt = "Restart Dendron";
-          vscode.window
-            .showErrorMessage("Dendron engine encountered an error", txt)
-            .then(async (resp) => {
-              if (resp === txt) {
-                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
-                  code: type,
-                });
-                _activate(context);
-              }
-            });
-        },
+        onExit,
       });
     }
     const durationStartServer = getDurationMilliseconds(start);

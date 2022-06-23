@@ -1,3 +1,4 @@
+import { SubProcessExitType } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -514,6 +515,19 @@ export async function _activate(
         context,
         start,
         wsService,
+        onExit: (type: SubProcessExitType) => {
+          const txt = "Restart Dendron";
+          vscode.window
+            .showErrorMessage("Dendron engine encountered an error", txt)
+            .then(async (resp) => {
+              if (resp === txt) {
+                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                  code: type,
+                });
+                _activate(context);
+              }
+            });
+        },
       });
 
       // Setup the Engine API Service and the tree view

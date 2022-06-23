@@ -82,6 +82,11 @@ async function startServerProcess(): Promise<{
 }
 
 export class ExtensionUtils {
+  static async activate() {
+    const ext = this.getExtension();
+    return ext.activate();
+  }
+
   static addCommand = ({
     context,
     key,
@@ -104,6 +109,11 @@ export class ExtensionUtils {
       );
     }
   };
+
+  static getExtension() {
+    const ext = vscode.extensions.getExtension("dendron.dendron");
+    return ext as vscode.Extension<any>;
+  }
 
   static setWorkspaceContextOnActivate(
     dendronConfig: IntermediateDendronConfig

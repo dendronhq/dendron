@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
+    "jsx": "react",
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*-spec.ts", "**/*.d.ts"]

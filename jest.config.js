@@ -7,6 +7,10 @@ const commonConfig = {
   snapshotSerializers: ["jest-serializer-path"],
   testEnvironment: "node",
   testPathIgnorePatterns: ["utils.ts"],
+  transformIgnorePatterns: [
+    // These are ESM modules that need to be transpiled before Jest can run them
+    "/node_modules/(?!(d3.*|internmap|delaunator|robust-predicates)/)",
+  ],
 };
 
 module.exports = {

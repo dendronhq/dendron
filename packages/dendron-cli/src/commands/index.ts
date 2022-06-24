@@ -14,3 +14,4 @@ export * from "./devCLICommand";
 export * from "./publishCLICommand";
 export * from "./base";
 export { ExportPodV2CLICommand } from "./exportPodV2";
+export * from "./visualizeCLICommand";

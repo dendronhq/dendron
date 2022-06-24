@@ -1,2 +1,2 @@
-// eslint-disable-next-line no-console
-console.log("hello world");
+export * from "./dendron";
+export { InputArgs } from "./types";

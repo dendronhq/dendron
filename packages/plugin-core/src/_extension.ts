@@ -431,7 +431,7 @@ export async function _activate(
       );
 
       Logger.info({
-        ctx,
+        ctx: ctx + ":postSetupWorkspace",
         platform,
         extensions,
         vaults: wsImpl.vaults,

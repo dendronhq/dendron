@@ -184,6 +184,7 @@ export class WorkspaceActivator {
       skipTreeView: boolean;
     }>;
   }): Promise<RespV3<{ workspace: DWorkspaceV2; engine: EngineAPIService }>> {
+    const ctx = "WorkspaceActivator.init";
     // --- Setup workspace
     let workspace: DWorkspaceV2;
     if (ext.type === WorkspaceType.NATIVE) {
@@ -211,6 +212,7 @@ export class WorkspaceActivator {
     }
 
     // --- Initialization
+    Logger.info({ ctx: `${ctx}:postSetupTraits`, wsRoot });
     const currentVersion = DendronExtension.version();
     const wsService = new WorkspaceService({ wsRoot });
     const dendronConfig = workspace.config;
@@ -271,6 +273,7 @@ export class WorkspaceActivator {
         }),
       };
     }
+    Logger.info({ ctx: `${ctx}:postWsServiceInitialize`, wsRoot });
 
     // check for vaults with duplicates
     const respNoDupVault = await checkNoDuplicateVaultNames(wsService.vaults);

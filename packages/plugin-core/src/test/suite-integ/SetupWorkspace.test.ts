@@ -211,12 +211,8 @@ suite("GIVEN SetupWorkspace Command", function () {
         test("THEN Dendron initializes", async () => {
           const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           // check for meta
-          const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
           const fpath = getWSMetaFilePath({ wsRoot });
           const meta = openWSMetaFile({ fpath });
-          expect(
-            _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-          ).toBeTruthy();
           expect(meta.version).toEqual("0.0.1");
           expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
           expect(_.values(engine.notes).length).toEqual(1);

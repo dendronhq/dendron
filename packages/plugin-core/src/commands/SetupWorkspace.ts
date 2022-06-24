@@ -194,7 +194,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(
     opts: CommandOpts
   ): Promise<{ wsVault?: DVault; additionalVaults?: DVault[] }> {
-    const ctx = "SetupWorkspaceCommand extends BaseCommand";
+    const ctx = "SetupWorkspaceCommand";
     // This command can run before the extension is registered, especially during testing
     const defaultSelfContained =
       VSCodeUtils.getWorkspaceConfig().get<boolean>(
@@ -238,6 +238,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
       wsRoot: rootDir,
       createCodeWorkspace,
       useSelfContainedVault: selfContained,
+    });
+    Logger.info({
+      ctx: `${ctx}:postCreateWorkspace`,
+      wsRoot: rootDir,
+      wsVault,
     });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({

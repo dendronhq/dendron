@@ -14,22 +14,24 @@ suite("GIVEN DiagnosticsReport", function () {
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     },
-    async () => {
-      const logDst = path.join(
-        path.dirname(env("LOG_DST")),
-        "dendron.server.log"
-      );
-      fs.writeFileSync(logDst, "foobar", { encoding: "utf8" });
-      const cmd = new DiagnosticsReportCommand();
-      await cmd.execute();
+    () => {
+      test("THEN generate diagnostics report", async () => {
+        const logDst = path.join(
+          path.dirname(env("LOG_DST")),
+          "dendron.server.log"
+        );
+        fs.writeFileSync(logDst, "foobar", { encoding: "utf8" });
+        const cmd = new DiagnosticsReportCommand();
+        await cmd.execute();
 
-      const editor = VSCodeUtils.getActiveTextEditor();
-      const body = editor?.document.getText() as string;
-      const isInString = await AssertUtils.assertInString({
-        body,
-        match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const body = editor?.document.getText() as string;
+        const isInString = await AssertUtils.assertInString({
+          body,
+          match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
+        });
+        expect(isInString).toBeTruthy();
       });
-      expect(isInString).toBeTruthy();
     }
   );
 });

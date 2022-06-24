@@ -28,6 +28,7 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import * as vscode from "vscode";
 
 const md = _md();
 
@@ -196,7 +197,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     };
   }
 
-  async showPreview(operations: RenameOperation[]) {
+  showPreview(operations: RenameOperation[]) {
     let content = [
       "# Refactor Preview",
       "",
@@ -222,7 +223,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const panel = window.createWebviewPanel(
       "refactorPreview", // Identifies the type of the webview. Used internally
       "Refactor Preview", // Title of the panel displayed to the user
-      ViewColumn.One, // Editor column to show the new webview panel in.
+      { viewColumn: ViewColumn.One, preserveFocus: true }, // Editor column to show the new webview panel in.
       {} // Webview options. More on these later.
     );
     panel.webview.html = md.render(content.join("\n"));
@@ -366,6 +367,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     if (noConfirm) return true;
     const options = ["Proceed", "Cancel"];
     const resp = await VSCodeUtils.showQuickPick(options, {
+      title: "Proceed with Refactor?",
       placeHolder: "Proceed",
       ignoreFocusOut: true,
     });
@@ -396,7 +398,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return;
     }
 
-    await this.showPreview(operations);
+    this.showPreview(operations);
 
     const shouldProceed = await this.promptConfirmation(noConfirm);
     if (!shouldProceed) {

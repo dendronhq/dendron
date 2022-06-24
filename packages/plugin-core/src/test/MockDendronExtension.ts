@@ -57,9 +57,6 @@ export class MockDendronExtension implements IDendronExtension {
   }
   fileWatcher?: FileWatcher | undefined;
   workspaceImpl?: DWorkspaceV2 | undefined;
-  setupTraits(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
 
   port?: number | undefined;
   get context(): ExtensionContext {

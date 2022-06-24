@@ -1,10 +1,13 @@
 import { SubProcessExitType } from "@dendronhq/api-server";
+import * as Sentry from "@sentry/node";
 import {
   CONSTANTS,
   DendronError,
   DVault,
   DWorkspaceV2,
   ErrorFactory,
+  getStage,
+  GitEvents,
   RespV3,
   TreeViewItemLabelTypeEnum,
   VaultUtils,
@@ -22,7 +25,7 @@ import _ from "lodash";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { EngineAPIService } from "../services/EngineAPIService";
@@ -85,6 +88,23 @@ function _setupTreeViewCommands(
       })
     );
   }
+}
+
+function analyzeWorkspace({ wsService }: { wsService: WorkspaceService }) {
+  // Track contributors to repositories, but do so in the background so
+  // initialization isn't delayed.
+  const startGetAllReposNumContributors = process.hrtime();
+  wsService
+    .getAllReposNumContributors()
+    .then((numContributors) => {
+      AnalyticsUtils.track(GitEvents.ContributorsFound, {
+        maxNumContributors: _.max(numContributors),
+        duration: getDurationMilliseconds(startGetAllReposNumContributors),
+      });
+    })
+    .catch((err) => {
+      Sentry.captureException(err);
+    });
 }
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {
@@ -297,6 +317,13 @@ async function reloadWorkspace({
   return maybeEngine;
 }
 
+function togglePluginActiveContext(enabled: boolean) {
+  const ctx = "togglePluginActiveContext";
+  Logger.info({ ctx, state: `togglePluginActiveContext: ${enabled}` });
+  VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
+  VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
+}
+
 function updateEngineAPI(
   port: number | string,
   ext: IDendronExtension
@@ -419,6 +446,7 @@ export class WorkspaceActivator {
         dendronConfig,
       });
     }
+    Logger.info({ ctx: `${ctx}:postMigration`, wsRoot });
 
     // show interactive elements,
     if (!opts?.skipInteractiveElements) {
@@ -467,7 +495,9 @@ export class WorkspaceActivator {
 
     // setup engine
     const port = await this.verifyOrStartServerProcess({ ext, wsService });
+    Logger.info({ ctx: `${ctx}:verifyOrStartServerProcess`, port });
     const engine = updateEngineAPI(port, ext);
+    Logger.info({ ctx: `${ctx}:exit` });
 
     return { data: { workspace, engine } };
   }
@@ -476,6 +506,7 @@ export class WorkspaceActivator {
     ext,
     context,
     wsService,
+    wsRoot,
     opts,
     engine,
   }: WorkspaceActivatorOpts &
@@ -500,11 +531,13 @@ export class WorkspaceActivator {
     const reloadSuccess = await reloadWorkspace({ ext, wsService });
     const durationReloadWorkspace = getDurationMilliseconds(start);
 
-    await ExtensionUtils.trackWorkspaceInit({
+    // NOTE: tracking is not awaited, don't block on this
+    ExtensionUtils.trackWorkspaceInit({
       durationReloadWorkspace,
       activatedSuccess: !!reloadSuccess,
       ext,
     });
+    analyzeWorkspace({ wsService });
 
     if (!reloadSuccess) {
       HistoryService.instance().add({
@@ -521,6 +554,18 @@ export class WorkspaceActivator {
     ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
     MetadataService.instance().setDendronWorkspaceActivated();
     Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
+
+    const stage = getStage();
+    if (stage !== "test") {
+      ext.activateWatchers();
+      togglePluginActiveContext(true);
+    }
+
+    // Add the current workspace to the recent workspace list. The current
+    // workspace is either the workspace file (Code Workspace) or the current
+    // folder (Native Workspace)
+    const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
+    MetadataService.instance().addToRecentWorkspaces(workspace);
     return { data: true };
   }
 

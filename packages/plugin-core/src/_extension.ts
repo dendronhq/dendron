@@ -368,27 +368,6 @@ export async function _activate(
       if (respActivate.error) {
         return false;
       }
-
-      // Track contributors to repositories, but do so in the background so
-      // initialization isn't delayed.
-      const startGetAllReposNumContributors = process.hrtime();
-      wsService
-        .getAllReposNumContributors()
-        .then((numContributors) => {
-          AnalyticsUtils.track(GitEvents.ContributorsFound, {
-            maxNumContributors: _.max(numContributors),
-            duration: getDurationMilliseconds(startGetAllReposNumContributors),
-          });
-        })
-        .catch((err) => {
-          Sentry.captureException(err);
-        });
-
-      if (stage !== "test") {
-        await ws.activateWatchers();
-        togglePluginActiveContext(true);
-      }
-
       if (!opts?.skipInteractiveElements) {
         // on first install, warn if extensions are incompatible ^dlx35gstwsun
         if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
@@ -401,12 +380,6 @@ export async function _activate(
           showcase.showToast();
         }, ONE_MINUTE_IN_MS);
       }
-
-      // Add the current workspace to the recent workspace list. The current
-      // workspace is either the workspace file (Code Workspace) or the current
-      // folder (Native Workspace)
-      const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
-      MetadataService.instance().addToRecentWorkspaces(workspace);
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });

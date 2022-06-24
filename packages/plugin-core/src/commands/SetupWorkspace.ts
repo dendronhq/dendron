@@ -35,6 +35,11 @@ type CommandOpts = CommandInput & {
   skipConfirmation?: boolean;
   /** Create self contained vaults, overriding the Dendron VSCode setting. */
   selfContained?: boolean;
+  /**
+   * Open worksapce without reloading
+   */
+  // eslint-disable-next-line camelcase
+  EXPERIMENTAL_openNativeWorkspaceNoReload?: boolean;
 };
 
 type CommandOutput = { wsVault?: DVault; additionalVaults?: DVault[] };
@@ -260,13 +265,19 @@ export class SetupWorkspaceCommand extends BasicCommand<
           vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
         );
       } else if (workspaceType === WorkspaceType.NATIVE) {
-        const ext = ExtensionProvider.getExtension();
-        const { context } = ext;
-        new WorkspaceActivator().initNativeWorkspace({
-          context,
-          ext,
-          wsRoot: rootDir,
-        });
+        if (opts.EXPERIMENTAL_openNativeWorkspaceNoReload) {
+          const ext = ExtensionProvider.getExtension();
+          const { context } = ext;
+          ext.type = WorkspaceType.NATIVE;
+          new WorkspaceActivator().init({
+            context,
+            ext,
+            wsRoot: rootDir,
+          });
+        } else {
+          // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
+          VSCodeUtils.reloadWindow();
+        }
       }
     }
     return { wsVault, additionalVaults };

@@ -728,5 +728,3 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
   completionProvider.activate(context);
   codeActionProvider.activate(context);
 }
-
-// ^qxkkg70u6w0z

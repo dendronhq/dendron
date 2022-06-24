@@ -6,6 +6,7 @@ import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
+import { ConfigureNoteTraitsCommand } from "./ConfigureNoteTraitsCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
 import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
@@ -164,6 +165,7 @@ const ALL_COMMANDS = [
   TaskStatusCommand,
   TaskCompleteCommand,
   RegisterNoteTraitCommand,
+  ConfigureNoteTraitsCommand,
   CreateNoteWithUserDefinedTrait,
   OpenBackupCommand,
   InstrumentedWrapperCommand,

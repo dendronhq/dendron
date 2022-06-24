@@ -4,6 +4,9 @@ import {
   NoteTrait,
   OnCreateContext,
   cleanName,
+  EngagementEvents,
+  NoteUtils,
+  SetNameModifierResp,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
@@ -17,6 +20,9 @@ import { GotoNoteCommand } from "./GotoNote";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { TemplateUtils } from "@dendronhq/common-server";
+import { AnalyticsUtils } from "../utils/analytics";
+import { TraitUtils } from "../traits/TraitUtils";
 
 export type CommandOpts = {
   fname: string;
@@ -44,6 +50,10 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
+    if (!TraitUtils.checkWorkspaceTrustAndWarn()) {
+      return;
+    }
+
     // If there's no modifier, provide a regular lookup UI.
     if (!this.trait.OnWillCreate?.setNameModifier) {
       const resp = await this.getNoteNameFromLookup();
@@ -58,12 +68,19 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     }
 
     try {
-      if (!this.checkWorkspaceTrustAndWarn()) {
-        return;
-      }
-
       const context = await this.getCreateContext();
-      const resp = this.trait.OnWillCreate.setNameModifier(context);
+
+      // Default settings in case something goes wrong.
+      let resp: SetNameModifierResp = {
+        name: context.currentNoteName ?? "",
+        promptUserForModification: true,
+      };
+
+      try {
+        resp = this.trait.OnWillCreate.setNameModifier(context);
+      } catch (Error: any) {
+        this.L.error({ ctx: "trait.OnWillCreate.setNameModifier", msg: Error });
+      }
 
       let fname = resp.name;
 
@@ -101,21 +118,13 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
 
     this.L.info({ ctx, msg: "enter", opts });
 
+    if (!TraitUtils.checkWorkspaceTrustAndWarn()) {
+      return;
+    }
+
     let title;
     let body;
-
-    if (this.checkWorkspaceTrustAndWarn()) {
-      if (this.trait.OnCreate?.setTitle) {
-        const context = await this.getCreateContext();
-        context.currentNoteName = fname;
-
-        title = this.trait.OnCreate.setTitle(context);
-      }
-
-      if (this.trait.OnCreate?.setBody) {
-        body = await this.trait.OnCreate.setBody();
-      }
-    }
+    let custom;
 
     // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then
     // this vault logic can be deferred there.
@@ -139,10 +148,71 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       }
     }
 
+    // Handle Trait Behavior
+    if (this.trait.OnCreate?.setTitle) {
+      const context = await this.getCreateContext();
+      context.currentNoteName = fname;
+
+      try {
+        title = this.trait.OnCreate.setTitle(context);
+      } catch (Error: any) {
+        this.L.error({ ctx: "trait.OnCreate.setTitle", msg: Error });
+      }
+    }
+
+    if (this.trait.OnCreate?.setBody) {
+      try {
+        body = await this.trait.OnCreate.setBody();
+      } catch (Error: any) {
+        this.L.error({ ctx: "trait.OnCreate.setBody", msg: Error });
+      }
+    } else if (this.trait.OnCreate?.setTemplate) {
+      // Check if we should apply a template from any traits:
+      let templateNoteName = "";
+      try {
+        templateNoteName = this.trait.OnCreate.setTemplate();
+      } catch (Error: any) {
+        this.L.error({ ctx: "trait.OnCreate.setTemplate", msg: Error });
+      }
+
+      const notes = await ExtensionProvider.getEngine().findNotes({
+        fname: templateNoteName,
+        vault,
+      });
+
+      const dummy = NoteUtils.createForFake({
+        contents: "",
+        fname: "trait-tmp",
+        id: "trait-tmp",
+        vault: vault!,
+      });
+
+      if (notes && notes.length > 0) {
+        // Only apply schema if note is found
+        TemplateUtils.applyTemplate({
+          templateNote: notes[0], // Ok to use [0] here because we specified a vault in findNotes()
+          targetNote: dummy,
+          engine: this._extension.getEngine(),
+        });
+
+        body = dummy.body;
+        custom = dummy.custom;
+
+        AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+          source: "Trait",
+        });
+      } else {
+        this.L.error({
+          ctx: "trait.OnCreate.setTemplate",
+          msg: `Unable to find note with name ${templateNoteName} to use as template.`,
+        });
+      }
+    }
+
     await new GotoNoteCommand(this._extension).execute({
       qs: fname,
       vault,
-      overrides: { title, traits: [this.trait.id], body },
+      overrides: { title, traits: [this.trait.id], body, custom },
     });
 
     this.L.info({ ctx, msg: "exit" });
@@ -234,17 +304,5 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       clipboard,
       currentNoteName: openNoteName,
     };
-  }
-
-  private checkWorkspaceTrustAndWarn(): boolean {
-    const engine = this._extension.getEngine();
-
-    if (!engine.trustedWorkspace) {
-      vscode.window.showWarningMessage(
-        "Workspace Trust has been disabled for this workspace. Note Trait behavior will not be applied."
-      );
-    }
-
-    return engine.trustedWorkspace;
   }
 }

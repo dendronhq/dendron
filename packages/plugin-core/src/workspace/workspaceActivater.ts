@@ -60,11 +60,17 @@ export class WorkspaceActivator {
       workspace = await this.activateCodeWorkspace({ ext, context });
     }
 
-    // --- Setup Traits
     ext.workspaceImpl = workspace;
-    // Only set up note traits after workspaceImpl has been set, so that the
-    // wsRoot path is known for locating the note trait definition location.
-    ext.setupTraits();
+
+    // HACK: Only set up note traits after workspaceImpl has been set, so that
+    // the wsRoot path is known for locating the note trait definition location.
+    if (vscode.workspace.isTrusted) {
+      ext.traitRegistrar.initialize();
+    } else {
+      Logger.info({
+        msg: "User specified note traits not initialized because workspace is not trusted.",
+      });
+    }
     return workspace;
   }
 

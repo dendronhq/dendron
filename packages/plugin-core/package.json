@@ -409,6 +409,10 @@
         "title": "Dendron: Register Note Trait"
       },
       {
+        "command": "dendron.configureNoteTraits",
+        "title": "Dendron: Configure Note Traits"
+      },
+      {
         "command": "dendron.createNoteWithTraits",
         "title": "Dendron: Create Note with Custom Traits"
       },
@@ -758,6 +762,10 @@
         },
         {
           "command": "dendron.registerNoteTrait",
+          "when": "false"
+        },
+        {
+          "command": "dendron.configureNoteTraits",
           "when": "dendron:pluginActive"
         },
         {

@@ -19,6 +19,7 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { NoteTraitService } from "../services/NoteTraitService";
 import { ISchemaSyncService } from "../services/SchemaSyncServiceInterface";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
@@ -49,6 +50,9 @@ export class MockDendronExtension implements IDendronExtension {
     this._context = context;
     this._wsRoot = wsRoot;
     this._vaults = vaults;
+  }
+  get traitRegistrar(): NoteTraitService {
+    throw new Error("Method not implemented.");
   }
 
   port?: number | undefined;

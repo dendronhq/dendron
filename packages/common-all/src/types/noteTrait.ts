@@ -60,15 +60,21 @@ export type onWillCreateProps = {
 };
 
 export type onCreateProps = {
-  //TODO: Should these be combined into one? Is String the right type for vault, probably not. Should we use DNoteProps for note?
-  //configurable_level_1
+  /**
+   * Function whose return value will be used as the title of the note
+   * @param props
+   */
   setTitle?(props: OnCreateContext): string;
 
-  // We shouldn't choose apply template; should be more generic
-  // applyTemplate(templateName: string): void;
+  /**
+   * Set a note template to be applied. Return the fname of the desired template
+   * note from this function
+   */
+  setTemplate?(): string;
 
-  //TODO: What are the arguments?
-  //configurable_level_1 - via a template
+  //TODO: What are the arguments? Also - reconcile this functionality with
+  //setTemplate, as both modify body contents.
+  // configurable_level_1 - via a template
   setBody?(): Promise<string>;
 
   //TODO: needs to return a prop array of some sort

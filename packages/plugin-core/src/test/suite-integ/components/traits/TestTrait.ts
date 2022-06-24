@@ -24,5 +24,8 @@ export class TestTrait implements NoteTrait {
     setTitle: () => {
       return this.TEST_TITLE_MODIFIER;
     },
+    setTemplate: () => {
+      return "foo";
+    },
   };
 }

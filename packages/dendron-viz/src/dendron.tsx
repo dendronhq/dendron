@@ -1,13 +1,10 @@
 /* eslint-disable no-await-in-loop */
 
-import { VaultUtils } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { processDir } from "./processDendronNotes";
 import { createTree } from "./Tree";
-import { GenerateSVGInput, InputArgs, VisualizationInput } from "./types";
-import path from "path";
+import { InputArgs, VisualizationInput } from "./types";
 
 function collectInput(args: InputArgs) {
   const rootPath = args.wsRoot;
@@ -22,34 +19,6 @@ function collectInput(args: InputArgs) {
     colorEncoding,
     customFileColors,
   };
-}
-
-export async function generateSVG(args: GenerateSVGInput) {
-  const { out, engine, wsRoot } = args;
-
-  /* Ensure that the provided directory exists. If not present, this creates the directory */
-  if (out) await fs.ensureDir(out);
-
-  if (!engine) throw new Error("Engine is not initialized");
-
-  await Promise.all(
-    engine.vaults.map(async (vault) => {
-      /* Get vault name */
-      const vaultName = VaultUtils.getName(vault);
-      /* Get the path to the output file */
-      const outputFile = path.join(out || wsRoot, `diagram-${vaultName}.svg`);
-      /* Create React component for visualization */
-      const Visualization = await getVisualizationContent({
-        ...args,
-        vault,
-        notes: engine.notes,
-      });
-      /* From React component, get svg as a string */
-      const html = ReactDOMServer.renderToStaticMarkup(Visualization);
-      /* Write svg to the output file */
-      await fs.writeFile(outputFile, html);
-    })
-  );
 }
 
 export async function getVisualizationContent(args: VisualizationInput) {
@@ -73,4 +42,9 @@ export async function getVisualizationContent(args: VisualizationInput) {
       customFileColors={customFileColors}
     />
   );
+}
+
+export async function getVisualizationMarkup(args: VisualizationInput) {
+  const component = await getVisualizationContent(args);
+  return ReactDOMServer.renderToStaticMarkup(component);
 }

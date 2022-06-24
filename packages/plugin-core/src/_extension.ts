@@ -10,7 +10,6 @@ import {
   GRAPH_THEME_TEST,
   InstallStatus,
   isDisposable,
-  TreeViewItemLabelTypeEnum,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
@@ -64,14 +63,12 @@ import { StateService } from "./services/stateService";
 import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
-import { StartupPrompts } from "./utils/StartupPrompts";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
 import { ExtensionUtils } from "./utils/ExtensionUtils";
 import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
+import { StartupPrompts } from "./utils/StartupPrompts";
 import { StartupUtils } from "./utils/StartupUtils";
-import { EngineNoteProvider } from "./views/EngineNoteProvider";
-import { NativeTreeView } from "./views/NativeTreeView";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
@@ -398,7 +395,7 @@ export async function _activate(
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
       // show interactive elements when **extension starts**
-      if (opts?.skipInteractiveElements) {
+      if (!opts?.skipInteractiveElements) {
         // check for missing default config keys and prompt for a backfill.
         StartupUtils.showMissingDefaultConfigMessageIfNecessary({
           ext: ws,
@@ -439,23 +436,7 @@ export async function _activate(
 
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
-
-      // TODO: This should eventually be consolidated with other view setup
-      // logic as in workspace.ts, but right now this needs an instance of
-      // EngineAPIService for init
-
-      const providerConstructor = function () {
-        return new EngineNoteProvider(resp.data.engine);
-      };
-
       const existingCommands = await vscode.commands.getCommands();
-      if (opts?.skipTreeView) {
-        const treeView = new NativeTreeView(providerConstructor);
-        treeView.show();
-        _setupTreeViewCommands(treeView, existingCommands);
-        context.subscriptions.push(treeView);
-      }
-
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
 
@@ -894,50 +875,3 @@ function _setupLanguageFeatures(context: vscode.ExtensionContext) {
 }
 
 // ^qxkkg70u6w0z
-
-function _setupTreeViewCommands(
-  treeView: NativeTreeView,
-  existingCommands: string[]
-) {
-  if (
-    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key)
-  ) {
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
-      sentryReportingCallback(() => {
-        treeView.updateLabelType({
-          labelType: TreeViewItemLabelTypeEnum.title,
-        });
-      })
-    );
-  }
-
-  if (
-    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key)
-  ) {
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
-      sentryReportingCallback(() => {
-        treeView.updateLabelType({
-          labelType: TreeViewItemLabelTypeEnum.filename,
-        });
-      })
-    );
-  }
-
-  /**
-   * This is a little flaky right now, but it works most of the time.
-   * Leaving this for dev / debug purposes.
-   * Enablement is set to be DendronContext.DEV_MODE
-   *
-   * TODO: fix tree item register issue and flip the dev mode flag.
-   */
-  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key)) {
-    vscode.commands.registerCommand(
-      DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
-      sentryReportingCallback(async () => {
-        await treeView.expandAll();
-      })
-    );
-  }
-}

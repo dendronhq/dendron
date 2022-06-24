@@ -4,6 +4,7 @@ import {
   DWorkspaceV2,
   ErrorFactory,
   RespV3,
+  TreeViewItemLabelTypeEnum,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -13,17 +14,67 @@ import _ from "lodash";
 import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { StateService } from "../services/stateService";
-import { AnalyticsUtils } from "../utils/analytics";
+import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { ExtensionUtils } from "../utils/ExtensionUtils";
 import { StartupUtils } from "../utils/StartupUtils";
+import { EngineNoteProvider } from "../views/EngineNoteProvider";
+import { NativeTreeView } from "../views/NativeTreeView";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { DendronCodeWorkspace } from "./codeWorkspace";
 import { DendronNativeWorkspace } from "./nativeWorkspace";
+
+function _setupTreeViewCommands(
+  treeView: NativeTreeView,
+  existingCommands: string[]
+) {
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.title,
+        });
+      })
+    );
+  }
+
+  if (
+    !existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key)
+  ) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
+      sentryReportingCallback(() => {
+        treeView.updateLabelType({
+          labelType: TreeViewItemLabelTypeEnum.filename,
+        });
+      })
+    );
+  }
+
+  /**
+   * This is a little flaky right now, but it works most of the time.
+   * Leaving this for dev / debug purposes.
+   * Enablement is set to be DendronContext.DEV_MODE
+   *
+   * TODO: fix tree item register issue and flip the dev mode flag.
+   */
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key)) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_EXPAND_ALL.key,
+      sentryReportingCallback(async () => {
+        await treeView.expandAll();
+      })
+    );
+  }
+}
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {
   if (!workspaceFolders) {
@@ -121,6 +172,20 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
     return false;
   }
   return true;
+}
+
+async function initTreeView({
+  providerConstructor,
+  context,
+}: {
+  providerConstructor: any;
+  context: vscode.ExtensionContext;
+}) {
+  const existingCommands = await vscode.commands.getCommands();
+  const treeView = new NativeTreeView(providerConstructor);
+  treeView.show();
+  _setupTreeViewCommands(treeView, existingCommands);
+  context.subscriptions.push(treeView);
 }
 
 function updateEngineAPI(
@@ -244,7 +309,7 @@ export class WorkspaceActivator {
     }
 
     // show interactive elements,
-    if (opts?.skipInteractiveElements) {
+    if (!opts?.skipInteractiveElements) {
       // check for duplicate config keys and prompt for a fix.
       StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
         ext,
@@ -291,6 +356,15 @@ export class WorkspaceActivator {
     const port = await this.verifyOrStartServerProcess({ ext, wsService });
     // Setup the Engine API Service and the tree view
     const engineAPIService = updateEngineAPI(port, ext);
+
+    // Setup tree viiew
+    const providerConstructor = function () {
+      return new EngineNoteProvider(engineAPIService);
+    };
+
+    if (!opts?.skipTreeView) {
+      await initTreeView({ context, providerConstructor });
+    }
 
     return { data: { workspace, engine: engineAPIService } };
   }

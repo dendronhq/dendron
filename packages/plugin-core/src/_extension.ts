@@ -418,7 +418,9 @@ class ExtensionUtils {
 }
 
 // this method is called when your extension is activated
-export function activate(context: vscode.ExtensionContext) {
+export function activate(
+  context: vscode.ExtensionContext
+): vscode.ExtensionContext {
   const stage = getStage();
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
@@ -437,7 +439,7 @@ export function activate(context: vscode.ExtensionContext) {
       });
     });
   }
-  return;
+  return context;
 }
 
 async function reloadWorkspace(opts: { extension: DendronExtension }) {
@@ -573,7 +575,26 @@ async function startServerProcess(): Promise<{
 
 // Only exported for test purposes ^jtm6bf7utsxy
 export async function _activate(
-  context: vscode.ExtensionContext
+  context: vscode.ExtensionContext,
+  opts?: Partial<{
+    /**
+     * Skip setting up language features (eg. code action providesr)
+     */
+    skipLanguageFeatures: boolean;
+    /**
+     * Skip automatic migrations on start
+     */
+    skipMigrations: boolean;
+    /**
+     * Skip surfacing dialogues on startup
+     */
+    skipInteractiveElements: boolean;
+
+    /**
+     * Skip showing tree view
+     */
+    skipTreeView: boolean;
+  }>
 ): Promise<boolean> {
   const startActivate = process.hrtime();
   const isDebug = VSCodeUtils.isDevMode();
@@ -635,7 +656,10 @@ export async function _activate(
 
     // Setup the commands
     await _setupCommands({ ws, context, requireActiveWorkspace: false });
-    _setupLanguageFeatures(context);
+
+    if (!opts?.skipLanguageFeatures) {
+      _setupLanguageFeatures(context);
+    }
 
     // Need to recompute this for tests, because the instance of DendronExtension doesn't get re-created.
     // Probably also needed if the user switches from one workspace to the other.
@@ -761,30 +785,34 @@ export async function _activate(
         ws.type === WorkspaceType.CODE
           ? wsService.getCodeWorkspaceSettingsSync()
           : undefined;
-      await StartupUtils.runMigrationsIfNecessary({
-        wsService,
-        currentVersion,
-        previousWorkspaceVersion,
-        maybeWsSettings,
-        dendronConfig,
-      });
+      if (!opts?.skipMigrations) {
+        await StartupUtils.runMigrationsIfNecessary({
+          wsService,
+          currentVersion,
+          previousWorkspaceVersion,
+          maybeWsSettings,
+          dendronConfig,
+        });
+      }
 
-      // check for duplicate config keys and prompt for a fix.
-      StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
-        ext: ws,
-      });
+      if (opts?.skipInteractiveElements) {
+        // check for duplicate config keys and prompt for a fix.
+        StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
+          ext: ws,
+        });
 
-      // check for missing default config keys and prompt for a backfill.
-      StartupUtils.showMissingDefaultConfigMessageIfNecessary({
-        ext: ws,
-        extensionInstallStatus,
-      });
+        // check for missing default config keys and prompt for a backfill.
+        StartupUtils.showMissingDefaultConfigMessageIfNecessary({
+          ext: ws,
+          extensionInstallStatus,
+        });
 
-      // check for deprecated config keys and prompt for removal.
-      StartupUtils.showDeprecatedConfigMessageIfNecessary({
-        ext: ws,
-        extensionInstallStatus,
-      });
+        // check for deprecated config keys and prompt for removal.
+        StartupUtils.showDeprecatedConfigMessageIfNecessary({
+          ext: ws,
+          extensionInstallStatus,
+        });
+      }
 
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
@@ -872,12 +900,13 @@ export async function _activate(
         return new EngineNoteProvider(engineAPIService);
       };
 
-      const treeView = new NativeTreeView(providerConstructor);
-      treeView.show();
       const existingCommands = await vscode.commands.getCommands();
-      _setupTreeViewCommands(treeView, existingCommands);
-
-      context.subscriptions.push(treeView);
+      if (opts?.skipTreeView) {
+        const treeView = new NativeTreeView(providerConstructor);
+        treeView.show();
+        _setupTreeViewCommands(treeView, existingCommands);
+        context.subscriptions.push(treeView);
+      }
 
       // Instantiate TextDocumentService
       context.subscriptions.push(TextDocumentServiceFactory.create(ws));
@@ -934,22 +963,23 @@ export async function _activate(
           Sentry.captureException(err);
         });
 
-      // on first install, warn if extensions are incompatible ^dlx35gstwsun
-      if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
-        StartupUtils.warnIncompatibleExtensions({ ext: ws });
-      }
-
       if (stage !== "test") {
         await ws.activateWatchers();
         togglePluginActiveContext(true);
       }
 
-      // Show the feature showcase toast one minute after initialization.
-      const ONE_MINUTE_IN_MS = 60_000;
-      setTimeout(() => {
-        const showcase = new FeatureShowcaseToaster();
-        showcase.showToast();
-      }, ONE_MINUTE_IN_MS);
+      if (!opts?.skipInteractiveElements) {
+        // on first install, warn if extensions are incompatible ^dlx35gstwsun
+        if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
+          StartupUtils.warnIncompatibleExtensions({ ext: ws });
+        }
+        // Show the feature showcase toast one minute after initialization.
+        const ONE_MINUTE_IN_MS = 60_000;
+        setTimeout(() => {
+          const showcase = new FeatureShowcaseToaster();
+          showcase.showToast();
+        }, ONE_MINUTE_IN_MS);
+      }
 
       // Add the current workspace to the recent workspace list. The current
       // workspace is either the workspace file (Code Workspace) or the current

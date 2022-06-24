@@ -86,6 +86,7 @@ suite("Migration", function () {
     test("global version ahead of workspace version", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         onInit: async () => {
           await ctx.globalState.update(GLOBAL_STATE.VERSION, "0.46.0");
           await ctx.workspaceState.update(WORKSPACE_STATE.VERSION, "0.45.0");
@@ -110,6 +111,7 @@ suite("Migration", function () {
     test("migrate to 46.0", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
           const wsConfig =
@@ -139,6 +141,7 @@ suite("Migration", function () {
       test("apply journal config, default settings", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
+          skipMigrations: false,
           modConfigCb: (config) => {
             // we are deleting a field that was optional before migraiton, hence the ignore
             // @ts-ignore
@@ -174,6 +177,7 @@ suite("Migration", function () {
       test("apply journal config, non standard settings", (done) => {
         runLegacyMultiWorkspaceTest({
           ctx,
+          skipMigrations: false,
           modConfigCb: (config) => {
             // we are deleting a field that was optional before migraiton, hence the ignore
             // @ts-ignore
@@ -217,6 +221,7 @@ suite("Migration", function () {
     test("migrate to 0.52.0, non standard settings", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
           const wsConfig =
@@ -252,6 +257,7 @@ suite("Migration", function () {
     test("migrate to 0.51.4 (set scratch notes in dendron.yml), non standard settings", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         onInit: async ({ engine, wsRoot }) => {
           const dendronConfig = engine.config;
           const wsConfig =
@@ -274,6 +280,7 @@ suite("Migration", function () {
     test("migrate to 0.55.2 (old existing ws config to new dendron config)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         modConfigCb: (config) => {
           // @ts-ignore
           delete config.commands["lookup"];
@@ -321,6 +328,7 @@ suite("Migration", function () {
     test("migrate to 0.55.2 (implicit to new dendron config)", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
+        skipMigrations: false,
         modConfigCb: (config) => {
           // @ts-ignore
           delete config.commands["lookup"];

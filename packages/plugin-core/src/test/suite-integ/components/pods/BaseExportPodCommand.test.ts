@@ -101,7 +101,7 @@ suite("BaseExportPodCommand", function () {
           const engine = ExtensionProvider.getEngine();
 
           const testNote = engine.notes["foo"];
-          vscode.workspace.onDidSaveTextDocument(() => {
+          const disposable = vscode.workspace.onDidSaveTextDocument(() => {
             assert(false, "Callback not expected");
           });
 
@@ -110,8 +110,12 @@ suite("BaseExportPodCommand", function () {
             .then(async () => {
               cmd.run();
             });
+
           // Small sleep to ensure callback doesn't fire.
-          waitInMilliseconds(10).then(() => done());
+          waitInMilliseconds(10).then(async () => {
+            disposable.dispose();
+            done();
+          });
         });
       }
     );

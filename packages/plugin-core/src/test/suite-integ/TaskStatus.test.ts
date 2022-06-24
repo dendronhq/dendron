@@ -10,6 +10,8 @@ import { NoteTestUtilsV4, SinonStubbedFn } from "@dendronhq/common-test-utils";
 import { TaskStatusCommand } from "../../commands/TaskStatus";
 
 suite("GIVEN TaskStatus", function () {
+  this.timeout(5e3);
+
   describeSingleWS("WHEN a link to a task note is selected", {}, () => {
     let taskNote: NoteProps;
     let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;

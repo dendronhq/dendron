@@ -386,7 +386,11 @@ export class WorkspaceActivator {
     wsRoot,
     opts,
   }: WorkspaceActivatorOpts & WorkspaceActivatorSkipOpts): Promise<
-    RespV3<{ workspace: DWorkspaceV2; engine: EngineAPIService }>
+    RespV3<{
+      workspace: DWorkspaceV2;
+      engine: EngineAPIService;
+      wsService: WorkspaceService;
+    }>
   > {
     const ctx = "WorkspaceActivator.init";
     // --- Setup workspace
@@ -424,6 +428,7 @@ export class WorkspaceActivator {
       globalState: context.globalState,
       workspaceState: context.workspaceState,
     });
+    ext.workspaceService = wsService;
 
     // get previous workspace version and fixup
     const previousWorkspaceVersion = await getAndCleanPreviousWSVersion({
@@ -499,7 +504,7 @@ export class WorkspaceActivator {
     const engine = updateEngineAPI(port, ext);
     Logger.info({ ctx: `${ctx}:exit` });
 
-    return { data: { workspace, engine } };
+    return { data: { workspace, engine, wsService } };
   }
 
   async activate({
@@ -527,6 +532,7 @@ export class WorkspaceActivator {
     }
 
     // Reload
+    WSUtils.showActivateProgress();
     const start = process.hrtime();
     const reloadSuccess = await reloadWorkspace({ ext, wsService });
     const durationReloadWorkspace = getDurationMilliseconds(start);

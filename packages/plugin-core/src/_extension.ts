@@ -2,7 +2,6 @@ import {
   CONSTANTS,
   DWorkspaceV2,
   getStage,
-  GitEvents,
   GraphEvents,
   GraphThemeEnum,
   GraphThemeTestGroups,
@@ -20,12 +19,10 @@ import {
 import {
   HistoryService,
   MetadataService,
-  WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
-import _ from "lodash";
 import os from "os";
 import path from "path";
 import semver from "semver";
@@ -309,10 +306,6 @@ export async function _activate(
       }
       const wsImpl: DWorkspaceV2 = resp.data.workspace;
 
-      // --- Get Version State
-      const wsRoot = wsImpl.wsRoot;
-      const wsService = new WorkspaceService({ wsRoot });
-
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
@@ -334,9 +327,6 @@ export async function _activate(
       // Re-use the id for error reporting too:
       Sentry.setUser({ id: SegmentClient.instance().anonymousId });
 
-      // --- checkpoint
-      ws.workspaceService = wsService;
-
       // stats
       const platform = getOS();
       const extensions = Extensions.getDendronExtensionRecommendations().map(
@@ -357,7 +347,7 @@ export async function _activate(
       });
 
       // --- Start Initializating the Engine
-      WSUtils.showInitProgress();
+      const wsService = resp.data.wsService;
       const respActivate = await activator.activate({
         ext: ws,
         context,
@@ -383,6 +373,8 @@ export async function _activate(
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });
+      AnalyticsUtils.setupSegmentWithCacheFlush({ context });
+      Sentry.setUser({ id: SegmentClient.instance().anonymousId });
     }
 
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {

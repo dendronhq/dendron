@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DENDRON_VSCODE_CONFIG_KEYS,
   DVault,
+  ErrorFactory,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { resolveTilde } from "@dendronhq/common-server";
@@ -269,10 +270,23 @@ export class SetupWorkspaceCommand extends BasicCommand<
           const ext = ExtensionProvider.getExtension();
           const { context } = ext;
           ext.type = WorkspaceType.NATIVE;
-          new WorkspaceActivator().init({
+          const wsa = new WorkspaceActivator();
+          const resp = await wsa.init({
             context,
             ext,
             wsRoot: rootDir,
+          });
+          if (resp.error) {
+            throw ErrorFactory.createInvalidStateError({
+              message: "issure init workspace",
+            });
+          }
+          await wsa.activate({
+            context,
+            ext,
+            wsRoot: rootDir,
+            engine: resp.data.engine,
+            wsService: resp.data.wsService,
           });
         } else {
           // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.

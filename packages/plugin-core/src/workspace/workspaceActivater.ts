@@ -375,10 +375,10 @@ type WorkspaceActivatorSkipOpts = {
 };
 export class WorkspaceActivator {
   /**
-   * Activate workspace
-   *
-   * Implies:
-   * - check workspace version and do init logic if needed
+   * Initialize workspace. All logic that happens before the engine is initialized happens here
+   * - create workspace class
+   * - register traits
+   * - run migrations if necessary
    */
   async init({
     ext,
@@ -507,6 +507,9 @@ export class WorkspaceActivator {
     return { data: { workspace, engine, wsService } };
   }
 
+  /**
+   * Initialize engine and activate workspace watchers
+   */
   async activate({
     ext,
     context,

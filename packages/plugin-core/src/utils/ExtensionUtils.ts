@@ -27,6 +27,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { CONFIG, DendronContext } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { IBaseCommand } from "../types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
@@ -224,7 +225,7 @@ export class ExtensionUtils {
     activatedSuccess,
   }: {
     durationReloadWorkspace: number;
-    ext: DendronExtension;
+    ext: IDendronExtension;
     activatedSuccess: boolean;
   }) {
     const engine = ext.getEngine();

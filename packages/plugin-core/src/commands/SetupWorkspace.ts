@@ -262,7 +262,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       } else if (workspaceType === WorkspaceType.NATIVE) {
         const ext = ExtensionProvider.getExtension();
         const { context } = ext;
-        new WorkspaceActivator().activateNativeWorkspace({
+        new WorkspaceActivator().initNativeWorkspace({
           context,
           ext,
           wsRoot: rootDir,

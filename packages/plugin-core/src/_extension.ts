@@ -1,6 +1,5 @@
 import {
   CONSTANTS,
-  DendronError,
   DWorkspaceV2,
   getStage,
   GitEvents,
@@ -60,7 +59,6 @@ import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
-import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
@@ -74,7 +72,6 @@ import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceActivator } from "./workspace/workspaceActivater";
-import { WorkspaceInitFactory } from "./workspace/WorkspaceInitFactory";
 import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -103,97 +100,6 @@ export function activate(
     });
   }
   return context;
-}
-
-async function reloadWorkspace(opts: { extension: DendronExtension }) {
-  const ctx = "reloadWorkspace";
-  const { extension } = opts;
-  const ws = extension.getDWorkspace();
-  const maybeEngine = await WSUtils.reloadWorkspace();
-  if (!maybeEngine) {
-    return maybeEngine;
-  }
-  Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
-
-  // Run any initialization code necessary for this workspace invocation.
-  const initializer = WorkspaceInitFactory.create();
-
-  if (initializer?.onWorkspaceOpen) {
-    initializer.onWorkspaceOpen({ ws });
-  }
-
-  vscode.window.showInformationMessage("Dendron is active");
-  Logger.info({ ctx, msg: "exit" });
-
-  await postReloadWorkspace({ extension });
-  HistoryService.instance().add({
-    source: "extension",
-    action: "initialized",
-  });
-  return maybeEngine;
-}
-
-async function postReloadWorkspace(opts: { extension: DendronExtension }) {
-  const ctx = "postReloadWorkspace";
-  const { extension } = opts;
-  const wsService = extension.workspaceService;
-  if (!wsService) {
-    const errorMsg = "No workspace service found.";
-    Logger.error({
-      msg: errorMsg,
-      error: new DendronError({ message: errorMsg }),
-    });
-    return;
-  }
-
-  const wsMeta = wsService.getMeta();
-  const previousWsVersion = wsMeta.version;
-  // stats
-  // NOTE: this is legacy to upgrade .code-workspace specific settings
-  // we are moving everything to dendron.yml
-  // see [[2021 06 Deprecate Workspace Settings|proj.2021-06-deprecate-workspace-settings]]
-  if (previousWsVersion === CONSTANTS.DENDRON_INIT_VERSION) {
-    Logger.info({ ctx, msg: "no previous global version" });
-    vscode.commands
-      .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
-      .then((changes) => {
-        Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
-      });
-    wsService.writeMeta({ version: DendronExtension.version() });
-  } else {
-    const newVersion = DendronExtension.version();
-    if (semver.lt(previousWsVersion, newVersion)) {
-      let changes: any;
-      Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
-      try {
-        changes = await vscode.commands.executeCommand(
-          DENDRON_COMMANDS.UPGRADE_SETTINGS.key
-        );
-        Logger.info({
-          ctx,
-          msg: "postUpgrade: new wsVersion",
-          changes,
-          previousWsVersion,
-          newVersion,
-        });
-        wsService.writeMeta({ version: DendronExtension.version() });
-      } catch (err) {
-        Logger.error({
-          msg: "error upgrading",
-          error: new DendronError({ message: JSON.stringify(err) }),
-        });
-        return;
-      }
-      HistoryService.instance().add({
-        source: "extension",
-        action: "upgraded",
-        data: { changes },
-      });
-    } else {
-      Logger.info({ ctx, msg: "same wsVersion" });
-    }
-  }
-  Logger.info({ ctx, msg: "exit" });
 }
 
 // Only exported for test purposes ^jtm6bf7utsxy
@@ -276,9 +182,25 @@ export async function _activate(
     const ws = await DendronExtension.getOrCreate(context, {
       skipSetup: stage === "test",
     });
+    const existingCommands = await vscode.commands.getCommands();
 
     // Setup the commands
     await _setupCommands({ ext: ws, context, requireActiveWorkspace: false });
+    // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
+    if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.RELOAD_INDEX.key,
+          sentryReportingCallback(async (silent?: boolean) => {
+            const out = await new ReloadIndexCommand().run({ silent });
+            if (!silent) {
+              vscode.window.showInformationMessage(`finish reload`);
+            }
+            return out;
+          })
+        )
+      );
+    }
 
     if (!opts?.skipLanguageFeatures) {
       _setupLanguageFeatures(context);
@@ -385,7 +307,6 @@ export async function _activate(
         return false;
       }
       const wsImpl: DWorkspaceV2 = resp.data.workspace;
-      const start = process.hrtime();
 
       // --- Get Version State
       const wsRoot = wsImpl.wsRoot;
@@ -436,45 +357,17 @@ export async function _activate(
 
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
-      const existingCommands = await vscode.commands.getCommands();
-      // Instantiate TextDocumentService
-      context.subscriptions.push(TextDocumentServiceFactory.create(ws));
-
-      // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
-      if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
-        context.subscriptions.push(
-          vscode.commands.registerCommand(
-            DENDRON_COMMANDS.RELOAD_INDEX.key,
-            sentryReportingCallback(async (silent?: boolean) => {
-              const out = await new ReloadIndexCommand().run({ silent });
-              if (!silent) {
-                vscode.window.showInformationMessage(`finish reload`);
-              }
-              return out;
-            })
-          )
-        );
-      }
-      const reloadSuccess = await reloadWorkspace({ extension: ws });
-      const durationReloadWorkspace = getDurationMilliseconds(start);
-
-      await ExtensionUtils.trackWorkspaceInit({
-        durationReloadWorkspace,
-        activatedSuccess: !!reloadSuccess,
+      const respActivate = await activator.activate({
         ext: ws,
+        context,
+        wsRoot: maybeWsRoot,
+        engine: resp.data.engine,
+        wsService,
       });
-
-      if (!reloadSuccess) {
-        HistoryService.instance().add({
-          source: "extension",
-          action: "not_initialized",
-        });
+      if (respActivate.error) {
         return false;
       }
 
-      ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
-
-      MetadataService.instance().setDendronWorkspaceActivated();
       await _setupCommands({ ext: ws, context, requireActiveWorkspace: true });
 
       // Track contributors to repositories, but do so in the background so
@@ -515,8 +408,6 @@ export async function _activate(
       // folder (Native Workspace)
       const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
       MetadataService.instance().addToRecentWorkspaces(workspace);
-
-      Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
     } else {
       // ws not active
       Logger.info({ ctx, msg: "dendron not active" });

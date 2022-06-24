@@ -1,5 +1,7 @@
 import { SubProcessExitType } from "@dendronhq/api-server";
 import {
+  CONSTANTS,
+  DendronError,
   DVault,
   DWorkspaceV2,
   ErrorFactory,
@@ -9,7 +11,13 @@ import {
   VSCodeEvents,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
+import {
+  HistoryService,
+  MetadataService,
+  WorkspaceService,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import semver from "semver";
@@ -19,6 +27,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { StateService } from "../services/stateService";
+import { TextDocumentServiceFactory } from "../services/TextDocumentServiceFactory";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { ExtensionUtils } from "../utils/ExtensionUtils";
 import { StartupUtils } from "../utils/StartupUtils";
@@ -26,8 +35,10 @@ import { EngineNoteProvider } from "../views/EngineNoteProvider";
 import { NativeTreeView } from "../views/NativeTreeView";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
+import { WSUtils } from "../WSUtils";
 import { DendronCodeWorkspace } from "./codeWorkspace";
 import { DendronNativeWorkspace } from "./nativeWorkspace";
+import { WorkspaceInitFactory } from "./WorkspaceInitFactory";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -188,6 +199,104 @@ async function initTreeView({
   context.subscriptions.push(treeView);
 }
 
+async function postReloadWorkspace({
+  wsService,
+}: {
+  wsService: WorkspaceService;
+}) {
+  const ctx = "postReloadWorkspace";
+  if (!wsService) {
+    const errorMsg = "No workspace service found.";
+    Logger.error({
+      msg: errorMsg,
+      error: new DendronError({ message: errorMsg }),
+    });
+    return;
+  }
+
+  const wsMeta = wsService.getMeta();
+  const previousWsVersion = wsMeta.version;
+  // stats
+  // NOTE: this is legacy to upgrade .code-workspace specific settings
+  // we are moving everything to dendron.yml
+  // see [[2021 06 Deprecate Workspace Settings|proj.2021-06-deprecate-workspace-settings]]
+  if (previousWsVersion === CONSTANTS.DENDRON_INIT_VERSION) {
+    Logger.info({ ctx, msg: "no previous global version" });
+    vscode.commands
+      .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
+      .then((changes) => {
+        Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+      });
+    wsService.writeMeta({ version: DendronExtension.version() });
+  } else {
+    const newVersion = DendronExtension.version();
+    if (semver.lt(previousWsVersion, newVersion)) {
+      let changes: any;
+      Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
+      try {
+        changes = await vscode.commands.executeCommand(
+          DENDRON_COMMANDS.UPGRADE_SETTINGS.key
+        );
+        Logger.info({
+          ctx,
+          msg: "postUpgrade: new wsVersion",
+          changes,
+          previousWsVersion,
+          newVersion,
+        });
+        wsService.writeMeta({ version: DendronExtension.version() });
+      } catch (err) {
+        Logger.error({
+          msg: "error upgrading",
+          error: new DendronError({ message: JSON.stringify(err) }),
+        });
+        return;
+      }
+      HistoryService.instance().add({
+        source: "extension",
+        action: "upgraded",
+        data: { changes },
+      });
+    } else {
+      Logger.info({ ctx, msg: "same wsVersion" });
+    }
+  }
+  Logger.info({ ctx, msg: "exit" });
+}
+
+async function reloadWorkspace({
+  ext,
+  wsService,
+}: {
+  ext: IDendronExtension;
+  wsService: WorkspaceService;
+}) {
+  const ctx = "reloadWorkspace";
+  const ws = ext.getDWorkspace();
+  const maybeEngine = await WSUtils.reloadWorkspace();
+  if (!maybeEngine) {
+    return maybeEngine;
+  }
+  Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
+
+  // Run any initialization code necessary for this workspace invocation.
+  const initializer = WorkspaceInitFactory.create();
+
+  if (initializer?.onWorkspaceOpen) {
+    initializer.onWorkspaceOpen({ ws });
+  }
+
+  vscode.window.showInformationMessage("Dendron is active");
+  Logger.info({ ctx, msg: "exit" });
+
+  await postReloadWorkspace({ wsService });
+  HistoryService.instance().add({
+    source: "extension",
+    action: "initialized",
+  });
+  return maybeEngine;
+}
+
 function updateEngineAPI(
   port: number | string,
   ext: IDendronExtension
@@ -216,6 +325,27 @@ type WorkspaceActivatorOpts = {
   wsRoot: string;
 };
 
+type WorkspaceActivatorSkipOpts = {
+  opts?: Partial<{
+    /**
+     * Skip setting up language features (eg. code action providesr)
+     */
+    skipLanguageFeatures: boolean;
+    /**
+     * Skip automatic migrations on start
+     */
+    skipMigrations: boolean;
+    /**
+     * Skip surfacing dialogues on startup
+     */
+    skipInteractiveElements: boolean;
+
+    /**
+     * Skip showing tree view
+     */
+    skipTreeView: boolean;
+  }>;
+};
 export class WorkspaceActivator {
   /**
    * Activate workspace
@@ -228,32 +358,14 @@ export class WorkspaceActivator {
     context,
     wsRoot,
     opts,
-  }: WorkspaceActivatorOpts & {
-    opts?: Partial<{
-      /**
-       * Skip setting up language features (eg. code action providesr)
-       */
-      skipLanguageFeatures: boolean;
-      /**
-       * Skip automatic migrations on start
-       */
-      skipMigrations: boolean;
-      /**
-       * Skip surfacing dialogues on startup
-       */
-      skipInteractiveElements: boolean;
-
-      /**
-       * Skip showing tree view
-       */
-      skipTreeView: boolean;
-    }>;
-  }): Promise<RespV3<{ workspace: DWorkspaceV2; engine: EngineAPIService }>> {
+  }: WorkspaceActivatorOpts & WorkspaceActivatorSkipOpts): Promise<
+    RespV3<{ workspace: DWorkspaceV2; engine: EngineAPIService }>
+  > {
     const ctx = "WorkspaceActivator.init";
     // --- Setup workspace
     let workspace: DWorkspaceV2;
     if (ext.type === WorkspaceType.NATIVE) {
-      workspace = await this.activateNativeWorkspace({ ext, context, wsRoot });
+      workspace = await this.initNativeWorkspace({ ext, context, wsRoot });
       if (!workspace) {
         return {
           error: ErrorFactory.createInvalidStateError({
@@ -262,7 +374,7 @@ export class WorkspaceActivator {
         };
       }
     } else {
-      workspace = await this.activateCodeWorkspace({ ext, context, wsRoot });
+      workspace = await this.initCodeWorkspace({ ext, context, wsRoot });
     }
 
     ext.workspaceImpl = workspace;
@@ -353,23 +465,66 @@ export class WorkspaceActivator {
     // write new workspace version
     wsService.writeMeta({ version: DendronExtension.version() });
 
+    // setup engine
     const port = await this.verifyOrStartServerProcess({ ext, wsService });
-    // Setup the Engine API Service and the tree view
-    const engineAPIService = updateEngineAPI(port, ext);
+    const engine = updateEngineAPI(port, ext);
+
+    return { data: { workspace, engine } };
+  }
+
+  async activate({
+    ext,
+    context,
+    wsService,
+    opts,
+    engine,
+  }: WorkspaceActivatorOpts &
+    WorkspaceActivatorSkipOpts & {
+      engine: EngineAPIService;
+      wsService: WorkspaceService;
+    }): Promise<RespV3<boolean>> {
+    const ctx = "WorkspaceActivator:activate";
+    // setup services
+    context.subscriptions.push(TextDocumentServiceFactory.create(ext));
 
     // Setup tree viiew
     const providerConstructor = function () {
-      return new EngineNoteProvider(engineAPIService);
+      return new EngineNoteProvider(engine);
     };
-
     if (!opts?.skipTreeView) {
       await initTreeView({ context, providerConstructor });
     }
 
-    return { data: { workspace, engine: engineAPIService } };
+    // Reload
+    const start = process.hrtime();
+    const reloadSuccess = await reloadWorkspace({ ext, wsService });
+    const durationReloadWorkspace = getDurationMilliseconds(start);
+
+    await ExtensionUtils.trackWorkspaceInit({
+      durationReloadWorkspace,
+      activatedSuccess: !!reloadSuccess,
+      ext,
+    });
+
+    if (!reloadSuccess) {
+      HistoryService.instance().add({
+        source: "extension",
+        action: "not_initialized",
+      });
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: `issue with init`,
+        }),
+      };
+    }
+
+    ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
+    MetadataService.instance().setDendronWorkspaceActivated();
+    Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
+    return { data: true };
   }
 
-  async activateCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
+  async initCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
     const ws = new DendronCodeWorkspace({
       wsRoot,
@@ -379,7 +534,7 @@ export class WorkspaceActivator {
     return ws;
   }
 
-  async activateNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
+  async initNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
     const ws = new DendronNativeWorkspace({
       wsRoot,

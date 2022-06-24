@@ -47,9 +47,11 @@ import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { ShowVisualizationCommand } from "./commands/ShowVisualization";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
+import { VisualizationFactory } from "./components/views/VisualizationFactory";
 import { DendronContext, DENDRON_COMMANDS } from "./constants";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -928,7 +930,7 @@ async function _setupCommands({
           DENDRON_COMMANDS.SHOW_VISUALIZATION.key,
           async () => {
             await new ShowVisualizationCommand(
-              VisualizationFactory.create(ws, ws.getEngine())
+              VisualizationFactory.create(ext, ext.getEngine())
             ).run();
           }
         )

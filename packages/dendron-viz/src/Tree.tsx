@@ -13,8 +13,6 @@ import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
 
 const loadModule = require("./loadModule");
 
-const loadModule = require("./loadModule");
-
 //TODO: Set default colors for different file types. Adjust this so that different types of notes (ex. schemas or journals)
 // can be color coded differently
 const defaultColors = {};

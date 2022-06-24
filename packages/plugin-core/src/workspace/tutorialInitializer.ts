@@ -78,10 +78,10 @@ export class TutorialInitializer
       vpath
     );
 
-    // 10 minutes after setup, try to show this toast if we haven't already tried
+    // 3 minutes after setup, try to show this toast if we haven't already tried
     setTimeout(() => {
       this.tryShowImportNotesFeatureToaster();
-    }, 1000 * 60 * 10);
+    }, 1000 * 60 * 3);
   }
 
   private getAnalyticsPayloadFromDocument(opts: {

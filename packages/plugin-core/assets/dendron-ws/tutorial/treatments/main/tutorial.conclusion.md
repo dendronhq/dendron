@@ -15,6 +15,8 @@ With fast lookup, flexible hierarchies, note linking, and rich formatting, you'r
 
 From here, you can start adding your notes to this workspace or, if you'd like to start fresh, you can create a new workspace for your notes with the `Dendron: Initialize Workspace` Command.
 
+> Coming from Obsidian? Click [here](command:dendron.importObsidianPod) to import your Obsidian notes (or any markdown notes) into Dendron to see how they look.
+
 ## Join the Dendron Community
 
 Dendron wouldn't be what it is today without our wonderful set of members and supporters.

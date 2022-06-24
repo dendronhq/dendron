@@ -154,6 +154,11 @@
     // Make the icons the same size regardless of the size of the size of the
     // container they are in
     font-size: 1rem;
+    // Anchors headings become visible when the item they are attached to is
+    // hovered over. We do that using opacity.
+    transition: all 0.2s ease;
+    opacity: 1;
+    color: inherit;
   }
 
   h1,
@@ -173,12 +178,13 @@
     }
   }
 
-  // Use text color for the anchors until the heading they are in is hovered
-  // over. Once they are hovered, the inherit is dropped and regular link color
-  // applies. Implemented it this way so it works for all themes without
-  // hardcoding link color.
-  *:not(:hover) .anchor-heading {
-    color: inherit;
+  @media (hover: hover) {
+    // Make the anchor icons invisible until the user hovers over them, but only
+    // on devices where the user can hover over things (for example, not on
+    // smartphones and tablets)
+    *:not(:hover) .anchor-heading {
+      opacity: 0;
+    }
   }
 
   summary {

@@ -1,12 +1,14 @@
 import { DWorkspaceV2, WorkspaceType } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
+import _ from "lodash";
+import path from "path";
+import * as vscode from "vscode";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
-import * as vscode from "vscode";
-import { DendronNativeWorkspace } from "./nativeWorkspace";
 import { DendronCodeWorkspace } from "./codeWorkspace";
-import path from "path";
+import { DendronNativeWorkspace } from "./nativeWorkspace";
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {
   if (!workspaceFolders) {
@@ -42,22 +44,28 @@ async function getOrPromptWSRoot(workspaceFolders: string[]) {
   }
 }
 
-type WorkspaceActivatorOpts = {
-  ext: DendronExtension;
+type WorkspaceActivatorValidateOpts = {
+  ext: IDendronExtension;
   context: vscode.ExtensionContext;
 };
 
+type WorkspaceActivatorOpts = {
+  ext: IDendronExtension;
+  context: vscode.ExtensionContext;
+  wsRoot: string;
+};
+
 export class WorkspaceActivator {
-  async activate({ ext, context }: WorkspaceActivatorOpts) {
+  async activate({ ext, context, wsRoot }: WorkspaceActivatorOpts) {
     // --- Setup workspace
     let workspace: DWorkspaceV2 | boolean;
     if (ext.type === WorkspaceType.NATIVE) {
-      workspace = await this.activateNativeWorkspace({ ext, context });
+      workspace = await this.activateNativeWorkspace({ ext, context, wsRoot });
       if (!workspace) {
         return;
       }
     } else {
-      workspace = await this.activateCodeWorkspace({ ext, context });
+      workspace = await this.activateCodeWorkspace({ ext, context, wsRoot });
     }
 
     ext.workspaceImpl = workspace;
@@ -74,29 +82,42 @@ export class WorkspaceActivator {
     return workspace;
   }
 
-  async activateCodeWorkspace({ context }: WorkspaceActivatorOpts) {
+  async activateCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
     return new DendronCodeWorkspace({
-      wsRoot: path.dirname(DendronExtension.workspaceFile().fsPath),
+      wsRoot,
       logUri: context.logUri,
       assetUri,
     });
   }
 
-  async activateNativeWorkspace({ context }: WorkspaceActivatorOpts) {
-    const workspaceFolders = await WorkspaceUtils.findWSRootsInWorkspaceFolders(
-      DendronExtension.workspaceFolders()!
-    );
-    if (!workspaceFolders) {
-      return false;
-    }
-    const wsRoot = await getOrPromptWSRoot(workspaceFolders);
-    if (!wsRoot) return false;
+  async activateNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
     return new DendronNativeWorkspace({
       wsRoot,
       logUri: context.logUri,
       assetUri,
     });
+  }
+
+  async getOrPromptWsRoot({
+    ext,
+  }: WorkspaceActivatorValidateOpts): Promise<string | undefined> {
+    if (ext.type === WorkspaceType.NATIVE) {
+      const workspaceFolders =
+        await WorkspaceUtils.findWSRootsInWorkspaceFolders(
+          DendronExtension.workspaceFolders()!
+        );
+      if (!workspaceFolders) {
+        return;
+      }
+      const resp = await getOrPromptWSRoot(workspaceFolders);
+      if (!_.isString(resp)) {
+        return;
+      }
+      return resp;
+    } else {
+      return path.dirname(DendronExtension.workspaceFile().fsPath);
+    }
   }
 }

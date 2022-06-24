@@ -65,6 +65,7 @@ export interface IDendronExtension {
   lookupControllerFactory: ILookupControllerV3Factory;
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
+  workspaceImpl?: DWorkspaceV2;
 
   activateWatchers(): Promise<void>;
   /**

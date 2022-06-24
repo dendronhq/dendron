@@ -32,8 +32,9 @@ function badFrontmatter(props: Omit<Diagnostic, "source">) {
 export function warnMissingFrontmatter() {
   const diagnostic: Diagnostic = badFrontmatter({
     message: `The frontmatter is missing. All notes in Dendron must have a frontmatter. ${RESOLVE_MESSAGE_AUTO_ONLY}`,
-    range: newRange(0, 0, 0, 0),
+    range: newRange(0, 0, 0, 10),
     severity: DiagnosticSeverity.Error,
+    code: BAD_FRONTMATTER_CODE,
   });
   return diagnostic;
 }

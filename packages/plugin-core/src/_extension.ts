@@ -201,6 +201,7 @@ export async function _activate(
         )
       );
     }
+    await _setupCommands({ ext: ws, context, requireActiveWorkspace: true });
 
     if (!opts?.skipLanguageFeatures) {
       _setupLanguageFeatures(context);
@@ -367,8 +368,6 @@ export async function _activate(
       if (respActivate.error) {
         return false;
       }
-
-      await _setupCommands({ ext: ws, context, requireActiveWorkspace: true });
 
       // Track contributors to repositories, but do so in the background so
       // initialization isn't delayed.

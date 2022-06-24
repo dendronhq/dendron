@@ -1,7 +1,6 @@
 import {
   ConfigUtils,
   DailyJournalTestGroups,
-  DendronError,
   genUUID,
   JournalConfig,
   NoteUtils,
@@ -13,8 +12,9 @@ import {
   _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
 } from "@dendronhq/common-all";
 import { SegmentClient, vault2Path } from "@dendronhq/common-server";
-import _ from "lodash";
+import { MetadataService } from "@dendronhq/engine-server";
 import * as fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -22,12 +22,11 @@ import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { JournalNote } from "../traits/journal";
+import { VSCodeUtils } from "../vsCodeUtils";
 import {
   CommandOpts,
   CreateNoteWithTraitCommand,
 } from "./CreateNoteWithTraitCommand";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { MetadataService } from "@dendronhq/engine-server";
 
 export type CreateDailyJournalData = {
   isFirstTime: boolean;
@@ -40,12 +39,11 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   public static DENDRON_TEMPLATES_FNAME: string = "dendron.templates";
 
   constructor(ext: IDendronExtension) {
-    const workspaceService = ext.workspaceService;
-
-    if (!workspaceService) {
-      throw new DendronError({ message: "Workspace Service not initialized!" });
-    }
-    super(ext, "dendron.journal", new JournalNote(workspaceService.config));
+    const initTrait = () => {
+      const config = ExtensionProvider.getDWorkspace().config;
+      return new JournalNote(config);
+    };
+    super(ext, "dendron.journal", initTrait);
     // override the key to maintain compatibility
     this.key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   }

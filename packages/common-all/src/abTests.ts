@@ -55,6 +55,31 @@ export enum DailyJournalTestGroups {
   withoutTemplate = "withoutTemplate",
 }
 
+export enum QuickstartTutorialTestGroups {
+  "main" = "main",
+  "quickstart-v1" = "quickstart-v1",
+}
+
+/**
+ * Experiment to test the impact of a short-form tutorial vs 5-step tutorial on the onboarding funnel.
+ *
+ * main:          full 5-step tutorial
+ * quickstart-v1: one pager tutorial
+ */
+const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
+  "2022-06-QuickstartTutorialTest",
+  [
+    {
+      name: QuickstartTutorialTestGroups["main"],
+      weight: 1,
+    },
+    {
+      name: QuickstartTutorialTestGroups["quickstart-v1"],
+      weight: 1,
+    },
+  ]
+);
+
 /**
  * Experiment to test whether users running `Daily Journal` for the first time should get an auto-generated template/schema or not.
  *
@@ -88,7 +113,8 @@ export const MAIN_TUTORIAL_TYPE_NAME = "main";
  * Currently running tutorial AB test group.
  * If we are not running any A/B testing, explicitly set this to `undefined`
  */
-export const CURRENT_TUTORIAL_TEST: ABTest<any> | undefined = undefined;
+export const CURRENT_TUTORIAL_TEST: ABTest<any> | undefined =
+  _2022_06_QUICKSTART_TUTORIAL_TEST;
 
 /** All A/B tests that are currently running.
  *

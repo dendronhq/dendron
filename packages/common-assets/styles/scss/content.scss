@@ -177,13 +177,9 @@
     }
   }
 
-  @media (hover: hover) {
-    // Make the anchor icons invisible until the user hovers over them, but only
-    // on devices where the user can hover over things (for example, not on
-    // smartphones and tablets)
-    *:not(:hover) .anchor-heading {
-      opacity: 0;
-    }
+  // Make the anchor icons invisible until the user hovers over them.
+  *:not(:hover) .anchor-heading {
+    opacity: 0;
   }
 
   summary {

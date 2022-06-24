@@ -1,9 +1,11 @@
+import { SubProcessExitType } from "@dendronhq/api-server";
 import {
   DVault,
   DWorkspaceV2,
   ErrorFactory,
   RespV3,
   VaultUtils,
+  VSCodeEvents,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
@@ -13,7 +15,10 @@ import semver from "semver";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
+import { EngineAPIService } from "../services/EngineAPIService";
 import { StateService } from "../services/stateService";
+import { AnalyticsUtils } from "../utils/analytics";
+import { ExtensionUtils } from "../utils/ExtensionUtils";
 import { StartupUtils } from "../utils/StartupUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
@@ -118,6 +123,23 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
   return true;
 }
 
+function updateEngineAPI(
+  port: number | string,
+  ext: IDendronExtension
+): EngineAPIService {
+  // set engine api ^9dr6chh7ah9v
+  const svc = EngineAPIService.createEngine({
+    port,
+    enableWorkspaceTrust: vscode.workspace.isTrusted,
+    vaults: ext.getDWorkspace().vaults,
+    wsRoot: ext.getDWorkspace().wsRoot,
+  });
+  ext.setEngine(svc);
+  ext.port = _.toInteger(port);
+
+  return svc;
+}
+
 type WorkspaceActivatorValidateOpts = {
   ext: IDendronExtension;
   context: vscode.ExtensionContext;
@@ -136,7 +158,7 @@ export class WorkspaceActivator {
    * Implies:
    * - check workspace version and do init logic if needed
    */
-  async activate({
+  async init({
     ext,
     context,
     wsRoot,
@@ -161,7 +183,7 @@ export class WorkspaceActivator {
        */
       skipTreeView: boolean;
     }>;
-  }): Promise<RespV3<DWorkspaceV2>> {
+  }): Promise<RespV3<{ workspace: DWorkspaceV2; engine: EngineAPIService }>> {
     // --- Setup workspace
     let workspace: DWorkspaceV2;
     if (ext.type === WorkspaceType.NATIVE) {
@@ -263,7 +285,11 @@ export class WorkspaceActivator {
     // write new workspace version
     wsService.writeMeta({ version: DendronExtension.version() });
 
-    return { data: workspace };
+    const port = await this.verifyOrStartServerProcess({ ext, wsService });
+    // Setup the Engine API Service and the tree view
+    const engineAPIService = updateEngineAPI(port, ext);
+
+    return { data: { workspace, engine: engineAPIService } };
   }
 
   async activateCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
@@ -305,5 +331,45 @@ export class WorkspaceActivator {
     } else {
       return path.dirname(DendronExtension.workspaceFile().fsPath);
     }
+  }
+
+  /**
+   * Return true if we started a server process
+   * @returns
+   */
+  async verifyOrStartServerProcess({
+    ext,
+    wsService,
+  }: {
+    ext: IDendronExtension;
+    wsService: WorkspaceService;
+  }): Promise<number> {
+    const context = ext.context;
+    const start = process.hrtime();
+    if (ext.port) {
+      return ext.port;
+    }
+
+    const { port, subprocess } = await ExtensionUtils.startServerProcess({
+      context,
+      start,
+      wsService,
+      onExit: (type: SubProcessExitType) => {
+        const txt = "Restart Dendron";
+        vscode.window
+          .showErrorMessage("Dendron engine encountered an error", txt)
+          .then(async (resp) => {
+            if (resp === txt) {
+              AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
+                code: type,
+              });
+              await ExtensionUtils.activate();
+            }
+          });
+      },
+    });
+    ext.port = _.toInteger(port);
+    ext.serverProcess = subprocess;
+    return ext.port;
   }
 }

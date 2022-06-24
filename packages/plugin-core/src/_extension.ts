@@ -1,4 +1,3 @@
-import { SubProcessExitType } from "@dendronhq/api-server";
 import {
   CONSTANTS,
   DendronError,
@@ -12,7 +11,6 @@ import {
   InstallStatus,
   isDisposable,
   TreeViewItemLabelTypeEnum,
-  VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
@@ -62,11 +60,11 @@ import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
-import { EngineAPIService } from "./services/EngineAPIService";
 import { StateService } from "./services/stateService";
 import { TextDocumentServiceFactory } from "./services/TextDocumentServiceFactory";
 import { Extensions } from "./settings";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
+import { StartupPrompts } from "./utils/StartupPrompts";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { isAutoCompletable } from "./utils/AutoCompletable";
 import { ExtensionUtils } from "./utils/ExtensionUtils";
@@ -381,7 +379,7 @@ export async function _activate(
       if (!maybeWsRoot) {
         return false;
       }
-      const resp = await activator.activate({
+      const resp = await activator.init({
         ext: ws,
         context,
         wsRoot: maybeWsRoot,
@@ -389,7 +387,7 @@ export async function _activate(
       if (resp.error) {
         return false;
       }
-      const wsImpl: DWorkspaceV2 = resp.data;
+      const wsImpl: DWorkspaceV2 = resp.data.workspace;
       const start = process.hrtime();
 
       // --- Get Version State
@@ -442,34 +440,12 @@ export async function _activate(
       // --- Start Initializating the Engine
       WSUtils.showInitProgress();
 
-      const port = await ExtensionUtils.startServerProcess({
-        context,
-        start,
-        wsService,
-        onExit: (type: SubProcessExitType) => {
-          const txt = "Restart Dendron";
-          vscode.window
-            .showErrorMessage("Dendron engine encountered an error", txt)
-            .then(async (resp) => {
-              if (resp === txt) {
-                AnalyticsUtils.track(VSCodeEvents.ServerCrashed, {
-                  code: type,
-                });
-                _activate(context);
-              }
-            });
-        },
-      });
-
-      // Setup the Engine API Service and the tree view
-      const engineAPIService = updateEngineAPI(port, ws);
-
       // TODO: This should eventually be consolidated with other view setup
       // logic as in workspace.ts, but right now this needs an instance of
       // EngineAPIService for init
 
       const providerConstructor = function () {
-        return new EngineNoteProvider(engineAPIService);
+        return new EngineNoteProvider(resp.data.engine);
       };
 
       const existingCommands = await vscode.commands.getCommands();
@@ -714,7 +690,7 @@ async function showWelcomeOrWhatsNew({
 
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
-  StartupUtils.showLapsedUserMessageIfNecessary({ assetUri });
+  StartupPrompts.showLapsedUserMessageIfNecessary({ assetUri });
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
@@ -964,21 +940,4 @@ function _setupTreeViewCommands(
       })
     );
   }
-}
-
-function updateEngineAPI(
-  port: number | string,
-  ext: DendronExtension
-): EngineAPIService {
-  // set engine api ^9dr6chh7ah9v
-  const svc = EngineAPIService.createEngine({
-    port,
-    enableWorkspaceTrust: vscode.workspace.isTrusted,
-    vaults: ext.getDWorkspace().vaults,
-    wsRoot: ext.getDWorkspace().wsRoot,
-  });
-  ext.setEngine(svc);
-  ext.port = _.toInteger(port);
-
-  return svc;
 }

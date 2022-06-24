@@ -171,7 +171,7 @@ export class ExtensionUtils {
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     wsService.writePort(port);
-    return port;
+    return { port, subprocess };
   }
 
   static getAndTrackInstallStatus({

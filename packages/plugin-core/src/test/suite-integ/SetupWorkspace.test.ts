@@ -19,8 +19,8 @@ import _ from "lodash";
 import * as mocha from "mocha";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
-import sinon, { SinonStub } from "sinon";
-import { ExtensionContext, window } from "vscode";
+import { SinonStub } from "sinon";
+import { ExtensionContext } from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -29,7 +29,7 @@ import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
 import { AnalyticsUtils } from "../../utils/analytics";
-import { StartupUtils } from "../../utils/StartupUtils";
+import { StartupPrompts } from "../../utils/StartupPrompts";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
 import { BlankInitializer } from "../../workspace/blankInitializer";
@@ -41,11 +41,7 @@ import {
   genEmptyWSFiles,
   resetCodeWorkspace,
 } from "../testUtilsv2";
-import {
-  describeMultiWS,
-  describeSingleWS,
-  stubSetupWorkspace,
-} from "../testUtilsV3";
+import { describeSingleWS, stubSetupWorkspace } from "../testUtilsV3";
 import { VSCodeTestUtils, WorkspaceTestUtils } from "../utils";
 
 function lapsedMessageTest({
@@ -68,7 +64,7 @@ function lapsedMessageTest({
   svc.setMeta("firstWsInitialize", firstWsInitialize);
   svc.setMeta("lapsedUserMsgSendTime", lapsedUserMsgSendTime);
   svc.setMeta("dendronWorkspaceActivated", workspaceActivated);
-  expect(StartupUtils.shouldDisplayLapsedUserMsg()).toEqual(
+  expect(StartupPrompts.shouldDisplayLapsedUserMsg()).toEqual(
     shouldDisplayMessage
   );
   done();
@@ -99,29 +95,6 @@ suite("GIVEN SetupWorkspace Command", function () {
     userConfigDirStub.restore();
     wsFoldersStub.restore();
   });
-  const opts = {
-    noSetInstallStatus: true,
-  };
-
-  // TODO: This test case fails in Windows if the logic in setupBeforeAfter (stubs) is not there. Look into why that is the case
-  describeMultiWS("WHEN command is gathering inputs", opts, () => {
-    let showOpenDialog: sinon.SinonStub;
-
-    beforeEach(async () => {
-      const cmd = new SetupWorkspaceCommand();
-      showOpenDialog = sinon.stub(window, "showOpenDialog");
-      await cmd.gatherInputs();
-    });
-    afterEach(() => {
-      showOpenDialog.restore();
-    });
-
-    test("THEN file picker is opened", (done) => {
-      expect(showOpenDialog.calledOnce).toBeTruthy();
-      done();
-    });
-  });
-
   describe("WHEN initializing a CODE workspace", function () {
     this.timeout(6 * 1000);
 

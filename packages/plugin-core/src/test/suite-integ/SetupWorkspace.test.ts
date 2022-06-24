@@ -7,7 +7,6 @@ import {
 } from "@dendronhq/common-all";
 import { readYAMLAsync, tmpDir } from "@dendronhq/common-server";
 import {
-  EngineUtils,
   getWSMetaFilePath,
   MetadataService,
   openWSMetaFile,

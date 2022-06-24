@@ -15,6 +15,7 @@ suite("DiagnosticsReport", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
+        // check for meta
         ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
       onInit: async () => {

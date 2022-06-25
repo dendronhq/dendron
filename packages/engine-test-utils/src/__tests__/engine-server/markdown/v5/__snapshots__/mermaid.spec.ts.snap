@@ -2,8 +2,8 @@
 
 exports[`GIVEN mermaid WHEN execute "HTML: WITH_MERMAID: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"mermaid-code-block\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#mermaid-code-block\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>mermaid code block</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+<h1 id=\\"mermaid-code-block\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#mermaid-code-block\\"></a>mermaid code block</h1>
 <div class=\\"mermaid\\">
   graph LR
 Start --> Stop

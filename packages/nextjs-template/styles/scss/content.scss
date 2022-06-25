@@ -148,38 +148,39 @@
   }
 
   .anchor-heading {
+    // Push the anchor icon to the left, into the gutter
     position: absolute;
-    right: -$sp-4;
-    width: $sp-5;
-    height: 100%;
-    padding-right: $sp-1;
-    padding-left: $sp-1;
-    overflow: visible;
+    left: -$sp-4;
+    // Make the icons the same size regardless of the size of the size of the
+    // container they are in
+    font-size: 1rem;
+    // Anchors headings become visible when the item they are attached to is
+    // hovered over. We do that using opacity.
+    transition: all 0.2s ease;
+    opacity: 1;
+    color: inherit;
+  }
 
-    @include mq(md) {
-      right: auto;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    // Align the anchor to the middle of the heading
+    display: flex;
+    align-items: center;
+
+    .anchor-heading {
+      // headings can fit a slightly bigger icon
+      font-size: 1.2rem;
       left: -$sp-5;
-    }
-
-    svg {
-      display: inline-block;
-      width: 100%;
-      height: 100%;
-      color: $link-color;
-      visibility: hidden;
     }
   }
 
-  .anchor-heading:hover,
-  h1:hover > .anchor-heading,
-  h2:hover > .anchor-heading,
-  h3:hover > .anchor-heading,
-  h4:hover > .anchor-heading,
-  h5:hover > .anchor-heading,
-  h6:hover > .anchor-heading {
-    svg {
-      visibility: visible;
-    }
+  // Make the anchor icons invisible until the user hovers over them
+  *:not(:hover) .anchor-heading {
+    opacity: 0;
   }
 
   summary {

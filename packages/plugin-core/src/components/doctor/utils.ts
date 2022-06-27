@@ -1,5 +1,6 @@
 import {
   DuplicateNoteError,
+  isRespV3SuccessResp,
   VaultUtils,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
@@ -12,6 +13,7 @@ import { MessageSeverity, VSCodeUtils } from "../../vsCodeUtils";
 
 export class DoctorUtils {
   static async findDuplicateNoteFromDocument(document: vscode.TextDocument) {
+    const ctx = "findDuplicateNoteFromDocument";
     const fsPath = document.uri.fsPath;
     // return if file is not a markdown
     if (!fsPath.endsWith(".md")) return;
@@ -31,7 +33,13 @@ export class DoctorUtils {
 
     // we do this because the note in document would _not_ be in our store
     // if it is a duplicate note.
-    const currentNote = file2Note(fsPath, vault);
+    const resp = file2Note(fsPath, vault);
+    if (!isRespV3SuccessResp(resp)) {
+      // not in file system, we do nothing.
+      Logger.error({ ctx, error: resp.error });
+      return;
+    }
+    const currentNote = resp.data;
 
     // find the potentially-duplicate note that's currently in our store.
     const noteById = await engine.getNote(currentNote.id);

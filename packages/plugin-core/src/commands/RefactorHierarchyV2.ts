@@ -28,7 +28,6 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
-import * as vscode from "vscode";
 
 const md = _md();
 

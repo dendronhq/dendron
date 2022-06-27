@@ -1,16 +1,9 @@
 import { ConfigUtils } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { MDUtilsV5 } from "@dendronhq/engine-server";
 import { runEngineTestV5, TestConfigUtils } from "../../..";
 
 describe("backlinks", () => {
-  let siteRootDir: string;
-
-  beforeEach(() => {
-    siteRootDir = tmpDir().name;
-  });
-
   describe("frontmatter tags", () => {
     test("single", async () => {
       await runEngineTestV5(

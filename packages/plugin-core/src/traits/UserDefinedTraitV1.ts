@@ -4,6 +4,7 @@ import {
   onCreateProps,
   onWillCreateProps,
 } from "@dendronhq/common-all";
+import { Logger } from "../logger";
 
 /**
  * A Note Trait that will execute end-user defined javascript code.
@@ -15,6 +16,8 @@ export class UserDefinedTraitV1 implements NoteTrait {
 
   OnCreate?: onCreateProps;
   OnWillCreate?: onWillCreateProps;
+
+  private L = Logger;
 
   /**
    *
@@ -31,6 +34,9 @@ export class UserDefinedTraitV1 implements NoteTrait {
    * methods will be invoked.
    */
   async initialize() {
+    this.L.info(
+      `UserDefinedTraitV1 - initialize. Script Path: ${this.scriptPath}`
+    );
     const hack = require(`./webpack-require-hack.js`);
     const trait: UserDefinedTraitV1 = hack(this.scriptPath);
 

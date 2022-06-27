@@ -6,11 +6,11 @@ import {
   DNoteHeaderAnchor,
   DNoteLink,
   DVault,
+  ErrorUtils,
   ERROR_SEVERITY,
   extractNoteChangeEntryCounts,
   getSlugger,
   NoteChangeEntry,
-  isRespV3SuccessResp,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -505,7 +505,7 @@ export class MoveHeaderCommand extends BasicCommand<
           path.join(vaultPath, note!.fname + ".md"),
           note!.vault
         );
-        if (!isRespV3SuccessResp<NoteProps>(resp)) {
+        if (ErrorUtils.isErrorResp(resp)) {
           throw error;
         }
         const _note = resp.data;

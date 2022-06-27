@@ -1,6 +1,6 @@
 import {
   DuplicateNoteError,
-  isRespV3SuccessResp,
+  ErrorUtils,
   VaultUtils,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
@@ -34,7 +34,7 @@ export class DoctorUtils {
     // we do this because the note in document would _not_ be in our store
     // if it is a duplicate note.
     const resp = file2Note(fsPath, vault);
-    if (!isRespV3SuccessResp(resp)) {
+    if (ErrorUtils.isErrorResp(resp)) {
       // not in file system, we do nothing.
       Logger.error({ ctx, error: resp.error });
       return;

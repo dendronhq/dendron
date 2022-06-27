@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  isRespV3SuccessResp,
+  ErrorUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -156,7 +156,7 @@ describe("h1 to h2", () => {
               `${nm.toLowerCase()}.md`
             );
             const resp = file2Note(fpath, vault);
-            if (!isRespV3SuccessResp(resp)) {
+            if (ErrorUtils.isErrorResp(resp)) {
               throw resp.error;
             }
             const note = resp.data;
@@ -197,7 +197,7 @@ describe("h1 to h2", () => {
 
         const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
         const resp1 = file2Note(fpathFoo, vault);
-        if (!isRespV3SuccessResp(resp1)) {
+        if (ErrorUtils.isErrorResp(resp1)) {
           throw resp1.error;
         }
         const noteFoo = resp1.data;
@@ -212,7 +212,7 @@ describe("h1 to h2", () => {
         // bar.md should be untouched.
         const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
         const resp2 = file2Note(fpathBar, vault);
-        if (!isRespV3SuccessResp(resp2)) {
+        if (ErrorUtils.isErrorResp(resp2)) {
           throw resp2.error;
         }
         const note = resp2.data;
@@ -251,7 +251,7 @@ describe("h1 to h2", () => {
               `${nm.toLowerCase()}.md`
             );
             const resp = file2Note(fpath, vault);
-            if (!isRespV3SuccessResp(resp)) {
+            if (ErrorUtils.isErrorResp(resp)) {
               throw resp.error;
             }
             const note = resp.data;
@@ -294,7 +294,7 @@ describe("H1_TO_TITLE", () => {
               `${nm.toLowerCase()}.md`
             );
             const resp = file2Note(fpath, vault);
-            if (!isRespV3SuccessResp(resp)) {
+            if (ErrorUtils.isErrorResp(resp)) {
               throw resp.error;
             }
             const note = resp.data;
@@ -329,7 +329,7 @@ describe("H1_TO_TITLE", () => {
         });
         const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
         const resp1 = file2Note(fpathFoo, vault);
-        if (!isRespV3SuccessResp(resp1)) {
+        if (ErrorUtils.isErrorResp(resp1)) {
           throw resp1.error;
         }
         const noteFoo = resp1.data;
@@ -338,7 +338,7 @@ describe("H1_TO_TITLE", () => {
 
         const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
         const resp2 = file2Note(fpathBar, vault);
-        if (!isRespV3SuccessResp(resp2)) {
+        if (ErrorUtils.isErrorResp(resp2)) {
           throw resp2.error;
         }
         const noteBar = resp2.data;

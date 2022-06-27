@@ -9,7 +9,7 @@ import {
   DEngineClient,
   EngineWriteOptsV2,
   SchemaTemplate,
-  isRespV3SuccessResp,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -207,7 +207,7 @@ export class NoteTestUtilsV4 {
     const { fname, vault, wsRoot } = opts;
     const npath = path.join(vault2Path({ vault, wsRoot }), fname + ".md");
     const resp = file2Note(npath, vault);
-    if (!isRespV3SuccessResp(resp)) {
+    if (ErrorUtils.isErrorResp(resp)) {
       throw resp.error;
     }
     const note = resp.data;

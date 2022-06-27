@@ -2,7 +2,7 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
-  isRespV3SuccessResp,
+  ErrorUtils,
   NoteUtils,
   SchemaUtils,
   Time,
@@ -452,7 +452,7 @@ export class WorkspaceWatcher {
       const vpath = vault2Path({ wsRoot, vault: newVault });
       const newLocPath = path.join(vpath, fname + ".md");
       const resp = file2Note(newLocPath, newVault);
-      if (!isRespV3SuccessResp(resp)) {
+      if (ErrorUtils.isErrorResp(resp)) {
         throw resp.error;
       }
       const noteRaw = resp.data;

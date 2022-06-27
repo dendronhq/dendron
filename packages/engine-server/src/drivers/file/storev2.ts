@@ -51,7 +51,7 @@ import {
   NoteFnameDictUtils,
   FindNoteOpts,
   isNotNull,
-  isRespV3SuccessResp,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -721,7 +721,7 @@ export class FileStorage implements DStore {
 
     // read note in case its changed
     const resp = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
-    if (!isRespV3SuccessResp(resp)) {
+    if (ErrorUtils.isErrorResp(resp)) {
       // couldn't read note. log it and return.
       this.logger.error({ ctx, error: stringifyError(resp.error) });
       return;
@@ -892,7 +892,7 @@ export class FileStorage implements DStore {
     // TODO: Move this business logic to engine so we can update metadata
     // read from disk since contents might have changed
     const resp = file2Note(oldLocPath, oldVault);
-    if (!isRespV3SuccessResp(resp)) {
+    if (ErrorUtils.isErrorResp(resp)) {
       throw new DendronError({ message: "file not found" });
     }
     const noteRaw = resp.data;

@@ -1,7 +1,7 @@
 import {
   DNodeUtils,
   DVault,
-  isRespV3SuccessResp,
+  ErrorUtils,
   NoteProps,
   VaultUtils,
   WorkspaceOpts,
@@ -129,7 +129,7 @@ export const getNoteFromTextEditor = (): NoteProps => {
     basename: path.basename(txtPath),
   });
   const resp = file2Note(fullPath, vault);
-  if (!isRespV3SuccessResp(resp)) {
+  if (ErrorUtils.isErrorResp(resp)) {
     throw resp.error;
   }
   return resp.data;

@@ -19,7 +19,7 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
-  isRespV3SuccessResp,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -408,7 +408,7 @@ export function convertNoteRefASTV2(
       let note: NoteProps;
       try {
         const resp = file2Note(npath, vault as DVault);
-        if (!isRespV3SuccessResp(resp)) {
+        if (ErrorUtils.isErrorResp(resp)) {
           throw resp.error;
         }
         note = resp.data;

@@ -1,7 +1,7 @@
 import {
   DNodeUtils as _du,
   DVault,
-  isRespV3SuccessResp,
+  ErrorUtils,
   SchemaUtils as _su,
 } from "@dendronhq/common-all";
 import {
@@ -102,7 +102,7 @@ config:
 Foo body`
       );
       const resp = file2Note(notePath, vault);
-      expect(isRespV3SuccessResp(resp)).toBeTruthy();
+      expect(ErrorUtils.isErrorResp(resp)).toBeFalsy();
       expect(resp.data).toMatchObject({
         id: "foo",
         title: "foo",

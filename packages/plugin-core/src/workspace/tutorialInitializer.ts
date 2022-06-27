@@ -8,7 +8,7 @@ import {
   MAIN_TUTORIAL_TYPE_NAME,
   TutorialNoteViewedPayload,
   isABTest,
-  isRespV3SuccessResp,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -95,7 +95,7 @@ export class TutorialInitializer
     const { vaults, wsRoot } = ws;
     const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
     const resp = file2Note(fsPath, vault);
-    if (!isRespV3SuccessResp(resp)) {
+    if (ErrorUtils.isErrorResp(resp)) {
       throw resp.error;
     }
     const note = resp.data;

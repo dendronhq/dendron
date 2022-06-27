@@ -1,7 +1,7 @@
 import {
   ContextualUIEvents,
   DVault,
-  isRespV3SuccessResp,
+  ErrorUtils,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -116,7 +116,7 @@ export class FileWatcher {
         wsRoot,
       });
       const resp = file2Note(fsPath, vault);
-      if (!isRespV3SuccessResp<NoteProps>(resp)) {
+      if (ErrorUtils.isErrorResp(resp)) {
         throw resp.error;
       }
       note = resp.data;

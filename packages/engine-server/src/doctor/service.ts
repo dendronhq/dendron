@@ -336,12 +336,18 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
+          const proc = MDUtilsV5._procRemark(
+            {
+              mode: ProcMode.IMPORT,
+              flavor: ProcFlavor.REGULAR,
+            },
+            {
+              dest: DendronASTDest.MD_DENDRON,
+              engine,
+              fname: note.fname,
+              vault: note.vault,
+            }
+          );
           const newBody = await proc()
             .use(RemarkUtils.h1ToH2(note, changes))
             .process(note.body);

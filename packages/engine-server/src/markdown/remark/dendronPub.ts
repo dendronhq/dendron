@@ -321,6 +321,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           pathValue: value,
           config,
           pathAnchor: data.anchorHeader,
+          note,
         });
         const exists = true;
         // for rehype

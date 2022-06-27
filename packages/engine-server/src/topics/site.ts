@@ -477,11 +477,13 @@ export class SiteUtils {
     pathAnchor,
     config,
     addPrefix,
+    note,
   }: {
     pathValue?: string;
     pathAnchor?: string;
     config: IntermediateDendronConfig;
     addPrefix?: boolean;
+    note?: NoteProps;
   }): string {
     // add path prefix if valid
     let pathPrefix: string = "";
@@ -493,6 +495,17 @@ export class SiteUtils {
     // slug anchor if it is not a block anchor
     if (pathAnchor && !isBlockAnchor(pathAnchor)) {
       pathAnchor = `${getSlugger().slug(pathAnchor)}`;
+    }
+
+    // no prefix if we are at the index note
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtils.isIndexNote({
+          indexNote: config.publishing?.siteIndex,
+          note,
+        });
+    if (isIndex) {
+      return `/`;
     }
     // remove extension for pretty links
     const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);

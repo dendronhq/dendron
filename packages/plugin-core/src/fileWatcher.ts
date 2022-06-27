@@ -20,6 +20,7 @@ import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 
+// Circular Here
 export class FileWatcher {
   public watchers: { vault: DVault; watcher: FileWatcherAdapter }[];
   /**

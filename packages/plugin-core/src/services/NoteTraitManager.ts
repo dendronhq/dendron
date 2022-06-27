@@ -34,6 +34,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
    * Loads up saved note traits and sets up a filewatcher on trait .js files
    */
   async initialize(): Promise<void> {
+    this.L.info("NoteTraitManager.initialize");
     await this.setupSavedTraitsFromFS();
     await this.setupFileWatcherForTraitFileChanges();
   }
@@ -41,6 +42,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
   registeredTraits: Map<string, NoteTrait>;
 
   registerTrait(trait: NoteTrait): RespV2<void> {
+    this.L.info("NoteTraitManager.registerTrait");
     if (this.registeredTraits.has(trait.id)) {
       return ResponseUtil.createUnhappyResponse({
         error: new DendronError({
@@ -99,11 +101,17 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
 
     this.registeredTraits.set(trait.id, trait);
 
-    this.cmdRegistar.registerCommandForTrait(trait);
+    try {
+      this.cmdRegistar.registerCommandForTrait(trait);
+    } catch (error: any) {
+      this.L.info("NoteTraitManager.registerTrait - ERROR" + error.toString());
+      return { error };
+    }
     return { error: null };
   }
 
   unregisterTrait(trait: NoteTrait): RespV2<void> {
+    this.L.info("NoteTraitManager.unregisterTrait");
     this.cmdRegistar.unregisterTrait(trait);
     this.registeredTraits.delete(trait.id);
 
@@ -130,6 +138,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
 
   // ^6fjseznl6au4
   private async setupSavedTraitsFromFS() {
+    this.L.info("NoteTraitManager.setupSavedTraitsFromFS");
     const { wsRoot } = ExtensionProvider.getDWorkspace();
 
     const userTraitsPath = wsRoot
@@ -194,6 +203,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
   ): Promise<RespV2<NoteTrait>> {
     const traitId = path.basename(fsPath, ".js");
 
+    this.L.info("NoteTraitManager.setupTraitFromJSFile");
     this.L.info("Registering User Defined Note Trait with ID " + traitId);
     const newNoteTrait = new UserDefinedTraitV1(traitId, fsPath);
 
@@ -217,6 +227,7 @@ export class NoteTraitManager implements NoteTraitService, vscode.Disposable {
   }
 
   private async setupFileWatcherForTraitFileChanges() {
+    this.L.info("NoteTraitManager.setupFileWatcherForTraitFileChanges");
     const userTraitsPath = this._wsRoot
       ? path.join(this._wsRoot, CONSTANTS.DENDRON_USER_NOTE_TRAITS_BASE)
       : undefined;

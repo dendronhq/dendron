@@ -131,6 +131,7 @@ class ImageNodeHandler extends DendronNodeHander {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
+  // eslint-disable-next-line prefer-const
   let { overrides, vault } = MDUtilsV4.getDendronData(proc);
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
@@ -168,6 +169,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (!note) {
         throw new DendronError({ message: `no note found for ${fname}` });
       }
+      // ^53ueid06urse
       if (insertTitle) {
         const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
         root.children.splice(

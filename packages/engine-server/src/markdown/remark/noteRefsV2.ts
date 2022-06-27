@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 import {
   CONSTANTS,
   IntermediateDendronConfig,

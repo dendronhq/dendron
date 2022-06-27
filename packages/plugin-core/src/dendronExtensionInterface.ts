@@ -11,7 +11,6 @@ import {
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
 import { FileWatcher } from "./fileWatcher";
-import { EngineAPIService } from "./services/EngineAPIService";
 import { IEngineAPIService } from "./services/EngineAPIServiceInterface";
 import { NoteTraitService } from "./services/NoteTraitService";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
@@ -106,6 +105,7 @@ export interface IDendronExtension {
   addDisposable(disposable: vscode.Disposable): void;
 
   getEngine(): IEngineAPIService;
+  setEngine(svc: IEngineAPIService): void;
 
   /**
    * Checks if a Dendron workspace is currently active.
@@ -132,5 +132,4 @@ export interface IDendronExtension {
    * about registered Note Traits
    */
   get traitRegistrar(): NoteTraitService;
-  setEngine(svc: EngineAPIService): void;
 }

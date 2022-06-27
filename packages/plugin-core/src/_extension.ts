@@ -68,7 +68,7 @@ import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";
 import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
-import { WorkspaceActivator } from "./workspace/workspaceActivater";
+import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -183,7 +183,8 @@ export async function _activate(
 
     // Setup the commands
     await _setupCommands({ ext: ws, context, requireActiveWorkspace: false });
-    // Order matters. Need to register `Reload Index` command before `reloadWorkspace`
+    // Order matters. Need to register `Reload Index` command before activating workspace
+    // Workspace activation calls `RELOAD_INDEX` via {@link WSUtils.reloadWorkspace}
     if (!existingCommands.includes(DENDRON_COMMANDS.RELOAD_INDEX.key)) {
       context.subscriptions.push(
         vscode.commands.registerCommand(

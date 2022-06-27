@@ -16,7 +16,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
-import { WorkspaceActivator } from "../workspace/workspaceActivater";
+import { WorkspaceActivator } from "../workspace/workspaceActivator";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
 import PathLike = fs.PathLike;

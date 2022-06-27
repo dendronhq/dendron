@@ -47,6 +47,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   constructor(
     ext: IDendronExtension,
     commandId: string,
+    // TODO: refactor trait to `initTratCb` and remove static initialization of trait
     trait: NoteTrait | (() => NoteTrait)
   ) {
     super();
@@ -60,7 +61,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     this._extension = ext;
   }
 
-  get trait(): NoteTrait {
+  private get trait(): NoteTrait {
     if (!this._trait) {
       this._trait = this.initTrait();
       if (_.isUndefined(this._trait)) {

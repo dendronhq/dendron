@@ -112,7 +112,11 @@ export class ExtensionUtils {
   };
 
   static getExtension() {
-    const ext = vscode.extensions.getExtension("dendron.dendron");
+    const extName =
+      getStage() === "dev"
+        ? "dendron.@dendronhq/plugin-core"
+        : "dendron.dendron";
+    const ext = vscode.extensions.getExtension(extName);
     return ext as vscode.Extension<any>;
   }
 

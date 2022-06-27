@@ -1,11 +1,4 @@
-import {
-  ConfigUtils,
-  DEngineClient,
-  DVault,
-  IntermediateDendronConfig,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";

@@ -3,6 +3,7 @@ import {
   DendronError,
   DNodeUtils,
   DVault,
+  ERROR_STATUS,
   FOLDERS,
   isNotUndefined,
   NoteProps,
@@ -195,11 +196,23 @@ export function file2Note(
   fpath: string,
   vault: DVault,
   toLowercase?: boolean
-): NoteProps {
-  const content = fs.readFileSync(fpath, { encoding: "utf8" });
-  const { name } = path.parse(fpath);
-  const fname = toLowercase ? name.toLowerCase() : name;
-  return string2Note({ content, fname, vault });
+): RespV3<NoteProps> {
+  if (!fs.existsSync(fpath)) {
+    const error = DendronError.createFromStatus({
+      status: ERROR_STATUS.INVALID_STATE,
+      message: `${fpath} does not exist`,
+    });
+    return {
+      error,
+    };
+  } else {
+    const content = fs.readFileSync(fpath, { encoding: "utf8" });
+    const { name } = path.parse(fpath);
+    const fname = toLowercase ? name.toLowerCase() : name;
+    return {
+      data: string2Note({ content, fname, vault }),
+    };
+  }
 }
 
 /** Read the contents of a note from the filesystem.

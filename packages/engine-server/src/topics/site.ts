@@ -472,6 +472,11 @@ export class SiteUtils {
     return { url: siteUrl, index: siteIndex };
   }
 
+  static getSitePrefixForNote(config: IntermediateDendronConfig) {
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+    return assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+  }
+
   static getSiteUrlPathForNote({
     pathValue,
     pathAnchor,
@@ -488,8 +493,7 @@ export class SiteUtils {
     // add path prefix if valid
     let pathPrefix: string = "";
     if (addPrefix) {
-      const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
-      pathPrefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+      pathPrefix = this.getSitePrefixForNote(config);
     }
 
     // slug anchor if it is not a block anchor

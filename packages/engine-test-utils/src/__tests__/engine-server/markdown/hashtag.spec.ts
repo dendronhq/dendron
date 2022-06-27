@@ -12,18 +12,20 @@ import {
   UnistNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { ConfigUtils, NoteProps } from "@dendronhq/common-all";
+import { ConfigUtils, NoteProps, ProcFlavor } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import {
   checkNotInVFile,
   checkVFile,
+  createProcCompileTests,
   createProcForTest,
   createProcTests,
   ProcTests,
 } from "./utils";
 import { TestConfigUtils } from "../../..";
 import { TestUnifiedUtils } from "../../../utils";
+import { getOpts, runTestCases } from "./v5/utils";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
@@ -144,6 +146,51 @@ describe("hashtag", () => {
 
   describe("rendering", () => {
     const hashtag = "#my-hash.tag0";
+
+    describe("WHEN hashtag with prefix", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN hashtag has prefix",
+          fname: "one",
+          setup: async (opts) => {
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(hashtag);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.HTML]: {
+              [ProcFlavor.PUBLISHING]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, `href="/foo/notes/tags.my-hash.tag0"`);
+              },
+            },
+          },
+          preSetupHook: async (opts: any) => {
+            const { wsRoot, vaults } = opts;
+            const vault = vaults[0];
+            await ENGINE_HOOKS.setupBasic(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "one",
+              vault,
+              wsRoot,
+              body: hashtag,
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "tags.my-hash.tag0",
+              vault,
+              wsRoot,
+            });
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
+          },
+        })
+      );
+    });
 
     const SIMPLE = createProcTests({
       name: "simple",

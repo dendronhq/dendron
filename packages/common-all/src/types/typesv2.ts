@@ -262,15 +262,31 @@ export interface BulkResp<T> {
 /**
  * This lets us use a discriminate union to see if result has error or data
  */
-export type RespV3<T> =
-  | {
-      error: IDendronError;
-      data?: never;
-    }
-  | {
-      error?: never;
-      data: T;
-    };
+type RespV3ErrorResp = {
+  error: IDendronError;
+  data?: never;
+};
+
+type RespV3SuccessResp<T> = {
+  error?: never;
+  data: T;
+};
+
+export type RespV3<T> = RespV3ErrorResp | RespV3SuccessResp<T>;
+
+/**
+ * Given a RespV3, ensure it is a success resp, and that data is of type T.
+ *
+ * This helps typescript properly narrow down the type of data as type T where it is called.
+ * Otherwise, because of how union types work, `data` will have the type T | undefined.
+ * @param args
+ * @returns
+ */
+export function isRespV3SuccessResp<T = any>(
+  args: any
+): args is RespV3SuccessResp<T> {
+  return args?.data !== undefined && args?.error === undefined;
+}
 
 export type BooleanResp =
   | { data: true; error: null }

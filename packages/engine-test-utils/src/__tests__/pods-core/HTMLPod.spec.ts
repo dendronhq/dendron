@@ -3,8 +3,8 @@ import { HTMLPublishPod } from "@dendronhq/pods-core";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 
-describe("markdown publish pod", () => {
-  test("basic", async () => {
+describe("WHEN using html publish pod to publish note", () => {
+  test("THEN generate correct HTML", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new HTMLPublishPod();

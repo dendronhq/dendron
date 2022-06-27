@@ -2,10 +2,10 @@ version: 1
 imports: []
 schemas:
   - id: dendron
-    children: 
+    children:
       - pattern: ref
         children:
           - pattern: template-all-vars
-            template: templates.all-vars
+            template: template.all-vars
     title: dendron
     parent: root

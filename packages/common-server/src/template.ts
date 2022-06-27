@@ -78,6 +78,7 @@ function genDefaultContext(targetNote: NoteProps) {
     CURRENT_SECOND,
     CURRENT_DAY_OF_WEEK,
     CURRENT_QUARTER,
+    TITLE: targetNote.title,
     FNAME: targetNote.fname,
     DESC: targetNote.desc,
   };

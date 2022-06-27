@@ -2,7 +2,7 @@
 id: gfgkb0mkvkcrk6itxylgqdi
 title: All Vars
 desc: Custom Description
-updated: 1656366448199
+updated: 1656366631472
 created: 1653259181861
 ---
 
@@ -17,5 +17,6 @@ created: 1653259181861
 - CURRENT_MINUTE: {{CURRENT_MINUTE}}
 - CURRENT_SECOND: {{CURRENT_SECOND}}
 - CURRENT_DAY_OF_WEEK: {{CURRENT_DAY_OF_WEEK}}
+- TITLE: {{TITLE}}
 - FNAME: {{FNAME}}
 - DESC: {{DESC}}

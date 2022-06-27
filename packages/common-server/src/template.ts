@@ -63,6 +63,7 @@ function genDefaultContext(targetNote: NoteProps) {
   const CURRENT_MINUTE = currentDate.toFormat("mm");
   const CURRENT_SECOND = currentDate.toFormat("ss");
   const CURRENT_DAY_OF_WEEK = currentDate.toJSDate().getDay();
+  const CURRENT_QUARTER = currentDate.toFormat("q");
   return {
     CURRENT_YEAR,
     CURRENT_MONTH,
@@ -72,6 +73,7 @@ function genDefaultContext(targetNote: NoteProps) {
     CURRENT_MINUTE,
     CURRENT_SECOND,
     CURRENT_DAY_OF_WEEK,
+    CURRENT_QUARTER,
     FNAME: targetNote.fname,
     DESC: targetNote.desc,
   };
@@ -300,6 +302,10 @@ export class TemplateUtils {
     targetNote.body = targetNote.body.replace(
       /<%=\s*CURRENT_SECOND\s*%>/g,
       currentDate.toFormat("ss")
+    );
+    targetNote.body = targetNote.body.replace(
+      /<%=\s*CURRENT_QUARTER\s*%>/g,
+      currentDate.toFormat("q")
     );
     return targetNote;
   }

@@ -19,6 +19,7 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
+  isRespV3SuccessResp,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -406,7 +407,11 @@ export function convertNoteRefASTV2(
       });
       let note: NoteProps;
       try {
-        note = file2Note(npath, vault as DVault);
+        const resp = file2Note(npath, vault as DVault);
+        if (!isRespV3SuccessResp(resp)) {
+          throw resp.error;
+        }
+        note = resp.data;
       } catch (err) {
         const msg = `error reading file, ${npath}`;
         return MdastUtils.genMDMsg(msg);

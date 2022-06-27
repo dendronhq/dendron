@@ -10,6 +10,7 @@ import {
   extractNoteChangeEntryCounts,
   getSlugger,
   NoteChangeEntry,
+  isRespV3SuccessResp,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -49,6 +50,7 @@ import {
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { error } from "console";
 
 type CommandInput =
   | {
@@ -486,6 +488,7 @@ export class MoveHeaderCommand extends BasicCommand<
     dest: NoteProps
   ): Promise<NoteChangeEntry[]> {
     let noteChangeEntries: NoteChangeEntry[] = [];
+    const ctx = `${this.key}:updateReferences`;
     const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
@@ -493,31 +496,40 @@ export class MoveHeaderCommand extends BasicCommand<
       .filter((note) => note !== undefined);
 
     await asyncLoopOneAtATime(refsToProcess, async (note) => {
-      const vaultPath = vault2Path({
-        vault: note!.vault,
-        wsRoot: engine.wsRoot,
-      });
-      const _note = file2Note(
-        path.join(vaultPath, note!.fname + ".md"),
-        note!.vault
-      );
-      const linksToUpdate = this.findLinksToUpdate(
-        _note,
-        engine,
-        origin,
-        anchorNamesToUpdate
-      );
-      const modifiedNote = this.updateLinksInNote({
-        note: _note,
-        engine,
-        linksToUpdate,
-        dest,
-      });
-      note!.body = modifiedNote.body;
-      const writeResp = await engine.writeNote(note!, {
-        updateExisting: true,
-      });
-      noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+      try {
+        const vaultPath = vault2Path({
+          vault: note!.vault,
+          wsRoot: engine.wsRoot,
+        });
+        const resp = file2Note(
+          path.join(vaultPath, note!.fname + ".md"),
+          note!.vault
+        );
+        if (!isRespV3SuccessResp<NoteProps>(resp)) {
+          throw error;
+        }
+        const _note = resp.data;
+        const linksToUpdate = this.findLinksToUpdate(
+          _note,
+          engine,
+          origin,
+          anchorNamesToUpdate
+        );
+        const modifiedNote = this.updateLinksInNote({
+          note: _note,
+          engine,
+          linksToUpdate,
+          dest,
+        });
+        note!.body = modifiedNote.body;
+        const writeResp = await engine.writeNote(note!, {
+          updateExisting: true,
+        });
+        noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+      } catch (error) {
+        // TODO: should notify which one we failed during update.
+        this.L.error({ ctx, error });
+      }
     });
     return noteChangeEntries;
   }

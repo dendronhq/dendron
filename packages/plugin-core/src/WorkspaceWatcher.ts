@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
+  isRespV3SuccessResp,
   NoteUtils,
   SchemaUtils,
   Time,
@@ -450,7 +451,11 @@ export class WorkspaceWatcher {
       });
       const vpath = vault2Path({ wsRoot, vault: newVault });
       const newLocPath = path.join(vpath, fname + ".md");
-      const noteRaw = file2Note(newLocPath, newVault);
+      const resp = file2Note(newLocPath, newVault);
+      if (!isRespV3SuccessResp(resp)) {
+        throw resp.error;
+      }
+      const noteRaw = resp.data;
       const newNote = NoteUtils.hydrate({
         noteRaw,
         noteHydrated: engine.notes[noteRaw.id],

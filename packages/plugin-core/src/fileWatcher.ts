@@ -1,6 +1,7 @@
 import {
   ContextualUIEvents,
   DVault,
+  isRespV3SuccessResp,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -114,7 +115,11 @@ export class FileWatcher {
         fsPath,
         wsRoot,
       });
-      note = file2Note(fsPath, vault);
+      const resp = file2Note(fsPath, vault);
+      if (!isRespV3SuccessResp<NoteProps>(resp)) {
+        throw resp.error;
+      }
+      note = resp.data;
 
       // check if note exist as
       const maybeNote = NoteUtils.getNoteByFnameFromEngine({

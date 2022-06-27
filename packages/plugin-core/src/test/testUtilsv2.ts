@@ -1,6 +1,7 @@
 import {
   DNodeUtils,
   DVault,
+  isRespV3SuccessResp,
   NoteProps,
   VaultUtils,
   WorkspaceOpts,
@@ -127,8 +128,11 @@ export const getNoteFromTextEditor = (): NoteProps => {
     vault,
     basename: path.basename(txtPath),
   });
-  const node = file2Note(fullPath, vault);
-  return node;
+  const resp = file2Note(fullPath, vault);
+  if (!isRespV3SuccessResp(resp)) {
+    throw resp.error;
+  }
+  return resp.data;
 };
 
 export class LocationTestUtils {

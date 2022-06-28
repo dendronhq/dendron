@@ -23,6 +23,7 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { TemplateUtils } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "../utils/analytics";
 import { TraitUtils } from "../traits/TraitUtils";
+import _ from "lodash";
 
 export type CommandOpts = {
   fname: string;
@@ -39,14 +40,37 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   CommandInput
 > {
   key: string;
-  trait: NoteTrait;
+  private _trait: NoteTrait | undefined;
+  private initTrait: () => NoteTrait;
   protected _extension: IDendronExtension;
 
-  constructor(ext: IDendronExtension, commandId: string, trait: NoteTrait) {
+  constructor(
+    ext: IDendronExtension,
+    commandId: string,
+    // TODO: refactor trait to `initTratCb` and remove static initialization of trait
+    trait: NoteTrait | (() => NoteTrait)
+  ) {
     super();
     this.key = commandId;
-    this.trait = trait;
+
+    if (_.isFunction(trait)) {
+      this.initTrait = trait;
+    } else {
+      this.initTrait = () => trait;
+    }
     this._extension = ext;
+  }
+
+  private get trait(): NoteTrait {
+    if (!this._trait) {
+      this._trait = this.initTrait();
+      if (_.isUndefined(this._trait)) {
+        throw new DendronError({
+          message: `unable to init trait for ${this.key}`,
+        });
+      }
+    }
+    return this._trait;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {

@@ -232,16 +232,19 @@ export class AnalyticsUtils {
     ws,
   }: {
     context: vscode.ExtensionContext;
-    ws: DWorkspaceV2;
+    ws?: DWorkspaceV2;
   }) {
     if (getStage() === "prod") {
       const segmentResidualCacheDir = context.globalStorageUri.fsPath;
       fs.ensureDir(segmentResidualCacheDir);
 
-      setupSegmentClient(
+      setupSegmentClient({
         ws,
-        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
-      );
+        cachePath: path.join(
+          segmentResidualCacheDir,
+          "segmentresidualcache.log"
+        ),
+      });
 
       // Try to flush the Segment residual cache every hour:
       (function tryFlushSegmentCache() {

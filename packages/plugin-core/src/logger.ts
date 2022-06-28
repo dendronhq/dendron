@@ -203,6 +203,7 @@ export class Logger {
       }
       Logger.logger?.[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
+      // ^oy9q7tpy0v3t
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {

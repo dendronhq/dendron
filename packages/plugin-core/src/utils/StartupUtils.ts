@@ -11,33 +11,30 @@ import {
   VSCodeEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
+import { readMD } from "@dendronhq/common-server";
 import {
   DConfig,
   DEPRECATED_PATHS,
   DoctorActionsEnum,
   InactvieUserMsgStatusEnum,
-  LapsedUserSurveyStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import _md from "markdown-it";
 import { Duration } from "luxon";
+import _md from "markdown-it";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../commands/Doctor";
-import { GLOBAL_STATE, INCOMPATIBLE_EXTENSIONS } from "../constants";
+import { INCOMPATIBLE_EXTENSIONS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { StateService } from "../services/stateService";
 import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { showWelcome } from "../WelcomeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
-import { ExtensionProvider } from "../ExtensionProvider";
-import { readMD } from "@dendronhq/common-server";
 
 export class StartupUtils {
   static async runMigrationsIfNecessary({
@@ -296,92 +293,6 @@ export class StartupUtils {
               status: ConfirmStatus.rejected,
             }
           );
-        }
-      });
-  }
-
-  static async showLapsedUserMessageIfNecessary(opts: {
-    assetUri: vscode.Uri;
-  }) {
-    if (StartupUtils.shouldDisplayLapsedUserMsg()) {
-      await StartupUtils.showLapsedUserMessage(opts.assetUri);
-    }
-  }
-
-  static shouldDisplayLapsedUserMsg(): boolean {
-    const ONE_DAY = Duration.fromObject({ days: 1 });
-    const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-    const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
-    const metaData = MetadataService.instance().getMeta();
-
-    // If we haven't prompted the user yet and it's been a day since their
-    // initial install OR if it's been one week since we last prompted the user
-
-    const lapsedUserMsgSendTime = metaData.lapsedUserMsgSendTime;
-    if (lapsedUserMsgSendTime !== undefined) {
-      MetadataService.instance().setLapsedUserSurveyStatus(
-        LapsedUserSurveyStatusEnum.cancelled
-      );
-    }
-
-    const refreshMsg =
-      (metaData.lapsedUserMsgSendTime === undefined &&
-        ONE_DAY <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.firstInstall })
-          )) ||
-      (metaData.lapsedUserMsgSendTime !== undefined &&
-        ONE_WEEK <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
-          ));
-
-    // If the user has never initialized, has never activated a dendron workspace,
-    // and it's time to refresh the lapsed user message
-    return (
-      !metaData.dendronWorkspaceActivated &&
-      !metaData.firstWsInitialize &&
-      refreshMsg
-    );
-  }
-
-  static async showLapsedUserMessage(assetUri: vscode.Uri) {
-    const START_TITLE = "Get Started";
-
-    AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
-    MetadataService.instance().setLapsedUserMsgSendTime();
-    vscode.window
-      .showInformationMessage(
-        "Hey, we noticed you haven't started using Dendron yet. Would you like to get started?",
-        { modal: true },
-        { title: START_TITLE }
-      )
-      .then(async (resp) => {
-        if (resp?.title === START_TITLE) {
-          AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
-          showWelcome(assetUri);
-        } else {
-          AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-          const lapsedSurveySubmittedState =
-            await StateService.instance().getGlobalState(
-              GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
-            );
-
-          if (lapsedSurveySubmittedState) {
-            MetadataService.instance().setLapsedUserSurveyStatus(
-              LapsedUserSurveyStatusEnum.submitted
-            );
-          }
-
-          const lapsedUserSurveySubmitted =
-            MetadataService.instance().getLapsedUserSurveyStatus();
-
-          if (
-            lapsedUserSurveySubmitted !== LapsedUserSurveyStatusEnum.submitted
-          ) {
-            await SurveyUtils.showLapsedUserSurvey();
-          }
-          return;
         }
       });
   }

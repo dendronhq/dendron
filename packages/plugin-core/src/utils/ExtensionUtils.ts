@@ -27,6 +27,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { CONFIG, DendronContext } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { IBaseCommand } from "../types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
@@ -82,6 +83,11 @@ async function startServerProcess(): Promise<{
 }
 
 export class ExtensionUtils {
+  static async activate() {
+    const ext = this.getExtension();
+    return ext.activate();
+  }
+
   static addCommand = ({
     context,
     key,
@@ -104,6 +110,15 @@ export class ExtensionUtils {
       );
     }
   };
+
+  static getExtension() {
+    const extName =
+      getStage() === "dev"
+        ? "dendron.@dendronhq/plugin-core"
+        : "dendron.dendron";
+    const ext = vscode.extensions.getExtension(extName);
+    return ext as vscode.Extension<any>;
+  }
 
   static setWorkspaceContextOnActivate(
     dendronConfig: IntermediateDendronConfig
@@ -161,7 +176,7 @@ export class ExtensionUtils {
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     wsService.writePort(port);
-    return port;
+    return { port, subprocess };
   }
 
   static getAndTrackInstallStatus({
@@ -214,7 +229,7 @@ export class ExtensionUtils {
     activatedSuccess,
   }: {
     durationReloadWorkspace: number;
-    ext: DendronExtension;
+    ext: IDendronExtension;
     activatedSuccess: boolean;
   }) {
     const engine = ext.getEngine();

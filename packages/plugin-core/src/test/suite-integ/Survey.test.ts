@@ -4,14 +4,14 @@ import {
   MetadataService,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import { describe, after, beforeEach, afterEach } from "mocha";
-import sinon, { SinonStub, SinonSpy } from "sinon";
+import { after, afterEach, beforeEach, describe } from "mocha";
+import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
 import { SurveyUtils } from "../../survey";
-import { StartupUtils } from "../../utils/StartupUtils";
+import { StartupPrompts } from "../../utils/StartupPrompts";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TutorialInitializer } from "../../workspace/tutorialInitializer";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
@@ -209,7 +209,7 @@ suite("SurveyUtils", function () {
 
         describe("AND lapsedUserSurveyStatus is not set", () => {
           test("THEN showLapsedUserSurvey is called", async () => {
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -226,7 +226,7 @@ suite("SurveyUtils", function () {
             MetadataService.instance().setLapsedUserSurveyStatus(
               LapsedUserSurveyStatusEnum.submitted
             );
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -282,7 +282,7 @@ suite("SurveyUtils", function () {
               )
             ).toEqual("submitted");
 
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -311,7 +311,7 @@ suite("SurveyUtils", function () {
               )
             ).toEqual("submitted");
 
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {

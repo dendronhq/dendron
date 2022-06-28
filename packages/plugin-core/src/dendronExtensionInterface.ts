@@ -3,7 +3,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { IWorkspaceService } from "@dendronhq/engine-server";
+import { execa, IWorkspaceService } from "@dendronhq/engine-server";
 import vscode from "vscode";
 import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
 import {
@@ -54,6 +54,10 @@ export type DendronWorkspaceSettings = Partial<{
  * */
 export interface IDendronExtension {
   port?: number;
+  /**
+   * If set, the server sub process that spawned the engine
+   */
+  serverProcess?: execa.ExecaChildProcess<string>;
   context: vscode.ExtensionContext;
   serverWatcher?: vscode.FileSystemWatcher;
   fileWatcher?: FileWatcher;
@@ -101,6 +105,7 @@ export interface IDendronExtension {
   addDisposable(disposable: vscode.Disposable): void;
 
   getEngine(): IEngineAPIService;
+  setEngine(svc: IEngineAPIService): void;
 
   /**
    * Checks if a Dendron workspace is currently active.

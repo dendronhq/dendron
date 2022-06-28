@@ -85,6 +85,12 @@ export enum ERROR_STATUS {
   INVALID_STATE = "invalid_state",
   // --- 500
   UNKNOWN = "unknown",
+
+  // storage layer errors
+  CONTENT_NOT_FOUND = "content_not_found",
+  WRITE_FAILED = "write_failed",
+  DELETE_FAILED = "delete_failed",
+  RENAME_FAILED = "rename_failed",
 }
 
 export enum USER_MESSAGES {

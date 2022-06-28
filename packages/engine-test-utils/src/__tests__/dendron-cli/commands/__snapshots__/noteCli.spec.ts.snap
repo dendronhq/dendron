@@ -8,8 +8,7 @@ desc: ''
 updated: 1
 created: 1
 ---
-foo body
-"
+foo body"
 `;
 
 exports[`WHEN run 'dendron note lookup_legacy' AND WHEN lookup note with no vault specified and --output = md_gfm THEN get note body in mardkown_gfm 1`] = `

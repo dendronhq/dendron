@@ -53,12 +53,12 @@ suite("completionProvider", function () {
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
-          editBuilder.insert(new Position(8, 0), "[[]]");
+          editBuilder.insert(new Position(7, 0), "[[]]");
         });
         // have the completion provider complete this wikilink
         const compList = await provideCompletionItems(
           editor.document,
-          new Position(8, 2)
+          new Position(7, 2)
         );
         expect(compList).toBeTruthy();
         // Suggested top level notes
@@ -140,12 +140,12 @@ suite("completionProvider", function () {
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
-          editBuilder.insert(new Position(8, 0), "#");
+          editBuilder.insert(new Position(7, 0), "#");
         });
         // have the completion provider complete this wikilink
         const items = await provideCompletionItems(
           editor.document,
-          new Position(8, 1)
+          new Position(7, 1)
         );
         expect(items).toBeTruthy();
         // Suggested all the notes
@@ -194,12 +194,12 @@ suite("completionProvider", function () {
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
-          editBuilder.insert(new Position(8, 0), "Lorem ipsum #");
+          editBuilder.insert(new Position(7, 0), "Lorem ipsum #");
         });
         // have the completion provider complete this wikilink
         const compList = await provideCompletionItems(
           editor.document,
-          new Position(8, 13)
+          new Position(7, 13)
         );
         const items = compList?.items;
         expect(items).toBeTruthy();
@@ -249,12 +249,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "@");
+            editBuilder.insert(new Position(7, 0), "@");
           });
           // have the completion provider complete this wikilink
           const compList = await provideCompletionItems(
             editor.document,
-            new Position(8, 1)
+            new Position(7, 1)
           );
           const items = compList?.items;
           expect(items).toBeTruthy();
@@ -285,12 +285,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "@ba");
+            editBuilder.insert(new Position(7, 0), "@ba");
           });
           // have the completion provider complete this wikilink
           const compList = await provideCompletionItems(
             editor.document,
-            new Position(8, 1)
+            new Position(7, 1)
           );
           const items = compList?.items;
           // Suggested all the notes
@@ -318,11 +318,11 @@ suite("completionProvider", function () {
         );
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
         await editor.edit((editBuilder) => {
-          editBuilder.insert(new Position(8, 0), "Commodi [[ nam");
+          editBuilder.insert(new Position(7, 0), "Commodi [[ nam");
         });
         const compList = await provideCompletionItems(
           editor.document,
-          new Position(8, 10)
+          new Position(7, 10)
         );
         items = compList?.items;
       });
@@ -369,12 +369,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "^");
+            editBuilder.insert(new Position(7, 0), "^");
           });
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 1)
+            new Position(7, 1)
           );
           expect(items).toEqual(undefined);
         });
@@ -414,12 +414,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "[[^]]");
+            editBuilder.insert(new Position(7, 0), "[[^]]");
           });
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 3)
+            new Position(7, 3)
           );
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(3);
@@ -464,12 +464,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "[[^]]");
+            editBuilder.insert(new Position(7, 0), "[[^]]");
           });
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 3)
+            new Position(7, 3)
           );
           expect(items).toBeTruthy();
           expect(items?.length).toEqual(8);
@@ -643,12 +643,12 @@ suite("completionProvider", function () {
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           await editor.edit((editBuilder) => {
-            editBuilder.insert(new Position(8, 0), "[[^]]");
+            editBuilder.insert(new Position(7, 0), "[[^]]");
           });
           // have the completion provider complete this wikilink
           const items = await provideBlockCompletionItems(
             editor.document,
-            new Position(8, 3)
+            new Position(7, 3)
           );
           // Check that the correct anchors were returned
           expect(items).toBeTruthy();

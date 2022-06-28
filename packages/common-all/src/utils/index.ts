@@ -8,6 +8,7 @@ import querystring from "querystring";
 import semver from "semver";
 import { DateTime, LruCache, VaultUtils } from "..";
 import { COLORS_LIST } from "../colors";
+import SparkMD5 from "spark-md5";
 import {
   CompatUtils,
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
@@ -455,6 +456,10 @@ export function debounceAsyncUntilComplete<I extends any[], O>({
     }
   };
   return { debouncedFn, states };
+}
+
+export function genHash(contents: any) {
+  return SparkMD5.hash(contents); // OR raw hash (binary string)
 }
 
 export class TagUtils {

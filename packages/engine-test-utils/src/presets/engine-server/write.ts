@@ -209,11 +209,13 @@ const NOTES = {
     return [
       {
         actual: note,
-        expected: engine.notes[note.id],
+        expected: _.omit(await engine.getNote(note.id), "contentHash"),
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(
+          (await engine.getNote(note.parent as string))!
+        ),
         expected: true,
       },
     ];
@@ -500,11 +502,13 @@ const NOTES_MULTI = {
     return [
       {
         actual: note,
-        expected: engine.notes[note.id],
+        expected: _.omit(await engine.getNote(note.id), "contentHash"),
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(
+          (await engine.getNote(note.parent as string))!
+        ),
         expected: true,
       },
     ];
@@ -532,11 +536,13 @@ const NOTES_MULTI = {
       return [
         {
           actual: note,
-          expected: engine.notes[note.id],
+          expected: _.omit(await engine.getNote(note.id), "contentHash"),
           msg: "bar should be written in engine",
         },
         {
-          actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+          actual: DNodeUtils.isRoot(
+            (await engine.getNote(note.parent as string))!
+          ),
           expected: true,
         },
       ];
@@ -544,8 +550,8 @@ const NOTES_MULTI = {
   ),
   ID_UPDATED: new TestPresetEntryV4(
     async ({ engine }) => {
-      const fooNote = engine.notes["foo"];
-      const fooUpdated = { ...fooNote };
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
       const changes = await engine.writeNote(fooUpdated);
       const createEntries = extractNoteChangeEntriesByType(

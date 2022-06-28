@@ -19,7 +19,7 @@ export * from "./unified";
 export * from "./events";
 export * from "./cacheData";
 export * from "./errorTypes";
-export * from "./rest";
+export * from "./store";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {

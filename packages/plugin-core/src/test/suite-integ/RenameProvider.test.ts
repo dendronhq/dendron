@@ -109,7 +109,6 @@ suite("RenameProvider", function () {
             "[[New Target|new-target]]",
             "[[New Target|dendron://vault1/new-target]]",
             "[[New Target|dendron://vault1/new-target#foo]]",
-            "",
           ].join("\n");
           expect(active?.body).toEqual(expectedBody);
         });
@@ -137,9 +136,9 @@ suite("RenameProvider", function () {
             })
           )[0];
 
-          expect(noteWithLink?.body).toEqual("[[new-target]]\n");
+          expect(noteWithLink?.body).toEqual("[[new-target]]");
           expect(noteWithLinkInAnotherVault?.body).toEqual(
-            "[[dendron://vault1/new-target]]\n"
+            "[[dendron://vault1/new-target]]"
           );
         });
       });
@@ -236,7 +235,6 @@ suite("RenameProvider", function () {
             "![[new-target]]",
             "![[dendron://vault1/new-target]]",
             "![[dendron://vault1/new-target#foo]]",
-            "",
           ].join("\n");
           expect(active?.body).toEqual(expectedBody);
         });
@@ -266,9 +264,9 @@ suite("RenameProvider", function () {
               vault: vaults[1],
             })
           )[0];
-          expect(noteWithLink?.body).toEqual("![[new-target]]\n");
+          expect(noteWithLink?.body).toEqual("![[new-target]]");
           expect(noteWithLinkInAnotherVault?.body).toEqual(
-            "![[dendron://vault1/new-target]]\n"
+            "![[dendron://vault1/new-target]]"
           );
         });
       });
@@ -335,7 +333,7 @@ suite("RenameProvider", function () {
               vault: vaults[0],
             })
           )[0];
-          const expectedBody = "#new-target\n";
+          const expectedBody = "#new-target";
           expect(active?.body).toEqual(expectedBody);
         });
 
@@ -359,7 +357,7 @@ suite("RenameProvider", function () {
             })
           )[0];
 
-          expect(noteWithLink?.body).toEqual("#new-target\n");
+          expect(noteWithLink?.body).toEqual("#new-target");
         });
       });
     }
@@ -511,7 +509,7 @@ suite("RenameProvider", function () {
               vault: vaults[0],
             })
           )[0];
-          const expectedBody = "@new-target\n";
+          const expectedBody = "@new-target";
           expect(active?.body).toEqual(expectedBody);
         });
 
@@ -535,7 +533,7 @@ suite("RenameProvider", function () {
             })
           )[0];
 
-          expect(noteWithLink?.body).toEqual("@new-target\n");
+          expect(noteWithLink?.body).toEqual("@new-target");
         });
       });
     }

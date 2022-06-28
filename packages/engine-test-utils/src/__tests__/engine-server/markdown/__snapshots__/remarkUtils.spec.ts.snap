@@ -280,27 +280,23 @@ Array [
 exports[`RemarkUtils and LinkUtils updateLink basic 1`] = `
 "# Foo.One
 ![[foo.two]]
-Regular wikilink: [[foo.bar]]
-"
+Regular wikilink: [[foo.bar]]"
 `;
 
 exports[`RemarkUtils and LinkUtils updateLink multiple links present link no space 1`] = `
 "[[foo]]
 nospace[[bar]]
-onespace [[foo]]
-"
+onespace [[foo]]"
 `;
 
 exports[`RemarkUtils and LinkUtils updateLink multiple links present link onespace 1`] = `
 "[[foo]]
 nospace[[foo]]
-onespace [[bar]]
-"
+onespace [[bar]]"
 `;
 
 exports[`RemarkUtils and LinkUtils updateLink multiple links present only link 1`] = `
 "[[bar]]
 nospace[[foo]]
-onespace [[foo]]
-"
+onespace [[foo]]"
 `;

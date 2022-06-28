@@ -63,7 +63,7 @@ suite("CreateNoteWithTraitCommand tests", () => {
           )[0];
 
           expect(props?.title).toEqual(testTrait.TEST_TITLE_MODIFIER);
-          expect(props?.body).toEqual("foo body\n");
+          expect(props?.body).toEqual("foo body");
         });
       });
     }

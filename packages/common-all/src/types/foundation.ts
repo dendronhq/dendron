@@ -229,6 +229,11 @@ export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, any>;
 
 /**
+ * Dendron note metadata
+ */
+export type NotePropsMeta = Omit<NoteProps, "body" | "contentHash">;
+
+/**
  * Dendron note with optional custom props
  */
 export type NotePropsWithOptionalCustom = Omit<NoteProps, "custom"> &

@@ -206,11 +206,23 @@ export class FileStorage implements DStore {
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
     const { fname, vault } = opts;
-    return NoteDictsUtils.findByFname(
-      fname,
-      { notesById: this.notes, notesByFname: this.noteFnames },
-      vault
-    );
+    if (fname) {
+      return _.cloneDeep(
+        NoteDictsUtils.findByFname(
+          fname,
+          { notesById: this.notes, notesByFname: this.noteFnames },
+          vault
+        )
+      );
+    } else if (vault) {
+      return _.cloneDeep(
+        _.values(this.notes).filter((note) =>
+          VaultUtils.isEqualV2(note.vault, vault)
+        )
+      );
+    } else {
+      return [];
+    }
   }
 
   /**
@@ -477,6 +489,7 @@ export class FileStorage implements DStore {
 
     let notesWithLinks: NoteProps[] = [];
     let errors: IDendronError<any>[] = [];
+    const start = process.hrtime();
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
@@ -512,6 +525,8 @@ export class FileStorage implements DStore {
     }
 
     this._addBacklinks({ notesWithLinks, allNotes });
+    const duration = getDurationMilliseconds(start);
+    this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 
     return { errors };
   }

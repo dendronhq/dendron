@@ -9,15 +9,10 @@ import {
   cleanName,
   DendronError,
   ERROR_SEVERITY,
+  GetAllFilesOpts,
   isNotNull,
   RespV2,
 } from "@dendronhq/common-all";
-
-export type GetAllFilesOpts = {
-  root: string;
-  include?: string[];
-  exclude?: string[];
-};
 
 /**
  *

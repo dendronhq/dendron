@@ -78,6 +78,12 @@ const createEngine = createEngineFactory({
     };
     return findNotes;
   },
+  getNote: () => {
+    const getNote: DendronEngineV2["getNote"] = async (id) => {
+      return ExtensionProvider.getEngine().getNote(id);
+    };
+    return getNote;
+  },
 });
 
 suite("MoveNoteCommand", function () {

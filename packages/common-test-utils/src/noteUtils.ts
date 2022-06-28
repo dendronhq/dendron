@@ -1,5 +1,6 @@
 import {
   DVault,
+  genHash,
   genUUID,
   NoteProps,
   NoteUtils,
@@ -14,7 +15,6 @@ import {
 import {
   file2Note,
   file2Schema,
-  genHash,
   note2File,
   resolvePath,
   schemaModuleProps2File,

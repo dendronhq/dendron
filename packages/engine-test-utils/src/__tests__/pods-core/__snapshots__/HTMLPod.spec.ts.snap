@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`markdown publish pod basic 1`] = `
+exports[`WHEN using html publish pod to publish note THEN generate correct HTML 1`] = `
 "<h1 id=\\"foo\\">Foo</h1>
 <p>foo body</p>
 <hr>

@@ -40,6 +40,7 @@ suite("GIVEN ShowPreview", function () {
         expect(out?.note).toBeTruthy();
         expect(out!.note!.id).toEqual(note.id);
         expect(out!.note!.fname).toEqual(note.fname);
+        await cmd.run();
       });
     }
   );
@@ -79,6 +80,7 @@ suite("GIVEN ShowPreview", function () {
         expect(out?.note).toBeTruthy();
         expect(out!.note!.id).toEqual(note.id);
         expect(out!.note!.fname).toEqual(note.fname);
+        await cmd.run();
       });
     }
   );
@@ -112,6 +114,7 @@ suite("GIVEN ShowPreview", function () {
         expect(out?.note).toBeTruthy();
         expect(out!.note!.id).toEqual(note.id);
         expect(out!.note!.fname).toEqual(note.fname);
+        await cmd.run();
       });
     }
   );
@@ -138,6 +141,7 @@ suite("GIVEN ShowPreview", function () {
         const path = vscode.Uri.file(fsPath);
         const out = await cmd.run(path);
         expect(out?.fsPath).toEqual(fsPath);
+        await cmd.run();
       });
     }
   );
@@ -163,6 +167,7 @@ suite("GIVEN ShowPreview", function () {
         );
         const out = await cmd.run();
         expect(out?.fsPath).toEqual(fsPath);
+        await cmd.run();
       });
     }
   );
@@ -203,6 +208,7 @@ suite("GIVEN ShowPreview", function () {
         expect(out!.note!.fname).toEqual(note.fname);
         const links = out!.note!.links;
         expect(links[0].value).toEqual("lorem.ipsum.mdone.first");
+        await cmd.run();
       });
     }
   );
@@ -233,8 +239,10 @@ suite("GIVEN ShowPreview", function () {
         );
 
         /* When the preview is hidden, the command retruns undefined */
+        await cmd.run();
         const out = await cmd.run();
         expect(out?.note).toBeFalsy();
+        await cmd.run();
       });
     }
   );

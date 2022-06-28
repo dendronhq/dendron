@@ -50,14 +50,6 @@ type CompilerOpts = {
   convertLinks?: boolean;
 };
 
-function parseAnchorIfExist(link: string) {
-  if (link.indexOf("#") !== -1) {
-    return link.split("#");
-  } else {
-    return [link, undefined];
-  }
-}
-
 function normalizeSpaces(link: string) {
   return link.replace(/ /g, "%20");
 }

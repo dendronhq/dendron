@@ -1,6 +1,8 @@
 import {
   ConfigUtils,
   DendronError,
+  DEngineClient,
+  DVault,
   ERROR_SEVERITY,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -11,6 +13,7 @@ import {
   StatusCodes,
   TAGS_HIERARCHY,
   TaskNoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import type { Image, Root } from "mdast";
@@ -33,7 +36,6 @@ import {
   VaultMissingBehavior,
   WikiLinkNoteV4,
 } from "../types";
-import { MDUtilsV4 } from "../utils";
 import {
   MDUtilsV5,
   ProcDataFullOptsV5,
@@ -60,6 +62,38 @@ type PluginOpts = NoteRefsOptsV2 & {
   /** Don't display randomly generated colors for tags, only display color if it's explicitly set by the user. */
   noRandomlyColoredTags?: boolean;
 };
+
+/**
+ * Get the vault name, either from processor or passed in vaultName
+ * @param opts.vaultMissingBehavior how to respond if no vault is found. See {@link VaultMissingBehavior}
+ */
+function getVault({
+  vaultMissingBehavior,
+  vaultName,
+  vault,
+  engine,
+}: {
+  vaultName?: string;
+  vaultMissingBehavior?: VaultMissingBehavior;
+  vault: DVault;
+  engine: DEngineClient;
+}) {
+  vaultMissingBehavior =
+    vaultMissingBehavior || VaultMissingBehavior.THROW_ERROR;
+  if (vaultName) {
+    try {
+      vault = VaultUtils.getVaultByNameOrThrow({
+        vaults: engine.vaults,
+        vname: vaultName,
+      });
+    } catch (err) {
+      if (vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR) {
+        throw err;
+      }
+    }
+  }
+  return vault;
+}
 
 /**
  * Returns a new copy of children array where the first un-rendered
@@ -129,10 +163,25 @@ class ImageNodeHandler extends DendronNodeHander {
   }
 }
 
+function shouldInsertTitle({ proc }: { proc: Processor }) {
+  const data = MDUtilsV5.getProcData(proc);
+  const opts = MDUtilsV5.getProcOpts(proc);
+  const isNoteRef = !_.isNumber(data.noteRefLvl) && data.noteRefLvl > 0;
+  let insertTitle;
+  if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
+    insertTitle = false;
+  } else {
+    const config = data.config as IntermediateDendronConfig;
+    const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+    insertTitle = ConfigUtils.getEnableFMTitle(config, shouldApplyPublishRules);
+  }
+  return insertTitle;
+}
+
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   // eslint-disable-next-line prefer-const
-  let { overrides, vault } = MDUtilsV4.getDendronData(proc);
+  let { vault, engine } = MDUtilsV5.getProcData(proc);
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
   const pData = MDUtilsV5.getProcData(proc);
@@ -140,10 +189,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
-    const { error: engineError, engine } = MDUtilsV4.getEngineFromProc(proc);
-    const insertTitle = !_.isUndefined(overrides?.insertTitle)
-      ? overrides?.insertTitle
-      : opts?.insertTitle;
+    const insertTitle = shouldInsertTitle({ proc });
     if (mode !== ProcMode.IMPORT && !insideNoteRef && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
@@ -209,10 +255,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
         parent.children[parentIndex] = node;
       }
-      if (
-        node.type === DendronASTTypes.WIKI_LINK &&
-        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
-      ) {
+      if (node.type === DendronASTTypes.WIKI_LINK) {
         // If the target is Dendron, no processing of links is needed
         if (dest === DendronASTDest.MD_DENDRON) return;
         const _node = node as WikiLinkNoteV4;
@@ -222,12 +265,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const valueOrig = value;
         let isPublished = true;
         const data = _node.data;
-        vault = MDUtilsV4.getVault(proc, data.vaultName, {
+        // eslint-disable-next-line prefer-const
+        let { vault, engine } = MDUtilsV5.getProcData(proc);
+        vault = getVault({
+          engine,
+          vault,
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
+          vaultName: data.vaultName,
         });
-        if (engineError) {
-          addError(proc, engineError);
-        }
 
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
@@ -378,7 +423,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const copts: NoteRefsOptsV2 = {
           wikiLinkOpts: opts?.wikiLinkOpts,
         };
-        const procOpts = MDUtilsV4.getProcOpts(proc);
+        const procOpts = MDUtilsV5.getProcOpts(proc);
         const { data } = convertNoteRefASTV2({
           link: ndata.link,
           proc,

@@ -1,8 +1,9 @@
 /* eslint-disable func-names */
 import {
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
   DendronError,
+  DEngineClient,
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
@@ -10,23 +11,23 @@ import {
   DVault,
   ErrorFactory,
   getSlugger,
+  IDendronError,
+  IntermediateDendronConfig,
   isBlockAnchor,
   NoteProps,
   NoteUtils,
   RespV2,
   VaultUtils,
-  ConfigUtils,
-  DEngineClient,
-  IDendronError,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import { RemarkUtils } from "../remark";
 import _ from "lodash";
 import { brk, html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { MdastUtils } from "..";
 import { SiteUtils } from "../../topics/site";
+import { RemarkUtils } from "../remark";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -38,7 +39,6 @@ import { ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import { MdastUtils, MDUtilsV4 } from "..";
 
 const LINK_REGEX = /^!\[\[(.+?)\]\]/;
 
@@ -248,11 +248,9 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl, dest, config, fname } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
+  const engine = procData.engine;
   let { vault } = procData;
-  const shouldApplyPublishRules =
-    MDUtilsV5.shouldApplyPublishingRules(proc) ||
-    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
 
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
@@ -485,7 +483,7 @@ export function convertNoteRefASTV2(
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
+  const engine = procData.engine;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -498,10 +496,7 @@ export function convertNoteRefASTV2(
   // figure out configs that change how we process the note reference
   const { dest, config, vault: vaultFromProc, fname, vault } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const shouldApplyPublishRules =
-    MDUtilsV5.shouldApplyPublishingRules(proc) ||
-    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
-
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   const { wikiLinkOpts } = compilerOpts;
 
   // The note that contains this reference might override the pretty refs option for references inside it.
@@ -825,9 +820,7 @@ function convertNoteRefHelperAST(
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
   // Workaround until all usages of MDUtilsV4 are removed
-  const engine =
-    MDUtilsV5.getProcData(proc).engine ||
-    MDUtilsV4.getEngineFromProc(proc).engine;
+  const engine = MDUtilsV5.getProcData(proc).engine;
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -886,13 +879,6 @@ function convertNoteRefHelperAST(
       data,
     };
   } catch (err) {
-    console.log(
-      JSON.stringify({
-        ctx: "convertNoteRefHelperAST",
-        msg: "Failed to render note reference",
-        err,
-      })
-    );
     return {
       error: new DendronError({
         message: "error processing note ref",

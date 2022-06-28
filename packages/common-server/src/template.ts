@@ -316,26 +316,6 @@ export class TemplateUtils {
       /<%=\s*CURRENT_SECOND\s*%>/g,
       currentDate.toFormat("ss")
     );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_QUARTER\s*%>/g,
-      currentDate.toFormat("q")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_DAY_OF_WEEK\s*%>/g,
-      currentDate.toJSDate().getDay().toString()
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*TITLE\s*%>/g,
-      targetNote.title
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*FNAME\s*%>/g,
-      targetNote.fname
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*DESC\s*%>/g,
-      targetNote.desc
-    );
     return targetNote;
   }
 

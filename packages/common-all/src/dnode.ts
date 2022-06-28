@@ -764,10 +764,12 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return NoteDictsUtils.findByFname(
-      fname,
-      { notesById: engine.notes, notesByFname: engine.noteFnames },
-      vault
+    return _.cloneDeep(
+      NoteDictsUtils.findByFname(
+        fname,
+        { notesById: engine.notes, notesByFname: engine.noteFnames },
+        vault
+      )
     );
   }
 

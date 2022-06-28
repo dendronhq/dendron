@@ -5,6 +5,7 @@ import {
   DVault,
   NoteProps,
   NoteDicts,
+  NotePropsMeta,
 } from "./types";
 import { cleanName, isNotUndefined } from "./utils";
 import { VaultUtils } from "./vault";
@@ -37,7 +38,7 @@ export class NoteDictsUtils {
    * @param fname
    * @param noteDicts
    * @param vault If provided, use to filter results
-   * @returns Copy of NoteProps array
+   * @returns Array of NoteProps matching opts
    */
   static findByFname(
     fname: string,
@@ -54,7 +55,7 @@ export class NoteDictsUtils {
     if (vault) {
       notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
     }
-    return _.cloneDeep(notes);
+    return notes;
   }
 
   /**
@@ -127,7 +128,7 @@ export class NoteFnameDictUtils {
    * @param note to add
    * @param notesByFname dictionary to modify
    */
-  static add(note: NoteProps, notesByFname: NotePropsByFnameDict) {
+  static add(note: NotePropsMeta, notesByFname: NotePropsByFnameDict) {
     const fname = cleanName(note.fname);
     let ids = notesByFname[fname];
     if (_.isUndefined(ids)) ids = [];
@@ -144,7 +145,10 @@ export class NoteFnameDictUtils {
    * @param notesByFname dictionary to modify
    * @returns whether note was deleted
    */
-  static delete(note: NoteProps, notesByFname: NotePropsByFnameDict): boolean {
+  static delete(
+    note: NotePropsMeta,
+    notesByFname: NotePropsByFnameDict
+  ): boolean {
     const fname = cleanName(note.fname);
     const ids = notesByFname[fname];
     if (_.isUndefined(ids)) return false;

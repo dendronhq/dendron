@@ -24,10 +24,10 @@ import {
   stringifyError,
   VaultUtils,
   NoteChangeEntry,
+  genHash,
 } from "@dendronhq/common-all";
 import {
   DLogger,
-  genHash,
   globMatch,
   string2Note,
   vault2Path,

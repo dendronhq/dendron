@@ -3,7 +3,6 @@ export type SeedConfig = {
   name: string;
   publisher: string;
   license: string;
-  root: string;
   description: string;
   repository: SeedRepository;
   contact?: SeedContact;
@@ -53,7 +52,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     description:
       "The Dendron Wiki. This contains the Dendron user guide, from getting started to advanced features. This also has information for Dendron developers.",
     license: "Creative Commons Attribution 4.0 International",
-    root: "vault",
     repository: {
       type: "git",
       url: "https://github.com/dendronhq/dendron-site.git",
@@ -74,7 +72,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     description:
       "The Dendron Company Handbook. Outlines Company Values and Principles.",
     license: "Creative Commons Attribution 4.0 International",
-    root: "handbook",
     repository: {
       type: "git",
       url: "https://github.com/dendronhq/handbook.git",
@@ -94,7 +91,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     publisher: "dendron",
     description: "Templates that can be applied to your new Dendron notes.",
     license: "Creative Commons Attribution 4.0 International",
-    root: "templates",
     repository: {
       type: "git",
       url: "https://github.com/dendronhq/templates.git",
@@ -110,7 +106,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     publisher: "dendron",
     description: "Documentation for the most popular CLI tools.",
     license: "Creative Commons Attribution 4.0 International",
-    root: "vault",
     repository: {
       type: "git",
       url: "https://github.com/kevinslin/seed-tldr.git",
@@ -130,7 +125,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     publisher: "dendron",
     description: "A complete collection of xkcd comics by Randall Monroe",
     license: "Creative Commons Attribution-NonCommercial 2.5 License",
-    root: "vault",
     repository: {
       type: "git",
       url: "https://github.com/kevinslin/seed-xkcd.git",
@@ -149,7 +143,6 @@ export const SEED_REGISTRY: SeedRegistryDict = {
     publisher: "dendron",
     description: "Documentation on all things related to AWS.",
     license: "Multiple",
-    root: "vault",
     repository: {
       type: "git",
       url: "https://github.com/dendronhq/dendron-aws-vault.git",

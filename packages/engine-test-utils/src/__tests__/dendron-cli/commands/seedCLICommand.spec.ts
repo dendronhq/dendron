@@ -223,7 +223,6 @@ runTest("init", () => {
     publisher: "dendron",
     description: "some foo",
     license: "CC",
-    root: "vault",
     repository: {
       type: "git",
       url: "",

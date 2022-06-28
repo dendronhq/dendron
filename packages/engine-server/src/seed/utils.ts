@@ -1,13 +1,15 @@
 import {
   ConfigUtils,
   DendronError,
-  DVault,
   ERROR_STATUS,
+  IntermediateDendronConfig,
   SeedConfig,
+  SeedVault,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DConfig } from "../config";
 import { WorkspaceService } from "../workspace";
 import { DEFAULT_SEED_PUBLISHER } from "./constants";
 
@@ -50,13 +52,36 @@ export class SeedUtils {
     return path.join(wsRoot, "seeds", id);
   }
 
-  static seed2Vault({ seed }: { seed: SeedConfig }): DVault {
+  static async seed2Vault({
+    seed,
+    wsRoot,
+  }: {
+    seed: SeedConfig;
+    wsRoot: string;
+  }): Promise<SeedVault> {
     const id = this.getSeedId(seed);
-    return {
-      fsPath: seed.root,
-      seed: id,
-      name: id,
-    };
+    const seedPath = this.seed2Path({ id: seed.id, wsRoot });
+    try {
+      // The fsPath for a seed vault is the fsPath of the first (and typically only) vault in that workspace
+      const seedConfig = DConfig.getRaw(seedPath) as IntermediateDendronConfig;
+      const vaults = ConfigUtils.getVaults(seedConfig);
+
+      return {
+        fsPath: vaults[0].fsPath,
+        seed: id,
+        name: id,
+      };
+    } catch (error) {
+      // We can't recover from this, but rethrow with more context
+      throw DendronError.createPlainError({
+        message: "Unable to read the seed vault configuration",
+        payload: {
+          error,
+          id,
+          seedPath,
+        },
+      });
+    }
   }
 
   static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {

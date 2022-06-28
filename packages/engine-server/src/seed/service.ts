@@ -135,7 +135,7 @@ export class SeedService {
       (await WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot)) ===
       WorkspaceType.CODE;
     await ws.addVault({
-      vault: SeedUtils.seed2Vault({ seed }),
+      vault: await SeedUtils.seed2Vault({ seed, wsRoot }),
       config,
       updateConfig: true,
       updateWorkspace,
@@ -196,10 +196,6 @@ export class SeedService {
             error,
           };
         }
-        const config = WorkspaceService.getOrCreateConfig(wsRoot);
-        const vaults = ConfigUtils.getVaults(config);
-        const vaultPath = VaultUtils.getRelPath(vaults[0]);
-        seed.root = vaultPath;
         writeYAML(cpath, seed);
         // validate
         break;
@@ -249,11 +245,18 @@ export class SeedService {
     // workspace that is open is the one being modified in addSeedMetadata(), VS
     // Code will reload the current window and the seed cloning may not execute.
     const spath = SeedUtils.seed2Path({ wsRoot: this.wsRoot, id });
-    if (fs.pathExistsSync(spath)) {
-      fs.removeSync(spath);
+    // Need to get the seedVault before we delete the files, otherwise it will
+    // fail because it needs the workspace config file inside the seed vault
+    const seedVault = await SeedUtils.seed2Vault({
+      wsRoot: this.wsRoot,
+      seed: seedOrError,
+    });
+    if (await fs.pathExists(spath)) {
+      await fs.remove(spath);
     }
 
     await this.removeSeedMetadata({
+      vault: seedVault,
       seed: seedOrError,
       onUpdatingWorkspace,
       onUpdatedWorkspace,
@@ -263,10 +266,12 @@ export class SeedService {
 
   async removeSeedMetadata({
     seed,
+    vault,
     onUpdatingWorkspace,
     onUpdatedWorkspace,
   }: {
     seed: SeedConfig;
+    vault: SeedVault;
     onUpdatingWorkspace?: () => Promise<void>;
     onUpdatedWorkspace?: () => Promise<void>;
   }) {
@@ -283,7 +288,7 @@ export class SeedService {
       (await WorkspaceUtils.getWorkspaceTypeFromDir(this.wsRoot)) ===
       WorkspaceType.CODE;
     await ws.removeVault({
-      vault: SeedUtils.seed2Vault({ seed }),
+      vault,
       updateWorkspace,
       onUpdatingWorkspace,
       onUpdatedWorkspace,

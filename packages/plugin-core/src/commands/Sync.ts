@@ -3,11 +3,13 @@ import {
   ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
+  IntermediateDendronConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
   DConfig,
   SeedService,
+  SeedUtils,
   SyncActionResult,
   SyncActionStatus,
   WorkspaceUtils,
@@ -31,6 +33,7 @@ export async function detectOutOfDateSeeds({
   wsRoot: string;
   seedSvc: SeedService;
 }) {
+  const ctx = "Sync.detectOutOfDateSeeds";
   const seedVaults = seedSvc.getSeedVaultsInWorkspace();
   await Promise.all(
     seedVaults.map(async (seedVault) => {
@@ -42,7 +45,45 @@ export async function detectOutOfDateSeeds({
         // around this so skipping it for now.
         return;
       }
-      if (seedVault.fsPath !== info.root) {
+
+      // This is the path for the vault inside the seed.
+      let seedVaultFsPath: string;
+      try {
+        const vaultInternalConfig = DConfig.getRaw(
+          SeedUtils.seed2Path({ id, wsRoot })
+        ) as IntermediateDendronConfig;
+        const vaults = ConfigUtils.getVaults(vaultInternalConfig);
+        if (vaults && vaults.length > 0) {
+          seedVaultFsPath = VaultUtils.getRelPath(vaults[0]);
+        } else {
+          // No vaults defined in the config for the seed vault
+          Logger.error({
+            ctx,
+            error: new DendronError({
+              message: "No vault in the seed vault config",
+              payload: {
+                seed: id,
+              },
+            }),
+          });
+          return;
+        }
+      } catch (error) {
+        // Ignore it if we can't read the config from the seed vault
+        Logger.error({
+          ctx,
+          error: new DendronError({
+            message: "Failed to read seed vault config",
+            payload: {
+              error,
+              seed: id,
+            },
+          }),
+        });
+        return;
+      }
+
+      if (seedVault.fsPath !== seedVaultFsPath) {
         // The path specified in the seed has changed compared to what's in the
         // users config. User won't be able to read the notes in that vault, we
         // should prompt to fix it.
@@ -67,7 +108,7 @@ export async function detectOutOfDateSeeds({
           await DConfig.createBackup(wsRoot, "update-seed");
           const config = DConfig.getOrCreate(wsRoot);
           ConfigUtils.updateVault(config, seedVault, (vault) => {
-            vault.fsPath = info.root;
+            vault.fsPath = seedVaultFsPath;
             return vault;
           });
           await DConfig.writeConfig({ wsRoot, config });

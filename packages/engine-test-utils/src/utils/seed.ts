@@ -60,7 +60,6 @@ export class TestSeedUtils {
         type: "git",
         url: `file://${opts.wsRoot}`,
       },
-      root: "vault",
     };
     await cli.execute({
       cmd,

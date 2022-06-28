@@ -630,7 +630,11 @@ export class ConfigUtils {
   }
 
   static getVaults(config: IntermediateDendronConfig): DVault[] {
-    return ConfigUtils.getWorkspace(config).vaults;
+    const vaults = ConfigUtils.getWorkspace(config).vaults;
+    if (!_.isEmpty(vaults)) return vaults;
+    // Fallback, in case we're reading a vault with an old config. This can
+    // sometimes happen with seeds, for example the `templates` seed.
+    return config.vaults || [];
   }
 
   static getHooks(config: IntermediateDendronConfig): DHookDict | undefined {

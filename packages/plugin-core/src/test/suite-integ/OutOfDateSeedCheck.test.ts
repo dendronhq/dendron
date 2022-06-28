@@ -6,17 +6,18 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { SinonStubbedFn } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TestSeedUtils } from "@dendronhq/engine-test-utils";
-import { DConfig, SeedService } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  SeedService,
+  SeedUtils,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import sinon from "sinon";
 import {
   detectOutOfDateSeeds,
   UPDATE_SEED_CONFIG_PROMPT,
 } from "../../commands/Sync";
-import {
-  ConfigUtils,
-  FOLDERS,
-  IntermediateDendronConfig,
-} from "@dendronhq/common-all";
+import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 import { PluginTestSeedUtils } from "../utils/TestSeedUtils";
 
 suite("GIVEN out of date seed check", function () {
@@ -26,6 +27,7 @@ suite("GIVEN out of date seed check", function () {
     before(async () => {
       const { engine } = ExtensionProvider.getDWorkspace();
       const wsRoot = engine.wsRoot;
+      const seedId = "dendron.foo";
 
       // Create the seed and add it into the workspace
       const seedRoot = tmpDir().name;
@@ -41,24 +43,19 @@ suite("GIVEN out of date seed check", function () {
         title: UPDATE_SEED_CONFIG_PROMPT,
       });
       await PluginTestSeedUtils.getFakedAddCommand(seedService).cmd.execute({
-        seedId: "dendron.foo",
+        seedId,
       });
 
-      // Swap the seed registry stub with one where the seed path is modified
-      const modifiedTestSeeds = await TestSeedUtils.createSeedRegistry({
-        engine,
-        wsRoot: seedRoot,
-        modifySeed: (seed) => {
-          seed.root = FOLDERS.NOTES;
-          return seed;
-        },
+      // Convert the seed into a self contained vault
+      const seedPath = SeedUtils.seed2Path({ wsRoot, id: seedId });
+      const seedWorkspaceService = new WorkspaceService({ wsRoot: seedPath });
+      await seedWorkspaceService.migrateVaultToSelfContained({
+        vault: ConfigUtils.getVaults(seedWorkspaceService.config)[0],
       });
-      const modifiedSeedService = new SeedService({
-        wsRoot,
-        registryFile: modifiedTestSeeds.registryFile,
-      });
+
+      // Check if out of date seed detection notices that the seed has migrated
       sinon.stub(VSCodeUtils, "reloadWindow");
-      await detectOutOfDateSeeds({ wsRoot, seedSvc: modifiedSeedService });
+      await detectOutOfDateSeeds({ wsRoot, seedSvc: seedService });
     });
 
     test("THEN Dendron prompts to update the seed config", () => {
@@ -71,7 +68,7 @@ suite("GIVEN out of date seed check", function () {
       const seed = ConfigUtils.getVaults(conf).find(
         (vault) => vault.seed === seedKey
       );
-      expect(seed?.fsPath).toEqual(FOLDERS.NOTES);
+      expect(seed?.fsPath).toEqual("vault/notes");
     });
   });
 });

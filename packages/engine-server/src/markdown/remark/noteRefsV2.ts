@@ -254,6 +254,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
         }
         return `![[${vaultPrefix}${link}${suffix}]]`;
       }
+      return;
     };
   }
 }

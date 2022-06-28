@@ -830,8 +830,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     when: "dendron:pluginActive && dendron:hasLegacyPreview",
   },
   SHOW_PREVIEW: {
-    key: "dendron.showPreview",
-    title: `${CMD_PREFIX} Show Preview`,
+    key: "dendron.togglePreview",
+    title: `${CMD_PREFIX} Toggle Preview`,
     icon: `$(open-preview)`,
     keybindings: {
       windows: "windows+ctrl+p",

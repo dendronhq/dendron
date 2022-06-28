@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { test, before } from "mocha";
-import { ShowPreviewCommand } from "../../commands/ShowPreview";
+import { TogglePreviewCommand } from "../../commands/ShowPreview";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
@@ -33,7 +33,7 @@ suite("GIVEN ShowPreview", function () {
         await ExtensionProvider.getWSUtils().openNote(note);
       });
       test("THEN the current note is opened", async () => {
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         const out = await cmd.run();
@@ -70,7 +70,7 @@ suite("GIVEN ShowPreview", function () {
       });
       test("THEN the selected note is opened", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         // When opened from a menu, the file path will be passed as an argument
@@ -103,7 +103,7 @@ suite("GIVEN ShowPreview", function () {
       });
       test("THEN the selected note is opened", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         // When opened from a menu, the file path will be passed as an argument
@@ -131,7 +131,7 @@ suite("GIVEN ShowPreview", function () {
         await VSCodeUtils.closeAllEditors();
       });
       test("THEN the selected non-note file is opened", async () => {
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         // When opened from a menu, the file path will be passed as an argument
@@ -158,7 +158,7 @@ suite("GIVEN ShowPreview", function () {
         await VSCodeUtils.openFileInEditor(uri);
       });
       test("THEN the current non-note file is opened", async () => {
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         const out = await cmd.run();
@@ -193,7 +193,7 @@ suite("GIVEN ShowPreview", function () {
       });
       test("THEN preview must link to the correct note", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new ShowPreviewCommand(
+        const cmd = new TogglePreviewCommand(
           PreviewPanelFactory.create(ExtensionProvider.getExtension())
         );
         // When opened from a menu, the file path will be passed as an argument

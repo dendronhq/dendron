@@ -18,7 +18,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
-import { ShowPreviewCommand } from "../commands/ShowPreview";
+import { TogglePreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -148,7 +148,7 @@ export class TutorialInitializer
       if (getStage() !== "test") {
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          new ShowPreviewCommand(
+          new TogglePreviewCommand(
             PreviewPanelFactory.create(ExtensionProvider.getExtension())
           ).execute();
         }, 1000);

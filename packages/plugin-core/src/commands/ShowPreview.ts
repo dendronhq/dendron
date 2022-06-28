@@ -8,8 +8,8 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { InputArgCommand } from "./base";
 import {
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput,
+  TogglePreviewCommandOpts,
+  TogglePreviewCommandOutput,
 } from "./ShowPreviewInterface";
 
 /**
@@ -17,9 +17,9 @@ import {
  * preview webview, then prefer to get an instance of {@link PreviewProxy}
  * instead of creating an instance of this command.
  */
-export class ShowPreviewCommand extends InputArgCommand<
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput
+export class TogglePreviewCommand extends InputArgCommand<
+  TogglePreviewCommandOpts,
+  TogglePreviewCommandOutput
 > {
   key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
 
@@ -29,14 +29,14 @@ export class ShowPreviewCommand extends InputArgCommand<
     this._panel = previewPanel;
   }
 
-  async sanityCheck(opts?: ShowPreviewCommandOpts) {
+  async sanityCheck(opts?: TogglePreviewCommandOpts) {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor()) && _.isEmpty(opts)) {
       return "No note currently open, and no note selected to open.";
     }
     return;
   }
 
-  addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
+  addAnalyticsPayload(opts?: TogglePreviewCommandOpts) {
     return { providedFile: !_.isEmpty(opts) };
   }
 
@@ -46,7 +46,7 @@ export class ShowPreviewCommand extends InputArgCommand<
    * be shown in preview. If unspecified, then preview will follow default
    * behavior of showing the contents of the currently in-focus Dendron note.
    */
-  async execute(opts?: ShowPreviewCommandOpts) {
+  async execute(opts?: TogglePreviewCommandOpts) {
     let note: NoteProps | undefined;
 
     if (opts !== undefined && !_.isEmpty(opts)) {

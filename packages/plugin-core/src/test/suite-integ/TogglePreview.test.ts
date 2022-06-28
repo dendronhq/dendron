@@ -206,4 +206,36 @@ suite("GIVEN ShowPreview", function () {
       });
     }
   );
+
+  describeSingleWS(
+    "WHEN preview panel is already open",
+    {
+      ctx,
+    },
+    () => {
+      /* Create and open a note */
+      let note: NoteProps;
+      before(async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        note = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          wsRoot,
+          vault: vaults[0],
+          fname: "preview-test",
+        });
+        // Open the note so that's the current note
+        await ExtensionProvider.getWSUtils().openNote(note);
+      });
+
+      test("THEN the preview should be hidden", async () => {
+        const cmd = new TogglePreviewCommand(
+          PreviewPanelFactory.create(ExtensionProvider.getExtension())
+        );
+
+        /* When the preview is hidden, the command retruns undefined */
+        const out = await cmd.run();
+        expect(out?.note).toBeFalsy();
+      });
+    }
+  );
 });

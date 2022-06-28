@@ -35,8 +35,65 @@ import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import semver from "semver";
 
 export class StartupUtils {
+  static shouldShowManualUpgradeMessage({
+    previousWorkspaceVersion,
+  }: {
+    previousWorkspaceVersion: string;
+  }) {
+    return semver.lte(previousWorkspaceVersion, "0.63.0");
+  }
+
+  static showManualUpgradeMessage() {
+    const SHOW_ME_HOW = "Show Me How";
+    const MESSAGE = "You are upgrading from a really old version of Dendron. ";
+    vscode.window
+      .showInformationMessage(MESSAGE, SHOW_ME_HOW)
+      .then(async (resp) => {
+        if (resp === SHOW_ME_HOW) {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.accepted,
+          });
+          const content = [
+            "# Instructions for Manual Upgrade",
+            "",
+            "You are upgrading from a version that is below 0.63.0, which we do not support automatic migration.",
+            "",
+            "Please follow the steps below to ",
+          ].join("\n");
+
+          const panel = vscode.window.createWebviewPanel(
+            "showManualUpgradeMessagePreview",
+            "Instructions for Manual Upgrade",
+            vscode.ViewColumn.One,
+            {
+              enableCommandUris: true,
+            }
+          );
+          const md = _md();
+          panel.webview.html = md.render(content);
+        } else {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.rejected,
+          });
+        }
+      });
+  }
+
+  static async showManualUpgradeMessageIfNecessary({
+    previousWorkspaceVersion,
+  }: {
+    previousWorkspaceVersion: string;
+  }) {
+    if (
+      StartupUtils.shouldShowManualUpgradeMessage({ previousWorkspaceVersion })
+    ) {
+      StartupUtils.showManualUpgradeMessage();
+    }
+  }
+
   static async runMigrationsIfNecessary({
     wsService,
     currentVersion,

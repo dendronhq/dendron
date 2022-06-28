@@ -18,7 +18,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
-import { TogglePreviewCommand } from "../commands/ShowPreview";
+import { TogglePreviewCommand } from "../commands/TogglePreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";

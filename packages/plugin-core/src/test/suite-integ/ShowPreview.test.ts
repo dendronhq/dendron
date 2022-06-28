@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { test, before } from "mocha";
-import { TogglePreviewCommand } from "../../commands/ShowPreview";
+import { TogglePreviewCommand } from "../../commands/TogglePreview";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";

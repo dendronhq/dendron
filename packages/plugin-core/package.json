@@ -465,8 +465,8 @@
         "title": "Dendron: Show Preview (legacy)"
       },
       {
-        "command": "dendron.showPreview",
-        "title": "Dendron: Show Preview",
+        "command": "dendron.togglePreview",
+        "title": "Dendron: Toggle Preview",
         "icon": "$(open-preview)"
       },
       {

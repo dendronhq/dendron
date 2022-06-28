@@ -798,7 +798,6 @@ publishing:
             - vault1
             - vault2
             - vaultThree
-            - dendron.foo
 "
 `;
 
@@ -920,6 +919,5 @@ publishing:
             - vault1
             - vault2
             - vaultThree
-            - dendron.foo
 "
 `;

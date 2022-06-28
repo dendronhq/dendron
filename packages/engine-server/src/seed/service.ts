@@ -95,6 +95,10 @@ export class SeedService {
     }
     await this.addSeedMetadata({
       seed: seedOrError,
+      vault: await SeedUtils.seed2Vault({
+        seed: seedOrError,
+        wsRoot: this.wsRoot,
+      }),
       wsRoot: this.wsRoot,
       onUpdatingWorkspace,
       onUpdatedWorkspace,
@@ -108,11 +112,13 @@ export class SeedService {
    */
   async addSeedMetadata({
     seed,
+    vault,
     wsRoot,
     onUpdatingWorkspace,
     onUpdatedWorkspace,
   }: {
     seed: SeedConfig;
+    vault: SeedVault;
     wsRoot: string;
     onUpdatingWorkspace?: () => Promise<void>;
     onUpdatedWorkspace?: () => Promise<void>;
@@ -135,7 +141,7 @@ export class SeedService {
       (await WorkspaceUtils.getWorkspaceTypeFromDir(wsRoot)) ===
       WorkspaceType.CODE;
     await ws.addVault({
-      vault: await SeedUtils.seed2Vault({ seed, wsRoot }),
+      vault,
       config,
       updateConfig: true,
       updateWorkspace,
@@ -245,22 +251,22 @@ export class SeedService {
     // workspace that is open is the one being modified in addSeedMetadata(), VS
     // Code will reload the current window and the seed cloning may not execute.
     const spath = SeedUtils.seed2Path({ wsRoot: this.wsRoot, id });
-    // Need to get the seedVault before we delete the files, otherwise it will
-    // fail because it needs the workspace config file inside the seed vault
-    const seedVault = await SeedUtils.seed2Vault({
-      wsRoot: this.wsRoot,
-      seed: seedOrError,
-    });
-    if (await fs.pathExists(spath)) {
-      await fs.remove(spath);
-    }
+    // Match which vault to delete based on the seed key
+    const seedVault = ConfigUtils.getVaults(config)
+      .filter(VaultUtils.isSeed)
+      .find((vault) => vault.seed === id);
+    if (seedVault) {
+      if (await fs.pathExists(spath)) {
+        await fs.remove(spath);
+      }
 
-    await this.removeSeedMetadata({
-      vault: seedVault,
-      seed: seedOrError,
-      onUpdatingWorkspace,
-      onUpdatedWorkspace,
-    });
+      await this.removeSeedMetadata({
+        vault: seedVault,
+        seed: seedOrError,
+        onUpdatingWorkspace,
+        onUpdatedWorkspace,
+      });
+    }
     return { data: { seed: seedOrError } };
   }
 

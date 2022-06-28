@@ -341,37 +341,5 @@ runTest("init", () => {
         }
       );
     });
-
-    test(`ok: diff root name`, async () => {
-      await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
-          const error = await runInit({ engine, wsRoot });
-          expect(error).toBeUndefined();
-          await checkDir(
-            {
-              fpath: wsRoot,
-              snapshot: true,
-            },
-            "dendron.yml",
-            "seed.yml"
-          );
-          await checkFile({
-            fpath: path.join(wsRoot, "dendron.yml"),
-            snapshot: true,
-          });
-          await checkFile(
-            {
-              fpath: path.join(wsRoot, "seed.yml"),
-              snapshot: true,
-            },
-            "root: fooVault"
-          );
-        },
-        {
-          expect,
-          vaults: [{ fsPath: "fooVault" }],
-        }
-      );
-    });
   });
 });

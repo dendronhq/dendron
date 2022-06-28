@@ -634,7 +634,7 @@ export class ConfigUtils {
     if (!_.isEmpty(vaults)) return vaults;
     // Fallback, in case we're reading a vault with an old config. This can
     // sometimes happen with seeds, for example the `templates` seed.
-    return config.vaults || [];
+    return config?.vaults || [];
   }
 
   static getHooks(config: IntermediateDendronConfig): DHookDict | undefined {

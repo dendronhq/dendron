@@ -67,7 +67,15 @@ runTest("remove", () => {
         // add seed to config;
         const seed = seedDict[id];
         const seedService = new SeedService({ wsRoot, registryFile });
-        await seedService.addSeedMetadata({ seed, wsRoot });
+        await seedService.addSeedMetadata({
+          seed,
+          wsRoot,
+          vault: {
+            seed: id,
+            name: id,
+            fsPath: "vault",
+          },
+        });
 
         // remove seed
         await seedService.removeSeed({ id });

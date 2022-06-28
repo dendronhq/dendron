@@ -985,7 +985,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         const updatedDuplicateNoteBehavior =
           publishingConfig.duplicateNoteBehavior;
 
-        _.pull(updatedDuplicateNoteBehavior.payload as string[], vault.fsPath);
+        _.pull(
+          updatedDuplicateNoteBehavior.payload as string[],
+          VaultUtils.getName(vault)
+        );
 
         ConfigUtils.setDuplicateNoteBehavior(
           config,

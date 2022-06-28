@@ -49,6 +49,11 @@ export class TogglePreviewCommand extends InputArgCommand<
   async execute(opts?: TogglePreviewCommandOpts) {
     let note: NoteProps | undefined;
 
+    if (this._panel.isVisible()) {
+      this._panel.hide();
+      return undefined;
+    }
+
     if (opts !== undefined && !_.isEmpty(opts)) {
       // Used a context menu to open preview for a specific note
       note = ExtensionProvider.getWSUtils().getNoteFromPath(opts.fsPath);

@@ -228,18 +228,6 @@ describe("hashtag", () => {
             },
           ];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: [`[${hashtag}](tags.my-hash.tag0.md)`],
-              }),
-              expected: true,
-            },
-          ];
-        },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(

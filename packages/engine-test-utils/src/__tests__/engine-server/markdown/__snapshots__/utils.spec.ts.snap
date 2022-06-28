@@ -104,38 +104,6 @@ created: 1
 "
 `;
 
-exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK" 1`] = `
-"---
-id: foo
-title: Foo
-desc: ''
-updated: 1
-created: 1
----
-
-# Foo
-
-[Ch1](foo.ch1.md)
-
-"
-`;
-
-exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK_X_VAULT" 1`] = `
-"---
-id: foo
-title: Foo
-desc: ''
-updated: 1
-created: 1
----
-
-# Foo
-
-[Bar](../vault2/bar.md)
-
-"
-`;
-
 exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK" 1`] = `
 "---
 id: foo

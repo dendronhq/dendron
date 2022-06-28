@@ -175,18 +175,6 @@ describe("user tags", () => {
             },
           ];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: [`[${userTag}](user.Hamilton.Margaret.md)`],
-              }),
-              expected: true,
-            },
-          ];
-        },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(

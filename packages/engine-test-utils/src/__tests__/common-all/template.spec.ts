@@ -428,13 +428,22 @@ describe(`WHEN running applyTemplate tests`, () => {
               engine.notes["date-variables"].body
             );
             expect(targetNote.body.trim()).toEqual(
-              `Today is 2022.01.10` +
-                "\n" +
-                "It is week 02 of the year" +
-                "\n" +
-                `This link goes to [[daily.journal.2022.01.10]]` +
-                "\n" +
-                `{{ 1 + 1 }} should not be evalated to 2`
+              [
+                "CURRENT_YEAR: 2022",
+                "CURRENT_QUARTER: 1",
+                "CURRENT_MONTH: 01",
+                "CURRENT_MONTH_NAME: January",
+                "CURRENT_MONTH_NAME_SHORT: Jan",
+                "CURRENT_WEEK: 02",
+                "CURRENT_DAY: 10",
+                "CURRENT_HOUR: 00",
+                "CURRENT_MINUTE: 00",
+                "CURRENT_SECOND: 00",
+                "CURRENT_DAY_OF_WEEK: 1",
+                "TITLE: New Note",
+                "FNAME: new note",
+                "{{ 1 + 1 }} should not be evalated to 2",
+              ].join("\n")
             );
           },
           {

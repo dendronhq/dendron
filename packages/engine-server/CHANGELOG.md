@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.101.0 (2022-06-28)
+
+
+### Bug Fixes
+
+* **structure:** hot reload in note traits + no template by default ([3904655](https://github.com/dendronhq/dendron/commit/390465552a6744495387aea6f49fa5392fb69b03))
+
+
+
+
+
 ## 0.100.1 (2022-06-23)
 
 **Note:** Version bump only for package @dendronhq/engine-server

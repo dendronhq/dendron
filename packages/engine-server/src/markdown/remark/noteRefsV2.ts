@@ -68,6 +68,68 @@ const createMissingNoteErrorMsg = (opts: { fname: string; vname?: string }) => {
   return out.join(" ");
 };
 
+function gatherNoteRefs({
+  link,
+  engine,
+  vault,
+}: {
+  link: DNoteRefLink;
+  engine: DEngineClient;
+  vault: DVault;
+}) {
+  let noteRefs: DNoteLoc[] = [];
+  if (link.from.fname.endsWith("*")) {
+    const resp = engine.queryNotesSync({
+      qs: link.from.fname,
+      originalQS: link.from.fname,
+      vault,
+    });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      "fname"
+    );
+  } else {
+    noteRefs.push(link.from);
+  }
+  return noteRefs;
+}
+
+function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
+  const procData = MDUtilsV5.getProcData(proc);
+  const { config, fname, engine, vault, dest } = procData;
+
+  // pretty refs not valid for regular markdown
+  if (
+    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
+  ) {
+    return false;
+  }
+
+  // The note that contains this reference might override the pretty refs option for references inside it.
+  const containingNote = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    vault,
+    engine,
+  });
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+
+  let prettyRefs =
+    ConfigUtils.getEnablePrettyRefs(config, {
+      note: containingNote,
+      shouldApplyPublishRules,
+    }) || true;
+  if (
+    containingNote?.custom.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom.usePrettyRefs)
+  ) {
+    prettyRefs = containingNote.custom.usePrettyRefs;
+  }
+  return prettyRefs;
+}
+
 const tryGetNotes = ({
   fname,
   vname,
@@ -219,7 +281,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   const errors: IDendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
-  const { noteRefLvl: refLvl, dest, config, fname } = procData;
+  const { noteRefLvl: refLvl, dest, config } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
   const engine = procData.engine;
   let { vault } = procData;
@@ -238,50 +300,14 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
     };
   }
   const { wikiLinkOpts } = compilerOpts;
-  let { prettyRefs } = compilerOpts;
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
       data,
     };
   }
-
-  // The note that contains this reference might override the pretty refs option for references inside it.
-  const containingNote = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  });
-  if (prettyRefs === undefined) {
-    prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
-      note: containingNote,
-      shouldApplyPublishRules,
-    });
-  }
-  if (
-    containingNote?.custom.usePrettyRefs !== undefined &&
-    _.isBoolean(containingNote.custom.usePrettyRefs)
-  ) {
-    prettyRefs = containingNote.custom.usePrettyRefs;
-  }
-
-  let noteRefs: DNoteLoc[] = [];
-  if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({
-      qs: link.from.fname,
-      originalQS: link.from.fname,
-      vault,
-    });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
-    );
-    noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
-      "fname"
-    );
-  } else {
-    noteRefs.push(link.from);
-  }
+  const prettyRefs = shouldRenderPretty({ proc });
+  const noteRefs: DNoteLoc[] = gatherNoteRefs({ link, engine, vault });
   const out = noteRefs.map((ref) => {
     const fname = ref.fname;
     // TODO: find first unit with path
@@ -313,16 +339,10 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
             engine,
             vault,
           });
-          if (!MDUtilsV5.isV5Active(proc)) {
-            suffix = ".html";
-          }
           if (maybeNote?.custom.permalink === "/") {
             href = "";
             suffix = "";
           }
-        }
-        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
-          suffix = ".md";
         }
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
         const title = getTitle({
@@ -348,6 +368,10 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   return { error: undefined, data: out.join("\n") };
 }
 
+// ^m0vy37pdpzgy
+/**
+ * This exists because {@link dendronPub} converts note refs using the AST
+ */
 export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
@@ -467,47 +491,20 @@ export function convertNoteRefASTV2(
   }
 
   // figure out configs that change how we process the note reference
-  const { dest, config, vault: vaultFromProc, fname, vault } = procData;
+  const { dest, config, vault: vaultFromProc } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
   const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   const { wikiLinkOpts } = compilerOpts;
 
-  // The note that contains this reference might override the pretty refs option for references inside it.
-  const containingNote = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  });
-  let prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
-    shouldApplyPublishRules,
-    note: containingNote,
-  });
-  if (
-    prettyRefs &&
-    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
-  ) {
-    prettyRefs = false;
-  }
+  const prettyRefs = shouldRenderPretty({ proc });
 
   const publishingConfig = ConfigUtils.getPublishingConfig(config);
   const duplicateNoteConfig = publishingConfig.duplicateNoteBehavior;
   // process note references.
-  let noteRefs: DNoteLoc[] = [];
+  // let noteRefs: DNoteLoc[] = [];
+  const vault = procData.vault;
+  const noteRefs: DNoteLoc[] = gatherNoteRefs({ link, engine, vault });
   if (link.from.fname.endsWith("*")) {
-    // wildcard reference case
-    const vault = procData.vault;
-    const resp = engine.queryNotesSync({
-      qs: link.from.fname,
-      originalQS: link.from.fname,
-      vault,
-    });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
-    );
-    noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
-      "fname"
-    );
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
       return { error: undefined, data: [MdastUtils.genMDErrorMsg(msg)] };
@@ -602,7 +599,6 @@ export function convertNoteRefASTV2(
       note = resp.data[0];
     }
 
-    noteRefs.push(link.from);
     const processedRefs = noteRefs.map((ref) => {
       const fname = note.fname;
       return processRef(ref, note, fname);

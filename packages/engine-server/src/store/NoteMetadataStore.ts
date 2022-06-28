@@ -16,7 +16,7 @@ import _ from "lodash";
 
 export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
   /**
-   * Map of noteId -> noteProp
+   * Map of noteId -> noteProp metadata
    */
   private _noteMetadataById: Record<string, NotePropsMeta>;
   /**

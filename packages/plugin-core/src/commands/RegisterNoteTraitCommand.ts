@@ -78,13 +78,13 @@ module.exports = {
       return props.currentNoteName.split(".").slice(-3).join("-");
     },
     /**
-     * Set a note template to be applied. This method is optional, if you don't
-     * want to apply a template, simply delete this 'setTemplate' property.
+     * Set a note template to be applied. This method is optional, uncomment out
+     * the lines below if you want to apply a template.
      * @returns the name of the desired template note from this function
      */
-    setTemplate: () => {
-      return "root";
-    },
+    // setTemplate: () => {
+    //   return "root";
+    // },
   },
 };
 `;

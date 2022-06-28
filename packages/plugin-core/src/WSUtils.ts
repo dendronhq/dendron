@@ -53,8 +53,8 @@ export class WSUtils {
     });
   }
 
-  static showInitProgress() {
-    const ctx = "showInitProgress";
+  static showActivateProgress() {
+    const ctx = "showActivateProgress";
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,

@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DENDRON_VSCODE_CONFIG_KEYS,
   DVault,
+  ErrorFactory,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { resolveTilde } from "@dendronhq/common-server";
@@ -11,9 +12,11 @@ import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BlankInitializer } from "../workspace/blankInitializer";
+import { WorkspaceActivator } from "../workspace/workspaceActivator";
 import { WorkspaceInitializer } from "../workspace/workspaceInitializer";
 import { BasicCommand } from "./base";
 import PathLike = fs.PathLike;
@@ -33,6 +36,11 @@ type CommandOpts = CommandInput & {
   skipConfirmation?: boolean;
   /** Create self contained vaults, overriding the Dendron VSCode setting. */
   selfContained?: boolean;
+  /**
+   * Open worksapce without reloading
+   */
+  // eslint-disable-next-line camelcase
+  EXPERIMENTAL_openNativeWorkspaceNoReload?: boolean;
 };
 
 type CommandOutput = { wsVault?: DVault; additionalVaults?: DVault[] };
@@ -192,7 +200,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(
     opts: CommandOpts
   ): Promise<{ wsVault?: DVault; additionalVaults?: DVault[] }> {
-    const ctx = "SetupWorkspaceCommand extends BaseCommand";
+    const ctx = "SetupWorkspaceCommand";
     // This command can run before the extension is registered, especially during testing
     const defaultSelfContained =
       VSCodeUtils.getWorkspaceConfig().get<boolean>(
@@ -237,6 +245,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
       createCodeWorkspace,
       useSelfContainedVault: selfContained,
     });
+    Logger.info({
+      ctx: `${ctx}:postCreateWorkspace`,
+      wsRoot: rootDir,
+      wsVault,
+    });
     if (opts?.workspaceInitializer?.onWorkspaceCreation) {
       await opts.workspaceInitializer.onWorkspaceCreation({
         wsVault,
@@ -253,8 +266,32 @@ export class SetupWorkspaceCommand extends BasicCommand<
           vscode.Uri.file(path.join(rootDir, CONSTANTS.DENDRON_WS_NAME)).fsPath
         );
       } else if (workspaceType === WorkspaceType.NATIVE) {
-        // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
-        VSCodeUtils.reloadWindow();
+        if (opts.EXPERIMENTAL_openNativeWorkspaceNoReload) {
+          const ext = ExtensionProvider.getExtension();
+          const { context } = ext;
+          ext.type = WorkspaceType.NATIVE;
+          const wsa = new WorkspaceActivator();
+          const resp = await wsa.init({
+            context,
+            ext,
+            wsRoot: rootDir,
+          });
+          if (resp.error) {
+            throw ErrorFactory.createInvalidStateError({
+              message: "issure init workspace",
+            });
+          }
+          await wsa.activate({
+            context,
+            ext,
+            wsRoot: rootDir,
+            engine: resp.data.engine,
+            wsService: resp.data.wsService,
+          });
+        } else {
+          // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.
+          VSCodeUtils.reloadWindow();
+        }
       }
     }
     return { wsVault, additionalVaults };

@@ -3,11 +3,17 @@ import { SegmentClient } from "@dendronhq/common-server";
 import { Logger } from "./logger";
 
 /** Creates a SegmentClient for telemetry, if enabled, and listens for vscode telemetry settings to disable it when requested. */
-export function setupSegmentClient(ws: DWorkspaceV2, cachePath?: string) {
+export function setupSegmentClient({
+  ws,
+  cachePath,
+}: {
+  ws?: DWorkspaceV2;
+  cachePath?: string;
+}) {
   try {
-    const disabledByWorkspace = ConfigUtils.getWorkspace(
-      ws.config
-    ).disableTelemetry;
+    const disabledByWorkspace = ws
+      ? ConfigUtils.getWorkspace(ws.config).disableTelemetry
+      : false;
     const segment = SegmentClient.instance({
       forceNew: true,
       cachePath,

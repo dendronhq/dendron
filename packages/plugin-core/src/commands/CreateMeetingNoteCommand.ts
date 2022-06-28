@@ -1,5 +1,4 @@
 import {
-  DendronError,
   genUUID,
   NoteUtils,
   SchemaCreationUtils,
@@ -38,17 +37,12 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
    * @param noConfirm - for testing purposes only; don't set in production code
    */
   constructor(ext: IDendronExtension, noConfirm?: boolean) {
-    const workspaceService = ext.workspaceService;
+    const initTrait = () => {
+      const config = ExtensionProvider.getDWorkspace().config;
+      return new MeetingNote(config, ext, noConfirm ?? false);
+    };
 
-    if (!workspaceService) {
-      throw new DendronError({ message: "Workspace Service not initialized!" });
-    }
-
-    super(
-      ext,
-      "dendron.meeting",
-      new MeetingNote(workspaceService.config, ext, noConfirm ?? false)
-    );
+    super(ext, "dendron.meeting", initTrait);
     this.key = DENDRON_COMMANDS.CREATE_MEETING_NOTE.key;
     this._ext = ext;
   }

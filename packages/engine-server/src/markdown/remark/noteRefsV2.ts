@@ -114,29 +114,6 @@ function attachParser(proc: Unified.Processor) {
     return value.indexOf("![[", fromIndex);
   }
 
-  function inlineTokenizer(eat: Eat, value: string) {
-    const match = LINK_REGEX.exec(value);
-    if (match) {
-      const linkMatch = match[1].trim();
-      const link = LinkUtils.parseNoteRef(linkMatch);
-      // If the link is same file [[#header]], it's implicitly to the same file it's located in
-      if (link.from.fname === "")
-        link.from.fname = MDUtilsV5.getProcData(proc).fname;
-      const { value } = LinkUtils.parseLink(linkMatch);
-
-      const refNote: NoteRefNoteV4 = {
-        type: DendronASTTypes.REF_LINK_V2,
-        data: {
-          link,
-        },
-        value,
-      };
-
-      return eat(match[0])(refNote);
-    }
-    return;
-  }
-
   function inlineTokenizerV5(eat: Eat, value: string) {
     const procOpts = MDUtilsV5.getProcOpts(proc);
     const match = LINK_REGEX.exec(value);
@@ -171,20 +148,14 @@ function attachParser(proc: Unified.Processor) {
     }
     return;
   }
-  inlineTokenizer.locator = locator;
   inlineTokenizerV5.locator = locator;
 
   const Parser = proc.Parser;
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   const inlineMethods = Parser.prototype.inlineMethods;
 
-  if (MDUtilsV5.isV5Active(proc)) {
-    inlineTokenizers.refLinkV2 = inlineTokenizerV5;
-    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
-  } else {
-    inlineTokenizers.refLinkV2 = inlineTokenizer;
-    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
-  }
+  inlineTokenizers.refLinkV2 = inlineTokenizerV5;
+  inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
   return Parser;
 }
 
@@ -197,6 +168,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   if (visitors) {
     visitors.refLinkV2 = function refLinkV2(node: NoteRefNoteV4) {
       const ndata = node.data;
+
+      // converting to itself (used for doctor commands. preserve existing format)
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
 

@@ -136,19 +136,6 @@ describe("noteRefV2", () => {
           );
           return [];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: ["foo body", "portal"],
-              }),
-              expected: true,
-            },
-          ];
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -243,19 +230,7 @@ describe("noteRefV2", () => {
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
-      verifyFuncDict: {
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["task2"],
-              nomatch: ["task1"],
-            })
-          ).toBeTruthy();
-        },
-      },
+      verifyFuncDict: {},
     });
 
     const WITH_NOTE_LINK_TITLE = createProcTests({
@@ -285,10 +260,6 @@ describe("noteRefV2", () => {
       },
       verifyFuncDict: {
         [DendronASTDest.HTML]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
         },
@@ -691,19 +662,6 @@ describe("noteRefV2", () => {
             },
           ];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
-              }),
-              expected: true,
-            },
-          ];
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
     });
@@ -754,10 +712,6 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-        },
       },
       preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
     });
@@ -797,16 +751,6 @@ describe("noteRefV2", () => {
           ).toBeTruthy();
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents,
-              match: ["two content"],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
           expect(
@@ -867,17 +811,6 @@ describe("noteRefV2", () => {
             await AssertUtils.assertInString({
               body: resp.contents,
               nomatch: ['href="bar.md"'],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          // for preview, show links
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents,
-              match: ['href="bar.md"'],
             })
           ).toBeTruthy();
         },
@@ -971,12 +904,6 @@ describe("noteRefV2", () => {
           await checkNotInVFile(resp, "sed", "eum");
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "Sint minus fuga omnis non.");
-          await checkNotInVFile(resp, "Tags");
-          await checkNotInVFile(resp, "sed", "eum");
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, "Sint minus fuga omnis non.");
           await checkNotInVFile(resp, "Tags");

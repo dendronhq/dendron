@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
-import { before, test } from "mocha";
+import { before, test, beforeEach, afterEach } from "mocha";
 import path from "path";
 import vscode from "vscode";
 import { TogglePreviewCommand } from "../../commands/TogglePreview";
@@ -12,6 +12,19 @@ import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 
 suite("GIVEN TogglePreview", function () {
+  let cmd: TogglePreviewCommand;
+
+  beforeEach(() => {
+    cmd = new TogglePreviewCommand(
+      PreviewPanelFactory.create(ExtensionProvider.getExtension())
+    );
+  });
+
+  // After each test, run Toggle Preview to close the preview panel
+  afterEach(() => {
+    cmd.run();
+  });
+
   describeSingleWS("WHEN opening the preview from the command bar", {}, () => {
     let note: NoteProps;
     before(async () => {
@@ -26,14 +39,10 @@ suite("GIVEN TogglePreview", function () {
       await ExtensionProvider.getWSUtils().openNote(note);
     });
     test("THEN the current note is opened", async () => {
-      const cmd = new TogglePreviewCommand(
-        PreviewPanelFactory.create(ExtensionProvider.getExtension())
-      );
       const out = await cmd.run();
       expect(out?.note).toBeTruthy();
       expect(out!.note!.id).toEqual(note.id);
       expect(out!.note!.fname).toEqual(note.fname);
-      await cmd.run();
     });
   });
   describeSingleWS(
@@ -60,16 +69,12 @@ suite("GIVEN TogglePreview", function () {
       });
       test("THEN the selected note is opened", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
         // When opened from a menu, the file path will be passed as an argument
         const path = vscode.Uri.file(NoteUtils.getFullPath({ note, wsRoot }));
         const out = await cmd.run(path);
         expect(out?.note).toBeTruthy();
         expect(out!.note!.id).toEqual(note.id);
         expect(out!.note!.fname).toEqual(note.fname);
-        await cmd.run();
       });
     }
   );
@@ -92,16 +97,12 @@ suite("GIVEN TogglePreview", function () {
       });
       test("THEN the selected note is opened", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
         // When opened from a menu, the file path will be passed as an argument
         const path = vscode.Uri.file(NoteUtils.getFullPath({ note, wsRoot }));
         const out = await cmd.run(path);
         expect(out?.note).toBeTruthy();
         expect(out!.note!.id).toEqual(note.id);
         expect(out!.note!.fname).toEqual(note.fname);
-        await cmd.run();
       });
     }
   );
@@ -120,14 +121,10 @@ suite("GIVEN TogglePreview", function () {
         await VSCodeUtils.closeAllEditors();
       });
       test("THEN the selected non-note file is opened", async () => {
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
         // When opened from a menu, the file path will be passed as an argument
         const path = vscode.Uri.file(fsPath);
         const out = await cmd.run(path);
         expect(out?.fsPath).toEqual(fsPath);
-        await cmd.run();
       });
     }
   );
@@ -146,12 +143,8 @@ suite("GIVEN TogglePreview", function () {
         await VSCodeUtils.openFileInEditor(uri);
       });
       test("THEN the current non-note file is opened", async () => {
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
         const out = await cmd.run();
         expect(out?.fsPath).toEqual(fsPath);
-        await cmd.run();
       });
     }
   );
@@ -180,9 +173,6 @@ suite("GIVEN TogglePreview", function () {
       });
       test("THEN preview must link to the correct note", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
         // When opened from a menu, the file path will be passed as an argument
         const path = vscode.Uri.file(NoteUtils.getFullPath({ note, wsRoot }));
         const out = await cmd.run(path);
@@ -190,7 +180,6 @@ suite("GIVEN TogglePreview", function () {
         expect(out!.note!.fname).toEqual(note.fname);
         const links = out!.note!.links;
         expect(links[0].value).toEqual("lorem.ipsum.mdone.first");
-        await cmd.run();
       });
     }
   );
@@ -207,17 +196,15 @@ suite("GIVEN TogglePreview", function () {
       });
       // Open the note so that's the current note
       await ExtensionProvider.getWSUtils().openNote(note);
+      // Open the preview panel
+      await cmd.run();
     });
 
     test("THEN the preview should be hidden", async () => {
-      const cmd = new TogglePreviewCommand(
-        PreviewPanelFactory.create(ExtensionProvider.getExtension())
-      );
-
       /* When the preview is hidden, the command retruns undefined */
-      await cmd.run();
       const out = await cmd.run();
       expect(out?.note).toBeFalsy();
+      // Run Toggle Preview to open the preview again (after each closes it by running the command again)
       await cmd.run();
     });
   });

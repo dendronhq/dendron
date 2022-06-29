@@ -1917,6 +1917,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "cquick01",
+      "name": "cquick01",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72400253?v=4",
+      "profile": "https://github.com/cquick01",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

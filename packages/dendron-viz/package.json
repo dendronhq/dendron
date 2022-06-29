@@ -27,7 +27,7 @@
     "prebuild": "yarn clean",
     "build": "yarn copyNonTSFiles && yarn compile",
     "buildCI": "yarn copyNonTSFiles && yarn compile",
-    "copyNonTSFiles": "mkdir -p lib && cross-env cp ./src/loadModule.js lib/",
+    "copyNonTSFiles": "node ./ensureDir && cross-env cp ./src/loadModule.js lib/",
     "compile": "tsc -p tsconfig.build.json",
     "watch": "yarn copyNonTSFiles && yarn compile --watch"
   },

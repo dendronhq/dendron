@@ -10,8 +10,19 @@ import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
 import { CircleText } from "./CircleText";
 import { keepBetween, keepCircleInsideCircle, truncateString } from "./utils";
-
-const loadModule = require("./loadModule");
+import {
+  extent,
+  forceCollide,
+  forceSimulation,
+  forceX,
+  forceY,
+  hierarchy,
+  pack,
+  range,
+  scaleLinear,
+  scaleSqrt,
+  timeFormat,
+} from "d3";
 
 //TODO: Set default colors for different file types. Adjust this so that different types of notes (ex. schemas or journals)
 // can be color coded differently
@@ -51,20 +62,6 @@ const lastCommitAccessor = (d: any) => new Date(d.commits?.[0]?.date + "0");
 const numberOfCommitsAccessor = (d: any) => d?.commits?.length || 0;
 
 export async function createTree() {
-  const {
-    extent,
-    forceCollide,
-    forceSimulation,
-    forceX,
-    forceY,
-    hierarchy,
-    pack,
-    range,
-    scaleLinear,
-    scaleSqrt,
-    timeFormat,
-  } = await loadModule("d3");
-
   const Tree = ({
     data,
     filesChanged = [],

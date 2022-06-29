@@ -15,6 +15,7 @@ import {
   NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -23,14 +24,14 @@ import {
   pathForVaultRoot,
 } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DEPRECATED_PATHS, Git, WorkspaceService } from "..";
+import { DEPRECATED_PATHS, Git, MDUtilsV5, WorkspaceService } from "..";
+import { DConfig } from "../config";
+import { ProcMode } from "../markdown";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
-import { MDUtilsV4 } from "../markdown/utils";
-import fs from "fs-extra";
-import { DConfig } from "../config";
 
 export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",
@@ -304,12 +305,18 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
+          const proc = MDUtilsV5._procRemark(
+            {
+              mode: ProcMode.IMPORT,
+              flavor: ProcFlavor.REGULAR,
+            },
+            {
+              dest: DendronASTDest.MD_DENDRON,
+              engine,
+              fname: note.fname,
+              vault: note.vault,
+            }
+          );
           const newBody = await proc()
             .use(RemarkUtils.h1ToTitle(note, changes))
             .process(note.body);
@@ -328,12 +335,18 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
+          const proc = MDUtilsV5._procRemark(
+            {
+              mode: ProcMode.IMPORT,
+              flavor: ProcFlavor.REGULAR,
+            },
+            {
+              dest: DendronASTDest.MD_DENDRON,
+              engine,
+              fname: note.fname,
+              vault: note.vault,
+            }
+          );
           const newBody = await proc()
             .use(RemarkUtils.h1ToH2(note, changes))
             .process(note.body);

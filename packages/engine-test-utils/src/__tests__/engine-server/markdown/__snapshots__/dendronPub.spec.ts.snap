@@ -508,7 +508,7 @@ VFile {
 
 exports[`GIVEN dendronPub (old tests - need to be migrated) note reference fail: ambiguous 1`] = `
 VFile {
-  "contents": "<h1 id=\\"ref\\">Ref</h1>
+  "contents": "<h1 id=\\"ref\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#ref\\"></a>Ref</h1>
 <p></p><blockquote>
 Error rendering note reference. There are multiple notes with the name dupe. Please specify the vault prefix.
 </blockquote><p></p>",

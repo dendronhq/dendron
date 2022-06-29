@@ -1,11 +1,4 @@
-import {
-  ConfigUtils,
-  DEngineClient,
-  DVault,
-  IntermediateDendronConfig,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -14,7 +7,6 @@ import { Node } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
-import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5 } from "../utilsv5";
 
 // Plugin that adds backlinks at the end of each page if they exist
@@ -23,21 +15,8 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    let fname: string;
-    let vault: DVault;
-    let dest: DendronASTDest;
-    let insideNoteRef: boolean | undefined;
-    let config: IntermediateDendronConfig;
-    let engine: DEngineClient;
-
-    if (MDUtilsV5.isV5Active(proc)) {
-      ({ fname, vault, dest, insideNoteRef, config, engine } =
-        MDUtilsV5.getProcData(proc));
-    } else {
-      ({ fname, vault, dest, insideNoteRef, config } =
-        MDUtilsV4.getDendronData(proc));
-      engine = MDUtilsV4.getEngineFromProc(proc).engine;
-    }
+    const { fname, vault, dest, insideNoteRef, config, engine } =
+      MDUtilsV5.getProcData(proc);
 
     // Don't show backlinks for the following cases:
     // - we are inside a note ref
@@ -71,6 +50,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
+    // filter out invalid backlinks
     const backlinksToPublish = _.filter(backlinks, (backlink) => {
       const vaultName = backlink.from.vaultName!;
       const vault = VaultUtils.getVaultByName({
@@ -83,9 +63,11 @@ const plugin: Plugin = function (this: Unified.Processor) {
         vault,
       });
 
+      // if note doesn't exist, don't include in backlinks
       if (!note) {
         return false;
       }
+      // if note exists but it can't be published, don't include
       const out = SiteUtils.canPublish({
         note,
         engine,

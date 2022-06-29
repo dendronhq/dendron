@@ -1,16 +1,15 @@
-import _ from "lodash";
 import {
   ConfigUtils,
   DendronError,
   USERS_HIERARCHY,
 } from "@dendronhq/common-all";
+import { Element } from "hast";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
-import { MDUtilsV4 } from "../utils";
-import { Element } from "hast";
-import { PUNCTUATION_MARKS } from "./hashtag";
 import { MDUtilsV5 } from "../../markdown";
+import { SiteUtils } from "../../topics/site";
+import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
+import { PUNCTUATION_MARKS } from "./hashtag";
 
 /** Can have period in the middle */
 const GOOD_MIDDLE_CHARACTER = `[^#@|\\[\\]\\s${PUNCTUATION_MARKS}]`;
@@ -127,8 +126,8 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
 
   if (visitors) {
     visitors.usertag = (node: HashTag): string | Element => {
-      const { dest } = MDUtilsV4.getDendronData(proc);
-      const prefix = MDUtilsV4.getProcOpts(proc).wikiLinksOpts?.prefix || "";
+      const { dest, config } = MDUtilsV5.getProcData(proc);
+      const prefix = SiteUtils.getSitePrefixForNote(config);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
           return node.value;

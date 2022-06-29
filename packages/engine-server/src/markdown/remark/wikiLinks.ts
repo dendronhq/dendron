@@ -6,9 +6,7 @@ import {
   Position,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import {
@@ -17,7 +15,6 @@ import {
   WikiLinkDataV4,
   WikiLinkNoteV4,
 } from "../types";
-import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
@@ -52,14 +49,6 @@ type CompilerOpts = {
   prefix?: string;
   convertLinks?: boolean;
 };
-
-function parseAnchorIfExist(link: string) {
-  if (link.indexOf("#") !== -1) {
-    return link.split("#");
-  } else {
-    return [link, undefined];
-  }
-}
 
 function normalizeSpaces(link: string) {
   return link.replace(/ /g, "%20");
@@ -121,9 +110,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         });
       }
 
-      const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-      if (error) {
-        addError(proc, error);
+      const { engine } = MDUtilsV5.getProcData(proc);
+      if (!engine) {
         return "error with engine";
       }
 
@@ -147,31 +135,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         case DendronASTDest.MD_REGULAR: {
           const alias = data.alias ? data.alias : value;
           return `[${alias}](${copts.prefix || ""}${normalizeSpaces(value)})`;
-        }
-        case DendronASTDest.MD_ENHANCED_PREVIEW: {
-          const alias = data.alias ? data.alias : value;
-          let cleanValue = normalizeSpaces(
-            parseAnchorIfExist(value)[0] as string
-          );
-          if (data.vaultName) {
-            const vaultByName = VaultUtils.getVaultByName({
-              vaults: engine.vaults,
-              vname: data.vaultName,
-            });
-            if (_.isUndefined(vaultByName)) {
-              return `ERROR: ${vaultByName} is not a vault in this workspace`;
-            }
-            const cpath = vault2Path({
-              wsRoot: engine.wsRoot,
-              vault: MDUtilsV4.getVault(proc),
-            });
-            const npath = vault2Path({
-              vault: vaultByName!,
-              wsRoot: engine.wsRoot,
-            });
-            cleanValue = path.join(path.relative(cpath, npath), cleanValue);
-          }
-          return `[${alias}](${copts.prefix || ""}${cleanValue}.md)`;
         }
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;
@@ -204,8 +167,8 @@ function attachParser(proc: Unified.Processor) {
 
     const procData = MDUtilsV5.getProcData(proc);
     let { vault } = procData;
+    const engine = procData.engine;
     const { config, dest, fname } = procData;
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
       const maybeVault = VaultUtils.getVaultByName({
         vaults: engine.vaults,

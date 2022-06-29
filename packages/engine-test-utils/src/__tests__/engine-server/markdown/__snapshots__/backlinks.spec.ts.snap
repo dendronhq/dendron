@@ -1,37 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`backlinks backlink to home page 1`] = `
-VFile {
-  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#beta\\"></a>Beta</h1>
-<hr>
-<strong>Backlinks</strong>
-<ul>
-<li><a href=\\"https://foo.com\\">Alpha (vault1)</a></li>
-<li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">Omega (vault1) (Private)</a></li>
-</ul>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`backlinks basic 1`] = `
-VFile {
-  "contents": "<h1 id=\\"beta\\">Beta</h1>
-<hr>
-<strong>Backlinks</strong>
-<ul>
-<li><a href=\\"alpha.html\\">Alpha (vault1)</a></li>
-<li><a href=\\"omega.html\\">Omega (vault1)</a></li>
-</ul>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
 exports[`backlinks frontmatter tags multiple 1`] = `
 VFile {
   "contents": "<h1 id=\\"test\\">Test</h1>
@@ -70,22 +38,6 @@ VFile {
 <strong>Backlinks</strong>
 <ul>
 <li><a href=\\"one\\">One (vault1)</a></li>
-</ul>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`backlinks multiple links 1`] = `
-VFile {
-  "contents": "<h1 id=\\"one\\">One</h1>
-<hr>
-<strong>Backlinks</strong>
-<ul>
-<li><a href=\\"three.html\\">Three (vault1)</a></li>
-<li><a href=\\"two.html\\">Two (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

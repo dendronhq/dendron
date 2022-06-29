@@ -926,13 +926,15 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           ConfigUtils.unsetPublishProp(engine.config, "duplicateNoteBehavior");
-          const out = await proc(engine, {
-            fname: "ref",
-            dest: DendronASTDest.HTML,
-            shouldApplyPublishRules: true,
-            vault: vaults[0],
-            config: engine.config,
-          }).process("![[dupe]]");
+          const out = await MDUtilsV5.procRehypeFull(
+            {
+              engine,
+              fname: "ref",
+              vault: vaults[0],
+              config: engine.config,
+            },
+            { flavor: ProcFlavor.PUBLISHING }
+          ).process("![[dupe]]");
           await checkVFile(
             out,
             "Error rendering note reference. There are multiple notes with the name"

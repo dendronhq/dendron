@@ -1,14 +1,13 @@
-import _ from "lodash";
 import {
   ConfigUtils,
   DendronError,
   TAGS_HIERARCHY,
 } from "@dendronhq/common-all";
+import { Element } from "hast";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
+import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
-import { MDUtilsV4 } from "../utils";
-import { Element } from "hast";
 import { MDUtilsV5 } from "../utilsv5";
 
 /** All sorts of punctuation marks and quotation marks from different languages. Please add any that may be missing.
@@ -148,8 +147,8 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
 
   if (visitors) {
     visitors.hashtag = (node: HashTag): string | Element => {
-      const { dest } = MDUtilsV4.getDendronData(proc);
-      const prefix = MDUtilsV4.getProcOpts(proc).wikiLinksOpts?.prefix || "";
+      const { dest, config } = MDUtilsV5.getProcData(proc);
+      const prefix = SiteUtils.getSitePrefixForNote(config);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
           return node.value;

@@ -472,27 +472,44 @@ export class SiteUtils {
     return { url: siteUrl, index: siteIndex };
   }
 
+  static getSitePrefixForNote(config: IntermediateDendronConfig) {
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+    return assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+  }
+
   static getSiteUrlPathForNote({
     pathValue,
     pathAnchor,
     config,
     addPrefix,
+    note,
   }: {
     pathValue?: string;
     pathAnchor?: string;
     config: IntermediateDendronConfig;
     addPrefix?: boolean;
+    note?: NoteProps;
   }): string {
     // add path prefix if valid
     let pathPrefix: string = "";
     if (addPrefix) {
-      const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
-      pathPrefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+      pathPrefix = this.getSitePrefixForNote(config);
     }
 
     // slug anchor if it is not a block anchor
     if (pathAnchor && !isBlockAnchor(pathAnchor)) {
       pathAnchor = `${getSlugger().slug(pathAnchor)}`;
+    }
+
+    // no prefix if we are at the index note
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtils.isIndexNote({
+          indexNote: config.publishing?.siteIndex,
+          note,
+        });
+    if (isIndex) {
+      return `/`;
     }
     // remove extension for pretty links
     const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);

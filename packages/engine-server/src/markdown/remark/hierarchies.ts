@@ -15,7 +15,6 @@ import visit from "unist-util-visit";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
-import { MDUtilsV4 } from "../utils";
 import { MDUtilsV5 } from "../utilsv5";
 import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
 
@@ -86,7 +85,7 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
   function transformer(tree: Node): void {
     const root = tree as Root;
     const { fname, vault, dest, config, insideNoteRef } =
-      MDUtilsV4.getDendronData(proc);
+      MDUtilsV5.getProcData(proc);
     let addedBreak = false;
 
     if (dest !== DendronASTDest.HTML) {
@@ -142,8 +141,7 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       addFootnotes();
       return;
     }
-
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
+    const { engine } = MDUtilsV5.getProcData(proc);
     const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
       engine,

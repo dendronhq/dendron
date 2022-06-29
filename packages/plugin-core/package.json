@@ -226,6 +226,10 @@
         "title": "Dendron: Random Note"
       },
       {
+        "command": "dendron.renameNoteV2a",
+        "title": "Dendron: Rename Note V2a"
+      },
+      {
         "command": "dendron.renameNote",
         "title": "Dendron: Rename Note"
       },
@@ -486,6 +490,10 @@
         "title": "Dendron: Configure Graph Style (css)"
       },
       {
+        "command": "dendron.configureLocalOverride",
+        "title": "Dendron: Configure Local Override"
+      },
+      {
         "command": "dendron.seedAdd",
         "title": "Dendron: Add Seed to Workspace"
       },
@@ -603,6 +611,10 @@
         {
           "command": "dendron.randomNote",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.renameNoteV2a",
+          "when": "false"
         },
         {
           "command": "dendron.renameNote",
@@ -818,6 +830,10 @@
         },
         {
           "command": "dendron.configureGraphStyle",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.configureLocalOverride",
           "when": "dendron:pluginActive"
         },
         {

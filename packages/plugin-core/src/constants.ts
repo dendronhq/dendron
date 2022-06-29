@@ -867,6 +867,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Configure Graph Style (css)`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  CONFIGURE_LOCAL_OVERRIDE: {
+    key: "dendron.configureLocalOverride",
+    title: `${CMD_PREFIX} Configure Local Override`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   //-- Seeds
   SEED_ADD: {
     key: "dendron.seedAdd",

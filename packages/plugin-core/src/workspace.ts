@@ -2,6 +2,7 @@ import {
   APIUtils,
   ConfigUtils,
   CONSTANTS,
+  DendronEditorViewKey,
   DendronError,
   DendronTreeViewKey,
   DWorkspaceV2,
@@ -36,6 +37,7 @@ import {
   ISchemaLookupProviderFactory,
 } from "./components/lookup/LookupProviderV3Interface";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
+import { WysiwygEditor } from "./components/views/WysiwygEditor";
 import { DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import {
   DendronWorkspaceSettings,
@@ -538,9 +540,12 @@ export class DendronExtension implements IDendronExtension {
         // Graph panel (side)
         const graphPanel = this.setupGraphPanel();
 
+        const editor = this.setupWysiwyg();
+
         context.subscriptions.push(backlinkTreeView);
         context.subscriptions.push(tipOfDayView);
         context.subscriptions.push(graphPanel);
+        context.subscriptions.push(editor);
       }
     });
   }
@@ -698,6 +703,15 @@ export class DendronExtension implements IDendronExtension {
   addDisposable(disposable: vscode.Disposable) {
     // handle all disposables
     this._disposableStore.add(disposable);
+  }
+
+  private setupWysiwyg() {
+    const editor = new WysiwygEditor({ extension: this });
+
+    return vscode.window.registerCustomEditorProvider(
+      DendronEditorViewKey.WYSIWYG_EDITOR,
+      editor
+    );
   }
 
   // === Workspace

@@ -819,6 +819,10 @@ export enum LookupViewMessageEnum {
   "onRequestControllerState" = "onRequestControllerState",
 }
 
+export enum EditorMessageEnum {
+  documentChanged = "documentChanged",
+}
+
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",
   "getTheme" = "getTheme",
@@ -864,6 +868,8 @@ export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
 
 export type GraphViewMessageType = DMessageEnum | GraphViewMessageEnum;
 
+export type EditorMessageType = DMessageEnum | EditorMessageEnum;
+
 /** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;
 
@@ -892,6 +898,11 @@ export type CalendarViewMessage = DMessage<
 export type NoteViewMessage = DMessage<
   NoteViewMessageType,
   { id?: string; href?: string }
+>;
+
+export type EditorMessage = DMessage<
+  EditorMessageType,
+  { text: string; lineNumber: number; editType: "insertion" | "deletion" }
 >;
 
 /** @deprecated: Tree view v2 is deprecated */

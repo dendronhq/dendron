@@ -119,6 +119,17 @@
         }
       ]
     },
+    "customEditors": [
+      {
+        "viewType": "dendron.wysiwyg-editor",
+        "displayName": "Dendron Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.tmd"
+          }
+        ]
+      }
+    ],
     "categories": [
       "Other"
     ],

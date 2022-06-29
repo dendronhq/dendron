@@ -443,6 +443,11 @@ export class WorkspaceActivator {
         ? wsService.getCodeWorkspaceSettingsSync()
         : undefined;
     if (!opts?.skipMigrations) {
+      await StartupUtils.showManualUpgradeMessageIfNecessary({
+        previousWorkspaceVersion,
+        currentVersion,
+      });
+
       await StartupUtils.runMigrationsIfNecessary({
         wsService,
         currentVersion,

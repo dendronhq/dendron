@@ -1,55 +1,44 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { test, before } from "mocha";
+import fs from "fs-extra";
+import { before, test } from "mocha";
+import path from "path";
+import vscode from "vscode";
 import { TogglePreviewCommand } from "../../commands/TogglePreview";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { expect } from "../testUtilsv2";
-import { describeSingleWS, setupBeforeAfter } from "../testUtilsV3";
-import vscode from "vscode";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import fs from "fs-extra";
-import path from "path";
+import { expect } from "../testUtilsv2";
+import { describeSingleWS } from "../testUtilsV3";
 
 suite("GIVEN ShowPreview", function () {
-  const ctx = setupBeforeAfter(this);
-
-  describeSingleWS(
-    "WHEN opening the preview from the command bar",
-    {
-      ctx,
-    },
-    () => {
-      let note: NoteProps;
-      before(async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        note = await NoteTestUtilsV4.createNoteWithEngine({
-          engine,
-          wsRoot,
-          vault: vaults[0],
-          fname: "preview-test",
-        });
-        // Open the note so that's the current note
-        await ExtensionProvider.getWSUtils().openNote(note);
+  describeSingleWS("WHEN opening the preview from the command bar", {}, () => {
+    let note: NoteProps;
+    before(async () => {
+      const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      note = await NoteTestUtilsV4.createNoteWithEngine({
+        engine,
+        wsRoot,
+        vault: vaults[0],
+        fname: "preview-test",
       });
-      test("THEN the current note is opened", async () => {
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
-        const out = await cmd.run();
-        expect(out?.note).toBeTruthy();
-        expect(out!.note!.id).toEqual(note.id);
-        expect(out!.note!.fname).toEqual(note.fname);
-        await cmd.run();
-      });
-    }
-  );
-
+      // Open the note so that's the current note
+      await ExtensionProvider.getWSUtils().openNote(note);
+    });
+    test("THEN the current note is opened", async () => {
+      const cmd = new TogglePreviewCommand(
+        PreviewPanelFactory.create(ExtensionProvider.getExtension())
+      );
+      const out = await cmd.run();
+      expect(out?.note).toBeTruthy();
+      expect(out!.note!.id).toEqual(note.id);
+      expect(out!.note!.fname).toEqual(note.fname);
+      await cmd.run();
+    });
+  });
   describeSingleWS(
     "WHEN opening the preview from a context menu AND a note is open",
-    {
-      ctx,
-    },
+    {},
     () => {
       let note: NoteProps;
       before(async () => {
@@ -87,9 +76,7 @@ suite("GIVEN ShowPreview", function () {
 
   describeSingleWS(
     "WHEN opening the preview from a context menu AND no note is open",
-    {
-      ctx,
-    },
+    {},
     () => {
       let note: NoteProps;
       before(async () => {
@@ -118,12 +105,11 @@ suite("GIVEN ShowPreview", function () {
       });
     }
   );
+  // });
 
   describeSingleWS(
     "WHEN opening a non-note file from the content menu",
-    {
-      ctx,
-    },
+    {},
     () => {
       let fsPath: string;
       before(async () => {
@@ -148,9 +134,7 @@ suite("GIVEN ShowPreview", function () {
 
   describeSingleWS(
     "WHEN opening a non-note file from the command bar",
-    {
-      ctx,
-    },
+    {},
     () => {
       let fsPath: string;
       let uri: vscode.Uri;
@@ -174,9 +158,7 @@ suite("GIVEN ShowPreview", function () {
 
   describeSingleWS(
     "WHEN preview is open for a note containing link with .md in its name", //[[lorem.ipsum.mdone.first]]
-    {
-      ctx,
-    },
+    {},
     () => {
       let note: NoteProps;
       before(async () => {
@@ -213,37 +195,31 @@ suite("GIVEN ShowPreview", function () {
     }
   );
 
-  describeSingleWS(
-    "WHEN preview panel is already open",
-    {
-      ctx,
-    },
-    () => {
-      /* Create and open a note */
-      let note: NoteProps;
-      before(async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-        note = await NoteTestUtilsV4.createNoteWithEngine({
-          engine,
-          wsRoot,
-          vault: vaults[0],
-          fname: "preview-test",
-        });
-        // Open the note so that's the current note
-        await ExtensionProvider.getWSUtils().openNote(note);
+  describeSingleWS("WHEN preview panel is already open", {}, () => {
+    /* Create and open a note */
+    let note: NoteProps;
+    before(async () => {
+      const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      note = await NoteTestUtilsV4.createNoteWithEngine({
+        engine,
+        wsRoot,
+        vault: vaults[0],
+        fname: "preview-test",
       });
+      // Open the note so that's the current note
+      await ExtensionProvider.getWSUtils().openNote(note);
+    });
 
-      test("THEN the preview should be hidden", async () => {
-        const cmd = new TogglePreviewCommand(
-          PreviewPanelFactory.create(ExtensionProvider.getExtension())
-        );
+    test("THEN the preview should be hidden", async () => {
+      const cmd = new TogglePreviewCommand(
+        PreviewPanelFactory.create(ExtensionProvider.getExtension())
+      );
 
-        /* When the preview is hidden, the command retruns undefined */
-        await cmd.run();
-        const out = await cmd.run();
-        expect(out?.note).toBeFalsy();
-        await cmd.run();
-      });
-    }
-  );
+      /* When the preview is hidden, the command retruns undefined */
+      await cmd.run();
+      const out = await cmd.run();
+      expect(out?.note).toBeFalsy();
+      await cmd.run();
+    });
+  });
 });

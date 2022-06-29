@@ -1,10 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 1`] = `
+exports[`noteRefV2 WHEN parse section AND section header has space "MD_DENDRON: THEN header is parsed correctly: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo
 
-((foo))
+# Foo Bar
+
+![[foo#header-2]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -14,11 +16,43 @@ VFile {
 }
 `;
 
-exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 2`] = `
+exports[`noteRefV2 WHEN parse section AND section header has space "MD_REGULAR: THEN header is parsed correctly: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo
 
-((foo))
+# Foo Bar
+
+## Header 2
+
+task2
+
+### Header 2.1
+
+task2.1
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse section AND section header has space "MD_REGULAR: THEN header is parsed correctly: REGULAR" 2`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+## Header 2
+
+task2
+
+### Header 2.1
+
+task2.1
+
 
 ",
   "cwd": "<PROJECT_ROOT>",

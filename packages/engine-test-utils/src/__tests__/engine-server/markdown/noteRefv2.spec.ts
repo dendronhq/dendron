@@ -1,7 +1,9 @@
 import {
   ConfigUtils,
+  DendronASTDest,
   IntermediateDendronConfig,
   NoteProps,
+  ProcFlavor,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -9,19 +11,21 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import { MDUtilsV5 } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
 import {
   checkNotInVFile,
   checkVFile,
+  createProcCompileTests,
   createProcTests,
   generateVerifyFunction,
   processNote,
   processTextV2,
   ProcTests,
 } from "./utils";
+import { getOpts, runTestCases } from "./v5/utils";
 
 function runAllTests(opts: {
   name: string;
@@ -55,38 +59,63 @@ export const modifyNote = async (
   );
 };
 
-describe("legacy note ref", () => {
-  const badRef = "((foo))";
-  const BAD_REF = createProcTests({
-    name: "BAD_REF",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = MDUtilsV5.procRemarkFull({
-        config: {
-          ...engine.config,
-        },
-        engine,
-        fname: "foo",
-        wikiLinksOpts: { useId: true },
-        dest: extra.dest,
-        vault: vaults[0],
-      });
-      const resp = await proc2.process(badRef);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        checkVFile(resp, badRef);
-      },
-    },
-    preSetupHook: ENGINE_HOOKS.setupBasic,
+describe("noteRefV2", () => {
+  const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, "foo", (note: NoteProps) => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        "## Header 1",
+        "task1",
+        "### Header 1.1",
+        "task1.1",
+        "## Header 2",
+        "task2",
+        "### Header 2.1",
+        "task2.1",
+        "## Header 3",
+        "task3",
+      ];
+      note.body = txt.join("\n");
+      return note;
+    });
+  };
+
+  describe.only("WHEN parse section", () => {
+    describe("AND section header has space", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN header is parsed correctly",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-2]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "task2", "task2.1");
+                await checkNotInVFile(resp, "task1", "task3");
+              },
+            },
+            [DendronASTDest.MD_DENDRON]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "![[foo#header-2]]");
+              },
+            },
+          },
+          preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
+        })
+      );
+    });
   });
 
-  runAllTests({ name: "compile", testCases: BAD_REF });
-});
-
-describe("noteRefV2", () => {
   describe("common cases", () => {
     const linkWithNoExtension = "![[foo]]";
 
@@ -152,24 +181,6 @@ describe("noteRefV2", () => {
           "## Header1",
           "task1",
           "## Header2",
-          "task2",
-        ];
-        note.body = txt.join("\n");
-        return note;
-      });
-    };
-
-    const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
-      await ENGINE_HOOKS.setupBasic(opts);
-      await modifyNote(opts, "foo", (note: NoteProps) => {
-        const txt = [
-          "---",
-          "id: foo",
-          "---",
-          `# Tasks`,
-          "## Header 1",
-          "task1",
-          "## HeadeR 2",
           "task2",
         ];
         note.body = txt.join("\n");
@@ -263,46 +274,6 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
         },
-      },
-    });
-
-    const WITH_ANCHOR_WITH_SPACE = createProcTests({
-      name: "WITH_ANCHOR_WITH_SPACE",
-      setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
-        return processTextV2({
-          text: "# Foo Bar\n![[foo#header-2]]",
-          dest: opts.extra.dest,
-          engine,
-          vault: vaults[0],
-          fname: "foo",
-        });
-      },
-      preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
-      verifyFuncDict: {
-        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["task2"],
-              nomatch: ["task1"],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["![[foo#header-2]]"],
-            })
-          ).toBeTruthy();
-        },
-        ...generateVerifyFunction({
-          target: DendronASTDest.MD_REGULAR,
-          exclude: [DendronASTDest.MD_DENDRON],
-        }),
       },
     });
 
@@ -922,7 +893,6 @@ describe("noteRefV2", () => {
       ...RECURSIVE_TEST_CASES,
       ...WITH_ANCHOR,
       ...WITH_FM_TITLE,
-      ...WITH_ANCHOR_WITH_SPACE,
       ...WITH_START_ANCHOR_INVALID,
       ...WITH_END_ANCHOR_INVALID,
       ...WITH_START_ANCHOR_OFFSET,

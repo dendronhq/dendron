@@ -1908,6 +1908,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "avhb",
+      "name": "avhb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66175168?v=4",
+      "profile": "http://avhb.github.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

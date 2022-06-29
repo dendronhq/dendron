@@ -370,7 +370,7 @@ export default class BacklinksTreeDataProvider
       const references = referencesByPath[pathParam];
 
       const backlink = Backlink.createNoteLevelBacklink(
-        _.trimEnd(path.basename(pathParam), path.extname(pathParam)),
+        path.basename(pathParam, path.extname(pathParam)),
         references
       );
 

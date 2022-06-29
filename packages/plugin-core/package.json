@@ -465,6 +465,11 @@
         "title": "Dendron: Show Preview (legacy)"
       },
       {
+        "command": "dendron.showPreview",
+        "title": "Dendron: Show Preview",
+        "icon": "$(open-preview)"
+      },
+      {
         "command": "dendron.togglePreview",
         "title": "Dendron: Toggle Preview",
         "icon": "$(open-preview)"
@@ -802,6 +807,10 @@
         },
         {
           "command": "dendron.showPreview",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.togglePreview",
           "when": "dendron:pluginActive"
         },
         {

@@ -621,6 +621,24 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
+            await new TogglePreviewCommand(
+              PreviewPanelFactory.create(ext),
+              // Set isShowCommand to true to use TogglePreviewCommand for the show preview command
+              true
+            ).run(args);
+          })
+        )
+      );
+    }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.TOGGLE_PREVIEW.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
             await new TogglePreviewCommand(PreviewPanelFactory.create(ext)).run(
               args
             );

@@ -21,12 +21,21 @@ export class TogglePreviewCommand extends InputArgCommand<
   TogglePreviewCommandOpts,
   TogglePreviewCommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
-
+  key = DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
+  _isShowCommand: boolean;
   _panel: PreviewProxy;
-  constructor(previewPanel: PreviewProxy) {
+
+  // This class is used for both ShowPreview and TogglePreview commands.
+  // Pass true for isShowCommand param to use this class for Show Preview command
+  // By default, this class is used for TogglePreview
+  constructor(previewPanel: PreviewProxy, isShowCommand?: boolean) {
     super();
     this._panel = previewPanel;
+    this._isShowCommand = !!isShowCommand;
+
+    this.key = this._isShowCommand
+      ? DENDRON_COMMANDS.SHOW_PREVIEW.key
+      : DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
   }
 
   async sanityCheck(opts?: TogglePreviewCommandOpts) {
@@ -49,7 +58,9 @@ export class TogglePreviewCommand extends InputArgCommand<
   async execute(opts?: TogglePreviewCommandOpts) {
     let note: NoteProps | undefined;
 
-    if (this._panel.isVisible()) {
+    // If this class is used as TogglePreview (not as ShowCommand),
+    // hide (dispose) the previwe panel when it's already visible
+    if (!this._isShowCommand && this._panel.isVisible()) {
       this._panel.hide();
       return undefined;
     }

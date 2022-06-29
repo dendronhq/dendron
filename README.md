@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-202-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-204-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -461,6 +461,10 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/bugfixd"><img src="https://avatars.githubusercontent.com/u/48696524?v=4?s=100" width="100px;" alt=""/><br /><sub><b>bugfixd</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Abugfixd" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/kfischer-okarin"><img src="https://avatars.githubusercontent.com/u/6623784?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Fischer</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=kfischer-okarin" title="Documentation">📖</a> <a href="#content-kfischer-okarin" title="Content">🖋</a></td>
     <td align="center"><a href="https://nikhiljha.com/"><img src="https://avatars.githubusercontent.com/u/2773700?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nikhil Jha</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Anikhiljha" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://avhb.github.io"><img src="https://avatars.githubusercontent.com/u/66175168?v=4?s=100" width="100px;" alt=""/><br /><sub><b>avhb</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=avhb" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/cquick01"><img src="https://avatars.githubusercontent.com/u/72400253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>cquick01</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Acquick01" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

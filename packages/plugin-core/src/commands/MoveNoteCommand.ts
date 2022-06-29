@@ -3,7 +3,10 @@ import {
   DEngineClient,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
+  NoteProps,
+  RefactoringCommandUsedPayload,
   RenameNoteOpts,
+  StatisticsUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -28,12 +31,13 @@ import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandInput = any;
 
 const md = _md();
 
-type CommandOpts = {
+export type CommandOpts = {
   moves: RenameNoteOpts[];
   /**
    * Show notification message
@@ -57,9 +61,11 @@ type CommandOpts = {
   useSameVault?: boolean;
   /** Defaults to true. */
   allowMultiselect?: boolean;
+  /** set a custom title for the quick input. Used for rename note */
+  title?: string;
 };
 
-type CommandOutput = {
+export type CommandOutput = {
   changed: NoteChangeEntry[];
 };
 
@@ -76,6 +82,13 @@ function isMoveNecessary(move: RenameNoteOpts) {
 
 export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MOVE_NOTE.key;
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -123,13 +136,14 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         id: "move",
         controller: lc,
         logger: this.L,
-        onDone: (event: HistoryEvent) => {
+        onDone: async (event: HistoryEvent) => {
           const data =
             event.data as NoteLookupProviderSuccessResp<OldNewLocation>;
           if (data.cancel) {
             resolve(undefined);
             return;
           }
+          await this.prepareProxyMetricPayload(data);
           const opts: CommandOpts = {
             moves: this.getDesiredMoves(data),
           };
@@ -142,13 +156,68 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         },
       });
       lc.show({
-        title: "Move note",
+        title: opts?.title || "Move note",
         placeholder: "foo",
         provider,
         initialValue: opts?.initialValue || initialValue,
         nonInteractive: opts?.nonInteractive,
       });
     });
+  }
+
+  private async prepareProxyMetricPayload(
+    data: NoteLookupProviderSuccessResp<OldNewLocation>
+  ) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
+    const engine = ExtensionProvider.getEngine();
+    let items: NoteProps[];
+    if (data.selectedItems.length === 1) {
+      // single move. find note from resp
+      const { oldLoc } = data.onAcceptHookResp[0];
+      const { fname, vaultName: vname } = oldLoc;
+      if (fname !== undefined && vname !== undefined) {
+        const vault = VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname,
+        });
+        const note = (await engine.findNotes({ fname, vault }))[0];
+        items = [note];
+      } else {
+        items = [];
+      }
+    } else {
+      const notes = data.selectedItems.map(
+        (item): NoteProps => _.omit(item, ["label", "detail", "alwaysShow"])
+      );
+      items = notes;
+    }
+
+    const basicStats = StatisticsUtils.getBasicStatsFromNotes(items);
+    if (basicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth, ...rest } = basicStats;
+
+    const traitsAcc = items.flatMap((item) =>
+      item.traits && item.traits.length > 0 ? item.traits : []
+    );
+    const traitsSet = new Set(traitsAcc);
+
+    this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
+      traits: [...traitsSet],
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
+      extra: {
+        numProcessed: items.length,
+        ...rest,
+      },
+    };
   }
 
   private getDesiredMoves(
@@ -316,10 +385,49 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     panel.webview.html = md.render(contentLines.join("\n"));
   }
 
-  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    const payload =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
-    return payload;
+  trackProxyMetrics({
+    opts,
+    noteChangeEntryCounts,
+  }: {
+    opts: CommandOpts;
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    if (this._proxyMetricPayload === undefined) {
+      // something went wrong during prep. don't track.
+      return;
+    }
+    const { extra, ...props } = this._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+        isMultiMove: isMultiMove(opts.moves),
+      },
+    });
+  }
+
+  addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+    try {
+      this.trackProxyMetrics({ opts, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+
+    return noteChangeEntryCounts;
   }
 }
 

@@ -71,6 +71,16 @@ export enum ConfirmStatus {
   rejected = "rejected",
 }
 
+export type RefactoringCommandUsedPayload = {
+  command: string;
+  numVaults: number;
+  traits: string[];
+  numChildren: number;
+  numLinks: number;
+  numChars: number;
+  noteDepth: number;
+};
+
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
   IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
@@ -165,6 +175,7 @@ export enum EngagementEvents {
   EngineStateChanged = "EngineStateChanged",
   AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
   TemplateApplied = "TemplateApplied",
+  RefactoringCommandUsed = "RefactoringCommandUsed",
 }
 
 export enum AppNames {

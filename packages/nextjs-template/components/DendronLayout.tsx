@@ -1,5 +1,5 @@
 import { MenuOutlined } from "@ant-design/icons";
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import { Col, Divider, Layout, Row } from "antd";
 import Script from "next/script";
 import * as React from "react";
@@ -103,6 +103,7 @@ export default function DendronLayout(
             // initialize
             mermaid.init();
           }}
+          strategy="lazyOnload"
         />
       )}
       <Header

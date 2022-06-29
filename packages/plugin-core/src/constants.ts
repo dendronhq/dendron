@@ -461,6 +461,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Random Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  RENAME_NOTE_V2A: {
+    key: "dendron.renameNoteV2a",
+    title: `${CMD_PREFIX} Rename Note V2a`,
+    when: "false", // this is internal only.
+  },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,

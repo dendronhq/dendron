@@ -330,6 +330,52 @@ describe(`WHEN running applyTemplate tests`, () => {
         );
       });
     });
+
+    describe("AND apply a template with date variables", () => {
+      it("THEN replace note's body with template's body and with proper date substitution", () => {
+        setupTemplateTest(
+          {
+            templateNoteFname: "new-note",
+            templateNoteBody: [
+              "CURRENT_YEAR: {{CURRENT_YEAR}}",
+              "CURRENT_QUARTER: {{CURRENT_QUARTER}}",
+              "CURRENT_MONTH: {{CURRENT_MONTH}}",
+              "CURRENT_MONTH_NAME: {{CURRENT_MONTH_NAME}}",
+              "CURRENT_MONTH_NAME_SHORT: {{CURRENT_MONTH_NAME_SHORT}}",
+              "CURRENT_WEEK: {{CURRENT_WEEK}}",
+              "CURRENT_DAY: {{CURRENT_DAY}}",
+              "CURRENT_HOUR: {{CURRENT_HOUR}}",
+              "CURRENT_MINUTE: {{CURRENT_MINUTE}}",
+              "CURRENT_SECOND: {{CURRENT_SECOND}}",
+              "CURRENT_DAY_OF_WEEK: {{CURRENT_DAY_OF_WEEK}}",
+              "TITLE: {{TITLE}}",
+              "FNAME: {{FNAME}}",
+            ].join("\n"),
+
+            fm: testFM,
+          },
+          ({ targetNote }) => {
+            expect(targetNote.body).toEqual(
+              [
+                "CURRENT_YEAR: 2022",
+                "CURRENT_QUARTER: 1",
+                "CURRENT_MONTH: 01",
+                "CURRENT_MONTH_NAME: January",
+                "CURRENT_MONTH_NAME_SHORT: Jan",
+                "CURRENT_WEEK: 02",
+                "CURRENT_DAY: 10",
+                "CURRENT_HOUR: 00",
+                "CURRENT_MINUTE: 00",
+                "CURRENT_SECOND: 00",
+                "CURRENT_DAY_OF_WEEK: 1",
+                "TITLE: New Note",
+                "FNAME: new-note",
+              ].join("\n")
+            );
+          }
+        );
+      });
+    });
   });
 
   describe("WHEN non-handlebars", () => {

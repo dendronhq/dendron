@@ -27,6 +27,7 @@ export * from "./schema";
 export * from "./abTesting";
 export * from "./abTests";
 export * from "./noteDictsUtils";
+export * from "./StatisticsUtils";
 export { axios, AxiosError };
 export { DateTime };
 

@@ -2,7 +2,7 @@
 
 exports[`GIVEN dendron.yml default WHEN enableBackLinks = false AND WHEN no note override "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -12,7 +12,7 @@ VFile {
 
 exports[`GIVEN dendron.yml default WHEN enableBackLinks = false GIVEN note override, WHEN note enableBackLinks = false "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -22,7 +22,7 @@ VFile {
 
 exports[`GIVEN dendron.yml default WHEN enableBackLinks = false GIVEN note override, WHEN note enableBackLinks = true "HTML: THEN backlinks are generated: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -35,9 +35,70 @@ VFile {
 }
 `;
 
-exports[`GIVEN dendron.yml default WHEN regular run "HTML: THEN backlinks are generated: PUBLISHING" 1`] = `
+exports[`GIVEN dendron.yml default WHEN generating backlink to invalid note "HTML: THEN do not crash: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>
+  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#one\\"></a>One</h1>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/notes/duplicateOne\\">duplicateTwo (vault2)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendron.yml default WHEN generating backlinks for publishing AND note has backlink to home page "HTML: THEN backlinks are generated: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#beta\\"></a>Beta</h1>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/\\">Alpha (vault1)</a></li>
+<li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">Omega (vault1) (Private)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendron.yml default WHEN generating backlinks to private vaults "HTML: THEN private backlinks not added: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#one\\"></a>One</h1>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/notes/not-secret.html\\">Not Secret (vaultThree)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendron.yml default WHEN generating backlinks to private vaults "HTML: THEN private backlinks not added: PUBLISHING" 2`] = `
+VFile {
+  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#one\\"></a>One</h1>
+<hr>
+<strong>Backlinks</strong>
+<ul>
+<li><a href=\\"/notes/not-secret.html\\">Not Secret (vaultThree)</a></li>
+</ul>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendron.yml default WHEN regular run AND note has backlinks "HTML: THEN backlinks are generated: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>
@@ -52,7 +113,7 @@ VFile {
 
 exports[`GIVEN note override, WHEN note enableBackLinks = false "HTML: THEN backlinks are not generated: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>",
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -62,7 +123,7 @@ VFile {
 
 exports[`GIVEN note override, WHEN note enableBackLinks = true "HTML: THEN backlinks are generated: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#alpha\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Alpha</h1>
+  "contents": "<h1 id=\\"alpha\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#alpha\\"></a>Alpha</h1>
 <hr>
 <strong>Backlinks</strong>
 <ul>

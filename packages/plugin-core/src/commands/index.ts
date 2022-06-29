@@ -81,6 +81,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { RenameNoteCommand } from "./RenameNoteCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -135,6 +136,7 @@ const ALL_COMMANDS = [
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
+  RenameNoteCommand,
   RenameHeaderCommand,
   MoveHeaderCommand,
   RefactorHierarchyCommandV2,

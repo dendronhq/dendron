@@ -121,7 +121,6 @@ const WITH_VARIABLE = createProcTests({
       ).toBeTruthy();
     },
     [DendronASTDest.HTML]: DendronASTDest.MD_REGULAR,
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: DendronASTDest.MD_REGULAR,
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
@@ -344,10 +343,6 @@ const WITH_TITLE_FOR_LINK = createProcTests({
       const { respProcess } = extra;
       await checkVFile(respProcess, "[[foo.ch1]]");
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { respProcess } = extra;
-      await checkVFile(respProcess, "[Ch1](foo.ch1.md)");
-    },
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { respProcess } = extra;
       await checkVFile(respProcess, `<p><a href="foo.ch1">Ch1</a></p>`);
@@ -375,13 +370,6 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
       const { respProcess } = extra;
       await checkVFile(respProcess, "[Bar](bar)");
-    },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { respProcess } = extra;
-      await checkVFile(
-        respProcess,
-        `[Bar](${path.join("..", "vault2", "bar.md")})`
-      );
     },
   },
   preSetupHook: async (opts) => {

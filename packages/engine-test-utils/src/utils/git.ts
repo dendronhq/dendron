@@ -1,4 +1,9 @@
-import { DEngineClient, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DEngineClient,
+  FOLDERS,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -20,10 +25,14 @@ export class GitTestUtils {
     wsRoot: string;
     vault: DVault;
   }) {
-    const localUrl = path.join(wsRoot, VaultUtils.getRelPath(vault));
+    const localUrl = path.join(wsRoot, VaultUtils.getRelVaultRootPath(vault));
     const git = new Git({ localUrl });
     await git.init();
-    await git.add("root.md");
+    if (VaultUtils.isSelfContained(vault)) {
+      await git.add(path.join(FOLDERS.NOTES, "root.md"));
+    } else {
+      await git.add("root.md");
+    }
     await git.commit({ msg: "init" });
   }
 

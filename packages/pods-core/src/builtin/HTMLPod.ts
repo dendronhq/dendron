@@ -1,8 +1,8 @@
-import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
-import { PublishPodPlantOpts, PublishPod, PublishPodConfig } from "../basev3";
-import { JSONSchemaType } from "ajv";
-import { PodUtils } from "../utils";
 import { ConfigUtils } from "@dendronhq/common-all";
+import { MDUtilsV5 } from "@dendronhq/engine-server";
+import { JSONSchemaType } from "ajv";
+import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
+import { PodUtils } from "../utils";
 
 const ID = "dendron.html";
 
@@ -57,23 +57,14 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
-    const proc = MDUtilsV4.procFull({
+    const proc = MDUtilsV5.procRehypeFull({
       engine,
-      dest: DendronASTDest.HTML,
       vault: note.vault,
       fname,
-      shouldApplyPublishRules: false,
-      publishOpts: {
-        insertTitle: ConfigUtils.getProp(overrideConfig, "useFMTitle"),
-      },
       config: overrideConfig,
-      mermaid: ConfigUtils.getProp(overrideConfig, "mermaid"),
       wikiLinksOpts: { convertLinks },
     });
-    const { contents } = await MDUtilsV4.procRehype({
-      proc,
-      mathjax: true,
-    }).process(note!.body);
+    const { contents } = await proc.processSync(note.body);
     return contents as string;
   }
 }

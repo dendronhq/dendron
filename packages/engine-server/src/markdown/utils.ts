@@ -375,25 +375,12 @@ export class MDUtilsV4 {
       _proc = _proc.use(link, {
         properties: {
           "aria-hidden": "true",
-          class: "anchor-heading",
+          class: "anchor-heading icon-link",
         },
         content: {
-          type: "element",
+          type: "text",
           // @ts-ignore
-          tagName: "svg",
-          properties: {
-            "aria-hidden": "true",
-            viewBox: "0 0 16 16",
-          },
-          children: [
-            {
-              type: "element",
-              tagName: "use",
-              properties: {
-                "xlink:href": "#svg-link",
-              },
-            },
-          ],
+          value: "",
         },
       });
     }

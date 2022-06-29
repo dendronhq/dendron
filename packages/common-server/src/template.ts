@@ -57,21 +57,28 @@ function genDefaultContext(targetNote: NoteProps) {
   const currentDate = Time.now();
   const CURRENT_YEAR = currentDate.toFormat("yyyy");
   const CURRENT_MONTH = currentDate.toFormat("LL");
+  const CURRENT_MONTH_NAME = currentDate.toFormat("LLLL");
+  const CURRENT_MONTH_NAME_SHORT = currentDate.toFormat("LLL");
   const CURRENT_WEEK = currentDate.toFormat("WW");
   const CURRENT_DAY = currentDate.toFormat("dd");
   const CURRENT_HOUR = currentDate.toFormat("HH");
   const CURRENT_MINUTE = currentDate.toFormat("mm");
   const CURRENT_SECOND = currentDate.toFormat("ss");
   const CURRENT_DAY_OF_WEEK = currentDate.toJSDate().getDay();
+  const CURRENT_QUARTER = currentDate.toFormat("q");
   return {
     CURRENT_YEAR,
     CURRENT_MONTH,
+    CURRENT_MONTH_NAME,
+    CURRENT_MONTH_NAME_SHORT,
     CURRENT_WEEK,
     CURRENT_DAY,
     CURRENT_HOUR,
     CURRENT_MINUTE,
     CURRENT_SECOND,
     CURRENT_DAY_OF_WEEK,
+    CURRENT_QUARTER,
+    TITLE: targetNote.title,
     FNAME: targetNote.fname,
     DESC: targetNote.desc,
   };
@@ -280,6 +287,14 @@ export class TemplateUtils {
     targetNote.body = targetNote.body.replace(
       /<%=\s*CURRENT_MONTH\s*%>/g,
       currentDate.toFormat("LL")
+    );
+    targetNote.body = targetNote.body.replace(
+      /<%=\s*CURRENT_MONTH_NAME\s*%>/g,
+      currentDate.toFormat("LLLL")
+    );
+    targetNote.body = targetNote.body.replace(
+      /<%=\s*CURRENT_MONTH_NAME_SHORT\s*%>/g,
+      currentDate.toFormat("LLL")
     );
     targetNote.body = targetNote.body.replace(
       /<%=\s*CURRENT_WEEK\s*%>/g,

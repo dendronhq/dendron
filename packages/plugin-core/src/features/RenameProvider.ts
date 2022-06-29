@@ -1,16 +1,21 @@
 import {
   assertUnreachable,
   DendronError,
+  DNodeUtils,
+  EngagementEvents,
+  extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { DLogger, vault2Path } from "@dendronhq/common-server";
+import { Logger } from "../logger";
 import _ from "lodash";
 import vscode from "vscode";
 import { RenameNoteV2aCommand } from "../commands/RenameNoteV2a";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { AnalyticsUtils } from "../utils/analytics";
 import {
   getReferenceAtPosition,
   getReferenceAtPositionResp,
@@ -21,6 +26,7 @@ import { WSUtils } from "../WSUtils";
 export default class RenameProvider implements vscode.RenameProvider {
   private _targetNote: NoteProps | undefined;
   private refAtPos: getReferenceAtPositionResp | undefined;
+  public L: DLogger = Logger;
 
   set targetNote(value: NoteProps) {
     this._targetNote = value;
@@ -113,6 +119,33 @@ export default class RenameProvider implements vscode.RenameProvider {
     return;
   }
 
+  trackProxyMetrics({
+    note,
+    noteChangeEntryCounts,
+  }: {
+    note: NoteProps;
+    noteChangeEntryCounts: {
+      createdCount?: number;
+      deletedCount?: number;
+      updatedCount?: number;
+    };
+  }) {
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults } = engine;
+
+    AnalyticsUtils.track(EngagementEvents.RefactoringCommandUsed, {
+      command: "RenameProvider",
+      ...noteChangeEntryCounts,
+      numVaults: vaults.length,
+      traits: note.traits ?? [],
+      numChildren: note.children.length,
+      numLinks: note.links.length,
+      numChars: note.body.length,
+      noteDepth: DNodeUtils.getDepth(note),
+    });
+  }
+
   public async executeRename(opts: { newName: string }): Promise<
     | {
         changed: NoteChangeEntry[];
@@ -151,6 +184,16 @@ export default class RenameProvider implements vscode.RenameProvider {
         openNewFile: false,
         noModifyWatcher: true,
       });
+
+      const noteChangeEntryCounts = extractNoteChangeEntryCounts(resp.changed);
+      try {
+        this.trackProxyMetrics({
+          note: this._targetNote,
+          noteChangeEntryCounts,
+        });
+      } catch (error) {
+        this.L.error({ error });
+      }
 
       const changed = resp.changed;
       if (changed.length > 0) {

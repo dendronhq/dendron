@@ -35,6 +35,15 @@ const writeStyles = ({ themeMaps, dest, common }) => {
   });
 };
 
+const copyContents = async ({ from, to }) => {
+  const contents = await fs.readdir(from);
+  await Promise.all(
+    contents.map(async (file) => {
+      await fs.copyFile(path.join(from, file), path.join(to, file));
+    })
+  );
+};
+
 const buildAll = async () => {
   const cssRoot = path.join("assets", "css");
   // everything that belongs to the top of the directory
@@ -52,6 +61,12 @@ const buildAll = async () => {
   const katex = fs.readFileSync(path.join(cssRoot, "katex.min.css"), {
     encoding: "utf-8",
   });
+  const fontello = fs.readFileSync(
+    path.join("assets", "fontello", "css", "fontello.css"),
+    {
+      encoding: "utf-8",
+    }
+  );
 
   // --- Compile
   // Concat and writes all styling into final style sheets
@@ -61,14 +76,18 @@ const buildAll = async () => {
     dstRoots.map(async (dstRoot) => {
       fs.ensureDirSync(dstRoot);
       fs.emptyDirSync(dstRoot);
-      writeStyles({ themeMaps, common: [katex], dest: dstRoot });
+      writeStyles({ themeMaps, common: [fontello, katex], dest: dstRoot });
     })
   );
 
+  const fontsTarget = path.join(dstCssRoot, "fonts");
   // --- Other
   // katex fonts need to be referenced in css
-  fs.copySync(katexFontsRoot, path.join(dstCssRoot, "fonts"));
+  fs.copySync(katexFontsRoot, fontsTarget);
   // add favicon
   fs.copySync(topRoot, path.join("build", "top"));
+  // Fontello, used for icons
+  const fontelloFonts = path.join("assets", "fontello", "font");
+  await copyContents({ from: fontelloFonts, to: fontsTarget });
 };
 buildAll();

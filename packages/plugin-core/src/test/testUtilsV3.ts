@@ -661,7 +661,7 @@ describeSingleWS.only = function (
   ...params: Parameters<typeof describeSingleWS>
 ) {
   describe.only("", () => {
-    describeMultiWS(...params);
+    describeSingleWS(...params);
   });
 };
 describeSingleWS.skip = function (
@@ -718,6 +718,8 @@ export function setupWorkspaceStubs(opts: {
 export function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
   HistoryService.instance().clearSubscriptions();
   cleanupVSCodeContextSubscriptions(ctx);
+  const ext = ExtensionProvider.getExtension();
+  ext.deactivate();
   sinon.restore();
 }
 

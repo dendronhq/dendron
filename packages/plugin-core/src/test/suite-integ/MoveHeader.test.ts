@@ -198,14 +198,14 @@ suite("MoveHeader", function () {
             await new Promise<void>((resolve) => {
               setTimeout(() => {
                 resolve();
-              }, 100);
+              }, 500);
             });
-            const refNote = out!.updated.find(
-              (n) => n.id === "ref-note"
-            ) as NoteProps;
-            const refNote2 = out!.updated.find(
-              (n) => n.id === "ref-note2"
-            ) as NoteProps;
+            const refNote = out!.changed.find(
+              (n) => n.note.id === "ref-note"
+            )!.note;
+            const refNote2 = out!.changed.find(
+              (n) => n.note.id === "ref-note2"
+            )!.note;
 
             expect(
               refNote.body.includes("[[Foo|dest#foo-header]]")
@@ -243,9 +243,9 @@ suite("MoveHeader", function () {
                 resolve();
               }, 100);
             });
-            const refNote = out!.updated.find(
-              (n) => n.id === "ref-note"
-            ) as NoteProps;
+            const refNote = out!.changed.find(
+              (n) => n.note.id === "ref-note"
+            )!.note;
             expect(
               refNote.body.includes("[[Foo|dest#foo-header]]")
             ).toBeFalsy();

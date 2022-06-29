@@ -6,6 +6,8 @@ import {
   DVault,
   extractNoteChangeEntryCounts,
   NoteUtils,
+  RefactoringCommandUsedPayload,
+  StatisticsUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -19,7 +21,6 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 import {
@@ -28,6 +29,7 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 const md = _md();
 
@@ -38,7 +40,9 @@ type CommandOpts = {
   noConfirm?: boolean;
 };
 
-type CommandOutput = RenameNoteOutputV2a;
+export type CommandOutput = RenameNoteOutputV2a & {
+  operations: RenameOperation[];
+};
 
 type RenameOperation = {
   vault: DVault;
@@ -51,6 +55,13 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   entireWorkspaceQuickPickItem = {
     label: "Entire Workspace",
@@ -373,18 +384,51 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     return resp === "Proceed";
   }
 
+  prepareProxyMetricPayload(capturedNotes: DNodeProps[]) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
+    const engine = ExtensionProvider.getEngine();
+
+    const basicStats = StatisticsUtils.getBasicStatsFromNotes(capturedNotes);
+    if (basicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth, ...rest } = basicStats;
+
+    const traitsAcc = capturedNotes.flatMap((note) =>
+      note.traits && note.traits.length > 0 ? note.traits : []
+    );
+    const traitsSet = new Set(traitsAcc);
+    this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
+      traits: [...traitsSet],
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
+      extra: {
+        numProcessed: capturedNotes.length,
+        ...rest,
+      },
+    };
+  }
+
   async execute(opts: CommandOpts): Promise<any> {
     const ctx = "RefactorHierarchy:execute";
     const { scope, match, replace, noConfirm } = opts;
     this.L.info({ ctx, opts, msg: "enter" });
-    const ext = getExtension();
-    const { engine } = getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const matchRE = new RegExp(match);
     const capturedNotes = this.getCapturedNotes({
       scope,
       matchRE,
       engine,
     });
+
+    this.prepareProxyMetricPayload(capturedNotes);
 
     const operations = this.getRenameOperations({
       capturedNotes,
@@ -420,7 +464,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         return out;
       }
     );
-    return out;
+    return { ...out, operations };
   }
 
   async showResponse(res: CommandOutput) {
@@ -439,9 +483,44 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     }
   }
 
-  addAnalyticsPayload(_opts?: CommandOpts, out?: CommandOutput) {
-    const payload =
-      out !== undefined ? { ...extractNoteChangeEntryCounts(out.changed) } : {};
-    return payload;
+  trackProxyMetrics({
+    noteChangeEntryCounts,
+  }: {
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    if (this._proxyMetricPayload === undefined) {
+      return;
+    }
+
+    const { extra, ...props } = this._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+      },
+    });
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+    try {
+      this.trackProxyMetrics({ noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+    return noteChangeEntryCounts;
   }
 }

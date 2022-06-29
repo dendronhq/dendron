@@ -11,7 +11,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 
-suite("GIVEN ShowPreview", function () {
+suite("GIVEN TogglePreview", function () {
   describeSingleWS("WHEN opening the preview from the command bar", {}, () => {
     let note: NoteProps;
     before(async () => {
@@ -196,7 +196,6 @@ suite("GIVEN ShowPreview", function () {
   );
 
   describeSingleWS("WHEN preview panel is already open", {}, () => {
-    /* Create and open a note */
     let note: NoteProps;
     before(async () => {
       const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();

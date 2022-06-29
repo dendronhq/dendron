@@ -900,10 +900,14 @@ export type NoteViewMessage = DMessage<
   { id?: string; href?: string }
 >;
 
-export type EditorMessage = DMessage<
-  EditorMessageType,
-  { text: string; lineNumber: number; editType: "insertion" | "deletion" }
->;
+export type EditorChange = {
+  text: string;
+  lineNumber: number;
+  editType: "insertion" | "deletion";
+  nodeType: "text" | "lineBreak";
+};
+
+export type EditorMessage = DMessage<EditorMessageType, EditorChange[]>;
 
 /** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;

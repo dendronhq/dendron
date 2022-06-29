@@ -14,7 +14,12 @@ import {
 import { $isElementNode } from "lexical";
 import { useEffect } from "react";
 import { postVSCodeMessage } from "../../utils/vscode";
-import { DMessageSource, EditorMessageEnum } from "@dendronhq/common-all";
+import {
+  DMessageSource,
+  EditorChange,
+  EditorMessage,
+  EditorMessageEnum,
+} from "@dendronhq/common-all";
 
 type LineCountSearchPayload = {
   count: number;
@@ -91,30 +96,33 @@ export default function UpdateListener() {
       ({ editorState, dirtyElements, dirtyLeaves, prevEditorState }) => {
         console.log("Editor State Changed");
         console.log(`Dirty Leaves Count: ${dirtyLeaves.size}`);
-        // console.log(`Dirty Elements Count: ${dirtyElements.size}`);
 
-        // debugger;
-        // The latest EditorState can be found as `editorState`.
-        // To read the contents of the EditorState, use the following API:
-
-        // for (const [key, value] of dirtyElements.entries()) {
-        //   console.log("found dirtyElement");
-        //   console.log(key, value);
-        // }
+        const msgToSend: EditorChange[] = [];
 
         for (const value of dirtyLeaves.values()) {
           console.log(` - Dirty Leaf: ${value}`);
-          // console.log("found dirtyLeaf");
-          // const node = editorState._nodeMap.get(value);
-          // debugger;
-          // console.log(value);
-          // console.log(node?.__text);
 
           editorState.read(() => {
             const node = $getNodeByKey(value);
 
-            // TODO: Adjust to also include line break nodes
             if (node) {
+              // In some cases, it's not actually dirty?
+              if ($isLineBreakNode(node)) {
+                let shouldContinue = true;
+                prevEditorState.read(() => {
+                  if ($getNodeByKey(node.getKey())) {
+                    console.log(
+                      `node ${node.getKey()} exists in prev editor state too, ignoring`
+                    );
+                    shouldContinue = false;
+                  }
+                });
+
+                if (!shouldContinue) {
+                  return;
+                }
+              }
+
               if ($isTextNode(node) || $isLineBreakNode(node)) {
                 const result = getLineNumber(editorState, value);
 
@@ -124,21 +132,18 @@ export default function UpdateListener() {
                   const text = $isTextNode(node)
                     ? node.getTextContent(true)
                     : ""; // TODO: Check parameter for getTextContent
-                  const lineNumber = $isLineBreakNode(node)
-                    ? result + 1
-                    : result;
+                  const lineNumber = result;
+
+                  const nodeType = $isTextNode(node) ? "text" : "lineBreak";
 
                   console.log(
-                    `postVSCodeMessage. lineNumber: ${lineNumber}, editType: insertion, text: ${text}`
+                    `postVSCodeMessage. lineNumber: ${lineNumber}, editType: insertion, text: ${text}, nodeType: ${nodeType}`
                   );
-                  postVSCodeMessage({
-                    type: EditorMessageEnum.documentChanged,
-                    data: {
-                      text,
-                      lineNumber,
-                      editType: "insertion",
-                    },
-                    source: DMessageSource.webClient,
+                  msgToSend.push({
+                    text,
+                    lineNumber,
+                    editType: "insertion",
+                    nodeType,
                   });
                 } else {
                   console.log(
@@ -153,8 +158,6 @@ export default function UpdateListener() {
               prevEditorState.read(() => {
                 const node = $getNodeByKey(value);
 
-                // if ($isLineBreakNode(node)) {
-                // debugger;
                 if (!node) {
                   console.log(
                     `JY_ERROR: Unable to find node with value ${value} in prevEditorState!`
@@ -163,35 +166,38 @@ export default function UpdateListener() {
                 } else {
                   const result = getLineNumber(prevEditorState, value);
 
-                  // debugger;
                   if (!result) {
                     console.log(
                       `JY_ERROR: Unable to get line number for node with value ${value} in prevEditorState!`
                     );
                   } else {
-                    const lineNumber = $isLineBreakNode(node)
-                      ? result + 1
-                      : result;
+                    const nodeType = $isTextNode(node) ? "text" : "lineBreak";
+                    const lineNumber = result;
 
                     console.log(
-                      `postVSCodeMessage. lineNumber: ${lineNumber}, editType: deletion`
+                      `postVSCodeMessage. lineNumber: ${lineNumber}, editType: deletion, nodeType: ${nodeType}`
                     );
-
-                    postVSCodeMessage({
-                      type: EditorMessageEnum.documentChanged,
-                      data: {
-                        text: "",
-                        lineNumber,
-                        editType: "deletion",
-                      },
-                      source: DMessageSource.webClient,
+                    msgToSend.push({
+                      text: "",
+                      lineNumber,
+                      editType: "deletion",
+                      nodeType,
                     });
                   }
                 }
-                // }
               });
             }
           });
+        }
+
+        if (msgToSend.length > 0) {
+          const msg: EditorMessage = {
+            type: EditorMessageEnum.documentChanged,
+            data: msgToSend,
+            source: DMessageSource.webClient,
+          };
+
+          postVSCodeMessage(msg);
         }
       }
     );

@@ -66,67 +66,80 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
       const ctx = "ShowPreview:onDidReceiveMessage";
       switch (msg.type) {
         case EditorMessageEnum.documentChanged: {
-          const zeroIndexedLineNumber = msg.data.lineNumber - 1;
-          console.log(
-            `Msg Received: 0 Indexed Line: ${zeroIndexedLineNumber} | Text: ${msg.data.text} | EditType: ${msg.data.editType}`
-          );
+          // const zeroIndexedLineNumber = msg.data.lineNumber - 1;
+          // console.log(
+          //   `Msg Received: Line: ${zeroIndexedLineNumber} | Text: ${msg.data.text} | EditType: ${msg.data.editType} | NodeType: ${msg.data.nodeType}`
+          // );
 
-          const edit = new vscode.WorkspaceEdit();
-
-          // Just replace the entire document every time for this example extension.
-          // A more complete extension should compute minimal edits instead.
-
-          if (msg.data.editType === "insertion") {
-            if (zeroIndexedLineNumber >= document.lineCount) {
-              console.log(`Doing Insert`);
-              edit.insert(
-                document.uri,
-                new vscode.Position(zeroIndexedLineNumber, 0),
-                "\n" + msg.data.text
-              );
-            } else {
-              console.log(
-                `Doing Replace. Existing Line: ${
-                  document.lineAt(zeroIndexedLineNumber).text
-                }`
-              );
-              edit.replace(
-                document.uri,
-                new vscode.Range(
-                  zeroIndexedLineNumber,
-                  0,
-                  zeroIndexedLineNumber,
-                  document.lineAt(zeroIndexedLineNumber).text.length
-                ),
-                msg.data.text
-              );
+          msg.data.sort((a, b) => {
+            if (a.editType === "deletion" && b.editType === "deletion") {
+              if (a.nodeType === "text") {
+                return -1;
+              }
             }
-          } else {
-            console.log(
-              `Doing Delete on line ${zeroIndexedLineNumber}. Existing Line: ${
-                document.lineAt(zeroIndexedLineNumber).text
-              }`
-            );
+            return 0;
+          });
 
-            if (zeroIndexedLineNumber > 0) {
-              edit.delete(
-                document.uri,
-                new vscode.Range(
-                  zeroIndexedLineNumber - 1,
-                  document.lineAt(zeroIndexedLineNumber - 1).text.length,
-                  zeroIndexedLineNumber,
-                  0
-                  // document.lineAt(zeroIndexedLineNumber).text.length
-                )
-              );
-            } else {
-              // we're trying to delete line 0
-              edit.delete(document.uri, new vscode.Range(0, 0, 1, 0));
+          for (const editorChange of msg.data) {
+            const zeroIndexedLineNumber = editorChange.lineNumber - 1;
+
+            const edit = new vscode.WorkspaceEdit();
+
+            if (editorChange.editType === "insertion") {
+              if (editorChange.nodeType === "text") {
+                console.log(
+                  `Doing Replace. Existing Line: ${
+                    document.lineAt(zeroIndexedLineNumber).text
+                  }`
+                );
+                edit.replace(
+                  document.uri,
+                  new vscode.Range(
+                    zeroIndexedLineNumber,
+                    0,
+                    zeroIndexedLineNumber,
+                    document.lineAt(zeroIndexedLineNumber).text.length
+                  ),
+                  editorChange.text
+                );
+              } else if (editorChange.nodeType === "lineBreak") {
+                edit.insert(
+                  document.uri,
+                  new vscode.Position(
+                    zeroIndexedLineNumber,
+                    document.lineAt(zeroIndexedLineNumber).text.length
+                  ),
+                  "\n"
+                );
+              }
+            } else if (editorChange.editType === "deletion") {
+              if (editorChange.nodeType === "lineBreak") {
+                edit.delete(
+                  document.uri,
+                  new vscode.Range(
+                    zeroIndexedLineNumber,
+                    document.lineAt(zeroIndexedLineNumber).text.length,
+                    zeroIndexedLineNumber + 1,
+                    0
+                  )
+                );
+              } else if (editorChange.nodeType === "text") {
+                edit.delete(
+                  document.uri,
+                  new vscode.Range(
+                    zeroIndexedLineNumber,
+                    0,
+                    zeroIndexedLineNumber,
+                    document.lineAt(zeroIndexedLineNumber).text.length
+                  )
+                );
+              }
             }
+
+            //TODO: Fix later
+            // eslint-disable-next-line no-await-in-loop
+            await vscode.workspace.applyEdit(edit);
           }
-
-          await vscode.workspace.applyEdit(edit);
-
           break;
         }
         default:

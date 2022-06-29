@@ -10,6 +10,7 @@ import _ from "lodash";
 import { describe, test } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
+import { StartupUtils } from "../../utils/StartupUtils";
 import { _activate } from "../../_extension";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
@@ -102,6 +103,27 @@ suite("MigrationUtils", () => {
           expect(MigrationUtils.deepCleanObjBy(obj, _.isNull)).toEqual(obj);
         });
       });
+    });
+  });
+});
+
+suite("GIVEN upgrade", () => {
+  describe("WHEN previous version was below 0.63.0", () => {
+    test("THEN should show prompt", () => {
+      const shouldShow = StartupUtils.shouldShowManualUpgradeMessage({
+        previousWorkspaceVersion: "0.62.0",
+        currentVersion: "0.102.0",
+      });
+      expect(shouldShow).toBeTruthy();
+    });
+  });
+  describe("WHEN previous version was above 0.63.0", () => {
+    test("THEN should not show prompt", () => {
+      const shouldShow = StartupUtils.shouldShowManualUpgradeMessage({
+        previousWorkspaceVersion: "0.100.0",
+        currentVersion: "0.102.0",
+      });
+      expect(shouldShow).toBeFalsy();
     });
   });
 });

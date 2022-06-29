@@ -6,7 +6,6 @@ import {
 } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
-import { CONFIG } from "../../constants";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, runTestButSkipForWindows } from "../testUtilsV3";
 import { DConfig } from "@dendronhq/engine-server";

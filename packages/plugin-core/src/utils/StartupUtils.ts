@@ -40,10 +40,20 @@ import semver from "semver";
 export class StartupUtils {
   static shouldShowManualUpgradeMessage({
     previousWorkspaceVersion,
+    currentVersion,
   }: {
     previousWorkspaceVersion: string;
+    currentVersion: string;
   }) {
-    return semver.lte(previousWorkspaceVersion, "0.63.0");
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion,
+      currentVersion,
+    });
+
+    return (
+      workspaceInstallStatus === InstallStatus.UPGRADED &&
+      semver.lte(previousWorkspaceVersion, "0.63.0")
+    );
   }
 
   static showManualUpgradeMessage() {
@@ -57,6 +67,7 @@ export class StartupUtils {
           AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
             status: ConfirmStatus.accepted,
           });
+
           const content = [
             "# Instructions for Upgrade",
             "",
@@ -64,13 +75,14 @@ export class StartupUtils {
             "",
             "You can either perform a stepped upgrade, or manually move the migrated configurations to the correct location.",
             "",
-            "If you have not set custom configurations for the deprecated configs listed in [this link](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/), you may safely ignore this warning.",
+            "If you have not set custom values for the deprecated configurations listed in [this link](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/), you may safely ignore this warning.",
             "",
             "Please follow the steps below:",
             "",
-            "## Instructions for stepped upgrade",
+            "## Stepped Upgrade",
             "",
             "- This instruction reverts you to the last version of Dendron that supported automatic migration.",
+            "",
             `1. Go to the Extensions panel and find Dendron ([Click Here](${vscode.Uri.parse(
               `command:workbench.extensions.search?${JSON.stringify(
                 "@id:dendron.dendron"
@@ -78,22 +90,28 @@ export class StartupUtils {
             )}))`,
             `2. Click on the cog wheel icon and select \`Install Another Version...\``,
             `3. Select \`0.100.0\`, and wait for the installation to complete`,
-            `4. Reload VSCode, and wait for Dendron to activate`,
+            `4. Reload VSCode ([Click Here](${vscode.Uri.parse(
+              `command:workbench.action.reloadWindow`
+            )})), and wait for Dendron to activate`,
             `5. Update Dendron back to the latest version`,
+            `6. Confirm that configurations are migrated correctly`,
             "",
-            "## Instructions for manual config migration",
+            "## Manual Migration",
             "",
             `1. Open [\`dendron.code-workspace\`](${vscode.Uri.parse(
               `command:workbench.action.openWorkspaceSettingsFile`
             )}) and [\`dendron.yml\`](${vscode.Uri.parse(
               `command:dendron.configureRaw`
             )})`,
-            "2. onsult [Deprecated Configs](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/) to move them to the correct location.",
+            "2. consult [Deprecated Configs](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/) and move them to the correct location.",
+            `3. Reload VSCode ([Click Here](${vscode.Uri.parse(
+              `command:workbench.action.reloadWindow`
+            )}))`,
           ].join("\n");
 
           const panel = vscode.window.createWebviewPanel(
             "showManualUpgradeMessagePreview",
-            "Instructions for Manual Upgrade",
+            "Instructions for Upgrade",
             vscode.ViewColumn.One,
             {
               enableCommandUris: true,
@@ -111,11 +129,16 @@ export class StartupUtils {
 
   static async showManualUpgradeMessageIfNecessary({
     previousWorkspaceVersion,
+    currentVersion,
   }: {
     previousWorkspaceVersion: string;
+    currentVersion: string;
   }) {
     if (
-      StartupUtils.shouldShowManualUpgradeMessage({ previousWorkspaceVersion })
+      StartupUtils.shouldShowManualUpgradeMessage({
+        previousWorkspaceVersion,
+        currentVersion,
+      })
     ) {
       StartupUtils.showManualUpgradeMessage();
     }

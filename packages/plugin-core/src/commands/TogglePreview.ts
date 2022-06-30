@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
-import fs from "fs-extra";
-import _ from "lodash";
-import path from "path";
+import * as fs from "fs-extra";
+import * as _ from "lodash";
+import * as path from "path";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";

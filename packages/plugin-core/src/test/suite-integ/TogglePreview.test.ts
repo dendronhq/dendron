@@ -1,7 +1,7 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
-import { before, test, beforeEach, afterEach } from "mocha";
+import { afterEach, before, beforeEach, test } from "mocha";
 import path from "path";
 import vscode from "vscode";
 import { TogglePreviewCommand } from "../../commands/TogglePreview";

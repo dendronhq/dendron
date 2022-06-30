@@ -9,6 +9,7 @@ const VALID_NAMES = [
   "DendronSchemaGraphPanel",
   "DendronSideGraphPanel",
   "SeedBrowser",
+  "DendronConfigure",
 ];
 
 const elem = window.document.getElementById("root")!;

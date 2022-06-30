@@ -27,6 +27,7 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
+import { ConfigureWithUICommand } from "./commands/ConfigureWithUICommand";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SeedAddCommand } from "./commands/SeedAddCommand";
@@ -39,6 +40,7 @@ import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
 import { TogglePreviewLockCommand } from "./commands/TogglePreviewLock";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { ConfigureUIPanelFactory } from "./components/views/ConfigureUIPanelFactory";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
@@ -557,7 +559,7 @@ async function _setupCommands({
         )
       );
   });
-
+  console.log("existing", existingCommands);
   // ---
   if (requireActiveWorkspace === true) {
     if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
@@ -631,6 +633,21 @@ async function _setupCommands({
           sentryReportingCallback(async () => {
             await new ShowNoteGraphCommand(
               NoteGraphPanelFactory.create(ext, ext.getEngine())
+            ).run();
+          })
+        )
+      );
+    }
+    console.log("there");
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.CONFIGURE_UI.key)) {
+      console.log("here");
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.CONFIGURE_UI.key,
+          sentryReportingCallback(async () => {
+            await new ConfigureWithUICommand(
+              ConfigureUIPanelFactory.create(ext)
             ).run();
           })
         )

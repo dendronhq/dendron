@@ -1,46 +1,67 @@
+import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
+import fs from "fs-extra";
+import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
-type CommandOpts = {};
+type CommandOpts = {
+  configScope?: LocalConfigScope;
+};
 
-type CommandOutput = {};
-
-enum Scopes {
-  Vault = "vault",
-  Global = "global",
-}
+type CommandOutput = void;
 
 export class ConfigureLocalOverride extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
   key = DENDRON_COMMANDS.CONFIGURE_LOCAL_OVERRIDE.key;
+  public static requireActiveWorkspace: boolean = true;
+  _ext: IDendronExtension;
 
-  async execute() {
-    const configScope = await getConfigScope();
+  constructor(extension: IDendronExtension) {
+    super();
+    this._ext = extension;
+  }
+
+  async execute(opts?: CommandOpts) {
+    /* In the test environemnt, configScope is passed as option for this command */
+    const configScope = opts?.configScope || (await getConfigScope());
+
     if (configScope === undefined) {
       VSCodeUtils.showMessage(
         MessageSeverity.ERROR,
         "Configuration scope needs to be selected to open dendronrc.yml file",
         {}
       );
-      return {};
+      return;
     }
 
-    return {};
+    const dendronRoot = this._ext.getDWorkspace().wsRoot;
+    const configPath = DConfig.configOverridePath(dendronRoot, configScope);
+
+    /* If the config file doesn't exist, create one */
+    await fs.ensureFile(configPath);
+
+    const uri = Uri.file(configPath);
+    // What happens if the file doesn't exist
+    await VSCodeUtils.openFileInEditor(uri);
+
+    return;
   }
 }
 
-const getConfigScope = async (): Promise<Scopes | undefined> => {
+const getConfigScope = async (): Promise<LocalConfigScope | undefined> => {
   const options = [
     {
-      label: Scopes.Vault,
-      detail: "Configure dendronrc.yml for current local vault",
+      label: LocalConfigScope.WORKSPACE,
+      detail: "Configure dendronrc.yml for current workspace",
     },
     {
-      label: Scopes.Global,
-      detail: "Configure dendronrc.yml for all local dendron workspaces",
+      label: LocalConfigScope.GLOBAL,
+      detail:
+        "Configure dendronrc.yml for all local dendron workspaces of the current user",
     },
   ];
 
@@ -50,5 +71,5 @@ const getConfigScope = async (): Promise<Scopes | undefined> => {
     ignoreFocusOut: true,
   });
 
-  return scope ? (scope.label as Scopes) : undefined;
+  return scope ? (scope.label as LocalConfigScope) : undefined;
 };

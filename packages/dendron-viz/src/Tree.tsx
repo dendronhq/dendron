@@ -17,6 +17,7 @@ import {
   forceX,
   forceY,
   hierarchy,
+  HierarchyCircularNode,
   pack,
   range,
   scaleLinear,
@@ -114,11 +115,14 @@ export async function createTree() {
         .domain(
           range(0, colors.length).map(
             (i: any) =>
-              +colorExtent[0] +
-              ((colorExtent[1] - colorExtent[0]) * i) / (colors.length - 1)
+              +colorExtent[0]! +
+              ((parseInt(colorExtent[1]!, 10) -
+                parseInt(colorExtent[0]!, 10))! *
+                i) /
+                (colors.length - 1)
           )
         )
-        .range(colors)
+        .range(colors.map((color) => parseInt(color, 10)))
         .clamp(true);
       return { colorScale, colorExtent };
     }, [data]);
@@ -137,6 +141,7 @@ export async function createTree() {
       } else if (colorEncoding === "last-change") {
         return colorScale(lastCommitAccessor(d)) || "#f4f4f4";
       }
+      return;
     };
 
     const packedData = useMemo(() => {
@@ -174,10 +179,10 @@ export async function createTree() {
           // return [60, 20, 12][d.depth] || 5;
         })(hierarchicalData);
       packedTree.children = reflowSiblings(
-        packedTree.children,
+        packedTree.children as ProcessedDataItem[],
         cachedPositions.current,
         maxDepth
-      );
+      ) as unknown as HierarchyCircularNode<unknown>[];
       const children = packedTree.descendants() as ProcessedDataItem[];
 
       cachedOrders.current = {};

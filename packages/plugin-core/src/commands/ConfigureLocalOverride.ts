@@ -60,8 +60,7 @@ const getConfigScope = async (): Promise<LocalConfigScope | undefined> => {
     },
     {
       label: LocalConfigScope.GLOBAL,
-      detail:
-        "Configure dendronrc.yml for all local dendron workspaces of the current user",
+      detail: "Configure dendronrc.yml for all dendron workspaces",
     },
   ];
 

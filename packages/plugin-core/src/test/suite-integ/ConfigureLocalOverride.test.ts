@@ -1,4 +1,5 @@
 import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
+import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import { ConfigureLocalOverride } from "../../commands/ConfigureLocalOverride";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -10,7 +11,7 @@ suite("ConfigureLocalOverrideCommand", function () {
   describeSingleWS("WHEN run", {}, () => {
     let cmd: ConfigureLocalOverride;
 
-    this.beforeEach(() => {
+    beforeEach(() => {
       const ext = ExtensionProvider.getExtension();
       cmd = new ConfigureLocalOverride(ext);
     });
@@ -32,6 +33,10 @@ suite("ConfigureLocalOverrideCommand", function () {
     });
 
     describe("AND scope is LOCAL", () => {
+      beforeEach(() => {
+        TestEngineUtils.mockHomeDir();
+      });
+
       test("THEN the configuration file for the workspace should open", async () => {
         await cmd.run({ configScope: LocalConfigScope.WORKSPACE });
 

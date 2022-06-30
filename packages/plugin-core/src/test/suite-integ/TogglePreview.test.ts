@@ -21,8 +21,8 @@ suite("GIVEN TogglePreview", function () {
   });
 
   // After each test, run Toggle Preview to close the preview panel
-  afterEach(() => {
-    cmd.run();
+  afterEach(async () => {
+    await VSCodeUtils.closeAllEditors();
   });
 
   describeSingleWS("WHEN opening the preview from the command bar", {}, () => {
@@ -201,11 +201,9 @@ suite("GIVEN TogglePreview", function () {
     });
 
     test("THEN the preview should be hidden", async () => {
-      /* When the preview is hidden, the command retruns undefined */
+      /* When the preview goes hidden, the command retruns undefined */
       const out = await cmd.run();
       expect(out?.note).toBeFalsy();
-      // Run Toggle Preview to open the preview again (after each closes it by running the command again)
-      await cmd.run();
     });
   });
 });

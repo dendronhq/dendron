@@ -161,7 +161,7 @@ async function getAndCleanPreviousWSVersion({
     previousWorkspaceVersionFromWSService = "0.91.0";
   }
   if (ext.type === WorkspaceType.NATIVE) {
-    return "previousWorkspaceVersionFromWSService";
+    return previousWorkspaceVersionFromWSService;
   }
 
   // Code workspace specific code

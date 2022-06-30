@@ -1,6 +1,6 @@
 import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import { describe } from "mocha";
+import { describe, beforeEach } from "mocha";
 import { ConfigureLocalOverride } from "../../commands/ConfigureLocalOverride";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
